@@ -1,0 +1,167 @@
+@startuml Donaciones
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' ====== IDENTIDAD Y ROLES ======
+abstract class Persona {
+    - roles: List<Rol>
+}
+
+class PersonaHumana {}
+class PersonaJuridica {}
+
+PersonaHumana -|> Persona
+PersonaJuridica --|> Persona
+
+abstract class Rol
+
+class Representante {
+    - organizacion: PersonaJuridica
+}
+
+class Beneficiario
+class Donante
+class Administrador{
+- estrategiaAsignacion: AsignacionStrategy
++ asignarDonacion(donacion, necesidades)
+}
+
+Administrador ..> Necesidad
+
+interface AsignacionStrategy
+class PorPrioridad
+class PorCercania
+
+PorPrioridad ..|> AsignacionStrategy
+PorCercania ..|> AsignacionStrategy
+
+
+Representante --up|> Rol
+Donante --up|> Rol
+Administrador --up|> Rol
+Beneficiario --up|> Rol
+
+Persona o-- Rol
+
+' ====== JURIDICA ======
+enum TipoJuridica {
+    GUBERNAMENTAL
+    ONG
+    EMPRESA
+    INSTITUCION
+}
+
+PersonaJuridica -> TipoJuridica
+
+' ====== LOCALIZACION ======
+class Direccion {
+- calle: String
+- altura: Decimal
+- localidad: String
+- pais: Pais
+- codigoPostal: String
+- coordenadas: Coordenada
+}
+
+class Coordenada {
+- latitud: Decimal
+- longitud: Decimal
+}
+
+class Deposito {
+}
+Deposito --> Direccion
+
+enum Pais {
+    ARGENTINA
+}
+
+Direccion --> Pais
+Persona --> Direccion
+Direccion -- Coordenada
+
+' ====== DONACION Y BIENES ======
+class Donacion {
+- necesidad: Necesidad
+- estado: EstadoDonacion
+- bienes: List<Bien>
+- foto: List<String>
+- estados: List<HistorialEstado>
+- registradoPor: Administrador
+}
+
+class Bien {
+- categoria: Categoria
+- cantidadDonada: Integer
+}
+
+class Categoria{
+- nombre: String
+- categorias: List<Categoria>
+}
+
+class HistorialEstado{
+- estado: EstadoDonacion
+- fecha: Date
+- usuario: Administrador
+}
+
+
+HistorialEstado --> Administrador
+HistorialEstado --> EstadoDonacion
+
+Bien --> Categoria
+Categoria --> Categoria
+
+enum EstadoDonacion {
+    PENDIENTE
+    EN_DEPOSITO
+    ASIGNADA
+    ENTREGADA
+    VENCIDA
+}
+
+Donacion --> Administrador
+Donacion *- HistorialEstado
+Donacion -- Necesidad
+Donacion --> Deposito
+Donacion --> EstadoDonacion
+Donacion o-- Bien
+
+'note bottom of Bien
+'posible patron composite porq hay
+'Categorias y Subcategorias
+'end note
+
+' ====== DOMINIO DONACIONES ======
+class Necesidad {
+- estado: EstadoNecesidad
+- cantRequerida: Integer
+- donaciones: List<Donacion>
+}
+
+enum EstadoNecesidad {
+    CUBIERTA
+    PENDIENTE
+}
+
+Necesidad --> EstadoNecesidad
+Donante --> Donacion
+Beneficiario -> Necesidad
+
+' ====== Ports y Adapters ======
+class DonacionController {}
+class DonacionService {}
+class DonacionRepository {}
+
+DonacionController --> AsignarDonacionUseCase
+AsignarDonacionService ..|> AsignarDonacionUseCase
+
+interface AsignarDonacionUseCase{
++ ejecutar(donacion, administrador)
+}
+
+
+
+
+@enduml
