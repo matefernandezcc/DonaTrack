@@ -4,46 +4,69 @@ skinparam linetype ortho
 
 ' ====== IDENTIDAD Y ROLES ======
 abstract class Persona {
+    - id: UUID
+    - nombre: String
+    - email: String
+    - telefono: String
+    - whatsapp: String
+    - direccion: Direccion
     - roles: List<Rol>
+    - medioContactoPreferido: MedioContacto
+    - mediosContacto: List<MedioContacto>
 }
 
-class PersonaHumana {}
-class PersonaJuridica {}
+class PersonaHumana {
+    - apellido: String
+    - dni: String
+    - fechaNacimiento: Date
+    - genero: String
+}
 
-PersonaHumana -|> Persona
-PersonaJuridica --|> Persona
+class PersonaJuridica {
+    - razonSocial: String
+    - cuit: String
+    - tipo: TipoJuridica
+    - rubro: String
+}
 
-abstract class Rol
+abstract class Rol {
+    - fechaAlta: Date
+}
 
 class Representante {
     - organizacion: PersonaJuridica
+    - cargo: String
 }
 
-class Beneficiario
-class Donante
-class Administrador{
-- estrategiaAsignacion: AsignacionStrategy
-+ asignarDonacion(donacion, necesidades)
+class Beneficiario {
+    - necesidades: List<Necesidad>
 }
 
-Administrador ..> Necesidad
+class Donante {
+    - donaciones: List<Donacion>
+}
 
-interface AsignacionStrategy
+class Administrador {
+    - estrategiaAsignacion: AsignacionStrategy
+    - estrategiaImportador: ImportadorStrategy
+    + asignarDonacion(donacion, necesidades)
+    + verRanking()
+    + registrarDonacion(bienes)
+}
+
+interface AsignacionStrategy {
+    + recomendarNecesidades(donaciones, necesidades)
+}
+
 class PorPrioridad
 class PorCercania
 
-PorPrioridad ..|> AsignacionStrategy
-PorCercania ..|> AsignacionStrategy
+interface ImportadorStrategy {
+    + importar(Archivo)
+}
 
+class ImportadorCSV
 
-Representante --up|> Rol
-Donante --up|> Rol
-Administrador --up|> Rol
-Beneficiario --up|> Rol
-
-Persona o-- Rol
-
-' ====== JURIDICA ======
 enum TipoJuridica {
     GUBERNAMENTAL
     ONG
@@ -51,67 +74,75 @@ enum TipoJuridica {
     INSTITUCION
 }
 
-PersonaJuridica -> TipoJuridica
+enum MedioContacto {
+    EMAIL
+    TELEFONO
+    WHATSAPP
+}
+
+
 
 ' ====== LOCALIZACION ======
 class Direccion {
-- calle: String
-- altura: Decimal
-- localidad: String
-- pais: Pais
-- codigoPostal: String
-- coordenadas: Coordenada
+    - calle: String
+    - altura: Decimal
+    - localidad: String
+    - pais: Pais
+    - codigoPostal: String
+    - coordenadas: Coordenada
 }
 
 class Coordenada {
-- latitud: Decimal
-- longitud: Decimal
+    - latitud: Decimal
+    - longitud: Decimal
 }
 
 class Deposito {
+    - nombre: String
+    - capacidadMaxima: Integer
+    - direccion: Direccion
 }
-Deposito --> Direccion
 
 enum Pais {
     ARGENTINA
 }
 
-Direccion --> Pais
-Persona --> Direccion
-Direccion -- Coordenada
 
 ' ====== DONACION Y BIENES ======
 class Donacion {
-- necesidad: Necesidad
-- estado: EstadoDonacion
-- bienes: List<Bien>
-- foto: List<String>
-- estados: List<HistorialEstado>
-- registradoPor: Administrador
+    - id: UUID
+    - fechaRegistro: Date
+    - fechaVencimiento: Date
+    - descripcion: String
+    - estado: EstadoDonacion
+    - necesidad: Necesidad
+    - bienes: List<Bien>
+    - fotos: List<String>
+    - estados: List<HistorialEstado>
+    - registradoPor: Administrador
 }
 
 class Bien {
-- categoria: Categoria
-- cantidadDonada: Integer
+    - categoria: Categoria
+    - cantidadDonada: Integer
+    - descripcion: String
+    - unidadMedida: String
+    - fotoOpcional: String
+    - esUsado: Boolean
 }
 
-class Categoria{
-- nombre: String
-- categorias: List<Categoria>
+class Categoria {
+    - nombre: String
+    - descripcion: String
+    - subcategorias: List<Categoria>
 }
 
-class HistorialEstado{
-- estado: EstadoDonacion
-- fecha: Date
-- usuario: Administrador
+class HistorialEstado {
+    - estado: EstadoDonacion
+    - fecha: Date
+    - observacion: String
+    - usuario: Administrador
 }
-
-
-HistorialEstado --> Administrador
-HistorialEstado --> EstadoDonacion
-
-Bien --> Categoria
-Categoria --> Categoria
 
 enum EstadoDonacion {
     PENDIENTE
@@ -121,23 +152,23 @@ enum EstadoDonacion {
     VENCIDA
 }
 
-Donacion --> Administrador
-Donacion *- HistorialEstado
-Donacion -- Necesidad
-Donacion --> Deposito
-Donacion --> EstadoDonacion
-Donacion o-- Bien
-
-'note bottom of Bien
-'posible patron composite porq hay
-'Categorias y Subcategorias
-'end note
 
 ' ====== DOMINIO DONACIONES ======
-class Necesidad {
-- estado: EstadoNecesidad
-- cantRequerida: Integer
-- donaciones: List<Donacion>
+abstract class Necesidad {
+    - id: UUID
+    - descripcion: String
+    - categoria: Categoria
+    - estado: EstadoNecesidad
+    - cantRequerida: Integer
+    - prioridad: Integer
+    - donaciones: List<Donacion>
+    - fechaSolicitud: Date
+}
+
+class NecesidadExtraordinaria {}
+
+class NecesidadRecurrente {
+    - periodo: String 
 }
 
 enum EstadoNecesidad {
@@ -145,23 +176,67 @@ enum EstadoNecesidad {
     PENDIENTE
 }
 
-Necesidad --> EstadoNecesidad
-Donante --> Donacion
-Beneficiario -> Necesidad
-
-' ====== Ports y Adapters ======
-class DonacionController {}
-class DonacionService {}
-class DonacionRepository {}
-
-DonacionController --> AsignarDonacionUseCase
-AsignarDonacionService ..|> AsignarDonacionUseCase
-
-interface AsignarDonacionUseCase{
-+ ejecutar(donacion, administrador)
+class Notificacion {
+    - id: UUID
+    - mensaje: String
+    - fechaEnvio: Date
+    - medio: MedioContacto
+    - leida: Boolean
 }
 
+Persona o-- Notificacion
+Notificacion --> MedioContacto
 
 
+' ====== RELACIONES ======
+
+PersonaHumana -|> Persona
+PersonaJuridica --|> Persona
+
+Representante -- PersonaJuridica
+Representante --up|> Rol
+Donante --up|> Rol
+Administrador --up|> Rol
+Beneficiario --up|> Rol
+
+Persona o-- Rol
+Persona --> MedioContacto
+
+PersonaJuridica -> TipoJuridica
+
+Administrador --> ImportadorStrategy
+Administrador --> AsignacionStrategy
+Administrador ..> Necesidad
+
+PorPrioridad ..up|> AsignacionStrategy
+PorCercania ..up|> AsignacionStrategy
+
+ImportadorCSV ..up|> ImportadorStrategy
+
+Deposito --> Direccion
+Direccion --> Pais
+Direccion -- Coordenada
+Persona --> Direccion
+
+HistorialEstado -- Administrador
+HistorialEstado --> EstadoDonacion
+
+Bien --> Categoria
+Categoria --> Categoria
+
+Donacion -- Administrador
+Donacion *- HistorialEstado
+Donacion -- Necesidad
+Donacion --> Deposito
+Donacion --> EstadoDonacion
+Donacion o-- Bien
+
+Necesidad --> Categoria
+Necesidad --> EstadoNecesidad
+NecesidadExtraordinaria --|> Necesidad
+NecesidadRecurrente --|> Necesidad
+
+Donante --> Donacion
+Beneficiario --> Necesidad
 
 @enduml
