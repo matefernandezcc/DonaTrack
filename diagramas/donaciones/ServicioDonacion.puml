@@ -149,14 +149,6 @@ Necesidad --> EstadoNecesidad
 Donante --> Donacion
 Beneficiario -> Necesidad
 
-' ====== Ports y Adapters ======
-class DonacionController {}
-class DonacionService {}
-class DonacionRepository {}
-
-DonacionController --> AsignarDonacionUseCase
-AsignarDonacionService ..|> AsignarDonacionUseCase
-
 interface AsignarDonacionUseCase{
 + ejecutar(donacion, administrador)
 }
