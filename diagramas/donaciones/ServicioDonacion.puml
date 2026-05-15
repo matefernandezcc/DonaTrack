@@ -1,23 +1,31 @@
-@startuml Donaciones
+@startuml DonaTrack_Final_NoPackages
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 
-' ====== IDENTIDAD Y ROLES ======
+' =====================================================
+' CLASES
+' =====================================================
+
 abstract class Persona {
     - id: UUID
-    - nombre: String
+    - direccion: Direccion
+    - medioDeContacto: Contacto
+    - roles: List<Rol>
+    + asignarRol(rol: Rol)
+    + getEdad(): Integer
+}
+
+class Contacto {
     - email: String
     - telefono: String
     - whatsapp: String
-    - direccion: Direccion
-    - roles: List<Rol>
-    - medioContactoPreferido: MedioContacto
-    - mediosContacto: List<MedioContacto>
+    - medioPreferido: MedioContacto
 }
 
 class PersonaHumana {
+    - nombre: String
     - apellido: String
-    - dni: String
+    - documento: DocumentoIdentidad
     - fechaNacimiento: Date
     - genero: String
 }
@@ -29,43 +37,165 @@ class PersonaJuridica {
     - rubro: String
 }
 
+class DocumentoIdentidad {
+    - tipo: TipoDocumento
+    - numero: String
+}
+
 abstract class Rol {
     - fechaAlta: Date
 }
 
 class Representante {
-    - organizacion: PersonaJuridica
     - cargo: String
+    - organizacion: PersonaJuridica
+}
+
+class Donante {
+    - historialRecepciones: List<RecepcionDonacion>
 }
 
 class Beneficiario {
     - necesidades: List<Necesidad>
-}
-
-class Donante {
-    - donaciones: List<Donacion>
+    + registrarNecesidad(n: Necesidad)
+    + confirmarRecepcion(d: Donacion, fotos: List<Foto>)
 }
 
 class Administrador {
-    - estrategiaAsignacion: AsignacionStrategy
-    - estrategiaImportador: ImportadorStrategy
-    + asignarDonacion(donacion, necesidades)
-    + verRanking()
-    + registrarDonacion(bienes)
+    + registrarRecepcion(donante, bienes)
+    + asignarDonacion(donacion, entidad)
+}
+
+class Direccion {
+    - calle: String
+    - altura: String
+    - localidad: String
+    - codigoPostal: String
+    - coordenadas: Coordenada
+}
+
+class Coordenada {
+    - latitud: Decimal
+    - longitud: Decimal
+}
+
+class Provincia {
+    - nombreProvincia: String
+}
+
+class Pais {
+    - nombrePais: String
+    - nacionalidad: String
+}
+
+class Deposito {
+    - nombre: String
+    - capacidadMaxima: Integer
+    - direccion: Direccion
+}
+
+class RecepcionDonacion {
+    - id: UUID
+    - fechaRecepcion: Date
+    - donante: Donante
+    - donacionesSegmentadas: List<Donacion>
+    - registradoPor: Administrador
+    + segmentarBienes(bienesBrutos: List<Bien>)
+}
+
+note right of RecepcionDonacion
+Representa la carga física inicial.
+De aquí nacen múltiples Donaciones
+agrupadas por subcategoría y vencimiento.
+end note
+
+class Donacion {
+    - id: UUID
+    - subcategoria: Categoria
+    - bienes: List<Bien>
+    - fechaVencimiento: Date
+    - estado: EstadoDonacion
+    - entidadAsignada: Beneficiario
+    - fotos: List<Foto>
+    - historialEstados: List<HistorialEstado>
+    + cambiarEstado(nuevoEstado, observacion, usuario)
+    + estaVencida(): Boolean
+}
+
+class HistorialEstado {
+    - estado: EstadoDonacion
+    - fecha: Date
+    - observacion: String
+    - usuario: Administrador
+}
+
+class Bien {
+    - cantidad: Decimal
+    - unidadMedida: String
+    - descripcion: String
+    - esUsado: Boolean
+    - categoriaInicial: Categoria
+    - fotoOpcional: Foto
+}
+
+class Categoria {
+    - nombre: String
+    - descripcion: String
+    - subcategorias: List<Categoria>
+    + esSubcategoriaDe(categoria): Boolean
+}
+
+class Foto {
+    - url: String
+    - fechaSubida: Date
+}
+
+abstract class Necesidad {
+    - id: UUID
+    - descripcion: String
+    - subcategoriaRequerida: Categoria
+    - estado: EstadoNecesidad
+    - donacionesAsignadas: List<Donacion>
+    - fechaSolicitud: Date
+    + asignarDonacion(d: Donacion)
+    + estaCubierta(): Boolean
+}
+
+class NecesidadExtraordinaria {
+    - cantidadRequerida: Decimal
+    + cantidadPendiente(): Decimal
+}
+
+class NecesidadRecurrente {
+    - cantidadObjetivo: Decimal
+    - periodo: String
+}
+
+class Notificacion {
+    - id: UUID
+    - mensaje: String
+    - fechaEnvio: Date
+    - medio: MedioContacto
+    - leida: Boolean
+    + marcarComoLeida()
 }
 
 interface AsignacionStrategy {
-    + recomendarNecesidades(donaciones, necesidades)
+    + recomendarEntidad(d: Donacion, necesidades: List<Necesidad>): Beneficiario
 }
 
 class PorPrioridad
 class PorCercania
 
 interface ImportadorStrategy {
-    + importar(Archivo)
+    + importar(archivo: Archivo)
 }
 
 class ImportadorCSV
+
+' =====================================================
+' ENUMS
+' =====================================================
 
 enum TipoJuridica {
     GUBERNAMENTAL
@@ -80,68 +210,10 @@ enum MedioContacto {
     WHATSAPP
 }
 
-
-
-' ====== LOCALIZACION ======
-class Direccion {
-    - calle: String
-    - altura: Decimal
-    - localidad: String
-    - pais: Pais
-    - codigoPostal: String
-    - coordenadas: Coordenada
-}
-
-class Coordenada {
-    - latitud: Decimal
-    - longitud: Decimal
-}
-
-class Deposito {
-    - nombre: String
-    - capacidadMaxima: Integer
-    - direccion: Direccion
-}
-
-enum Pais {
-    ARGENTINA
-}
-
-
-' ====== DONACION Y BIENES ======
-class Donacion {
-    - id: UUID
-    - fechaRegistro: Date
-    - fechaVencimiento: Date
-    - descripcion: String
-    - estado: EstadoDonacion
-    - necesidad: Necesidad
-    - bienes: List<Bien>
-    - fotos: List<String>
-    - estados: List<HistorialEstado>
-    - registradoPor: Administrador
-}
-
-class Bien {
-    - categoria: Categoria
-    - cantidadDonada: Integer
-    - descripcion: String
-    - unidadMedida: String
-    - fotoOpcional: String
-    - esUsado: Boolean
-}
-
-class Categoria {
-    - nombre: String
-    - descripcion: String
-    - subcategorias: List<Categoria>
-}
-
-class HistorialEstado {
-    - estado: EstadoDonacion
-    - fecha: Date
-    - observacion: String
-    - usuario: Administrador
+enum TipoDocumento {
+    DNI
+    PASAPORTE
+    CUIT
 }
 
 enum EstadoDonacion {
@@ -152,91 +224,81 @@ enum EstadoDonacion {
     VENCIDA
 }
 
-
-' ====== DOMINIO DONACIONES ======
-abstract class Necesidad {
-    - id: UUID
-    - descripcion: String
-    - categoria: Categoria
-    - estado: EstadoNecesidad
-    - cantRequerida: Integer
-    - prioridad: Integer
-    - donaciones: List<Donacion>
-    - fechaSolicitud: Date
-}
-
-class NecesidadExtraordinaria {}
-
-class NecesidadRecurrente {
-    - periodo: String 
-}
-
 enum EstadoNecesidad {
-    CUBIERTA
     PENDIENTE
+    CUBIERTA
 }
 
-class Notificacion {
-    - id: UUID
-    - mensaje: String
-    - fechaEnvio: Date
-    - medio: MedioContacto
-    - leida: Boolean
-}
+' =====================================================
+' HERENCIA
+' =====================================================
 
-Persona o-- Notificacion
-Notificacion --> MedioContacto
+Persona <|-- PersonaHumana
+Persona <|-- PersonaJuridica
 
+Rol <|-- Representante
+Rol <|-- Donante
+Rol <|-- Beneficiario
+Rol <|-- Administrador
 
-' ====== RELACIONES ======
+Necesidad <|-- NecesidadExtraordinaria
+Necesidad <|-- NecesidadRecurrente
 
-PersonaHumana -|> Persona
-PersonaJuridica --|> Persona
+PorPrioridad ..|> AsignacionStrategy
+PorCercania ..|> AsignacionStrategy
+ImportadorCSV ..|> ImportadorStrategy
 
-Representante -- PersonaJuridica
-Representante --up|> Rol
-Donante --up|> Rol
-Administrador --up|> Rol
-Beneficiario --up|> Rol
+' =====================================================
+' RELACIONES
+' =====================================================
+
+PersonaHumana *-- DocumentoIdentidad
+DocumentoIdentidad --> TipoDocumento
+PersonaJuridica --> TipoJuridica
+
+Persona *-- Contacto
+Contacto --> MedioContacto
 
 Persona o-- Rol
-Persona --> MedioContacto
+Persona --> Direccion
+Persona o-- "0..*" Notificacion
 
-PersonaJuridica -> TipoJuridica
+Representante --> PersonaJuridica
 
-Administrador --> ImportadorStrategy
-Administrador --> AsignacionStrategy
-Administrador ..> Necesidad
+Donante --> RecepcionDonacion
+Beneficiario *-- Necesidad
 
-PorPrioridad ..up|> AsignacionStrategy
-PorCercania ..up|> AsignacionStrategy
-
-ImportadorCSV ..up|> ImportadorStrategy
+Direccion --> Coordenada
+Direccion --> Provincia
+Provincia --> Pais
 
 Deposito --> Direccion
-Direccion --> Pais
-Direccion -- Coordenada
-Persona --> Direccion
+RecepcionDonacion --> Deposito
+RecepcionDonacion --> Administrador
+RecepcionDonacion --> "1..*" Donacion : genera >
 
-HistorialEstado -- Administrador
-HistorialEstado --> EstadoDonacion
+Donacion *-- HistorialEstado
+Donacion o-- Bien
+Donacion --> Categoria : agrupa por >
+Donacion --> EstadoDonacion
+Donacion --> Foto
+Donacion --> Beneficiario : asignada a >
 
 Bien --> Categoria
-Categoria --> Categoria
+Bien --> Foto
 
-Donacion -- Administrador
-Donacion *- HistorialEstado
-Donacion -- Necesidad
-Donacion --> Deposito
-Donacion --> EstadoDonacion
-Donacion o-- Bien
+HistorialEstado --> Administrador
+HistorialEstado --> EstadoDonacion
+
+Categoria --> Categoria
 
 Necesidad --> Categoria
 Necesidad --> EstadoNecesidad
-NecesidadExtraordinaria --|> Necesidad
-NecesidadRecurrente --|> Necesidad
+Necesidad --> Donacion
 
-Donante --> Donacion
-Beneficiario --> Necesidad
+Administrador ..> AsignacionStrategy : usa
+Administrador ..> ImportadorStrategy : usa
+
+Notificacion --> MedioContacto
 
 @enduml
