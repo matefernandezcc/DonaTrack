@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Donatrack {
-    public static void main(String[] args) {
-        SpringApplication.run(Donatrack.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(Donatrack.class, args);
+  }
 }
