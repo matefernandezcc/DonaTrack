@@ -1,9 +1,11 @@
 package com.donatrack;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 @SpringBootApplication
-public class DonatrackApplication {
+public class Donatrack {
     public static void main(String[] args) {
-        SpringApplication.run(DonatrackApplication.class, args);
+        SpringApplication.run(Donatrack.class, args);
     }
 }
