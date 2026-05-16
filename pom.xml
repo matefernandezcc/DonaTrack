@@ -62,24 +62,26 @@
     </dependencies>
 
     <build>
-        <plugins>
+        <pluginManagement>
+            <plugins>
 
-            <!-- FORMATEADOR -->
-            <plugin>
-                <groupId>com.spotify.fmt</groupId>
-                <artifactId>fmt-maven-plugin</artifactId>
-                <version>${fmt.version}</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+                <!-- FORMATEADOR -->
+                <plugin>
+                    <groupId>com.spotify.fmt</groupId>
+                    <artifactId>fmt-maven-plugin</artifactId>
+                    <version>${fmt.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>format</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
 
-        </plugins>
+            </plugins>
+        </pluginManagement>
     </build>
 
 </project>
