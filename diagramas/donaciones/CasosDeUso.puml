@@ -1,0 +1,71 @@
+@startuml DonaTrack_CasosDeUso
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario Público" as Publico
+actor "Persona Donante" as Donante
+actor "Beneficiario" as Entidad
+actor "Persona Administradora" as Admin
+
+package "DonaTrack - Sistema de Gestión de Donaciones" {
+    
+    ' --- Casos de Uso de Acceso ---
+    usecase "Ver landing page y donaciones entregadas" as UC_Publico1
+    usecase "Registrarse en el sistema" as UC_Registro
+    usecase "Iniciar Sesión" as UC_Login
+
+    ' --- Casos de Uso de Persona Donante ---
+    usecase "Filtrar donaciones realizadas" as UC_D1
+    usecase "Navegar entidades beneficiarias" as UC_D2
+    usecase "Consultar misiones e insignias" as UC_D3
+    usecase "Seguir entregas activas en mapa" as UC_SeguirMapa
+
+    ' --- Casos de Uso de Beneficiario ---
+    usecase "Registrar necesidad material" as UC_E1
+    usecase "Ver estado de donaciones asignadas" as UC_E2
+    usecase "Confirmar recepción de donación" as UC_E3
+    usecase "Cargar fotos de comprobante" as UC_E4
+
+    ' --- Casos de Uso de Persona Administradora ---
+    usecase "Registrar persona donante presencial" as UC_A1
+    usecase "Registrar recepción de donación" as UC_A2
+    usecase "Actualizar donaciones vencidas" as UC_A3
+    usecase "Asignar donación a entidad final" as UC_A4
+    usecase "Administrar camiones" as UC_A5
+    usecase "Visualizar ranking mensual" as UC_A6
+    usecase "Importar donantes masivos (CSV)" as UC_A7
+}
+
+' --- Relaciones del Usuario Público ---
+Publico --> UC_Publico1
+Publico --> UC_Registro
+Publico --> UC_Login
+
+' --- Relaciones de Persona Donante ---
+Donante --> UC_Login
+Donante --> UC_D1
+Donante --> UC_D2
+Donante --> UC_D3
+Donante --> UC_SeguirMapa
+
+' --- Relaciones de Beneficiario ---
+Entidad --> UC_Login
+Entidad --> UC_E1
+Entidad --> UC_E2
+Entidad --> UC_E3
+Entidad --> UC_SeguirMapa
+
+' Relación de extensión para subir fotos opcionales/comprobantes
+UC_E3 <.. UC_E4 : <<extend>>
+
+' --- Relaciones de Persona Administradora ---
+Admin --> UC_Login
+Admin --> UC_A1
+Admin --> UC_A2
+Admin --> UC_A3
+Admin --> UC_A4
+Admin --> UC_A5
+Admin --> UC_A6
+Admin --> UC_A7
+
+@enduml
