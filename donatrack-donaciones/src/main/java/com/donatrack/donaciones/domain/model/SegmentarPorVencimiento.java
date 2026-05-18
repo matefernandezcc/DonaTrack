@@ -7,8 +7,7 @@ import java.util.Map;
 
 public class SegmentarPorVencimiento implements EstrategiaSegmentacion {
 
-    @Override
-    public List<Donacion> segmentar(List<Bien> bienes) {
+    @Override public List<Donacion> segmentar(List<Bien> bienes) {
         // Agrupamos utilizando la fecha de vencimiento como clave
         Map<LocalDate, Donacion> donacionesPorVencimiento = new HashMap<>();
 

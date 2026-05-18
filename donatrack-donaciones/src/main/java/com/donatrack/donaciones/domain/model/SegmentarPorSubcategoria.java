@@ -6,8 +6,7 @@ import java.util.Map;
 
 public class SegmentarPorSubcategoria implements EstrategiaSegmentacion {
 
-    @Override
-    public List<Donacion> segmentar(List<Bien> bienes) {
+    @Override public List<Donacion> segmentar(List<Bien> bienes) {
         // Usamos un Map para agrupar las donaciones utilizando la Subcategoria como clave
         Map<Categoria, Donacion> donacionesPorSubcategoria = new HashMap<>();
 

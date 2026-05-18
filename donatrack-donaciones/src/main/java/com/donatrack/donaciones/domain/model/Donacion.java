@@ -8,20 +8,28 @@ public class Donacion {
     private UUID id;
     private EstadoDonacion estado;
     private List<Bien> bienes;
-    private Categoria subcategoria; // Obligatoriamente agrupada por subcategoría
+    private Categoria Categoria; 
+    private List<HistorialEstado> historial;
 
-    public Donacion(Categoria subcategoria) {
+    public Donacion(Categoria Categoria) {
         this.id = UUID.randomUUID();
         this.estado = EstadoDonacion.PENDIENTE; 
         this.bienes = new ArrayList<>();
-        this.subcategoria = subcategoria;
+        this.Categoria = Categoria;
+        this.historial = new ArrayList<>(); 
     }
 
     public void agregarBien(Bien b) {
         this.bienes.add(b);
     }
+    
+    public void registrarCambioEstado(HistorialEstado nuevoRegistro) {
+        this.historial.add(nuevoRegistro);
+        // Cuando agregamos un historial nuevo, actualizamos el estado actual de la donación
+        this.estado = nuevoRegistro.getEstado(); 
+    }
 
-    // Getters y Setters
+    // --- Getters y Setters ---
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
@@ -31,6 +39,9 @@ public class Donacion {
     public List<Bien> getBienes() { return bienes; }
     public void setBienes(List<Bien> bienes) { this.bienes = bienes; }
 
-    public Categoria getSubcategoria() { return subcategoria; }
-    public void setSubcategoria(Categoria subcategoria) { this.subcategoria = subcategoria; }
+    public Categoria getSubcategoria() { return Categoria; }
+    public void setSubcategoria(Categoria Categoria) { this.Categoria = Categoria; }
+
+    public List<HistorialEstado> getHistorial() { return historial; }
+    public void setHistorial(List<HistorialEstado> historial) { this.historial = historial; }
 }

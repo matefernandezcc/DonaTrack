@@ -6,8 +6,7 @@ import java.util.Map;
 
 public class SegmentarPorEstado implements EstrategiaSegmentacion {
 
-    @Override
-    public List<Donacion> segmentar(List<Bien> bienes) {
+    @Override public List<Donacion> segmentar(List<Bien> bienes) {
         // Usamos un booleano como clave: true (esUsado) o false (es nuevo)
         Map<Boolean, Donacion> donacionesPorEstado = new HashMap<>();
 

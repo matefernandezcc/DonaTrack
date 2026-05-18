@@ -9,15 +9,22 @@ public class PersonaHumana extends Persona {
     private String documento;
     private int edad;
 
-    // Constructor
-    public PersonaHumana(String email, Contacto contacto, String nombre, String apellido, TipoDocumento tipoDocumento, String documento, int edad) {
-        super(email, contacto);
+    public PersonaHumana(String email, Contacto contacto, Direccion direccion, String nombre, String apellido, TipoDocumento tipoDocumento, String documento, int edad) {
+        super(email, contacto, direccion);
         this.nombre = nombre;
         this.apellido = apellido;
         this.tipoDocumento = tipoDocumento;
         this.documento = documento;
         this.edad = edad;
     }
+
+    @Override protected void validarRol(Rol r) {
+        // Regla de Negocio: Tira excepción si el rol es Beneficiario
+        if (r instanceof Beneficiario) {
+            throw new IllegalArgumentException("Error: Una persona humana no puede ser una Entidad Beneficiaria.");
+        }
+    }
+
 
     @Override public void actualizarInformacion(Map<String, Object> datosNuevos) {
         super.actualizarInformacion(datosNuevos); 
@@ -36,6 +43,7 @@ public class PersonaHumana extends Persona {
         }
     }
 
+    // Getters y Setters
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 

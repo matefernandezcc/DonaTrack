@@ -1,44 +1,43 @@
 package com.donatrack.donaciones.domain.model;
-//import com.donatrack.donaciones.Donacion;
-//import com.donatrack.necesidades.Necesidad;
+import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Beneficiario extends Rol {
 
+public class Beneficiario extends Rol {
     private List<Donacion> donacionesAsignadas;
+    private List<Necesidad> necesidadesDeclaradas;
 
     public Beneficiario() {
         super();
-        // ¡Clave! Inicializamos la lista vacía para evitar errores de referencia nula
         this.donacionesAsignadas = new ArrayList<>(); 
+        this.necesidadesDeclaradas = new ArrayList<>();
     }
 
-    // --- Métodos de comportamiento ---
+    //se registra la necesidad del beneficiario
+    public void registrarNecesidad(Necesidad n) { this.necesidadesDeclaradas.add(n); }
 
-    public void registrarNecesidad(Necesidad n) {
-        // Lógica para dar de alta una nueva necesidad (recurrente o extraordinaria)
-    }
-
-    public void confirmarRecepcion(Donacion d, List<String> fotos) {
-        // Lógica para asentar que los bienes llegaron, guardando las fotos de comprobante
+    //Se confirma que el beneficiario recibió la donación asignada que le fue asignada
+    public void confirmarRecepcion(Donacion d, List<Foto> fotosComprobante) {
+        //Verificamos que la donación estuviera asignada a este beneficiario
+        if (this.donacionesAsignadas.contains(d)) {
+            d.setEstado(EstadoDonacion.ENTREGADA);
+            //(Opcional) Las fotos se podrían guardar en la donación como comprobante de que el beneficiario firmó la recepción.
+        }
     }
 
     public void verEstadoDonaciones() {
-        // Lógica para listar y revisar en qué estado se encuentran las donaciones que espera
+        // Cuando haya base de datos, este método hará un SELECT filtrando por la entidad.
     }
 
     public void verUbicacionCamion() {
-        // Lógica para ver por dónde va el camión que trae sus donaciones
+        // Queda vacío. Requerirá integración con API de mapas en el frontend.
     }
 
     // --- Getters y Setters ---
-
-    public List<Donacion> getDonacionesAsignadas() {
-        return donacionesAsignadas;
-    }
-
-    public void setDonacionesAsignadas(List<Donacion> donacionesAsignadas) {
-        this.donacionesAsignadas = donacionesAsignadas;
-    }
+    public List<Donacion> getDonacionesAsignadas() { return donacionesAsignadas; }
+    public void setDonacionesAsignadas(List<Donacion> donacionesAsignadas) {this.donacionesAsignadas = donacionesAsignadas; }
+    
+    public List<Necesidad> getNecesidadesDeclaradas() {return necesidadesDeclaradas;}
+    public void setNecesidadesDeclaradas(List<Necesidad> necesidadesDeclaradas) {this.necesidadesDeclaradas = necesidadesDeclaradas;}
 }

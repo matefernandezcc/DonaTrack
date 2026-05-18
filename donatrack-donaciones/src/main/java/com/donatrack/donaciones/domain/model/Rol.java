@@ -4,14 +4,11 @@ import java.time.LocalDate;
 public abstract class Rol {
     private LocalDate fechaAlta;
 
-    // Constructor
     public Rol() {
         this.fechaAlta = LocalDate.now(); 
     }
 
-    public Rol(LocalDate fechaAlta) {
-        this.fechaAlta = fechaAlta;
-    }
+    public Rol(LocalDate fechaAlta) {this.fechaAlta = fechaAlta;}
 
     // Getters y Setters
     public LocalDate getFechaAlta() {return fechaAlta;}

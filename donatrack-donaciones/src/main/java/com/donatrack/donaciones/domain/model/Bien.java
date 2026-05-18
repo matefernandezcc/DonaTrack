@@ -1,5 +1,7 @@
 package com.donatrack.donaciones.domain.model;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bien {
     private String descripcion;
@@ -7,7 +9,7 @@ public class Bien {
     private String unidadMedicion;
     private boolean esUsado;
     private LocalDate fechaVencimiento;
-    private String foto; // Ruta o URL de la foto
+    private List<Foto> fotos;
     private Categoria subcategoria;
 
     public Bien(String descripcion, double cantidad, String unidadMedicion, boolean esUsado, LocalDate fechaVencimiento, String foto) {
@@ -16,8 +18,10 @@ public class Bien {
         this.unidadMedicion = unidadMedicion;
         this.esUsado = esUsado;
         this.fechaVencimiento = fechaVencimiento;
-        this.foto = foto;
+        this.fotos = new ArrayList<>();
     }
+
+    public void agregarFoto(Foto foto) {this.fotos.add(foto);}
 
     // Getters y Setters
     public String getDescripcion() { return descripcion; }
@@ -35,9 +39,9 @@ public class Bien {
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
 
-    public String getFoto() { return foto; }
-    public void setFoto(String foto) { this.foto = foto; }
-
     public Categoria getSubcategoria() { return subcategoria; }
     public void setSubcategoria(Categoria subcategoria) { this.subcategoria = subcategoria; }
+
+    public List<Foto> getFotos() { return fotos; }
+    public void setFotos(List<Foto> fotos) { this.fotos = fotos; }
 }

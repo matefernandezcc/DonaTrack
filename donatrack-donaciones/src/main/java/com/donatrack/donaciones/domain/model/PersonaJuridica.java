@@ -12,11 +12,10 @@ public class PersonaJuridica extends Persona {
     private String cuit;
     private TipoJuridica tipo;
     private String rubro;
-    private List<Representante> representantes; // Relación de composición con los representantes
+    private List<Representante> representantes;
 
-    // Constructor
-    public PersonaJuridica(String email, Contacto contacto, String razonSocial, TipoDocumento tipoDocumento, String cuit, TipoJuridica tipo, String rubro) {
-        super(email, contacto);
+    public PersonaJuridica(String email, Contacto contacto, Direccion direccion, String razonSocial, TipoDocumento tipoDocumento, String cuit, TipoJuridica tipo, String rubro) {
+        super(email, contacto, direccion);
         this.razonSocial = razonSocial;
         this.tipoDocumento = tipoDocumento;
         this.cuit = cuit;
@@ -25,10 +24,15 @@ public class PersonaJuridica extends Persona {
         this.representantes = new ArrayList<>();
     }
 
-    // Comportamiento para gestionar representantes
-    public void agregarRepresentante(Representante r) {
-        this.representantes.add(r);
+    public void agregarRepresentante(Representante r) {this.representantes.add(r);}
+
+    @Override protected void validarRol(Rol r) {
+        // Regla de Negocio: Tira excepción si el rol es Administrador
+        if (r instanceof Administrador) {
+            throw new IllegalArgumentException("Error: Una persona jurídica no puede asumir el rol de Administrador.");
+        }
     }
+
 
     @Override public void actualizarInformacion(Map<String, Object> datosNuevos) {
         super.actualizarInformacion(datosNuevos);

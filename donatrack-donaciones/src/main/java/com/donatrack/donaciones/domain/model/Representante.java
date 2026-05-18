@@ -9,6 +9,7 @@ public class Representante extends Rol {
         this.apellido = apellido;
     }
 
+    // Getters y Setters
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
