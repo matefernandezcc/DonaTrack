@@ -9,14 +9,14 @@ skinparam linetype ortho
 abstract class Persona {
     - id: UUID
     - direccion: Direccion
-    - medioDeContacto: Contacto
+    - Contacto: Contacto
     - roles: List<Rol>
-    + asignarRol(rol: Rol)
-    + getEdad(): Integer
+    + agregarRol(rol: Rol)
+    + validarRol(rol: Rol)
 }
 
 class Contacto {
-    - email: String
+    - correoElectronico: String
     - telefono: String
     - whatsapp: String
     - medioPreferido: MedioContacto
@@ -43,7 +43,7 @@ class DocumentoIdentidad {
 }
 
 abstract class Rol {
-    - fechaAlta: Date
+    - fechaAlta: LocalDate
 }
 
 class Representante {
@@ -52,16 +52,19 @@ class Representante {
 }
 
 class Donante {
+    - donacionesRealizadas: List<Donacion>
     - historialRecepciones: List<RecepcionDonacion>
 }
 
 class Beneficiario {
-    - necesidades: List<Necesidad>
+    - donacionesAsignadas: List<Donacion>
+    - necesidadesDeclaradas: List<Necesidad>
     + registrarNecesidad(n: Necesidad)
     + confirmarRecepcion(d: Donacion, fotos: List<Foto>)
 }
 
 class Administrador {
+    - DepositoAsignado: Deposito
     + registrarRecepcion(donante, bienes)
     + asignarDonacion(donacion, entidad)
 }
@@ -72,15 +75,18 @@ class Direccion {
     - localidad: String
     - codigoPostal: String
     - coordenadas: Coordenada
+    - Provincia: Provincia
+    - Pais: Pais
 }
 
 class Coordenada {
-    - latitud: Decimal
-    - longitud: Decimal
+    - latitud: double
+    - longitud: double
 }
 
 class Provincia {
     - nombreProvincia: String
+    - Pais: Pais
 }
 
 class Pais {
@@ -89,6 +95,8 @@ class Pais {
 }
 
 class Deposito {
+    - id: String
+    - donacionesDisponibles: List<Donacion>
     - nombre: String
     - capacidadMaxima: Integer
     - direccion: Direccion
@@ -96,7 +104,7 @@ class Deposito {
 
 class RecepcionDonacion {
     - id: UUID
-    - fechaRecepcion: Date
+    - fechaRecepcion: LocalDate
     - donante: Donante
     - donacionesSegmentadas: List<Donacion>
     - registradoPor: Administrador
@@ -124,18 +132,19 @@ class Donacion {
 
 class HistorialEstado {
     - estado: EstadoDonacion
-    - fecha: Date
+    - fecha: LocalDate
     - observacion: String
     - usuario: Administrador
 }
 
 class Bien {
-    - cantidad: Decimal
+    - cantidad: Double
     - unidadMedida: String
     - descripcion: String
     - esUsado: Boolean
-    - categoriaInicial: Categoria
-    - fotoOpcional: Foto
+    - subcategoria: Categoria
+    - fechaVencimiento: LocalDate
+    - fotoOpcional: list<Foto>
 }
 
 class Categoria {
@@ -147,7 +156,7 @@ class Categoria {
 
 class Foto {
     - url: String
-    - fechaSubida: Date
+    - descripcion: String
 }
 
 abstract class Necesidad {
@@ -162,7 +171,7 @@ abstract class Necesidad {
 }
 
 class NecesidadExtraordinaria {
-    - cantidadRequerida: Decimal
+    - cantidadRequerida: double
     + cantidadPendiente(): Decimal
 }
 
@@ -174,7 +183,7 @@ class NecesidadRecurrente {
 class Notificacion {
     - id: UUID
     - mensaje: String
-    - fechaEnvio: Date
+    - fechaEnvio: LocalDate
     - medio: MedioContacto
     - leida: Boolean
     + marcarComoLeida()
@@ -191,7 +200,10 @@ interface ImportadorStrategy {
     + importar(archivo: Archivo)
 }
 
-class ImportadorCSV
+class ImportadorCSV {
+    - registroPersonas: List<Persona>
+    + buscarPorEmail(String email)
+}
 
 ' =====================================================
 ' ENUMS

@@ -1,7 +1,8 @@
 package com.donatrack.donaciones.domain.model;
-import com.donatrack.donaciones.domain.enums.EstadoNecesidad;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.donatrack.donaciones.domain.enums.EstadoNecesidad;
 
 public class NecesidadExtraordinaria extends Necesidad {
     private double cantidadRequerida;
@@ -24,8 +25,19 @@ public class NecesidadExtraordinaria extends Necesidad {
         }
 
         if (totalAcumulado >= this.cantidadRequerida) {
-            this.setEstado(EstadoNecesidad.SATISFECHA);
+            this.setEstado(EstadoNecesidad.CUBIERTA);
         }
+    }
+
+    public double cantidadAcumulada(){
+        return this.donacionesParciales.stream()
+            .flatMap(donacion -> donacion.getBienes().stream())
+            .mapToDouble(Bien::getCantidad)
+            .sum();
+    }
+
+    public double cantidadPendiente(){
+        return this.cantidadRequerida - this.cantidadAcumulada();
     }
 
     // Getters y Setters

@@ -1,21 +1,26 @@
 package com.donatrack.donaciones.domain.model;
-import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 
 public class Donacion {
     private UUID id;
     private EstadoDonacion estado;
     private List<Bien> bienes;
-    private Categoria Categoria; 
+    private Categoria subCategoria; 
     private List<HistorialEstado> historial;
+    private Date fechaVencimiento;
+    private Beneficiario EntidadAsignada;
+    private List<Foto> fotos;
 
     public Donacion(Categoria Categoria) {
         this.id = UUID.randomUUID();
         this.estado = EstadoDonacion.PENDIENTE; 
         this.bienes = new ArrayList<>();
-        this.Categoria = Categoria;
+        this.subCategoria = Categoria;
         this.historial = new ArrayList<>(); 
     }
 
@@ -39,9 +44,17 @@ public class Donacion {
     public List<Bien> getBienes() { return bienes; }
     public void setBienes(List<Bien> bienes) { this.bienes = bienes; }
 
-    public Categoria getSubcategoria() { return Categoria; }
-    public void setSubcategoria(Categoria Categoria) { this.Categoria = Categoria; }
+    public Categoria getSubcategoria() { return subCategoria; }
+    public void setSubcategoria(Categoria Categoria) { this.subCategoria = Categoria; }
 
     public List<HistorialEstado> getHistorial() { return historial; }
     public void setHistorial(List<HistorialEstado> historial) { this.historial = historial; }
+
+    public Date getFechaVencimiento() { return fechaVencimiento; }
+
+    public Beneficiario getEntidadAsignada() { return EntidadAsignada; }
+    public void setEntidadAsignada(Beneficiario entidadAsignada) { EntidadAsignada = entidadAsignada; }
+
+    public List<Foto> getFotos() { return fotos; }
+    public void addFoto(Foto foto) { this.fotos.add(foto); }
 }

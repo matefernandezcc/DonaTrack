@@ -1,18 +1,18 @@
 package com.donatrack.donaciones.domain.model;
 
 public class Representante extends Rol {
-    private String nombre;
-    private String apellido;
+    private String cargo;
+    private PersonaJuridica Organizacion;
 
-    public Representante(String nombre, String apellido) {
-        this.nombre = nombre;
-        this.apellido = apellido;
+    public Representante(String cargo, PersonaJuridica organizacion) {
+        this.cargo = cargo;
+        this.Organizacion = organizacion;
     }
 
     // Getters y Setters
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getCargo() { return cargo; }
+    public void setCargo(String cargo) { this.cargo = cargo; }
 
-    public String getApellido() { return apellido; }
-    public void setApellido(String apellido) { this.apellido = apellido; }
+    public PersonaJuridica getOrganizacion() { return Organizacion; }
+    public void setOrganizacion(PersonaJuridica organizacion) { this.Organizacion = organizacion; }
 }

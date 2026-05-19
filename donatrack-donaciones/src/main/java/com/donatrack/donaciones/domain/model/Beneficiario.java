@@ -1,7 +1,8 @@
 package com.donatrack.donaciones.domain.model;
-import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 
 
 public class Beneficiario extends Rol {
@@ -23,6 +24,8 @@ public class Beneficiario extends Rol {
         if (this.donacionesAsignadas.contains(d)) {
             d.setEstado(EstadoDonacion.ENTREGADA);
             //(Opcional) Las fotos se podrían guardar en la donación como comprobante de que el beneficiario firmó la recepción.
+        } else {
+            throw new IllegalStateException("Error: La donación no pertenece a este beneficiario.");
         }
     }
 

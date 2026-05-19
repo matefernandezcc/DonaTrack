@@ -1,17 +1,21 @@
 package com.donatrack.donaciones.domain.model;
-import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+
 public class Donante extends Rol {
     private List<Donacion> donacionesRealizadas;
+    private List<RecepcionDonacion> historialRecepciones;
 
     public Donante() {
         super();
         this.donacionesRealizadas = new ArrayList<>();
+        this.historialRecepciones = new ArrayList<>();
     }
 
     public void agregarDonacion(Donacion d) {this.donacionesRealizadas.add(d);}
+    public void agregarRecepcion(RecepcionDonacion r) {this.historialRecepciones.add(r);}
 
     // --- Métodos de comportamiento ---
     public void filtrarDonaciones(EstadoDonacion estado, String categoria) {
@@ -25,4 +29,6 @@ public class Donante extends Rol {
     // Getters y Setters
     public List<Donacion> getDonaciones() { return donacionesRealizadas; }
     public void setDonaciones(List<Donacion> donacionesRealizadas) { this.donacionesRealizadas = donacionesRealizadas; }
+    
+    public List<RecepcionDonacion> getHistorialRecepciones() { return historialRecepciones; }
 }
