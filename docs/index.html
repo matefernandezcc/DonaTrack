@@ -172,8 +172,8 @@
               <li class="is-active">En camino</li>
               <li>Entregada</li>
             </ul>
-            <div class="mock__map" role="img" aria-label="Mapa de ruta">
-              <svg viewBox="0 0 240 90">
+            <div class="mock__map">
+              <svg viewBox="0 0 240 90" role="img" aria-label="Mapa de ruta">
                 <path d="M10 70 C 60 10, 120 90, 230 25" stroke="#0B4A8F" stroke-width="2" fill="none"
                   stroke-dasharray="4 4" />
                 <circle cx="10" cy="70" r="4" fill="#1F9D6E" />
@@ -223,7 +223,7 @@
         </svg>
 
         <div class="story__truck" id="story-truck" aria-hidden="true">
-          <img id="truck-image" src="img/delivery-truck-start.svg" alt=""
+          <img id="truck-image" src="img/delivery-truck-start.svg" loading="lazy" decoding="async" alt=""
             style="width: 100%; height: 100%; object-fit: contain;">
         </div>
 
@@ -370,11 +370,11 @@
           <span><i class="dot dot--orange"></i> Entrega confirmada</span>
         </div>
 
-        <div id="map" class="map-sec__map" role="region" aria-label="Mapa interactivo de donaciones"></div>
+        <section id="map" class="map-sec__map" aria-label="Mapa interactivo de donaciones"></section>
       </div>
 
       <!-- Modal for marker -->
-      <div class="modal" id="map-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+      <dialog class="modal" id="map-modal" aria-modal="true" aria-labelledby="modal-title" hidden>
         <div class="modal__backdrop" data-close></div>
         <div class="modal__panel">
           <button class="modal__close" aria-label="Cerrar" data-close>
@@ -401,7 +401,7 @@
             </dl>
           </div>
         </div>
-      </div>
+      </dialog>
     </section>
 
     <!-- ============ CAMPAIGNS ============ -->
@@ -741,7 +741,7 @@
     </svg>
   </button>
 
-  <aside class="chatbot" id="chat-panel" role="dialog" aria-modal="false" aria-labelledby="chat-title" hidden>
+  <dialog class="chatbot" id="chat-panel" aria-modal="false" aria-labelledby="chat-title" hidden>
     <header class="chatbot__head">
       <div class="chatbot__who">
         <span class="chatbot__avatar" aria-hidden="true">
@@ -769,7 +769,7 @@
       <div class="msg msg--bot">Hola 👋 ¿En qué puedo ayudarte hoy?</div>
     </div>
 
-    <div class="chatbot__chips" role="group" aria-label="Acciones rápidas">
+    <div class="chatbot__chips">
       <button class="chip" data-q="¿Cómo dono?">Cómo donar</button>
       <button class="chip" data-q="Ver campañas">Ver campañas</button>
       <button class="chip" data-q="Quiero registrarme">Registrarse</button>
@@ -788,7 +788,7 @@
         </svg>
       </button>
     </form>
-  </aside>
+  </dialog>
 
   <!-- Leaflet -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

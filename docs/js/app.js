@@ -21,7 +21,7 @@
     setTimeout(() => {
       loader.classList.add("is-hidden");
       document.body.style.overflow = "";
-    }, 3800);
+    }, 2400);
   }
 
   // --- Navbar elevation on scroll ---

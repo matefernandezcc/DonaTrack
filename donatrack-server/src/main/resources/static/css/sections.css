@@ -667,6 +667,12 @@
     display: grid;
     place-items: center;
     padding: 16px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    margin: 0;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .modal__backdrop {
@@ -705,8 +711,8 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 0;
     background: var(--bg-nav-elevated);
@@ -1095,8 +1101,8 @@
 }
 
 .footer__social a {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     display: grid;
     place-items: center;
     border-radius: 50%;
@@ -1154,6 +1160,7 @@
     position: fixed;
     bottom: 96px;
     right: 24px;
+    left: auto;
     width: 360px;
     max-width: calc(100vw - 32px);
     background: var(--bg);
@@ -1166,6 +1173,9 @@
     max-height: 70vh;
     animation: chatPop 0.25s var(--ease);
     overflow: hidden;
+    margin: 0;
+    padding: 0;
+    color: inherit;
 }
 
 @keyframes chatPop {
@@ -1471,8 +1481,8 @@
     width: 82px;
     height: 82px;
     animation:
-        slideIn 1.2s cubic-bezier(.22, 1, .36, 1) forwards,
-        floatBox 2s ease-in-out infinite 1.2s;
+        slideIn 0.8s cubic-bezier(.22, 1, .36, 1) forwards,
+        floatBox 2s ease-in-out infinite 0.8s;
 }
 
 .speed-line {
@@ -1482,7 +1492,7 @@
     background: var(--muted-2);
     left: -60px;
     opacity: 0;
-    animation: lines 0.8s ease forwards, wind 1.5s ease-in-out infinite 0.8s;
+    animation: lines 0.5s ease forwards, wind 1.5s ease-in-out infinite 0.5s;
 }
 
 .line1 {
@@ -1493,13 +1503,13 @@
 .line2 {
     width: 26px;
     top: 38px;
-    animation-delay: .08s;
+    animation-delay: .05s;
 }
 
 .line3 {
     width: 35px;
     top: 54px;
-    animation-delay: .15s;
+    animation-delay: .1s;
 }
 
 .box {
@@ -1517,14 +1527,15 @@
 }
 
 .dona {
-    font-size: 54px;
+    font-size: clamp(32px, 8vw, 54px);
     font-weight: 700;
     letter-spacing: -3px;
     color: var(--ink);
-    width: 0;
+    width: max-content;
+    max-width: 0;
     overflow: hidden;
     white-space: nowrap;
-    animation: revealText 1s cubic-bezier(.22, 1, .36, 1) 2.5s forwards;
+    animation: revealText 0.8s cubic-bezier(.22, 1, .36, 1) 1.2s forwards;
 }
 
 .track {
@@ -1570,12 +1581,12 @@
 
 @keyframes revealText {
     from {
-        width: 0;
+        max-width: 0;
         opacity: 0;
     }
 
     to {
-        width: 320px;
+        max-width: 320px;
         opacity: 1;
     }
 }
