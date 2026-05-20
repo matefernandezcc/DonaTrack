@@ -4,9 +4,12 @@ import java.util.List;
 
 import com.donatrack.donaciones.domain.enums.EstadoNecesidad;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class NecesidadExtraordinaria extends Necesidad {
-    private double cantidadRequerida;
-    private List<Donacion> donacionesParciales;
+    @Getter @Setter private double cantidadRequerida;
+    @Getter private List<Donacion> donacionesParciales;
 
     public NecesidadExtraordinaria(String descripcion, Categoria subcategoriaRequerida, double cantidadRequerida) {
         super(descripcion, subcategoriaRequerida);
@@ -39,10 +42,4 @@ public class NecesidadExtraordinaria extends Necesidad {
     public double cantidadPendiente(){
         return this.cantidadRequerida - this.cantidadAcumulada();
     }
-
-    // Getters y Setters
-    public double getCantidadRequerida() { return cantidadRequerida; }
-    public void setCantidadRequerida(double cantidadRequerida) { this.cantidadRequerida = cantidadRequerida; }
-    
-    public List<Donacion> getDonacionesParciales() { return donacionesParciales; }
 }

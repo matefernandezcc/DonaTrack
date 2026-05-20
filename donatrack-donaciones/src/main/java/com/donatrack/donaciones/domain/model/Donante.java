@@ -4,9 +4,12 @@ import java.util.List;
 
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Donante extends Rol {
-    private List<Donacion> donacionesRealizadas;
-    private List<RecepcionDonacion> historialRecepciones;
+    @Getter @Setter private List<Donacion> donacionesRealizadas;
+    @Getter private List<RecepcionDonacion> historialRecepciones;
 
     public Donante() {
         super();
@@ -25,10 +28,4 @@ public class Donante extends Rol {
     public void verUbicacionCamion() {
         // Lógica para consultar la ubicación en tiempo real del camión asignado
     }
-
-    // Getters y Setters
-    public List<Donacion> getDonaciones() { return donacionesRealizadas; }
-    public void setDonaciones(List<Donacion> donacionesRealizadas) { this.donacionesRealizadas = donacionesRealizadas; }
-    
-    public List<RecepcionDonacion> getHistorialRecepciones() { return historialRecepciones; }
 }

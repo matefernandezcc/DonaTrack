@@ -2,10 +2,13 @@ package com.donatrack.donaciones.domain.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Categoria {
-    private String nombre;
-    private String descripcion;
-    private List<Categoria> subcategorias;
+    @Getter @Setter private String nombre;
+    @Getter @Setter private String descripcion;
+    @Getter private List<Categoria> subcategorias;
 
     public Categoria(String nombre, String descripcion) {
         this.nombre = nombre;
@@ -28,13 +31,4 @@ public class Categoria {
         }
         return false;
     }
-
-    // Getters y Setters
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-    
-    public List<Categoria> getSubcategorias() { return subcategorias; }
 }

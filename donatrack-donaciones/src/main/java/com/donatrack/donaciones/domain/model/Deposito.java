@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Deposito {
-    private String id;
-    private List<Donacion> donacionesDisponibles;
-    private String nombre;
-    private int capacidadMaxima;
-    private Direccion direccion;
+    @Getter @Setter private String id;
+    @Getter private List<Donacion> donacionesDisponibles;
+    @Getter @Setter private String nombre;
+    @Getter @Setter private int capacidadMaxima;
+    @Getter @Setter private Direccion direccion;
 
     public Deposito(String id, String nombre, int capacidadMaxima, Direccion direccion) {
         this.id = id;
@@ -47,20 +50,5 @@ public class Deposito {
     }
 
     public void ingresarDonacion(Donacion d) { this.donacionesDisponibles.add(d); }
-
-    // Getters y Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public int getCapacidadMaxima() { return capacidadMaxima; }
-    public void setCapacidadMaxima(int capacidadMaxima) { this.capacidadMaxima = capacidadMaxima; }
-
-    public Direccion getDireccion() { return direccion; }
-    public void setDireccion(Direccion direccion) { this.direccion = direccion; }
-    
-    public List<Donacion> getDonacionesDisponibles() { return donacionesDisponibles; }
 }
 

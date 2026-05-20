@@ -1,8 +1,11 @@
 package com.donatrack.donaciones.domain.model;
 import java.time.LocalDate;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public abstract class Rol {
-    private LocalDate fechaAlta;
+    @Getter @Setter private LocalDate fechaAlta;
 
     public Rol() {
         this.fechaAlta = LocalDate.now(); 
@@ -10,7 +13,4 @@ public abstract class Rol {
 
     public Rol(LocalDate fechaAlta) {this.fechaAlta = fechaAlta;}
 
-    // Getters y Setters
-    public LocalDate getFechaAlta() {return fechaAlta;}
-    public void setFechaAlta(LocalDate fechaAlta) {this.fechaAlta = fechaAlta;}
 }

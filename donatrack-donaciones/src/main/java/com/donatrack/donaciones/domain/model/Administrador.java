@@ -1,11 +1,15 @@
 package com.donatrack.donaciones.domain.model;
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 public class Administrador extends Rol {
-    private Deposito depositoAsignado;
-    private AsignacionStrategy estrategiaAsignacion;
-    private ImportadorStrategy estrategiaImportador;
+    @Getter @Setter private Deposito depositoAsignado;
+    @Getter @Setter private AsignacionStrategy estrategiaAsignacion;
+    @Getter @Setter private ImportadorStrategy estrategiaImportador;
 
     public Administrador(Deposito depositoAsignado) {
         super();
@@ -54,14 +58,4 @@ public class Administrador extends Rol {
     public void verRankingMensual() {
         // Queda vacío. Requerirá motor de base de datos para procesar métricas de los donantes.
     }
-
-    // --- Getters y Setters ---
-    public Deposito getDepositoAsignado() { return depositoAsignado; }
-    public void setDepositoAsignado(Deposito depositoAsignado) { this.depositoAsignado = depositoAsignado; }
-
-    public AsignacionStrategy getEstrategiaAsignacion() { return estrategiaAsignacion; }
-    public void setEstrategiaAsignacion(AsignacionStrategy estrategiaAsignacion) { this.estrategiaAsignacion = estrategiaAsignacion; }
-
-    public ImportadorStrategy getEstrategiaImportador() { return estrategiaImportador; }
-    public void setEstrategiaImportador(ImportadorStrategy estrategiaImportador) { this.estrategiaImportador = estrategiaImportador; }
 }
