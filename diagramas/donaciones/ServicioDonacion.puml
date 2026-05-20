@@ -233,16 +233,9 @@ enum EstadoNecesidad {
 ' HERENCIA
 ' =====================================================
 
-Persona <|-- PersonaHumana
-Persona <|-- PersonaJuridica
-
-Rol <|-- Representante
-Rol <|-- Donante
-Rol <|-- Beneficiario
-Rol <|-- Administrador
-
-Necesidad <|-- NecesidadExtraordinaria
-Necesidad <|-- NecesidadRecurrente
+interface AsignarDonacionUseCase{
++ ejecutar(donacion, administrador)
+}
 
 PorPrioridad ..|> AsignacionStrategy
 PorCercania ..|> AsignacionStrategy
