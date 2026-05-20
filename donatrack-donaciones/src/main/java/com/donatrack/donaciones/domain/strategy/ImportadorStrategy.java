@@ -1,5 +1,5 @@
 package com.donatrack.donaciones.domain.strategy;
 
-public interface AsignacionStrategy {
+public interface ImportadorStrategy {
 
 }

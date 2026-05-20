@@ -1,0 +1,6 @@
+package com.donatrack.donaciones.domain.enums;
+
+public enum EstadoNecesidad {
+    ABIERTA,
+    SATISFECHA
+}

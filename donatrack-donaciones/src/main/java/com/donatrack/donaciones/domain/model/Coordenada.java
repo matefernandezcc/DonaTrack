@@ -1,6 +1,18 @@
 package com.donatrack.donaciones.domain.model;
 
 public class Coordenada {
-    private Double latitud;
-    private Double longitud;
+    private double latitud;
+    private double longitud;
+
+    public Coordenada(double latitud, double longitud) {
+        this.latitud = latitud;
+        this.longitud = longitud;
+    }
+
+    // Getters y Setters
+    public double getLatitud() { return latitud; }
+    public void setLatitud(double latitud) { this.latitud = latitud; }
+
+    public double getLongitud() { return longitud; }
+    public void setLongitud(double longitud) { this.longitud = longitud; }
 }
