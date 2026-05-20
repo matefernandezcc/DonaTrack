@@ -29,5 +29,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build and test project
-        run: mvn -B clean verify --file pom.xml
+      - name: Compile project
+        run: mvn -B clean compile --file pom.xml
+
+      - name: Run tests
+        run: mvn -B test --file pom.xml
+
+      - name: Package project
+        run: mvn -B package --file pom.xml
