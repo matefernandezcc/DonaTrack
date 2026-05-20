@@ -1,0 +1,975 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DonaTrack — Donaciones trazables, impacto real</title>
+    <meta
+      name="description"
+      content="DonaTrack conecta donaciones con organizaciones beneficiarias y permite seguir cada entrega de forma transparente, de origen a destino."
+    />
+    <meta name="theme-color" content="#0B4A8F" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <link rel="stylesheet" href="css/style.css" />
+
+    <link rel="icon" type="image/svg+xml" href="img/favicon.svg" />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
+
+    <!-- ============ NAVBAR ============ -->
+    <header class="nav" id="nav">
+      <div class="nav__inner container">
+        <a href="#" class="nav__brand" aria-label="DonaTrack, inicio">
+          <svg
+            class="logo"
+            viewBox="0 0 40 40"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <defs>
+              <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#0B4A8F" />
+                <stop offset="1" stop-color="#1F9D6E" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M32 12a14 14 0 0 0-24 8"
+              fill="none"
+              stroke="url(#lg)"
+              stroke-width="4"
+              stroke-linecap="round"
+            />
+            <path
+              d="M8 28a14 14 0 0 0 24-8"
+              fill="none"
+              stroke="url(#lg)"
+              stroke-width="4"
+              stroke-linecap="round"
+            />
+            <circle cx="32" cy="12" r="2.6" fill="#F25C1F" />
+            <circle cx="8" cy="28" r="2.6" fill="#0B4A8F" />
+          </svg>
+          <span class="nav__brand-text">DonaTrack</span>
+        </a>
+
+        <nav class="nav__links" aria-label="Navegación principal">
+          <a href="#como-funciona">Cómo funciona</a>
+          <a href="#campanas">Campañas</a>
+          <a href="#organizaciones">Organizaciones</a>
+          <a href="#impacto">Impacto</a>
+        </nav>
+
+        <div class="nav__cta">
+          <a href="#login" class="btn btn--ghost">Iniciar sesión</a>
+          <a href="#registro" class="btn btn--primary btn--sm">Registrarse</a>
+          <button
+            class="nav__burger"
+            id="nav-burger"
+            aria-label="Abrir menú"
+            aria-expanded="false"
+            aria-controls="nav-drawer"
+          >
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="nav__drawer" id="nav-drawer" hidden>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#campanas">Campañas</a>
+        <a href="#organizaciones">Organizaciones</a>
+        <a href="#impacto">Impacto</a>
+        <a href="#login" class="btn btn--ghost">Iniciar sesión</a>
+        <a href="#registro" class="btn btn--primary">Registrarse</a>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <!-- ============ HERO ============ -->
+      <section class="hero">
+        <div class="hero__bg" aria-hidden="true">
+          <span class="blob blob--blue"></span>
+          <span class="blob blob--green"></span>
+          <span class="blob blob--orange"></span>
+        </div>
+
+        <div class="container hero__grid">
+          <div class="hero__copy">
+            <span class="eyebrow">
+              <span class="eyebrow__dot"></span>
+              UTN Solidaria · Trazabilidad transparente
+            </span>
+            <h1 class="hero__title">
+              Convertí el excedente en
+              <span class="grad-text">esperanza</span>.
+            </h1>
+            <p class="hero__lead">
+              Cada donación merece ser trazable. DonaTrack conecta a personas y
+              empresas con organizaciones verificadas, y te muestra el recorrido
+              completo: desde tu mano hasta quien lo necesita.
+            </p>
+            <div class="hero__ctas">
+              <a href="#registro" class="btn btn--primary btn--lg">
+                Quiero Donar
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="btn__icon">
+                  <path
+                    d="M5 12h14M13 5l7 7-7 7"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </a>
+              <a href="#recorrido" class="btn btn--ghost btn--lg">
+                Ver Cómo Funciona
+              </a>
+            </div>
+
+            <ul class="hero__trust" aria-label="Indicadores de confianza">
+              <li><strong>+128</strong> ONG verificadas</li>
+              <li><strong>4.9/5</strong> satisfacción de donantes</li>
+              <li><strong>100%</strong> trazabilidad</li>
+            </ul>
+          </div>
+
+          <div class="hero__mock" aria-hidden="true">
+            <div class="mock mock--card">
+              <div class="mock__head">
+                <span class="mock__dot"></span>
+                <span class="mock__dot"></span>
+                <span class="mock__dot"></span>
+                <span class="mock__title">Donación #DT-2418</span>
+              </div>
+              <div class="mock__row">
+                <span>Estado</span>
+                <strong class="pill pill--green">En entrega</strong>
+              </div>
+              <div class="mock__bar">
+                <span style="width: 78%"></span>
+              </div>
+              <ul class="mock__steps">
+                <li class="is-done">Recibida</li>
+                <li class="is-done">Acopio</li>
+                <li class="is-active">En camino</li>
+                <li>Entregada</li>
+              </ul>
+              <div class="mock__map" role="img" aria-label="Mapa de ruta">
+                <svg viewBox="0 0 240 90">
+                  <path
+                    d="M10 70 C 60 10, 120 90, 230 25"
+                    stroke="#0B4A8F"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-dasharray="4 4"
+                  />
+                  <circle cx="10" cy="70" r="4" fill="#1F9D6E" />
+                  <circle cx="230" cy="25" r="4" fill="#F25C1F" />
+                </svg>
+              </div>
+            </div>
+
+            <div class="mock mock--badge">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"
+                  fill="#0B4A8F"
+                />
+                <path
+                  d="m9 12 2 2 4-4"
+                  stroke="#fff"
+                  stroke-width="2"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <div>
+                <strong>ONG verificada</strong>
+                <span>Comedor "El Faro"</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCROLL STORY ============ -->
+      <section class="story" id="recorrido" aria-labelledby="story-title">
+        <div class="container story__intro">
+          <span class="eyebrow eyebrow--green">El recorrido de una donación</span>
+          <h2 id="story-title">De tu mano a quien lo necesita.</h2>
+          <p>
+            Seguí cada etapa del trayecto. Transparencia real, sin intermediarios
+            opacos.
+          </p>
+        </div>
+
+        <div class="story__stage" id="story-stage">
+          <svg
+            class="story__svg"
+            viewBox="0 0 1000 1800"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path
+              id="road"
+              d="M150 60
+                 C 700 180, 100 380, 850 540
+                 C 200 720, 900 920, 200 1120
+                 C 850 1300, 200 1480, 800 1720"
+              fill="none"
+              stroke="#E5ECF5"
+              stroke-width="22"
+              stroke-linecap="round"
+            />
+            <path
+              d="M150 60
+                 C 700 180, 100 380, 850 540
+                 C 200 720, 900 920, 200 1120
+                 C 850 1300, 200 1480, 800 1720"
+              fill="none"
+              stroke="#0B4A8F"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-dasharray="2 14"
+              opacity="0.55"
+            />
+          </svg>
+
+          <div class="story__truck" id="story-truck" aria-hidden="true">
+            <svg viewBox="0 0 64 40">
+              <rect x="2" y="10" width="36" height="20" rx="3" fill="#0B4A8F" />
+              <rect x="38" y="16" width="18" height="14" rx="2" fill="#1E6BB8" />
+              <rect x="42" y="18" width="10" height="6" rx="1" fill="#E8F1FB" />
+              <circle cx="14" cy="32" r="5" fill="#0E1726" />
+              <circle cx="14" cy="32" r="2" fill="#F6F8FB" />
+              <circle cx="48" cy="32" r="5" fill="#0E1726" />
+              <circle cx="48" cy="32" r="2" fill="#F6F8FB" />
+              <path
+                d="M8 18h26M8 22h26"
+                stroke="#1E6BB8"
+                stroke-width="1.2"
+              />
+            </svg>
+          </div>
+
+          <ol class="story__steps">
+            <li class="step" data-step="1">
+              <span class="step__num">01</span>
+              <h3>Donación realizada</h3>
+              <p>
+                Registrás tu donación en segundos. Indicás tipo, cantidad y punto
+                de retiro.
+              </p>
+            </li>
+            <li class="step" data-step="2">
+              <span class="step__num">02</span>
+              <h3>Centro de acopio</h3>
+              <p>
+                Tu donación es clasificada y certificada por personal capacitado
+                en el centro más cercano.
+              </p>
+            </li>
+            <li class="step" data-step="3">
+              <span class="step__num">03</span>
+              <h3>Transporte en camino</h3>
+              <p>
+                Logística verificada en ruta. Recibís actualizaciones en tiempo
+                real con cada movimiento.
+              </p>
+            </li>
+            <li class="step" data-step="4">
+              <span class="step__num">04</span>
+              <h3>ONG receptora</h3>
+              <p>
+                La organización beneficiaria confirma la recepción con foto y
+                firma digital.
+              </p>
+            </li>
+            <li class="step" data-step="5">
+              <span class="step__num">05</span>
+              <h3>Entrega completada</h3>
+              <p>
+                Recibís la prueba de entrega y el impacto generado. El círculo se
+                cierra.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ============ HOW IT WORKS ============ -->
+      <section class="how" id="como-funciona" aria-labelledby="how-title">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Cómo funciona</span>
+            <h2 id="how-title">Tres pasos, un impacto medible.</h2>
+          </div>
+          <div class="how__grid">
+            <article class="card card--hover">
+              <div class="card__icon card__icon--blue">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M21 21l-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
+              <h3>Descubrí causas</h3>
+              <p>
+                Explorá campañas reales de organizaciones verificadas. Filtrá
+                por causa, zona o tipo de donación.
+              </p>
+            </article>
+            <article class="card card--hover">
+              <div class="card__icon card__icon--orange">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 21s-7-4.5-7-10a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.5-7 10-7 10Z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <h3>Doná fácilmente</h3>
+              <p>
+                Coordiná el retiro o entregá en un punto de acopio. Sin trámites,
+                sin fricciones.
+              </p>
+            </article>
+            <article class="card card--hover">
+              <div class="card__icon card__icon--green">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M3 12h4l3-8 4 16 3-8h4"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <h3>Seguí el impacto real</h3>
+              <p>
+                Recibís notificaciones en cada etapa. Fotos, confirmaciones y
+                métricas de impacto en tu panel.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ METRICS ============ -->
+      <section class="metrics" id="impacto" aria-labelledby="metrics-title">
+        <div class="container">
+          <div class="section-head section-head--center">
+            <span class="eyebrow eyebrow--light">Impacto</span>
+            <h2 id="metrics-title">Números que cuentan historias.</h2>
+          </div>
+          <div class="metrics__grid">
+            <div class="metric">
+              <strong class="metric__num" data-count="14820">0</strong>
+              <span>Donaciones completadas</span>
+            </div>
+            <div class="metric">
+              <strong class="metric__num" data-count="237">0</strong>
+              <span>Campañas activas</span>
+            </div>
+            <div class="metric">
+              <strong class="metric__num" data-count="128">0</strong>
+              <span>ONG verificadas</span>
+            </div>
+            <div class="metric">
+              <strong class="metric__num" data-count="36412">0</strong>
+              <span>Personas ayudadas este mes</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ MAP ============ -->
+      <section class="map-sec" id="organizaciones" aria-labelledby="map-title">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Mapa de impacto</span>
+            <h2 id="map-title">Donde tus donaciones están haciendo bien.</h2>
+            <p class="section-head__lead">
+              Explorá puntos de acopio, organizaciones beneficiarias y entregas
+              confirmadas en tu zona.
+            </p>
+          </div>
+
+          <div class="map-sec__legend" aria-hidden="true">
+            <span><i class="dot dot--blue"></i> Punto de acopio</span>
+            <span><i class="dot dot--green"></i> ONG receptora</span>
+            <span><i class="dot dot--orange"></i> Entrega confirmada</span>
+          </div>
+
+          <div
+            id="map"
+            class="map-sec__map"
+            role="region"
+            aria-label="Mapa interactivo de donaciones"
+          ></div>
+        </div>
+
+        <!-- Modal for marker -->
+        <div
+          class="modal"
+          id="map-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          hidden
+        >
+          <div class="modal__backdrop" data-close></div>
+          <div class="modal__panel">
+            <button
+              class="modal__close"
+              aria-label="Cerrar"
+              data-close
+            >
+              &times;
+            </button>
+            <div class="modal__media" id="modal-media"></div>
+            <div class="modal__body">
+              <span class="pill pill--green" id="modal-status">Entregado</span>
+              <h3 id="modal-title">Donación</h3>
+              <p id="modal-desc"></p>
+              <dl class="modal__meta">
+                <div><dt>Beneficiario</dt><dd id="modal-org">—</dd></div>
+                <div><dt>Tipo</dt><dd id="modal-type">—</dd></div>
+                <div><dt>Fecha</dt><dd id="modal-date">—</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CAMPAIGNS ============ -->
+      <section class="camp" id="campanas" aria-labelledby="camp-title">
+        <div class="container">
+          <div class="section-head section-head--row">
+            <div>
+              <span class="eyebrow">Campañas destacadas</span>
+              <h2 id="camp-title">Donde podés ayudar hoy.</h2>
+            </div>
+            <a href="#" class="link-arrow">Ver todas las campañas →</a>
+          </div>
+
+          <div class="camp__grid">
+            <article class="campaign">
+              <div class="campaign__img campaign__img--1" aria-hidden="true">
+                <span class="badge">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="m9 12 2 2 4-4"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      fill="none"
+                      stroke-linecap="round"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      fill="none"
+                    />
+                  </svg>
+                  Verificada
+                </span>
+              </div>
+              <div class="campaign__body">
+                <h3>Alimentos para comedores del sur</h3>
+                <p>
+                  Cubrimos 12 comedores en La Matanza con productos no
+                  perecederos durante el invierno.
+                </p>
+                <div class="campaign__progress">
+                  <div class="bar"><span style="width: 72%"></span></div>
+                  <div class="campaign__stats">
+                    <strong>72%</strong>
+                    <span>· 1.284 donantes</span>
+                  </div>
+                </div>
+                <a href="#" class="btn btn--primary btn--sm">Donar a esta campaña</a>
+              </div>
+            </article>
+
+            <article class="campaign">
+              <div class="campaign__img campaign__img--2" aria-hidden="true">
+                <span class="badge">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="m9 12 2 2 4-4"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      fill="none"
+                      stroke-linecap="round"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      fill="none"
+                    />
+                  </svg>
+                  Verificada
+                </span>
+              </div>
+              <div class="campaign__body">
+                <h3>Ropa de abrigo para infancias</h3>
+                <p>
+                  Camperas, frazadas y calzado para 3 hogares de niñez en
+                  Córdoba antes del invierno.
+                </p>
+                <div class="campaign__progress">
+                  <div class="bar"><span style="width: 48%"></span></div>
+                  <div class="campaign__stats">
+                    <strong>48%</strong>
+                    <span>· 612 donantes</span>
+                  </div>
+                </div>
+                <a href="#" class="btn btn--primary btn--sm">Donar a esta campaña</a>
+              </div>
+            </article>
+
+            <article class="campaign">
+              <div class="campaign__img campaign__img--3" aria-hidden="true">
+                <span class="badge">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="m9 12 2 2 4-4"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      fill="none"
+                      stroke-linecap="round"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      fill="none"
+                    />
+                  </svg>
+                  Verificada
+                </span>
+              </div>
+              <div class="campaign__body">
+                <h3>Equipamiento escolar UTN Solidaria</h3>
+                <p>
+                  Bancos, sillas y útiles para escuelas rurales de Mendoza.
+                  Cierra el 30 de junio.
+                </p>
+                <div class="campaign__progress">
+                  <div class="bar"><span style="width: 91%"></span></div>
+                  <div class="campaign__stats">
+                    <strong>91%</strong>
+                    <span>· 2.044 donantes</span>
+                  </div>
+                </div>
+                <a href="#" class="btn btn--primary btn--sm">Donar a esta campaña</a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TESTIMONIALS ============ -->
+      <section class="testi" aria-labelledby="testi-title">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Historias reales</span>
+            <h2 id="testi-title">Lo que dicen donantes y organizaciones.</h2>
+          </div>
+          <div class="testi__grid">
+            <figure class="quote">
+              <blockquote>
+                "Por primera vez sé exactamente dónde terminó lo que doné. La
+                foto de los chicos recibiendo las cajas me emocionó."
+              </blockquote>
+              <figcaption>
+                <span class="avatar avatar--1" aria-hidden="true">M</span>
+                <div>
+                  <strong>María L.</strong>
+                  <span>Donante, Rosario</span>
+                </div>
+              </figcaption>
+            </figure>
+            <figure class="quote">
+              <blockquote>
+                "DonaTrack nos permite mostrar transparencia real a quienes
+                confían en nosotros. Cambió cómo gestionamos la logística."
+              </blockquote>
+              <figcaption>
+                <span class="avatar avatar--2" aria-hidden="true">J</span>
+                <div>
+                  <strong>Juan P.</strong>
+                  <span>Coordinador, Comedor El Faro</span>
+                </div>
+              </figcaption>
+            </figure>
+            <figure class="quote">
+              <blockquote>
+                "La trazabilidad nos profesionalizó. Recibimos donaciones de
+                empresas que antes desconfiaban del sector."
+              </blockquote>
+              <figcaption>
+                <span class="avatar avatar--3" aria-hidden="true">S</span>
+                <div>
+                  <strong>Sofía R.</strong>
+                  <span>Fundadora, ONG Raíces</span>
+                </div>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ FAQ ============ -->
+      <section class="faq" aria-labelledby="faq-title">
+        <div class="container faq__wrap">
+          <div class="section-head">
+            <span class="eyebrow">Preguntas frecuentes</span>
+            <h2 id="faq-title">Todo lo que querés saber antes de donar.</h2>
+          </div>
+
+          <div class="faq__list">
+            <details>
+              <summary>
+                ¿Cómo funcionan las donaciones en DonaTrack?
+                <span class="faq__chev" aria-hidden="true"></span>
+              </summary>
+              <p>
+                Te registrás, elegís una campaña o creás una donación libre,
+                coordinás retiro o entrega en un punto de acopio, y seguís cada
+                etapa hasta la confirmación final del beneficiario.
+              </p>
+            </details>
+            <details>
+              <summary>
+                ¿Cómo verifican a las organizaciones beneficiarias?
+                <span class="faq__chev" aria-hidden="true"></span>
+              </summary>
+              <p>
+                Verificamos personería jurídica, antecedentes y referencias
+                cruzadas con organismos públicos. Cada ONG verificada lleva un
+                sello visible en su perfil.
+              </p>
+            </details>
+            <details>
+              <summary>
+                ¿Qué hace que una donación sea "trazable"?
+                <span class="faq__chev" aria-hidden="true"></span>
+              </summary>
+              <p>
+                Registramos cada cambio de estado con timestamp, ubicación y
+                responsable. Recibís notificaciones en cada hito y prueba
+                fotográfica al cierre.
+              </p>
+            </details>
+            <details>
+              <summary>
+                ¿Cómo cuidan mis datos personales?
+                <span class="faq__chev" aria-hidden="true"></span>
+              </summary>
+              <p>
+                Aplicamos los principios de la Ley 25.326 de Protección de
+                Datos Personales: recolección limitada al fin declarado, uso
+                transparente, y derecho de acceso, rectificación y supresión.
+              </p>
+            </details>
+            <details>
+              <summary>
+                ¿Necesito registrarme para donar?
+                <span class="faq__chev" aria-hidden="true"></span>
+              </summary>
+              <p>
+                Sí, para garantizar trazabilidad y poder enviarte la prueba de
+                entrega. El registro toma menos de un minuto y no requiere
+                información sensible.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ACCESS / REGISTER ============ -->
+      <section class="access" id="registro" aria-labelledby="access-title">
+        <div class="container">
+          <div class="section-head section-head--center">
+            <span class="eyebrow">Sumate</span>
+            <h2 id="access-title">Elegí cómo querés participar.</h2>
+          </div>
+          <div class="access__grid">
+            <article class="access__card">
+              <div class="access__icon access__icon--blue">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
+              <h3>Soy donante</h3>
+              <p>
+                Personas y empresas que quieren transformar excedentes en
+                impacto medible.
+              </p>
+              <div class="access__ctas">
+                <a href="#" class="btn btn--primary">Crear cuenta</a>
+                <a href="#login" class="btn btn--ghost">Iniciar sesión</a>
+              </div>
+            </article>
+            <article class="access__card">
+              <div class="access__icon access__icon--green">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M3 21V9l9-6 9 6v12M9 21v-7h6v7"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <h3>Soy organización</h3>
+              <p>
+                ONGs, comedores y fundaciones que reciben donaciones y necesitan
+                gestionar entregas con transparencia.
+              </p>
+              <div class="access__ctas">
+                <a href="#" class="btn btn--secondary">Solicitar verificación</a>
+                <a href="#login" class="btn btn--ghost">Iniciar sesión</a>
+              </div>
+            </article>
+          </div>
+
+          <p class="access__privacy">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Tus datos se procesan responsablemente y solo para el funcionamiento
+            de la plataforma, conforme a la
+            <a href="#">Ley 25.326 de Protección de Datos Personales</a>.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer">
+      <div class="container footer__grid">
+        <div class="footer__brand">
+          <a href="#" class="nav__brand">
+            <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+              <use href="#" />
+              <path
+                d="M32 12a14 14 0 0 0-24 8"
+                fill="none"
+                stroke="url(#lg)"
+                stroke-width="4"
+                stroke-linecap="round"
+              />
+              <path
+                d="M8 28a14 14 0 0 0 24-8"
+                fill="none"
+                stroke="url(#lg)"
+                stroke-width="4"
+                stroke-linecap="round"
+              />
+              <circle cx="32" cy="12" r="2.6" fill="#F25C1F" />
+              <circle cx="8" cy="28" r="2.6" fill="#0B4A8F" />
+            </svg>
+            <span class="nav__brand-text">DonaTrack</span>
+          </a>
+          <p>
+            Plataforma de gestión y trazabilidad de donaciones. Proyecto de UTN
+            Solidaria.
+          </p>
+          <div class="footer__badges" aria-label="Sellos de confianza">
+            <span class="trust">UTN</span>
+            <span class="trust">ONG Verif.</span>
+            <span class="trust">Ley 25.326</span>
+          </div>
+        </div>
+
+        <div>
+          <h4>Plataforma</h4>
+          <ul>
+            <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#campanas">Campañas</a></li>
+            <li><a href="#organizaciones">Organizaciones</a></li>
+            <li><a href="#impacto">Impacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Términos y condiciones</a></li>
+            <li><a href="#">Política de privacidad</a></li>
+            <li><a href="#">Declaración de accesibilidad</a></li>
+            <li><a href="#">Ley 26.653</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contacto</h4>
+          <ul>
+            <li><a href="mailto:hola@donatrack.org">hola@donatrack.org</a></li>
+            <li>UTN Facultad Regional</li>
+            <li class="footer__social">
+              <a href="#" aria-label="Instagram">IG</a>
+              <a href="#" aria-label="LinkedIn">In</a>
+              <a href="#" aria-label="X">X</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom container">
+        <span>© <span id="year"></span> DonaTrack · UTN Solidaria</span>
+        <span>Hecho con propósito en Argentina.</span>
+      </div>
+    </footer>
+
+    <!-- ============ CHATBOT ============ -->
+    <button
+      class="chatbot__fab"
+      id="chat-fab"
+      aria-label="Abrir asistente"
+      aria-expanded="false"
+      aria-controls="chat-panel"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V5Z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
+
+    <aside
+      class="chatbot"
+      id="chat-panel"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="chat-title"
+      hidden
+    >
+      <header class="chatbot__head">
+        <div class="chatbot__who">
+          <span class="chatbot__avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="#1F9D6E" />
+              <path
+                d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2"
+                stroke="#fff"
+                stroke-width="2"
+                stroke-linecap="round"
+                fill="none"
+              />
+              <circle cx="9" cy="10" r="1" fill="#fff" />
+              <circle cx="15" cy="10" r="1" fill="#fff" />
+            </svg>
+          </span>
+          <div>
+            <strong id="chat-title">Asistente DonaTrack</strong>
+            <span class="chatbot__status">
+              <i></i> En línea
+            </span>
+          </div>
+        </div>
+        <button
+          class="chatbot__close"
+          id="chat-close"
+          aria-label="Cerrar asistente"
+        >
+          &times;
+        </button>
+      </header>
+
+      <div class="chatbot__log" id="chat-log" aria-live="polite">
+        <div class="msg msg--bot">Hola 👋 ¿En qué puedo ayudarte hoy?</div>
+      </div>
+
+      <div class="chatbot__chips" role="group" aria-label="Acciones rápidas">
+        <button class="chip" data-q="¿Cómo dono?">Cómo donar</button>
+        <button class="chip" data-q="Ver campañas">Ver campañas</button>
+        <button class="chip" data-q="Quiero registrarme">Registrarse</button>
+        <button class="chip" data-q="Seguimiento de mi donación">
+          Seguimiento
+        </button>
+      </div>
+
+      <form class="chatbot__form" id="chat-form">
+        <label for="chat-input" class="sr-only">Escribí tu mensaje</label>
+        <input
+          id="chat-input"
+          type="text"
+          placeholder="Escribí tu mensaje…"
+          autocomplete="off"
+        />
+        <button type="submit" class="btn btn--primary btn--sm" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M3 11 21 3l-8 18-2-8-8-2Z"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </form>
+    </aside>
+
+    <!-- Leaflet -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <script src="js/app.js" defer></script>
+    <script src="js/scroll-story.js" defer></script>
+    <script src="js/map.js" defer></script>
+    <script src="js/chatbot.js" defer></script>
+  </body>
+</html>
