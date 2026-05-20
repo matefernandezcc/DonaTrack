@@ -2,6 +2,28 @@
 (function () {
   "use strict";
 
+  // --- Theme Toggle ---
+  const themeBtn = document.getElementById("theme-toggle");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      const docEl = document.documentElement;
+      const isDark = docEl.getAttribute("data-theme") === "dark";
+      const newTheme = isDark ? "light" : "dark";
+      docEl.setAttribute("data-theme", newTheme);
+      localStorage.setItem("dt-theme", newTheme);
+    });
+  }
+
+  // --- Page Loader ---
+  const loader = document.getElementById("page-loader");
+  if (loader) {
+    document.body.style.overflow = "hidden";
+    setTimeout(() => {
+      loader.classList.add("is-hidden");
+      document.body.style.overflow = "";
+    }, 3800);
+  }
+
   // --- Navbar elevation on scroll ---
   const nav = document.getElementById("nav");
   const onScroll = () => {
