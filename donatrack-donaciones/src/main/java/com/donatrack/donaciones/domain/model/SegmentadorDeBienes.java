@@ -1,7 +1,10 @@
 package com.donatrack.donaciones.domain.model;
 
+import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class SegmentadorDeBienes {
 
@@ -14,16 +17,40 @@ public class SegmentadorDeBienes {
         this.estrategiasSegmentacion.add(new SegmentarPorEstado());
     }
 
-    //La idea es hacer un bucle, y e ir aplicando filtros a las listas de bienes (las futuras donaciones)
     public List<Donacion> procesar(List<Bien> bienesBrutos) {
-        //1. Las estrategias de segmentacion reciben List<List<Bien>> y devuelven lo mismo
-        // List<List<Bien>> = una futura List<Donacion> (ya que Donacion tambien tiene lista de bienes)
-        List<List<Bien>> bienesBrutosUnprocessed = new ArrayList<>();
-        bienesBrutosUnprocessed.add(bienesBrutos);
+        //1. Lista inicial
+        List<List<Bien>> listasDeBienes = new ArrayList<>();
+        listasDeBienes.add(bienesBrutos);
 
+        //2. Se ejecuta el pipeline
         for (EstrategiaSegmentacion estrategia : estrategiasSegmentacion) {
+            listasDeBienes = estrategia.segmentar(listasDeBienes);
         }
 
-        return null;
+        //3. Cada lista de bienes se convierte en una Donacion
+        List<Donacion> donacionesResultantes = new ArrayList<>();
+
+        for (List<Bien> listaFinal : listasDeBienes) {
+            if (listaFinal.isEmpty()) {
+                continue;
+            }
+            //bien de muestra para asignarle la misma subcategoria a la donacion
+            Bien muestra = listaFinal.get(0);
+
+            //Instanciamos la Donacion y le asignamos la subcategoria en base a la muestra
+            Donacion nuevaDonacion = new Donacion(muestra.getSubcategoria());
+            nuevaDonacion.setId(UUID.randomUUID());
+
+            //Si no es perecedero, la fecha de vencimiento es null
+            nuevaDonacion.setFechaVencimiento(muestra.getFechaVencimiento());
+
+            nuevaDonacion.setBienes(listaFinal);
+            //Estado inicial de donacion: Pendiente
+            nuevaDonacion.setEstado(EstadoDonacion.PENDIENTE);
+
+            donacionesResultantes.add(nuevaDonacion);
+        }
+
+        return donacionesResultantes;
     }
 }

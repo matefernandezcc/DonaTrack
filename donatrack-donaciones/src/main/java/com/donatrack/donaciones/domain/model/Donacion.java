@@ -1,4 +1,5 @@
 package com.donatrack.donaciones.domain.model;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +13,7 @@ public class Donacion {
     private List<Bien> bienes;
     private Categoria subCategoria; 
     private List<HistorialEstado> historial;
-    private Date fechaVencimiento;
+    private LocalDate fechaVencimiento;
     private Beneficiario EntidadAsignada;
     private List<Foto> fotos;
 
@@ -50,7 +51,8 @@ public class Donacion {
     public List<HistorialEstado> getHistorial() { return historial; }
     public void setHistorial(List<HistorialEstado> historial) { this.historial = historial; }
 
-    public Date getFechaVencimiento() { return fechaVencimiento; }
+    public LocalDate getFechaVencimiento() { return fechaVencimiento; }
+    public void setFechaVencimiento(LocalDate fecha) { this.fechaVencimiento = fecha; }
 
     public Beneficiario getEntidadAsignada() { return EntidadAsignada; }
     public void setEntidadAsignada(Beneficiario entidadAsignada) { EntidadAsignada = entidadAsignada; }
