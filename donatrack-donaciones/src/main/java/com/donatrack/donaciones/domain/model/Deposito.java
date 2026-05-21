@@ -1,11 +1,8 @@
-package com.donatrack.logistica.domain.model;
+package com.donatrack.donaciones.domain.model;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import com.donatrack.donaciones.domain.model.Direccion;
-import com.donatrack.donaciones.domain.model.Donacion;
-import com.donatrack.donaciones.domain.model.Bien;
 
 import lombok.Getter;
 import lombok.Setter;
