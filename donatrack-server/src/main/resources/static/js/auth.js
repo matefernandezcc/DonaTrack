@@ -27,14 +27,14 @@
 
   function guard() {
     if (sessionStorage.getItem(KEY) !== '1') {
-      window.location.href = 'login-admin.html';
+      window.location.href = 'login.html';
     }
     document.addEventListener('click', function (e) {
       const t = e.target.closest('#logoutBtn');
       if (t) {
         e.preventDefault();
         sessionStorage.removeItem(KEY);
-        window.location.href = 'login-admin.html';
+        window.location.href = 'login.html';
       }
     });
   }
