@@ -1,5 +1,9 @@
 package com.donatrack.donaciones.domain.model;
 import com.donatrack.donaciones.domain.enums.TipoJuridica;
+
+import lombok.Getter;
+import lombok.Setter;
+
 import com.donatrack.donaciones.domain.enums.TipoDocumento;
 import java.util.Map;
 import java.util.ArrayList;
@@ -7,12 +11,12 @@ import java.util.List;
 
 public class PersonaJuridica extends Persona {
 
-    private String razonSocial;
-    private TipoDocumento tipoDocumento;
-    private String cuit;
-    private TipoJuridica tipo;
-    private String rubro;
-    private List<Representante> representantes;
+    @Getter @Setter private String razonSocial;
+    @Getter @Setter private TipoDocumento tipoDocumento;
+    @Getter @Setter private String cuit;
+    @Getter @Setter private TipoJuridica tipo;
+    @Getter @Setter private String rubro;
+    @Getter @Setter private List<Representante> representantes;
 
     public PersonaJuridica(String email, Contacto contacto, Direccion direccion, String razonSocial, TipoDocumento tipoDocumento, String cuit, TipoJuridica tipo, String rubro) {
         super(email, contacto, direccion);
@@ -44,23 +48,4 @@ public class PersonaJuridica extends Persona {
             this.rubro = (String) datosNuevos.get("rubro");
         }
     }
-
-    // Getters y Setters
-    public String getRazonSocial() { return razonSocial; }
-    public void setRazonSocial(String razonSocial) { this.razonSocial = razonSocial; }
-
-    public TipoDocumento getTipoDocumento() { return tipoDocumento; }
-    public void setTipoDocumento(TipoDocumento tipoDocumento) { this.tipoDocumento = tipoDocumento; }
-
-    public String getCuit() { return cuit; }
-    public void setCuit(String cuit) { this.cuit = cuit; }
-
-    public TipoJuridica getTipo() { return tipo; }
-    public void setTipo(TipoJuridica tipo) { this.tipo = tipo; }
-
-    public String getRubro() { return rubro; }
-    public void setRubro(String rubro) { this.rubro = rubro; }
-
-    public List<Representante> getRepresentantes() { return representantes; }
-    public void setRepresentantes(List<Representante> representantes) { this.representantes = representantes; }
 }

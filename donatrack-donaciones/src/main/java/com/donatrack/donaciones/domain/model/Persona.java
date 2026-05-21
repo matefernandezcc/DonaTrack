@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public abstract class Persona {
-    private UUID id;
-    private String email;
-    private Contacto contacto;
-     private Direccion direccion;
-    private List<Rol> roles;
+    @Getter @Setter private UUID id;
+    @Getter @Setter private String email;
+    @Getter @Setter private Contacto contacto;
+    @Getter @Setter private Direccion direccion;
+    @Getter @Setter private List<Rol> roles;
 
     public Persona(String email, Contacto contacto, Direccion direccion) {
         this.id = UUID.randomUUID(); 
@@ -40,20 +43,4 @@ public abstract class Persona {
         }
         // Las clases hijas (Humana o Jurídica) podrán sobrescribir este método
     }
-
-    // Getters y Setters
-    public UUID getId() {return id;}
-    public void setId(UUID id) {this.id = id;}
-
-    public String getEmail() {return email;}
-    public void setEmail(String email) {this.email = email;}
-
-    public Contacto getContacto() {return contacto;}
-    public void setContacto(Contacto contacto) {this.contacto = contacto;}
-
-    public List<Rol> getRoles() {return roles;}
-    public void setRoles(List<Rol> roles) {this.roles = roles;}
-
-    public Direccion getDireccion() {return direccion;}
-    public void setDireccion(Direccion direccion) {this.direccion = direccion;}
 }

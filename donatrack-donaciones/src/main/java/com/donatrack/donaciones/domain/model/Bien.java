@@ -3,14 +3,17 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Bien {
-    private String descripcion;
-    private double cantidad;
-    private String unidadMedicion;
-    private boolean esUsado;
-    private LocalDate fechaVencimiento;
-    private List<Foto> fotos;
-    private Categoria subcategoria;
+    @Getter @Setter private String descripcion;
+    @Getter @Setter private double cantidad;
+    @Getter @Setter private String unidadMedicion;
+    @Getter @Setter private boolean esUsado;
+    @Getter @Setter private LocalDate fechaVencimiento;
+    @Getter @Setter private List<Foto> fotos;
+    @Getter @Setter private Categoria subcategoria;
 
     public Bien(String descripcion, double cantidad, String unidadMedicion, boolean esUsado, LocalDate fechaVencimiento, String foto) {
         this.descripcion = descripcion;
@@ -22,26 +25,4 @@ public class Bien {
     }
 
     public void agregarFoto(Foto foto) {this.fotos.add(foto);}
-
-    // Getters y Setters
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-    public double getCantidad() { return cantidad; }
-    public void setCantidad(double cantidad) { this.cantidad = cantidad; }
-
-    public String getUnidadMedicion() { return unidadMedicion; }
-    public void setUnidadMedicion(String unidadMedicion) { this.unidadMedicion = unidadMedicion; }
-
-    public boolean isEsUsado() { return esUsado; }
-    public void setEsUsado(boolean esUsado) { this.esUsado = esUsado; }
-
-    public LocalDate getFechaVencimiento() { return fechaVencimiento; }
-    public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
-
-    public Categoria getSubcategoria() { return subcategoria; }
-    public void setSubcategoria(Categoria subcategoria) { this.subcategoria = subcategoria; }
-
-    public List<Foto> getFotos() { return fotos; }
-    public void setFotos(List<Foto> fotos) { this.fotos = fotos; }
 }

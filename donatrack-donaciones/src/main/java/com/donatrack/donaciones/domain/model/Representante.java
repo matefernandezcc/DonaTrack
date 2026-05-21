@@ -1,18 +1,14 @@
 package com.donatrack.donaciones.domain.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Representante extends Rol {
-    private String nombre;
-    private String apellido;
+    @Getter @Setter private String cargo;
+    @Getter @Setter private PersonaJuridica Organizacion;
 
-    public Representante(String nombre, String apellido) {
-        this.nombre = nombre;
-        this.apellido = apellido;
+    public Representante(String cargo, PersonaJuridica organizacion) {
+        this.cargo = cargo;
+        this.Organizacion = organizacion;
     }
-
-    // Getters y Setters
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public String getApellido() { return apellido; }
-    public void setApellido(String apellido) { this.apellido = apellido; }
 }

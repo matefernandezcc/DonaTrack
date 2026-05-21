@@ -1,12 +1,16 @@
 package com.donatrack.donaciones.domain.model;
-import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+
+import lombok.Getter;
+import lombok.Setter;
+
 
 public class Beneficiario extends Rol {
-    private List<Donacion> donacionesAsignadas;
-    private List<Necesidad> necesidadesDeclaradas;
+    @Getter @Setter private List<Donacion> donacionesAsignadas;
+    @Getter @Setter private List<Necesidad> necesidadesDeclaradas;
 
     public Beneficiario() {
         super();
@@ -23,6 +27,8 @@ public class Beneficiario extends Rol {
         if (this.donacionesAsignadas.contains(d)) {
             d.setEstado(EstadoDonacion.ENTREGADA);
             //(Opcional) Las fotos se podrían guardar en la donación como comprobante de que el beneficiario firmó la recepción.
+        } else {
+            throw new IllegalStateException("Error: La donación no pertenece a este beneficiario.");
         }
     }
 
@@ -33,11 +39,4 @@ public class Beneficiario extends Rol {
     public void verUbicacionCamion() {
         // Queda vacío. Requerirá integración con API de mapas en el frontend.
     }
-
-    // --- Getters y Setters ---
-    public List<Donacion> getDonacionesAsignadas() { return donacionesAsignadas; }
-    public void setDonacionesAsignadas(List<Donacion> donacionesAsignadas) {this.donacionesAsignadas = donacionesAsignadas; }
-    
-    public List<Necesidad> getNecesidadesDeclaradas() {return necesidadesDeclaradas;}
-    public void setNecesidadesDeclaradas(List<Necesidad> necesidadesDeclaradas) {this.necesidadesDeclaradas = necesidadesDeclaradas;}
 }

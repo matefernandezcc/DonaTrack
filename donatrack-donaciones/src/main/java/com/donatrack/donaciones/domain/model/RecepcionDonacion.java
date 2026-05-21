@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class RecepcionDonacion {
-    private UUID id;
-    private LocalDate fechaRecepcion;
-    private Donante donante;
-    private Administrador registradoPor;
-    private List<Donacion> donacionesSegmentadas;
+    @Getter @Setter private UUID id;
+    @Getter @Setter private LocalDate fechaRecepcion;
+    @Getter @Setter private Donante donante;
+    @Getter @Setter private Administrador registradoPor;
+    @Getter @Setter private List<Donacion> donacionesSegmentadas;
 
     public RecepcionDonacion(Donante donante, Administrador registradoPor) {
         this.id = UUID.randomUUID();
@@ -23,20 +26,4 @@ public class RecepcionDonacion {
         // Delega la responsabilidad de segmentación a la interfaz EstrategiaSegmentacion
         this.donacionesSegmentadas = estrategia.segmentar(bienesBrutos);
     }
-
-    // --- Getters y Setters ---
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-
-    public LocalDate getFechaRecepcion() { return fechaRecepcion; }
-    public void setFechaRecepcion(LocalDate fechaRecepcion) { this.fechaRecepcion = fechaRecepcion; }
-
-    public Donante getDonante() { return donante; }
-    public void setDonante(Donante donante) { this.donante = donante; }
-
-    public Administrador getRegistradoPor() { return registradoPor; }
-    public void setRegistradoPor(Administrador registradoPor) { this.registradoPor = registradoPor; }
-
-    public List<Donacion> getDonacionesSegmentadas() { return donacionesSegmentadas; }
-    public void setDonacionesSegmentadas(List<Donacion> donacionesSegmentadas) { this.donacionesSegmentadas = donacionesSegmentadas; }
 }

@@ -1,24 +1,29 @@
 package com.donatrack.donaciones.domain.model;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.donatrack.donaciones.domain.enums.EstadoNecesidad;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public abstract class Necesidad {
-    private String descripcion;
-    private EstadoNecesidad estado;
-    private Categoria subcategoriaRequerida;
+    @Getter @Setter private String descripcion;
+    @Getter @Setter private EstadoNecesidad estado;
+    @Getter @Setter private Categoria subcategoriaRequerida;
+    @Getter private UUID id;
+    @Getter private LocalDate fechaSolicitud;
 
     public Necesidad(String descripcion, Categoria subcategoriaRequerida) {
         this.descripcion = descripcion;
         this.subcategoriaRequerida = subcategoriaRequerida;
-        this.estado = EstadoNecesidad.ABIERTA;
+        this.estado = EstadoNecesidad.PENDIENTE;
+        this.id = UUID.randomUUID();
+        this.fechaSolicitud = LocalDate.now();
     }
 
-    // Getters y Setters
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-    public EstadoNecesidad getEstado() { return estado; }
-    public void setEstado(EstadoNecesidad estado) { this.estado = estado; }
-
-    public Categoria getSubcategoriaRequerida() { return subcategoriaRequerida; }
-    public void setSubcategoriaRequerida(Categoria subcategoriaRequerida) { this.subcategoriaRequerida = subcategoriaRequerida; }
+    
+    public boolean estaCubierta(){
+     return this.estado == EstadoNecesidad.CUBIERTA;
+    }
 }

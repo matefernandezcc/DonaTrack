@@ -1,18 +1,14 @@
 package com.donatrack.donaciones.domain.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Coordenada {
-    private double latitud;
-    private double longitud;
+    @Getter @Setter private double latitud;
+    @Getter @Setter private double longitud;
 
     public Coordenada(double latitud, double longitud) {
         this.latitud = latitud;
         this.longitud = longitud;
     }
-
-    // Getters y Setters
-    public double getLatitud() { return latitud; }
-    public void setLatitud(double latitud) { this.latitud = latitud; }
-
-    public double getLongitud() { return longitud; }
-    public void setLongitud(double longitud) { this.longitud = longitud; }
 }
