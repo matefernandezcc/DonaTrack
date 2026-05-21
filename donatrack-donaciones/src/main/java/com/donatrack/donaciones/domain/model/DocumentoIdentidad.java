@@ -1,6 +1,5 @@
 package com.donatrack.donaciones.domain.model;
 import com.donatrack.donaciones.domain.enums.TipoDocumento;
-
 import lombok.Getter;
 import lombok.Setter;
 

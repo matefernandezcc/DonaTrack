@@ -8,33 +8,43 @@ skinparam linetype ortho
 
 abstract class Persona {
     - id: UUID
+    - email: String
+    - contacto: Contacto
     - direccion: Direccion
-    - Contacto: Contacto
+    - documento: DocumentoIdentidad
     - roles: List<Rol>
-    + agregarRol(rol: Rol)
-    + validarRol(rol: Rol)
+    + agregarRol(Rol r)
+    + validarRol(Rol r)
+    + validarDocumentacion(DocumentoIdentidad d)
+    + setDocumento(DocumentoIdentidad documento)
+    + actualizarInformacion(Map<String, Object> datosNuevos)
 }
 
 class Contacto {
     - correoElectronico: String
     - telefono: String
     - whatsapp: String
-    - medioPreferido: MedioContacto
+    - medioPredeterminado: MedioContacto
 }
 
 class PersonaHumana {
     - nombre: String
     - apellido: String
-    - documento: DocumentoIdentidad
-    - fechaNacimiento: Date
-    - genero: String
+    - edad: Integer
+    + validarRol(Rol r)
+    + validarDocumentacion(DocumentoIdentidad d)
+    + actualizarInformacion(Map<String, Object> datosNuevos)
 }
 
 class PersonaJuridica {
     - razonSocial: String
-    - cuit: String
     - tipo: TipoJuridica
     - rubro: String
+    - representantes: List<Representante>
+    + agregarRepresentante(Representante r)
+    + validarRol(Rol r)
+    + validarDocumentacion(DocumentoIdentidad d)
+    + actualizarInformacion(Map<String, Object> datosNuevos)
 }
 
 class DocumentoIdentidad {
@@ -54,39 +64,53 @@ class Representante {
 class Donante {
     - donacionesRealizadas: List<Donacion>
     - historialRecepciones: List<RecepcionDonacion>
+    + agregarDonacion(Donacion d)
+    + agregarRecepcion(RecepcionDonacion r)
+    + consultarEstadoDonacion(Donacion d)
+    + consultarEstadoTodasLasDonaciones(List<Donacion> donacionesRealizadas)
+    + filtrarDonaciones(EstadoDonacion estado, String categoria)
+    + verUbicacionCamion()
 }
 
 class Beneficiario {
+    - necesidades: List<Necesidad>
     - donacionesAsignadas: List<Donacion>
-    - necesidadesDeclaradas: List<Necesidad>
     + registrarNecesidad(n: Necesidad)
-    + confirmarRecepcion(d: Donacion, fotos: List<Foto>)
+    + confirmarRecepcion(Donacion d, List<Foto> fotosComprobante)
+    + verEstadoDonaciones(List<Donacion> donacionesAsignadas)
+    + verUbicacionCamion()
 }
 
 class Administrador {
-    - DepositoAsignado: Deposito
-    + registrarRecepcion(donante, bienes)
-    + asignarDonacion(donacion, entidad)
+    - depositoAsignado : Deposito
+    - estrategiasAsignacion: AsignacionStrategy
+    - estrategiasImportacion: ImportadorStrategy
+    + importarDonantesMasivos(String rutaArchivo)
+    + obtenerRecomendacionAsignacion(List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas)
+    + asignarDonacionFinal(Donacion d, Beneficiario b)
+    + actualizarDonacionesVencidas()
+    + asociarDonacion(Donacion d, Donante donante)
+    + administrarCamiones()
+    + verRankingMensual()
 }
 
 class Direccion {
     - calle: String
-    - altura: String
+    - altura: Double
     - localidad: String
+    - provincia: Provincia
     - codigoPostal: String
     - coordenadas: Coordenada
-    - Provincia: Provincia
-    - Pais: Pais
 }
 
 class Coordenada {
-    - latitud: double
-    - longitud: double
+    - latitud: Double
+    - longitud: Double
 }
 
 class Provincia {
     - nombreProvincia: String
-    - Pais: Pais
+    - pais: Pais
 }
 
 class Pais {
@@ -94,21 +118,32 @@ class Pais {
     - nacionalidad: String
 }
 
+class Camion{
+    - patente: String
+    - ubicacionActual: String
+    - ultimaActualizacion: LocalDate
+    + setUbicacionActual(String ubicacionActual)
+}
+
 class Deposito {
-    - id: String
+    - id: UUID
     - donacionesDisponibles: List<Donacion>
     - nombre: String
     - capacidadMaxima: Integer
     - direccion: Direccion
+    + auditarVencidos()
+    + ingresarDonacion(Donacion d) { this.donacionesDisponibles.add(d)
 }
 
 class RecepcionDonacion {
     - id: UUID
     - fechaRecepcion: LocalDate
     - donante: Donante
-    - donacionesSegmentadas: List<Donacion>
     - registradoPor: Administrador
-    + segmentarBienes(bienesBrutos: List<Bien>)
+    - donacionesResultantes: List<Donacion>
+    - bienesBrutos: List<Bien>
+    - estrategiasSegmentacion: List<EstrategiaSegmentacion>
+    + procesar(List<Bien> bienesBrutos)
 }
 
 note right of RecepcionDonacion
@@ -119,15 +154,17 @@ end note
 
 class Donacion {
     - id: UUID
-    - subcategoria: Categoria
-    - bienes: List<Bien>
-    - fechaVencimiento: Date
     - estado: EstadoDonacion
-    - entidadAsignada: Beneficiario
+    - bienes: List<Bien>
+    - subCategoria: Categoria
+    - historial: List<HistorialEstado>
+    - fechaVencimiento: LocalDate
+    - EntidadAsignada: Beneficiario
     - fotos: List<Foto>
-    - historialEstados: List<HistorialEstado>
-    + cambiarEstado(nuevoEstado, observacion, usuario)
-    + estaVencida(): Boolean
+    + Donacion(Categoria: Categoria)
+    + agregarBien(b: Bien)
+    + registrarCambioEstado(nuevoRegistro: HistorialEstado)
+    + addFoto(foto: Foto)
 }
 
 class HistorialEstado {
@@ -138,46 +175,52 @@ class HistorialEstado {
 }
 
 class Bien {
-    - cantidad: Double
-    - unidadMedida: String
     - descripcion: String
+    - cantidad: Double
+    - unidadMedicion: String
     - esUsado: Boolean
-    - subcategoria: Categoria
     - fechaVencimiento: LocalDate
-    - fotoOpcional: list<Foto>
+    - fotos: List<Foto>
+    - subcategoria: Categoria
+    + agregarFoto(Foto foto)
 }
 
 class Categoria {
     - nombre: String
     - descripcion: String
     - subcategorias: List<Categoria>
+    + agregarSubcategoria(categoria: Categoria)
     + esSubcategoriaDe(categoria): Boolean
 }
 
 class Foto {
-    - url: String
     - descripcion: String
+    - url: String
 }
 
 abstract class Necesidad {
-    - id: UUID
     - descripcion: String
-    - subcategoriaRequerida: Categoria
     - estado: EstadoNecesidad
-    - donacionesAsignadas: List<Donacion>
+    - subcategoriaRequerida: Categoria
+    - id: UUID
     - fechaSolicitud: Date
-    + asignarDonacion(d: Donacion)
     + estaCubierta(): Boolean
 }
 
 class NecesidadExtraordinaria {
-    - cantidadRequerida: double
-    + cantidadPendiente(): Decimal
+    - cantidadRequerida: Double
+    - donacionesParciales: List<Donacion>
+    + acumularDonacionesParciales(nuevaDonacion: Donacion)
+    + cantidadAcumulada(): Double
+    + cantidadPendiente(): Double
 }
 
 class NecesidadRecurrente {
-    - cantidadObjetivo: Decimal
-    - periodo: String
+    - cantidadObjetivo: Double
+    - periodo: Double
+    + FechaVencimientoPeriodo(): LocalDate
+    + cumplirObjetivo(nuevaDonacion: Donacion)
+    + cantidadAcumulada(nuevaDonacion: Donacion): Double
 }
 
 class Notificacion {
@@ -189,21 +232,45 @@ class Notificacion {
     + marcarComoLeida()
 }
 
-interface AsignacionStrategy {
-    + recomendarEntidad(d: Donacion, necesidades: List<Necesidad>): Beneficiario
+interface ServicioNotificaciones {
+    + enviar(Notificacion notificacion, Contacto contactoDestino)
 }
 
-class PorPrioridad
-class PorCercania
+interface AsignacionStrategy {
+    + recomendarNecesidades(List<Donacion> donaciones, List<Necesidad> necesidades)
+}
+
+class PorPrioridad{
+    + recomendarNecesidades(List<Donacion> donaciones, List<Necesidad> necesidades)
+}
+class PorCercania{
+    + recomendarNecesidades(List<Donacion> donaciones, List<Necesidad> necesidades)
+}
 
 interface ImportadorStrategy {
-    + importar(archivo: Archivo)
+    + importar(String rutaArchivo)
 }
 
-class ImportadorCSV {
-    - registroPersonas: List<Persona>
-    + buscarPorEmail(String email)
+class ImportadorCSV{
+    
 }
+
+interface EstrategiaSegmentacion {
+    + segmentar(List<List<Bien>> bienes)
+}
+
+class SegmentarPorEstado{
+    + segmentar(List<List<Bien>> listasDeBienes)
+}
+
+class SegmentarPorSubcategoria{
+    + segmentar(List<List<Bien>> listasDeBienes)
+}
+
+class SegmentarPorVencimiento{
+    + segmentar(List<List<Bien>> listasDeBienes)
+}
+
 
 ' =====================================================
 ' ENUMS
@@ -217,22 +284,22 @@ enum TipoJuridica {
 }
 
 enum MedioContacto {
-    EMAIL
+    CORREO
     TELEFONO
     WHATSAPP
 }
 
 enum TipoDocumento {
     DNI
-    PASAPORTE
     CUIT
+    PASAPORTE
 }
 
 enum EstadoDonacion {
     PENDIENTE
-    EN_DEPOSITO
     ASIGNADA
     ENTREGADA
+    EN_DEPOSITO
     VENCIDA
 }
 
@@ -245,9 +312,16 @@ enum EstadoNecesidad {
 ' HERENCIA
 ' =====================================================
 
-interface AsignarDonacionUseCase{
-+ ejecutar(donacion, administrador)
-}
+Persona <|-- PersonaHumana
+Persona <|-- PersonaJuridica
+
+Rol <|-- Representante
+Rol <|-- Donante
+Rol <|-- Beneficiario
+Rol <|-- Administrador
+
+Necesidad <|-- NecesidadExtraordinaria
+Necesidad <|-- NecesidadRecurrente
 
 PorPrioridad ..|> AsignacionStrategy
 PorCercania ..|> AsignacionStrategy
