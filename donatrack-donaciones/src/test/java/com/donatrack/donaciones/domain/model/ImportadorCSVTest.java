@@ -30,7 +30,8 @@ public class ImportadorCSVTest {
             30
     );
     
-    @Test public void testImportar() {
+    @Test 
+    public void testImportar() {
         PersonaHumana personaPrueba2 = new PersonaHumana(
             "emailABuscar@prueba.com",
             new Contacto("emailABuscar@prueba.com", "123456789", "987654321", MedioContacto.CORREO),
@@ -51,7 +52,7 @@ public class ImportadorCSVTest {
         ImportadorCSV importador = new ImportadorCSV(ListaPersonas);
 
         //el archivo tiene 19986 registros
-        importador.importar("enunciado/CSV/donantes_import_20000_UTF8_BOM.csv");
+        importador.importar("../enunciado/CSV/donantes_import_20000_UTF8_BOM.csv");
         
         assertEquals(19986, importador.getRegistroPersonas().size());
     }
