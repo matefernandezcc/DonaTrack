@@ -1,8 +1,8 @@
 package com.donatrack.donaciones.domain.model;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+// import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;

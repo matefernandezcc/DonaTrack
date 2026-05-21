@@ -3,19 +3,20 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.Getter;
 import lombok.Setter;
 
 public class Deposito {
-    @Getter @Setter private String id;
+    @Getter @Setter private UUID id;
     @Getter private List<Donacion> donacionesDisponibles;
     @Getter @Setter private String nombre;
     @Getter @Setter private int capacidadMaxima;
     @Getter @Setter private Direccion direccion;
 
-    public Deposito(String id, String nombre, int capacidadMaxima, Direccion direccion) {
-        this.id = id;
+    public Deposito(String nombre, int capacidadMaxima, Direccion direccion) {
+        this.id = UUID.randomUUID();
         this.nombre = nombre;
         this.capacidadMaxima = capacidadMaxima;
         this.direccion = direccion;
