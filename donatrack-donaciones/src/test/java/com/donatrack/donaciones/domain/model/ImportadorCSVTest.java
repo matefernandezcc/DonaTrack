@@ -48,8 +48,8 @@ public class ImportadorCSVTest {
 
         ImportadorCSV importador = new ImportadorCSV(ListaPersonas);
 
-        //el archivo tiene 20000 registros
-        importador.importar("C:\\Users\\Admin\\Desktop\\tomi\\Carpeta con codigo\\DiseñoDeSistemas\\Donatrack\\DonaTrack\\enunciado\\CSV\\donantes_import_20000_UTF8_BOM.csv");
+        //el archivo tiene 19986 registros
+        importador.importar("enunciado/CSV/donantes_import_20000_UTF8_BOM.csv");
         
         assertEquals(19986, importador.getRegistroPersonas().size());
     }
