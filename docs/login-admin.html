@@ -1,144 +1,67 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login Administrador | DonaTrack</title>
+    <title>DonaTrack · Iniciar sesión</title>
     <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/design-system/2.21.1/styles/salesforce-lightning-design-system.min.css" />
-    
-    <style>
-        body {
-            background: linear-gradient(135deg, #f3f3f3 0%, #e8e8e8 100%);
-            font-family: 'Salesforce Sans', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 0 1rem;
-        }
-
-        .dt-logo-wrapper {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .dt-logo {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 1rem;
-        }
-
-        .dt-brand-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #014486;
-            margin: 0;
-        }
-
-        .dt-brand-subtitle {
-            font-size: 0.875rem;
-            color: #706e6b;
-            margin-top: 0.25rem;
-        }
-    </style>
+        href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/styles/salesforce-lightning-design-system.min.css" />
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 
-<body>
+<body class="dt-login-body">
+    <main class="dt-login-shell">
+        <div class="slds-card dt-login-card">
+            <div class="slds-p-around_x-large">
+                <header class="slds-text-align_center slds-m-bottom_large">
+                    <div class="dt-logo dt-logo_lg slds-m-bottom_small">
+                        <span class="dt-logo__mark">D</span>
+                        <span class="dt-logo__text">DonaTrack</span>
+                    </div>
+                    <p class="slds-text-body_small slds-text-color_weak">Plataforma de gestión de donaciones</p>
+                </header>
 
-    <div class="login-container">
-        
-        <!-- Logo and Brand -->
-        <div class="dt-logo-wrapper">
-            <img src="img/package.svg" alt="DonaTrack Logo" class="dt-logo" />
-            <h1 class="dt-brand-title">DonaTrack</h1>
-            <p class="dt-brand-subtitle">Panel de Administración</p>
-        </div>
-
-        <!-- Login Card -->
-        <article class="slds-card">
-            <div class="slds-card__body slds-card__body_inner slds-p-around_large">
-                
-                <form id="admin-login-form">
-
-                    <!-- Error Alert (hidden by default) -->
-                    <div id="login-error" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium"
-                        role="alert" style="display: none;">
+                <div id="login-alert" class="slds-m-bottom_medium" hidden>
+                    <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
                         <span class="slds-assistive-text">error</span>
-                        <span class="slds-icon_container slds-icon-utility-error slds-m-right_x-small">
-                            <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
-                                <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#error"></use>
-                            </svg>
-                        </span>
-                        <h2>Usuario o contraseña incorrectos. <br><small>(Probá: admin / admin)</small></h2>
+                        <h2>Credenciales inválidas. Intenta nuevamente.</h2>
                     </div>
+                </div>
 
-                    <!-- Username Field -->
+                <form id="login-form" novalidate>
                     <div class="slds-form-element slds-m-bottom_medium">
-                        <label class="slds-form-element__label" for="username">
-                            <abbr class="slds-required" title="required">*</abbr>Usuario
-                        </label>
+                        <label class="slds-form-element__label" for="username">Usuario</label>
                         <div class="slds-form-element__control">
-                            <input type="text" id="username" required class="slds-input" placeholder="Ingresá tu usuario" 
-                                autocomplete="username" />
+                            <input type="text" id="username" name="username" class="slds-input" autocomplete="username"
+                                required />
                         </div>
                     </div>
 
-                    <!-- Password Field -->
                     <div class="slds-form-element slds-m-bottom_large">
-                        <label class="slds-form-element__label" for="password">
-                            <abbr class="slds-required" title="required">*</abbr>Contraseña
-                        </label>
+                        <label class="slds-form-element__label" for="password">Contraseña</label>
                         <div class="slds-form-element__control">
-                            <input type="password" id="password" required class="slds-input" placeholder="••••••••" 
-                                autocomplete="current-password" />
+                            <input type="password" id="password" name="password" class="slds-input"
+                                autocomplete="current-password" required />
                         </div>
                     </div>
 
-                    <!-- Submit Button -->
-                    <button type="submit" class="slds-button slds-button_brand slds-button_stretch">
-                        Iniciar Sesión
-                    </button>
+                    <button type="submit" class="slds-button slds-button_brand dt-block-button">Ingresar al
+                        Panel</button>
+
+                    <p class="slds-text-body_small slds-text-color_weak slds-text-align_center slds-m-top_medium">
+                        Demo: <strong>admin</strong> / <strong>admin</strong>
+                    </p>
                 </form>
-
             </div>
-        </article>
-
-        <!-- Footer Info -->
-        <div class="slds-text-align_center slds-m-top_medium">
-            <p class="slds-text-body_small slds-text-color_weak">
-                © 2026 DonaTrack. Sistema de Gestión de Donaciones.
-            </p>
         </div>
+        <p class="slds-text-body_small slds-text-color_weak slds-text-align_center slds-m-top_medium">
+            © DonaTrack · Panel de administración
+        </p>
+    </main>
 
-    </div>
-
-    <script>
-        document.getElementById('admin-login-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            const errorAlert = document.getElementById('login-error');
-
-            if (user === 'admin' && pass === 'admin') {
-                window.location.href = 'admin-dashboard.html';
-            } else {
-                errorAlert.style.display = 'flex';
-                // Auto-hide after 5 seconds
-                setTimeout(() => {
-                    errorAlert.style.display = 'none';
-                }, 5000);
-            }
-        });
-    </script>
+    <script src="js/auth.js"></script>
+    <script>DT_Auth.initLogin();</script>
 </body>
 
 </html>
