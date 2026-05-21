@@ -4,24 +4,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SegmentarPorVencimiento implements EstrategiaSegmentacion {
 
-    @Override public List<Donacion> segmentar(List<Bien> bienes) {
-        // Agrupamos utilizando la fecha de vencimiento como clave
-        Map<LocalDate, Donacion> donacionesPorVencimiento = new HashMap<>();
+    @Override public List<List<Bien>> segmentar(List<List<Bien>> listasDeBienes) {
 
-        for (Bien bien : bienes) {
-            LocalDate vencimiento = bien.getFechaVencimiento();
-            
-            if (!donacionesPorVencimiento.containsKey(vencimiento)) {
-                // Al crear la donación, le asignamos la subcategoría del primer bien que entra
-                donacionesPorVencimiento.put(vencimiento, new Donacion(bien.getSubcategoria()));
+        List<List<Bien>> listasSegmentadas = new ArrayList<>();
+
+        for (List<Bien> listaAIterar : listasDeBienes) {
+            //Cada sublista tiene una subcategoria, se toma el primer bien como muestra
+            Bien muestra = listaAIterar.get(0);
+
+            if (muestra.getFechaVencimiento() == null) {
+                //Caso 1: El bien no es perecedero. Pasa intacto a SegmentarPorEstado
+                listasSegmentadas.add(listaAIterar);
+            } else {
+                //Caso 2: Es perecedero. (Ej: leche)
+                //Aca el problema es que si es "no perecedero" como arroz blanco, deberia ir null en fechaVencimiento
+                //Se subdivide por fecha exacta
+                Map<LocalDate, List<Bien>> bienesPorFecha = listaAIterar.stream()
+                        .collect(Collectors.groupingBy(Bien::getFechaVencimiento));
+
+                //Se agrega las nuevas subdivisiones al resultado final
+                listasSegmentadas.addAll(bienesPorFecha.values());
             }
-            
-            donacionesPorVencimiento.get(vencimiento).agregarBien(bien);
         }
 
-        return new ArrayList<>(donacionesPorVencimiento.values());
+        return listasSegmentadas;
     }
 }

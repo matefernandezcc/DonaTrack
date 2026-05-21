@@ -16,8 +16,12 @@ public class SegmentadorDeBienes {
 
     //La idea es hacer un bucle, y e ir aplicando filtros a las listas de bienes (las futuras donaciones)
     public List<Donacion> procesar(List<Bien> bienesBrutos) {
-        for (EstrategiaSegmentacion estrategia : estrategiasSegmentacion) {
+        //1. Las estrategias de segmentacion reciben List<List<Bien>> y devuelven lo mismo
+        // List<List<Bien>> = una futura List<Donacion> (ya que Donacion tambien tiene lista de bienes)
+        List<List<Bien>> bienesBrutosUnprocessed = new ArrayList<>();
+        bienesBrutosUnprocessed.add(bienesBrutos);
 
+        for (EstrategiaSegmentacion estrategia : estrategiasSegmentacion) {
         }
 
         return null;

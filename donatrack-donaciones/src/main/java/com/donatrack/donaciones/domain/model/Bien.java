@@ -7,7 +7,7 @@ public class Bien {
     private String descripcion;
     private double cantidad;
     private String unidadMedicion;
-    private boolean esUsado;
+    private Boolean esUsado;
     private LocalDate fechaVencimiento;
     private List<Foto> fotos;
     private Categoria subcategoria;
@@ -33,7 +33,7 @@ public class Bien {
     public String getUnidadMedicion() { return unidadMedicion; }
     public void setUnidadMedicion(String unidadMedicion) { this.unidadMedicion = unidadMedicion; }
 
-    public boolean isEsUsado() { return esUsado; }
+    public Boolean isEsUsado() { return esUsado; }
     public void setEsUsado(boolean esUsado) { this.esUsado = esUsado; }
 
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }

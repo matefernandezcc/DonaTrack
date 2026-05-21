@@ -3,23 +3,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SegmentarPorEstado implements EstrategiaSegmentacion {
 
-    @Override public List<Donacion> segmentar(List<Bien> bienes) {
-        // Usamos un booleano como clave: true (esUsado) o false (es nuevo)
-        Map<Boolean, Donacion> donacionesPorEstado = new HashMap<>();
+    @Override public List<List<Bien>> segmentar(List<List<Bien>> listasDeBienes) {
 
-        for (Bien bien : bienes) {
-            boolean estadoUsado = bien.isEsUsado();
-            
-            if (!donacionesPorEstado.containsKey(estadoUsado)) {
-                donacionesPorEstado.put(estadoUsado, new Donacion(bien.getSubcategoria()));
+        List<List<Bien>> listasSegmentadas = new ArrayList<>();
+
+        for (List<Bien> listaAIterar : listasDeBienes) {
+            //Se toma el primer bien como muestra
+            Bien muestra = listaAIterar.get(0);
+
+            if (muestra.isEsUsado() == null) {
+                //Caso 1: No es relevante el estado
+                //Pasa intacto
+                listasSegmentadas.add(listaAIterar);
+            } else {
+                //Caso 2: El estado es relevante
+                //Se subdivide en 2: true "usados" y los false "no usados"
+                Map<Boolean, List<Bien>> bienesPorEstado = listaAIterar.stream()
+                        .collect(Collectors.groupingBy(Bien::isEsUsado));
+
+                //Agrega las subdivisiones finales al resultado
+                listasSegmentadas.addAll(bienesPorEstado.values());
             }
-            
-            donacionesPorEstado.get(estadoUsado).agregarBien(bien);
         }
 
-        return new ArrayList<>(donacionesPorEstado.values());
+        return listasSegmentadas;
     }
 }
