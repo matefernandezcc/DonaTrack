@@ -3,5 +3,5 @@ import java.util.List;
 
 public interface EstrategiaSegmentacion {
     // Recibe la lista completa de bienes y devuelve la lista de donaciones ya segmentadas
-    List<Donacion> segmentar(List<Bien> bienes);
+    List<List<Bien>> segmentar(List<List<Bien>> bienes);
 }

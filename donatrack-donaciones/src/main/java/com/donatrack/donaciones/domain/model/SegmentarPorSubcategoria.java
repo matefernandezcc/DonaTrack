@@ -1,28 +1,27 @@
 package com.donatrack.donaciones.domain.model;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+//import java.util.HashMap;
 
 public class SegmentarPorSubcategoria implements EstrategiaSegmentacion {
 
-    @Override public List<Donacion> segmentar(List<Bien> bienes) {
-        // Usamos un Map para agrupar las donaciones utilizando la Subcategoria como clave
-        Map<Categoria, Donacion> donacionesPorSubcategoria = new HashMap<>();
+    @Override public List<List<Bien>> segmentar(List<List<Bien>> listasDeBienes) {
 
-        for (Bien bien : bienes) {
-            Categoria sub = bien.getSubcategoria();
-            
-            // Si todavía no creamos una Donación para esta subcategoría, la instanciamos
-            if (!donacionesPorSubcategoria.containsKey(sub)) {
-                donacionesPorSubcategoria.put(sub, new Donacion(sub));
-            }
-            
-            // Agregamos el bien a la donación que le corresponde
-            donacionesPorSubcategoria.get(sub).agregarBien(bien);
+        List<List<Bien>> listasSegmentadas = new ArrayList<>();
+
+        // Se itera sobre las listas que entraron en la tuberia
+        for (List<Bien> listaAIterar : listasDeBienes) {
+
+            //Robo la idea de Maxi: Agrupo bienes usando su subcategoria como clave
+            //Te da un mapa temporal { "Ropa invierno" -> [campera, bufanda], "Muebles" -> [sillas] }
+            Map<Categoria, List<Bien>> bienesEnLista = listaAIterar.stream()
+                    .collect(Collectors.groupingBy(Bien::getSubcategoria));
+
+            listasSegmentadas.addAll(bienesEnLista.values());
         }
 
-        // Devolvemos solo los valores del mapa (la lista de donaciones ya armadas)
-        return new ArrayList<>(donacionesPorSubcategoria.values());
+        return listasSegmentadas;
     }
 }

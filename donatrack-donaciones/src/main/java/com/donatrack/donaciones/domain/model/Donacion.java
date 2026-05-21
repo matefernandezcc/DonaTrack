@@ -1,8 +1,9 @@
 package com.donatrack.donaciones.domain.model;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+//import java.util.Date;
 
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 
@@ -15,7 +16,7 @@ public class Donacion {
     @Getter @Setter private List<Bien> bienes;
     @Getter @Setter private Categoria subCategoria; 
     @Getter @Setter private List<HistorialEstado> historial;
-    @Getter private Date fechaVencimiento;
+    @Getter @Setter private LocalDate fechaVencimiento;
     @Getter @Setter private Beneficiario EntidadAsignada;
     @Getter private List<Foto> fotos;
 

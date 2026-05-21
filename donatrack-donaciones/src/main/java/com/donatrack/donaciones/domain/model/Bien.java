@@ -10,7 +10,7 @@ public class Bien {
     @Getter @Setter private String descripcion;
     @Getter @Setter private double cantidad;
     @Getter @Setter private String unidadMedicion;
-    @Getter @Setter private boolean esUsado;
+    @Getter @Setter private Boolean esUsado;
     @Getter @Setter private LocalDate fechaVencimiento;
     @Getter @Setter private List<Foto> fotos;
     @Getter @Setter private Categoria subcategoria;
