@@ -1,6 +1,8 @@
 package com.donatrack.donaciones.domain.model;
+import com.donatrack.donaciones.domain.strategy.AsignacionStrategy;
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
-
+import com.donatrack.donaciones.domain.strategy.ImportadorStrategy;
+import com.donatrack.logistica.domain.model.Deposito;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.logistica.domain.model;
 import java.time.LocalDate;
 
 import lombok.Getter;

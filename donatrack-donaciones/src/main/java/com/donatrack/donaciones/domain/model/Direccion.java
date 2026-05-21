@@ -8,7 +8,6 @@ public class Direccion {
     @Getter @Setter private double altura;
     @Getter @Setter private String localidad;
     @Getter @Setter private Provincia provincia; 
-    @Getter @Setter private Pais pais;
     @Getter @Setter private String codigoPostal;
     @Getter @Setter private Coordenada coordenadas;
 
@@ -17,7 +16,6 @@ public class Direccion {
         this.altura = altura;
         this.localidad = localidad;
         this.provincia = provincia;
-        this.pais = pais;
         this.codigoPostal = codigoPostal;
         this.coordenadas = coordenadas;
     }

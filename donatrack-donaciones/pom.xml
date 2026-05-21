@@ -12,6 +12,18 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.donatrack</groupId> 
+            <artifactId>donatrack-logistica</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.donatrack</groupId> 
+            <artifactId>donatrack-notificaciones</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.donatrack</groupId>
             <artifactId>donatrack-common</artifactId>
             <version>${project.version}</version>
@@ -26,3 +38,5 @@
         </dependency>
     </dependencies>
 </project>
+
+    

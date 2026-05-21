@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 //import java.util.Date;
-
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 
 import lombok.Getter;

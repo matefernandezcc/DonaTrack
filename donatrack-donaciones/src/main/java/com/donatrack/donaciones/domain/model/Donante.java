@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.domain.model;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 
 import lombok.Getter;
@@ -10,6 +10,7 @@ import lombok.Setter;
 public class Donante extends Rol {
     @Getter @Setter private List<Donacion> donacionesRealizadas;
     @Getter private List<RecepcionDonacion> historialRecepciones;
+
 
     public Donante() {
         super();
@@ -21,6 +22,12 @@ public class Donante extends Rol {
     public void agregarRecepcion(RecepcionDonacion r) {this.historialRecepciones.add(r);}
 
     // --- Métodos de comportamiento ---
+
+    public List<EstadoDonacion> consultarEstadoTodasLasDonaciones(List<Donacion> donacionesRealizadas) {
+        return donacionesRealizadas.stream().map(Donacion::getEstado).toList();}
+
+    public EstadoDonacion consultarEstadoDonacion(Donacion d) {return d.getEstado();}
+
     public void filtrarDonaciones(EstadoDonacion estado, String categoria) {
         // Lógica para filtrar el historial de donaciones realizadas por este usuario
     }

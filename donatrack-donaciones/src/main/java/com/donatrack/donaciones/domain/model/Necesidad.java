@@ -1,7 +1,6 @@
 package com.donatrack.donaciones.domain.model;
 import java.time.LocalDate;
 import java.util.UUID;
-
 import com.donatrack.donaciones.domain.enums.EstadoNecesidad;
 
 import lombok.Getter;

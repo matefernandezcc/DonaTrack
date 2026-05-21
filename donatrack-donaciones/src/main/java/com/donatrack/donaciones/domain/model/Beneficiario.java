@@ -32,9 +32,10 @@ public class Beneficiario extends Rol {
         }
     }
 
-    public void verEstadoDonaciones() {
-        // Cuando haya base de datos, este método hará un SELECT filtrando por la entidad.
+    public List<EstadoDonacion> verEstadoDonaciones(List<Donacion> donacionesAsignadas) {
+        return donacionesAsignadas.stream().map(Donacion::getEstado).toList();
     }
+
 
     public void verUbicacionCamion() {
         // Queda vacío. Requerirá integración con API de mapas en el frontend.

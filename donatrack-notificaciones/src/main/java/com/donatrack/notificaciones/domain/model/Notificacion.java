@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.notificaciones.domain.model;
 import com.donatrack.donaciones.domain.enums.MedioContacto;
 
 import lombok.Getter;

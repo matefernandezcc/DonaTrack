@@ -11,6 +11,13 @@
     <artifactId>donatrack-notificaciones</artifactId>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.donatrack</groupId> 
+            <artifactId>donatrack-donaciones</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>com.donatrack</groupId>
             <artifactId>donatrack-common</artifactId>
