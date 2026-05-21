@@ -30,32 +30,14 @@ body.dt-login-body {
   color: #181818;
 }
 
-.dt-logo__mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: #0176d3;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 14px;
+.dt-logo img {
+  height: 32px;
+  width: auto;
+  display: block;
 }
 
-.dt-logo__text {
-  font-size: 16px;
-  letter-spacing: 0.2px;
-}
-
-.dt-logo_lg .dt-logo__mark {
-  width: 40px;
-  height: 40px;
-  font-size: 18px;
-}
-
-.dt-logo_lg .dt-logo__text {
-  font-size: 22px;
+.dt-logo_lg img {
+  height: 48px;
 }
 
 .dt-logo_lg {
@@ -63,69 +45,137 @@ body.dt-login-body {
   width: 100%;
 }
 
-/* ===== Login ===== */
-.dt-login-shell {
+/* ===== Login (Estilo Split Screen) ===== */
+body.dt-login-body {
+  background: #f4f6f9;
+  /* Color de fondo claro estilo Salesforce */
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Salesforce Sans', Arial, sans-serif;
+}
+
+.dt-login-split {
+  display: flex;
+  min-height: 100vh;
   width: 100%;
-  max-width: 420px;
+}
+
+/* Columna Izquierda */
+.dt-login-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+}
+
+.dt-login-form-container {
+  width: 100%;
+  max-width: 380px;
+}
+
+.dt-login-logo {
+  height: 80px;
+  /* Ajusta este valor según las proporciones de tu SVG */
+  width: auto;
+  max-width: 100%;
 }
 
 .dt-login-card {
-  border: 1px solid #e5e5e5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #c9c7c5;
+  border-radius: 4px;
+  box-shadow: none;
+  /* Salesforce usa un diseño de tarjeta plano sin sombra dura */
+  background: #fff;
 }
 
 .dt-block-button {
   width: 100%;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
-/* ===== Topbar ===== */
-.dt-topbar {
-  height: 56px;
-  background: #fff;
-  border-bottom: 1px solid #e5e5e5;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.dt-topbar__search {
-  max-width: 480px;
-}
-
-.dt-topbar__actions {
-  margin-left: auto;
-  gap: 4px;
-}
-
-.dt-avatar-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.dt-avatar-btn:hover {
-  background: #f3f3f3;
-}
-
-.dt-notif {
-  position: relative;
-}
-
-.dt-notif__badge {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  background: #ba0517;
+/* Columna Derecha (Promocional con Gradiente) */
+.dt-login-right {
+  flex: 1.2;
+  /* Gradiente extraído mezclando el Blue Vibrant y el Electric Blue de SF */
+  background: linear-gradient(135deg, #0176d3 0%, #022ac0 100%);
   color: #fff;
-  border-radius: 10px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dt-promo-content {
+  max-width: 540px;
+  z-index: 2;
+}
+
+.dt-promo-date {
+  font-size: 14px;
   font-weight: 600;
-  line-height: 18px;
-  text-align: center;
+  margin-bottom: 24px;
+  color: #eaf5fe;
+}
+
+.dt-promo-title {
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+
+.dt-promo-desc {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 32px;
+  color: #eaf5fe;
+}
+
+.dt-promo-btn {
+  color: #0176d3 !important;
+  /* Mantiene el texto azul de la marca */
+  background-color: #fff !important;
+  border-color: #fff !important;
+  font-weight: 600;
+  padding: 0 24px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.dt-promo-btn:hover {
+  background-color: #f3f3f3 !important;
+  /* --pbc-g-gray-95 del código que pasaste */
+  border-color: #f3f3f3 !important;
+}
+
+.dt-promo-image-container {
+  margin-top: 48px;
+}
+
+.dt-promo-image {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: block;
+}
+
+/* Hacerlo Responsivo (Ocultar imagen en celulares) */
+@media (max-width: 900px) {
+  .dt-login-right {
+    display: none;
+    /* Oculta la columna azul en pantallas pequeñas */
+  }
+
+  .dt-login-left {
+    background-color: #fff;
+    /* Opcional: fondo blanco entero en móvil */
+  }
 }
 
 /* ===== Shell ===== */
