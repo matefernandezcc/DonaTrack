@@ -54,6 +54,7 @@
       date: "12 May 2026",
       status: "Entregado",
       emoji: "📍",
+      image: "url('https://tn.com.ar/resizer/v2/las-bufandas-algunas-de-las-ropas-de-abrigo-que-pueden-donarse-foto-adobe-stock-XXU6MIVU5VCQLMFZ7DF4TGIMSM.jpeg?auth=9fd575f77a87e748a4edceda4f2642d469d8c74460b9261a4449eadfca9b432d&width=1440')",
     },
     {
       type: "green",
@@ -76,6 +77,7 @@
       date: "08 May 2026",
       status: "Entregado",
       emoji: "🛋️",
+      image: "url('https://diariomovil.info/download/multimedia.miniatura.89b66ec132aa87f2.bWluaWF0dXJhLndlYnA%3D.webp')",
     },
     {
       type: "blue",
@@ -111,23 +113,31 @@
       (p.type === "orange"
         ? "pill--orange"
         : p.type === "blue"
-        ? "pill--blue"
-        : "pill--green");
-    mMedia.textContent = p.emoji;
-    modal.hidden = false;
+          ? "pill--blue"
+          : "pill--green");
+    if (p.image) {
+      mMedia.style.backgroundImage = p.image;
+      mMedia.style.backgroundSize = "cover";
+      mMedia.textContent = "";
+    } else {
+      mMedia.style.background = ""; // Resetea al gradiente de CSS
+      mMedia.textContent = p.emoji;
+    }
+    modal.removeAttribute("hidden");
+    modal.showModal();
     document.body.style.overflow = "hidden";
   };
 
   const closeModal = () => {
-    modal.hidden = true;
-    document.body.style.overflow = "";
+    modal.close();
   };
 
   modal.querySelectorAll("[data-close]").forEach((el) =>
     el.addEventListener("click", closeModal)
   );
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.hidden) closeModal();
+  modal.addEventListener("close", () => {
+    modal.setAttribute("hidden", "");
+    document.body.style.overflow = "";
   });
 
   points.forEach((p) => {

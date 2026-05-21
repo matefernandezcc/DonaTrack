@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard Admin | DonaTrack</title>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/design-system/2.21.1/styles/salesforce-lightning-design-system.min.css" />
+
+    <style>
+        body {
+            background-color: #f3f3f3;
+            margin: 0;
+            font-family: 'Salesforce Sans', Arial, sans-serif;
+        }
+
+        .dt-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .dt-brand-text {
+            font-weight: 700;
+            color: #014486;
+            font-size: 1.125rem;
+            letter-spacing: -0.01em;
+        }
+
+        /* SLDS2 enhancements */
+        .slds-global-header {
+            background: #ffffff;
+            border-bottom: 1px solid #dddbda;
+        }
+
+        .slds-context-bar {
+            background: #fafaf9;
+            border-bottom: 1px solid #dddbda;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Global Header -->
+    <div class="slds-global-header_container">
+        <header class="slds-global-header slds-grid slds-grid_align-spread">
+
+            <!-- Left Section: App Launcher + Logo + Brand -->
+            <div class="slds-global-header__item">
+                <div class="slds-global-header__logo">
+                    <div class="slds-icon-waffle_container slds-m-right_medium">
+                        <button class="slds-button slds-icon-waffle_button" title="App Launcher"
+                            aria-haspopup="true">
+                            <span class="slds-icon-waffle">
+                                <span class="slds-r1"></span><span class="slds-r2"></span><span class="slds-r3"></span>
+                                <span class="slds-r4"></span><span class="slds-r5"></span><span class="slds-r6"></span>
+                                <span class="slds-r7"></span><span class="slds-r8"></span><span class="slds-r9"></span>
+                            </span>
+                            <span class="slds-assistive-text">Abrir App Launcher</span>
+                        </button>
+                    </div>
+                    <div class="slds-global-header__item">
+                        <div class="slds-global-header__logo">
+                            <img src="img/package.svg" alt="DonaTrack" class="dt-logo" />
+                        </div>
+                    </div>
+                    <div class="slds-global-header__item slds-m-left_x-small">
+                        <span class="dt-brand-text">DonaTrack</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Section: Search -->
+            <div class="slds-global-header__item slds-global-header__item_search">
+                <div class="slds-form-element">
+                    <label for="global-search-01" class="slds-assistive-text">Buscar</label>
+                    <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                        <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default"
+                            aria-hidden="true">
+                            <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#search"></use>
+                        </svg>
+                        <input type="search" id="global-search-01" class="slds-input"
+                            placeholder="Buscar donaciones, usuarios, ONGs..." />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Section: Utilities -->
+            <div class="slds-global-header__item">
+                <ul class="slds-global-header__utilities">
+                    <li class="slds-global-header__utility">
+                        <button class="slds-button slds-button_icon slds-button_icon-container slds-button_icon-small slds-global-header__button_icon"
+                            title="Ayuda y capacitación" aria-haspopup="true">
+                            <svg class="slds-button__icon slds-global-header__icon" aria-hidden="true">
+                                <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#help"></use>
+                            </svg>
+                            <span class="slds-assistive-text">Ayuda y capacitación</span>
+                        </button>
+                    </li>
+                    <li class="slds-global-header__utility">
+                        <button class="slds-button slds-button_icon slds-button_icon-container slds-button_icon-small slds-global-header__button_icon"
+                            title="Configuración" aria-haspopup="true">
+                            <svg class="slds-button__icon slds-global-header__icon" aria-hidden="true">
+                                <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#settings"></use>
+                            </svg>
+                            <span class="slds-assistive-text">Configuración</span>
+                        </button>
+                    </li>
+                    <li class="slds-global-header__notification">
+                        <button class="slds-button slds-button_icon slds-button_icon-container slds-button_icon-small slds-global-header__button_icon"
+                            title="Notificaciones" aria-haspopup="true">
+                            <svg class="slds-button__icon slds-global-header__icon" aria-hidden="true">
+                                <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#notification"></use>
+                            </svg>
+                            <span class="slds-assistive-text">Notificaciones</span>
+                        </button>
+                    </li>
+                    <li class="slds-global-header__utility">
+                        <button class="slds-button slds-button_icon slds-button_icon-container slds-button_icon-small slds-global-header__button_icon"
+                            title="SuperAdmin | Cerrar Sesión" onclick="window.location.href='login-admin.html'">
+                            <span class="slds-avatar slds-avatar_circle slds-avatar_medium">
+                                <img alt="SuperAdmin" src="https://www.lightningdesignsystem.com/assets/images/avatar2.jpg"
+                                    title="SuperAdmin" />
+                            </span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Navigation Bar -->
+        <div class="slds-context-bar">
+            <div class="slds-context-bar__primary">
+                <div class="slds-context-bar__item slds-context-bar__dropdown-trigger slds-dropdown-trigger slds-dropdown-trigger_click slds-no-hover">
+                    <span class="slds-context-bar__label-action slds-context-bar__app-name">
+                        <span class="slds-truncate" title="DonaTrack Admin">DonaTrack Admin</span>
+                    </span>
+                </div>
+            </div>
+            <nav class="slds-context-bar__secondary" role="navigation">
+                <ul class="slds-grid">
+                    <li class="slds-context-bar__item slds-is-active">
+                        <a href="#" class="slds-context-bar__label-action" title="Inicio">
+                            <span class="slds-truncate" title="Inicio">Inicio</span>
+                        </a>
+                    </li>
+                    <li class="slds-context-bar__item">
+                        <a href="#" class="slds-context-bar__label-action" title="Donantes">
+                            <span class="slds-truncate" title="Donantes">Donantes</span>
+                        </a>
+                    </li>
+                    <li class="slds-context-bar__item">
+                        <a href="#" class="slds-context-bar__label-action" title="Recepciones (Acopio)">
+                            <span class="slds-truncate" title="Recepciones">Recepciones (Acopio)</span>
+                        </a>
+                    </li>
+                    <li class="slds-context-bar__item">
+                        <a href="#" class="slds-context-bar__label-action" title="Asignaciones">
+                            <span class="slds-truncate" title="Asignaciones">Asignaciones</span>
+                        </a>
+                    </li>
+                    <li class="slds-context-bar__item">
+                        <a href="#" class="slds-context-bar__label-action" title="Camiones">
+                            <span class="slds-truncate" title="Camiones">Camiones</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="slds-p-around_large" style="max-width: 1400px; margin: 0 auto;">
+
+        <!-- Page Header -->
+        <div class="slds-page-header slds-m-bottom_large">
+            <div class="slds-page-header__row">
+                <div class="slds-page-header__col-title">
+                    <div class="slds-media">
+                        <div class="slds-media__body">
+                            <div class="slds-page-header__name">
+                                <div class="slds-page-header__name-title">
+                                    <h1>
+                                        <span class="slds-page-header__title slds-truncate"
+                                            title="Vista General de Operaciones">Vista General de Operaciones</span>
+                                    </h1>
+                                </div>
+                            </div>
+                            <p class="slds-page-header__name-meta">Panel de Control • DonaTrack</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-page-header__col-actions">
+                    <div class="slds-page-header__controls">
+                        <div class="slds-page-header__control">
+                            <ul class="slds-button-group-list">
+                                <li>
+                                    <button class="slds-button slds-button_neutral">Importar CSV</button>
+                                </li>
+                                <li>
+                                    <button class="slds-button slds-button_brand">Registrar Recepción</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="slds-grid slds-gutters">
+
+            <!-- Left Column: 8 of 12 -->
+            <div class="slds-col slds-size_8-of-12">
+
+                <!-- Card: Donaciones Pendientes -->
+                <article class="slds-card slds-m-bottom_large">
+                    <div class="slds-card__header slds-grid">
+                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                            <div class="slds-media__body">
+                                <h2 class="slds-card__header-title">
+                                    <span class="slds-text-heading_small">Donaciones Pendientes de Asignación</span>
+                                </h2>
+                            </div>
+                        </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="ID Donación">ID Donación</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Tipo">Tipo</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Cantidad">Cantidad</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Estado">Estado</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Acción">Acción</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="slds-hint-parent">
+                                    <th scope="row">
+                                        <div class="slds-truncate"><a href="#" title="#DT-8830">#DT-8830</a></div>
+                                    </th>
+                                    <td data-label="Tipo">
+                                        <div class="slds-truncate" title="Alimentos no perecederos">Alimentos no
+                                            perecederos</div>
+                                    </td>
+                                    <td data-label="Cantidad">
+                                        <div class="slds-truncate" title="150 kg">150 kg</div>
+                                    </td>
+                                    <td data-label="Estado">
+                                        <span class="slds-badge slds-badge_lightest slds-theme_error">Sin Asignar</span>
+                                    </td>
+                                    <td data-label="Acción">
+                                        <button class="slds-button slds-button_neutral">Asignar a ONG</button>
+                                    </td>
+                                </tr>
+                                <tr class="slds-hint-parent">
+                                    <th scope="row">
+                                        <div class="slds-truncate"><a href="#" title="#DT-8831">#DT-8831</a></div>
+                                    </th>
+                                    <td data-label="Tipo">
+                                        <div class="slds-truncate" title="Mobiliario Escolar">Mobiliario Escolar</div>
+                                    </td>
+                                    <td data-label="Cantidad">
+                                        <div class="slds-truncate" title="40 sillas">40 sillas</div>
+                                    </td>
+                                    <td data-label="Estado">
+                                        <span class="slds-badge slds-badge_lightest slds-theme_error">Sin Asignar</span>
+                                    </td>
+                                    <td data-label="Acción">
+                                        <button class="slds-button slds-button_neutral">Asignar a ONG</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <!-- Card: Estado de Flota -->
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                            <div class="slds-media__body">
+                                <h2 class="slds-card__header-title">
+                                    <span class="slds-text-heading_small">Estado de Flota / Camiones</span>
+                                </h2>
+                            </div>
+                        </header>
+                        <div class="slds-no-flex">
+                            <button class="slds-button slds-button_neutral">Ver mapa</button>
+                        </div>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Transportista">Transportista</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Ruta">Ruta</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Estado">Estado</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="slds-hint-parent">
+                                    <td data-label="Transportista">
+                                        <div class="slds-truncate" title="Camión 01 (Logística Sur)">Camión 01
+                                            (Logística Sur)</div>
+                                    </td>
+                                    <td data-label="Ruta">
+                                        <div class="slds-truncate" title="Acopio Central -> Comedor Faro">Acopio Central
+                                            -> Comedor Faro</div>
+                                    </td>
+                                    <td data-label="Estado">
+                                        <span class="slds-badge slds-badge_lightest slds-theme_success">En
+                                            Tránsito</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- Right Column: 4 of 12 -->
+            <div class="slds-col slds-size_4-of-12">
+
+                <!-- Card: Registro Rápido -->
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                            <div class="slds-media__body">
+                                <h2 class="slds-card__header-title">
+                                    <span class="slds-text-heading_small">Registro Rápido Donante</span>
+                                </h2>
+                            </div>
+                        </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <form>
+                            <div class="slds-form-element slds-m-bottom_small">
+                                <label class="slds-form-element__label" for="dni-input">
+                                    <abbr class="slds-required" title="required">*</abbr>DNI / CUIT
+                                </label>
+                                <div class="slds-form-element__control">
+                                    <input type="text" id="dni-input" required class="slds-input"
+                                        placeholder="Ej: 30123456" />
+                                </div>
+                            </div>
+                            <div class="slds-form-element slds-m-bottom_medium">
+                                <label class="slds-form-element__label" for="name-input">
+                                    <abbr class="slds-required" title="required">*</abbr>Nombre Completo
+                                </label>
+                                <div class="slds-form-element__control">
+                                    <input type="text" id="name-input" required class="slds-input"
+                                        placeholder="Nombre y Apellido" />
+                                </div>
+                            </div>
+                            <button type="submit" class="slds-button slds-button_brand slds-button_stretch">
+                                Guardar y Asociar Donación
+                            </button>
+                        </form>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
