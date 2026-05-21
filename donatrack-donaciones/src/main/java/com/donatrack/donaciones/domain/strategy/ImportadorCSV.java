@@ -1,14 +1,24 @@
 package com.donatrack.donaciones.domain.strategy;
+
+import com.donatrack.donaciones.domain.model.Persona;
+import com.donatrack.donaciones.domain.model.PersonaHumana;
+import com.donatrack.donaciones.domain.model.PersonaJuridica;
+import com.donatrack.donaciones.domain.model.Contacto;
+
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import com.donatrack.donaciones.domain.model.Contacto;
-import com.donatrack.donaciones.domain.model.Persona;
 
+import com.donatrack.donaciones.domain.enums.MedioContacto;
+import com.donatrack.donaciones.domain.enums.TipoDocumento;
+
+
+import lombok.Getter;
 public class ImportadorCSV implements ImportadorStrategy {
     //Simulamos la base de datos (el "RepositorioDonantes") con una lista en memoria
-    private List<Persona> registroPersonas;
+    @Getter private List<Persona> registroPersonas;
 
     public ImportadorCSV(List<Persona> registroPersonas) {
         this.registroPersonas = registroPersonas;
@@ -25,12 +35,12 @@ public class ImportadorCSV implements ImportadorStrategy {
                 // Según el formato: TipoPersona, TipoDoc, Documento, Nombre/Razón Social, Email, Teléfono
                 String[] datos = linea.split(separador);
 
-                String tipoPersona = datos[1];
-                String tipoDoc = datos[2];
-                String documento = datos[3];
-                String nombreRazonSocial = datos[4];
-                String email = datos[5];
-                String telefono = datos[6];
+                String tipoPersona = datos[0];
+                String tipoDoc = datos[1];
+                String documento = datos[2];
+                String nombreRazonSocial = datos[3];
+                String email = datos[4];
+                String telefono = datos[5];
 
                 // 1. Validar si el registro ya existe buscando por correo electrónico
                 Persona personaExistente = buscarPorEmail(email);
@@ -44,10 +54,31 @@ public class ImportadorCSV implements ImportadorStrategy {
                     // 3. En caso contrario, crearlo y enviarle sus credenciales de acceso
                     System.out.println("Creando nuevo donante para: " + email);
                     
-                    Contacto nuevoContacto = new Contacto(email, telefono, null, null);
-                    // (Aquí habría una lógica con ifs para instanciar PersonaHumana o PersonaJuridica según 'tipoPersona')
-                    
-                    // Simulación del envío de credenciales usando el servicio de usuarios o notificaciones
+                    if(tipoPersona == "HUMANA"){
+                        PersonaHumana nuevaPersona = new PersonaHumana(
+                            email,
+                            new Contacto(email, telefono, null, MedioContacto.CORREO),
+                            null, // Dirección no proporcionada en el CSV
+                            nombreRazonSocial,
+                            null, // Apellido se debe separar del nombre completo
+                            TipoDocumento.valueOf(tipoDoc.toUpperCase()),
+                            documento,
+                            0 // Edad no proporcionada en el CSV
+                        );
+                        this.registroPersonas.add(nuevaPersona);
+                    }else{
+                        PersonaJuridica nuevaPersona = new PersonaJuridica(
+                            email,
+                            new Contacto(email, telefono, null, MedioContacto.CORREO),
+                            null, // Dirección no proporcionada en el CSV
+                            nombreRazonSocial,
+                            TipoDocumento.valueOf(tipoDoc.toUpperCase()),
+                            documento,
+                            null, // Tipo de persona jurídica no proporcionado en el CSV
+                            null  // Rubro no proporcionado en el CSV
+                        );
+                        this.registroPersonas.add(nuevaPersona);
+                    }
                     System.out.println("Enviando credenciales de acceso a " + email);
                 }
             }
