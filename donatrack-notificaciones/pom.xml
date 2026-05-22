@@ -10,7 +10,7 @@
     </parent>
     <artifactId>donatrack-notificaciones</artifactId>
 
-    <dependencies>
+    <dependencies>     
         <dependency>
             <groupId>com.donatrack</groupId>
             <artifactId>donatrack-common</artifactId>
