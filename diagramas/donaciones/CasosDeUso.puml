@@ -48,6 +48,7 @@ Donante --> UC_D1
 Donante --> UC_D2
 Donante --> UC_D3
 Donante --> UC_SeguirMapa
+Donante --> UC_Registro
 
 ' --- Relaciones de Beneficiario ---
 Entidad --> UC_Login
@@ -55,6 +56,7 @@ Entidad --> UC_E1
 Entidad --> UC_E2
 Entidad --> UC_E3
 Entidad --> UC_SeguirMapa
+Entidad --> UC_Registro
 
 ' Relación de extensión para subir fotos opcionales/comprobantes
 UC_E3 <.. UC_E4 : <<extend>>

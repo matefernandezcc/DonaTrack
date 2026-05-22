@@ -327,6 +327,10 @@ PorPrioridad ..|> AsignacionStrategy
 PorCercania ..|> AsignacionStrategy
 ImportadorCSV ..|> ImportadorStrategy
 
+SegmentarPorSubcategoria ..up|> EstrategiaSegmentacion
+SegmentarPorEstado ..up|> EstrategiaSegmentacion
+SegmentarPorVencimiento ..up|> EstrategiaSegmentacion
+
 ' =====================================================
 ' RELACIONES
 ' =====================================================
@@ -345,6 +349,8 @@ Persona o-- "0..*" Notificacion
 Representante --> PersonaJuridica
 
 Donante --> RecepcionDonacion
+Donante ..> Camion
+Beneficiario ..> Camion
 Beneficiario *-- Necesidad
 
 Direccion --> Coordenada
@@ -355,6 +361,11 @@ Deposito --> Direccion
 RecepcionDonacion --> Deposito
 RecepcionDonacion --> Administrador
 RecepcionDonacion --> "1..*" Donacion : genera >
+RecepcionDonacion ..> EstrategiaSegmentacion
+RecepcionDonacion o-- Bien
+
+ServicioNotificaciones ..> Notificacion
+ServicioNotificaciones ..> Contacto
 
 Donacion *-- HistorialEstado
 Donacion o-- Bien
@@ -377,6 +388,7 @@ Necesidad --> Donacion
 
 Administrador ..> AsignacionStrategy : usa
 Administrador ..> ImportadorStrategy : usa
+Administrador --> Camion
 
 Notificacion --> MedioContacto
 
