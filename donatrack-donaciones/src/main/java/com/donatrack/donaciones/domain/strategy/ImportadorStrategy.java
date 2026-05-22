@@ -1,5 +1,5 @@
 package com.donatrack.donaciones.domain.strategy;
 
 public interface ImportadorStrategy {
-    void importar(String rutaArchivo); 
+  void importar(String rutaArchivo);
 }

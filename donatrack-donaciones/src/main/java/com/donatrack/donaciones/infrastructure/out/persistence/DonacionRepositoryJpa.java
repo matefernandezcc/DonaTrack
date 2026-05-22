@@ -1,5 +1,3 @@
 package com.donatrack.donaciones.infrastructure.out.persistence;
 
-public interface DonacionRepositoryJpa {
-
-}
+public interface DonacionRepositoryJpa {}

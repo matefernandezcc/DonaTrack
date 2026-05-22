@@ -1,8 +1,8 @@
 package com.donatrack.donaciones.domain.enums;
 
 public enum TipoJuridica {
-    GUBERNAMENTAL,
-    ONG,
-    EMPRESA,
-    INSTITUCION
+  GUBERNAMENTAL,
+  ONG,
+  EMPRESA,
+  INSTITUCION
 }

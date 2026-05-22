@@ -1,25 +1,28 @@
 package com.donatrack.donaciones.domain.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 
 public class CategoriaTest {
-    Categoria categoriaPadre = new Categoria("ropa", "ropaGeneral");
-    Categoria categoriaHija = new Categoria("camisas", "camisas");
-    
-    @Test public void testEsSubcategoriaDePadre(){
-        Categoria categoriaNieta = new Categoria("camisasMangaCorta", "camisasMangaCorta");
-        categoriaPadre.agregarSubcategoria(categoriaHija);
+  Categoria categoriaPadre = new Categoria("ropa", "ropaGeneral");
+  Categoria categoriaHija = new Categoria("camisas", "camisas");
 
-        categoriaHija.agregarSubcategoria(categoriaNieta);
-    
-        assertEquals(true, categoriaHija.esSubcategoriaDe(categoriaPadre));
-        assertEquals(true, categoriaNieta.esSubcategoriaDe(categoriaPadre));
-    }
+  @Test
+  public void testEsSubcategoriaDePadre() {
+    Categoria categoriaNieta = new Categoria("camisasMangaCorta", "camisasMangaCorta");
+    categoriaPadre.agregarSubcategoria(categoriaHija);
 
-    @Test public void testNoEssubcategoriaDe(){
-        Categoria categoriaDistinta = new Categoria("calzado", "calzado");
+    categoriaHija.agregarSubcategoria(categoriaNieta);
 
-        assertEquals(false, categoriaHija.esSubcategoriaDe(categoriaDistinta));
-    }
+    assertEquals(true, categoriaHija.esSubcategoriaDe(categoriaPadre));
+    assertEquals(true, categoriaNieta.esSubcategoriaDe(categoriaPadre));
+  }
+
+  @Test
+  public void testNoEssubcategoriaDe() {
+    Categoria categoriaDistinta = new Categoria("calzado", "calzado");
+
+    assertEquals(false, categoriaHija.esSubcategoriaDe(categoriaDistinta));
+  }
 }
