@@ -18,16 +18,16 @@ public class ImportadorCSVTest {
     Provincia provinciaPrueba = new Provincia("Buenos Aires", Argentina);
     Coordenada coordenadaPrueba = new Coordenada(-34.6037, -58.3816);
     Direccion direccionPrueba = new Direccion("calleFalsa", 123, "Springfield", provinciaPrueba, Argentina, "1234", coordenadaPrueba);
+    DocumentoIdentidad documentoPrueba = new DocumentoIdentidad(TipoDocumento.DNI,"43637832");
 
     PersonaHumana personaPrueba = new PersonaHumana(
             "emailprueba@prueba.com",
             new Contacto("emailprueba@prueba.com", "123456789", "987654321", MedioContacto.CORREO),
             direccionPrueba,
-            "juan",
-            "perez",
-            TipoDocumento.DNI,
-            "123465879",
-            30
+            documentoPrueba,
+            "Dario",
+            "Dardo",
+            23
     );
     
     @Test 
@@ -36,11 +36,10 @@ public class ImportadorCSVTest {
             "emailABuscar@prueba.com",
             new Contacto("emailABuscar@prueba.com", "123456789", "987654321", MedioContacto.CORREO),
             direccionPrueba,
-            "juan",
-            "perez",
-            TipoDocumento.DNI,
-            "123465879",
-            30
+            documentoPrueba,
+            "Roberto",
+            "Carlos",
+            56
         );
 
         List<Persona> ListaPersonas = new ArrayList<>();

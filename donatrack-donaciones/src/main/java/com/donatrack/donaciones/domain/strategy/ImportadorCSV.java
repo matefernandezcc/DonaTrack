@@ -3,8 +3,9 @@ package com.donatrack.donaciones.domain.strategy;
 import com.donatrack.donaciones.domain.model.Persona;
 import com.donatrack.donaciones.domain.model.PersonaHumana;
 import com.donatrack.donaciones.domain.model.PersonaJuridica;
+import com.google.gson.Gson;
 import com.donatrack.donaciones.domain.model.Contacto;
-
+import com.donatrack.donaciones.domain.model.DocumentoIdentidad;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import com.donatrack.donaciones.domain.enums.MedioContacto;
 import com.donatrack.donaciones.domain.enums.TipoDocumento;
+
 
 
 import lombok.Getter;
@@ -42,6 +44,10 @@ public class ImportadorCSV implements ImportadorStrategy {
                 String email = datos[4];
                 String telefono = datos[5];
 
+                Gson gson = new Gson();
+                    TipoDocumento tipoDocu = gson.fromJson(tipoDoc, TipoDocumento.class);
+
+
                 // 1. Validar si el registro ya existe buscando por correo electrónico
                 Persona personaExistente = buscarPorEmail(email);
 
@@ -59,10 +65,9 @@ public class ImportadorCSV implements ImportadorStrategy {
                             email,
                             new Contacto(email, telefono, null, MedioContacto.CORREO),
                             null, // Dirección no proporcionada en el CSV
+                            new DocumentoIdentidad(tipoDocu, documento),
                             nombreRazonSocial,
                             null, // Apellido se debe separar del nombre completo
-                            TipoDocumento.valueOf(tipoDoc.toUpperCase()),
-                            documento,
                             0 // Edad no proporcionada en el CSV
                         );
                         this.registroPersonas.add(nuevaPersona);
@@ -71,9 +76,8 @@ public class ImportadorCSV implements ImportadorStrategy {
                             email,
                             new Contacto(email, telefono, null, MedioContacto.CORREO),
                             null, // Dirección no proporcionada en el CSV
+                            new DocumentoIdentidad(TipoDocumento.CUIT, documento),
                             nombreRazonSocial,
-                            TipoDocumento.valueOf(tipoDoc.toUpperCase()),
-                            documento,
                             null, // Tipo de persona jurídica no proporcionado en el CSV
                             null  // Rubro no proporcionado en el CSV
                         );
