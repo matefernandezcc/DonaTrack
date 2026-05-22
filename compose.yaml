@@ -14,5 +14,20 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n_donatrack
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      # Zona horaria para que las ejecuciones programadas (cron) funcionen con la hora local
+      - GENERIC_TIMEZONE=America/Argentina/Buenos_Aires
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/workflows # Carpeta local para importar/exportar los JSON de tus workflows
+
 volumes:
   postgres_data:
+  n8n_data:
