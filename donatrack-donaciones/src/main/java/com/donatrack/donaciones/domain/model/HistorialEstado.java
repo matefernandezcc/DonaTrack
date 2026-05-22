@@ -1,16 +1,15 @@
 package com.donatrack.donaciones.domain.model;
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
-
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 
 public class HistorialEstado {
     @Getter @Setter private EstadoDonacion estado;
     @Getter @Setter private LocalDate fecha;
     @Getter @Setter private String observacion;
-    @Getter @Setter private Administrador usuario; // El administrador que registró el cambio
+    @Getter @Setter private Administrador usuario; 
 
     public HistorialEstado(EstadoDonacion estado, String observacion, Administrador usuario) {
         this.estado = estado;

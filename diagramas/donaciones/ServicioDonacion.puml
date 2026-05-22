@@ -335,7 +335,7 @@ SegmentarPorVencimiento ..up|> EstrategiaSegmentacion
 ' RELACIONES
 ' =====================================================
 
-PersonaHumana *-- DocumentoIdentidad
+Persona *-- DocumentoIdentidad
 DocumentoIdentidad --> TipoDocumento
 PersonaJuridica --> TipoJuridica
 

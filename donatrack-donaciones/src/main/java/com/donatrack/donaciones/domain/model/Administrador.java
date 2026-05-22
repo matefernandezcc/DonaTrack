@@ -12,6 +12,7 @@ public class Administrador extends Rol {
     @Getter @Setter private Deposito depositoAsignado;
     @Getter @Setter private AsignacionStrategy estrategiaAsignacion;
     @Getter @Setter private ImportadorStrategy estrategiaImportador;
+    @Getter @Setter private List<Camion> camiones;
 
     public Administrador(Deposito depositoAsignado) {
         super();
