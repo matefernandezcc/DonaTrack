@@ -65,7 +65,9 @@ ci:
 # =========================
 
 N8N_CONTAINER=n8n_donatrack
-N8N_WORKFLOW=/workflows/Chatbot\ Workflow\ Automation.json
+N8N_CHATBOT_WORKFLOW=/workflows/Chatbot\ Workflow\ Automation.json
+N8N_INSIGNIAS_WORKFLOW=/workflows/DonaTrack_Insignias.json
+N8N_RANKING_WORKFLOW=/workflows/DonaTrack_Ranking.json
 
 docker-up:
 	docker compose up -d
@@ -73,20 +75,42 @@ docker-up:
 docker-down:
 	docker compose down
 
-n8n-export:
-	docker exec -it $(N8N_CONTAINER) \
+n8n-export-chatbot:
+	docker exec $(N8N_CONTAINER) \
 	n8n export:workflow \
 	--all \
 	--output=/tmp/workflows.json
-
 	docker cp \
 	$(N8N_CONTAINER):/tmp/workflows.json \
 	./n8n/workflows/Chatbot\ Workflow\ Automation.json
 
-n8n-import:
-	docker exec -it $(N8N_CONTAINER) \
+n8n-import-chatbot:
+	docker exec $(N8N_CONTAINER) \
 	n8n import:workflow \
-	--input=$(N8N_WORKFLOW)
+	--input=$(N8N_CHATBOT_WORKFLOW)
+
+n8n-export-insignias:
+	docker exec $(N8N_CONTAINER) \
+	n8n export:workflow \
+	--id=donatrack-insignias \
+	--output=$(N8N_INSIGNIAS_WORKFLOW)
+
+n8n-import-insignias:
+	docker exec $(N8N_CONTAINER) \
+	n8n import:workflow \
+	--input=$(N8N_INSIGNIAS_WORKFLOW)
+
+
+n8n-export-ranking:
+	docker exec $(N8N_CONTAINER) \
+	n8n export:workflow \
+	--id=donatrack-ranking \
+	--output=$(N8N_RANKING_WORKFLOW)
+
+n8n-import-ranking:
+	docker exec $(N8N_CONTAINER) \
+	n8n import:workflow \
+	--input=$(N8N_RANKING_WORKFLOW)
 
 setup:
 	docker compose up -d

@@ -1,0 +1,195 @@
+{
+  "name": "DonaTrack - Ranking",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 1 * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        200
+      ],
+      "id": "schedule-node",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { user: 'Juan', donations: 5 } },\n  { json: { user: 'Maria', donations: 12 } },\n  { json: { user: 'Pedro', donations: 3 } },\n  { json: { user: 'Ana', donations: 8 } },\n  { json: { user: 'Luis', donations: 1 } },\n  { json: { user: 'Juan', donations: 2 } },\n  { json: { user: 'Ana', donations: 4 } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        200
+      ],
+      "id": "mock-data-node",
+      "name": "Mock Data Source"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst totals = {};\n\nfor (const item of items) {\n  const user = item.json.user;\n  const donations = item.json.donations;\n  if (!totals[user]) totals[user] = 0;\n  totals[user] += donations;\n}\n\nconst ranking = Object.keys(totals).map(user => ({\n  user: user,\n  totalDonations: totals[user]\n}));\n\nranking.sort((a, b) => b.totalDonations - a.totalDonations);\n\nreturn ranking.map(r => ({ json: r }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        200
+      ],
+      "id": "calculate-ranking-node",
+      "name": "Calculate Ranking"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://httpbin.org/post",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        200
+      ],
+      "id": "persist-results-node",
+      "name": "Persist Results (Mock API)"
+    },
+    {
+      "parameters": {
+        "operation": "limit",
+        "limit": 3
+      },
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        800,
+        200
+      ],
+      "id": "filter-top-3-node",
+      "name": "Filter Top 3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst medals = ['\\u{1F947}', '\\u{1F948}', '\\u{1F949}']; // 🥇 🥈 🥉\nlet message = '\\u{1F4E2} ¡Ranking Mensual de DonaTrack! \\u{1F4E2}\\n\\n';\n\nfor (let i = 0; i < items.length; i++) {\n  const user = items[i].json.user;\n  const donations = items[i].json.totalDonations;\n  message += `${medals[i] || ''} ${i + 1}º Lugar: ${user} con ${donations} donaciones.\\n`;\n}\n\nmessage += '\\n¡Gracias a todos por su solidaridad!';\n\nreturn [{ json: { content: message } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        200
+      ],
+      "id": "format-message-node",
+      "name": "Format Podium Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://httpbin.org/post",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyFormat": "multipart",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        200
+      ],
+      "id": "publish-discord-node",
+      "name": "Publish to Discord Webhook"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Mock Data Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock Data Source": {
+      "main": [
+        [
+          {
+            "node": "Calculate Ranking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Ranking": {
+      "main": [
+        [
+          {
+            "node": "Persist Results (Mock API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist Results (Mock API)": {
+      "main": [
+        [
+          {
+            "node": "Filter Top 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Top 3": {
+      "main": [
+        [
+          {
+            "node": "Format Podium Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Podium Message": {
+      "main": [
+        [
+          {
+            "node": "Publish to Discord Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "donatrack-ranking"
+}
