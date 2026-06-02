@@ -12,11 +12,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import com.donatrack.donaciones.domain.factory.PersonaFactory;
 import lombok.Getter;
 
 public class ImportadorCSV implements ImportadorStrategy {
   // Simulamos la base de datos (el "RepositorioDonantes") con una lista en memoria
   @Getter private List<Persona> registroPersonas;
+  private final PersonaFactory personaFactory = new PersonaFactory();
 
   public ImportadorCSV(List<Persona> registroPersonas) {
     this.registroPersonas = registroPersonas;
@@ -33,16 +35,7 @@ public class ImportadorCSV implements ImportadorStrategy {
       while ((linea = br.readLine()) != null) {
         // Según el formato: TipoPersona, TipoDoc, Documento, Nombre/Razón Social, Email, Teléfono
         String[] datos = linea.split(separador);
-
-        String tipoPersona = datos[0];
-        String tipoDoc = datos[1];
-        String documento = datos[2];
-        String nombreRazonSocial = datos[3];
         String email = datos[4];
-        String telefono = datos[5];
-
-        Gson gson = new Gson();
-        TipoDocumento tipoDocu = gson.fromJson(tipoDoc, TipoDocumento.class);
 
         // 1. Validar si el registro ya existe buscando por correo electrónico
         Persona personaExistente = buscarPorEmail(email);
@@ -50,37 +43,13 @@ public class ImportadorCSV implements ImportadorStrategy {
         if (personaExistente != null) {
           // 2. Si ya existe, se deberá actualizar su información
           System.out.println("El email " + email + " ya existe. Actualizando información...");
-          // personaExistente.actualizarInformacion(nuevosDatos);
-
         } else {
           // 3. En caso contrario, crearlo y enviarle sus credenciales de acceso
           System.out.println("Creando nuevo donante para: " + email);
-
-          if (tipoPersona == "HUMANA") {
-            PersonaHumana nuevaPersona =
-                new PersonaHumana(
-                    email,
-                    new Contacto(email, telefono, null, MedioContacto.CORREO),
-                    null, // Dirección no proporcionada en el CSV
-                    new DocumentoIdentidad(tipoDocu, documento),
-                    nombreRazonSocial,
-                    null, // Apellido se debe separar del nombre completo
-                    0 // Edad no proporcionada en el CSV
-                    );
-            this.registroPersonas.add(nuevaPersona);
-          } else {
-            PersonaJuridica nuevaPersona =
-                new PersonaJuridica(
-                    email,
-                    new Contacto(email, telefono, null, MedioContacto.CORREO),
-                    null, // Dirección no proporcionada en el CSV
-                    new DocumentoIdentidad(TipoDocumento.CUIT, documento),
-                    nombreRazonSocial,
-                    null, // Tipo de persona jurídica no proporcionado en el CSV
-                    null // Rubro no proporcionado en el CSV
-                    );
-            this.registroPersonas.add(nuevaPersona);
-          }
+          
+          Persona nuevaPersona = personaFactory.crearDesdeCSV(datos);
+          this.registroPersonas.add(nuevaPersona);
+          
           System.out.println("Enviando credenciales de acceso a " + email);
         }
       }
