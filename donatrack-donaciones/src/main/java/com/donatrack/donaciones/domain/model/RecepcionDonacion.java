@@ -2,6 +2,7 @@ package com.donatrack.donaciones.domain.model;
 
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.strategy.EstrategiaSegmentacion;
+import com.donatrack.donaciones.domain.factory.DonacionFactory;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class RecepcionDonacion {
   @Getter private List<Donacion> donacionesResultantes;
   @Getter private List<Bien> bienesBrutos;
   private List<EstrategiaSegmentacion> estrategiasSegmentacion;
+  private DonacionFactory donacionFactory = new DonacionFactory();
 
   public RecepcionDonacion(Donante donante, Administrador registradoPor, List<EstrategiaSegmentacion> estrategiasSegmentacion) {
     this.id = UUID.randomUUID();
@@ -39,24 +41,10 @@ public class RecepcionDonacion {
 
     // 3. Cada lista de bienes se convierte en una Donacion
     for (List<Bien> listaFinal : listasDeBienes) {
-      if (listaFinal.isEmpty()) {
-        continue;
+      Donacion nuevaDonacion = donacionFactory.crearDesdeBienes(listaFinal);
+      if (nuevaDonacion != null) {
+        donacionesResultantes.add(nuevaDonacion);
       }
-      // bien de muestra para asignarle la misma subcategoria a la donacion
-      Bien muestra = listaFinal.get(0);
-
-      // Instanciamos la Donacion y le asignamos la subcategoria en base a la muestra
-      Donacion nuevaDonacion = new Donacion(muestra.getSubcategoria());
-      nuevaDonacion.setId(UUID.randomUUID());
-
-      // Si no es perecedero, la fecha de vencimiento es null
-      nuevaDonacion.setFechaVencimiento(muestra.getFechaVencimiento());
-
-      nuevaDonacion.setBienes(listaFinal);
-      // Estado inicial de donacion: Pendiente
-      nuevaDonacion.setEstado(EstadoDonacion.PENDIENTE);
-
-      donacionesResultantes.add(nuevaDonacion);
     }
 
     return donacionesResultantes;

@@ -11,7 +11,7 @@ import lombok.Getter;
 public class ImportadorCSV implements ImportadorStrategy {
   // Simulamos la base de datos (el "RepositorioDonantes") con una lista en memoria
   @Getter private List<Persona> registroPersonas;
-  private final PersonaFactory personaFactory = new PersonaFactory();
+  private PersonaFactory personaFactory = new PersonaFactory();
 
   public ImportadorCSV(List<Persona> registroPersonas) {
     this.registroPersonas = registroPersonas;
