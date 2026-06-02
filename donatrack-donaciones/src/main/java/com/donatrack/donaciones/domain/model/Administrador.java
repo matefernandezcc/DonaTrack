@@ -18,6 +18,16 @@ public class Administrador extends Rol {
     this.depositoAsignado = depositoAsignado;
   }
 
+  @Override
+  public boolean esValidoParaHumana() { 
+    return true; 
+  }
+
+  @Override
+  public boolean esValidoParaJuridica() { 
+    return false; // Una persona jurídica no puede ser administrador
+  }
+
   public void importarDonantesMasivos(String rutaArchivo) {
     if (this.estrategiaImportador != null) {
       this.estrategiaImportador.importar(rutaArchivo);

@@ -10,4 +10,8 @@ public abstract class Rol {
   public Rol() {
     this.fechaAlta = LocalDate.now();
   }
+
+  public abstract boolean esValidoParaHumana();
+  
+  public abstract boolean esValidoParaJuridica();
 }

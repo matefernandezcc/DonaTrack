@@ -16,6 +16,16 @@ public class Beneficiario extends Rol {
     this.necesidadesDeclaradas = new ArrayList<>();
   }
 
+  @Override
+  public boolean esValidoParaHumana() { 
+    return false; // Una persona humana no puede ser beneficiaria
+  }
+
+  @Override
+  public boolean esValidoParaJuridica() { 
+    return true; 
+  }
+
   // se registra la necesidad del beneficiario
   public void registrarNecesidad(Necesidad n) {
     this.necesidadesDeclaradas.add(n);

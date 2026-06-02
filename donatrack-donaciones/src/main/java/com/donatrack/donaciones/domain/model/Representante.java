@@ -11,4 +11,14 @@ public class Representante extends Rol {
     this.cargo = cargo;
     this.Organizacion = organizacion;
   }
+
+  @Override
+  public boolean esValidoParaHumana() { 
+    return true; // Un representante debe ser una persona humana
+  }
+
+  @Override
+  public boolean esValidoParaJuridica() { 
+    return false; 
+  }
 }
