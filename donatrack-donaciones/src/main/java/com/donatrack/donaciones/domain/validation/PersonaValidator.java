@@ -10,11 +10,12 @@ public abstract class PersonaValidator {
         return siguiente;
     }
 
-    public abstract void validar(Persona persona);
+    public abstract boolean validar(Persona persona);
 
-    protected void chequearSiguiente(Persona persona) {
+    protected boolean chequearSiguiente(Persona persona) {
         if (siguienteValidador != null) {
-            siguienteValidador.validar(persona);
+            return siguienteValidador.validar(persona);
         }
+        return true;
     }
 }

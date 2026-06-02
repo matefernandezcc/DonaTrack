@@ -2,7 +2,6 @@ package com.donatrack.donaciones.domain.model;
 
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.strategy.EstrategiaSegmentacion;
-import com.donatrack.donaciones.domain.strategy.EstrategiaSegmentacion;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

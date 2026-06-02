@@ -28,12 +28,13 @@ public class Administrador extends Rol {
     return false; // Una persona jurídica no puede ser administrador
   }
 
-  public void importarDonantesMasivos(String rutaArchivo) {
+  public boolean importarDonantesMasivos(String rutaArchivo) {
     if (this.estrategiaImportador != null) {
       this.estrategiaImportador.importar(rutaArchivo);
+      return true;
     } else {
-      throw new IllegalStateException(
-          "Error: Primero debe asignarle una estrategia de importación al Administrador.");
+      // Error: Primero debe asignarle una estrategia de importación al Administrador.
+      return false;
     }
   }
 
@@ -43,8 +44,8 @@ public class Administrador extends Rol {
       return this.estrategiaAsignacion.recomendarNecesidades(
           donacionesDisponibles, necesidadesDeclaradas);
     } else {
-      throw new IllegalStateException(
-          "Error: Primero debe asignarle una estrategia de asignación al Administrador.");
+      // Error: Primero debe asignarle una estrategia de asignación al Administrador.
+      return new java.util.ArrayList<>();
     }
   }
 

@@ -1,13 +1,6 @@
 package com.donatrack.donaciones.domain.strategy;
 
-import com.donatrack.donaciones.domain.enums.MedioContacto;
-import com.donatrack.donaciones.domain.enums.TipoDocumento;
-import com.donatrack.donaciones.domain.model.Contacto;
-import com.donatrack.donaciones.domain.model.DocumentoIdentidad;
 import com.donatrack.donaciones.domain.model.Persona;
-import com.donatrack.donaciones.domain.model.PersonaHumana;
-import com.donatrack.donaciones.domain.model.PersonaJuridica;
-import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

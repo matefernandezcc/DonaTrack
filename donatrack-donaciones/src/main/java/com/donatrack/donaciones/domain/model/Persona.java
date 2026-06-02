@@ -14,7 +14,7 @@ public abstract class Persona {
   @Getter @Setter private Contacto contacto;
   @Getter @Setter private Direccion direccion;
   @Getter @Setter private List<Rol> roles;
-  @Getter @Setter private DocumentoIdentidad documento;
+  @Getter private DocumentoIdentidad documento;
 
   public Persona(
       String email, Contacto contacto, Direccion direccion, DocumentoIdentidad documento) {
@@ -26,22 +26,27 @@ public abstract class Persona {
     this.setDocumento(documento);
   }
 
-  public void agregarRol(Rol r) {
-    this.validarRol(r);
-    this.roles.add(r);
+  public boolean agregarRol(Rol r) {
+    if (this.validarRol(r)) {
+      this.roles.add(r);
+      return true;
+    }
+    return false;
   }
 
-  protected abstract void validarRol(Rol r);
+  protected abstract boolean validarRol(Rol r);
 
-  public void setDocumento(DocumentoIdentidad documento) {
+  public boolean setDocumento(DocumentoIdentidad documento) {
     if (documento == null) {
-      throw new IllegalArgumentException("Error: El documento de identidad no puede ser nulo.");
+      // Error: El documento de identidad no puede ser nulo.
+      return false;
     }
     this.documento = documento;
+    return true;
   }
 
-  public void validar(PersonaValidator validador) {
-    validador.validar(this);
+  public boolean validar(PersonaValidator validador) {
+    return validador.validar(this);
   }
 
   public void actualizarInformacion(Map<String, Object> datosNuevos) {

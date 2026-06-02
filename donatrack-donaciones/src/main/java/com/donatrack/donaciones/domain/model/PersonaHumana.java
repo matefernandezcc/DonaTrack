@@ -1,6 +1,5 @@
 package com.donatrack.donaciones.domain.model;
 
-import com.donatrack.donaciones.domain.enums.TipoDocumento;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,11 +25,12 @@ public class PersonaHumana extends Persona {
   }
 
   @Override
-  protected void validarRol(Rol r) {
+  protected boolean validarRol(Rol r) {
     if (!r.esValidoParaHumana()) {
-      throw new IllegalArgumentException(
-          "Error: Una persona humana no puede asumir este rol.");
+      // Error: Una persona humana no puede asumir este rol.
+      return false;
     }
+    return true;
   }
 
 

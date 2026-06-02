@@ -8,11 +8,11 @@ public class TelefonoRepetidoValidator extends PersonaValidator {
     // para verificar si el teléfono ya está registrado en la base de datos.
 
     @Override
-    public void validar(Persona persona) {
+    public boolean validar(Persona persona) {
         if (persona.getContacto() != null && persona.getContacto().getTelefono() != null) {
           
         }
 
-        chequearSiguiente(persona);
+        return chequearSiguiente(persona);
     }
 }

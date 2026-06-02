@@ -8,23 +8,24 @@ import com.donatrack.donaciones.domain.model.PersonaJuridica;
 public class TipoDocumentoValidator extends PersonaValidator {
 
     @Override
-    public void validar(Persona persona) {
+    public boolean validar(Persona persona) {
         if (persona.getDocumento() == null) {
-            throw new IllegalArgumentException("Error: El documento de identidad no puede ser nulo.");
+            // Error: El documento de identidad no puede ser nulo.
+            return false;
         }
 
         if (persona instanceof PersonaHumana) {
             if (persona.getDocumento().getTipo() == TipoDocumento.CUIT) {
-                throw new IllegalArgumentException(
-                    "Error: Una persona humana debe tener un documento de tipo DNI o Pasaporte.");
+                // Error: Una persona humana debe tener un documento de tipo DNI o Pasaporte.
+                return false;
             }
         } else if (persona instanceof PersonaJuridica) {
             if (persona.getDocumento().getTipo() != TipoDocumento.CUIT) {
-                throw new IllegalArgumentException(
-                    "Error: Una persona jurídica debe tener un documento de tipo CUIT.");
+                // Error: Una persona jurídica debe tener un documento de tipo CUIT.
+                return false;
             }
         }
 
-        chequearSiguiente(persona);
+        return chequearSiguiente(persona);
     }
 }

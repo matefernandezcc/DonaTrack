@@ -32,14 +32,16 @@ public class Beneficiario extends Rol {
   }
 
   // Se confirma que el beneficiario recibió la donación asignada que le fue asignada
-  public void confirmarRecepcion(Donacion d, List<Foto> fotosComprobante) {
+  public boolean confirmarRecepcion(Donacion d, List<Foto> fotosComprobante) {
     // Verificamos que la donación estuviera asignada a este beneficiario
     if (this.donacionesAsignadas.contains(d)) {
       d.setEstado(EstadoDonacion.ENTREGADA);
       // (Opcional) Las fotos se podrían guardar en la donación como comprobante de que el
       // beneficiario firmó la recepción.
+      return true;
     } else {
-      throw new IllegalStateException("Error: La donación no pertenece a este beneficiario.");
+      // Error: La donación no pertenece a este beneficiario.
+      return false;
     }
   }
 

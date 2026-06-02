@@ -8,11 +8,11 @@ public class DocumentoRepetidoValidator extends PersonaValidator {
     // para verificar si el número de documento ya está registrado en la base de datos.
 
     @Override
-    public void validar(Persona persona) {
+    public boolean validar(Persona persona) {
         if (persona.getDocumento() != null && persona.getDocumento().getNumero() != null) {
 
         }
 
-        chequearSiguiente(persona);
+        return chequearSiguiente(persona);
     }
 }

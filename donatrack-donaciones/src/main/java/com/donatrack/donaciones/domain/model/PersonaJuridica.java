@@ -1,6 +1,5 @@
 package com.donatrack.donaciones.domain.model;
 
-import com.donatrack.donaciones.domain.enums.TipoDocumento;
 import com.donatrack.donaciones.domain.enums.TipoJuridica;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +34,12 @@ public class PersonaJuridica extends Persona {
   }
 
   @Override
-  protected void validarRol(Rol r) {
+  protected boolean validarRol(Rol r) {
     if (!r.esValidoParaJuridica()) {
-      throw new IllegalArgumentException(
-          "Error: Una persona jurídica no puede asumir este rol.");
+      // Error: Una persona jurídica no puede asumir este rol.
+      return false;
     }
+    return true;
   }
 
 
