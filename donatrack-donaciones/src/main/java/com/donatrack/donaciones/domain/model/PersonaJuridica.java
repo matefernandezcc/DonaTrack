@@ -36,19 +36,13 @@ public class PersonaJuridica extends Persona {
 
   @Override
   protected void validarRol(Rol r) {
-    if (r instanceof Administrador) {
+    if (!r.esValidoParaJuridica()) {
       throw new IllegalArgumentException(
-          "Error: Una persona jurídica no puede asumir el rol de Administrador.");
+          "Error: Una persona jurídica no puede asumir este rol.");
     }
   }
 
-  @Override
-  protected void validarDocumentacion(DocumentoIdentidad d) {
-    if (d.getTipo() != TipoDocumento.CUIT) {
-      throw new IllegalArgumentException(
-          "Error: Una persona jurídica debe tener un documento de tipo CUIT.");
-    }
-  }
+
 
   @Override
   public void actualizarInformacion(Map<String, Object> datosNuevos) {

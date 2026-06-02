@@ -27,19 +27,13 @@ public class PersonaHumana extends Persona {
 
   @Override
   protected void validarRol(Rol r) {
-    if (r instanceof Beneficiario) {
+    if (!r.esValidoParaHumana()) {
       throw new IllegalArgumentException(
-          "Error: Una persona humana no puede ser una Entidad Beneficiaria.");
+          "Error: Una persona humana no puede asumir este rol.");
     }
   }
 
-  @Override
-  protected void validarDocumentacion(DocumentoIdentidad d) {
-    if (d.getTipo() == TipoDocumento.CUIT) {
-      throw new IllegalArgumentException(
-          "Error: Una persona humana debe tener un documento de tipo DNI o Pasaporte.");
-    }
-  }
+
 
   @Override
   public void actualizarInformacion(Map<String, Object> datosNuevos) {

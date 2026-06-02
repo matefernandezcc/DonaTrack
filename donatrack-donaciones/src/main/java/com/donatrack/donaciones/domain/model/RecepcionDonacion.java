@@ -2,9 +2,7 @@ package com.donatrack.donaciones.domain.model;
 
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.strategy.EstrategiaSegmentacion;
-import com.donatrack.donaciones.domain.strategy.SegmentarPorEstado;
-import com.donatrack.donaciones.domain.strategy.SegmentarPorSubcategoria;
-import com.donatrack.donaciones.domain.strategy.SegmentarPorVencimiento;
+import com.donatrack.donaciones.domain.strategy.EstrategiaSegmentacion;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,19 +17,15 @@ public class RecepcionDonacion {
   @Getter @Setter private Administrador registradoPor;
   @Getter private List<Donacion> donacionesResultantes;
   @Getter private List<Bien> bienesBrutos;
-  List<EstrategiaSegmentacion> estrategiasSegmentacion =
-      new ArrayList<>(); // Patron pipes and filters
+  private List<EstrategiaSegmentacion> estrategiasSegmentacion;
 
-  public RecepcionDonacion(Donante donante, Administrador registradoPor) {
+  public RecepcionDonacion(Donante donante, Administrador registradoPor, List<EstrategiaSegmentacion> estrategiasSegmentacion) {
     this.id = UUID.randomUUID();
     this.fechaRecepcion = LocalDate.now();
     this.donante = donante;
     this.registradoPor = registradoPor;
     this.donacionesResultantes = new ArrayList<>();
-    // Pipeline, cada aplicacion de filtro se aplica en orden
-    this.estrategiasSegmentacion.add(new SegmentarPorSubcategoria());
-    this.estrategiasSegmentacion.add(new SegmentarPorVencimiento());
-    this.estrategiasSegmentacion.add(new SegmentarPorEstado());
+    this.estrategiasSegmentacion = estrategiasSegmentacion;
   }
 
   public List<Donacion> procesar(List<Bien> bienesBrutos) {

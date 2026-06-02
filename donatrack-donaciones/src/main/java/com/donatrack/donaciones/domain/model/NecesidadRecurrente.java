@@ -19,7 +19,7 @@ public class NecesidadRecurrente extends Necesidad {
     this.periodo = periodo;
   }
 
-  public LocalDate FechaVencimientoPeriodo() {
+  public LocalDate fechaVencimientoPeriodo() {
     return this.getFechaSolicitud().plusDays((long) this.periodo);
   }
 

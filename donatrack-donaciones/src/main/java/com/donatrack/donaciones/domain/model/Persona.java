@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import com.donatrack.donaciones.domain.validation.PersonaValidator;
 
 public abstract class Persona {
   @Getter @Setter private UUID id;
@@ -32,14 +33,15 @@ public abstract class Persona {
 
   protected abstract void validarRol(Rol r);
 
-  protected abstract void validarDocumentacion(DocumentoIdentidad d);
-
   public void setDocumento(DocumentoIdentidad documento) {
     if (documento == null) {
       throw new IllegalArgumentException("Error: El documento de identidad no puede ser nulo.");
     }
-    this.validarDocumentacion(documento);
     this.documento = documento;
+  }
+
+  public void validar(PersonaValidator validador) {
+    validador.validar(this);
   }
 
   public void actualizarInformacion(Map<String, Object> datosNuevos) {

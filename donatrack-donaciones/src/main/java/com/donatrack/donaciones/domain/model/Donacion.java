@@ -16,14 +16,14 @@ public class Donacion {
   @Getter @Setter private Categoria subCategoria;
   @Getter @Setter private List<HistorialEstado> historial;
   @Getter @Setter private LocalDate fechaVencimiento;
-  @Getter @Setter private Beneficiario EntidadAsignada;
+  @Getter @Setter private Beneficiario entidadAsignada;
   @Getter private List<Foto> fotos;
 
-  public Donacion(Categoria Categoria) {
+  public Donacion(Categoria categoria) {
     this.id = UUID.randomUUID();
     this.estado = EstadoDonacion.PENDIENTE;
     this.bienes = new ArrayList<>();
-    this.subCategoria = Categoria;
+    this.subCategoria = categoria;
     this.historial = new ArrayList<>();
   }
 

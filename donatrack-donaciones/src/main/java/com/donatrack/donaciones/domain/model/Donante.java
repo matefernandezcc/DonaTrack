@@ -16,6 +16,16 @@ public class Donante extends Rol {
     this.historialRecepciones = new ArrayList<>();
   }
 
+  @Override
+  public boolean esValidoParaHumana() { 
+    return true; 
+  }
+
+  @Override
+  public boolean esValidoParaJuridica() { 
+    return true; 
+  }
+
   // --- Métodos de comportamiento ---
 
   public void agregarDonacion(Donacion d) {
