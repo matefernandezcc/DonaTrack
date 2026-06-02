@@ -9,28 +9,33 @@ public class Categoria {
   @Getter @Setter private String nombre;
   @Getter @Setter private String descripcion;
   @Getter private List<Categoria> subcategorias;
+  @Getter private Categoria categoriaPadre;
 
   public Categoria(String nombre, String descripcion) {
     this.nombre = nombre;
     this.descripcion = descripcion;
     this.subcategorias = new ArrayList<>();
+    this.categoriaPadre = null;
   }
 
-  public void agregarSubcategoria(Categoria categoria) {
+  public boolean agregarSubcategoria(Categoria categoria) {
+    // Una subcategoría (que ya tiene padre) no puede tener sus propias subcategorías
+    if (this.categoriaPadre != null) {
+      return false;
+    }
+    
+    // Una categoría que ya tiene hijas no puede convertirse en subcategoría
+    if (!categoria.getSubcategorias().isEmpty()) {
+      return false;
+    }
+
+    categoria.categoriaPadre = this;
     this.subcategorias.add(categoria);
+    return true;
   }
 
   public boolean esSubcategoriaDe(Categoria otraCategoria) {
-    // Caso base: si mi categoría padre es "otraCategoria"
-    if (otraCategoria.getSubcategorias().contains(this)) {
-      return true;
-    }
-    // Búsqueda recursiva: revisamos si estoy en algún nivel más profundo del árbol
-    for (Categoria sub : otraCategoria.getSubcategorias()) {
-      if (this.esSubcategoriaDe(sub)) {
-        return true;
-      }
-    }
-    return false;
+    // Al limitarse a 2 niveles (Padre -> Hijo), la recursividad ya no es necesaria.
+    return this.categoriaPadre == otraCategoria;
   }
 }
