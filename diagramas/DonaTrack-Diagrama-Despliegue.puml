@@ -1,0 +1,62 @@
+@startuml DonaTrack_Deployment
+skinparam node {
+    BackgroundColor #E2E2F0
+    BorderColor #333333
+}
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #666666
+}
+skinparam linetype polyline
+
+node "Dispositivo del Usuario\n(Donante, Admin, Entidad)" as Cliente <<Client Device>> {
+    component "Navegador Web\n(Interfaz SPA / Landing Page)" as Frontend
+}
+
+node "Servidor de Aplicaciones\n(Host Backend)" as AppServer <<Web/App Server>> {
+    component "DonaTrack App\n(Aplicación Multimódulo Java)" as Backend {
+        artifact "Módulo Core\n(Personas, Roles, Donaciones)" as ModCore
+        artifact "Módulo Incentivos" as ModIncentivos
+        artifact "Módulo Logística" as ModLogistica
+        artifact "Módulo Notificaciones" as ModNotificaciones
+    }
+}
+
+node "Servidor de Automatización" as n8nServer <<Automation Engine>> {
+    component "Plataforma n8n" as n8n
+}
+
+node "Servidor de Base de Datos" as DBServer <<Database Server>> {
+    database "RDBMS (ej. PostgreSQL)" as DB {
+        artifact "Esquemas de DonaTrack" as Schemas
+    }
+}
+
+cloud "Servicios Externos (SaaS)" as CloudSaaS {
+    component "Twilio" as API_SMS <<SMS>>
+    component "SendGrid / SMTP" as API_Email <<Email>>
+    component "Meta API" as API_WA <<WhatsApp>>
+    component "Redes Sociales" as API_Social <<LinkedIn>>
+}
+
+' --- Conexiones y Protocolos ---
+
+Frontend 0..> Backend : "HTTPS / API REST"
+
+' Conexiones a Base de Datos
+ModCore 0..> Schemas : "JDBC / TCP (Puerto 5432)"
+ModIncentivos 0..> Schemas : "JDBC / TCP"
+ModLogistica 0..> Schemas : "JDBC / TCP"
+ModNotificaciones 0..> Schemas : "JDBC / TCP"
+
+' Integraciones Externas (Notificaciones)
+ModNotificaciones 0..> API_SMS : "HTTPS"
+ModNotificaciones 0..> API_Email : "HTTPS"
+ModNotificaciones 0..> API_WA : "HTTPS"
+
+' Integración con n8n (Incentivos)
+ModIncentivos 0..> n8n : "Webhook (Eventos: Insignias, Ranking)"
+n8n 0..> API_Social : "HTTPS (Publicación Automática)"
+n8n 0..> Backend : "HTTPS / API REST (Actualización)"
+
+@enduml
