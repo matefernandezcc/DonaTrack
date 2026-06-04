@@ -1,0 +1,17 @@
+package com.donatrack.notificaciones.domain.service;
+
+import com.donatrack.notificaciones.domain.model.Notificacion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class NotificacionEmail implements EstrategiaNotificacion {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificacionEmail.class);
+
+    @Override
+    public void enviar(Notificacion notificacion) {
+        // Simulación de envío por Email
+        logger.info("Enviando Email a {}: {}", notificacion.getDestinatario(), notificacion.getMensaje());
+        notificacion.setCompletada(true);
+    }
+}
