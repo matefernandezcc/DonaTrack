@@ -1,0 +1,100 @@
+@startuml ServicioIncentivos.puml
+skinparam classAttributeIconSize 0
+
+package "Servicio de Incentivos" {
+
+    enum CategoriaDonante {
+        COLABORADOR
+        SOSTENEDOR
+        TRANSFORMADOR
+    }
+
+    class GestorIncentivos {
+        + procesarNuevaDonacion(idDonante: UUID, d: DonacionDTO)
+        + ejecutarRankingMensual()
+    }
+
+    class PerfilIncentivos {
+        - idDonante: UUID
+        - categoriaActual: CategoriaDonante
+        + evaluarMisiones(d: DonacionDTO)
+        + subirCategoria()
+        + agregarInsignia(i: Insignia)
+        + visibilizarInsignia(i: Insignia, visible: boolean)
+    }
+
+    class MetricasDonante {
+        - totalDonaciones: int
+        - organizacionesAyudadas: int
+        - impactoAcumulado: double
+        + registrarDonacion(d: DonacionDTO)
+        + generarGraficoEvolucionMensual()
+    }
+
+    abstract class Mision {
+        - nombre: String
+        - descripcion: String
+        - ordenSecuencial: int
+        - progresoActual: int
+        - progresoObjetivo: int
+        - completada: boolean
+        + actualizarProgreso(cantidad: int)
+        + reiniciarProgreso()
+        + getDistanciaObjetivo(): int
+        {abstract} + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class MisionRacha extends Mision {
+        - fechaUltimaDonacion: LocalDate
+        - mesesConsecutivos: int
+        + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class MisionCompletitud extends Mision {
+        - categoriasDonadas: List<String>
+        + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class MisionHabilDonador extends Mision {
+        - cantidadMinimaBienes: int
+        + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class MisionDonacionesExitosas extends Mision {
+        + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class Insignia {
+        - nombre: String
+        - descripcion: String
+        - fechaObtencion: LocalDate
+        - visiblePublicamente: boolean
+        + setVisible(visible: boolean)
+    }
+
+    class RankingMensual {
+        - mes: int
+        - anio: int
+        - topDonantes: List<PosicionRanking>
+        + calcularRanking(perfiles: List<PerfilIncentivos>)
+        + obtenerTop3(): List<PosicionRanking>
+    }
+
+    class PosicionRanking {
+        - idDonante: UUID
+        - misionesCompletadasEnMes: int
+        - posicion: int
+    }
+
+    ' Relaciones
+    GestorIncentivos --> RankingMensual : genera >
+    GestorIncentivos --> PerfilIncentivos : administra >
+
+    PerfilIncentivos "1" *-- "1" MetricasDonante : consolida datos en >
+    PerfilIncentivos "1" *-- "0..*" Mision : intenta superar >
+    PerfilIncentivos "1" *-- "0..*" Insignia : exhibe >
+    PerfilIncentivos --> CategoriaDonante : posee >
+
+    RankingMensual *-- "0..*" PosicionRanking : contiene >
+}
+@enduml

@@ -1,0 +1,493 @@
+@startuml DonaTrack-Diagrama-Clases.puml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Gestión de Personas" {
+    enum TipoDocumento {
+        DNI
+        CUIT
+        PASAPORTE
+    }
+
+    enum TipoPersonaJuridica {
+        GUBERNAMENTAL
+        ONG
+        EMPRESA
+        INSTITUCION
+    }
+
+    enum MedioContacto {
+        CORREO
+        TELEFONO
+        WHATSAPP
+    }
+
+    abstract class Persona {
+        - id: UUID
+        - direccion: Direccion
+        - medioDeContacto: Contacto
+        - roles: List<Rol>
+        + agregarRol(r: Rol)
+    }
+
+    class Contacto {
+        - correoElectronico: String
+        - telefono: String
+        - whatsapp: String
+        - medioPredeterminado: MedioContacto
+    }
+
+    class Direccion {
+        - calle: String
+        - altura: Decimal
+        - localidad: String
+        - pais: Pais
+        - codigoPostal: String
+        - coordenadas: Coordenada
+    }
+
+    class Coordenada {
+        - latitud: Decimal
+        - longitud: Decimal
+    }
+
+    class Provincia{
+        - nombreProvincia: String
+        - Pais: Pais
+    }
+
+    class Pais {
+        - nombrePais: String
+        - nacionalidad: String
+    }
+
+    class PersonaHumana extends Persona {
+        - nombre: String
+        - apellido: String
+        - tipoDocumento: TipoDocumento
+        - documento: String
+        - edad: int
+        + validarRol(r: Rol)
+    }
+
+    note top of PersonaHumana
+    **Regla de negocio:**
+    Tira excepción de invalidez de 
+    rol si el rol es EntidadBeneficiaria 
+    (acepta solo Donante,
+    Representante o Administrador)
+    end note
+
+    class PersonaJuridica extends Persona {
+        - razonSocial: String
+        - tipo: TipoPersonaJuridica
+        - representantes: List<Representante>
+        - rubro: String
+    }
+
+    note top of PersonaJuridica
+    **Regla de negocio:**
+    Tira excepción de 
+    invalidez de rol si el rol es 
+    Representante o Administrador
+    end note
+
+    Direccion --> Provincia : "es de un"
+    Provincia --> Pais : "forma parte de"
+    Direccion --> Coordenada : "se encuentra"
+    Persona --> Direccion : "tiene"
+    Persona "1" *-- "1" Contacto : "tiene"
+    Contacto --> MedioContacto : "define"
+    PersonaHumana --> TipoDocumento : "usa"
+    PersonaJuridica --> TipoPersonaJuridica : "se clasifica en"
+}
+
+package "Gestion de Roles" {
+    abstract class Rol {
+        - fechaAlta: LocalDate
+    }
+
+    class Donante extends Rol {
+        + filtrarDonaciones(estado: EstadoDonacion, categoria: String)
+        + UbicacionCamion()
+    }
+
+    class Representante extends Rol {
+        - cargo: String
+        - organizacion: PersonaJuridica
+    }
+
+    class EntidadBeneficiaria extends Rol {
+        - donacionesAsignadas: List<Donacion>
+        - necesidadesDeclaradas: List<Necesidad>
+        - correoRepresentante: String
+        + registrarNecesidad(n: Necesidad)
+        + confirmarRecepcion(d: Donacion, fotos: List<String>)
+        + EstadoDonaciones()
+        + UbicacionCamion()
+    }
+
+    class Administrador extends Rol {
+        - estrategiaAsignacion: AsignacionStrategy
+        - estrategiaImportador: ImportadorStrategy
+        + asociarDonacion(d: Donacion, p: Persona)
+        + actualizarDonacionesVencidas()
+        + asignarDonacionFinal(d: Donacion, e: EntidadBeneficiaria)
+        + administrarCamiones()
+        + RankingMensual()
+    }
+
+    class CorreoRegistro {
+        - Destinatario: String
+        - mensaje: String
+        - fechaEnvio: Date
+    }
+
+    interface AsignacionStrategy {
+        + recomendarNecesidades(donaciones, necesidades)
+    }
+
+    class PorPrioridad
+    class PorCercania
+
+    interface ImportadorStrategy {
+        + importar(Archivo)
+    }
+
+    class ImportadorCSV
+
+    Administrador --> ImportadorStrategy
+    Administrador --> AsignacionStrategy
+    PorPrioridad ..up|> AsignacionStrategy
+    PorCercania ..up|> AsignacionStrategy
+    ImportadorCSV ..up|> ImportadorStrategy
+    Administrador --> CorreoRegistro : "genera"
+}
+
+package "Gestion de Ingreso y Segmentación" {
+    class RecepcionDonacion {
+        - id: UUID
+        - fechaRecepcion: Date
+        - donante: Donante
+        - donacionesSegmentadas: List<Donacion>
+        - registradoPor: Administrador
+        + segmentarBienes(bienesBrutos)
+    }
+
+    note left of RecepcionDonacion 
+    **Regla de negocio:**
+    Representa la "única carga" 
+    física en el depósito. A partir 
+    de los bienes, se generan las 
+    Donaciones independientes.
+    end note
+
+    class Donacion {
+        - id: UUID
+        - estado: EstadoDonacion
+        - bienes: List<Bien>
+        - categoria: Categoria
+    }
+
+    enum EstadoDonacion {
+        PENDIENTE
+        ASIGNADA
+        ENTREGADA
+    }
+
+    class HistorialEstado {
+        - estado: EstadoDonacion
+        - fecha: Date
+        - observacion: String
+        - usuario: Administrador
+    }
+
+    class Bien {
+        - descripcion: String
+        - cantidad: double
+        - unidadMedicion: String
+        - esUsado: boolean
+        - fechaVencimiento: LocalDate
+        - foto: List<Foto>
+    }
+
+    class Categoria {
+        - nombre: String
+        - descripcion: String
+        - subcategorias: List<Categoria>
+        + agregarSubcategoria(categoria)
+        + esSubcategoriaDe(categoria)
+    }
+
+    class Foto{
+        - descripcion: String
+        - Url: String
+    }
+
+    Bien --> Categoria
+    Bien --> Foto
+    Categoria --> Categoria
+    Donacion *-- HistorialEstado
+    Donacion "1" *-- "1..*" Bien : "agrupa"
+    Donacion --> EstadoDonacion : "se encuentra en"
+    RecepcionDonacion *-- Donacion : segmenta >
+}
+
+package "Gestion de Necesidades" {
+    enum EstadoNecesidad {
+        ABIERTA
+        SATISFECHA
+    }
+
+    abstract class Necesidad {
+        - descripcion: String
+        - estado: EstadoNecesidad
+        - subcategoriaRequerida: Categoria
+    }
+
+    class NecesidadRecurrente extends Necesidad {
+        - cantidadObjetivo: double
+        - periodo: String
+    }
+
+    class NecesidadExtraordinaria extends Necesidad {
+        - cantidadRequerida: double
+        + acumularDonacionesParciales()
+    }
+
+    Necesidad --> EstadoNecesidad : "se encuentra en"
+}
+
+package "Servicio de Incentivos" {
+    enum CategoriaDonante {
+        COLABORADOR
+        SOSTENEDOR
+        TRANSFORMADOR
+    }
+
+    class GestorIncentivos {
+        + procesarNuevaDonacion(idDonante: UUID, d: DonacionDTO)
+        + ejecutarRankingMensual()
+    }
+
+    class PerfilIncentivos {
+        - idDonante: UUID
+        - categoriaActual: CategoriaDonante
+        + evaluarMisiones(d: DonacionDTO)
+        + subirCategoria()
+        + agregarInsignia(i: Insignia)
+        + visibilizarInsignia(i: Insignia, visible: boolean)
+    }
+
+    class MetricasDonante {
+        - totalDonaciones: int
+        - organizacionesAyudadas: int
+        - impactoAcumulado: double
+        + registrarDonacion(d: DonacionDTO)
+        + generarGraficoEvolucionMensual()
+    }
+
+    abstract class Mision {
+        - nombre: String
+        - descripcion: String
+        - ordenSecuencial: int
+        - progresoActual: int
+        - progresoObjetivo: int
+        - completada: boolean
+        + actualizarProgreso(cantidad: int)
+        + reiniciarProgreso()
+        + getDistanciaObjetivo(): int
+        {abstract} + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class MisionRacha extends Mision {
+        - fechaUltimaDonacion: LocalDate
+        - mesesConsecutivos: int
+        + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class MisionCompletitud extends Mision {
+        - categoriasDonadas: List<String>
+        + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class MisionHabilDonador extends Mision {
+        - cantidadMinimaBienes: int
+        + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class MisionDonacionesExitosas extends Mision {
+        + evaluarCondicion(d: DonacionDTO)
+    }
+
+    class Insignia {
+        - nombre: String
+        - descripcion: String
+        - fechaObtencion: LocalDate
+        - visiblePublicamente: boolean
+        + setVisible(visible: boolean)
+    }
+
+    class RankingMensual {
+        - mes: int
+        - anio: int
+        - topDonantes: List<PosicionRanking>
+        + calcularRanking(perfiles: List<PerfilIncentivos>)
+        + obtenerTop3(): List<PosicionRanking>
+    }
+
+    class PosicionRanking {
+        - idDonante: UUID
+        - misionesCompletadasEnMes: int
+        - posicion: int
+    }
+
+    GestorIncentivos --> RankingMensual : genera >
+    GestorIncentivos --> PerfilIncentivos : administra >
+    PerfilIncentivos "1" *-- "1" MetricasDonante : consolida datos en >
+    PerfilIncentivos "1" *-- "0..*" Mision : intenta superar >
+    PerfilIncentivos "1" *-- "0..*" Insignia : exhibe >
+    PerfilIncentivos --> CategoriaDonante : posee >
+    RankingMensual *-- "0..*" PosicionRanking : contiene >
+}
+
+package "Servicio de Logística y Depósito" {
+    enum EstadoRuta {
+        PLANIFICADA
+        EN_CURSO
+        FINALIZADA
+    }
+
+    class GestorLogisticaYDeposito {
+        + registrarCamion(patente: String, modelo: String)
+        + ingresarDonacionADeposito(idDonacion: UUID)
+        + planificarRuta(fecha: LocalDate, patenteCamion: String, idDonaciones: List<UUID>)
+        + iniciarRuta(idRuta: UUID)
+        + actualizarUbicacionCamion(patente: String, lat: Double, lon: Double)
+    }
+
+    class Deposito {
+        - id: UUID
+        - nombre: String
+        - direccion: Direccion
+        - capacidadMaxima: Integer
+        - idDonacionesDisponibles: List<UUID>
+        + registrarIngreso(idDonacion: UUID)
+        + registrarSalida(idDonacion: UUID)
+        + auditarVencidos()
+    }
+
+    class Camion {
+        - patente: String
+        - modelo: String
+        - ubicacionActual: Coordenada
+        - ultimaActualizacion: LocalDateTime
+        - activo: boolean
+        + actualizarUbicacion(c: Coordenada)
+    }
+
+    class RutaEntrega {
+        - id: UUID
+        - fechaPlanificada: LocalDate
+        - fechaInicioReal: LocalDateTime
+        - estado: EstadoRuta
+        - donacionesAsignadas: List<UUID>
+        - camionAsignado: Camion
+        - depositoOrigen: Deposito
+        + iniciarRecorrido()
+        + finalizarRecorrido()
+    }
+
+    GestorLogisticaYDeposito "1" *-- "0..*" Camion : administra >
+    GestorLogisticaYDeposito "1" *-- "0..*" RutaEntrega : planifica y monitorea >
+    GestorLogisticaYDeposito "1" *-- "1" Deposito : gestiona >
+    RutaEntrega --> EstadoRuta : se encuentra en >
+    RutaEntrega "1" --> "1" Camion : ejecutada por >
+    RutaEntrega "0..*" --> "1" Deposito : parte desde >
+}
+
+package "Servicio de Notificaciones" {
+    enum TipoEvento {
+        INACTIVIDAD_DONANTE
+        DONACION_ASIGNADA_ENTIDAD
+        DONACION_ASIGNADA_DONANTE
+        MISION_CUMPLIDA
+        CAMBIO_CATEGORIA
+    }
+
+    class GestorNotificaciones {
+        + procesarEvento(evento: TipoEvento, idDestinatario: UUID, parametros: Map)
+        + despacharNotificacion(n: Notificacion)
+    }
+
+    class Notificacion {
+        - id: UUID
+        - idDestinatario: UUID
+        - contactoDestino: String
+        - mensaje: String
+        - medio: MedioContactoNOTIFICACION
+        - evento: TipoEvento
+        - fechaCreacion: LocalDateTime
+        - fechaEnvio: LocalDateTime
+        - enviada: boolean
+        + marcarComoCompletada()
+    }
+
+    enum MedioContactoNOTIFICACION {
+        EMAIL
+        SMS
+        WHATSAPP
+    }
+
+    interface NotificadorAdapter {
+        + enviar(n: Notificacion): boolean
+    }
+
+    class AdaptadorEmail implements NotificadorAdapter {
+        + enviar(n: Notificacion): boolean
+    }
+
+    class AdaptadorSMS implements NotificadorAdapter {
+        + enviar(n: Notificacion): boolean
+    }
+
+    class AdaptadorWhatsApp implements NotificadorAdapter {
+        + enviar(n: Notificacion): boolean
+    }
+
+    class CreadorMensajesTemplate {
+        + generarCuerpoMensaje(evento: TipoEvento, parametros: Map): String
+    }
+
+    GestorNotificaciones "1" *-- "0..*" Notificacion : gestiona >
+    GestorNotificaciones --> NotificadorAdapter : delega envío a >
+    GestorNotificaciones --> CreadorMensajesTemplate : utiliza para armar texto >
+    Notificacion --> MedioContactoNOTIFICACION: a través de >
+    Notificacion --> TipoEvento : originada por >
+}
+
+' --- CONEXIONES ARQUITECTÓNICAS ENTRE PAQUETES ---
+
+' Gestión de Personas y Roles
+Persona "1" *--down--- "1..*" Rol : "asume"
+
+' Conexiones de Dominio (Roles y Donaciones)
+EntidadBeneficiaria "1" ---> "0..*" Donacion : "tiene asignadas"
+Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
+Donacion -up-> Administrador : "es gestionada por"
+RecepcionDonacion --> Administrador
+EntidadBeneficiaria "1" *--- "0..*" Necesidad : "declara"
+Necesidad "*" ---> "1" Categoria : "demanda"
+Necesidad "1" o-- "0..*" Donacion : "tiene"
+
+' Conexiones con el Servicio de Incentivos
+PersonaHumana ----> GestorIncentivos : "consulta logros / misiones"
+Donante "1" --.> "1" PerfilIncentivos : "posee traza de (vinculado por idDonante)"
+
+' Conexiones con el Servicio de Logística y Depósito
+Administrador --> GestorLogisticaYDeposito : "coordina flotas y stock"
+Donacion "...*" --> "1" Deposito : "se almacena físicamente en"
+
+' Conexiones con el Servicio de Notificaciones
+CorreoRegistro --> GestorNotificaciones : "despacha vía"
+@enduml

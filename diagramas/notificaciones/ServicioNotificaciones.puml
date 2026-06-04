@@ -1,0 +1,70 @@
+@startuml ServicioNotificaciones.puml
+skinparam classAttributeIconSize 0
+
+package "Servicio de Notificaciones" {
+
+    enum MedioContacto {
+        EMAIL
+        SMS
+        WHATSAPP
+    }
+
+    enum TipoEvento {
+        INACTIVIDAD_DONANTE
+        DONACION_ASIGNADA_ENTIDAD
+        DONACION_ASIGNADA_DONANTE
+        MISION_CUMPLIDA
+        CAMBIO_CATEGORIA
+    }
+
+    class GestorNotificaciones {
+        + procesarEvento(evento: TipoEvento, idDestinatario: UUID, parametros: Map)
+        + despacharNotificacion(n: Notificacion)
+    }
+
+    class Notificacion {
+        - id: UUID
+        - idDestinatario: UUID
+        - contactoDestino: String
+        - mensaje: String
+        - medio: MedioContacto
+        - evento: TipoEvento
+        - fechaCreacion: LocalDateTime
+        - fechaEnvio: LocalDateTime
+        - enviada: boolean
+        + marcarComoCompletada()
+    }
+
+    interface NotificadorAdapter {
+        + enviar(n: Notificacion): boolean
+    }
+
+    class AdaptadorEmail implements NotificadorAdapter {
+        + enviar(n: Notificacion): boolean
+        note "Simula conexión a SMTP/SendGrid"
+    }
+
+    class AdaptadorSMS implements NotificadorAdapter {
+        + enviar(n: Notificacion): boolean
+        note "Simula conexión a Twilio"
+    }
+
+    class AdaptadorWhatsApp implements NotificadorAdapter {
+        + enviar(n: Notificacion): boolean
+        note "Simula conexión a Meta API"
+    }
+
+    class CreadorMensajesTemplate {
+        + generarCuerpoMensaje(evento: TipoEvento, parametros: Map): String
+    }
+
+    ' Relaciones
+    GestorNotificaciones "1" *-- "0..*" Notificacion : gestiona >
+    GestorNotificaciones --> NotificadorAdapter : delega envío a >
+    GestorNotificaciones --> CreadorMensajesTemplate : utiliza para armar texto >
+    
+    Notificacion --> MedioContacto : a través de >
+    Notificacion --> TipoEvento : originada por >
+
+}
+@enduml
