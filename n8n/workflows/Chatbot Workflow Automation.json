@@ -1,0 +1,413 @@
+{
+  "name": "Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0774c47d-97dd-4cd4-a6c2-494e81c8d4b5",
+      "name": "Webhook",
+      "webhookId": "ce38f0f7-30a2-4e8c-8c55-18901276b0d2"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.mensaje }}",
+                    "rightValue": "¿Cómo dono?",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "56335df4-6758-4174-9e25-908782b52cf8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Donar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9d3315a4-953e-4343-ae03-d293a51cd8cd",
+                    "leftValue": "={{ $json.body.mensaje }}",
+                    "rightValue": "Ver campañas",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ver campañas"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "89f3ca79-b05f-48cc-bbe0-20574f6841ac",
+                    "leftValue": "={{ $json.body.mensaje }}",
+                    "rightValue": "Quiero registrarme",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Registro"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "64859fc6-def7-4f4f-8542-8f823fa49c8b",
+                    "leftValue": "={{ $json.body.mensaje }}",
+                    "rightValue": "Seguimiento de mi donación",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Seguimiento Donacion"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d8b5e02e-f9b4-45bf-8986-cc3a30d8c974",
+                    "leftValue": "={{ $json.body.mensaje }}",
+                    "rightValue": "Ayuda",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ayuda"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 4
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        -48
+      ],
+      "id": "dbbad5cc-157f-4217-974c-4a547487586a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        848,
+        0
+      ],
+      "id": "3e8badd0-e9b7-4450-9626-fe942433368b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de2611b3-1b69-4241-b07f-b6d8cf8bfd11",
+              "name": "respuesta",
+              "value": "¡Es súper fácil! Seguí estos 3 pasos: 1) Registrate en la plataforma. 2) Elegí una campaña activa o hacé una donación libre. 3) Coordiná el punto de entrega o retiro. ¡Nosotros te vamos avisando cómo avanza tu donación en cada etapa!",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        -336
+      ],
+      "id": "05727528-e91a-435d-9662-e2d062281e15",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de2611b3-1b69-4241-b07f-b6d8cf8bfd11",
+              "name": "respuesta",
+              "value": "¡Entendido! Ya le envié un aviso a nuestro equipo. Un agente humano se va a conectar a este mismo chat en los próximos minutos para ayudarte personalmente. Mientras tanto, ¿te puedo ayudar con algo más?",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        352
+      ],
+      "id": "1356ac12-0cc1-4a0e-bbd6-0647f21400f7",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de2611b3-1b69-4241-b07f-b6d8cf8bfd11",
+              "name": "respuesta",
+              "value": "Actualmente tenemos varias campañas activas donde podés ayudar. Cada una muestra su progreso y la ONG verificada que está a cargo. 👉 <a href=\"#campanas\" style=\"color: #007bff; text-decoration: underline; font-weight: bold;\">Hacé clic acá para ver las campañas destacadas</a>.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        -176
+      ],
+      "id": "2d812ae7-5c0e-4bb6-ba6c-653c34cd1760",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de2611b3-1b69-4241-b07f-b6d8cf8bfd11",
+              "name": "respuesta",
+              "value": "El registro es 100% gratuito y no te toma ni un minuto. Podés encontrar los botones de acceso para \"Donantes\" o \"Sedes\" en la sección superior de la página (Sumate).",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        0
+      ],
+      "id": "cceb77b8-6f7c-4f98-85c1-39fff0bc7d34",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de2611b3-1b69-4241-b07f-b6d8cf8bfd11",
+              "name": "respuesta",
+              "value": "Cada donación que hacés genera un código de seguimiento único. Con ese ID podés ver su estado en tiempo real (Recibida, En viaje, Entregada). 🔍 <a href=\"#organizaciones\" style=\"color: #007bff; text-decoration: underline; font-weight: bold;\">Hacé clic acá para ir a tu panel de tracking</a>.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        176
+      ],
+      "id": "f9014368-4ec1-485a-8221-3768a8f43e1f",
+      "name": "Edit Fields4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1bb1d3fe-c519-41ce-a8ec-df53acb02b7d",
+  "meta": {
+    "instanceId": "95be60674b7801e60f2cdd7e4e984e3ab744c71d05e6caf079beea406b504282"
+  },
+  "id": "2zpu451nLHxitRhz",
+  "tags": []
+}

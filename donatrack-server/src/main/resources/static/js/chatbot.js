@@ -31,31 +31,27 @@
   const addMsg = (text, who) => {
     const div = document.createElement("div");
     div.className = "msg msg--" + who;
-    div.textContent = text;
+    div.innerHTML = text; // Permite renderizar links HTML
+    div.style.whiteSpace = "pre-wrap"; // Permite los saltos de línea \n
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
   };
 
   const respond = (q) => {
-    const lower = q.toLowerCase();
-    let r =
-      "Gracias por tu mensaje. Un miembro del equipo te responderá pronto. Mientras tanto, podés explorar las campañas o registrarte.";
-    if (/dona[rn]|donaci/.test(lower))
-      r =
-        "Para donar: 1) Registrate (toma menos de un minuto), 2) Elegí una campaña o creá una donación libre, 3) Coordiná retiro o entrega. Vas a recibir actualizaciones en cada etapa.";
-    else if (/campaña|campan/.test(lower))
-      r =
-        "Podés ver las campañas activas en la sección 'Campañas destacadas' más arriba. Cada campaña muestra el progreso, los donantes y la ONG verificada.";
-    else if (/registr/.test(lower))
-      r =
-        "El registro es gratuito y rápido. Encontrá los accesos para donantes y organizaciones en la sección 'Sumate'.";
-    else if (/seguim|tracking|trazab|estado/.test(lower))
-      r =
-        "Cada donación recibe un ID. Desde tu panel podés ver el estado en vivo: recibida, en acopio, en transporte, recibida por la ONG y entregada.";
-    else if (/privac|datos|ley/.test(lower))
-      r =
-        "Cuidamos tus datos según la Ley 25.326. Solo recolectamos lo necesario para operar la plataforma y nunca compartimos información con terceros sin tu consentimiento.";
-    setTimeout(() => addMsg(r, "bot"), 500);
+    // Le pegamos al Webhook de producción de n8n
+    fetch("http://localhost:5678/webhook/chatbot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mensaje: q })
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        addMsg(data.respuesta || "Mensaje procesado por n8n (sin respuesta)", "bot");
+      })
+      .catch((e) => {
+        console.warn("Error al conectar con n8n:", e);
+        addMsg("Ups, el bot está fuera de servicio en este momento.", "bot");
+      });
   };
 
   form.addEventListener("submit", (e) => {

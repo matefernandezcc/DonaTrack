@@ -1,0 +1,124 @@
+{
+  "name": "DonaTrack - Insignias",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "donatrack/badge-earned",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        200
+      ],
+      "id": "webhook-trigger-node",
+      "name": "Webhook Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const user = item.json.user || 'Usuario';\n  const badge = item.json.badge || 'Insignia';\n  const description = item.json.description || '';\n  return {\n    json: {\n      text: `🏆 ¡Felicitaciones a ${user}! Ha ganado la insignia \"${badge}\"${description ? ` (${description})` : ''}. ¡Gracias por apoyar a DonaTrack! 🌟 #DonaTrack`,\n      badgeName: badge\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        200
+      ],
+      "id": "transform-code-node",
+      "name": "Transform Message"
+    },
+    {
+      "parameters": {
+        "url": "={{ \"https://api.dicebear.com/9.x/bottts/svg?seed=\" + encodeURIComponent($json.badgeName) }}",
+        "responseFormat": "file",
+        "outputPropertyName": "image",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        200
+      ],
+      "id": "generate-badge-image-node",
+      "name": "Generate Badge Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL || \"https://discord.com/api/webhooks/YOUR_MOCK_DISCORD_WEBHOOK_URL\" }}",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyFormat": "multipart",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "name": "file",
+              "parameterType": "formBinaryData",
+              "inputDataFieldName": "image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        200
+      ],
+      "id": "publish-discord-node",
+      "name": "Publish to Discord Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Transform Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Message": {
+      "main": [
+        [
+          {
+            "node": "Generate Badge Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Badge Image": {
+      "main": [
+        [
+          {
+            "node": "Publish to Discord Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "id": "donatrack-insignias",
+  "tags": []
+}
