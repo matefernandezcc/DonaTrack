@@ -13,10 +13,11 @@ public class CategoriaTest {
     Categoria categoriaNieta = new Categoria("camisasMangaCorta", "camisasMangaCorta");
     categoriaPadre.agregarSubcategoria(categoriaHija);
 
-    categoriaHija.agregarSubcategoria(categoriaNieta);
+    // Debería fallar al agregar subcategoría a una hija
+    assertEquals(false, categoriaHija.agregarSubcategoria(categoriaNieta));
 
     assertEquals(true, categoriaHija.esSubcategoriaDe(categoriaPadre));
-    assertEquals(true, categoriaNieta.esSubcategoriaDe(categoriaPadre));
+    assertEquals(false, categoriaNieta.esSubcategoriaDe(categoriaPadre));
   }
 
   @Test

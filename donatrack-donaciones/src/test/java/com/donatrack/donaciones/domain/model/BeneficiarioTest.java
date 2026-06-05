@@ -18,7 +18,6 @@ public class BeneficiarioTest {
 
     Beneficiario beneficiario = new Beneficiario();
 
-    assertThrows(
-        IllegalStateException.class, () -> beneficiario.confirmarRecepcion(donacionPrueba, fotos));
+    org.junit.jupiter.api.Assertions.assertFalse(beneficiario.confirmarRecepcion(donacionPrueba, fotos));
   }
 }

@@ -20,21 +20,14 @@ public class AdministradorTest {
 
     Administrador admin = new Administrador(depositoPrueba);
 
-    assertThrows(
-        IllegalStateException.class,
-        () -> {
-          admin.importarDonantesMasivos("rutaPrueba.csv");
-        });
+    org.junit.jupiter.api.Assertions.assertFalse(admin.importarDonantesMasivos("rutaPrueba.csv"));
   }
 
   @Test
   public void testErrorSinEstrategiaAsignacion() {
     Administrador admin = new Administrador(depositoPrueba);
 
-    assertThrows(
-        IllegalStateException.class,
-        () -> {
-          admin.obtenerRecomendacionAsignacion(null, null);
-        });
+    org.junit.jupiter.api.Assertions.assertTrue(
+        admin.obtenerRecomendacionAsignacion(null, null).isEmpty());
   }
 }

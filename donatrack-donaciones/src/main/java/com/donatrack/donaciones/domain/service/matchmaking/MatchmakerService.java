@@ -5,11 +5,18 @@ import com.donatrack.donaciones.domain.model.Donacion;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MatchmakerService {
 
     private final AlgoritmoAsignacion algoritmoPrimario;
     private final AlgoritmoAsignacion algoritmoSecundario;
+
+    public MatchmakerService() {
+        this.algoritmoPrimario = new CompatibilidadSemantica();
+        this.algoritmoSecundario = new PrioridadASubAtendidos();
+    }
 
     public MatchmakerService(AlgoritmoAsignacion algoritmoPrimario, AlgoritmoAsignacion algoritmoSecundario) {
         this.algoritmoPrimario = algoritmoPrimario;
