@@ -44,6 +44,9 @@ git-clean:
 run:
 	mvn spring-boot:run -pl $(SERVER_MODULE)
 
+ngrok:
+	ngrok http --url=exclude-stoplight-registrar.ngrok-free.dev 80
+
 run-clean:
 	mvn clean install && mvn spring-boot:run -pl $(SERVER_MODULE)
 
@@ -77,14 +80,15 @@ docker-down:
 	docker compose down
 
 n8n-import:
-	docker cp ./n8n/workflows/. $(N8N_CONTAINER):/tmp/workflows
+	docker cp ./n8n/workflows/workflows.json \
+		$(N8N_CONTAINER):/tmp/workflows.json
 	docker exec $(N8N_CONTAINER) \
-	n8n import:workflow --separate --input=/tmp/workflows
+		n8n import:workflow --input=/tmp/workflows.json
 
 n8n-export:
 	docker exec $(N8N_CONTAINER) \
-	n8n export:workflow --separate --output=/tmp/workflows
-	docker cp $(N8N_CONTAINER):/tmp/workflows/. ./n8n/workflows
+		n8n export:workflow --all --output=/tmp/workflows.json && \
+	docker cp $(N8N_CONTAINER):/tmp/workflows.json ./n8n/workflows/workflows.json
 
 setup:
 	docker compose up -d
