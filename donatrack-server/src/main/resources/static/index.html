@@ -800,8 +800,8 @@
   <script type='text/javascript'>
     (function () {
       // Configuramos qué dominios soportan el chatbot de Salesforce.
-      // Ngrok autorizado en Salesforce:
-      const isSalesforceEnv = window.location.hostname === 'exclude-stoplight-registrar.ngrok-free.dev';
+      const isSalesforceEnv = window.location.hostname === 'exclude-stoplight-registrar.ngrok-free.dev' ||
+                              window.location.hostname === 'matefernandezcc.github.io';
 
       function loadN8N() {
         console.log("Cargando chatbot de n8n de respaldo...");
