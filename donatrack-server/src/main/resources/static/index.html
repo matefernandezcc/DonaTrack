@@ -8,6 +8,7 @@
   <meta name="description"
     content="DonaTrack conecta donaciones con organizaciones beneficiarias y permite seguir cada entrega de forma transparente, de origen a destino." />
   <meta name="theme-color" content="#0B4A8F" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -734,62 +735,119 @@
     </div>
   </footer>
 
-  <!-- ============ CHATBOT ============ -->
-  <button class="chatbot__fab" id="chat-fab" aria-label="Abrir asistente" aria-expanded="false"
-    aria-controls="chat-panel">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V5Z" fill="currentColor" />
-    </svg>
-  </button>
+  <!-- ============ OLD N8N CHATBOT (BACKUP) ============ -->
+  <template id="old-n8n-chatbot">
+    <button class="chatbot__fab" id="chat-fab" aria-label="Abrir asistente" aria-expanded="false"
+      aria-controls="chat-panel">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V5Z" fill="currentColor" />
+      </svg>
+    </button>
 
-  <dialog class="chatbot" id="chat-panel" aria-modal="false" aria-labelledby="chat-title" hidden>
-    <header class="chatbot__head">
-      <div class="chatbot__who">
-        <span class="chatbot__avatar" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" fill="#1F9D6E" />
-            <path d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"
-              fill="none" />
-            <circle cx="9" cy="10" r="1" fill="#fff" />
-            <circle cx="15" cy="10" r="1" fill="#fff" />
-          </svg>
-        </span>
-        <div>
-          <strong id="chat-title">Asistente DonaTrack</strong>
-          <span class="chatbot__status">
-            <i></i> En línea
+    <dialog class="chatbot" id="chat-panel" aria-modal="false" aria-labelledby="chat-title" hidden>
+      <header class="chatbot__head">
+        <div class="chatbot__who">
+          <span class="chatbot__avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="#1F9D6E" />
+              <path d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                fill="none" />
+              <circle cx="9" cy="10" r="1" fill="#fff" />
+              <circle cx="15" cy="10" r="1" fill="#fff" />
+            </svg>
           </span>
+          <div>
+            <strong id="chat-title">Asistente DonaTrack</strong>
+            <span class="chatbot__status">
+              <i></i> En línea
+            </span>
+          </div>
         </div>
+        <button class="chatbot__close" id="chat-close" aria-label="Cerrar asistente">
+          &times;
+        </button>
+      </header>
+
+      <div class="chatbot__log" id="chat-log" aria-live="polite">
+        <div class="msg msg--bot">Hola 👋 ¿En qué puedo ayudarte hoy?</div>
       </div>
-      <button class="chatbot__close" id="chat-close" aria-label="Cerrar asistente">
-        &times;
-      </button>
-    </header>
 
-    <div class="chatbot__log" id="chat-log" aria-live="polite">
-      <div class="msg msg--bot">Hola 👋 ¿En qué puedo ayudarte hoy?</div>
-    </div>
+      <div class="chatbot__chips">
+        <button class="chip" data-q="¿Cómo dono?">Cómo donar</button>
+        <button class="chip" data-q="Ver campañas">Ver campañas</button>
+        <button class="chip" data-q="Quiero registrarme">Registrarse</button>
+        <button class="chip" data-q="Seguimiento de mi donación">Seguimiento</button>
+        <button class="chip" data-q="¿Qué tipo de donaciones aceptan?">Qué donar</button>
+        <button class="chip" data-q="Quiero ser voluntario">Voluntariado</button>
+        <button class="chip" data-q="Horarios y puntos de entrega">Horarios</button>
+        <button class="chip" data-q="Ayuda">Ayuda</button>
+      </div>
 
-    <div class="chatbot__chips">
-      <button class="chip" data-q="¿Cómo dono?">Cómo donar</button>
-      <button class="chip" data-q="Ver campañas">Ver campañas</button>
-      <button class="chip" data-q="Quiero registrarme">Registrarse</button>
-      <button class="chip" data-q="Seguimiento de mi donación">
-        Seguimiento
-      </button>
-    </div>
+      <form class="chatbot__form" id="chat-form">
+        <label for="chat-input" class="sr-only">Escribí tu mensaje</label>
+        <input id="chat-input" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
+        <button type="submit" class="btn btn--primary btn--sm" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 11 21 3l-8 18-2-8-8-2Z" stroke="currentColor" stroke-width="2" fill="none"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+      </form>
+    </dialog>
+  </template>
 
-    <form class="chatbot__form" id="chat-form">
-      <label for="chat-input" class="sr-only">Escribí tu mensaje</label>
-      <input id="chat-input" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
-      <button type="submit" class="btn btn--primary btn--sm" aria-label="Enviar">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 11 21 3l-8 18-2-8-8-2Z" stroke="currentColor" stroke-width="2" fill="none"
-            stroke-linejoin="round" />
-        </svg>
-      </button>
-    </form>
-  </dialog>
+  <!-- ============ CHATBOT ROUTER ============ -->
+  <script type='text/javascript'>
+    (function () {
+      // Configuramos qué dominios soportan el chatbot de Salesforce.
+      // Ngrok autorizado en Salesforce:
+      const isSalesforceEnv = window.location.hostname === 'exclude-stoplight-registrar.ngrok-free.dev';
+
+      function loadN8N() {
+        console.log("Cargando chatbot de n8n de respaldo...");
+        const template = document.getElementById("old-n8n-chatbot");
+        if (template) {
+          template.parentNode.insertBefore(template.content.cloneNode(true), template);
+          const script = document.createElement("script");
+          script.src = "js/chatbot.js";
+          document.body.appendChild(script);
+        }
+      }
+
+      if (isSalesforceEnv) {
+        console.log("Entorno de Salesforce detectado. Intentando cargar Embedded Messaging...");
+        window.initEmbeddedMessaging = function () {
+          try {
+            embeddedservice_bootstrap.settings.language = 'es_AR';
+            embeddedservice_bootstrap.init(
+              '00DKh000001LcL5',
+              'Chatbot_DonaTrack',
+              'https://be1776887191673.my.site.com/ESWChatbotDonaTrack1780800682238',
+              {
+                scrt2URL: 'https://be1776887191673.my.salesforce-scrt.com'
+              }
+            );
+          } catch (err) {
+            console.error('Error cargando Embedded Messaging: ', err);
+            loadN8N(); // Fallback si tira excepción síncrona
+          }
+        };
+
+        const sfScript = document.createElement('script');
+        sfScript.type = 'text/javascript';
+        sfScript.src = 'https://be1776887191673.my.site.com/ESWChatbotDonaTrack1780800682238/assets/js/bootstrap.min.js';
+        sfScript.onload = window.initEmbeddedMessaging;
+
+        // Si el script de Salesforce no carga por completo (ej: bloqueador de anuncios o error de red inicial)
+        sfScript.onerror = loadN8N;
+
+        document.body.appendChild(sfScript);
+      } else {
+        // En localhost o cualquier otro ngrok, cargamos directo n8n (no genera errores molestos de CORS en consola)
+        loadN8N();
+      }
+    })();
+  </script>
 
   <!-- Leaflet -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -798,7 +856,7 @@
   <script src="js/app.js" defer></script>
   <script src="js/scroll-story.js" defer></script>
   <script src="js/map.js" defer></script>
-  <script src="js/chatbot.js" defer></script>
+  <!-- <script src="js/chatbot.js" defer></script> -->
 </body>
 
 </html>

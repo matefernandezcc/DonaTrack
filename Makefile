@@ -33,12 +33,19 @@ quality:
 	mvn fmt:format
 	mvn test
 
+git-clean:
+	git fetch --prune
+	git branch -vv | grep 'gone' | awk '{print $1}' | xargs -r git branch -D 
+
 # =========================
 # RUN APP
 # =========================
 
 run:
 	mvn spring-boot:run -pl $(SERVER_MODULE)
+
+ngrok:
+	ngrok http --url=exclude-stoplight-registrar.ngrok-free.dev 80
 
 run-clean:
 	mvn clean install && mvn spring-boot:run -pl $(SERVER_MODULE)
@@ -65,9 +72,6 @@ ci:
 # =========================
 
 N8N_CONTAINER=n8n_donatrack
-N8N_CHATBOT_WORKFLOW=/workflows/Chatbot\ Workflow\ Automation.json
-N8N_INSIGNIAS_WORKFLOW=/workflows/DonaTrack_Insignias.json
-N8N_RANKING_WORKFLOW=/workflows/DonaTrack_Ranking.json
 
 docker-up:
 	docker compose up -d
@@ -75,42 +79,16 @@ docker-up:
 docker-down:
 	docker compose down
 
-n8n-export-chatbot:
+n8n-import:
+	docker cp ./n8n/workflows/workflows.json \
+		$(N8N_CONTAINER):/tmp/workflows.json
 	docker exec $(N8N_CONTAINER) \
-	n8n export:workflow \
-	--all \
-	--output=/tmp/workflows.json
-	docker cp \
-	$(N8N_CONTAINER):/tmp/workflows.json \
-	./n8n/workflows/Chatbot\ Workflow\ Automation.json
+		n8n import:workflow --input=/tmp/workflows.json
 
-n8n-import-chatbot:
+n8n-export:
 	docker exec $(N8N_CONTAINER) \
-	n8n import:workflow \
-	--input=$(N8N_CHATBOT_WORKFLOW)
-
-n8n-export-insignias:
-	docker exec $(N8N_CONTAINER) \
-	n8n export:workflow \
-	--id=donatrack-insignias \
-	--output=$(N8N_INSIGNIAS_WORKFLOW)
-
-n8n-import-insignias:
-	docker exec $(N8N_CONTAINER) \
-	n8n import:workflow \
-	--input=$(N8N_INSIGNIAS_WORKFLOW)
-
-
-n8n-export-ranking:
-	docker exec $(N8N_CONTAINER) \
-	n8n export:workflow \
-	--id=donatrack-ranking \
-	--output=$(N8N_RANKING_WORKFLOW)
-
-n8n-import-ranking:
-	docker exec $(N8N_CONTAINER) \
-	n8n import:workflow \
-	--input=$(N8N_RANKING_WORKFLOW)
+		n8n export:workflow --all --output=/tmp/workflows.json && \
+	docker cp $(N8N_CONTAINER):/tmp/workflows.json ./n8n/workflows/workflows.json
 
 setup:
 	docker compose up -d
