@@ -1,7 +1,7 @@
 @startuml DonaTrack-Diagrama-Clases.puml
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
-
+package "servicio de donaciones"{
 package "Gestión de Personas" {
     enum TipoDocumento {
         DNI
@@ -257,6 +257,7 @@ package "Gestion de Necesidades" {
 
     Necesidad --> EstadoNecesidad : "se encuentra en"
 }
+}
 
 package "Servicio de Incentivos" {
     enum CategoriaDonante {
@@ -351,61 +352,6 @@ package "Servicio de Incentivos" {
     RankingMensual *-- "0..*" PosicionRanking : contiene >
 }
 
-package "Servicio de Logística y Depósito" {
-    enum EstadoRuta {
-        PLANIFICADA
-        EN_CURSO
-        FINALIZADA
-    }
-
-    class GestorLogisticaYDeposito {
-        + registrarCamion(patente: String, modelo: String)
-        + ingresarDonacionADeposito(idDonacion: UUID)
-        + planificarRuta(fecha: LocalDate, patenteCamion: String, idDonaciones: List<UUID>)
-        + iniciarRuta(idRuta: UUID)
-        + actualizarUbicacionCamion(patente: String, lat: Double, lon: Double)
-    }
-
-    class Deposito {
-        - id: UUID
-        - nombre: String
-        - direccion: Direccion
-        - capacidadMaxima: Integer
-        - idDonacionesDisponibles: List<UUID>
-        + registrarIngreso(idDonacion: UUID)
-        + registrarSalida(idDonacion: UUID)
-        + auditarVencidos()
-    }
-
-    class Camion {
-        - patente: String
-        - modelo: String
-        - ubicacionActual: Coordenada
-        - ultimaActualizacion: LocalDateTime
-        - activo: boolean
-        + actualizarUbicacion(c: Coordenada)
-    }
-
-    class RutaEntrega {
-        - id: UUID
-        - fechaPlanificada: LocalDate
-        - fechaInicioReal: LocalDateTime
-        - estado: EstadoRuta
-        - donacionesAsignadas: List<UUID>
-        - camionAsignado: Camion
-        - depositoOrigen: Deposito
-        + iniciarRecorrido()
-        + finalizarRecorrido()
-    }
-
-    GestorLogisticaYDeposito "1" *-- "0..*" Camion : administra >
-    GestorLogisticaYDeposito "1" *-- "0..*" RutaEntrega : planifica y monitorea >
-    GestorLogisticaYDeposito "1" *-- "1" Deposito : gestiona >
-    RutaEntrega --> EstadoRuta : se encuentra en >
-    RutaEntrega "1" --> "1" Camion : ejecutada por >
-    RutaEntrega "0..*" --> "1" Deposito : parte desde >
-}
-
 package "Servicio de Notificaciones" {
     enum TipoEvento {
         INACTIVIDAD_DONANTE
@@ -483,10 +429,6 @@ Necesidad "1" o-- "0..*" Donacion : "tiene"
 ' Conexiones con el Servicio de Incentivos
 PersonaHumana ----> GestorIncentivos : "consulta logros / misiones"
 Donante "1" --.> "1" PerfilIncentivos : "posee traza de (vinculado por idDonante)"
-
-' Conexiones con el Servicio de Logística y Depósito
-Administrador --> GestorLogisticaYDeposito : "coordina flotas y stock"
-Donacion "...*" --> "1" Deposito : "se almacena físicamente en"
 
 ' Conexiones con el Servicio de Notificaciones
 CorreoRegistro --> GestorNotificaciones : "despacha vía"
