@@ -1,7 +1,8 @@
 package com.donatrack.donaciones.domain.strategy;
 
-import com.donatrack.donaciones.domain.model.Donacion;
-import com.donatrack.donaciones.domain.model.Necesidad;
+import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.necesidades.Necesidad;
+
 import java.util.List;
 
 public class PorPrioridad implements AsignacionStrategy {

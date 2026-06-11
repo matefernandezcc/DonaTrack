@@ -1,8 +1,14 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.roles;
 
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.necesidades.Necesidad;
 import com.donatrack.donaciones.domain.strategy.AsignacionStrategy;
 import com.donatrack.donaciones.domain.strategy.ImportadorStrategy;
+import com.donatrack.donaciones.domain.model.donacion.HistorialEstado;
+import com.donatrack.donaciones.domain.model.Deposito;
+import com.donatrack.logistica.domain.model.Camion;
+
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;

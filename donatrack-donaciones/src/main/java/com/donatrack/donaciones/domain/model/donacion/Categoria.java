@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.donacion;
 
 import java.util.ArrayList;
 import java.util.List;

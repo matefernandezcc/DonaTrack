@@ -1,7 +1,6 @@
 package com.donatrack.donaciones.infrastructure.controller;
-
-import com.donatrack.donaciones.domain.model.Donacion;
-import com.donatrack.donaciones.domain.model.Beneficiario;
+import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import com.donatrack.donaciones.domain.service.matchmaking.MatchmakerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,10 +45,7 @@ public class DonacionController {
 
     @GetMapping("/{id}/matchmaking")
     public ResponseEntity<List<Beneficiario>> sugerirBeneficiarios(@PathVariable UUID id) {
-        // donacion = repo.findById(id)
-        // disponibles = repoBeneficiarios.findAll()
-        // List<Beneficiario> sugerencias = matchmakerService.obtenerSugerencias(donacion, disponibles);
-        // return ResponseEntity.ok(sugerencias);
-        return ResponseEntity.ok(List.of()); // Mock
+        // TODO: obtener donación y beneficiarios disponibles desde repositorios
+        return ResponseEntity.ok(List.of());
     }
 }

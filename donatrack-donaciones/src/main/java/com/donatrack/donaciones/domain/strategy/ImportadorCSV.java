@@ -1,11 +1,12 @@
 package com.donatrack.donaciones.domain.strategy;
 
-import com.donatrack.donaciones.domain.model.Persona;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import com.donatrack.donaciones.domain.factory.PersonaFactory;
+import com.donatrack.donaciones.domain.model.persona.Persona;
+
 import lombok.Getter;
 
 public class ImportadorCSV implements ImportadorStrategy {

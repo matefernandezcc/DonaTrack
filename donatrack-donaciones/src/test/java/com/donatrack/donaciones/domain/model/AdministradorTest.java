@@ -1,8 +1,11 @@
 package com.donatrack.donaciones.domain.model;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.Test;
+import com.donatrack.donaciones.domain.model.persona.Coordenada;
+import com.donatrack.donaciones.domain.model.persona.Direccion;
+import com.donatrack.donaciones.domain.model.persona.Pais;
+import com.donatrack.donaciones.domain.model.persona.Provincia;
+import com.donatrack.donaciones.domain.model.roles.Administrador;
 
 public class AdministradorTest {
 

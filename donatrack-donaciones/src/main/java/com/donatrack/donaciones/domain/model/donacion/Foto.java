@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.donacion;
 
 import lombok.Getter;
 import lombok.Setter;

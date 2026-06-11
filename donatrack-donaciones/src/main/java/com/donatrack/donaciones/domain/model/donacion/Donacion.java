@@ -1,11 +1,11 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.donacion;
 
 import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-// import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 

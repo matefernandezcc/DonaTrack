@@ -1,7 +1,8 @@
 package com.donatrack.donaciones.domain.strategy;
 
-import com.donatrack.donaciones.domain.model.Bien;
 import java.util.List;
+
+import com.donatrack.donaciones.domain.model.donacion.Bien;
 
 public interface EstrategiaSegmentacion {
   // Recibe la lista completa de bienes y devuelve la lista de donaciones ya segmentadas

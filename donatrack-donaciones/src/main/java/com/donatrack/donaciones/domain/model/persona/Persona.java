@@ -1,12 +1,14 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.persona;
 
+import com.donatrack.donaciones.domain.validation.PersonaValidator;
+import com.donatrack.donaciones.domain.model.roles.Rol;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import com.donatrack.donaciones.domain.validation.PersonaValidator;
+
 
 public abstract class Persona {
   @Getter @Setter private UUID id;

@@ -4,6 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.donatrack.donaciones.domain.enums.MedioContacto;
 import com.donatrack.donaciones.domain.enums.TipoDocumento;
+import com.donatrack.donaciones.domain.model.persona.Contacto;
+import com.donatrack.donaciones.domain.model.persona.Coordenada;
+import com.donatrack.donaciones.domain.model.persona.Direccion;
+import com.donatrack.donaciones.domain.model.persona.DocumentoIdentidad;
+import com.donatrack.donaciones.domain.model.persona.Pais;
+import com.donatrack.donaciones.domain.model.persona.Persona;
+import com.donatrack.donaciones.domain.model.persona.PersonaHumana;
+import com.donatrack.donaciones.domain.model.persona.Provincia;
 import com.donatrack.donaciones.domain.strategy.ImportadorCSV;
 import java.util.ArrayList;
 import java.util.List;

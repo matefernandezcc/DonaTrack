@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.roles;
 
 import java.time.LocalDate;
 import lombok.Getter;

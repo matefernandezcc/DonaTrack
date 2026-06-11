@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.validation;
 
-import com.donatrack.donaciones.domain.model.Persona;
+import com.donatrack.donaciones.domain.model.persona.Persona;
 
 public class TelefonoRepetidoValidator extends PersonaValidator {
 

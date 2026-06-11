@@ -2,11 +2,11 @@ package com.donatrack.donaciones.domain.factory;
 
 import com.donatrack.donaciones.domain.enums.MedioContacto;
 import com.donatrack.donaciones.domain.enums.TipoDocumento;
-import com.donatrack.donaciones.domain.model.Contacto;
-import com.donatrack.donaciones.domain.model.DocumentoIdentidad;
-import com.donatrack.donaciones.domain.model.Persona;
-import com.donatrack.donaciones.domain.model.PersonaHumana;
-import com.donatrack.donaciones.domain.model.PersonaJuridica;
+import com.donatrack.donaciones.domain.model.persona.Contacto;
+import com.donatrack.donaciones.domain.model.persona.DocumentoIdentidad;
+import com.donatrack.donaciones.domain.model.persona.Persona;
+import com.donatrack.donaciones.domain.model.persona.PersonaHumana;
+import com.donatrack.donaciones.domain.model.persona.PersonaJuridica;
 public class PersonaFactory {
 
     public Persona crearDesdeCSV(String[] datos) {

@@ -1,7 +1,8 @@
 package com.donatrack.donaciones.domain.service.matchmaking;
 
-import com.donatrack.donaciones.domain.model.Beneficiario;
-import com.donatrack.donaciones.domain.model.Donacion;
+import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.roles.Beneficiario;
+
 import java.util.List;
 
 public interface AlgoritmoAsignacion {

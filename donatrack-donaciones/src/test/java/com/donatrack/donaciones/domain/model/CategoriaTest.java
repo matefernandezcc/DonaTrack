@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import com.donatrack.donaciones.domain.model.donacion.Categoria;
+
 public class CategoriaTest {
   Categoria categoriaPadre = new Categoria("ropa", "ropaGeneral");
   Categoria categoriaHija = new Categoria("camisas", "camisas");

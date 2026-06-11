@@ -1,8 +1,9 @@
 package com.donatrack.donaciones.domain.factory;
 
-import com.donatrack.donaciones.domain.model.Bien;
-import com.donatrack.donaciones.domain.model.Donacion;
 import java.util.List;
+
+import com.donatrack.donaciones.domain.model.donacion.Bien;
+import com.donatrack.donaciones.domain.model.donacion.Donacion;
 
 public class DonacionFactory {
 

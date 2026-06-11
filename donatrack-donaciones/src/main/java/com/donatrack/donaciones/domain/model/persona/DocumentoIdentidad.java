@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.persona;
 
 import com.donatrack.donaciones.domain.enums.TipoDocumento;
 import lombok.Getter;

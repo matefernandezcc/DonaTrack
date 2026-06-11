@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
+import com.donatrack.donaciones.domain.model.donacion.Bien;
+import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.persona.Direccion;
+
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,5 +1,6 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.persona;
 
+import com.donatrack.donaciones.domain.model.roles.Rol;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;

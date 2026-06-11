@@ -7,9 +7,13 @@ public abstract class Mision {
     private String nombre;
     private Insignia recompensa;
 
-    public Mision(String nombre, Insignia recompensa) {
+    protected Mision(String nombre, Insignia recompensa) {
         this.nombre = nombre;
         this.recompensa = recompensa;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getNombre() {

@@ -1,4 +1,6 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.roles;
+
+import com.donatrack.donaciones.domain.model.persona.PersonaJuridica;
 
 import lombok.Getter;
 import lombok.Setter;

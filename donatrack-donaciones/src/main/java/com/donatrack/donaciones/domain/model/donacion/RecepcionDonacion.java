@@ -1,7 +1,9 @@
-package com.donatrack.donaciones.domain.model;
+package com.donatrack.donaciones.domain.model.donacion;
 
 import com.donatrack.donaciones.domain.strategy.EstrategiaSegmentacion;
 import com.donatrack.donaciones.domain.factory.DonacionFactory;
+import com.donatrack.donaciones.domain.model.roles.Administrador;
+import com.donatrack.donaciones.domain.model.roles.Donante;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
