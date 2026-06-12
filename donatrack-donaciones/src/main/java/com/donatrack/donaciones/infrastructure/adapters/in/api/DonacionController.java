@@ -37,13 +37,13 @@ public class DonacionController {
         return ResponseEntity.ok(donacion);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[a-fA-F0-9\\-]{36}}")
     public ResponseEntity<Donacion> obtenerDonacion(@PathVariable UUID id) {
         // Lógica de obtención (mocked)
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}/estado/asignar")
+    @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado/asignar")
     public ResponseEntity<Void> asignarDonacion(@PathVariable UUID id, @RequestBody Beneficiario beneficiario) {
         // Mocking assignment logic
         
@@ -58,7 +58,7 @@ public class DonacionController {
         return ResponseEntity.ok().build();
     }
     
-    @PutMapping("/{id}/estado/entregada")
+    @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado/entregada")
     public ResponseEntity<Void> donacionEntregada(@PathVariable UUID id, @RequestParam UUID idDonante) {
         // Cuando se entrega y finaliza exitosamente
         // Informar al modulo de incentivos
@@ -66,7 +66,7 @@ public class DonacionController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}/matchmaking")
+    @GetMapping("/{id:[a-fA-F0-9\\-]{36}}/matchmaking")
     public ResponseEntity<List<Beneficiario>> sugerirBeneficiarios(@PathVariable UUID id) {
         // TODO: obtener donación y beneficiarios disponibles desde repositorios
         return ResponseEntity.ok(List.of());
