@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.infrastructure.controller;
+package com.donatrack.donaciones.infrastructure.adapters.in.api;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/beneficiarios")
+@RequestMapping("/donaciones/beneficiarios")
 public class BeneficiarioController {
 
     @PostMapping

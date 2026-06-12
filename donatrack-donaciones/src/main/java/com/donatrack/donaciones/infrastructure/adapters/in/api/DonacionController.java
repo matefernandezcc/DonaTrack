@@ -1,4 +1,5 @@
-package com.donatrack.donaciones.infrastructure.controller;
+package com.donatrack.donaciones.infrastructure.adapters.in.api;
+
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import com.donatrack.donaciones.domain.service.matchmaking.MatchmakerService;
@@ -12,10 +13,10 @@ import com.donatrack.donaciones.domain.model.Notificacion;
 import com.donatrack.donaciones.domain.model.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.model.persona.Contacto;
 import com.donatrack.donaciones.domain.enums.MedioContacto;
-import com.donatrack.donaciones.infrastructure.client.IncentivoClient;
+import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
 
 @RestController
-@RequestMapping("/api/donaciones")
+@RequestMapping("/donaciones")
 public class DonacionController {
 
     private final MatchmakerService matchmakerService;

@@ -13,7 +13,7 @@ import com.donatrack.incentivos.infrastructure.client.NotificacionClient;
 import com.donatrack.incentivos.infrastructure.client.NotificacionRequest;
 
 @RestController
-@RequestMapping("/api/incentivos")
+@RequestMapping("/incentivos")
 public class IncentivoController {
 
     private final NotificacionClient notificacionClient;

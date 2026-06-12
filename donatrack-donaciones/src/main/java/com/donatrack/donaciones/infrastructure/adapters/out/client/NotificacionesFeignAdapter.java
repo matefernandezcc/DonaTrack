@@ -1,10 +1,8 @@
-package com.donatrack.donaciones.infrastructure.adapter;
+package com.donatrack.donaciones.infrastructure.adapters.out.client;
 
 import com.donatrack.donaciones.domain.model.Notificacion;
 import com.donatrack.donaciones.domain.model.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.model.persona.Contacto;
-import com.donatrack.donaciones.infrastructure.client.NotificacionClient;
-import com.donatrack.donaciones.infrastructure.client.NotificacionRequest;
 import org.springframework.stereotype.Service;
 
 @Service
