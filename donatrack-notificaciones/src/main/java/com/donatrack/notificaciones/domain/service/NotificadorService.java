@@ -1,10 +1,16 @@
 package com.donatrack.notificaciones.domain.service;
 
 import com.donatrack.notificaciones.domain.model.Notificacion;
+import org.springframework.stereotype.Service;
 
+@Service
 public class NotificadorService {
 
     private EstrategiaNotificacion estrategiaNotificacion;
+
+    public NotificadorService() {
+        this.estrategiaNotificacion = new NotificacionEmail(); // Default
+    }
 
     public NotificadorService(EstrategiaNotificacion estrategiaInicial) {
         this.estrategiaNotificacion = estrategiaInicial;

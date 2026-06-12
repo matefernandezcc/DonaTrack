@@ -9,9 +9,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.donatrack.incentivos.infrastructure.client.NotificacionClient;
+import com.donatrack.incentivos.infrastructure.client.NotificacionRequest;
+
 @RestController
 @RequestMapping("/api/incentivos")
 public class IncentivoController {
+
+    private final NotificacionClient notificacionClient;
+    
+    public IncentivoController(NotificacionClient notificacionClient) {
+        this.notificacionClient = notificacionClient;
+    }
 
     @GetMapping("/donantes/{id}/metricas")
     public ResponseEntity<PerfilDonante> obtenerMetricas(@PathVariable UUID id) {
@@ -27,5 +36,21 @@ public class IncentivoController {
     @GetMapping("/donantes/{id}/insignias")
     public ResponseEntity<List<Insignia>> obtenerInsignias(@PathVariable UUID id) {
         return ResponseEntity.ok(List.of());
+    }
+
+    @PostMapping("/donantes/{id}/actividad")
+    public ResponseEntity<Void> registrarActividadDonacionExitosa(@PathVariable UUID id) {
+        // repo.findById(id).registrarDonacionExitosa();
+        // checkearMisiones();
+        
+        // Simular que el donante completó una misión
+        boolean completada = true;
+        if (completada) {
+            notificacionClient.enviarNotificacion(
+                new NotificacionRequest("donante" + id + "@test.com", "¡Felicidades! Has completado una misión.", "EMAIL")
+            );
+        }
+
+        return ResponseEntity.ok().build();
     }
 }

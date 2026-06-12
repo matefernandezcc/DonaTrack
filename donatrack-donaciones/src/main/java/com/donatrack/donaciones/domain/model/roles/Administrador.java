@@ -7,9 +7,9 @@ import com.donatrack.donaciones.domain.strategy.AsignacionStrategy;
 import com.donatrack.donaciones.domain.strategy.ImportadorStrategy;
 import com.donatrack.donaciones.domain.model.donacion.HistorialEstado;
 import com.donatrack.donaciones.domain.model.Deposito;
-import com.donatrack.logistica.domain.model.Camion;
 
 import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +17,7 @@ public class Administrador extends Rol {
   @Getter @Setter private Deposito depositoAsignado;
   @Getter @Setter private AsignacionStrategy estrategiaAsignacion;
   @Getter @Setter private ImportadorStrategy estrategiaImportador;
-  @Getter @Setter private List<Camion> camiones;
+  @Getter @Setter private List<UUID> camionesIds;
 
   public Administrador(Deposito depositoAsignado) {
     super();
