@@ -1,0 +1,26 @@
+info:
+  name: Agregar Necesidad
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/donaciones/beneficiarios/:id/necesidades"
+  body: json
+  auth: inherit
+  params:
+    - name: id
+      value: "123e4567-e89b-12d3-a456-426614174000"
+      type: path
+
+body:json: |-
+  {
+    "descripcion": "Leche en polvo",
+    "frecuenciaDias": 7
+  }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

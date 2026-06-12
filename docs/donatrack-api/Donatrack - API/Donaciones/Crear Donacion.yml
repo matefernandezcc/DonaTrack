@@ -1,0 +1,23 @@
+info:
+  name: Crear Donacion
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/donaciones"
+  body: json
+  auth: inherit
+
+body:json: |-
+  {
+    "descripcion": "Ropa de abrigo",
+    "cantidad": 5,
+    "estado": "PENDIENTE"
+  }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

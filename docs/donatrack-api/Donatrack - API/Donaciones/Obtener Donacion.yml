@@ -1,0 +1,19 @@
+info:
+  name: Obtener Donacion
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/donaciones/:id"
+  auth: inherit
+  params:
+    - name: id
+      value: "123e4567-e89b-12d3-a456-426614174000"
+      type: path
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

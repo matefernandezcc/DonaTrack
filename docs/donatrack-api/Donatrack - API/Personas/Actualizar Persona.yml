@@ -1,0 +1,26 @@
+info:
+  name: Actualizar Persona
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/donaciones/personas/:id"
+  body: json
+  auth: inherit
+  params:
+    - name: id
+      value: "123e4567-e89b-12d3-a456-426614174000"
+      type: path
+
+body:json: |-
+  {
+    "nombre": "Juan Pérez Modificado",
+    "tipo": "HUMANA"
+  }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

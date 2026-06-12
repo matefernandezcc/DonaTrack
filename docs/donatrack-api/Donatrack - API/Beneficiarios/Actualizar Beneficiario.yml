@@ -1,0 +1,25 @@
+info:
+  name: Actualizar Beneficiario
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/donaciones/beneficiarios/:id"
+  body: json
+  auth: inherit
+  params:
+    - name: id
+      value: "123e4567-e89b-12d3-a456-426614174000"
+      type: path
+
+body:json: |-
+  {
+    "nombre": "Entidad de Ayuda Mutua Modificada"
+  }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
