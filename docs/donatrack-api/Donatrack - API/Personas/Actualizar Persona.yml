@@ -6,18 +6,18 @@ info:
 http:
   method: PUT
   url: "{{baseUrl}}/donaciones/personas/:id"
-  body: json
-  auth: inherit
   params:
     - name: id
-      value: "123e4567-e89b-12d3-a456-426614174000"
+      value: 123e4567-e89b-12d3-a456-426614174000
       type: path
-
-body:json: |-
-  {
-    "nombre": "Juan Pérez Modificado",
-    "tipo": "HUMANA"
-  }
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Juan Pérez Modificado",
+        "tipo": "HUMANA"
+      }
+  auth: inherit
 
 settings:
   encodeUrl: true

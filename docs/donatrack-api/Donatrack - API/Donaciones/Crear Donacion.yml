@@ -6,15 +6,15 @@ info:
 http:
   method: POST
   url: "{{baseUrl}}/donaciones"
-  body: json
+  body:
+    type: json
+    data: |-
+      {
+        "descripcion": "Ropa de abrigo",
+        "cantidad": 5,
+        "estado": "PENDIENTE"
+      }
   auth: inherit
-
-body:json: |-
-  {
-    "descripcion": "Ropa de abrigo",
-    "cantidad": 5,
-    "estado": "PENDIENTE"
-  }
 
 settings:
   encodeUrl: true

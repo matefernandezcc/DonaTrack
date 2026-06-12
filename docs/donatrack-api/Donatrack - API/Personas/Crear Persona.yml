@@ -6,14 +6,14 @@ info:
 http:
   method: POST
   url: "{{baseUrl}}/donaciones/personas"
-  body: json
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Juan Pérez",
+        "tipo": "HUMANA"
+      }
   auth: inherit
-
-body:json: |-
-  {
-    "nombre": "Juan Pérez",
-    "tipo": "HUMANA"
-  }
 
 settings:
   encodeUrl: true

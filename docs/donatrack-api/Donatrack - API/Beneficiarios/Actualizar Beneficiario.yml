@@ -1,22 +1,22 @@
 info:
   name: Actualizar Beneficiario
   type: http
-  seq: 3
+  seq: 4
 
 http:
   method: PUT
   url: "{{baseUrl}}/donaciones/beneficiarios/:id"
-  body: json
-  auth: inherit
   params:
     - name: id
-      value: "123e4567-e89b-12d3-a456-426614174000"
+      value: 123e4567-e89b-12d3-a456-426614174000
       type: path
-
-body:json: |-
-  {
-    "nombre": "Entidad de Ayuda Mutua Modificada"
-  }
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Entidad de Ayuda Mutua Modificada"
+      }
+  auth: inherit
 
 settings:
   encodeUrl: true

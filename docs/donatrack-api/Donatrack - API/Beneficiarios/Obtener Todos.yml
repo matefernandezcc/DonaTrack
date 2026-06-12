@@ -1,17 +1,11 @@
 info:
-  name: Crear Beneficiario
+  name: Obtener Todos
   type: http
-  seq: 1
+  seq: 2
 
 http:
-  method: POST
+  method: GET
   url: "{{baseUrl}}/donaciones/beneficiarios"
-  body:
-    type: json
-    data: |-
-      {
-        "nombre": "Entidad de Ayuda Mutua"
-      }
   auth: inherit
 
 settings:

@@ -5,16 +5,15 @@ info:
 
 http:
   method: PUT
-  url: "{{baseUrl}}/donaciones/:id/estado/entregada"
-  body: none
-  auth: inherit
+  url: "{{baseUrl}}/donaciones/:id/estado/entregada?idDonante=987f6543-e89b-12d3-a456-426614174000"
   params:
-    - name: id
-      value: "123e4567-e89b-12d3-a456-426614174000"
-      type: path
     - name: idDonante
-      value: "987f6543-e89b-12d3-a456-426614174000"
+      value: 987f6543-e89b-12d3-a456-426614174000
       type: query
+    - name: id
+      value: 123e4567-e89b-12d3-a456-426614174000
+      type: path
+  auth: inherit
 
 settings:
   encodeUrl: true

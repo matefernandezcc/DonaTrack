@@ -6,17 +6,17 @@ info:
 http:
   method: PUT
   url: "{{baseUrl}}/donaciones/:id/estado/asignar"
-  body: json
-  auth: inherit
   params:
     - name: id
-      value: "123e4567-e89b-12d3-a456-426614174000"
+      value: 123e4567-e89b-12d3-a456-426614174000
       type: path
-
-body:json: |-
-  {
-    "nombre": "Entidad de Ayuda Mutua"
-  }
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Entidad de Ayuda Mutua"
+      }
+  auth: inherit
 
 settings:
   encodeUrl: true
