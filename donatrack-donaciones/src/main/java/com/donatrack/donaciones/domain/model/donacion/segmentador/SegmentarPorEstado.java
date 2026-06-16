@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model.donacion.segmentacionDonacion;
+package com.donatrack.donaciones.domain.model.donacion.segmentador;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.infrastructure.adapters.out.client;
 
-import com.donatrack.donaciones.domain.model.Notificacion;
-import com.donatrack.donaciones.domain.model.ServicioNotificaciones;
+import com.donatrack.donaciones.application.port.out.NotificacionOutDTO;
+import com.donatrack.donaciones.application.port.out.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.model.persona.Contacto;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ public class NotificacionesFeignAdapter implements ServicioNotificaciones {
     }
 
     @Override
-    public void enviar(Notificacion notificacion, Contacto contactoDestino) {
+    public void enviar(NotificacionOutDTO notificacion, Contacto contactoDestino) {
         String destinatario = "";
         String medio = contactoDestino.getMedioPredeterminado().name();
 

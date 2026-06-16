@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model.donacion.segmentacionDonacion;
+package com.donatrack.donaciones.domain.model.donacion.segmentador;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class SegmentarPorSubcategoria implements EstrategiaSegmentacion {
     // Se itera sobre las listas que entraron en la tuberia
     for (List<Bien> listaAIterar : listasDeBienes) {
 
-      // Robo la idea de Maxi: Agrupo bienes usando su subcategoria como clave
+      // Robo la idea de Maxi: Agrupo bienes usando su subcategoria como clave 
       // Te da un mapa temporal { "Ropa invierno" -> [campera, bufanda], "Muebles" -> [sillas] }
       Map<Categoria, List<Bien>> bienesEnLista =
           listaAIterar.stream().collect(Collectors.groupingBy(Bien::getSubcategoria));

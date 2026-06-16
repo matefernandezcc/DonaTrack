@@ -20,8 +20,7 @@ public class Bien {
       double cantidad,
       String unidadMedicion,
       boolean esUsado,
-      LocalDate fechaVencimiento,
-      String foto) {
+      LocalDate fechaVencimiento) {
     this.descripcion = descripcion;
     this.cantidad = cantidad;
     this.unidadMedicion = unidadMedicion;

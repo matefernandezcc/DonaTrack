@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-import com.donatrack.donaciones.domain.model.Notificacion;
-import com.donatrack.donaciones.domain.model.ServicioNotificaciones;
+import com.donatrack.donaciones.application.port.out.NotificacionOutDTO;
+import com.donatrack.donaciones.application.port.out.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.model.persona.Contacto;
 import com.donatrack.donaciones.domain.enums.MedioContacto;
 import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
@@ -60,11 +60,11 @@ public class DonacionController {
         
         // 1. Notificar a la entidad (beneficiario)
         Contacto contactoBeneficiario = new Contacto("entidad@test.com", null, null, MedioContacto.CORREO);
-        servicioNotificaciones.enviar(new Notificacion("Donación asignada", MedioContacto.CORREO), contactoBeneficiario);
+        servicioNotificaciones.enviar(new NotificacionOutDTO("Donación asignada", MedioContacto.CORREO), contactoBeneficiario);
         
         // 2. Notificar al donante
         Contacto contactoDonante = new Contacto("donante@test.com", null, null, MedioContacto.CORREO);
-        servicioNotificaciones.enviar(new Notificacion("Tu donación ha sido asignada a una entidad", MedioContacto.CORREO), contactoDonante);
+        servicioNotificaciones.enviar(new NotificacionOutDTO("Tu donación ha sido asignada a una entidad", MedioContacto.CORREO), contactoDonante);
 
         return ResponseEntity.ok().build();
     }

@@ -14,7 +14,7 @@ public abstract class Necesidad {
   @Getter private UUID id;
   @Getter private LocalDate fechaSolicitud;
 
-  public Necesidad(String descripcion, Categoria subcategoriaRequerida) {
+  protected Necesidad(String descripcion, Categoria subcategoriaRequerida) {
     this.descripcion = descripcion;
     this.subcategoriaRequerida = subcategoriaRequerida;
     this.estado = EstadoNecesidad.PENDIENTE;

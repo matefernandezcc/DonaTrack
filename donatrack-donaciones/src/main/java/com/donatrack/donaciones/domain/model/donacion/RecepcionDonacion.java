@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.model.donacion;
 
-import com.donatrack.donaciones.domain.model.donacion.segmentacionDonacion.EstrategiaSegmentacion;
+import com.donatrack.donaciones.domain.model.donacion.segmentador.EstrategiaSegmentacion;
 import com.donatrack.donaciones.domain.model.roles.Administrador;
 import com.donatrack.donaciones.domain.model.roles.Donante;
 import java.time.LocalDate;

@@ -1,11 +1,11 @@
 package com.donatrack.donaciones.application.service;
 
-import com.donatrack.donaciones.domain.model.Notificacion;
-import com.donatrack.donaciones.domain.model.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.model.persona.Persona;
 import com.donatrack.donaciones.domain.model.roles.Donante;
 import com.donatrack.donaciones.domain.model.roles.Rol;
 import com.donatrack.donaciones.domain.model.persona.Contacto;
+import com.donatrack.donaciones.application.port.out.NotificacionOutDTO;
+import com.donatrack.donaciones.application.port.out.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.enums.MedioContacto;
 import com.donatrack.donaciones.domain.repository.PersonaRepository;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
@@ -41,7 +41,7 @@ public class NotificacionInactividadJob {
                     if (estaInactivo(donante, hoy)) {
                         Contacto contacto = persona.getContacto();
                         if (contacto != null) {
-                            Notificacion notificacion = new Notificacion(
+                            NotificacionOutDTO notificacion = new NotificacionOutDTO(
                                 "¡Te extrañamos en DonaTrack! Anímate a realizar una nueva donación para seguir ayudando.",
                                 contacto.getMedioPredeterminado() != null ? contacto.getMedioPredeterminado() : MedioContacto.CORREO
                             );
