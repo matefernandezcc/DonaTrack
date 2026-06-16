@@ -4,6 +4,9 @@ import com.donatrack.notificaciones.domain.model.Notificacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.stereotype.Component;
+
+@Component("SMS")
 public class NotificacionSMS implements EstrategiaNotificacion {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificacionSMS.class);

@@ -82,12 +82,17 @@ public class IncentivoController {
         PerfilDonante perfil = new PerfilDonante(id);
         
         int insigniasAntes = perfil.getInsigniasObtenidas().size();
-        perfil.registrarDonacionExitosa(actividad);
-        int insigniasDespues = perfil.getInsigniasObtenidas().size();
+        com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteEnum categoriaAntes = perfil.getCategoria().getValorEnum();
         
-        boolean completada = insigniasDespues > insigniasAntes;
+        perfil.registrarDonacionExitosa(actividad);
+        
+        int insigniasDespues = perfil.getInsigniasObtenidas().size();
+        com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteEnum categoriaDespues = perfil.getCategoria().getValorEnum();
+        
+        boolean misionCompletada = insigniasDespues > insigniasAntes;
+        boolean categoriaCambiada = categoriaAntes != categoriaDespues;
 
-        if (completada) {
+        if (misionCompletada) {
             notificacionClient.enviarNotificacion(
                 new NotificacionRequest("donante" + id + "@test.com", "¡Felicidades! Has completado una misión.", "EMAIL")
             );
@@ -95,6 +100,12 @@ public class IncentivoController {
             // Publicar el último evento de insignia (la nueva que ganó)
             Insignia ultimaInsignia = perfil.getInsigniasObtenidas().get(insigniasDespues - 1);
             eventPublisher.publishEvent(new InsigniaObtenidaEvent(perfil.getDonanteId(), ultimaInsignia));
+        }
+
+        if (categoriaCambiada) {
+            notificacionClient.enviarNotificacion(
+                new NotificacionRequest("donante" + id + "@test.com", "¡Increíble! Has subido de categoría a " + categoriaDespues.name(), "EMAIL")
+            );
         }
 
         return ResponseEntity.ok().build();

@@ -4,6 +4,9 @@ import com.donatrack.notificaciones.domain.model.Notificacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.stereotype.Component;
+
+@Component("EMAIL")
 public class NotificacionEmail implements EstrategiaNotificacion {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificacionEmail.class);
