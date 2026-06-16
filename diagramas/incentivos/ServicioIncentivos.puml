@@ -11,11 +11,12 @@ package "Servicio de Incentivos" {
 
     class GestorIncentivos {
         - PerfilesIncentivos: List<PerfilIncentivos>
+        + procesarNuevaDonacion(idDonante: UUID, d: DonacionDTO)
         + ejecutarRankingMensual()
     }
 
     class PerfilIncentivos {
-        - Donante: Donante
+        - perfilDonante: DonanteDto
         - categoriaActual: CategoriaDonante
         - InsigniasObtenidas: List<Insignia>
         + evaluarMisiones(d: DonacionDTO)
@@ -32,7 +33,7 @@ package "Servicio de Incentivos" {
         + generarGraficoEvolucionMensual()
     }
 
-    abstract class MisionesPorNivel{
+    abstract class MisionesPorCategoria{
         - Misiones: List<Mision>
         - MisionActual: Mision
         - PerfilAsociado: PerfilIncentivos
@@ -41,21 +42,20 @@ package "Servicio de Incentivos" {
         + Clonar()
     }
     
-    note top of MisionesPorNivel
-    **Regla de negocio:**
+    note top of MisionesPorCategoria
     Cada clase concreta de MisionesPorNivel
     Tiene sus Misiones especificas concretas
     end note
 
-    class MisionesPorNivelSostenedor extends MisionesPorNivel{
+    class MisionesSostenedor extends MisionesPorCategoria{
         + Clonar()
     }
 
-    class MisionesPorNivelTransformador extends MisionesPorNivel{
+    class MisionesTransformador extends MisionesPorCategoria{
         + Clonar()
     }
 
-    class MisionesPorNivelColaborador extends MisionesPorNivel{
+    class MisionesColaborador extends MisionesPorCategoria{
         + Clonar()
     }
 
@@ -70,7 +70,6 @@ package "Servicio de Incentivos" {
     }
 
     class MisionRacha extends Mision {
-        - RachaActual: int
         + ConsultarProgeso(): int
         + PerderProgreso()
     }
@@ -124,9 +123,9 @@ package "Servicio de Incentivos" {
     GestorIncentivos --> RankingMensual : genera >
     GestorIncentivos --> PerfilIncentivos : administra >
 
-    MisionesPorNivel *-- Mision : contine >
-    MisionesPorNivel --> CategoriaDonante : Objetivo >
-    MisionesPorNivel <-- PerfilIncentivos : Debe completar <
+    MisionesPorCategoria *-- Mision : contine >
+    MisionesPorCategoria --> CategoriaDonante : Objetivo >
+    MisionesPorCategoria <-- PerfilIncentivos : Debe completar <
 
     Mision ..> insigniaFabric : usa >
 
