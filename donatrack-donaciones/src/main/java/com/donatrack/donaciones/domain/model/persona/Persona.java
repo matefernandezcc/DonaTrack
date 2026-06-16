@@ -10,7 +10,18 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "tipo"
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = PersonaHumana.class, name = "HUMANA"),
+    @JsonSubTypes.Type(value = PersonaJuridica.class, name = "JURIDICA")
+})
 public abstract class Persona {
   @Getter @Setter private UUID id;
   @Getter @Setter private String email;

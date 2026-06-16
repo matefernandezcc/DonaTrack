@@ -26,17 +26,20 @@ public class DonacionController {
     private final IncentivoClient incentivoClient;
     private final DonacionRepository donacionRepository;
     private final BeneficiarioRepository beneficiarioRepository;
+    private final com.donatrack.donaciones.application.service.AsignacionBatchJob asignacionBatchJob;
     
     public DonacionController(MatchmakerService matchmakerService, 
                               ServicioNotificaciones servicioNotificaciones,
                               IncentivoClient incentivoClient,
                               DonacionRepository donacionRepository,
-                              BeneficiarioRepository beneficiarioRepository) {
+                              BeneficiarioRepository beneficiarioRepository,
+                              com.donatrack.donaciones.application.service.AsignacionBatchJob asignacionBatchJob) {
         this.matchmakerService = matchmakerService;
         this.servicioNotificaciones = servicioNotificaciones;
         this.incentivoClient = incentivoClient;
         this.donacionRepository = donacionRepository;
         this.beneficiarioRepository = beneficiarioRepository;
+        this.asignacionBatchJob = asignacionBatchJob;
     }
 
     @PostMapping
@@ -97,4 +100,36 @@ public class DonacionController {
         
         return ResponseEntity.ok(sugerencias);
     }
+
+    @PutMapping("/{id:[a-fA-F0-9\\-]{36}}")
+    public ResponseEntity<Donacion> actualizarDonacion(@PathVariable UUID id, @RequestBody Donacion donacion) {
+        // Lógica de actualización (mocked)
+        donacion.setId(id);
+        return ResponseEntity.ok(donacion);
+    }
+
+    @DeleteMapping("/{id:[a-fA-F0-9\\-]{36}}")
+    public ResponseEntity<Void> eliminarDonacion(@PathVariable UUID id) {
+        // Lógica de eliminación (mocked)
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado")
+    public ResponseEntity<Void> cambiarEstado(@PathVariable UUID id, @RequestBody CambioEstadoRequest request) {
+        // Trazabilidad y auditoría
+        // Lógica mockeada
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/asignacion-batch")
+    public ResponseEntity<Void> ejecutarAsignacionBatch() {
+        asignacionBatchJob.asignarDonacionesEnDeposito();
+        return ResponseEntity.ok().build();
+    }
+}
+
+class CambioEstadoRequest {
+    public com.donatrack.donaciones.domain.enums.EstadoDonacionEnum nuevoEstado;
+    public String observacion;
+    public UUID idUsuario;
 }

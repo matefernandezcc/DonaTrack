@@ -80,4 +80,28 @@ public class BeneficiarioController {
                 .map(b -> ResponseEntity.ok(b.getNecesidadesDeclaradas()))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{id}/necesidades/{idNecesidad}")
+    public ResponseEntity<Void> actualizarNecesidad(@PathVariable UUID id, @PathVariable UUID idNecesidad, @RequestBody Necesidad necesidadActualizada) {
+        return beneficiarios.stream()
+                .filter(b -> id.equals(b.getId()))
+                .findFirst()
+                .map(b -> {
+                    // Logic to update the necessity inside the beneficiario's list
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}/necesidades/{idNecesidad}")
+    public ResponseEntity<Void> eliminarNecesidad(@PathVariable UUID id, @PathVariable UUID idNecesidad) {
+        return beneficiarios.stream()
+                .filter(b -> id.equals(b.getId()))
+                .findFirst()
+                .map(b -> {
+                    // Logic to remove the necessity from the beneficiario's list
+                    return ResponseEntity.noContent().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
