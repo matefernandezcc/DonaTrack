@@ -14,13 +14,6 @@ package "servicio de donaciones"{
             PASAPORTE
         }
 
-        class DocumentoIdentidad {
-            - tipo: TipoDocumento
-            - numero: String
-        }
-
-        DocumentoIdentidad --> TipoDocumento
-
         enum TipoPersonaJuridica {
             GUBERNAMENTAL
             ONG
@@ -34,51 +27,34 @@ package "servicio de donaciones"{
             WHATSAPP
         }
 
-        abstract class Persona {
-            - id: UUID
-            - email: String
-            - contacto: Contacto
-            - direccion: Direccion
-            - documento: DocumentoIdentidad
-            - roles: List<Rol>
-            + agregarRol(Rol r)
-            + validarRol(Rol r)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + setDocumento(DocumentoIdentidad documento)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
-        }
+        package validadorDatosPersona{
+            class DocumentoIdentidad {
+                - tipo: TipoDocumento
+                - numero: String
+            }
 
-        class Contacto {
-            - correoElectronico: String
-            - telefono: String
-            - whatsapp: String
-            - medioPredeterminado: MedioContacto
-        }
+            abstract class Persona {
+                - id: UUID
+                - email: String
+                - contacto: Contacto
+                - direccion: Direccion
+                - documento: DocumentoIdentidad
+                - roles: List<Rol>
+                + agregarRol(Rol r)
+                + validarRol(Rol r)
+                + validarDocumentacion(DocumentoIdentidad d)
+                + setDocumento(DocumentoIdentidad documento)
+                + actualizarInformacion(Map<String, Object> datosNuevos)
+            }
 
-        class Direccion {
-            - calle: String
-            - altura: Decimal
-            - localidad: String
-            - pais: Pais
-            - codigoPostal: String
-            - coordenadas: Coordenada
-        }
+            class Contacto {
+                - correoElectronico: String
+                - telefono: String
+                - whatsapp: String
+                - medioPredeterminado: MedioContacto
+            }
 
-        class Coordenada {
-            - latitud: Decimal
-            - longitud: Decimal
-        }
-
-        class Provincia{
-            - nombreProvincia: String
-            - Pais: Pais
-        }
-
-        class Pais {
-            - nombrePais: String
-            - nacionalidad: String
-        }
-
+            
         class PersonaHumana extends Persona {
             - nombre: String
             - apellido: String
@@ -115,14 +91,44 @@ package "servicio de donaciones"{
         end note
 
         'relaciones
-        Direccion --> Provincia : "es de un"
-        Provincia --> Pais : "forma parte de"
-        Direccion --> Coordenada : "se encuentra"
-        Persona --> Direccion : "tiene"
         Persona "1" *-- "1" Contacto : "tiene"
         Contacto --> MedioContacto : "define"
         Persona --> DocumentoIdentidad : "tiene"
         PersonaJuridica --> TipoPersonaJuridica : "se clasifica en"
+        DocumentoIdentidad --> TipoDocumento
+        }
+
+        package Ubicacion{
+            class Direccion {
+            - calle: String
+            - altura: Decimal
+            - localidad: String
+            - pais: Pais
+            - codigoPostal: String
+            - coordenadas: Coordenada
+            }
+
+            class Coordenada {
+                - latitud: Decimal
+                - longitud: Decimal
+            }
+
+            class Provincia{
+                - nombreProvincia: String
+                - Pais: Pais
+            }
+
+            class Pais {
+                - nombrePais: String
+                - nacionalidad: String
+            }
+
+            Direccion --> Provincia : "es de un"
+            Provincia --> Pais : "forma parte de"
+            Direccion --> Coordenada : "se encuentra"
+        }
+
+        Persona --> Direccion : "tiene"
     }
 
     package "Gestion de Roles" {
@@ -173,24 +179,28 @@ package "servicio de donaciones"{
             - fechaEnvio: Date
         }
 
-        interface AsignacionStrategy {
-            + recomendarNecesidades(donaciones, necesidades)
+        package StrategyAdministrador{
+
+            package asignador{
+                interface AlgoritmoAsignacion {
+                    + recomendarNecesidades(donaciones, necesidades)
+                }
+                
+                class PrioridadASubAtendidos implements AlgoritmoAsignacion
+                class CompatibilidadSemantica implements AlgoritmoAsignacion
+            }
+
+            package importador{
+                interface ImportadorStrategy {
+                    + importar(Archivo)
+                }
+
+                class ImportadorCSV implements ImportadorStrategy
+            }     
         }
-
-        class PorPrioridad
-        class PorCercania
-
-        interface ImportadorStrategy {
-            + importar(Archivo)
-        }
-
-        class ImportadorCSV
 
         Administrador --> ImportadorStrategy
-        Administrador --> AsignacionStrategy
-        PorPrioridad ..up|> AsignacionStrategy
-        PorCercania ..up|> AsignacionStrategy
-        ImportadorCSV ..up|> ImportadorStrategy
+        Administrador --> AlgoritmoAsignacion
         Administrador --> CorreoRegistro : "genera"
     }
 
@@ -249,8 +259,6 @@ package "servicio de donaciones"{
         class SegmentarPorVencimiento implements EstrategiaSegmentacion{
             + segmentar(List<List<Bien>> listasDeBienes)
         }
-
-
     }
 
     package Estado{
@@ -262,7 +270,7 @@ package "servicio de donaciones"{
             VENCIDA
         }
 
-        abstract class EstadoDonacion{
+        abstract class EstadoDonacionState{
             + asignar(Beneficiario beneficiario)
             + planificarRuta()
             + iniciarTraslado()
@@ -272,38 +280,38 @@ package "servicio de donaciones"{
             + recibirEnDeposito()
         }
 
-        class Asignada implements EstadoDonacion{
+        class Asignada implements EstadoDonacionState{
             + planificarRuta()
             + EstadoDonacionEnum getValorEnum()
         }
 
-        class Endeposito implements EstadoDonacion{
+        class Endeposito implements EstadoDonacionState{
             + asignar(Beneficiario beneficiario)
             + marcarVencida()
             + getValorEnum()
         }
 
-        class EnTraslado implements EstadoDonacion{
+        class EnTraslado implements EstadoDonacionState{
             + entregar()
             + fallarEntrega(String justificacion)
             + getValorEnum()
         }
 
-        class EntregaFallida implements EstadoDonacion{
+        class EntregaFallida implements EstadoDonacionState{
             + recibirEnDeposito()
             + getValorEnum()
         }
 
-        class Entregada implements EstadoDonacion{
+        class Entregada implements EstadoDonacionState{
             + getValorEnum()
         }
 
-        class ListaParaEntregar implements EstadoDonacion{
+        class ListaParaEntregar implements EstadoDonacionState{
             + iniciarTraslado()
             + getValorEnum()
         }
 
-        class Vencida implements EstadoDonacion{
+        class Vencida implements EstadoDonacionState{
             + getValorEnum()
         }
 
@@ -345,7 +353,7 @@ package "servicio de donaciones"{
         Donacion *-- HistorialEstado
         Donacion "1" *-- "1..*" Bien : "agrupa"
         Donacion --> EstadoDonacionEnum : "se encuentra en"
-        Donacion --> EstadoDonacion : "se encuentra en"
+        Donacion --> EstadoDonacionState : "se encuentra en"
 
         RecepcionDonacion --> Donante
 
