@@ -1,10 +1,8 @@
 package com.donatrack.donaciones.domain.model.donacion;
 
-import com.donatrack.donaciones.domain.model.donacion.segmentador.EstrategiaSegmentacion;
 import com.donatrack.donaciones.domain.model.roles.Administrador;
 import com.donatrack.donaciones.domain.model.roles.Donante;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -17,36 +15,17 @@ public class RecepcionDonacion {
   @Getter @Setter private Administrador registradoPor;
   @Getter private List<Donacion> donacionesResultantes;
   @Getter private List<Bien> bienesBrutos;
-  private List<EstrategiaSegmentacion> estrategiasSegmentacion;
-  private DonacionFactory donacionFactory = new DonacionFactory();
 
-  public RecepcionDonacion(Donante donante, Administrador registradoPor, List<EstrategiaSegmentacion> estrategiasSegmentacion) {
+  public RecepcionDonacion(
+      Donante donante, 
+      Administrador registradoPor, 
+      List<Bien> bienesBrutos, 
+      List<Donacion> donacionesResultantes) {
     this.id = UUID.randomUUID();
     this.fechaRecepcion = LocalDate.now();
     this.donante = donante;
     this.registradoPor = registradoPor;
-    this.donacionesResultantes = new ArrayList<>();
-    this.estrategiasSegmentacion = estrategiasSegmentacion;
-  }
-
-  public List<Donacion> procesar(List<Bien> bienesBrutos) {
-    // 1. Lista inicial
-    List<List<Bien>> listasDeBienes = new ArrayList<>();
-    listasDeBienes.add(bienesBrutos);
-
-    // 2. Se ejecuta el pipeline
-    for (EstrategiaSegmentacion estrategia : estrategiasSegmentacion) {
-      listasDeBienes = estrategia.segmentar(listasDeBienes);
-    }
-
-    // 3. Cada lista de bienes se convierte en una Donacion
-    for (List<Bien> listaFinal : listasDeBienes) {
-      Donacion nuevaDonacion = donacionFactory.crearDesdeBienes(listaFinal);
-      if (nuevaDonacion != null) {
-        donacionesResultantes.add(nuevaDonacion);
-      }
-    }
-
-    return donacionesResultantes;
+    this.bienesBrutos = bienesBrutos;
+    this.donacionesResultantes = donacionesResultantes;
   }
 }
