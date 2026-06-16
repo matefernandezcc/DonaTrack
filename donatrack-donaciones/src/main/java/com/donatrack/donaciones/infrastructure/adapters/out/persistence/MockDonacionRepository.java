@@ -21,6 +21,13 @@ public class MockDonacionRepository implements DonacionRepository {
     }
 
     @Override
+    public java.util.Optional<Donacion> buscarPorId(java.util.UUID id) {
+        return baseDeDatosMock.stream()
+                .filter(d -> d.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
     public void guardar(Donacion donacion) {
         baseDeDatosMock.removeIf(d -> d.getId().equals(donacion.getId()));
         baseDeDatosMock.add(donacion);

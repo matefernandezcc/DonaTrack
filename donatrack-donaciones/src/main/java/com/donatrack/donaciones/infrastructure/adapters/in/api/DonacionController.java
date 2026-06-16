@@ -116,9 +116,24 @@ public class DonacionController {
 
     @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado")
     public ResponseEntity<Void> cambiarEstado(@PathVariable UUID id, @RequestBody CambioEstadoRequest request) {
-        // Trazabilidad y auditoría
-        // Lógica mockeada
-        return ResponseEntity.ok().build();
+        return donacionRepository.buscarPorId(id).map(donacion -> {
+            switch (request.nuevoEstado) {
+                case LISTA_PARA_ENTREGAR -> donacion.planificarRuta();
+                case EN_TRASLADO -> donacion.iniciarTraslado();
+                case ENTREGADA -> donacion.entregar();
+                case ENTREGA_FALLIDA -> donacion.fallarEntrega(request.observacion);
+                case VENCIDA -> donacion.marcarVencida();
+                case EN_DEPOSITO -> donacion.recibirEnDeposito();
+                default -> throw new IllegalArgumentException("Estado no soportado vía endpoint genérico");
+            }
+            
+            // La trazabilidad se agrega asumiendo que Admin no está aquí o se extrae del token, pero mockeamos null o agregamos manualmente
+            // Los métodos delegan al state y cambian el estado real. El estado hace donacion.cambiarEstado(...) el cual registra.
+            // Para ENTREGA_FALLIDA por ejemplo, fallarEntrega recibe justificación.
+            
+            donacionRepository.guardar(donacion);
+            return ResponseEntity.ok().<Void>build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/asignacion-batch")

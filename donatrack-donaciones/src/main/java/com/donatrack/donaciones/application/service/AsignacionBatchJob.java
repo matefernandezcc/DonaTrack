@@ -31,6 +31,7 @@ public class AsignacionBatchJob {
      * Busca las donaciones En Depósito y usa el Matchmaker para asignar automáticamente
      * el mejor candidato posible.
      */
+    @org.springframework.scheduling.annotation.Async
     @Scheduled(cron = "0 0 2 * * ?")
     public void asignarDonacionesEnDeposito() {
         List<Donacion> donacionesPendientes = donacionRepository.buscarPorEstado(EstadoDonacionEnum.EN_DEPOSITO);
