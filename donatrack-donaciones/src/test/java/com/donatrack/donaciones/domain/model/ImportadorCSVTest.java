@@ -2,8 +2,8 @@ package com.donatrack.donaciones.domain.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.donatrack.donaciones.domain.enums.MedioContacto;
-import com.donatrack.donaciones.domain.enums.TipoDocumento;
+import com.donatrack.donaciones.domain.model.enums.MedioContacto;
+import com.donatrack.donaciones.domain.model.enums.TipoDocumento;
 import com.donatrack.donaciones.domain.model.persona.Contacto;
 import com.donatrack.donaciones.domain.model.persona.DocumentoIdentidad;
 import com.donatrack.donaciones.domain.model.persona.Persona;

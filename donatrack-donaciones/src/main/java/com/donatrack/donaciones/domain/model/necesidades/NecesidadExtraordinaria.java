@@ -1,9 +1,10 @@
 package com.donatrack.donaciones.domain.model.necesidades;
 
-import com.donatrack.donaciones.domain.enums.EstadoNecesidad;
 import com.donatrack.donaciones.domain.model.donacion.Bien;
 import com.donatrack.donaciones.domain.model.donacion.Categoria;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.enums.EstadoNecesidad;
+
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;

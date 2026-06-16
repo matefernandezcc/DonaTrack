@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.model.persona.validadorDatosPersona;
 
-import com.donatrack.donaciones.domain.enums.TipoDocumento;
+import com.donatrack.donaciones.domain.model.enums.TipoDocumento;
 import com.donatrack.donaciones.domain.model.persona.Persona;
 import com.donatrack.donaciones.domain.model.persona.PersonaHumana;
 import com.donatrack.donaciones.domain.model.persona.PersonaJuridica;

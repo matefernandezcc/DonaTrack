@@ -1,8 +1,10 @@
 package com.donatrack.donaciones.application.port.out;
 
-import com.donatrack.donaciones.domain.enums.MedioContacto;
 import java.time.LocalDate;
 import java.util.UUID;
+
+import com.donatrack.donaciones.domain.model.enums.MedioContacto;
+
 import lombok.Getter;
 import lombok.Setter;
 

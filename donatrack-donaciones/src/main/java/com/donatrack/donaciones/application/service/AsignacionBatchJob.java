@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.application.service;
 
-import com.donatrack.donaciones.domain.enums.EstadoDonacionEnum;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.enums.EstadoDonacionEnum;
 import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
 import com.donatrack.donaciones.domain.repository.DonacionRepository;

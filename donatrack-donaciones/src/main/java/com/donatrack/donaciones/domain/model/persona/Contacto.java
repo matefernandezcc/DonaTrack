@@ -1,6 +1,7 @@
 package com.donatrack.donaciones.domain.model.persona;
 
-import com.donatrack.donaciones.domain.enums.MedioContacto;
+import com.donatrack.donaciones.domain.model.enums.MedioContacto;
+
 import lombok.Getter;
 import lombok.Setter;
 

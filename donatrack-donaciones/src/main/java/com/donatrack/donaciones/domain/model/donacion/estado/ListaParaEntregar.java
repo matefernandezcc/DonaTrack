@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.domain.model.donacion.estado;
 
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.enums.EstadoDonacionEnum;
+import com.donatrack.donaciones.domain.model.enums.EstadoDonacionEnum;
 
 public class ListaParaEntregar extends EstadoDonacion {
 

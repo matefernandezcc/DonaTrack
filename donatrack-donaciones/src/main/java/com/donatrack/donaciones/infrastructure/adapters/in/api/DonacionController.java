@@ -1,6 +1,7 @@
 package com.donatrack.donaciones.infrastructure.adapters.in.api;
 
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.enums.MedioContacto;
 import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import com.donatrack.donaciones.domain.service.matchmaking.MatchmakerService;
 import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
@@ -14,7 +15,6 @@ import java.util.UUID;
 import com.donatrack.donaciones.application.port.out.NotificacionOutDTO;
 import com.donatrack.donaciones.application.port.out.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.model.persona.Contacto;
-import com.donatrack.donaciones.domain.enums.MedioContacto;
 import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
 
 @RestController
@@ -144,7 +144,7 @@ public class DonacionController {
 }
 
 class CambioEstadoRequest {
-    public com.donatrack.donaciones.domain.enums.EstadoDonacionEnum nuevoEstado;
+    public com.donatrack.donaciones.domain.model.enums.EstadoDonacionEnum nuevoEstado;
     public String observacion;
     public UUID idUsuario;
 }

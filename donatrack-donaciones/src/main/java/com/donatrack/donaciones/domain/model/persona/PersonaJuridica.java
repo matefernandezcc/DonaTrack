@@ -1,8 +1,8 @@
 package com.donatrack.donaciones.domain.model.persona;
 
-import com.donatrack.donaciones.domain.enums.TipoJuridica;
 import com.donatrack.donaciones.domain.model.roles.Rol;
 import com.donatrack.donaciones.domain.model.roles.Representante;
+import com.donatrack.donaciones.domain.model.enums.TipoJuridica;
 import com.donatrack.donaciones.domain.model.persona.ubicacion.Direccion;
 import java.util.ArrayList;
 import java.util.List;

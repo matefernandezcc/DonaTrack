@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.model.donacion.estado;
 
-import com.donatrack.donaciones.domain.enums.EstadoDonacionEnum;
+import com.donatrack.donaciones.domain.model.enums.EstadoDonacionEnum;
 import com.donatrack.donaciones.domain.model.roles.Administrador;
 import java.time.LocalDate;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.enums;
+package com.donatrack.donaciones.domain.model.enums;
 
 public enum TipoJuridica {
   GUBERNAMENTAL,
