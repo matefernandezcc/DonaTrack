@@ -9,7 +9,7 @@ import com.donatrack.donaciones.domain.model.persona.DocumentoIdentidad;
 import com.donatrack.donaciones.domain.model.persona.Persona;
 import com.donatrack.donaciones.domain.model.persona.PersonaHumana;
 import com.donatrack.donaciones.domain.model.persona.ubicacion.*;
-import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.ImportadorCSV;
+import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.importador.ImportadorCSV;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;

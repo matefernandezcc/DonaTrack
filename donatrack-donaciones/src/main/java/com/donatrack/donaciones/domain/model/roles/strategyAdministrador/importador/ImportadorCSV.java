@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model.roles.strategyAdministrador;
+package com.donatrack.donaciones.domain.model.roles.strategyAdministrador.importador;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
