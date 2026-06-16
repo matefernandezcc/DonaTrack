@@ -1,8 +1,8 @@
 package com.donatrack.incentivos.infrastructure.controller;
 
 import com.donatrack.incentivos.domain.model.Insignia;
-import com.donatrack.incentivos.domain.model.Mision;
 import com.donatrack.incentivos.domain.model.PerfilDonante;
+import com.donatrack.incentivos.domain.model.misiones.Mision;
 import com.donatrack.common.dto.ActividadDonacionDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

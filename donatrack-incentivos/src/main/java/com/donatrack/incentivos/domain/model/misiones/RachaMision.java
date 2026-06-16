@@ -1,4 +1,7 @@
-package com.donatrack.incentivos.domain.model;
+package com.donatrack.incentivos.domain.model.misiones;
+
+import com.donatrack.incentivos.domain.model.Insignia;
+import com.donatrack.incentivos.domain.model.PerfilDonante;
 
 public class RachaMision extends Mision {
 

@@ -1,6 +1,7 @@
-package com.donatrack.incentivos.domain.model;
-
+package com.donatrack.incentivos.domain.model.misiones;
 import java.util.UUID;
+import com.donatrack.incentivos.domain.model.Insignia;
+import com.donatrack.incentivos.domain.model.PerfilDonante;
 
 public abstract class Mision {
     private UUID id = UUID.randomUUID();
