@@ -201,7 +201,6 @@ package "servicio de donaciones"{
             - donante: Donante
             - donacionesSegmentadas: List<Donacion>
             - registradoPor: Administrador
-            + segmentarBienes(bienesBrutos)
         }
 
         class SegmentadorDeBienes {
@@ -233,6 +232,26 @@ package "servicio de donaciones"{
             - bienes: List<Bien>
             - categoria: Categoria
         }
+
+    package Segmentacion{
+        interface EstrategiaSegmentacion{
+            +segmentar(List<List<Bien>> bienes)
+        } 
+
+        class segmentarPorEstado implements EstrategiaSegmentacion{
+            +segmentar(List<List<Bien>> listasDeBienes)
+        }
+        
+        class SegmentarPorSubcategoria implements EstrategiaSegmentacion{
+            + segmentar(List<List<Bien>> listasDeBienes)
+        }
+
+        class SegmentarPorVencimiento implements EstrategiaSegmentacion{
+            + segmentar(List<List<Bien>> listasDeBienes)
+        }
+
+
+    }
 
     package Estado{
         enum EstadoDonacionEnum {
@@ -331,6 +350,7 @@ package "servicio de donaciones"{
         RecepcionDonacion --> Donante
 
         SegmentadorDeBienes *-- Donacion : segmenta >
+        SegmentadorDeBienes -- EstrategiaSegmentacion : usa >
     }
 
     package "Gestion de Necesidades" {
@@ -640,15 +660,15 @@ PerfilIncentivos --> ActividadDonacionDto
 class IncentivosController{}
 
     'conexion con Donaciones evento de asignación
-    Administrador --> IncentivosControler
+    Administrador --> IncentivosController
     'conexion con Donaciones evento inactividad
 
     'conexion con Donaciones CorreoRegistro
-    CorreoRegistro --> IncentivosControler : "despacha vía"
+    CorreoRegistro --> IncentivosController : "despacha vía"
 
     'conexion con Incentivos evento MisionCumplida
-    Mision --> IncentivosControler
-    IncentivosControler --> GestorNotificaciones
+    Mision --> IncentivosController
+    IncentivosController --> GestorNotificaciones
 
 'conexion exterior
 ConeccionIngresoInicial --> SegmentadorDeBienes
