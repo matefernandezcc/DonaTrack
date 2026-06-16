@@ -5,14 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.donatrack.donaciones.domain.enums.MedioContacto;
 import com.donatrack.donaciones.domain.enums.TipoDocumento;
 import com.donatrack.donaciones.domain.model.persona.Contacto;
-import com.donatrack.donaciones.domain.model.persona.Coordenada;
-import com.donatrack.donaciones.domain.model.persona.Direccion;
 import com.donatrack.donaciones.domain.model.persona.DocumentoIdentidad;
-import com.donatrack.donaciones.domain.model.persona.Pais;
 import com.donatrack.donaciones.domain.model.persona.Persona;
 import com.donatrack.donaciones.domain.model.persona.PersonaHumana;
-import com.donatrack.donaciones.domain.model.persona.Provincia;
-import com.donatrack.donaciones.domain.strategy.ImportadorCSV;
+import com.donatrack.donaciones.domain.model.persona.ubicacion.*;
+import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.ImportadorCSV;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -26,7 +23,7 @@ public class ImportadorCSVTest {
   Coordenada coordenadaPrueba = new Coordenada(-34.6037, -58.3816);
   Direccion direccionPrueba =
       new Direccion(
-          "calleFalsa", 123, "Springfield", provinciaPrueba, Argentina, "1234", coordenadaPrueba);
+          "calleFalsa", 123, "Springfield", provinciaPrueba, "1234", coordenadaPrueba);
   DocumentoIdentidad documentoPrueba = new DocumentoIdentidad(TipoDocumento.DNI, "43637832");
 
   PersonaHumana personaPrueba =

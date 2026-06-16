@@ -1,6 +1,7 @@
 package com.donatrack.donaciones.domain.model.persona;
 
-import com.donatrack.donaciones.domain.validation.PersonaValidator;
+import com.donatrack.donaciones.domain.model.persona.validadorDatosPersona.PersonaValidator;
+import com.donatrack.donaciones.domain.model.persona.ubicacion.Direccion;
 import com.donatrack.donaciones.domain.model.roles.Rol;
 import java.util.ArrayList;
 import java.util.List;

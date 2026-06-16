@@ -1,11 +1,10 @@
 package com.donatrack.donaciones.domain.model.roles;
 
-import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.necesidades.Necesidad;
-import com.donatrack.donaciones.domain.strategy.AsignacionStrategy;
-import com.donatrack.donaciones.domain.strategy.ImportadorStrategy;
-import com.donatrack.donaciones.domain.model.donacion.HistorialEstado;
+import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.ImportadorStrategy;
+import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.asignador.AsignacionStrategy;
 import com.donatrack.donaciones.domain.model.Deposito;
 
 import java.util.List;
@@ -57,12 +56,7 @@ public class Administrador extends Rol {
 
   public void asignarDonacionFinal(Donacion d, Beneficiario b) {
     b.getDonacionesAsignadas().add(d);
-
-    HistorialEstado nuevoHistorial =
-        new HistorialEstado(
-            EstadoDonacion.ASIGNADA, "Donación asignada a entidad por administrador.", this);
-
-    d.registrarCambioEstado(nuevoHistorial);
+    d.asignar(b);
   }
 
   public void actualizarDonacionesVencidas() {

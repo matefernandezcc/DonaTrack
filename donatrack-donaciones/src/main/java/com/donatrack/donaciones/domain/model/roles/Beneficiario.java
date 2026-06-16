@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.model.roles;
 
-import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+import com.donatrack.donaciones.domain.enums.EstadoDonacionEnum;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.necesidades.Necesidad;
 import com.donatrack.donaciones.domain.model.donacion.Foto;
@@ -38,7 +38,7 @@ public class Beneficiario extends Rol {
   public boolean confirmarRecepcion(Donacion d, List<Foto> fotosComprobante) {
     // Verificamos que la donación estuviera asignada a este beneficiario
     if (this.donacionesAsignadas.contains(d)) {
-      d.setEstado(EstadoDonacion.ENTREGADA);
+      d.entregar();
       // (Opcional) Las fotos se podrían guardar en la donación como comprobante de que el
       // beneficiario firmó la recepción.
       return true;
@@ -48,8 +48,8 @@ public class Beneficiario extends Rol {
     }
   }
 
-  public List<EstadoDonacion> verEstadoDonaciones(List<Donacion> donacionesAsignadas) {
-    return donacionesAsignadas.stream().map(Donacion::getEstado).toList();
+  public List<EstadoDonacionEnum> verEstadoDonaciones(List<Donacion> donacionesAsignadas) {
+    return donacionesAsignadas.stream().map(d -> d.getEstado().getValorEnum()).toList();
   }
 
   public void verUbicacionCamion() {

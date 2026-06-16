@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import com.donatrack.donaciones.domain.model.donacion.Bien;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.persona.Direccion;
+import com.donatrack.donaciones.domain.model.persona.ubicacion.Direccion;
 
 import lombok.Getter;
 import lombok.Setter;

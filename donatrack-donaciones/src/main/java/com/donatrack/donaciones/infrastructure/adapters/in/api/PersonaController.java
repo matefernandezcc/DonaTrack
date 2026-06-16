@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import com.donatrack.donaciones.domain.model.persona.Persona;
 
 import java.util.UUID;
-import java.util.List;
 
 @RestController
 @RequestMapping("/donaciones/personas")

@@ -1,10 +1,7 @@
 package com.donatrack.donaciones.domain.model;
 
 import org.junit.jupiter.api.Test;
-import com.donatrack.donaciones.domain.model.persona.Coordenada;
-import com.donatrack.donaciones.domain.model.persona.Direccion;
-import com.donatrack.donaciones.domain.model.persona.Pais;
-import com.donatrack.donaciones.domain.model.persona.Provincia;
+import com.donatrack.donaciones.domain.model.persona.ubicacion.*;
 import com.donatrack.donaciones.domain.model.roles.Administrador;
 
 public class AdministradorTest {
@@ -14,7 +11,7 @@ public class AdministradorTest {
   Coordenada coordenadaPrueba = new Coordenada(-34.6037, -58.3816);
   Direccion direccionPrueba =
       new Direccion(
-          "calleFalsa", 123, "Springfield", provinciaPrueba, Argentina, "1234", coordenadaPrueba);
+          "calleFalsa", 123, "Springfield", provinciaPrueba, "1234", coordenadaPrueba);
 
   Deposito depositoPrueba = new Deposito("depositoPrueba", 1000, direccionPrueba);
 

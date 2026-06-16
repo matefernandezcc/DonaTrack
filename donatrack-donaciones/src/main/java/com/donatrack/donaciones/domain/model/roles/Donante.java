@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.model.roles;
 
-import com.donatrack.donaciones.domain.enums.EstadoDonacion;
+import com.donatrack.donaciones.domain.enums.EstadoDonacionEnum;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.donacion.RecepcionDonacion;
 
@@ -39,16 +39,16 @@ public class Donante extends Rol {
     this.historialRecepciones.add(r);
   }
 
-  public List<EstadoDonacion> consultarEstadoTodasLasDonaciones(
+  public List<EstadoDonacionEnum> consultarEstadoTodasLasDonaciones(
       List<Donacion> donacionesRealizadas) {
-    return donacionesRealizadas.stream().map(Donacion::getEstado).toList();
+    return donacionesRealizadas.stream().map(d -> d.getEstado().getValorEnum()).toList();
   }
 
-  public EstadoDonacion consultarEstadoDonacion(Donacion d) {
-    return d.getEstado();
+  public EstadoDonacionEnum consultarEstadoDonacion(Donacion d) {
+    return d.getEstado().getValorEnum();
   }
 
-  public void filtrarDonaciones(EstadoDonacion estado, String categoria) {
+  public void filtrarDonaciones(EstadoDonacionEnum estado, String categoria) {
     // Lógica para filtrar el historial de donaciones realizadas por este usuario
   }
 

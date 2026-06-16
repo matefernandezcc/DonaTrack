@@ -2,6 +2,7 @@ package com.donatrack.donaciones.domain.service.matchmaking;
 
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.roles.Beneficiario;
+import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.asignador.*;
 
 import java.util.List;
 import java.util.Set;
