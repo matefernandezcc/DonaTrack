@@ -4,12 +4,13 @@ import com.donatrack.incentivos.domain.model.Insignia;
 import com.donatrack.incentivos.domain.model.PerfilDonante;
 import com.donatrack.incentivos.domain.model.misiones.Mision;
 import com.donatrack.common.dto.ActividadDonacionDTO;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
+import com.donatrack.incentivos.domain.model.InsigniaObtenidaEvent;
 import com.donatrack.incentivos.infrastructure.client.NotificacionClient;
 import com.donatrack.incentivos.infrastructure.client.NotificacionRequest;
 
@@ -18,9 +19,15 @@ import com.donatrack.incentivos.infrastructure.client.NotificacionRequest;
 public class IncentivoController {
 
     private final NotificacionClient notificacionClient;
+    private final ApplicationEventPublisher eventPublisher;
+    private final com.donatrack.incentivos.domain.service.RankingMensualService rankingMensualService;
     
-    public IncentivoController(NotificacionClient notificacionClient) {
+    public IncentivoController(NotificacionClient notificacionClient, 
+                               ApplicationEventPublisher eventPublisher,
+                               com.donatrack.incentivos.domain.service.RankingMensualService rankingMensualService) {
         this.notificacionClient = notificacionClient;
+        this.eventPublisher = eventPublisher;
+        this.rankingMensualService = rankingMensualService;
     }
 
     @GetMapping("/donantes/{id}/metricas")
@@ -54,19 +61,40 @@ public class IncentivoController {
         return ResponseEntity.ok(perfil.getInsigniasObtenidas());
     }
 
+    @GetMapping("/ranking/top5")
+    public ResponseEntity<List<java.util.Map<String, Object>>> obtenerRankingMensual() {
+        List<PerfilDonante> top5 = rankingMensualService.obtenerTop5Mensual();
+        
+        List<java.util.Map<String, Object>> response = top5.stream().map(p -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            // n8n espera "user" y "totalDonations" (según su Format Podium Message)
+            map.put("user", p.getDonanteId().toString());
+            map.put("totalDonations", p.getDonacionesExitosas());
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/donantes/{id}/actividad")
     public ResponseEntity<Void> registrarActividadDonacionExitosa(@PathVariable UUID id, @RequestBody ActividadDonacionDTO actividad) {
-        // En una app real haríamos:
-        // PerfilDonante perfil = repo.findById(id).orElse(new PerfilDonante(id));
-        // perfil.registrarDonacionExitosa(actividad);
-        // checkearMisiones();
+        // Mock
+        PerfilDonante perfil = new PerfilDonante(id);
         
-        // Simular que el donante completó una misión
-        boolean completada = true;
+        int insigniasAntes = perfil.getInsigniasObtenidas().size();
+        perfil.registrarDonacionExitosa(actividad);
+        int insigniasDespues = perfil.getInsigniasObtenidas().size();
+        
+        boolean completada = insigniasDespues > insigniasAntes;
+
         if (completada) {
             notificacionClient.enviarNotificacion(
                 new NotificacionRequest("donante" + id + "@test.com", "¡Felicidades! Has completado una misión.", "EMAIL")
             );
+            
+            // Publicar el último evento de insignia (la nueva que ganó)
+            Insignia ultimaInsignia = perfil.getInsigniasObtenidas().get(insigniasDespues - 1);
+            eventPublisher.publishEvent(new InsigniaObtenidaEvent(perfil.getDonanteId(), ultimaInsignia));
         }
 
         return ResponseEntity.ok().build();
