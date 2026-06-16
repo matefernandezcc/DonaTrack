@@ -23,11 +23,5 @@ public class AdministradorTest {
     org.junit.jupiter.api.Assertions.assertFalse(admin.importarDonantesMasivos("rutaPrueba.csv"));
   }
 
-  @Test
-  public void testErrorSinEstrategiaAsignacion() {
-    Administrador admin = new Administrador(depositoPrueba);
 
-    org.junit.jupiter.api.Assertions.assertTrue(
-        admin.obtenerRecomendacionAsignacion(null, null).isEmpty());
-  }
 }

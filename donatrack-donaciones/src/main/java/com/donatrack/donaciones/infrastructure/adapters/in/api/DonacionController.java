@@ -3,6 +3,8 @@ package com.donatrack.donaciones.infrastructure.adapters.in.api;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import com.donatrack.donaciones.domain.service.matchmaking.MatchmakerService;
+import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
+import com.donatrack.donaciones.domain.repository.DonacionRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +24,19 @@ public class DonacionController {
     private final MatchmakerService matchmakerService;
     private final ServicioNotificaciones servicioNotificaciones;
     private final IncentivoClient incentivoClient;
+    private final DonacionRepository donacionRepository;
+    private final BeneficiarioRepository beneficiarioRepository;
     
     public DonacionController(MatchmakerService matchmakerService, 
                               ServicioNotificaciones servicioNotificaciones,
-                              IncentivoClient incentivoClient) {
+                              IncentivoClient incentivoClient,
+                              DonacionRepository donacionRepository,
+                              BeneficiarioRepository beneficiarioRepository) {
         this.matchmakerService = matchmakerService;
         this.servicioNotificaciones = servicioNotificaciones;
         this.incentivoClient = incentivoClient;
+        this.donacionRepository = donacionRepository;
+        this.beneficiarioRepository = beneficiarioRepository;
     }
 
     @PostMapping
@@ -68,7 +76,14 @@ public class DonacionController {
 
     @GetMapping("/{id:[a-fA-F0-9\\-]{36}}/matchmaking")
     public ResponseEntity<List<Beneficiario>> sugerirBeneficiarios(@PathVariable UUID id) {
-        // TODO: obtener donación y beneficiarios disponibles desde repositorios
-        return ResponseEntity.ok(List.of());
+        // En una aplicación real usaríamos donacionRepository.findById(id).orElseThrow(...)
+        // Aquí mockeamos la donación hasta tener DB conectada
+        Donacion donacionMock = new Donacion(null);
+        donacionMock.setId(id);
+
+        List<Beneficiario> disponibles = beneficiarioRepository.buscarTodos();
+        List<Beneficiario> sugerencias = matchmakerService.obtenerSugerencias(donacionMock, disponibles);
+        
+        return ResponseEntity.ok(sugerencias);
     }
 }

@@ -4,7 +4,7 @@ package com.donatrack.donaciones.domain.model.roles;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.necesidades.Necesidad;
 import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.ImportadorStrategy;
-import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.asignador.AsignacionStrategy;
+
 import com.donatrack.donaciones.domain.model.Deposito;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import lombok.Setter;
 
 public class Administrador extends Rol {
   @Getter @Setter private Deposito depositoAsignado;
-  @Getter @Setter private AsignacionStrategy estrategiaAsignacion;
+
   @Getter @Setter private ImportadorStrategy estrategiaImportador;
   @Getter @Setter private List<UUID> camionesIds;
 
@@ -43,16 +43,7 @@ public class Administrador extends Rol {
     }
   }
 
-  public List<Donacion> obtenerRecomendacionAsignacion(
-      List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas) {
-    if (this.estrategiaAsignacion != null) {
-      return this.estrategiaAsignacion.recomendarNecesidades(
-          donacionesDisponibles, necesidadesDeclaradas);
-    } else {
-      // Error: Primero debe asignarle una estrategia de asignación al Administrador.
-      return new java.util.ArrayList<>();
-    }
-  }
+
 
   public void asignarDonacionFinal(Donacion d, Beneficiario b) {
     b.getDonacionesAsignadas().add(d);

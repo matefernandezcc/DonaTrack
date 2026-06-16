@@ -1,0 +1,28 @@
+package com.donatrack.donaciones.infrastructure.adapters.out.persistence;
+
+import com.donatrack.donaciones.domain.enums.EstadoDonacionEnum;
+import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.repository.DonacionRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Repository
+public class MockDonacionRepository implements DonacionRepository {
+
+    private final List<Donacion> baseDeDatosMock = new ArrayList<>();
+
+    @Override
+    public List<Donacion> buscarPorEstado(EstadoDonacionEnum estado) {
+        return baseDeDatosMock.stream()
+                .filter(d -> d.getEstado().getValorEnum() == estado)
+                .toList();
+    }
+
+    @Override
+    public void guardar(Donacion donacion) {
+        baseDeDatosMock.removeIf(d -> d.getId().equals(donacion.getId()));
+        baseDeDatosMock.add(donacion);
+    }
+}
