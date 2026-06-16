@@ -253,38 +253,38 @@ package "servicio de donaciones"{
             + recibirEnDeposito()
         }
 
-        class Asignada extends EstadoDonacion{
+        class Asignada implements EstadoDonacion{
             + planificarRuta()
             + EstadoDonacionEnum getValorEnum()
         }
 
-        class Endeposito extends EstadoDonacion{
+        class Endeposito implements EstadoDonacion{
             + asignar(Beneficiario beneficiario)
             + marcarVencida()
             + getValorEnum()
         }
 
-        class EnTraslado extends EstadoDonacion{
+        class EnTraslado implements EstadoDonacion{
             + entregar()
             + fallarEntrega(String justificacion)
             + getValorEnum()
         }
 
-        class EntregaFallida extends EstadoDonacion{
+        class EntregaFallida implements EstadoDonacion{
             + recibirEnDeposito()
             + getValorEnum()
         }
 
-        class Entregada extends EstadoDonacion{
+        class Entregada implements EstadoDonacion{
             + getValorEnum()
         }
 
-        class ListaParaEntregar extends EstadoDonacion{
+        class ListaParaEntregar implements EstadoDonacion{
             + iniciarTraslado()
             + getValorEnum()
         }
 
-        class Vencida extends EstadoDonacion{
+        class Vencida implements EstadoDonacion{
             + getValorEnum()
         }
 
@@ -296,7 +296,6 @@ package "servicio de donaciones"{
             - usuario: Administrador
         }
     }
-        
 
         class Bien {
             - descripcion: String
@@ -349,12 +348,12 @@ package "servicio de donaciones"{
             + estaCubierta(): Boolean
         }
 
-        class NecesidadRecurrente extends Necesidad {
+        class NecesidadRecurrente implements Necesidad {
             - cantidadObjetivo: double
             - periodo: String
         }
 
-        class NecesidadExtraordinaria extends Necesidad {
+        class NecesidadExtraordinaria implements Necesidad {
             - cantidadRequerida: double
             + acumularDonacionesParciales()
         }
@@ -364,10 +363,31 @@ package "servicio de donaciones"{
 }
 
 package "Servicio de Incentivos" {
-    enum CategoriaDonante {
+    enum CategoriaDonanteEnum {
         COLABORADOR
         SOSTENEDOR
         TRANSFORMADOR
+    }
+
+    abstract class CategoriaDonanteState{
+        - perfil: PerfilIncentivos
+        + avanzarCategoria()
+        + getValorEnum()
+    }
+
+    class ColaboradorState implements CategoriaDonanteState{
+        + avanzarCategoria()
+        + getValorEnum()
+    }
+
+    class SostenedorState implements CategoriaDonanteState{
+        + avanzarCategoria()
+        + getValorEnum()
+    }
+
+    class TransformadorState implements CategoriaDonanteState{
+        + avanzarCategoria()
+        + getValorEnum()
     }
 
     class GestorIncentivos {
@@ -494,7 +514,9 @@ package "Servicio de Incentivos" {
     insigniaFabric <-- Insignia
 
     PerfilIncentivos "1" *-- "1" MetricasDonante : consolida datos en >
-    PerfilIncentivos --> CategoriaDonante : posee >
+    PerfilIncentivos --> CategoriaDonanteEnum : posee >
+
+    PerfilIncentivos --> CategoriaDonanteState
 
     RankingMensual *-- "0..*" PosicionRanking : contiene >
 }
@@ -604,10 +626,10 @@ Necesidad "1" o-- "0..*" Donacion : "tiene"
 
 ' Conexiones Servicio de Incentivos y donaciones
 
-class ControlerIncentivos {}
+class donacionesController {}
 
-Donante <---> ControlerIncentivos : "Consulta"
-GestorIncentivos ---> ControlerIncentivos : "Solicita Donaciones realizadas"
+Donante <---> donacionesController : "Consulta"
+GestorIncentivos ---> donacionesController : "Solicita Donaciones realizadas"
 
 class ActividadDonacionDto{}
 
@@ -615,18 +637,18 @@ Donante --> ActividadDonacionDto
 PerfilIncentivos --> ActividadDonacionDto
 
 ' Conexiones con el Servicio de Notificaciones
-class ControlerNotificaciones{}
+class IncentivosController{}
 
     'conexion con Donaciones evento de asignación
-    Administrador --> ControlerNotificaciones
+    Administrador --> IncentivosControler
     'conexion con Donaciones evento inactividad
 
     'conexion con Donaciones CorreoRegistro
-    CorreoRegistro --> ControlerNotificaciones : "despacha vía"
+    CorreoRegistro --> IncentivosControler : "despacha vía"
 
     'conexion con Incentivos evento MisionCumplida
-    Mision --> ControlerNotificaciones
-    ControlerNotificaciones --> GestorNotificaciones
+    Mision --> IncentivosControler
+    IncentivosControler --> GestorNotificaciones
 
 'conexion exterior
 ConeccionIngresoInicial --> SegmentadorDeBienes
