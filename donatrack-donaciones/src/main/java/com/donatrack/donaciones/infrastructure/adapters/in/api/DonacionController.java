@@ -69,8 +69,19 @@ public class DonacionController {
     @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado/entregada")
     public ResponseEntity<Void> donacionEntregada(@PathVariable UUID id, @RequestParam UUID idDonante) {
         // Cuando se entrega y finaliza exitosamente
-        // Informar al modulo de incentivos
-        incentivoClient.registrarActividadDonacionExitosa(idDonante);
+        // En una app real recuperaríamos la donación de BD para obtener detalles (bienes, entidad)
+        
+        int cantidadBienesMock = 5;
+        List<String> categoriasMock = List.of("Alimentos", "Vestimenta");
+        UUID idEntidadMock = UUID.randomUUID(); 
+        java.time.LocalDate fechaMock = java.time.LocalDate.now();
+
+        com.donatrack.common.dto.ActividadDonacionDTO dto = new com.donatrack.common.dto.ActividadDonacionDTO(
+            idDonante, cantidadBienesMock, categoriasMock, idEntidadMock, fechaMock
+        );
+
+        // Informar al modulo de incentivos pasándole el contexto completo
+        incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
         return ResponseEntity.ok().build();
     }
 
