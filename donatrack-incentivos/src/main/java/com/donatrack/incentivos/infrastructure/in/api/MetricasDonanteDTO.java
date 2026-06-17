@@ -1,4 +1,4 @@
-package com.donatrack.incentivos.infrastructure.controller;
+package com.donatrack.incentivos.infrastructure.in.api;
 
 import java.time.YearMonth;
 import java.util.Map;

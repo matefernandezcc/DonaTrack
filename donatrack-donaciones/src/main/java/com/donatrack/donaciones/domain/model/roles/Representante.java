@@ -7,11 +7,11 @@ import lombok.Setter;
 
 public class Representante extends Rol {
   @Getter @Setter private String cargo;
-  @Getter @Setter private PersonaJuridica Organizacion;
+  @Getter @Setter private PersonaJuridica organizacion;
 
   public Representante(String cargo, PersonaJuridica organizacion) {
     this.cargo = cargo;
-    this.Organizacion = organizacion;
+    this.organizacion = organizacion;
   }
 
   @Override

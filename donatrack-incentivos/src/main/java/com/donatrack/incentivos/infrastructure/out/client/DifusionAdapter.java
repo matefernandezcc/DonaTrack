@@ -1,4 +1,4 @@
-package com.donatrack.incentivos.domain.service;
+package com.donatrack.incentivos.infrastructure.out.client;
 
 import com.donatrack.incentivos.domain.model.InsigniaObtenidaEvent;
 public interface DifusionAdapter {

@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.service.matchmaking;
+package com.donatrack.donaciones.domain.service;
 
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.roles.Beneficiario;
@@ -19,7 +19,7 @@ public class MatchmakerService {
         this.algoritmoPrimario = new CompatibilidadSemantica();
         this.algoritmoSecundario = new PrioridadASubAtendidos();
     }
-
+    
     public MatchmakerService(AlgoritmoAsignacion algoritmoPrimario, AlgoritmoAsignacion algoritmoSecundario) {
         this.algoritmoPrimario = algoritmoPrimario;
         this.algoritmoSecundario = algoritmoSecundario;

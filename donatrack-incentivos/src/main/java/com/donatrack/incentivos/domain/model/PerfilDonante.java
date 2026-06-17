@@ -24,7 +24,7 @@ public class PerfilDonante {
     private List<Insignia> insigniasObtenidas;
     private Queue<Mision> misionesPendientesCategoria;
     private Mision misionActual;
-    
+
     // Métricas
     private int totalDonacionesHistoricas;
     private int mesesConsecutivosDonando;
@@ -32,7 +32,7 @@ public class PerfilDonante {
     private int donacionesExitosas;
     private int maxBienesEnUnaDonacion;
     private Set<String> categoriasUnicasDonadas;
-    
+
     // Historial para gráficas y analíticas
     private Set<UUID> organizacionesUnicasAyudadas;
     private Map<YearMonth, Integer> historialDonacionesPorMes;
@@ -45,14 +45,15 @@ public class PerfilDonante {
         this.historialDonacionesPorMes = new HashMap<>();
         this.categoriasUnicasDonadas = new HashSet<>();
         this.maxBienesEnUnaDonacion = 0;
-        
+
         // Inicializar categoría y misiones (State y Factory)
         this.categoria = new ColaboradorState(this);
         cargarMisionesDeCategoriaActual();
     }
 
     public void cargarMisionesDeCategoriaActual() {
-        this.misionesPendientesCategoria = ConfiguracionRecompensasFactory.obtenerMisionesPara(this.categoria.getValorEnum());
+        this.misionesPendientesCategoria = ConfiguracionRecompensasFactory
+                .obtenerMisionesPara(this.categoria.getValorEnum());
         this.misionActual = this.misionesPendientesCategoria.poll();
     }
 
@@ -60,7 +61,7 @@ public class PerfilDonante {
         this.donacionesExitosas++;
         this.totalDonacionesHistoricas++;
         this.cantidadBienesDonados += actividad.getCantidadBienes();
-        
+
         if (actividad.getIdEntidadBeneficiaria() != null) {
             this.organizacionesUnicasAyudadas.add(actividad.getIdEntidadBeneficiaria());
         }
@@ -87,30 +88,28 @@ public class PerfilDonante {
             // Perdió la racha
             this.mesesConsecutivosDonando = 1;
         }
-        
+
         this.ultimoMesDonacion = mesActual;
 
         evaluarMisiones();
     }
 
     public void evaluarMisiones() {
-        if (misionActual != null) {
-            if (misionActual.evaluar(this)) {
-                agregarInsignia(misionActual.getRecompensa());
-                
-                // Obtener siguiente misión de la cola
-                misionActual = misionesPendientesCategoria.poll();
-                
-                // Si ya no hay misiones, completó la categoría
-                if (misionActual == null) {
-                    categoria.avanzarCategoria();
-                }
+        if ((misionActual != null) && (misionActual.evaluar(this))) {
+            agregarInsignia(misionActual.getRecompensa());
+            // Obtener siguiente misión de la cola
+            misionActual = misionesPendientesCategoria.poll();
+            // Si ya no hay misiones, completó la categoría
+            if (misionActual == null) {
+                categoria.avanzarCategoria();
             }
+
         }
     }
 
     public List<Mision> getMisionesActivas() {
-        // Para compatibilidad con el frontend, devolvemos la misión actual como lista de 1 elemento
+        // Para compatibilidad con el frontend, devolvemos la misión actual como lista
+        // de 1 elemento
         if (misionActual != null) {
             return List.of(misionActual);
         }

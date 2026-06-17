@@ -1,4 +1,4 @@
-package com.donatrack.donaciones.domain.model.persona.validadorDatosPersona;
+package com.donatrack.donaciones.domain.model.persona.validador;
 
 import com.donatrack.donaciones.domain.model.persona.Persona;
 

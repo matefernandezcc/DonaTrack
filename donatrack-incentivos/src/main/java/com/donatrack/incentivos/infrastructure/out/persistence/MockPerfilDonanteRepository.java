@@ -1,7 +1,9 @@
 package com.donatrack.incentivos.infrastructure.out.persistence;
 
-import com.donatrack.incentivos.domain.model.PerfilDonante;
 import com.donatrack.incentivos.domain.repository.PerfilDonanteRepository;
+
+import com.donatrack.incentivos.domain.model.PerfilDonante;
+
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

@@ -6,7 +6,7 @@ public abstract class CategoriaDonanteState {
     
     protected PerfilDonante perfil;
 
-    public CategoriaDonanteState(PerfilDonante perfil) {
+    protected CategoriaDonanteState(PerfilDonante perfil) {
         this.perfil = perfil;
     }
 

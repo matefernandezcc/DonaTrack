@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.domain.model.persona;
 
-import com.donatrack.donaciones.domain.model.persona.validadorDatosPersona.PersonaValidator;
 import com.donatrack.donaciones.domain.model.persona.ubicacion.Direccion;
+import com.donatrack.donaciones.domain.model.persona.validador.PersonaValidator;
 import com.donatrack.donaciones.domain.model.roles.Rol;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public abstract class Persona {
   @Getter @Setter private List<Rol> roles;
   @Getter private DocumentoIdentidad documento;
 
-  public Persona(
+  protected Persona(
       String email, Contacto contacto, Direccion direccion, DocumentoIdentidad documento) {
     this.id = UUID.randomUUID();
     this.email = email;

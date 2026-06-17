@@ -86,10 +86,8 @@ public class BeneficiarioController {
         return beneficiarios.stream()
                 .filter(b -> id.equals(b.getId()))
                 .findFirst()
-                .map(b -> {
-                    // Logic to update the necessity inside the beneficiario's list
-                    return ResponseEntity.ok().<Void>build();
-                })
+                .map(b -> // Logic to update the necessity inside the beneficiario's list
+                    ResponseEntity.ok().<Void>build())
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -98,10 +96,9 @@ public class BeneficiarioController {
         return beneficiarios.stream()
                 .filter(b -> id.equals(b.getId()))
                 .findFirst()
-                .map(b -> {
+                .map(b -> 
                     // Logic to remove the necessity from the beneficiario's list
-                    return ResponseEntity.noContent().<Void>build();
-                })
+                    ResponseEntity.noContent().<Void>build())
                 .orElse(ResponseEntity.notFound().build());
     }
 }

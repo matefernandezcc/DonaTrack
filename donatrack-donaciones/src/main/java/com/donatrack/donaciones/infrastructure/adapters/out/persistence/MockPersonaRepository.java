@@ -1,7 +1,9 @@
 package com.donatrack.donaciones.infrastructure.adapters.out.persistence;
 
-import com.donatrack.donaciones.domain.model.persona.Persona;
 import com.donatrack.donaciones.domain.repository.PersonaRepository;
+
+import com.donatrack.donaciones.domain.model.persona.Persona;
+
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

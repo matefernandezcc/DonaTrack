@@ -1,6 +1,8 @@
-package com.donatrack.notificaciones.infrastructure.controller;
+package com.donatrack.notificaciones.infrastructure.in.api;
 
-import com.donatrack.notificaciones.domain.service.NotificadorService;
+import com.donatrack.notificaciones.application.service.NotificadorService;
+import com.donatrack.notificaciones.infrastructure.out.client.NotificacionRequest;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

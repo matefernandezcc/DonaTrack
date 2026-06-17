@@ -9,7 +9,7 @@ public abstract class Rol {
   @Getter @Setter private UUID id;
   @Getter @Setter private LocalDate fechaAlta;
 
-  public Rol() {
+  protected Rol() {
     this.id = UUID.randomUUID();
     this.fechaAlta = LocalDate.now();
   }

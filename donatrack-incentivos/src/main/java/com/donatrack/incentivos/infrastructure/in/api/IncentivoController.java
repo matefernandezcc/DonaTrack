@@ -1,8 +1,10 @@
-package com.donatrack.incentivos.infrastructure.controller;
+package com.donatrack.incentivos.infrastructure.in.api;
 
 import com.donatrack.incentivos.domain.model.Insignia;
 import com.donatrack.incentivos.domain.model.PerfilDonante;
 import com.donatrack.incentivos.domain.model.misiones.Mision;
+import com.donatrack.incentivos.infrastructure.out.client.NotificacionClient;
+import com.donatrack.incentivos.infrastructure.out.client.NotificacionRequest;
 import com.donatrack.common.dto.ActividadDonacionDTO;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 import com.donatrack.incentivos.domain.model.InsigniaObtenidaEvent;
-import com.donatrack.incentivos.infrastructure.client.NotificacionClient;
-import com.donatrack.incentivos.infrastructure.client.NotificacionRequest;
 
 @RestController
 @RequestMapping("/incentivos")

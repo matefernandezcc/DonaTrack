@@ -8,7 +8,7 @@ public abstract class EstadoDonacion {
 
   protected Donacion donacion;
 
-  public EstadoDonacion(Donacion donacion) {
+  protected EstadoDonacion(Donacion donacion) {
     this.donacion = donacion;
   }
 

@@ -1,4 +1,4 @@
-package com.donatrack.notificaciones.domain.service;
+package com.donatrack.notificaciones.application.port.out;
 
 import com.donatrack.notificaciones.domain.model.Notificacion;
 
