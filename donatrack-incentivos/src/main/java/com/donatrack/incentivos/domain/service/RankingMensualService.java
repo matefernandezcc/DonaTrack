@@ -3,12 +3,10 @@ package com.donatrack.incentivos.domain.service;
 import com.donatrack.incentivos.domain.model.PerfilDonante;
 import com.donatrack.incentivos.domain.model.ranking.RankingPuntuacionStrategy;
 import com.donatrack.incentivos.domain.repository.PerfilDonanteRepository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 public class RankingMensualService {
 
     private final PerfilDonanteRepository repository;

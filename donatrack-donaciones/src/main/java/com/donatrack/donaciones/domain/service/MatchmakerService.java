@@ -7,9 +7,7 @@ import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.asignad
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
 
-@Service
 public class MatchmakerService {
 
     private final AlgoritmoAsignacion algoritmoPrimario;

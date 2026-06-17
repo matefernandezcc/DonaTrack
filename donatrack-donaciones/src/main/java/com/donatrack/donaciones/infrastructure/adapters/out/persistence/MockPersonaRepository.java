@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class MockPersonaRepository implements PersonaRepository {
@@ -23,5 +25,12 @@ public class MockPersonaRepository implements PersonaRepository {
     public void guardar(Persona persona) {
         baseDeDatosMock.removeIf(p -> p.getId().equals(persona.getId()));
         baseDeDatosMock.add(persona);
+    }
+
+    @Override
+    public Optional<Persona> buscarPorId(UUID id) {
+        return baseDeDatosMock.stream()
+                .filter(p -> p.getId().equals(id))
+                .findFirst();
     }
 }

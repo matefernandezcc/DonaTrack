@@ -2,9 +2,6 @@ package com.donatrack.incentivos.domain.model.ranking;
 
 import com.donatrack.incentivos.domain.model.PerfilDonante;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class RankingPorDonacionesStrategy implements RankingPuntuacionStrategy {
 
     @Override
