@@ -9,6 +9,11 @@ package "Servicio de Notificaciones" {
         WHATSAPP
     }
 
+    class GestorNotificaciones {
+        + procesarEvento(evento: TipoEvento, idDestinatario: UUID, parametros: Map)
+        + despacharNotificacion(n: Notificacion)
+    }
+
     enum TipoEvento {
         INACTIVIDAD_DONANTE
         DONACION_ASIGNADA_ENTIDAD
@@ -17,18 +22,29 @@ package "Servicio de Notificaciones" {
         CAMBIO_CATEGORIA
     }
 
-    class GestorNotificaciones {
-        + procesarEvento(evento: TipoEvento, idDestinatario: UUID, parametros: Map)
-        + despacharNotificacion(n: Notificacion)
+    class Evento{
+        - RolDestinatario: List<Rol>
+        - Descripcion: String
+        - TipoEvento: TipoEvento
+        + ValidoParaNotificar(Rol): boolean
+    }
+
+    note left of Evento
+    La idea seria
+    tener eventos 
+    ya definidos 
+    en el sistema
+    endnote
+
+    class NotificacionFabric{
+        + crearNotificacion()
     }
 
     class Notificacion {
         - id: UUID
-        - idDestinatario: UUID
-        - contactoDestino: String
+        - Destinatario: Persona
         - mensaje: String
-        - medio: MedioContacto
-        - evento: TipoEvento
+        - evento: Evento
         - fechaCreacion: LocalDateTime
         - fechaEnvio: LocalDateTime
         - enviada: boolean
@@ -59,12 +75,17 @@ package "Servicio de Notificaciones" {
     }
 
     ' Relaciones
-    GestorNotificaciones "1" *-- "0..*" Notificacion : gestiona >
+    
     GestorNotificaciones --> NotificadorAdapter : delega envío a >
     GestorNotificaciones --> CreadorMensajesTemplate : utiliza para armar texto >
-    
+    GestorNotificaciones ..> NotificacionFabric : usa >
+
+    NotificacionFabric --> Notificacion
+
     Notificacion --> MedioContacto : a través de >
-    Notificacion --> TipoEvento : originada por >
+    Notificacion --> Evento : originada por >
+
+    Evento --> TipoEvento : corresponde a >
 
 }
 @enduml

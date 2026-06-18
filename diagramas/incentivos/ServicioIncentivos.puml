@@ -10,13 +10,15 @@ package "Servicio de Incentivos" {
     }
 
     class GestorIncentivos {
+        - PerfilesIncentivos: List<PerfilIncentivos>
         + procesarNuevaDonacion(idDonante: UUID, d: DonacionDTO)
         + ejecutarRankingMensual()
     }
 
     class PerfilIncentivos {
-        - idDonante: UUID
+        - perfilDonante: DonanteDto
         - categoriaActual: CategoriaDonante
+        - InsigniasObtenidas: List<Insignia>
         + evaluarMisiones(d: DonacionDTO)
         + subirCategoria()
         + agregarInsignia(i: Insignia)
@@ -31,38 +33,65 @@ package "Servicio de Incentivos" {
         + generarGraficoEvolucionMensual()
     }
 
+    abstract class MisionesPorCategoria{
+        - Misiones: List<Mision>
+        - MisionActual: Mision
+        - PerfilAsociado: PerfilIncentivos
+        - CategoriaObtener: CategoriaDonante
+        - FechaAsignacion: LocalDate
+        + Clonar()
+    }
+    
+    note top of MisionesPorCategoria
+    Cada clase concreta de MisionesPorNivel
+    Tiene sus Misiones especificas concretas
+    end note
+
+    class MisionesSostenedor extends MisionesPorCategoria{
+        + Clonar()
+    }
+
+    class MisionesTransformador extends MisionesPorCategoria{
+        + Clonar()
+    }
+
+    class MisionesColaborador extends MisionesPorCategoria{
+        + Clonar()
+    }
+
     abstract class Mision {
         - nombre: String
         - descripcion: String
-        - ordenSecuencial: int
-        - progresoActual: int
         - progresoObjetivo: int
         - completada: boolean
-        + actualizarProgreso(cantidad: int)
-        + reiniciarProgreso()
+        + ConsultarProgeso(): int
         + getDistanciaObjetivo(): int
-        {abstract} + evaluarCondicion(d: DonacionDTO)
+        + PerderProgreso()
     }
 
     class MisionRacha extends Mision {
-        - fechaUltimaDonacion: LocalDate
-        - mesesConsecutivos: int
-        + evaluarCondicion(d: DonacionDTO)
+        + ConsultarProgeso(): int
+        + PerderProgreso()
     }
 
     class MisionCompletitud extends Mision {
-        - categoriasDonadas: List<String>
-        + evaluarCondicion(d: DonacionDTO)
+        + ConsultarProgeso(): int
     }
 
     class MisionHabilDonador extends Mision {
         - cantidadMinimaBienes: int
-        + evaluarCondicion(d: DonacionDTO)
+        + ConsultarProgeso(): int
     }
 
     class MisionDonacionesExitosas extends Mision {
-        + evaluarCondicion(d: DonacionDTO)
+        + ConsultarProgeso(): int
     }
+
+    
+    Class insigniaFabric{
+        +CrearInsignia()
+    }
+
 
     class Insignia {
         - nombre: String
@@ -73,26 +102,36 @@ package "Servicio de Incentivos" {
     }
 
     class RankingMensual {
-        - mes: int
-        - anio: int
+        - Fecha: LocalDate
         - topDonantes: List<PosicionRanking>
         + calcularRanking(perfiles: List<PerfilIncentivos>)
         + obtenerTop3(): List<PosicionRanking>
     }
 
     class PosicionRanking {
-        - idDonante: UUID
-        - misionesCompletadasEnMes: int
+        - PerfilAsociado: PerfilIncentivos
         - posicion: int
+        + MisionesCompletadas(): int
     }
+
+    note right of PosicionRanking
+    Para determinar las misionesCompletados
+    se evalua la cantidad de insignias obtenidas
+    end note
 
     ' Relaciones
     GestorIncentivos --> RankingMensual : genera >
     GestorIncentivos --> PerfilIncentivos : administra >
 
+    MisionesPorCategoria *-- Mision : contine >
+    MisionesPorCategoria --> CategoriaDonante : Objetivo >
+    MisionesPorCategoria <-- PerfilIncentivos : Debe completar <
+
+    Mision ..> insigniaFabric : usa >
+
+    insigniaFabric <-- Insignia
+
     PerfilIncentivos "1" *-- "1" MetricasDonante : consolida datos en >
-    PerfilIncentivos "1" *-- "0..*" Mision : intenta superar >
-    PerfilIncentivos "1" *-- "0..*" Insignia : exhibe >
     PerfilIncentivos --> CategoriaDonante : posee >
 
     RankingMensual *-- "0..*" PosicionRanking : contiene >

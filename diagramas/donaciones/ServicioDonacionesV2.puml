@@ -1,0 +1,301 @@
+package "servicio de donaciones"{
+    package "Gestión de Personas" {
+        enum TipoDocumento {
+            DNI
+            CUIT
+            PASAPORTE
+        }
+
+        class DocumentoIdentidad {
+            - tipo: TipoDocumento
+            - numero: String
+        }
+
+        DocumentoIdentidad --> TipoDocumento
+
+        enum TipoPersonaJuridica {
+            GUBERNAMENTAL
+            ONG
+            EMPRESA
+            INSTITUCION
+        }
+
+        enum MedioContacto {
+            CORREO
+            TELEFONO
+            WHATSAPP
+        }
+
+        abstract class Persona {
+            - id: UUID
+            - email: String
+            - contacto: Contacto
+            - direccion: Direccion
+            - documento: DocumentoIdentidad
+            - roles: List<Rol>
+            + agregarRol(Rol r)
+            + validarRol(Rol r)
+            + validarDocumentacion(DocumentoIdentidad d)
+            + setDocumento(DocumentoIdentidad documento)
+            + actualizarInformacion(Map<String, Object> datosNuevos)
+        }
+
+        class Contacto {
+            - correoElectronico: String
+            - telefono: String
+            - whatsapp: String
+            - medioPredeterminado: MedioContacto
+        }
+
+        class Direccion {
+            - calle: String
+            - altura: Decimal
+            - localidad: String
+            - pais: Pais
+            - codigoPostal: String
+            - coordenadas: Coordenada
+        }
+
+        class Coordenada {
+            - latitud: Decimal
+            - longitud: Decimal
+        }
+
+        class Provincia{
+            - nombreProvincia: String
+            - Pais: Pais
+        }
+
+        class Pais {
+            - nombrePais: String
+            - nacionalidad: String
+        }
+
+        class PersonaHumana extends Persona {
+            - nombre: String
+            - apellido: String
+            - edad: int
+            + validarRol(r: Rol)
+            + validarDocumentacion(DocumentoIdentidad d)
+            + actualizarInformacion(Map<String, Object> datosNuevos)
+        }
+
+        note top of PersonaHumana
+        **Regla de negocio:**
+        Tira excepción de invalidez de 
+        rol si el rol es EntidadBeneficiaria 
+        (acepta solo Donante,
+        Representante o Administrador)
+        end note
+
+        class PersonaJuridica extends Persona {
+            - razonSocial: String
+            - tipo: TipoPersonaJuridica
+            - representantes: List<Representante>
+            - rubro: String
+            + agregarRepresentante(Representante r)
+            + validarRol(Rol r)
+            + validarDocumentacion(DocumentoIdentidad d)
+            + actualizarInformacion(Map<String, Object> datosNuevos)
+        }
+
+        note top of PersonaJuridica
+        **Regla de negocio:**
+        Tira excepción de 
+        invalidez de rol si el rol es 
+        Representante o Administrador
+        end note
+
+        'relaciones
+        Direccion --> Provincia : "es de un"
+        Provincia --> Pais : "forma parte de"
+        Direccion --> Coordenada : "se encuentra"
+        Persona --> Direccion : "tiene"
+        Persona "1" *-- "1" Contacto : "tiene"
+        Contacto --> MedioContacto : "define"
+        Persona --> DocumentoIdentidad : "tiene"
+        PersonaJuridica --> TipoPersonaJuridica : "se clasifica en"
+    }
+
+    package "Gestion de Roles" {
+        abstract class Rol {
+            - fechaAlta: LocalDate
+        }
+
+        class Donante extends Rol {
+            - donacionesRealizadas: List<Donacion>
+            - historialRecepciones: List<RecepcionDonacion>
+            + agregarDonacion(Donacion d)
+            + agregarRecepcion(RecepcionDonacion r)
+            + consultarEstadoDonacion(Donacion d)
+            + filtrarDonaciones(estado: EstadoDonacion, categoria: String)
+            + UbicacionCamion()
+        }
+
+        class Representante extends Rol {
+            - cargo: String
+            - organizacion: PersonaJuridica
+        }
+
+        class EntidadBeneficiaria extends Rol {
+            - donacionesAsignadas: List<Donacion>
+            - necesidadesDeclaradas: List<Necesidad>
+            - correoRepresentante: String
+            + registrarNecesidad(n: Necesidad)
+            + confirmarRecepcion(d: Donacion, fotos: List<String>)
+            + EstadoDonaciones()
+            + UbicacionCamion()
+        }
+
+        class Administrador extends Rol {
+            - estrategiaAsignacion: AsignacionStrategy
+            - estrategiaImportador: ImportadorStrategy
+            + importarDonantesMasivos(String rutaArchivo)
+            + obtenerRecomendacionAsignacion(List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas)
+            + asociarDonacion(d: Donacion, p: Persona)
+            + actualizarDonacionesVencidas()
+            + asignarDonacionFinal(d: Donacion, e: EntidadBeneficiaria)
+            + administrarCamiones()
+            + RankingMensual()
+        }
+
+        class CorreoRegistro {
+            - Destinatario: String
+            - mensaje: String
+            - fechaEnvio: Date
+        }
+
+        interface AsignacionStrategy {
+            + recomendarNecesidades(donaciones, necesidades)
+        }
+
+        class PorPrioridad
+        class PorCercania
+
+        interface ImportadorStrategy {
+            + importar(Archivo)
+        }
+
+        class ImportadorCSV
+
+        Administrador --> ImportadorStrategy
+        Administrador --> AsignacionStrategy
+        PorPrioridad ..up|> AsignacionStrategy
+        PorCercania ..up|> AsignacionStrategy
+        ImportadorCSV ..up|> ImportadorStrategy
+        Administrador --> CorreoRegistro : "genera"
+    }
+
+    package "Gestion de Ingreso y Segmentación" {
+        class RecepcionDonacion {
+            - id: UUID
+            - fechaRecepcion: Date
+            - donante: Donante
+            - donacionesSegmentadas: List<Donacion>
+            - registradoPor: Administrador
+            + segmentarBienes(bienesBrutos)
+        }
+
+        note left of RecepcionDonacion 
+        **Regla de negocio:**
+        Representa la "única carga" 
+        física en el depósito. A partir 
+        de los bienes, se generan las 
+        Donaciones independientes.
+        end note
+
+        class Donacion {
+            - id: UUID
+            - fechaCreacion: Date
+            - estado: EstadoDonacion
+            - bienes: List<Bien>
+            - categoria: Categoria
+        }
+
+        enum EstadoDonacion {
+            PENDIENTE
+            ASIGNADA
+            ENTREGADA
+            EN_DEPOSITO
+            VENCIDA
+        }
+
+        class HistorialEstado {
+            - Donacion: Donacion
+            - estado: EstadoDonacion
+            - fecha: Date
+            - observacion: String
+            - usuario: Administrador
+        }
+
+        class Bien {
+            - descripcion: String
+            - cantidad: double
+            - unidadMedicion: String
+            - esUsado: boolean
+            - fechaVencimiento: LocalDate
+            - foto: List<Foto>
+        }
+
+        class Categoria {
+            - nombre: String
+            - descripcion: String
+            - subcategorias: List<Categoria>
+            + agregarSubcategoria(categoria)
+            + esSubcategoriaDe(categoria)
+        }
+
+        class Foto{
+            - descripcion: String
+            - Url: String
+        }
+
+        Bien --> Categoria
+        Bien --> Foto
+        Categoria --> Categoria
+        Donacion *-- HistorialEstado
+        Donacion "1" *-- "1..*" Bien : "agrupa"
+        Donacion --> EstadoDonacion : "se encuentra en"
+        RecepcionDonacion *-- Donacion : segmenta >
+    }
+
+    package "Gestion de Necesidades" {
+        enum EstadoNecesidad {
+            ABIERTA
+            SATISFECHA
+        }
+
+        abstract class Necesidad {
+            - descripcion: String
+            - estado: EstadoNecesidad
+            - subcategoriaRequerida: Categoria
+            - id: UUID
+            - fechaSolicitud: Date
+            + estaCubierta(): Boolean
+        }
+
+        class NecesidadRecurrente extends Necesidad {
+            - cantidadObjetivo: double
+            - periodo: String
+        }
+
+        class NecesidadExtraordinaria extends Necesidad {
+            - cantidadRequerida: double
+            + acumularDonacionesParciales()
+        }
+
+        Necesidad --> EstadoNecesidad : "se encuentra en"
+    }
+}
+
+' Gestión de Personas y Roles
+Persona "1" *--down--- "1..*" Rol : "asume"
+
+' Conexiones de Dominio (Roles y Donaciones)
+EntidadBeneficiaria "1" ---> "0..*" Donacion : "tiene asignadas"
+Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
+Donacion -up-> Administrador : "es gestionada por"
+RecepcionDonacion --> Administrador
+EntidadBeneficiaria "1" *--- "0..*" Necesidad : "declara"
+Necesidad "*" ---> "1" Categoria : "demanda"
+Necesidad "1" o-- "0..*" Donacion : "tiene"
