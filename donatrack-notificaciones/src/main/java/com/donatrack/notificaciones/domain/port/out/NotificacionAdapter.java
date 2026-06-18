@@ -1,8 +1,8 @@
-package com.donatrack.notificaciones.application.port.out;
+package com.donatrack.notificaciones.domain.port.out;
 
 import com.donatrack.notificaciones.domain.model.Notificacion;
 
-public interface EstrategiaNotificacion {
+public interface NotificacionAdapter {
     /**
      * Envía la notificación y marca como completada si el envío (simulado) fue exitoso.
      */

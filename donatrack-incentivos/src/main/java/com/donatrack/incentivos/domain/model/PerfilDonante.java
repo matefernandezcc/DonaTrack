@@ -15,6 +15,7 @@ import com.donatrack.common.dto.ActividadDonacionDTO;
 import com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteState;
 import com.donatrack.incentivos.domain.model.categoria.ColaboradorState;
 import com.donatrack.incentivos.domain.model.misiones.Mision;
+import com.donatrack.incentivos.domain.model.misiones.MisionesPorNivel;
 
 @Getter
 @Setter
@@ -22,7 +23,7 @@ public class PerfilDonante {
     private UUID donanteId;
     private CategoriaDonanteState categoria;
     private List<Insignia> insigniasObtenidas;
-    private Queue<Mision> misionesPendientesCategoria;
+    private MisionesPorNivel misionesPorNivel;
     private Mision misionActual;
 
     // Métricas
@@ -52,9 +53,13 @@ public class PerfilDonante {
     }
 
     public void cargarMisionesDeCategoriaActual() {
-        this.misionesPendientesCategoria = ConfiguracionRecompensasFactory
-                .obtenerMisionesPara(this.categoria.getValorEnum());
-        this.misionActual = this.misionesPendientesCategoria.poll();
+        this.misionesPorNivel = ConfiguracionRecompensasFactory
+                .obtenerMisionesPara(this, this.categoria.getValorEnum());
+        if (this.misionesPorNivel != null) {
+            this.misionActual = this.misionesPorNivel.getMisionActual();
+        } else {
+            this.misionActual = null;
+        }
     }
 
     public void registrarDonacionExitosa(ActividadDonacionDTO actividad) {
@@ -97,13 +102,16 @@ public class PerfilDonante {
     public void evaluarMisiones() {
         if ((misionActual != null) && (misionActual.evaluar(this))) {
             agregarInsignia(misionActual.getRecompensa());
-            // Obtener siguiente misión de la cola
-            misionActual = misionesPendientesCategoria.poll();
+            // Obtener siguiente misión
+            if (misionesPorNivel != null) {
+                misionActual = misionesPorNivel.avanzarMision();
+            } else {
+                misionActual = null;
+            }
             // Si ya no hay misiones, completó la categoría
             if (misionActual == null) {
                 categoria.avanzarCategoria();
             }
-
         }
     }
 

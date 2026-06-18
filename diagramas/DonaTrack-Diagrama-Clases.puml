@@ -67,7 +67,7 @@ package "servicio de donaciones"{
         note top of PersonaHumana
         **Regla de negocio:**
         Tira excepción de invalidez de 
-        rol si el rol es EntidadBeneficiaria 
+        rol si el rol es Beneficiario 
         (acepta solo Donante,
         Representante o Administrador)
         end note
@@ -151,7 +151,7 @@ package "servicio de donaciones"{
             - organizacion: PersonaJuridica
         }
 
-        class EntidadBeneficiaria extends Rol {
+        class Beneficiario extends Rol {
             - donacionesAsignadas: List<Donacion>
             - necesidadesDeclaradas: List<Necesidad>
             - correoRepresentante: String
@@ -168,7 +168,7 @@ package "servicio de donaciones"{
             + obtenerRecomendacionAsignacion(List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas)
             + asociarDonacion(d: Donacion, p: Persona)
             + actualizarDonacionesVencidas()
-            + asignarDonacionFinal(d: Donacion, e: EntidadBeneficiaria)
+            + asignarDonacionFinal(d: Donacion, e: Beneficiario)
             + administrarCamiones()
             + RankingMensual()
         }
@@ -397,111 +397,107 @@ package "Servicio de Incentivos" {
         TRANSFORMADOR
     }
 
-    abstract class CategoriaDonanteState{
-        - perfil: PerfilIncentivos
+    interface CategoriaDonanteState {
         + avanzarCategoria()
-        + getValorEnum()
+        + getValorEnum(): CategoriaDonanteEnum
     }
 
-    class ColaboradorState implements CategoriaDonanteState{
+    class ColaboradorState implements CategoriaDonanteState {
+        - perfil: PerfilDonante
         + avanzarCategoria()
-        + getValorEnum()
+        + getValorEnum(): CategoriaDonanteEnum
     }
 
-    class SostenedorState implements CategoriaDonanteState{
+    class SostenedorState implements CategoriaDonanteState {
+        - perfil: PerfilDonante
         + avanzarCategoria()
-        + getValorEnum()
+        + getValorEnum(): CategoriaDonanteEnum
     }
 
-    class TransformadorState implements CategoriaDonanteState{
+    class TransformadorState implements CategoriaDonanteState {
+        - perfil: PerfilDonante
         + avanzarCategoria()
-        + getValorEnum()
+        + getValorEnum(): CategoriaDonanteEnum
     }
 
-    class GestorIncentivos {
-        - PerfilesIncentivos: List<PerfilIncentivos>
-        + procesarNuevaDonacion(idDonante: UUID, d: DonacionDTO)
-        + ejecutarRankingMensual()
+    class PerfilDonante {
+        - donanteId: UUID
+        - categoria: CategoriaDonanteState
+        - insigniasObtenidas: List<Insignia>
+        - misionesPorNivel: MisionesPorNivel
+        - misionActual: Mision
+        - totalDonacionesHistoricas: int
+        - mesesConsecutivosDonando: int
+        - cantidadBienesDonados: int
+        - donacionesExitosas: int
+        - maxBienesEnUnaDonacion: int
+        - categoriasUnicasDonadas: Set<String>
+        - organizacionesUnicasAyudadas: Set<UUID>
+        - historialDonacionesPorMes: Map<YearMonth, Integer>
+        - ultimoMesDonacion: YearMonth
+        + PerfilDonante(donanteId: UUID)
+        + cargarMisionesDeCategoriaActual()
+        + registrarDonacionExitosa(actividad: ActividadDonacionDTO)
+        + evaluarMisiones()
+        + getMisionesActivas(): List<Mision>
     }
 
-    class PerfilIncentivos {
-        - idPerfil: UUID
-        - categoriaActual: CategoriaDonante
-        - InsigniasObtenidas: List<Insignia>
-        + evaluarMisiones(d: DonacionDTO)
-        + subirCategoria()
-        + agregarInsignia(i: Insignia)
-        + visibilizarInsignia(i: Insignia, visible: boolean)
+    abstract class MisionesPorNivel {
+        # misiones: List<Mision>
+        # misionActual: Mision
+        # perfilAsociado: PerfilDonante
+        # categoriaObtener: CategoriaDonanteEnum
+        # fechaAsignacion: LocalDate
+        + {abstract} clonar(): MisionesPorNivel
+        + avanzarMision(): Mision
     }
 
-    class MetricasDonante {
-        - totalDonaciones: int
-        - organizacionesAyudadas: int
-        - impactoAcumulado: double
-        + registrarDonacion(d: DonacionDTO)
-        + generarGraficoEvolucionMensual()
+    class MisionesPorNivelColaborador extends MisionesPorNivel {
+        + MisionesPorNivelColaborador()
+        + clonar(): MisionesPorNivel
     }
 
-    abstract class MisionesPorNivel{
-        - Misiones: List<Mision>
-        - MisionActual: Mision
-        - PerfilAsociado: PerfilIncentivos
-        - CategoriaObtener: CategoriaDonante
-        - FechaAsignacion: LocalDate
-        + Clonar()
-    }
-    
-    note top of MisionesPorNivel
-    Cada clase concreta de MisionesPorNivel
-    Tiene sus Misiones especificas concretas
-    end note
-
-    class MisionesPorNivelSostenedor extends MisionesPorNivel{
-        + Clonar()
+    class MisionesPorNivelSostenedor extends MisionesPorNivel {
+        + MisionesPorNivelSostenedor()
+        + clonar(): MisionesPorNivel
     }
 
-    class MisionesPorNivelTransformador extends MisionesPorNivel{
-        + Clonar()
-    }
-
-    class MisionesPorNivelColaborador extends MisionesPorNivel{
-        + Clonar()
+    class MisionesPorNivelTransformador extends MisionesPorNivel {
+        + MisionesPorNivelTransformador()
+        + clonar(): MisionesPorNivel
     }
 
     abstract class Mision {
         - nombre: String
-        - descripcion: String
-        - progresoObjetivo: int
-        - completada: boolean
-        + ConsultarProgeso(): int
-        + getDistanciaObjetivo(): int
-        + PerderProgreso()
+        - recompensa: Insignia
+        + Mision(nombre: String, recompensa: Insignia)
+        + {abstract} evaluar(perfil: PerfilDonante): boolean
+        + {abstract} getProgresoActual(perfil: PerfilDonante): String
     }
 
-    class MisionRacha extends Mision {
-        - RachaActual: int
-        + ConsultarProgeso(): int
-        + PerderProgreso()
+    class RachaMision extends Mision {
+        - mesesObjetivo: int
+        + evaluar(perfil: PerfilDonante): boolean
+        + getProgresoActual(perfil: PerfilDonante): String
     }
 
-    class MisionCompletitud extends Mision {
-        + ConsultarProgeso(): int
+    class CompletitudMision extends Mision {
+        - categoriasObjetivo: int
+        + evaluar(perfil: PerfilDonante): boolean
+        + getProgresoActual(perfil: PerfilDonante): String
     }
 
-    class MisionHabilDonador extends Mision {
+    class HabilDonadorMision extends Mision {
         - cantidadMinimaBienes: int
-        + ConsultarProgeso(): int
+        + evaluar(perfil: PerfilDonante): boolean
+        + getProgresoActual(perfil: PerfilDonante): String
     }
 
-    class MisionDonacionesExitosas extends Mision {
-        + ConsultarProgeso(): int
+    class DonacionesExitosasMision extends Mision {
+        - donacionesObjetivo: int
+        + evaluar(perfil: PerfilDonante): boolean
+        + getProgresoActual(perfil: PerfilDonante): String
     }
-
-    
-    Class insigniaFabric{
-        +CrearInsignia()
-    }
-
 
     class Insignia {
         - nombre: String
@@ -511,55 +507,31 @@ package "Servicio de Incentivos" {
         + setVisible(visible: boolean)
     }
 
-    class RankingMensual {
-        - Fecha: LocalDate
-        - topDonantes: List<PosicionRanking>
-        + calcularRanking(perfiles: List<PerfilIncentivos>)
-        + obtenerTop3(): List<PosicionRanking>
+    class RankingMensualService {
+        - repository: PerfilDonanteRepository
+        - puntuacionStrategy: RankingPuntuacionStrategy
+        + RankingMensualService(repository: PerfilDonanteRepository, puntuacionStrategy: RankingPuntuacionStrategy)
+        + obtenerTop5Mensual(): List<PerfilDonante>
     }
 
-    class PosicionRanking {
-        - PerfilAsociado: PerfilIncentivos
-        - posicion: int
-        + MisionesCompletadas(): int
+    interface RankingPuntuacionStrategy {
+        + calcularPuntaje(perfil: PerfilDonante): double
     }
 
-    note right of PosicionRanking
-    Para determinar las misionesCompletados
-    se evalua la cantidad de insignias obtenidas
-    end note
+    class RankingPorDonacionesStrategy implements RankingPuntuacionStrategy {
+        + calcularPuntaje(perfil: PerfilDonante): double
+    }
 
-    ' Relaciones
-    GestorIncentivos --> RankingMensual : genera >
-    GestorIncentivos --> PerfilIncentivos : administra >
-
-    MisionesPorNivel *-- Mision : contine >
-    MisionesPorNivel --> CategoriaDonante : Objetivo >
-    MisionesPorNivel <-- PerfilIncentivos : Debe completar <
-
-    Mision ..> insigniaFabric : usa >
-
-    insigniaFabric <-- Insignia
-
-    PerfilIncentivos "1" *-- "1" MetricasDonante : consolida datos en >
-    PerfilIncentivos --> CategoriaDonanteEnum : posee >
-
-    PerfilIncentivos --> CategoriaDonanteState
-
-    RankingMensual *-- "0..*" PosicionRanking : contiene >
+    interface PerfilDonanteRepository {
+        + findAll(): List<PerfilDonante>
+    }
 }
 
 package "Servicio de Notificaciones" {
-
-    enum MedioContacto {
-        EMAIL
-        SMS
-        WHATSAPP
-    }
-
-    class GestorNotificaciones {
-        + procesarEvento(evento: TipoEvento, idDestinatario: UUID, parametros: Map)
-        + despacharNotificacion(n: Notificacion)
+    class NotificadorService {
+        - adaptadores: Map<String, NotificacionAdapter>
+        + NotificadorService(adaptadores: Map<String, NotificacionAdapter>)
+        + enviarNotificacion(destinatario: String, mensaje: String, medio: String)
     }
 
     enum TipoEvento {
@@ -570,72 +542,44 @@ package "Servicio de Notificaciones" {
         CAMBIO_CATEGORIA
     }
 
-    class Evento{
-        - RolDestinatario: List<Rol>
-        - Descripcion: String
-        - TipoEvento: TipoEvento
-        + ValidoParaNotificar(Rol): boolean
+    class Evento {
+        - tipoEvento: TipoEvento
+        - descripcion: String
+        - rolesDestinatarios: List<String>
+        + validoParaNotificar(rol: String): boolean
     }
 
-    note left of Evento
-    La idea seria
-    tener eventos 
-    ya definidos 
-    en el sistema
-    endnote
-
-    class NotificacionFabric{
-        + crearNotificacion()
+    class NotificacionFactory {
+        + {static} crearNotificacion(evento: Evento, destinatario: String, mensaje: String): Notificacion
+        + {static} crearNotificacion(evento: Evento, destinatario: String, mensaje: String, medio: String): Notificacion
     }
 
     class Notificacion {
-        - id: UUID
-        - Destinatario: Persona
+        - destinatario: String
         - mensaje: String
-        - evento: Evento
-        - fechaCreacion: LocalDateTime
         - fechaEnvio: LocalDateTime
-        - enviada: boolean
-        + marcarComoCompletada()
+        - completada: boolean
+        - evento: Evento
+        - medio: String
+        + Notificacion(destinatario: String, mensaje: String)
+        + Notificacion(destinatario: String, mensaje: String, evento: Evento, medio: String)
     }
 
-    interface NotificadorAdapter {
-        + enviar(n: Notificacion): boolean
+    interface NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
     }
 
-    class AdaptadorEmail implements NotificadorAdapter {
-        + enviar(n: Notificacion): boolean
-        note "Simula conexión a SMTP/SendGrid"
+    class AdaptadorEmail implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
     }
 
-    class AdaptadorSMS implements NotificadorAdapter {
-        + enviar(n: Notificacion): boolean
-        note "Simula conexión a Twilio"
+    class AdaptadorSMS implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
     }
 
-    class AdaptadorWhatsApp implements NotificadorAdapter {
-        + enviar(n: Notificacion): boolean
-        note "Simula conexión a Meta API"
+    class AdaptadorWhatsApp implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
     }
-
-    class CreadorMensajesTemplate {
-        + generarCuerpoMensaje(evento: TipoEvento, parametros: Map): String
-    }
-
-    ' Relaciones
-    
-    GestorNotificaciones --> NotificadorAdapter : delega envío >
-    GestorNotificaciones --> CreadorMensajesTemplate : utiliza para armar texto >
-    GestorNotificaciones ..> NotificacionFabric : usa >
-
-    NotificacionFabric --> Notificacion
-
-    Notificacion --> MedioContacto : a través de >
-    Notificacion --> Evento : originada por >
-
-    Evento --> TipoEvento : corresponde a >
-
-
 }
 
 ' --- CONEXIONES ARQUITECTÓNICAS ENTRE PAQUETES ---
@@ -644,42 +588,34 @@ package "Servicio de Notificaciones" {
 Persona "1" *--down--- "1..*" Rol : "asume"
 
 ' Conexiones de Dominio (Roles y Donaciones)
-EntidadBeneficiaria "1" ---> "0..*" Donacion : "tiene asignadas"
+Beneficiario "1" ---> "0..*" Donacion : "tiene asignadas"
 Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
 Donacion -up-> Administrador : "es gestionada por"
 RecepcionDonacion --> Administrador
-EntidadBeneficiaria "1" *--- "0..*" Necesidad : "declara"
+Beneficiario "1" *--- "0..*" Necesidad : "declara"
 Necesidad "*" ---> "1" Categoria : "demanda"
 Necesidad "1" o-- "0..*" Donacion : "tiene"
 
-' Conexiones Servicio de Incentivos y donaciones
+' Conexiones Servicio de Incentivos
+Donante "1" --> "1" PerfilDonante : "tiene asociado"
+PerfilDonante "1" *-- "1" CategoriaDonanteState : posee >
+PerfilDonante "1" *-- "1" MisionesPorNivel : debe completar >
+PerfilDonante "1" *-- "0..*" Insignia : posee >
 
-class donacionesController {}
+MisionesPorNivel "1" *-- "0..*" Mision : contiene >
+MisionesPorNivel --> CategoriaDonanteEnum : Objetivo >
+Mision --> Insignia : recompensa >
 
-Donante <---> donacionesController : "Consulta"
-GestorIncentivos ---> donacionesController : "Solicita Donaciones realizadas"
+RankingMensualService --> PerfilDonanteRepository : consulta >
+RankingMensualService --> RankingPuntuacionStrategy : utiliza >
+RankingPuntuacionStrategy ..> PerfilDonante : evalúa >
 
-class ActividadDonacionDto{}
-
-Donante --> ActividadDonacionDto
-PerfilIncentivos --> ActividadDonacionDto
-
-' Conexiones con el Servicio de Notificaciones
-class IncentivosController{}
-
-    'conexion con Donaciones evento de asignación
-    Administrador --> IncentivosController
-    'conexion con Donaciones evento inactividad
-
-    'conexion con Donaciones CorreoRegistro
-    CorreoRegistro --> IncentivosController : "despacha vía"
-
-    'conexion con Incentivos evento MisionCumplida
-    Mision --> IncentivosController
-    IncentivosController --> GestorNotificaciones
-
-'conexion exterior
-ConeccionIngresoInicial --> SegmentadorDeBienes
+' Conexiones Servicio de Notificaciones
+NotificadorService --> NotificacionAdapter : utiliza >
+NotificadorService ..> Notificacion : envía >
+NotificacionFactory ..> Notificacion : crea >
+Notificacion --> Evento : posee >
+Evento --> TipoEvento : posee >
 
 @enduml
 

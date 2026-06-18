@@ -3,15 +3,10 @@ skinparam classAttributeIconSize 0
 
 package "Servicio de Notificaciones" {
 
-    enum MedioContacto {
-        EMAIL
-        SMS
-        WHATSAPP
-    }
-
-    class GestorNotificaciones {
-        + procesarEvento(evento: TipoEvento, idDestinatario: UUID, parametros: Map)
-        + despacharNotificacion(n: Notificacion)
+    class NotificadorService {
+        - adaptadores: Map<String, NotificacionAdapter>
+        + NotificadorService(adaptadores: Map<String, NotificacionAdapter>)
+        + enviarNotificacion(destinatario: String, mensaje: String, medio: String)
     }
 
     enum TipoEvento {
@@ -22,70 +17,52 @@ package "Servicio de Notificaciones" {
         CAMBIO_CATEGORIA
     }
 
-    class Evento{
-        - RolDestinatario: List<Rol>
-        - Descripcion: String
-        - TipoEvento: TipoEvento
-        + ValidoParaNotificar(Rol): boolean
+    class Evento {
+        - tipoEvento: TipoEvento
+        - descripcion: String
+        - rolesDestinatarios: List<String>
+        + validoParaNotificar(rol: String): boolean
     }
 
-    note left of Evento
-    La idea seria
-    tener eventos 
-    ya definidos 
-    en el sistema
-    endnote
-
-    class NotificacionFabric{
-        + crearNotificacion()
+    class NotificacionFactory {
+        + {static} crearNotificacion(evento: Evento, destinatario: String, mensaje: String): Notificacion
+        + {static} crearNotificacion(evento: Evento, destinatario: String, mensaje: String, medio: String): Notificacion
     }
 
     class Notificacion {
-        - id: UUID
-        - Destinatario: Persona
+        - destinatario: String
         - mensaje: String
-        - evento: Evento
-        - fechaCreacion: LocalDateTime
         - fechaEnvio: LocalDateTime
-        - enviada: boolean
-        + marcarComoCompletada()
+        - completada: boolean
+        - evento: Evento
+        - medio: String
+        + Notificacion(destinatario: String, mensaje: String)
+        + Notificacion(destinatario: String, mensaje: String, evento: Evento, medio: String)
     }
 
-    interface NotificadorAdapter {
-        + enviar(n: Notificacion): boolean
+    interface NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
     }
 
-    class AdaptadorEmail implements NotificadorAdapter {
-        + enviar(n: Notificacion): boolean
-        note "Simula conexión a SMTP/SendGrid"
+    class AdaptadorEmail implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
     }
 
-    class AdaptadorSMS implements NotificadorAdapter {
-        + enviar(n: Notificacion): boolean
-        note "Simula conexión a Twilio"
+    class AdaptadorSMS implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
     }
 
-    class AdaptadorWhatsApp implements NotificadorAdapter {
-        + enviar(n: Notificacion): boolean
-        note "Simula conexión a Meta API"
-    }
-
-    class CreadorMensajesTemplate {
-        + generarCuerpoMensaje(evento: TipoEvento, parametros: Map): String
+    class AdaptadorWhatsApp implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
     }
 
     ' Relaciones
-    
-    GestorNotificaciones --> NotificadorAdapter : delega envío a >
-    GestorNotificaciones --> CreadorMensajesTemplate : utiliza para armar texto >
-    GestorNotificaciones ..> NotificacionFabric : usa >
+    NotificadorService --> NotificacionAdapter : utiliza >
+    NotificadorService ..> Notificacion : envía >
 
-    NotificacionFabric --> Notificacion
+    NotificacionFactory ..> Notificacion : crea >
 
-    Notificacion --> MedioContacto : a través de >
-    Notificacion --> Evento : originada por >
-
-    Evento --> TipoEvento : corresponde a >
-
+    Notificacion --> Evento : posee >
+    Evento --> TipoEvento : posee >
 }
 @enduml

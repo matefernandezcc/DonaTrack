@@ -83,7 +83,7 @@ package "servicio de donaciones"{
         note top of PersonaHumana
         **Regla de negocio:**
         Tira excepción de invalidez de 
-        rol si el rol es EntidadBeneficiaria 
+        rol si el rol es Beneficiario 
         (acepta solo Donante,
         Representante o Administrador)
         end note
@@ -137,7 +137,7 @@ package "servicio de donaciones"{
             - organizacion: PersonaJuridica
         }
 
-        class EntidadBeneficiaria extends Rol {
+        class Beneficiario extends Rol {
             - donacionesAsignadas: List<Donacion>
             - necesidadesDeclaradas: List<Necesidad>
             - correoRepresentante: String
@@ -154,7 +154,7 @@ package "servicio de donaciones"{
             + obtenerRecomendacionAsignacion(List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas)
             + asociarDonacion(d: Donacion, p: Persona)
             + actualizarDonacionesVencidas()
-            + asignarDonacionFinal(d: Donacion, e: EntidadBeneficiaria)
+            + asignarDonacionFinal(d: Donacion, e: Beneficiario)
             + administrarCamiones()
             + RankingMensual()
         }
@@ -292,10 +292,10 @@ package "servicio de donaciones"{
 Persona "1" *--down--- "1..*" Rol : "asume"
 
 ' Conexiones de Dominio (Roles y Donaciones)
-EntidadBeneficiaria "1" ---> "0..*" Donacion : "tiene asignadas"
+Beneficiario "1" ---> "0..*" Donacion : "tiene asignadas"
 Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
 Donacion -up-> Administrador : "es gestionada por"
 RecepcionDonacion --> Administrador
-EntidadBeneficiaria "1" *--- "0..*" Necesidad : "declara"
+Beneficiario "1" *--- "0..*" Necesidad : "declara"
 Necesidad "*" ---> "1" Categoria : "demanda"
 Necesidad "1" o-- "0..*" Donacion : "tiene"

@@ -39,6 +39,7 @@ public class DonacionController {
     private final BeneficiarioRepository beneficiarioRepository;
     private final com.donatrack.donaciones.application.service.AsignacionBatchJob asignacionBatchJob;
     private final RecepcionDonacionesUseCase recepcionDonacionesUseCase;
+    private final com.donatrack.donaciones.application.service.AuditoriaDepositoJob auditoriaDepositoJob;
     
     public DonacionController(MatchmakerService matchmakerService, 
                               ServicioNotificaciones servicioNotificaciones,
@@ -46,7 +47,8 @@ public class DonacionController {
                               DonacionRepository donacionRepository,
                               BeneficiarioRepository beneficiarioRepository,
                               com.donatrack.donaciones.application.service.AsignacionBatchJob asignacionBatchJob,
-                              RecepcionDonacionesUseCase recepcionDonacionesUseCase) {
+                              RecepcionDonacionesUseCase recepcionDonacionesUseCase,
+                              com.donatrack.donaciones.application.service.AuditoriaDepositoJob auditoriaDepositoJob) {
         this.matchmakerService = matchmakerService;
         this.servicioNotificaciones = servicioNotificaciones;
         this.incentivoClient = incentivoClient;
@@ -54,6 +56,13 @@ public class DonacionController {
         this.beneficiarioRepository = beneficiarioRepository;
         this.asignacionBatchJob = asignacionBatchJob;
         this.recepcionDonacionesUseCase = recepcionDonacionesUseCase;
+        this.auditoriaDepositoJob = auditoriaDepositoJob;
+    }
+
+    @PostMapping("/auditoria/vencidos")
+    public ResponseEntity<Void> auditarVencidos() {
+        auditoriaDepositoJob.auditarVencidos();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/recepcion")

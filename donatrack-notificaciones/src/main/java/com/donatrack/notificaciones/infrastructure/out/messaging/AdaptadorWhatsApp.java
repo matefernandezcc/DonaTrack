@@ -1,17 +1,15 @@
 package com.donatrack.notificaciones.infrastructure.out.messaging;
 
-import com.donatrack.notificaciones.application.port.out.EstrategiaNotificacion;
-
+import com.donatrack.notificaciones.domain.port.out.NotificacionAdapter;
 import com.donatrack.notificaciones.domain.model.Notificacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.stereotype.Component;
 
 @Component("WHATSAPP")
-public class NotificacionWhatsApp implements EstrategiaNotificacion {
+public class AdaptadorWhatsApp implements NotificacionAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(NotificacionWhatsApp.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdaptadorWhatsApp.class);
 
     @Override
     public void enviar(Notificacion notificacion) {

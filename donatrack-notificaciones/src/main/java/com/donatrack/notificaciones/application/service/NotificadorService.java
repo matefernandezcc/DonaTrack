@@ -1,7 +1,6 @@
 package com.donatrack.notificaciones.application.service;
 
-import com.donatrack.notificaciones.application.port.out.EstrategiaNotificacion;
-
+import com.donatrack.notificaciones.domain.port.out.NotificacionAdapter;
 import com.donatrack.notificaciones.domain.model.Notificacion;
 import org.springframework.stereotype.Service;
 
@@ -10,24 +9,24 @@ import java.util.Map;
 @Service
 public class NotificadorService {
 
-    private final Map<String, EstrategiaNotificacion> estrategias;
+    private final Map<String, NotificacionAdapter> adaptadores;
 
-    public NotificadorService(Map<String, EstrategiaNotificacion> estrategias) {
-        this.estrategias = estrategias;
+    public NotificadorService(Map<String, NotificacionAdapter> adaptadores) {
+        this.adaptadores = adaptadores;
     }
 
     public void enviarNotificacion(String destinatario, String mensaje, String medio) {
         Notificacion notificacion = new Notificacion(destinatario, mensaje);
-        EstrategiaNotificacion estrategia = estrategias.getOrDefault(
+        NotificacionAdapter adaptador = adaptadores.getOrDefault(
             medio != null ? medio.toUpperCase() : "EMAIL", 
-            estrategias.get("EMAIL")
+            adaptadores.get("EMAIL")
         );
         
-        if (estrategia != null) {
-            estrategia.enviar(notificacion);
+        if (adaptador != null) {
+            adaptador.enviar(notificacion);
         } else {
             // Fallback en caso de que EMAIL tampoco exista
-            System.err.println("No se encontró estrategia de notificación para: " + medio);
+            System.err.println("No se encontró adaptador de notificación para: " + medio);
         }
     }
 }
