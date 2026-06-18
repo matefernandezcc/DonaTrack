@@ -1,0 +1,22 @@
+info:
+  name: Donacion Entregada
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/donaciones/:id/estado/entregada?idDonante=987f6543-e89b-12d3-a456-426614174000"
+  params:
+    - name: idDonante
+      value: 987f6543-e89b-12d3-a456-426614174000
+      type: query
+    - name: id
+      value: 123e4567-e89b-12d3-a456-426614174000
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,19 @@
+info:
+  name: Sugerir Beneficiarios
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{baseUrl}}/donaciones/:id/matchmaking"
+  params:
+    - name: id
+      value: 123e4567-e89b-12d3-a456-426614174000
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

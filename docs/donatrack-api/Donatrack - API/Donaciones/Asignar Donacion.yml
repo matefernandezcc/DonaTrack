@@ -1,0 +1,25 @@
+info:
+  name: Asignar Donacion
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/donaciones/:id/estado/asignar"
+  params:
+    - name: id
+      value: 123e4567-e89b-12d3-a456-426614174000
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Entidad de Ayuda Mutua"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
