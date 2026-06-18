@@ -48,13 +48,9 @@ public class ImportadorCSVTest {
             "Carlos",
             56);
 
-    List<Persona> ListaPersonas = new ArrayList<>();
+    com.donatrack.donaciones.domain.repository.PersonaRepository personaRepository = new com.donatrack.donaciones.infrastructure.adapters.out.persistence.MockPersonaRepository();
 
-    List<Persona> ListaImportar = new ArrayList<>();
-    ListaImportar.add(personaPrueba);
-    ListaImportar.add(personaPrueba2);
-
-    ImportadorCSV importador = new ImportadorCSV(ListaPersonas);
+    ImportadorCSV importador = new ImportadorCSV(personaRepository);
 
     // el archivo tiene 19986 registros
     importador.importar("../enunciado/CSV/donantes_import_20000_UTF8_BOM.csv");

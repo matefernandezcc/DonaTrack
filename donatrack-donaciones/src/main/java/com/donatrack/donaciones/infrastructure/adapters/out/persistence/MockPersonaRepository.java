@@ -33,4 +33,12 @@ public class MockPersonaRepository implements PersonaRepository {
                 .filter(p -> p.getId().equals(id))
                 .findFirst();
     }
+
+    @Override
+    public Optional<Persona> buscarPorEmail(String email) {
+        if (email == null) return Optional.empty();
+        return baseDeDatosMock.stream()
+                .filter(p -> p.getEmail() != null && p.getEmail().equalsIgnoreCase(email.trim()))
+                .findFirst();
+    }
 }

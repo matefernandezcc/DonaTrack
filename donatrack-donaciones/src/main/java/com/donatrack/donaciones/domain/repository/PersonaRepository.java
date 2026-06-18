@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public interface PersonaRepository {
     Optional<Persona> buscarPorId(UUID id);
+    Optional<Persona> buscarPorEmail(String email);
     List<Persona> obtenerTodas();
     void guardar(Persona persona);
 }
