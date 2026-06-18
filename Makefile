@@ -45,7 +45,7 @@ run:
 	mvn spring-boot:run -pl $(SERVER_MODULE)
 
 ngrok:
-	ngrok http --url=exclude-stoplight-registrar.ngrok-free.dev 80
+	ngrok http --url=exclude-stoplight-registrar.ngrok-free.dev 8080
 
 run-clean:
 	mvn clean install && mvn spring-boot:run -pl $(SERVER_MODULE)
