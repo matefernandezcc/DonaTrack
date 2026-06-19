@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.donatrack.donaciones.domain.model.donacion.Bien;
-import com.donatrack.donaciones.domain.model.donacion.Categoria;
+import com.donatrack.donaciones.domain.model.donacion.Subcategoria;
 
 public class SegmentarPorSubcategoria implements EstrategiaSegmentacion {
 
@@ -20,7 +20,7 @@ public class SegmentarPorSubcategoria implements EstrategiaSegmentacion {
 
       // Robo la idea de Maxi: Agrupo bienes usando su subcategoria como clave 
       // Te da un mapa temporal { "Ropa invierno" -> [campera, bufanda], "Muebles" -> [sillas] }
-      Map<Categoria, List<Bien>> bienesEnLista =
+      Map<Subcategoria, List<Bien>> bienesEnLista =
           listaAIterar.stream().collect(Collectors.groupingBy(Bien::getSubcategoria));
 
       listasSegmentadas.addAll(bienesEnLista.values());

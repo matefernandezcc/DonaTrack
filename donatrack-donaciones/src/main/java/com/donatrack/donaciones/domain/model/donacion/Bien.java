@@ -13,7 +13,7 @@ public class Bien {
   @Getter @Setter private Boolean esUsado;
   @Getter @Setter private LocalDate fechaVencimiento;
   @Getter @Setter private List<Foto> fotos;
-  @Getter @Setter private Categoria subcategoria;
+  @Getter @Setter private Subcategoria subcategoria;
 
   public Bien(
       String descripcion,

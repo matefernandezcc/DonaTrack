@@ -4,7 +4,7 @@ import com.donatrack.donaciones.application.port.in.BienDTO;
 import com.donatrack.donaciones.application.port.in.CargaBienesRequestDTO;
 import com.donatrack.donaciones.application.port.in.RecepcionDonacionesUseCase;
 import com.donatrack.donaciones.domain.model.donacion.Bien;
-import com.donatrack.donaciones.domain.model.donacion.Categoria;
+import com.donatrack.donaciones.domain.model.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.donacion.RecepcionDonacion;
 import com.donatrack.donaciones.domain.model.persona.Persona;
@@ -82,8 +82,8 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
                 dto.esUsado(),
                 dto.fechaVencimiento()
         );
-        // En una app real, buscaríamos la Categoria en un repositorio
-        Categoria subcategoriaMock = new Categoria(dto.nombreSubcategoria(), "Subcategoría generada");
+        // En una app real, buscaríamos la Subcategoria en un repositorio
+        Subcategoria subcategoriaMock = new Subcategoria(dto.nombreSubcategoria(), "Subcategoría generada");
         bien.setSubcategoria(subcategoriaMock);
         return bien;
     }

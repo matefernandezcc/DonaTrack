@@ -5,18 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.donatrack.donaciones.domain.model.donacion.Categoria;
+import com.donatrack.donaciones.domain.model.donacion.Subcategoria;
 
 public class CategoriaTest {
   Categoria categoriaPadre = new Categoria("ropa", "ropaGeneral");
-  Categoria categoriaHija = new Categoria("camisas", "camisas");
+  Subcategoria categoriaHija = new Subcategoria("camisas", "camisas");
 
   @Test
   public void testEsSubcategoriaDePadre() {
-    Categoria categoriaNieta = new Categoria("camisasMangaCorta", "camisasMangaCorta");
+    Subcategoria categoriaNieta = new Subcategoria("camisasMangaCorta", "camisasMangaCorta");
     categoriaPadre.agregarSubcategoria(categoriaHija);
-
-    // Debería fallar al agregar subcategoría a una hija
-    assertEquals(false, categoriaHija.agregarSubcategoria(categoriaNieta));
 
     assertEquals(true, categoriaHija.esSubcategoriaDe(categoriaPadre));
     assertEquals(false, categoriaNieta.esSubcategoriaDe(categoriaPadre));

@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.domain.model.necesidades;
 
 import com.donatrack.donaciones.domain.model.donacion.Bien;
-import com.donatrack.donaciones.domain.model.donacion.Categoria;
+import com.donatrack.donaciones.domain.model.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.enums.EstadoNecesidad;
 
@@ -15,7 +15,7 @@ public class NecesidadRecurrente extends Necesidad {
 
   public NecesidadRecurrente(
       String descripcion,
-      Categoria subcategoriaRequerida,
+      Subcategoria subcategoriaRequerida,
       double cantidadObjetivo,
       double periodo) {
     super(descripcion, subcategoriaRequerida);

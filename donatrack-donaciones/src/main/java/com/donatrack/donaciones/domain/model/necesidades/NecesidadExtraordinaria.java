@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.domain.model.necesidades;
 
 import com.donatrack.donaciones.domain.model.donacion.Bien;
-import com.donatrack.donaciones.domain.model.donacion.Categoria;
+import com.donatrack.donaciones.domain.model.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.enums.EstadoNecesidad;
 
@@ -15,7 +15,7 @@ public class NecesidadExtraordinaria extends Necesidad {
   @Getter private List<Donacion> donacionesParciales;
 
   public NecesidadExtraordinaria(
-      String descripcion, Categoria subcategoriaRequerida, double cantidadRequerida) {
+      String descripcion, Subcategoria subcategoriaRequerida, double cantidadRequerida) {
     super(descripcion, subcategoriaRequerida);
     this.cantidadRequerida = cantidadRequerida;
     this.donacionesParciales = new ArrayList<>();

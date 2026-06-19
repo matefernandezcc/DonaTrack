@@ -240,8 +240,14 @@ package "servicio de donaciones"{
         class Categoria {
             - nombre: String
             - descripcion: String
-            - subcategorias: List<Categoria>
-            + agregarSubcategoria(categoria)
+            - subcategorias: List<Subcategoria>
+            + agregarSubcategoria(Subcategoria)
+        }
+
+        class Subcategoria {
+            - nombre: String
+            - descripcion: String
+            - categoriaPadre: Categoria
             + esSubcategoriaDe(categoria)
         }
 
@@ -250,9 +256,9 @@ package "servicio de donaciones"{
             - Url: String
         }
 
-        Bien --> Categoria
+        Bien --> Subcategoria
         Bien --> Foto
-        Categoria --> Categoria
+        Categoria --> Subcategoria
         Donacion *-- HistorialEstado
         Donacion "1" *-- "1..*" Bien : "agrupa"
         Donacion --> EstadoDonacion : "se encuentra en"
@@ -268,7 +274,7 @@ package "servicio de donaciones"{
         abstract class Necesidad {
             - descripcion: String
             - estado: EstadoNecesidad
-            - subcategoriaRequerida: Categoria
+            - subcategoriaRequerida: Subcategoria
             - id: UUID
             - fechaSolicitud: Date
             + estaCubierta(): Boolean
@@ -297,5 +303,5 @@ Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
 Donacion -up-> Administrador : "es gestionada por"
 RecepcionDonacion --> Administrador
 Beneficiario "1" *--- "0..*" Necesidad : "declara"
-Necesidad "*" ---> "1" Categoria : "demanda"
+Necesidad "*" ---> "1" Subcategoria : "demanda"
 Necesidad "1" o-- "0..*" Donacion : "tiene"
