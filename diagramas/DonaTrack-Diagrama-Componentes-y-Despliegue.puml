@@ -1,0 +1,65 @@
+
+@startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #333333
+}
+
+' Componente de API REST expuesto por el Backend
+component "API REST (HTTPS)" as ModuloAPI
+
+' Interfaz Frontend
+component "Frontend SPA\n(Cliente Web/Móvil)" as Frontend
+
+' --- BACKEND MULTIMÓDULO ---
+package "DonaTrack Backend (Aplicación Multimódulo)" {
+    
+    component "Módulo de Donaciones" as ModDonaciones
+    component "Módulo de Incentivos" as ModIncentivos
+    component "Módulo de Logística" as ModLogistica
+    component "Módulo de Notificaciones" as ModNotificaciones
+    
+    ' Layout hints para evitar superposición
+    ModDonaciones -[hidden]right- ModIncentivos
+    ModIncentivos -[hidden]right- ModLogistica
+    
+    ' Dependencias internas
+    ModDonaciones ---(0-- ModNotificaciones : <<uses>>
+    ModIncentivos ---(0-- ModNotificaciones : <<uses>>
+    ModDonaciones ---(0-- ModLogistica : <<uses>>
+    ModIncentivos ---(0-- ModDonaciones : <<uses>>
+    
+    ' Exposición de la API hacia el exterior
+    ModuloAPI --(0-- ModDonaciones
+    ModuloAPI --(0-- ModIncentivos
+    ModuloAPI --(0-- ModLogistica
+}
+
+' --- SISTEMAS EXTERNOS ---
+component "Base de Datos\n(PostgreSQL)" as DB
+
+component "Servidor n8n\n(Automatización)" as n8n
+
+component "APIs Notificaciones\n(Twilio, SendGrid, Meta)" as SaaSNotif
+
+
+' --- CONEXIONES EXTERNAS ---
+
+Frontend -(0- ModuloAPI : <<consume>>
+
+' Conexiones a BD
+ModDonaciones --(0-- DB : "JDBC / JPA"
+ModIncentivos --(0-- DB : "JDBC / JPA"
+ModLogistica --(0-- DB : "JDBC / JPA"
+ModNotificaciones --(0-- DB : "JDBC / JPA"
+
+' Integraciones n8n y Redes
+ModIncentivos -(0- n8n : "Notifica insignia obtenida"
+n8n -(0- ModuloAPI : "Actualiza estado en BD"
+
+' Integraciones SaaS
+ModNotificaciones -(0- SaaSNotif : "Despacha SMS/WA/Email"
+
+@enduml
