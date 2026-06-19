@@ -4,77 +4,138 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DonaTrack · Panel de administración</title>
+    <title>DonaTrack · Panel de Control</title>
+    <!-- SLDS Stylesheet -->
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/styles/salesforce-lightning-design-system.min.css" />
+    <!-- Leaflet Map Stylesheet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Custom Overrides -->
     <link rel="stylesheet" href="css/styles.css" />
 </head>
 
 <body class="dt-app-body">
     <!-- TOP NAVBAR -->
-    <header class="dt-topbar slds-grid slds-grid_vertical-align-center slds-p-horizontal_medium">
-        <button id="sidebarToggle" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Menú"
-            aria-label="Menú">
-            <svg class="slds-button__icon" aria-hidden="true">
-                <use
-                    xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#rows">
-                </use>
-            </svg>
-        </button>
-
-        <div class="dt-logo slds-m-left_medium">
-            <img src="img/DonaTrack-logo-light.svg" alt="DonaTrack" />
-        </div>
-
-        <div class="dt-topbar__search slds-m-left_x-large slds-grow">
-            <div class="slds-form-element">
-                <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
-                    <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default"
-                        aria-hidden="true">
-                        <use
-                            xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#search">
-                        </use>
-                    </svg>
-                    <input type="search" class="slds-input" placeholder="Buscar donaciones, donantes, entidades..." />
+    <!-- TOP NAVBAR -->
+    <header class="slds-global-header_container">
+        <a href="#" class="slds-assistive-text slds-assistive-text_focus">Skip to Navigation</a>
+        <a href="#" class="slds-assistive-text slds-assistive-text_focus">Skip to Main Content</a>
+        <div class="slds-global-header slds-grid slds-grid_align-spread">
+            <!-- Logo & Mobile Toggle -->
+            <div class="slds-global-header__item" style="display: flex; align-items: center; gap: 8px;">
+                <button id="sidebarToggle" class="slds-button slds-icon-waffle_container slds-context-bar__button" title="Menú" aria-label="Menú" style="margin: 0; padding: 0;">
+                    <span class="slds-icon-waffle">
+                        <span class="slds-r1"></span>
+                        <span class="slds-r2"></span>
+                        <span class="slds-r3"></span>
+                        <span class="slds-r4"></span>
+                        <span class="slds-r5"></span>
+                        <span class="slds-r6"></span>
+                        <span class="slds-r7"></span>
+                        <span class="slds-r8"></span>
+                        <span class="slds-r9"></span>
+                    </span>
+                    <span class="slds-assistive-text">Abrir menú lateral</span>
+                </button>
+                <div class="slds-global-header__logo" style="background-image: none !important; display: flex; align-items: center;">
+                    <img src="img/package.svg" alt="DonaTrack" style="height: 32px; width: 32px;" />
+                    <span class="slds-text-heading_small slds-m-left_small" style="font-weight: bold; color: #0176d3;">DonaTrack</span>
                 </div>
             </div>
-        </div>
 
-        <div class="dt-topbar__actions slds-grid slds-grid_vertical-align-center">
-            <button class="slds-button slds-button_icon slds-button_icon-container dt-notif" title="Notificaciones"
-                aria-label="Notificaciones">
-                <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                    <use
-                        xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#notification">
-                    </use>
-                </svg>
-                <span class="dt-notif__badge">3</span>
-            </button>
-
-            <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-m-left_small" id="avatarMenu">
-                <button class="slds-button dt-avatar-btn" aria-haspopup="true">
-                    <span class="slds-avatar slds-avatar_circle slds-avatar_small">
-                        <abbr class="slds-avatar__initials slds-avatar__initials_inverse"
-                            title="Administrador">AD</abbr>
-                    </span>
-                    <span class="slds-m-left_x-small slds-text-body_small dt-hide-sm">Administrador</span>
-                    <svg class="slds-button__icon slds-m-left_x-small" aria-hidden="true">
-                        <use
-                            xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#down">
-                        </use>
-                    </svg>
-                </button>
-                <div class="slds-dropdown slds-dropdown_right">
-                    <ul class="slds-dropdown__list" role="menu">
-                        <li class="slds-dropdown__item" role="presentation"><a href="#" role="menuitem"><span
-                                    class="slds-truncate">Mi perfil</span></a></li>
-                        <li class="slds-dropdown__item" role="presentation"><a href="#" role="menuitem"><span
-                                    class="slds-truncate">Configuración</span></a></li>
-                        <li class="slds-has-divider_top-space" role="separator"></li>
-                        <li class="slds-dropdown__item" role="presentation"><a href="#" role="menuitem"
-                                id="logoutBtn"><span class="slds-truncate">Cerrar sesión</span></a></li>
-                    </ul>
+            <!-- Global Search Combobox -->
+            <!-- Global Search -->
+            <div class="slds-global-header__item slds-global-header__item_search">
+                <div class="slds-form-element">
+                    <label class="slds-form-element__label slds-assistive-text" for="combobox-id-2">Buscar en DonaTrack</label>
+                    <div class="slds-form-element__control">
+                        <div class="slds-combobox_container">
+                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" id="primary-search-combobox-id-1">
+                                <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_left slds-global-search__form-element" role="none">
+                                    <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true" style="fill: #706e6b; width: 14px; height: 14px;">
+                                        <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#search"></use>
+                                    </svg>
+                                    <input class="slds-input slds-combobox__input" id="combobox-id-2" aria-autocomplete="list" aria-controls="search-listbox-id-1" aria-expanded="false" aria-haspopup="listbox" autoComplete="off" role="combobox" type="text" placeholder="Buscar en DonaTrack..." style="border-radius: 4px; padding-left: 36px; min-height: 32px;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Global Actions -->
+            <div class="slds-global-header__item">
+                <ul class="slds-global-actions">
+                    <!-- Notifications Dropdown -->
+                    <li class="slds-global-actions__item">
+                        <div class="slds-dropdown-trigger slds-dropdown-trigger_click" id="notifDropdown">
+                            <button class="slds-button slds-button_icon slds-button_icon-container slds-button_icon-small slds-global-actions__notifications slds-global-actions__item-action" title="Notificaciones" aria-live="assertive" aria-atomic="true" id="notifBellBtn">
+                                <svg class="slds-button__icon slds-global-header__icon" aria-hidden="true" style="width: 20px; height: 20px;">
+                                    <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#notification"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Notificaciones</span>
+                            </button>
+                            <span class="slds-notification-badge" id="notifCount" style="display: none;">0</span>
+                            
+                            <!-- Notifications Popover -->
+                            <section aria-describedby="dialog-body-id-11" aria-labelledby="dialog-heading-id-11" class="slds-popover slds-popover_large slds-nubbin_top-right" role="dialog" style="position:absolute;top:calc(100% + 12px);right:-12px; max-height: 400px; overflow-y: auto;">
+                                <div class="slds-popover__body slds-p-around_none" id="dialog-body-id-11">
+                                    <header class="slds-popover__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center" style="font-weight: bold; color: #181818; padding: 12px 16px; border-bottom: 1px solid #e5e5e5;">
+                                        <h2 class="slds-text-heading_small" id="dialog-heading-id-11" style="margin: 0; font-size: 14px;">Notificaciones Recientes</h2>
+                                        <button class="slds-button slds-button_icon slds-button_icon-more" aria-haspopup="true" aria-expanded="false" title="Opciones de notificación" style="border: none; background: transparent; padding: 0;">
+                                            <svg class="slds-button__icon" aria-hidden="true" style="fill: #706e6b; width: 14px; height: 14px;">
+                                                <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#settings"></use>
+                                            </svg>
+                                            <svg class="slds-button__icon slds-button__icon_x-small" aria-hidden="true" style="fill: #706e6b; width: 8px; height: 8px;">
+                                                <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#down"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Opciones</span>
+                                        </button>
+                                    </header>
+                                    <ul id="notifList" class="slds-dropdown__list" role="menu" style="padding: 4px;">
+                                        <!-- Populated dynamically -->
+                                    </ul>
+                                </div>
+                            </section>
+                        </div>
+                    </li>
+                    
+                    <!-- User Avatar Dropdown -->
+                    <li class="slds-global-actions__item">
+                        <div class="slds-dropdown-trigger slds-dropdown-trigger_click" id="avatarMenu">
+                            <button class="slds-button slds-global-actions__avatar slds-global-actions__item-action" title="Usuario" aria-haspopup="true" id="avatarMenuBtn" style="display: flex; align-items: center; gap: 8px; background: transparent; border: none; padding: 0; cursor: pointer;">
+                                <span class="slds-avatar slds-avatar_circle slds-avatar_medium" style="width: 32px; height: 32px;">
+                                    <img alt="Usuario" src="https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=admin" title="Avatar de usuario" id="avatarImg" />
+                                </span>
+                                <span class="slds-m-left_xx-small slds-text-body_small dt-hide-sm" id="avatarName" style="color: #3e3e3c; font-weight: normal; margin-left: 4px;">Usuario</span>
+                                <svg class="slds-button__icon slds-button__icon_x-small slds-m-left_xx-small" aria-hidden="true" style="fill: #3e3e3c; width: 10px; height: 10px; margin-left: 4px;">
+                                    <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#down"></use>
+                                </svg>
+                            </button>
+                            <div class="slds-dropdown slds-dropdown_right" style="margin-top: 10px;">
+                                <ul class="slds-dropdown__list" role="menu">
+                                    <li class="slds-dropdown__item" role="presentation">
+                                        <a href="#" role="menuitem" tabindex="0">
+                                            <span class="slds-truncate">Mi perfil</span>
+                                        </a>
+                                    </li>
+                                    <li class="slds-dropdown__item" role="presentation">
+                                        <a href="#" role="menuitem" tabindex="-1">
+                                            <span class="slds-truncate">Configuración</span>
+                                        </a>
+                                    </li>
+                                    <li class="slds-has-divider_top-space" role="separator"></li>
+                                    <li class="slds-dropdown__item" role="presentation">
+                                        <a href="#" role="menuitem" tabindex="-1" id="logoutBtn">
+                                            <span class="slds-truncate">Cerrar sesión</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </header>
@@ -82,234 +143,544 @@
     <div class="dt-shell">
         <!-- SIDEBAR -->
         <aside class="dt-sidebar" id="sidebar">
-            <nav class="dt-nav">
-                <ul>
-                    <li class="dt-nav__item is-active" data-icon="home"><a href="#dashboard">Dashboard</a></li>
-                    <li class="dt-nav__item" data-icon="moneybag"><a href="#donaciones">Donaciones</a></li>
-                    <li class="dt-nav__item" data-icon="people"><a href="#donantes">Donantes</a></li>
-                    <li class="dt-nav__item" data-icon="company"><a href="#entidades">Entidades Beneficiarias</a></li>
-                    <li class="dt-nav__item" data-icon="truck"><a href="#camiones">Camiones</a></li>
-                    <li class="dt-nav__item" data-icon="package"><a href="#entregas">Entregas</a></li>
-                    <li class="dt-nav__item" data-icon="ranking"><a href="#ranking">Ranking</a></li>
-                    <li class="dt-nav__item" data-icon="upload"><a href="#csv">Importaciones CSV</a></li>
-                    <li class="dt-nav__item" data-icon="metrics"><a href="#reportes">Reportes</a></li>
-                    <li class="dt-nav__item" data-icon="settings"><a href="#config">Configuración</a></li>
-                </ul>
+            <nav class="slds-nav-vertical slds-nav-vertical_shade" aria-label="Navegación principal" style="height: 100%;">
+                <div class="slds-nav-vertical__section">
+                    <h2 id="sidebarNavTitle" class="slds-nav-vertical__title">Menú</h2>
+                    <ul aria-describedby="sidebarNavTitle" id="sidebarNavList">
+                        <!-- Populated dynamically based on user role -->
+                    </ul>
+                </div>
             </nav>
         </aside>
 
-        <!-- MAIN -->
-        <main class="dt-main">
-            <!-- Breadcrumb -->
+        <!-- MAIN CONTENT -->
+        <main class="dt-main slds-p-bottom_xx-large">
+            <!-- Breadcrumbs -->
             <nav role="navigation" aria-label="Breadcrumbs" class="slds-p-horizontal_large slds-p-top_medium">
-                <ol class="slds-breadcrumb slds-list_horizontal">
-                    <li class="slds-breadcrumb__item"><a href="#">Inicio</a></li>
-                    <li class="slds-breadcrumb__item"><a href="#">Administración</a></li>
-                    <li class="slds-breadcrumb__item"><span>Dashboard</span></li>
+                <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+                    <li class="slds-breadcrumb__item"><a href="#">DonaTrack</a></li>
+                    <li class="slds-breadcrumb__item"><a href="javascript:void(0)" id="breadcrumbRole">Panel</a></li>
+                    <li class="slds-breadcrumb__item"><a href="javascript:void(0)" id="breadcrumbSection">Dashboard</a></li>
                 </ol>
             </nav>
 
-            <!-- Page header -->
+            <!-- Page Header -->
             <div class="slds-page-header slds-page-header_record-home slds-m-horizontal_large slds-m-top_small">
                 <div class="slds-page-header__row">
                     <div class="slds-page-header__col-title">
                         <div class="slds-media">
                             <div class="slds-media__figure">
-                                <span class="slds-icon_container slds-icon-standard-dashboard">
-                                    <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
-                                        <use
-                                            xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/standard-sprite/svg/symbols.svg#dashboard">
-                                        </use>
-                                    </svg>
+                                <span class="slds-icon_container" id="headerIconContainer">
+                                    <!-- Dynamic Icon -->
                                 </span>
                             </div>
                             <div class="slds-media__body">
                                 <div class="slds-page-header__name">
                                     <div class="slds-page-header__name-title">
                                         <h1>
-                                            <span class="slds-page-header__title slds-truncate">Panel de
-                                                administración</span>
+                                            <span class="slds-page-header__title slds-truncate" id="headerTitle">Cargando...</span>
                                         </h1>
                                     </div>
                                 </div>
-                                <p class="slds-page-header__name-meta">Vista general · Actualizado hace 2 minutos</p>
+                                <p class="slds-page-header__name-meta" id="headerSubtitle">Cargando detalles...</p>
                             </div>
                         </div>
                     </div>
                     <div class="slds-page-header__col-actions">
-                        <div class="slds-page-header__controls">
-                            <button class="slds-button slds-button_neutral">Exportar</button>
-                            <button class="slds-button slds-button_brand" data-modal="modal-recepcion">Nueva
-                                donación</button>
+                        <div class="slds-page-header__controls" id="headerActions">
+                            <!-- Dynamic Actions -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- KPI -->
-            <section id="dashboard" class="slds-m-horizontal_large slds-m-top_large">
-                <h2 class="slds-text-heading_small slds-m-bottom_small">Indicadores clave</h2>
-                <div id="kpiGrid" class="slds-grid slds-wrap slds-gutters_small dt-kpi-grid"></div>
-            </section>
-
-            <!-- Recent Activity -->
-            <section class="slds-m-horizontal_large slds-m-top_x-large">
-                <article class="slds-card">
-                    <header class="slds-card__header slds-grid">
-                        <div class="slds-media slds-media_center slds-has-flexi-truncate">
-                            <div class="slds-media__body">
-                                <h2 class="slds-card__header-title slds-text-heading_small">Actividad reciente</h2>
-                            </div>
+            <!-- DYNAMIC VIEW SECTIONS -->
+            <div class="slds-p-horizontal_large slds-p-top_medium">
+                
+                <!-- ==================== ADMIN SECTIONS ==================== -->
+                <!-- Admin Dashboard -->
+                <div id="sec-admin-dashboard" class="dt-role-section">
+                    <h2 class="slds-text-heading_small slds-m-bottom_medium">Indicadores clave</h2>
+                    <div id="adminKpis" class="slds-grid slds-wrap slds-gutters_small dt-kpi-grid slds-m-bottom_large"></div>
+                    
+                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_large">
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
+                            <article class="slds-card">
+                                <header class="slds-card__header slds-grid">
+                                    <h2 class="slds-card__header-title slds-text-heading_small">Actividad de donaciones reciente</h2>
+                                </header>
+                                <div class="slds-card__body">
+                                    <div class="dt-table-scroll">
+                                        <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                            <thead>
+                                                <tr class="slds-line-height_reset">
+                                                    <th>Fecha</th>
+                                                    <th>Donante</th>
+                                                    <th>Entidad Beneficiaria</th>
+                                                    <th>Tipo de Bien</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminActivityBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </article>
                         </div>
-                        <div class="slds-no-flex">
-                            <button class="slds-button slds-button_neutral">Ver todas</button>
-                        </div>
-                    </header>
-                    <div class="slds-card__body">
-                        <div class="dt-table-scroll">
-                            <table
-                                class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout">
-                                <thead>
-                                    <tr class="slds-line-height_reset">
-                                        <th scope="col" style="width:130px">
-                                            <div class="slds-truncate">Fecha</div>
-                                        </th>
-                                        <th scope="col">
-                                            <div class="slds-truncate">Donante</div>
-                                        </th>
-                                        <th scope="col">
-                                            <div class="slds-truncate">Entidad</div>
-                                        </th>
-                                        <th scope="col">
-                                            <div class="slds-truncate">Tipo</div>
-                                        </th>
-                                        <th scope="col" style="width:140px">
-                                            <div class="slds-truncate">Estado</div>
-                                        </th>
-                                        <th scope="col" style="width:120px">
-                                            <div class="slds-truncate">Acción</div>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody id="activityBody"></tbody>
-                            </table>
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+                            <article class="slds-card">
+                                <header class="slds-card__header">
+                                    <h2 class="slds-card__header-title slds-text-heading_small">Acciones de administración</h2>
+                                </header>
+                                <div class="slds-card__body slds-p-around_medium">
+                                    <div id="adminQuickActions" class="slds-grid slds-wrap slds-gutters_small"></div>
+                                </div>
+                            </article>
                         </div>
                     </div>
-                </article>
-            </section>
+                </div>
 
-            <!-- Quick Actions -->
-            <section class="slds-m-horizontal_large slds-m-top_x-large">
-                <h2 class="slds-text-heading_small slds-m-bottom_small">Acciones rápidas</h2>
-                <div id="quickActions" class="slds-grid slds-wrap slds-gutters_small dt-actions-grid"></div>
-            </section>
-
-            <!-- Tracking + Map -->
-            <section class="slds-m-horizontal_large slds-m-top_x-large">
-                <article class="slds-card">
-                    <header class="slds-card__header slds-grid">
-                        <div class="slds-media slds-media_center slds-has-flexi-truncate">
-                            <h2 class="slds-card__header-title slds-text-heading_small">Seguimiento logístico</h2>
-                        </div>
-                        <div class="slds-no-flex">
-                            <span class="slds-badge slds-theme_success">En línea</span>
-                        </div>
-                    </header>
-                    <div class="slds-card__body slds-p-around_medium">
-                        <div class="slds-grid slds-gutters slds-wrap">
-                            <div class="slds-col slds-size_1-of-1 slds-large-size_5-of-12">
-                                <h3 class="slds-text-title_caps slds-text-color_weak slds-m-bottom_small">Entregas
-                                    activas</h3>
-                                <ul id="deliveriesList" class="dt-delivery-list"></ul>
+                <!-- Admin Matchmaking (Asignación con algoritmos) -->
+                <div id="sec-admin-matchmaking" class="dt-role-section">
+                    <article class="slds-card slds-m-bottom_large">
+                        <div class="slds-p-around_medium">
+                            <h2 class="slds-text-heading_small slds-m-bottom_medium">Matchmaking Inteligente de Donaciones</h2>
+                            <p class="slds-m-bottom_medium">Selecciona una donación en depósito para analizar y preseleccionar la mejor entidad beneficiaria según nuestros algoritmos de asignación.</p>
+                            
+                            <div class="slds-m-bottom_large" id="algoDonationSelectContainer" style="max-width: 400px; position: relative;">
+                                <!-- Will be populated dynamically with SLDS Picklist -->
                             </div>
-                            <div class="slds-col slds-size_1-of-1 slds-large-size_7-of-12">
-                                <h3 class="slds-text-title_caps slds-text-color_weak slds-m-bottom_small">Mapa de
-                                    distribución</h3>
-                                <div class="dt-map">
-                                    <svg viewBox="0 0 600 320" preserveAspectRatio="none" class="dt-map__svg">
-                                        <defs>
-                                            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                                                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e5e8ec"
-                                                    stroke-width="1" />
-                                            </pattern>
-                                        </defs>
-                                        <rect width="600" height="320" fill="url(#grid)" />
-                                        <path d="M40,260 C160,140 280,300 440,120 L540,60" fill="none" stroke="#0176d3"
-                                            stroke-width="3" stroke-dasharray="6 5" />
-                                        <circle cx="40" cy="260" r="7" fill="#0176d3" />
-                                        <circle cx="540" cy="60" r="7" fill="#2e844a" />
-                                        <circle cx="300" cy="200" r="6" fill="#fe9339" />
+
+                            <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                    <button class="slds-button slds-button_brand dt-block-button" id="runAlgoBtn">
+                                        Ejecutar algoritmos de asignación (Matchmaking)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <div id="algoResultsContainer" hidden>
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">Resultados y Recomendaciones Generadas</h3>
+                        <article class="slds-card">
+                            <div class="slds-card__body">
+                                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th>ONG Beneficiaria</th>
+                                            <th>Grado de Coincidencia (Match Score)</th>
+                                            <th>Justificación Técnica del Algoritmo</th>
+                                            <th>Criterio Recomendado</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="algoResultsBody">
+                                        <!-- Dynamically generated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <!-- Admin Ranking (Sin importes monetarios) -->
+                <div id="sec-admin-ranking" class="dt-role-section">
+                    <article class="slds-card">
+                        <header class="slds-card__header slds-grid">
+                            <h2 class="slds-card__header-title slds-text-heading_small">Ranking mensual de donantes activos</h2>
+                        </header>
+                        <div class="slds-card__body">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th style="width: 80px;">Puesto</th>
+                                        <th>Donante</th>
+                                        <th>Colaboraciones Realizadas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminRankingBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Admin CSV (Carga masiva de 10k+ donantes) -->
+                <div id="sec-admin-csv" class="dt-role-section">
+                    <article class="slds-card">
+                        <header class="slds-card__header">
+                            <h2 class="slds-card__header-title slds-text-heading_small">Migración e Importación Masiva de Donantes (CSV > 10,000 registros)</h2>
+                        </header>
+                        <div class="slds-card__body slds-p-around_medium">
+                            <p class="slds-m-bottom_medium">Arrastra el archivo CSV exportado del sistema histórico para dar de alta o actualizar de forma masiva los datos de donantes y enviarles automáticamente sus credenciales de acceso.</p>
+                            
+                            <div id="dropzone" class="dt-dropzone slds-m-bottom_medium">
+                                <svg class="slds-icon slds-icon_large slds-icon-text-default" aria-hidden="true" style="width:48px;height:48px;">
+                                    <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#upload"></use>
+                                </svg>
+                                <p class="slds-text-heading_small slds-m-top_small">Arrastra tu archivo CSV aquí</p>
+                                <p class="slds-text-body_small slds-text-color_weak">o</p>
+                                <label class="slds-button slds-button_neutral">
+                                    Seleccionar archivo
+                                    <input type="file" id="csvFile" accept=".csv" hidden />
+                                </label>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">Formatos aceptados: .csv (máx. 10MB)</p>
+                            </div>
+                            <div id="csvStatus" class="slds-m-top_medium" hidden></div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Admin Trucks & Fleets -->
+                <div id="sec-admin-camiones" class="dt-role-section">
+                    <article class="slds-card">
+                        <header class="slds-card__header">
+                            <h2 class="slds-card__header-title slds-text-heading_small">Flota de Camiones y Centros de Logística</h2>
+                        </header>
+                        <div class="slds-card__body">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th>Identificador</th>
+                                        <th>Patente / Matrícula</th>
+                                        <th>Capacidad de Carga</th>
+                                        <th>Estado de Operación</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminTrucksBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- ==================== DONANTE SECTIONS ==================== -->
+                <!-- Donante Dashboard (Salesforce Trailhead Profile) -->
+                <div id="sec-donante-dashboard" class="dt-role-section">
+                    <!-- Trailhead Header Profile Card -->
+                    <div class="dt-th-header">
+                        <div class="dt-th-profile">
+                            <div class="dt-th-avatar-container">
+                                <span class="slds-avatar slds-avatar_circle" style="width: 90px; height: 90px; display: block;">
+                                    <img src="https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=donante" alt="avatar" id="thAvatarImg" style="width: 100%; height: 100%; border: 4px solid #fff; border-radius: 50%; background:#eaf5fe; object-fit:cover;" />
+                                </span>
+                                <div class="dt-th-badge-emblem" id="thRankLevel" title="Nivel de Rango">1</div>
+                            </div>
+                            <div class="dt-th-info">
+                                <div class="dt-th-name" id="thProfileName">María González</div>
+                                <div class="dt-th-rank-name">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px; fill: #ffd700;">
+                                        <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
                                     </svg>
-                                    <div class="dt-map__legend">
-                                        <span><i class="dt-dot" style="background:#0176d3"></i> Origen</span>
-                                        <span><i class="dt-dot" style="background:#fe9339"></i> En tránsito</span>
-                                        <span><i class="dt-dot" style="background:#2e844a"></i> Destino</span>
+                                    Rango: <span id="thRankLabel" style="font-weight: bold; color: #ffd700;">Colaborador</span>
+                                </div>
+                                <div class="dt-th-stats-row">
+                                    <div class="dt-th-stat-box">
+                                        <span class="dt-th-stat-value" id="thStatPoints">8,400</span>
+                                        <span class="dt-th-stat-label">Puntos Totales</span>
+                                    </div>
+                                    <div class="dt-th-stat-box">
+                                        <span class="dt-th-stat-value" id="thStatBadges">4</span>
+                                        <span class="dt-th-stat-label">Insignias</span>
+                                    </div>
+                                    <div class="dt-th-stat-box">
+                                        <span class="dt-th-stat-value" id="thStatDonations">19</span>
+                                        <span class="dt-th-stat-label">Donaciones</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </article>
-            </section>
 
-            <!-- Ranking -->
-            <section id="ranking" class="slds-m-horizontal_large slds-m-top_x-large">
-                <article class="slds-card">
-                    <header class="slds-card__header slds-grid">
-                        <div class="slds-media slds-media_center slds-has-flexi-truncate">
-                            <h2 class="slds-card__header-title slds-text-heading_small">Ranking mensual de donantes</h2>
+                    <!-- Level Progress Bar -->
+                    <div class="dt-th-progress-card slds-m-bottom_large">
+                        <div class="dt-th-progress-header">
+                            <span>Progreso al Siguiente Rango: <strong style="color:#0176d3;" id="thNextRankLabel">Sostenedor</strong></span>
+                            <span id="thProgressText">8,400 / 10,000 Puntos</span>
                         </div>
-                        <div class="slds-no-flex">
-                            <span class="slds-text-body_small slds-text-color_weak">Mes en curso</span>
+                        <div class="slds-progress-bar slds-progress-bar_circular slds-progress-bar_large" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                            <span class="slds-progress-bar__value" id="thProgressBar" style="width: 84%; background: #0176d3;">
+                                <span class="slds-assistive-text">84% completado</span>
+                            </span>
                         </div>
-                    </header>
-                    <div class="slds-card__body">
-                        <table class="slds-table slds-table_bordered slds-table_cell-buffer">
-                            <thead>
-                                <tr class="slds-line-height_reset">
-                                    <th scope="col" style="width:80px">#</th>
-                                    <th scope="col">Nombre</th>
-                                    <th scope="col">Cantidad donada</th>
-                                    <th scope="col">Insignias</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rankingBody"></tbody>
-                        </table>
                     </div>
-                </article>
-            </section>
 
-            <!-- CSV Import -->
-            <section id="csv" class="slds-m-horizontal_large slds-m-top_x-large slds-m-bottom_x-large">
-                <article class="slds-card">
-                    <header class="slds-card__header slds-grid">
-                        <div class="slds-media slds-media_center slds-has-flexi-truncate">
-                            <h2 class="slds-card__header-title slds-text-heading_small">Importación masiva (CSV)</h2>
+                    <!-- Misiones and Badges grid -->
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <!-- Badges Column -->
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_6-of-12 slds-m-bottom_large">
+                            <article class="slds-card" style="height: 100%;">
+                                <div class="slds-p-around_medium">
+                                    <h2 class="slds-text-heading_small slds-m-bottom_medium">Insignias Obtenidas (Badges)</h2>
+                                    <div class="dt-th-badges-grid" id="thBadgesGrid">
+                                        <!-- Dynamically generated badges -->
+                                    </div>
+                                </div>
+                            </article>
                         </div>
-                    </header>
-                    <div class="slds-card__body slds-p-around_medium">
-                        <div id="dropzone" class="dt-dropzone">
-                            <svg class="slds-icon slds-icon_large slds-icon-text-default" aria-hidden="true">
-                                <use
-                                    xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#upload">
-                                </use>
-                            </svg>
-                            <p class="slds-text-heading_small slds-m-top_small">Arrastra tu archivo CSV aquí</p>
-                            <p class="slds-text-body_small slds-text-color_weak">o</p>
-                            <label class="slds-button slds-button_neutral">
-                                Seleccionar archivo
-                                <input type="file" id="csvFile" accept=".csv" hidden />
-                            </label>
-                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">Formatos aceptados:
-                                .csv (máx. 5MB)</p>
+                        <!-- Active Missions Column -->
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_6-of-12 slds-m-bottom_large">
+                            <article class="slds-card" style="height: 100%;">
+                                <div class="slds-p-around_medium">
+                                    <h2 class="slds-text-heading_small slds-m-bottom_medium">Misiones y Recompensas del Rango</h2>
+                                    <div class="dt-th-mission-list" id="thMisionesList">
+                                        <!-- Dynamically generated missions -->
+                                    </div>
+                                </div>
+                            </article>
                         </div>
-                        <div id="csvStatus" class="slds-m-top_medium" hidden></div>
                     </div>
-                </article>
-            </section>
+                </div>
 
-            <footer class="slds-text-align_center slds-text-body_small slds-text-color_weak slds-p-around_medium">
-                © DonaTrack · Panel de administración v1.0
+                <!-- Donante My Donations (Filterable) -->
+                <div id="sec-donante-mis-donaciones" class="dt-role-section">
+                    <article class="slds-card">
+                        <div class="slds-p-around_medium">
+                            <div class="slds-grid slds-wrap slds-grid_vertical-align-center slds-m-bottom_medium">
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+                                    <h2 class="slds-text-heading_small">Tus Donaciones Históricas</h2>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-text-align_right">
+                                    <button class="slds-button slds-button_brand" id="donanteNewDonationBtn">
+                                        Registrar nueva donación
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Filters -->
+                            <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_medium">
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small" id="filterStateContainer" style="position: relative;">
+                                    <!-- Will be populated dynamically with SLDS Picklist -->
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small" id="filterCategoryContainer" style="position: relative;">
+                                    <!-- Will be populated dynamically with SLDS Picklist -->
+                                </div>
+                            </div>
+
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th>ID Donación</th>
+                                        <th>Fecha</th>
+                                        <th>Categoría</th>
+                                        <th>Subcategoría</th>
+                                        <th>Cantidad</th>
+                                        <th>Destino final</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="donanteActivityBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Donante Browse Beneficiaries -->
+                <div id="sec-donante-entidades" class="dt-role-section">
+                    <article class="slds-card">
+                        <header class="slds-card__header">
+                            <h2 class="slds-card__header-title slds-text-heading_small">Entidades Beneficiarias Verificadas</h2>
+                        </header>
+                        <div class="slds-card__body">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th>Organización</th>
+                                        <th>Ubicación</th>
+                                        <th>Contacto</th>
+                                        <th>Necesidades Declaradas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="donanteBeneficiariesBody">
+                                    <!-- Dynamically loaded -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Donante Delivery Tracking (Interactive map) -->
+                <div id="sec-donante-seguimiento" class="dt-role-section">
+                    <article class="slds-card">
+                        <div class="slds-p-around_medium">
+                            <h2 class="slds-text-heading_small slds-m-bottom_medium">Monitoreo en Tiempo Real de tus Entregas Activas</h2>
+                            <p class="slds-m-bottom_medium">El siguiente mapa muestra las rutas activas de los camiones de DonaTrack que transportan las donaciones que has realizado.</p>
+                            
+                            <div class="slds-grid slds-gutters slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12 slds-m-bottom_medium">
+                                    <h3 class="slds-text-title_caps slds-text-color_weak slds-m-bottom_small">Tus despachos activos</h3>
+                                    <ul id="donanteTrackingList" class="dt-sidebar-deliveries dt-delivery-list">
+                                        <!-- Dynamically generated -->
+                                    </ul>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
+                                    <div id="donanteMap" class="dt-leaflet-map"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- ==================== BENEFICIARIA SECTIONS ==================== -->
+                <!-- Beneficiaria Dashboard -->
+                <div id="sec-beneficiaria-dashboard" class="dt-role-section">
+                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_large">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <article class="slds-card">
+                                <div class="slds-p-around_medium">
+                                    <h2 class="slds-text-heading_small slds-m-bottom_small">Tus Necesidades Activas</h2>
+                                    <p class="slds-m-bottom_medium slds-text-color_weak">Registradas en el sistema para matchmaking.</p>
+                                    <ul class="slds-list_vertical-space" id="benefDashboardNeeds">
+                                        <!-- Dynamic summary -->
+                                    </ul>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <article class="slds-card">
+                                <div class="slds-p-around_medium">
+                                    <h2 class="slds-text-heading_small slds-m-bottom_small">Próximas Entregas a Recibir</h2>
+                                    <p class="slds-m-bottom_medium slds-text-color_weak">Donaciones en traslado hacia tu sede.</p>
+                                    <ul class="dt-delivery-list" id="benefDashboardDeliveries">
+                                        <!-- Dynamic deliveries -->
+                                    </ul>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Beneficiaria Register Needs -->
+                <div id="sec-beneficiaria-necesidades" class="dt-role-section">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <!-- Left: Register Form -->
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_5-of-12 slds-m-bottom_large">
+                            <article class="slds-card">
+                                <div class="slds-p-around_medium">
+                                    <h2 class="slds-text-heading_small slds-m-bottom_medium">Declarar Nueva Necesidad</h2>
+                                    <form id="needRegisterForm">
+                                        <!-- Category Combobox -->
+                                        <div class="slds-m-bottom_small" id="needCategoryContainer"></div>
+
+                                        <!-- Subcategory Combobox -->
+                                        <div class="slds-m-bottom_small" id="needSubcategoryContainer"></div>
+
+                                        <!-- Quantity Grid with Combobox Unit -->
+                                        <div class="slds-form-element slds-m-bottom_small">
+                                            <label class="slds-form-element__label">Cantidad Requerida</label>
+                                            <div class="slds-form-element__control">
+                                                <div class="slds-grid slds-gutters_direct-xx-small">
+                                                    <div class="slds-col slds-size_2-of-3">
+                                                        <input class="slds-input" type="number" id="needQtyValue" min="1" value="10" required />
+                                                    </div>
+                                                    <div class="slds-col slds-size_1-of-3" id="needQtyUnitContainer"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Need Type Combobox -->
+                                        <div class="slds-m-bottom_small" id="needTypeContainer"></div>
+
+                                        <!-- Description Textarea (Required) -->
+                                        <div class="slds-form-element slds-m-bottom_medium">
+                                            <label class="slds-form-element__label" for="needDescription">
+                                                <abbr class="slds-required" title="required" aria-hidden="true">* </abbr>Breve descripción / Justificación
+                                            </label>
+                                            <div class="slds-form-element__control">
+                                                <textarea class="slds-textarea" id="needDescription" required placeholder="Detalla brevemente por qué tu organización necesita este bien."></textarea>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="slds-button slds-button_brand dt-block-button">
+                                            Registrar Necesidad Material
+                                        </button>
+                                    </form>
+                                </div>
+                            </article>
+                        </div>
+                        
+                        <!-- Right: Needs List -->
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_7-of-12">
+                            <article class="slds-card">
+                                <div class="slds-p-around_medium">
+                                    <h2 class="slds-text-heading_small slds-m-bottom_medium">Tus Necesidades Registradas</h2>
+                                    <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th>Categoría</th>
+                                                <th>Subcategoría</th>
+                                                <th>Cantidad</th>
+                                                <th>Tipo</th>
+                                                <th>Estado de Match</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="benefNeedsTableBody">
+                                            <!-- Dynamically generated list -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Beneficiaria Confirm Delivery -->
+                <div id="sec-beneficiaria-entregas" class="dt-role-section">
+                    <article class="slds-card">
+                        <div class="slds-p-around_medium">
+                            <h2 class="slds-text-heading_small slds-m-bottom_medium">Confirmar Recepción de Donaciones Asignadas</h2>
+                            <p class="slds-m-bottom_medium">Al recibir los bienes en tu sede, debes certificar la entrega ingresando una justificación/comentario y cargando una foto como prueba.</p>
+                            
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-m-bottom_large">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th>ID Donación</th>
+                                        <th>Donante</th>
+                                        <th>Bienes</th>
+                                        <th>Estado Logístico</th>
+                                        <th>Acción de Recepción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="benefDeliveriesBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Beneficiaria Delivery Tracking (Interactive map) -->
+                <div id="sec-beneficiaria-seguimiento" class="dt-role-section">
+                    <article class="slds-card">
+                        <div class="slds-p-around_medium">
+                            <h2 class="slds-text-heading_small slds-m-bottom_medium">Mapa de Seguimiento Logístico de Envío de Donaciones</h2>
+                            <p class="slds-m-bottom_medium">Sigue en vivo la ubicación actual y última actualización de los camiones cargados con donaciones destinadas a tu organización.</p>
+                            
+                            <div class="slds-grid slds-gutters slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12 slds-m-bottom_medium">
+                                    <h3 class="slds-text-title_caps slds-text-color_weak slds-m-bottom_small">Despachos en tránsito</h3>
+                                    <ul id="benefTrackingList" class="dt-sidebar-deliveries dt-delivery-list">
+                                        <!-- Dynamically generated -->
+                                    </ul>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
+                                    <div id="benefMap" class="dt-leaflet-map"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <footer class="slds-text-align_center slds-text-body_small slds-text-color_weak slds-p-around_medium slds-m-top_xx-large">
+                © DonaTrack · Panel de Control v1.1 · UTN Solidaria 2026
             </footer>
         </main>
     </div>
@@ -317,10 +688,15 @@
     <!-- MODAL HOST -->
     <div id="modalHost"></div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- App Scripts -->
     <script src="js/auth.js"></script>
     <script src="js/data.js"></script>
     <script src="js/dashboard.js"></script>
     <script>
+        // Start Page Guard and App Initialization
         DT_Auth.guard();
         DT_App.init();
     </script>
