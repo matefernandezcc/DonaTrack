@@ -213,10 +213,12 @@ package "servicio de donaciones"{
         }
 
         enum EstadoDonacion {
-            PENDIENTE
-            ASIGNADA
-            ENTREGADA
             EN_DEPOSITO
+            ASIGNADA
+            LISTA_PARA_ENTREGAR
+            EN_TRASLADO
+            ENTREGADA
+            ENTREGA_FALLIDA
             VENCIDA
         }
 

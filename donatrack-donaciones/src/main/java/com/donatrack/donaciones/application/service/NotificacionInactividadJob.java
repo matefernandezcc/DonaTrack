@@ -8,7 +8,7 @@ import com.donatrack.donaciones.application.port.out.NotificacionOutDTO;
 import com.donatrack.donaciones.application.port.out.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.repository.PersonaRepository;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.donacion.estado.HistorialEstado;
+import com.donatrack.donaciones.domain.model.donacion.HistorialEstado;
 import com.donatrack.donaciones.domain.model.enums.MedioContacto;
 
 import org.springframework.scheduling.annotation.Scheduled;

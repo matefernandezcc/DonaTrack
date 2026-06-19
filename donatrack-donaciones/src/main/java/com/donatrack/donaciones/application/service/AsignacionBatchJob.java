@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.application.service;
 
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.enums.EstadoDonacionEnum;
+import com.donatrack.donaciones.domain.model.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
 import com.donatrack.donaciones.domain.repository.DonacionRepository;
@@ -35,7 +35,7 @@ public class AsignacionBatchJob {
     @org.springframework.scheduling.annotation.Async
     @Scheduled(cron = "0 0 2 * * ?")
     public void asignarDonacionesEnDeposito() {
-        List<Donacion> donacionesPendientes = donacionRepository.buscarPorEstado(EstadoDonacionEnum.EN_DEPOSITO);
+        List<Donacion> donacionesPendientes = donacionRepository.buscarPorEstado(EstadoDonacion.EN_DEPOSITO);
         List<Beneficiario> beneficiariosDisponibles = beneficiarioRepository.buscarTodos();
 
         for (Donacion donacion : donacionesPendientes) {

@@ -1,8 +1,6 @@
 package com.donatrack.donaciones.domain.model.donacion;
 
-import com.donatrack.donaciones.domain.model.donacion.estado.EnDeposito;
-import com.donatrack.donaciones.domain.model.donacion.estado.EstadoDonacion;
-import com.donatrack.donaciones.domain.model.donacion.estado.HistorialEstado;
+import com.donatrack.donaciones.domain.model.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.model.roles.Administrador;
 import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import java.time.LocalDate;
@@ -24,10 +22,11 @@ public class Donacion {
 
   public Donacion(Subcategoria subcategoria) {
     this.id = UUID.randomUUID();
-    this.estado = new EnDeposito(this);
+    this.estado = EstadoDonacion.EN_DEPOSITO;
     this.bienes = new ArrayList<>();
     this.subCategoria = subcategoria;
     this.historial = new ArrayList<>();
+    this.fotos = new ArrayList<>();
   }
 
   public void agregarBien(Bien b) {
@@ -40,35 +39,12 @@ public class Donacion {
 
   public void cambiarEstado(EstadoDonacion nuevoEstado, String observacion, Administrador usuario) {
     this.estado = nuevoEstado;
-    this.historial.add(new HistorialEstado(nuevoEstado.getValorEnum(), observacion, usuario));
+    this.historial.add(new HistorialEstado(nuevoEstado, observacion, usuario));
   }
 
   public void asignar(Beneficiario beneficiario) {
-    this.estado.asignar(beneficiario);
-  }
-
-  public void planificarRuta() {
-    this.estado.planificarRuta();
-  }
-
-  public void iniciarTraslado() {
-    this.estado.iniciarTraslado();
-  }
-
-  public void entregar() {
-    this.estado.entregar();
-  }
-
-  public void fallarEntrega(String justificacion) {
-    this.estado.fallarEntrega(justificacion);
-  }
-
-  public void marcarVencida() {
-    this.estado.marcarVencida();
-  }
-
-  public void recibirEnDeposito() {
-    this.estado.recibirEnDeposito();
+    this.entidadAsignada = beneficiario;
+    this.cambiarEstado(EstadoDonacion.ASIGNADA, "Donación asignada", null);
   }
 
   public void addFoto(Foto foto) {

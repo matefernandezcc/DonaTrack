@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.application.service;
 
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.enums.EstadoDonacionEnum;
+import com.donatrack.donaciones.domain.model.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.repository.DonacionRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -26,12 +26,12 @@ public class AuditoriaDepositoJob {
     @Async
     @Scheduled(cron = "0 0 1 * * ?")
     public void auditarVencidos() {
-        List<Donacion> donacionesEnDeposito = donacionRepository.buscarPorEstado(EstadoDonacionEnum.EN_DEPOSITO);
+        List<Donacion> donacionesEnDeposito = donacionRepository.buscarPorEstado(EstadoDonacion.EN_DEPOSITO);
         LocalDate hoy = LocalDate.now();
 
         for (Donacion donacion : donacionesEnDeposito) {
             if (tieneBienesVencidos(donacion, hoy)) {
-                donacion.marcarVencida();
+                donacion.cambiarEstado(EstadoDonacion.VENCIDA, "Auditoría nocturna", null);
                 donacionRepository.guardar(donacion);
             }
         }

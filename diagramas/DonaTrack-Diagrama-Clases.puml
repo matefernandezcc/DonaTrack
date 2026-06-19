@@ -262,7 +262,7 @@ package "servicio de donaciones"{
     }
 
     package Estado{
-        enum EstadoDonacionEnum {
+        enum EstadoDonacion {
             PENDIENTE
             ASIGNADA
             ENTREGADA
@@ -282,7 +282,7 @@ package "servicio de donaciones"{
 
         class Asignada implements EstadoDonacionState{
             + planificarRuta()
-            + EstadoDonacionEnum getValorEnum()
+            + EstadoDonacion getValorEnum()
         }
 
         class Endeposito implements EstadoDonacionState{
@@ -352,7 +352,7 @@ package "servicio de donaciones"{
 
         Donacion *-- HistorialEstado
         Donacion "1" *-- "1..*" Bien : "agrupa"
-        Donacion --> EstadoDonacionEnum : "se encuentra en"
+        Donacion --> EstadoDonacion : "se encuentra en"
         Donacion --> EstadoDonacionState : "se encuentra en"
 
         RecepcionDonacion --> Donante

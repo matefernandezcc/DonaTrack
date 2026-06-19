@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.model.enums;
 
-public enum EstadoDonacionEnum {
+public enum EstadoDonacion {
   EN_DEPOSITO,
   ASIGNADA,
   LISTA_PARA_ENTREGAR,
