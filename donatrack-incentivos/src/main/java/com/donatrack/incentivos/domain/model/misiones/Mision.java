@@ -3,37 +3,38 @@ import java.util.UUID;
 import com.donatrack.incentivos.domain.model.Insignia;
 import com.donatrack.incentivos.domain.model.PerfilDonante;
 
-public abstract class Mision {
-    private UUID id = UUID.randomUUID();
-    private String nombre;
-    private Insignia recompensa;
+import lombok.Getter;
+import lombok.Setter;
 
-    protected Mision(String nombre, Insignia recompensa) {
+
+public class Mision {
+    @Getter private UUID id = UUID.randomUUID();
+    @Getter @Setter private String nombre;
+    @Getter @Setter private Insignia recompensa;
+    @Getter @Setter private TipoMetricaMision tipoMetrica;
+    @Getter @Setter private int objetivo;
+
+    public Mision(String nombre, Insignia recompensa, TipoMetricaMision tipoMetrica, int objetivo) {
         this.nombre = nombre;
         this.recompensa = recompensa;
+        this.tipoMetrica = tipoMetrica;
+        this.objetivo = objetivo;
     }
 
-    public UUID getId() {
-        return id;
+    public boolean evaluar(PerfilDonante perfil) {
+        return extraerValor(perfil) >= objetivo;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getProgresoActual(PerfilDonante perfil) {
+        return extraerValor(perfil) + " / " + objetivo + " " + tipoMetrica.getUnidad();
     }
 
-    public Insignia getRecompensa() {
-        return recompensa;
+    private int extraerValor(PerfilDonante perfil) {
+        return switch (tipoMetrica) {
+            case DONACIONES_EXITOSAS -> perfil.getDonacionesExitosas();
+            case MAX_BIENES -> perfil.getMaxBienesEnUnaDonacion();
+            case MESES_CONSECUTIVOS -> perfil.getMesesConsecutivosDonando();
+            case CATEGORIAS_DISTINTAS -> perfil.getCategoriasUnicasDonadas() != null ? perfil.getCategoriasUnicasDonadas().size() : 0;
+        };
     }
-
-    /**
-     * @param perfil El perfil del donante a evaluar
-     * @return true si la misión ha sido cumplida, false de lo contrario
-     */
-    public abstract boolean evaluar(PerfilDonante perfil);
-
-    /**
-     * @param perfil El perfil del donante
-     * @return porcentaje de progreso o una descripción textual del progreso
-     */
-    public abstract String getProgresoActual(PerfilDonante perfil);
 }

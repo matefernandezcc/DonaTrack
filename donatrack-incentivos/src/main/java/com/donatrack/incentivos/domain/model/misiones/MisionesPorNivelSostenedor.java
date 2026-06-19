@@ -9,9 +9,9 @@ public class MisionesPorNivelSostenedor extends MisionesPorNivel {
 
     public MisionesPorNivelSostenedor() {
         this.categoriaObtener = CategoriaDonanteEnum.SOSTENEDOR;
-        this.misiones.add(new HabilDonadorMision(5, new Insignia("Manos Llenas", "Donaste más de 5 bienes en una sola vez.")));
-        this.misiones.add(new CompletitudMision(3, new Insignia("Multifacético", "Donaste en 3 categorías diferentes.")));
-        this.misiones.add(new RachaMision(4, new Insignia("Constancia", "Donaste 4 meses seguidos.")));
+        this.misiones.add(new Mision("Hábil Donador: más de 5 bienes en una donación", new Insignia("Manos Llenas", "Donaste más de 5 bienes en una sola vez."), TipoMetricaMision.MAX_BIENES, 5));
+        this.misiones.add(new Mision("Completitud 3 categorías", new Insignia("Multifacético", "Donaste en 3 categorías diferentes."), TipoMetricaMision.CATEGORIAS_DISTINTAS, 3));
+        this.misiones.add(new Mision("Racha 4 meses", new Insignia("Constancia", "Donaste 4 meses seguidos."), TipoMetricaMision.MESES_CONSECUTIVOS, 4));
         this.misionActual = this.misiones.isEmpty() ? null : this.misiones.remove(0);
     }
 

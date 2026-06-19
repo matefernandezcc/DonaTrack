@@ -9,8 +9,8 @@ public class MisionesPorNivelColaborador extends MisionesPorNivel {
 
     public MisionesPorNivelColaborador() {
         this.categoriaObtener = CategoriaDonanteEnum.COLABORADOR;
-        this.misiones.add(new DonacionesExitosasMision(2, new Insignia("Buen Inicio", "Lograste tus primeras 2 donaciones.")));
-        this.misiones.add(new RachaMision(2, new Insignia("Donante Frecuente", "Donaste 2 meses seguidos.")));
+        this.misiones.add(new Mision("Lograr 2 donaciones exitosas", new Insignia("Buen Inicio", "Lograste tus primeras 2 donaciones."), TipoMetricaMision.DONACIONES_EXITOSAS, 2));
+        this.misiones.add(new Mision("Racha 2 meses", new Insignia("Donante Frecuente", "Donaste 2 meses seguidos."), TipoMetricaMision.MESES_CONSECUTIVOS, 2));
         this.misionActual = this.misiones.isEmpty() ? null : this.misiones.remove(0);
     }
 

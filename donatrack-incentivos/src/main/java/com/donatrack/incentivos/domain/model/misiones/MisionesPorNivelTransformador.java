@@ -9,8 +9,8 @@ public class MisionesPorNivelTransformador extends MisionesPorNivel {
 
     public MisionesPorNivelTransformador() {
         this.categoriaObtener = CategoriaDonanteEnum.TRANSFORMADOR;
-        this.misiones.add(new DonacionesExitosasMision(10, new Insignia("Leyenda", "10 donaciones exitosas.")));
-        this.misiones.add(new CompletitudMision(5, new Insignia("Omnipresente", "Ayudaste en 5 categorías.")));
+        this.misiones.add(new Mision("Lograr 10 donaciones exitosas", new Insignia("Leyenda", "10 donaciones exitosas."), TipoMetricaMision.DONACIONES_EXITOSAS, 10));
+        this.misiones.add(new Mision("Completitud 5 categorías", new Insignia("Omnipresente", "Ayudaste en 5 categorías."), TipoMetricaMision.CATEGORIAS_DISTINTAS, 5));
         this.misionActual = this.misiones.isEmpty() ? null : this.misiones.remove(0);
     }
 

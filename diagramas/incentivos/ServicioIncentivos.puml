@@ -9,6 +9,14 @@ package "Servicio de Incentivos" {
         TRANSFORMADOR
     }
 
+    enum tipoMetricaMision {
+        DONACIONES_EXITOSAS
+        MAX_BIENES
+        MESES_CONSECUTIVOS
+        CATEGORIAS_DISTINTAS
+        -unidad: String
+    }
+
     interface CategoriaDonanteState {
         + avanzarCategoria()
         + getValorEnum(): CategoriaDonanteEnum
@@ -79,36 +87,15 @@ package "Servicio de Incentivos" {
         + clonar(): MisionesPorNivel
     }
 
-    abstract class Mision {
+    class Mision {
+        - id: UUID
         - nombre: String
         - recompensa: Insignia
-        + Mision(nombre: String, recompensa: Insignia)
-        + {abstract} evaluar(perfil: PerfilDonante): boolean
-        + {abstract} getProgresoActual(perfil: PerfilDonante): String
-    }
-
-    class RachaMision extends Mision {
-        - mesesObjetivo: int
+        - tipoMetrica: TipoMetricaMision
+        - objetivo: int
         + evaluar(perfil: PerfilDonante): boolean
         + getProgresoActual(perfil: PerfilDonante): String
-    }
-
-    class CompletitudMision extends Mision {
-        - categoriasObjetivo: int
-        + evaluar(perfil: PerfilDonante): boolean
-        + getProgresoActual(perfil: PerfilDonante): String
-    }
-
-    class HabilDonadorMision extends Mision {
-        - cantidadMinimaBienes: int
-        + evaluar(perfil: PerfilDonante): boolean
-        + getProgresoActual(perfil: PerfilDonante): String
-    }
-
-    class DonacionesExitosasMision extends Mision {
-        - donacionesObjetivo: int
-        + evaluar(perfil: PerfilDonante): boolean
-        + getProgresoActual(perfil: PerfilDonante): String
+        + extraerValor(perfil: PerfilDonante ): int
     }
 
     class Insignia {
@@ -147,6 +134,7 @@ package "Servicio de Incentivos" {
     MisionesPorNivel --> CategoriaDonanteEnum : Objetivo >
 
     Mision --> Insignia : recompensa >
+    Mision --> tipoMetricaMision : evalúa >
 
     RankingMensualService --> PerfilDonanteRepository : consulta >
     RankingMensualService --> RankingPuntuacionStrategy : utiliza >
