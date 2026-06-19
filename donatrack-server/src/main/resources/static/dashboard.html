@@ -17,86 +17,125 @@
 
 <body class="dt-app-body">
     <!-- TOP NAVBAR -->
-    <header class="dt-topbar slds-grid slds-grid_vertical-align-center slds-p-horizontal_medium">
-        <button id="sidebarToggle" class="slds-button slds-icon-waffle_container slds-context-bar__button" title="Menú" aria-label="Menú">
-            <span class="slds-icon-waffle">
-                <span class="slds-r1"></span>
-                <span class="slds-r2"></span>
-                <span class="slds-r3"></span>
-                <span class="slds-r4"></span>
-                <span class="slds-r5"></span>
-                <span class="slds-r6"></span>
-                <span class="slds-r7"></span>
-                <span class="slds-r8"></span>
-                <span class="slds-r9"></span>
-            </span>
-            <span class="slds-assistive-text">Abrir menú lateral</span>
-        </button>
-
-        <div class="dt-logo slds-m-left_medium">
-            <img src="img/DonaTrack-logo-light.svg" alt="DonaTrack" style="height: 32px;" />
-        </div>
-
-        <div class="dt-topbar__search slds-m-left_x-large slds-grow">
-            <div class="slds-form-element">
-                <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
-                    <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default"
-                        aria-hidden="true">
-                        <use
-                            xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#search">
-                        </use>
-                    </svg>
-                    <input type="search" class="slds-input" placeholder="Buscar en DonaTrack..." />
-                </div>
-            </div>
-        </div>
-
-        <div class="dt-topbar__actions slds-grid slds-grid_vertical-align-center">
-            <!-- Notifications Popover Menu -->
-            <div class="slds-dropdown-trigger slds-dropdown-trigger_click" id="notifDropdown">
-                <button class="slds-button slds-button_icon slds-button_icon-container dt-notif" title="Notificaciones"
-                    id="notifBellBtn" aria-haspopup="true">
-                    <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                        <use
-                            xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#notification">
-                        </use>
-                    </svg>
-                    <span class="dt-notif__badge" id="notifCount">0</span>
-                </button>
-                <div class="slds-dropdown slds-dropdown_right slds-dropdown_medium" style="max-height: 400px; overflow-y: auto;">
-                    <div class="slds-p-around_small slds-border_bottom" style="font-weight: bold; color: #181818;">
-                        Notificaciones Recientes
-                    </div>
-                    <ul class="slds-dropdown__list" role="menu" id="notifList">
-                        <!-- Populated dynamically -->
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Avatar Dropdown Menu -->
-            <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-m-left_small" id="avatarMenu">
-                <button class="slds-button dt-avatar-btn" aria-haspopup="true" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="slds-avatar slds-avatar_circle slds-avatar_small" style="width:32px; height:32px;">
-                        <img src="https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=admin" alt="avatar" id="avatarImg" style="border-radius: 50%; width:100%; height:100%; object-fit:cover;" />
+    <!-- TOP NAVBAR -->
+    <header class="slds-global-header_container">
+        <a href="#" class="slds-assistive-text slds-assistive-text_focus">Skip to Navigation</a>
+        <a href="#" class="slds-assistive-text slds-assistive-text_focus">Skip to Main Content</a>
+        <div class="slds-global-header slds-grid slds-grid_align-spread">
+            <!-- Logo & Mobile Toggle -->
+            <div class="slds-global-header__item" style="display: flex; align-items: center; gap: 8px;">
+                <button id="sidebarToggle" class="slds-button slds-icon-waffle_container slds-context-bar__button" title="Menú" aria-label="Menú" style="margin: 0; padding: 0;">
+                    <span class="slds-icon-waffle">
+                        <span class="slds-r1"></span>
+                        <span class="slds-r2"></span>
+                        <span class="slds-r3"></span>
+                        <span class="slds-r4"></span>
+                        <span class="slds-r5"></span>
+                        <span class="slds-r6"></span>
+                        <span class="slds-r7"></span>
+                        <span class="slds-r8"></span>
+                        <span class="slds-r9"></span>
                     </span>
-                    <span class="slds-m-left_x-small slds-text-body_small dt-hide-sm" id="avatarName">Usuario</span>
-                    <svg class="slds-button__icon slds-m-left_x-small" aria-hidden="true" style="width: 12px; height: 12px;">
-                        <use
-                            xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#down">
-                        </use>
-                    </svg>
+                    <span class="slds-assistive-text">Abrir menú lateral</span>
                 </button>
-                <div class="slds-dropdown slds-dropdown_right">
-                    <ul class="slds-dropdown__list" role="menu">
-                        <li class="slds-dropdown__item" role="presentation"><a href="#" role="menuitem"><span
-                                    class="slds-truncate">Mi perfil</span></a></li>
-                        <li class="slds-dropdown__item" role="presentation"><a href="#" role="menuitem"><span
-                                    class="slds-truncate">Configuración</span></a></li>
-                        <li class="slds-has-divider_top-space" role="separator"></li>
-                        <li class="slds-dropdown__item" role="presentation"><a href="#" role="menuitem"
-                                id="logoutBtn"><span class="slds-truncate">Cerrar sesión</span></a></li>
-                    </ul>
+                <div class="slds-global-header__logo" style="background-image: none !important; display: flex; align-items: center;">
+                    <img src="img/package.svg" alt="DonaTrack" style="height: 32px; width: 32px;" />
+                    <span class="slds-text-heading_small slds-m-left_small" style="font-weight: bold; color: #0176d3;">DonaTrack</span>
                 </div>
+            </div>
+
+            <!-- Global Search Combobox -->
+            <!-- Global Search -->
+            <div class="slds-global-header__item slds-global-header__item_search">
+                <div class="slds-form-element">
+                    <label class="slds-form-element__label slds-assistive-text" for="combobox-id-2">Buscar en DonaTrack</label>
+                    <div class="slds-form-element__control">
+                        <div class="slds-combobox_container">
+                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" id="primary-search-combobox-id-1">
+                                <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_left slds-global-search__form-element" role="none">
+                                    <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true" style="fill: #706e6b; width: 14px; height: 14px;">
+                                        <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#search"></use>
+                                    </svg>
+                                    <input class="slds-input slds-combobox__input" id="combobox-id-2" aria-autocomplete="list" aria-controls="search-listbox-id-1" aria-expanded="false" aria-haspopup="listbox" autoComplete="off" role="combobox" type="text" placeholder="Buscar en DonaTrack..." style="border-radius: 4px; padding-left: 36px; min-height: 32px;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Actions -->
+            <div class="slds-global-header__item">
+                <ul class="slds-global-actions">
+                    <!-- Notifications Dropdown -->
+                    <li class="slds-global-actions__item">
+                        <div class="slds-dropdown-trigger slds-dropdown-trigger_click" id="notifDropdown">
+                            <button class="slds-button slds-button_icon slds-button_icon-container slds-button_icon-small slds-global-actions__notifications slds-global-actions__item-action" title="Notificaciones" aria-live="assertive" aria-atomic="true" id="notifBellBtn">
+                                <svg class="slds-button__icon slds-global-header__icon" aria-hidden="true" style="width: 20px; height: 20px;">
+                                    <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#notification"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Notificaciones</span>
+                            </button>
+                            <span class="slds-notification-badge" id="notifCount" style="display: none;">0</span>
+                            
+                            <!-- Notifications Popover -->
+                            <section aria-describedby="dialog-body-id-11" aria-labelledby="dialog-heading-id-11" class="slds-popover slds-popover_large slds-nubbin_top-right" role="dialog" style="position:absolute;top:calc(100% + 12px);right:-12px; max-height: 400px; overflow-y: auto;">
+                                <div class="slds-popover__body slds-p-around_none" id="dialog-body-id-11">
+                                    <header class="slds-popover__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center" style="font-weight: bold; color: #181818; padding: 12px 16px; border-bottom: 1px solid #e5e5e5;">
+                                        <h2 class="slds-text-heading_small" id="dialog-heading-id-11" style="margin: 0; font-size: 14px;">Notificaciones Recientes</h2>
+                                        <button class="slds-button slds-button_icon slds-button_icon-more" aria-haspopup="true" aria-expanded="false" title="Opciones de notificación" style="border: none; background: transparent; padding: 0;">
+                                            <svg class="slds-button__icon" aria-hidden="true" style="fill: #706e6b; width: 14px; height: 14px;">
+                                                <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#settings"></use>
+                                            </svg>
+                                            <svg class="slds-button__icon slds-button__icon_x-small" aria-hidden="true" style="fill: #706e6b; width: 8px; height: 8px;">
+                                                <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#down"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Opciones</span>
+                                        </button>
+                                    </header>
+                                    <ul id="notifList" class="slds-dropdown__list" role="menu" style="padding: 4px;">
+                                        <!-- Populated dynamically -->
+                                    </ul>
+                                </div>
+                            </section>
+                        </div>
+                    </li>
+                    
+                    <!-- User Avatar Dropdown -->
+                    <li class="slds-global-actions__item">
+                        <div class="slds-dropdown-trigger slds-dropdown-trigger_click" id="avatarMenu">
+                            <button class="slds-button slds-global-actions__avatar slds-global-actions__item-action" title="Usuario" aria-haspopup="true" id="avatarMenuBtn" style="display: flex; align-items: center; gap: 8px; background: transparent; border: none; padding: 0; cursor: pointer;">
+                                <span class="slds-avatar slds-avatar_circle slds-avatar_medium" style="width: 32px; height: 32px;">
+                                    <img alt="Usuario" src="https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=admin" title="Avatar de usuario" id="avatarImg" />
+                                </span>
+                                <span class="slds-m-left_xx-small slds-text-body_small dt-hide-sm" id="avatarName" style="color: #3e3e3c; font-weight: normal; margin-left: 4px;">Usuario</span>
+                                <svg class="slds-button__icon slds-button__icon_x-small slds-m-left_xx-small" aria-hidden="true" style="fill: #3e3e3c; width: 10px; height: 10px; margin-left: 4px;">
+                                    <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#down"></use>
+                                </svg>
+                            </button>
+                            <div class="slds-dropdown slds-dropdown_right" style="margin-top: 10px;">
+                                <ul class="slds-dropdown__list" role="menu">
+                                    <li class="slds-dropdown__item" role="presentation">
+                                        <a href="#" role="menuitem" tabindex="0">
+                                            <span class="slds-truncate">Mi perfil</span>
+                                        </a>
+                                    </li>
+                                    <li class="slds-dropdown__item" role="presentation">
+                                        <a href="#" role="menuitem" tabindex="-1">
+                                            <span class="slds-truncate">Configuración</span>
+                                        </a>
+                                    </li>
+                                    <li class="slds-has-divider_top-space" role="separator"></li>
+                                    <li class="slds-dropdown__item" role="presentation">
+                                        <a href="#" role="menuitem" tabindex="-1" id="logoutBtn">
+                                            <span class="slds-truncate">Cerrar sesión</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </header>
@@ -249,7 +288,7 @@
                 <div id="sec-admin-ranking" class="dt-role-section">
                     <article class="slds-card">
                         <header class="slds-card__header slds-grid">
-                            <h2 class="slds-card__header-title slds-text-heading_small">Ranking mensual de donantes activos (No Monetario)</h2>
+                            <h2 class="slds-card__header-title slds-text-heading_small">Ranking mensual de donantes activos</h2>
                         </header>
                         <div class="slds-card__body">
                             <table class="slds-table slds-table_bordered slds-table_cell-buffer">
@@ -258,7 +297,6 @@
                                         <th style="width: 80px;">Puesto</th>
                                         <th>Donante</th>
                                         <th>Colaboraciones Realizadas</th>
-                                        <th>Medalla de Logro</th>
                                     </tr>
                                 </thead>
                                 <tbody id="adminRankingBody">
@@ -280,7 +318,7 @@
                             
                             <div id="dropzone" class="dt-dropzone slds-m-bottom_medium">
                                 <svg class="slds-icon slds-icon_large slds-icon-text-default" aria-hidden="true" style="width:48px;height:48px;">
-                                    <use xlink:href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/icons/utility-sprite/svg/symbols.svg#upload"></use>
+                                    <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#upload"></use>
                                 </svg>
                                 <p class="slds-text-heading_small slds-m-top_small">Arrastra tu archivo CSV aquí</p>
                                 <p class="slds-text-body_small slds-text-color_weak">o</p>

@@ -565,8 +565,13 @@ body.dt-login-body {
     display: none;
   }
 
+  /* Obsolete: Replaced by slds-global-header__item_search
   .dt-topbar__search {
     display: none;
+  }
+  */
+  .slds-global-header__item_search {
+    display: none !important;
   }
 
   .dt-sidebar {
@@ -941,6 +946,7 @@ body.dt-login-body {
 }
 
 /* ===== Fixed Header / Topbar Alignment ===== */
+/* Obsolete: Replaced by slds-global-header
 .dt-topbar {
   height: 56px;
   background: #fff;
@@ -959,6 +965,34 @@ body.dt-login-body {
 .dt-topbar .slds-form-element__control {
   margin: 0 !important;
   padding: 0 !important;
+}
+*/
+
+/* ===== SLDS Global Header Layout & Spacing Overrides ===== */
+.slds-global-header_container {
+  position: sticky !important;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+}
+
+.slds-global-header {
+  height: 56px !important;
+  border-bottom: 1px solid #e5e5e5;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.slds-global-header__item_search {
+  max-width: 45rem !important;
+  flex-grow: 1 !important;
+  margin-right: 1.5rem !important;
+  margin-left: 1.5rem !important;
+}
+
+.slds-global-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
 }
 
 
@@ -1048,4 +1082,39 @@ body.dt-login-body {
   100% {
     box-shadow: 0 0 0 0 rgba(239, 108, 0, 0);
   }
+}
+
+/* ===== Header Icon Custom Override ===== */
+#headerIconContainer {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+#headerIconContainer svg {
+  fill: #0176d3 !important;
+}
+
+/* ===== Popover and Unread Badge Overrides ===== */
+#notifDropdown section.slds-popover {
+  display: none;
+}
+#notifDropdown.slds-is-open section.slds-popover {
+  display: block !important;
+}
+
+.slds-global-header__notification_unread {
+  background-color: #f3f9fe !important;
+}
+
+.slds-global-header__notification_unread:hover {
+  background-color: #eaf5fe !important;
+}
+
+.slds-global-header__notification abbr {
+  color: #0176d3 !important;
+}
+
+.slds-global-search__form-element .slds-input__icon {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin-top: 0 !important;
 }

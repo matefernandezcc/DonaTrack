@@ -337,6 +337,38 @@
         localStorage.setItem('dt_sidebar_collapsed', sidebar.classList.contains('is-collapsed') ? '1' : '0');
       }
     };
+
+    // Toggle dropdowns (Bell and Avatar)
+    const bellBtn = document.getElementById('notifBellBtn');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const avatarMenuBtn = document.getElementById('avatarMenuBtn');
+    const avatarMenu = document.getElementById('avatarMenu');
+
+    if (bellBtn && notifDropdown) {
+      bellBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (avatarMenu) avatarMenu.classList.remove('slds-is-open');
+        notifDropdown.classList.toggle('slds-is-open');
+      };
+    }
+
+    if (avatarMenuBtn && avatarMenu) {
+      avatarMenuBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (notifDropdown) notifDropdown.classList.remove('slds-is-open');
+        avatarMenu.classList.toggle('slds-is-open');
+      };
+    }
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+      if (notifDropdown && !notifDropdown.contains(e.target)) {
+        notifDropdown.classList.remove('slds-is-open');
+      }
+      if (avatarMenu && !avatarMenu.contains(e.target)) {
+        avatarMenu.classList.remove('slds-is-open');
+      }
+    });
   }
 
   // ----- Router & View Switcher -----
@@ -435,31 +467,96 @@
       return;
     }
 
-    list.innerHTML = notifs.map((n, index) => `
-      <li class="dt-notification-card ${n.unread ? 'is-unread' : ''}" role="presentation" data-notif-index="${index}">
-        <a href="javascript:void(0);" role="menuitem" style="color: #444; text-decoration: none;">
-          <div class="slds-text-body_small">${n.text}</div>
-          <div class="dt-notification-time">${n.time}</div>
-        </a>
-      </li>
-    `).join('');
+    list.innerHTML = notifs.map((n, index) => {
+      // Determine standard/utility icon based on text
+      let icon = 'task'; // default
+      let iconContainerClass = 'slds-icon-standard-task';
+      if (n.text.toLowerCase().includes('camión') || n.text.toLowerCase().includes('tránsito') || n.text.toLowerCase().includes('ruta')) {
+        icon = 'delivery_truck';
+        iconContainerClass = 'slds-icon-standard-delivery-truck';
+      } else if (n.text.toLowerCase().includes('insignia') || n.text.toLowerCase().includes('rango') || n.text.toLowerCase().includes('felicidades')) {
+        icon = 'coaching';
+        iconContainerClass = 'slds-icon-standard-coaching';
+      } else if (n.text.toLowerCase().includes('csv') || n.text.toLowerCase().includes('importación')) {
+        icon = 'lead_import';
+        iconContainerClass = 'slds-icon-standard-lead-import';
+      } else if (n.text.toLowerCase().includes('asignada') || n.text.toLowerCase().includes('recepción') || n.text.toLowerCase().includes('donación')) {
+        icon = 'orders';
+        iconContainerClass = 'slds-icon-standard-orders';
+      }
 
-    // Toggle dropdown
-    const bellBtn = document.getElementById('notifBellBtn');
-    const dropdown = document.getElementById('notifDropdown');
-    
-    bellBtn.onclick = (e) => {
-      e.stopPropagation();
-      dropdown.classList.toggle('slds-is-open');
-    };
+      // Map dynamic icon name to utility sprite icon name using global helper mappings
+      const ICON_MAPPING = {
+        'dashboard': 'home',
+        'partners': 'people',
+        'ranking': 'trail',
+        'coaching': 'user',
+        'lead_import': 'upload',
+        'delivery_truck': 'truck',
+        'payment_gateway': 'moneybag',
+        'relationship': 'people',
+        'lead': 'lead',
+        'orders': 'orders',
+        'route': 'location',
+        'add_contact': 'adduser',
+        'task': 'task'
+      };
+      const spriteIcon = ICON_MAPPING[icon] || icon;
 
-    document.addEventListener('click', () => dropdown.classList.remove('slds-is-open'));
+      const unreadClass = n.unread ? 'slds-global-header__notification_unread' : '';
+      const dot = n.unread ? `<abbr class="slds-text-link slds-m-horizontal_xxx-small" title="unread" style="text-decoration: none;">●</abbr>` : '';
+
+      return `
+        <li role="presentation" data-notif-index="${index}" class="slds-global-header__notification ${unreadClass}" style="list-style-type: none; border-bottom: 1px solid #f3f3f3; position: relative;">
+          <div class="slds-media slds-has-flexi-truncate slds-p-around_x-small">
+            <div class="slds-media__figure" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; background-color: #f3f3f3; flex-shrink: 0;">
+              <span class="slds-icon_container ${iconContainerClass}" style="padding: 4px; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; color: white;">
+                <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: currentColor; width: 16px; height: 16px;">
+                  <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#${spriteIcon}"></use>
+                </svg>
+              </span>
+            </div>
+            <div class="slds-media__body" style="min-width: 0; padding-right: 24px;">
+              <div class="slds-grid slds-grid_align-spread">
+                <a class="slds-notification__target slds-text-link_reset slds-has-flexi-truncate" href="javascript:void(0);" style="text-decoration: none; color: inherit; display: block;">
+                  <h3 class="slds-truncate" title="${n.text}" style="font-size: 13px; font-weight: normal; margin: 0; white-space: normal; line-height: 1.3;">
+                    ${n.text}
+                  </h3>
+                  <p class="slds-m-top_xx-small slds-text-color_weak" style="font-size: 11px; margin: 4px 0 0 0;">
+                    ${n.time} ${dot}
+                  </p>
+                </a>
+              </div>
+            </div>
+            <button class="slds-button slds-button_icon slds-button_icon-container slds-notification__close" title="Cerrar" style="position: absolute; right: 8px; top: 12px; border: none; background: transparent; cursor: pointer; padding: 0;">
+              <svg class="slds-button__icon" aria-hidden="true" style="fill: #706e6b; width: 12px; height: 12px;">
+                <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#close"></use>
+              </svg>
+              <span class="slds-assistive-text">Cerrar</span>
+            </button>
+          </div>
+        </li>
+      `;
+    }).join('');
 
     // Notification click listener
-    list.querySelectorAll('[data-notif-index]').forEach(el => {
+    list.querySelectorAll('[data-notif-index] a.slds-notification__target').forEach(el => {
       el.addEventListener('click', (e) => {
-        const idx = el.dataset.notifIndex;
+        e.stopPropagation();
+        const card = el.closest('[data-notif-index]');
+        const idx = card.dataset.notifIndex;
         notifs[idx].unread = false;
+        renderNotifications();
+      });
+    });
+
+    // Dismiss click listener
+    list.querySelectorAll('[data-notif-index] .slds-notification__close').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = btn.closest('[data-notif-index]');
+        const idx = card.dataset.notifIndex;
+        notifs.splice(idx, 1);
         renderNotifications();
       });
     });
@@ -578,15 +675,11 @@
   function renderAdminRanking() {
     const tbody = document.getElementById('adminRankingBody');
     tbody.innerHTML = window.DT_Data.ranking.map(r => {
-      const medal = r.medal
-        ? `<span class="dt-medal dt-medal_${r.medal}">${r.pos}</span>`
-        : `<span class="slds-text-color_weak">#${r.pos}</span>`;
       return `
         <tr class="slds-hint-parent">
-          <th data-label="Puesto" scope="row"><div class="slds-truncate">${medal}</div></th>
+          <th data-label="Puesto" scope="row"><div class="slds-truncate">${r.pos}</div></th>
           <td data-label="Nombre"><div class="slds-truncate" title="${r.name}"><strong>${r.name}</strong></div></td>
           <td data-label="Donaciones"><div class="slds-truncate" title="${r.amount}">${r.amount}</div></td>
-          <td data-label="Medalla"><div class="slds-truncate" title="${r.medal ? r.medal.toUpperCase() : 'Ninguna'}">${r.medal ? r.medal.toUpperCase() : 'Ninguna'}</div></td>
         </tr>
       `;
     }).join('');
@@ -1516,31 +1609,39 @@
 
   function showToast(message, type = 'info') {
     let themeClass = 'slds-theme_info';
-    let iconText = 'ℹ️';
+    let iconName = 'info';
+    let iconContainerClass = 'slds-icon-utility-info';
     if (type === 'success') {
       themeClass = 'slds-theme_success';
-      iconText = '✅';
+      iconName = 'success';
+      iconContainerClass = 'slds-icon-utility-success';
     } else if (type === 'warning') {
       themeClass = 'slds-theme_warning';
-      iconText = '⚠️';
+      iconName = 'warning';
+      iconContainerClass = 'slds-icon-utility-warning';
     } else if (type === 'error') {
       themeClass = 'slds-theme_error';
-      iconText = '❌';
+      iconName = 'error';
+      iconContainerClass = 'slds-icon-utility-error';
     }
 
     const toastHtml = `
       <div class="slds-notify_container" style="top: 20px; pointer-events: none;">
         <div class="slds-notify slds-notify_toast ${themeClass}" role="status" style="pointer-events: auto;">
           <span class="slds-assistive-text">${type}</span>
-          <span class="slds-icon_container slds-m-right_small slds-no-flex slds-align-top" style="font-size: 18px; line-height: 1;">
-            ${iconText}
+          <span class="slds-icon_container ${iconContainerClass} slds-m-right_small slds-no-flex slds-align-top">
+            <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: currentColor;">
+              <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#${iconName}"></use>
+            </svg>
           </span>
           <div class="slds-notify__content" style="flex-grow: 1;">
             <h2 class="slds-text-heading_small">${message}</h2>
           </div>
           <div class="slds-notify__close">
-            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar" style="border: none; background: transparent; color: white;" onclick="this.closest('.dt-toast-wrapper').remove()">
-              <span style="font-size: 20px; font-weight: bold; line-height: 1;">&times;</span>
+            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar" onclick="this.closest('.dt-toast-wrapper').remove()">
+              <svg class="slds-button__icon" aria-hidden="true" style="fill: currentColor;">
+                <use xlink:href="/assets/slds-icons/utility-sprite/svg/symbols.svg#close"></use>
+              </svg>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
           </div>
