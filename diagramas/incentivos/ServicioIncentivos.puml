@@ -1,0 +1,155 @@
+@startuml ServicioIncentivos.puml
+skinparam classAttributeIconSize 0
+
+package "Servicio de Incentivos" {
+
+    enum CategoriaDonanteEnum {
+        COLABORADOR
+        SOSTENEDOR
+        TRANSFORMADOR
+    }
+
+    interface CategoriaDonanteState {
+        + avanzarCategoria()
+        + getValorEnum(): CategoriaDonanteEnum
+    }
+
+    class ColaboradorState implements CategoriaDonanteState {
+        - perfil: PerfilDonante
+        + avanzarCategoria()
+        + getValorEnum(): CategoriaDonanteEnum
+    }
+
+    class SostenedorState implements CategoriaDonanteState {
+        - perfil: PerfilDonante
+        + avanzarCategoria()
+        + getValorEnum(): CategoriaDonanteEnum
+    }
+
+    class TransformadorState implements CategoriaDonanteState {
+        - perfil: PerfilDonante
+        + avanzarCategoria()
+        + getValorEnum(): CategoriaDonanteEnum
+    }
+
+    class PerfilDonante {
+        - donanteId: UUID
+        - categoria: CategoriaDonanteState
+        - insigniasObtenidas: List<Insignia>
+        - misionesPorNivel: MisionesPorNivel
+        - misionActual: Mision
+        - totalDonacionesHistoricas: int
+        - mesesConsecutivosDonando: int
+        - cantidadBienesDonados: int
+        - donacionesExitosas: int
+        - maxBienesEnUnaDonacion: int
+        - categoriasUnicasDonadas: Set<String>
+        - organizacionesUnicasAyudadas: Set<UUID>
+        - historialDonacionesPorMes: Map<YearMonth, Integer>
+        - ultimoMesDonacion: YearMonth
+        + PerfilDonante(donanteId: UUID)
+        + cargarMisionesDeCategoriaActual()
+        + registrarDonacionExitosa(actividad: ActividadDonacionDTO)
+        + evaluarMisiones()
+        + getMisionesActivas(): List<Mision>
+    }
+
+    abstract class MisionesPorNivel {
+        # misiones: List<Mision>
+        # misionActual: Mision
+        # perfilAsociado: PerfilDonante
+        # categoriaObtener: CategoriaDonanteEnum
+        # fechaAsignacion: LocalDate
+        + {abstract} clonar(): MisionesPorNivel
+        + avanzarMision(): Mision
+    }
+
+    class MisionesPorNivelColaborador extends MisionesPorNivel {
+        + MisionesPorNivelColaborador()
+        + clonar(): MisionesPorNivel
+    }
+
+    class MisionesPorNivelSostenedor extends MisionesPorNivel {
+        + MisionesPorNivelSostenedor()
+        + clonar(): MisionesPorNivel
+    }
+
+    class MisionesPorNivelTransformador extends MisionesPorNivel {
+        + MisionesPorNivelTransformador()
+        + clonar(): MisionesPorNivel
+    }
+
+    abstract class Mision {
+        - nombre: String
+        - recompensa: Insignia
+        + Mision(nombre: String, recompensa: Insignia)
+        + {abstract} evaluar(perfil: PerfilDonante): boolean
+        + {abstract} getProgresoActual(perfil: PerfilDonante): String
+    }
+
+    class RachaMision extends Mision {
+        - mesesObjetivo: int
+        + evaluar(perfil: PerfilDonante): boolean
+        + getProgresoActual(perfil: PerfilDonante): String
+    }
+
+    class CompletitudMision extends Mision {
+        - categoriasObjetivo: int
+        + evaluar(perfil: PerfilDonante): boolean
+        + getProgresoActual(perfil: PerfilDonante): String
+    }
+
+    class HabilDonadorMision extends Mision {
+        - cantidadMinimaBienes: int
+        + evaluar(perfil: PerfilDonante): boolean
+        + getProgresoActual(perfil: PerfilDonante): String
+    }
+
+    class DonacionesExitosasMision extends Mision {
+        - donacionesObjetivo: int
+        + evaluar(perfil: PerfilDonante): boolean
+        + getProgresoActual(perfil: PerfilDonante): String
+    }
+
+    class Insignia {
+        - nombre: String
+        - descripcion: String
+        - fechaObtencion: LocalDate
+        - visiblePublicamente: boolean
+        + setVisible(visible: boolean)
+    }
+
+    class RankingMensualService {
+        - repository: PerfilDonanteRepository
+        - puntuacionStrategy: RankingPuntuacionStrategy
+        + RankingMensualService(repository: PerfilDonanteRepository, puntuacionStrategy: RankingPuntuacionStrategy)
+        + obtenerTop5Mensual(): List<PerfilDonante>
+    }
+
+    interface RankingPuntuacionStrategy {
+        + calcularPuntaje(perfil: PerfilDonante): double
+    }
+
+    class RankingPorDonacionesStrategy implements RankingPuntuacionStrategy {
+        + calcularPuntaje(perfil: PerfilDonante): double
+    }
+
+    interface PerfilDonanteRepository {
+        + findAll(): List<PerfilDonante>
+    }
+
+    ' Relaciones
+    PerfilDonante "1" *-- "1" CategoriaDonanteState : posee >
+    PerfilDonante "1" *-- "1" MisionesPorNivel : debe completar >
+    PerfilDonante "1" *-- "0..*" Insignia : posee >
+
+    MisionesPorNivel "1" *-- "0..*" Mision : contiene >
+    MisionesPorNivel --> CategoriaDonanteEnum : Objetivo >
+
+    Mision --> Insignia : recompensa >
+
+    RankingMensualService --> PerfilDonanteRepository : consulta >
+    RankingMensualService --> RankingPuntuacionStrategy : utiliza >
+    RankingPuntuacionStrategy ..> PerfilDonante : evalúa >
+}
+@enduml

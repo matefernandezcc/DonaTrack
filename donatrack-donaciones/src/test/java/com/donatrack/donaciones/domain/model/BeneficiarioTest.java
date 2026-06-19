@@ -2,22 +2,25 @@ package com.donatrack.donaciones.domain.model;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
+
+import com.donatrack.donaciones.domain.model.donacion.Categoria;
+import com.donatrack.donaciones.domain.model.donacion.Donacion;
+import com.donatrack.donaciones.domain.model.donacion.Foto;
+import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 
 public class BeneficiarioTest {
 
-    @Test public void testErrorDonacionNoAsignada(){
+  @Test
+  public void testErrorDonacionNoAsignada() {
 
-        Categoria categoriaPrueba = new Categoria("Ropa", "esta Bien");
-        Donacion donacionPrueba = new Donacion(categoriaPrueba);
+    Categoria categoriaPrueba = new Categoria("Ropa", "esta Bien");
+    Donacion donacionPrueba = new Donacion(categoriaPrueba);
 
-        List<Foto> fotos = new ArrayList<>();
+    List<Foto> fotos = new ArrayList<>();
 
-        Beneficiario beneficiario = new Beneficiario();
+    Beneficiario beneficiario = new Beneficiario();
 
-        assertThrows(IllegalStateException.class, () -> beneficiario.confirmarRecepcion(donacionPrueba, fotos));
-    }
-
+    org.junit.jupiter.api.Assertions.assertFalse(beneficiario.confirmarRecepcion(donacionPrueba, fotos));
+  }
 }

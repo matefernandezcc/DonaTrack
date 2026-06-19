@@ -197,19 +197,48 @@ body.dt-login-body {
   border-right: 1px solid #e5e5e5;
   transition: width 0.2s ease;
   flex-shrink: 0;
+  overflow-x: hidden; /* Prevent text leaking during transitions */
 }
 
 .dt-sidebar.is-collapsed {
   width: 64px;
 }
 
-.dt-sidebar.is-collapsed .dt-nav a {
-  padding: 10px 0;
-  justify-content: center;
+.dt-sidebar.is-collapsed .slds-nav-vertical {
+  width: 100% !important;
+  min-width: unset !important;
 }
 
-.dt-sidebar.is-collapsed .dt-nav a span.dt-nav__label {
-  display: none;
+.dt-sidebar.is-collapsed .slds-nav-vertical__section {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.dt-sidebar.is-collapsed .slds-nav-vertical__title {
+  display: none !important;
+}
+
+.dt-sidebar.is-collapsed .slds-nav-vertical__action {
+  padding: 12px 0 !important;
+  justify-content: center !important;
+  display: flex !important;
+  width: 100% !important;
+}
+
+.dt-sidebar.is-collapsed .dt-nav__icon {
+  margin: 0 !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.dt-sidebar.is-collapsed .dt-nav__icon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.dt-sidebar.is-collapsed .slds-nav-vertical__action span.dt-nav__label {
+  display: none !important;
 }
 
 .dt-nav {
@@ -536,8 +565,13 @@ body.dt-login-body {
     display: none;
   }
 
+  /* Obsolete: Replaced by slds-global-header__item_search
   .dt-topbar__search {
     display: none;
+  }
+  */
+  .slds-global-header__item_search {
+    display: none !important;
   }
 
   .dt-sidebar {
@@ -602,4 +636,485 @@ body.dt-login-body {
 
 .dt-medal_bronze {
   background: #b08049;
+}
+
+/* ===== Dynamic Role Sections ===== */
+.dt-role-section {
+  display: none;
+}
+.dt-role-section.is-active {
+  display: block !important;
+}
+
+/* ===== Trailhead-Style Gamification ===== */
+.dt-th-container {
+  background: #f3f3f3;
+  padding: 1rem 0;
+}
+
+.dt-th-header {
+  background: linear-gradient(135deg, #104e8b 0%, #1c86ee 100%);
+  border-radius: 8px;
+  color: #fff;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.dt-th-header::after {
+  content: "";
+  position: absolute;
+  right: -50px;
+  bottom: -50px;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dt-th-profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.dt-th-avatar-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dt-th-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background: #eaf5fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #0176d3;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.dt-th-badge-emblem {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f39c12;
+  border: 3px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.dt-th-info {
+  flex-grow: 1;
+}
+
+.dt-th-name {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.dt-th-rank-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f1f8ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dt-th-stats-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.dt-th-stat-box {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 16px;
+  border-radius: 6px;
+  backdrop-filter: blur(5px);
+  text-align: center;
+  min-width: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dt-th-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  display: block;
+}
+
+.dt-th-stat-label {
+  font-size: 12px;
+  color: #e2effa;
+  text-transform: uppercase;
+}
+
+.dt-th-progress-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.dt-th-progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Badge Grids */
+.dt-th-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.dt-th-badge-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 16px 8px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dt-th-badge-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.dt-th-badge-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 24px;
+  margin-bottom: 12px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.dt-th-badge-icon-wrap::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+}
+
+.dt-th-badge-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #181818;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+}
+
+.dt-th-badge-date {
+  font-size: 11px;
+  color: #706e6b;
+}
+
+/* Badge specific color schemes */
+.dt-th-badge-orange { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+.dt-th-badge-blue { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+.dt-th-badge-green { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+.dt-th-badge-purple { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
+
+/* Missions */
+.dt-th-mission-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dt-th-mission-item {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.dt-th-mission-details {
+  flex-grow: 1;
+}
+
+.dt-th-mission-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #181818;
+  margin: 0 0 2px 0;
+}
+
+.dt-th-mission-desc {
+  font-size: 12px;
+  color: #706e6b;
+  margin: 0 0 6px 0;
+}
+
+.dt-th-mission-loss-condition {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #b78103;
+  background: #fffbeb;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #ffeaa7;
+  margin-top: 4px;
+}
+
+.dt-th-mission-badge {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* ===== Maps ===== */
+.dt-leaflet-map {
+  height: 380px;
+  border-radius: 6px;
+  border: 1px solid #c9c7c5;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: #fafaf9;
+}
+
+/* ===== Needs Forms ===== */
+.dt-needs-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Notification Item Custom */
+.dt-notification-card {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f3f3f3;
+  transition: background 0.1s ease;
+}
+.dt-notification-card:hover {
+  background-color: #f9f9fa;
+}
+.dt-notification-card.is-unread {
+  background-color: #edf7ff;
+}
+.dt-notification-time {
+  font-size: 11px;
+  color: #706e6b;
+  margin-top: 4px;
+}
+
+/* ===== Fixed Header / Topbar Alignment ===== */
+/* Obsolete: Replaced by slds-global-header
+.dt-topbar {
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.dt-topbar .slds-form-element,
+.dt-topbar .slds-form-element__control {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+*/
+
+/* ===== SLDS Global Header Layout & Spacing Overrides ===== */
+.slds-global-header_container {
+  position: sticky !important;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+}
+
+.slds-global-header {
+  height: 56px !important;
+  border-bottom: 1px solid #e5e5e5;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.slds-global-header__item_search {
+  max-width: 45rem !important;
+  flex-grow: 1 !important;
+  margin-right: 1.5rem !important;
+  margin-left: 1.5rem !important;
+}
+
+.slds-global-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+
+
+/* ===== Toast Pointer Events (Click-through) & Styling ===== */
+.slds-notify_container {
+  pointer-events: none !important;
+  z-index: 10000 !important;
+}
+
+.slds-notify_toast {
+  pointer-events: auto !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ===== Premium Rounded Corners Overrides ===== */
+.slds-card, 
+.dt-kpi__card, 
+.dt-action__card, 
+.dt-th-header, 
+.dt-th-progress-card, 
+.dt-th-badge-card, 
+.dt-th-mission-item, 
+.dt-leaflet-map,
+.dt-map,
+.slds-page-header,
+.dt-dropzone,
+.slds-modal__container,
+.slds-dropdown {
+  border-radius: 16px !important;
+}
+
+.slds-modal__header {
+  border-top-left-radius: 16px !important;
+  border-top-right-radius: 16px !important;
+}
+
+.slds-modal__footer {
+  border-bottom-left-radius: 16px !important;
+  border-bottom-right-radius: 16px !important;
+}
+
+/* ===== Leaflet Custom Marker Pins ===== */
+.dt-marker-custom {
+  width: 34px !important;
+  height: 34px !important;
+  background: white;
+  border: 2px solid #0176d3;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.2s ease-in-out;
+}
+
+.dt-marker-custom:hover {
+  transform: scale(1.2) !important;
+  z-index: 1000 !important;
+}
+
+.dt-marker-custom--depot {
+  border-color: #0176d3 !important;
+  background: #eaf5fe !important;
+}
+
+.dt-marker-custom--destination {
+  border-color: #2e7d32 !important;
+  background: #ebf7ec !important;
+}
+
+.dt-marker-custom--truck {
+  border-color: #ef6c00 !important;
+  background: #fff3e0 !important;
+  animation: dt-marker-pulse 2s infinite;
+}
+
+@keyframes dt-marker-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 108, 0, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(239, 108, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 108, 0, 0);
+  }
+}
+
+/* ===== Header Icon Custom Override ===== */
+#headerIconContainer {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+#headerIconContainer svg {
+  fill: #0176d3 !important;
+}
+
+/* ===== Popover and Unread Badge Overrides ===== */
+#notifDropdown section.slds-popover {
+  display: none;
+}
+#notifDropdown.slds-is-open section.slds-popover {
+  display: block !important;
+}
+
+.slds-global-header__notification_unread {
+  background-color: #f3f9fe !important;
+}
+
+.slds-global-header__notification_unread:hover {
+  background-color: #eaf5fe !important;
+}
+
+.slds-global-header__notification abbr {
+  color: #0176d3 !important;
+}
+
+.slds-global-search__form-element .slds-input__icon {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin-top: 0 !important;
 }

@@ -1,0 +1,17 @@
+info:
+  name: Auditar Vencidos
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/donaciones/auditoria/vencidos"
+  body:
+    type: none
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

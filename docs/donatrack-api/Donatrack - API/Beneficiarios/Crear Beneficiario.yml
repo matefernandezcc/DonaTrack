@@ -1,0 +1,21 @@
+info:
+  name: Crear Beneficiario
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/donaciones/beneficiarios"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Entidad de Ayuda Mutua"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

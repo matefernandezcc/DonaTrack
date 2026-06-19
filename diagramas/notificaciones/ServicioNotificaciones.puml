@@ -1,0 +1,68 @@
+@startuml ServicioNotificaciones.puml
+skinparam classAttributeIconSize 0
+
+package "Servicio de Notificaciones" {
+
+    class NotificadorService {
+        - adaptadores: Map<String, NotificacionAdapter>
+        + NotificadorService(adaptadores: Map<String, NotificacionAdapter>)
+        + enviarNotificacion(destinatario: String, mensaje: String, medio: String)
+    }
+
+    enum TipoEvento {
+        INACTIVIDAD_DONANTE
+        DONACION_ASIGNADA_ENTIDAD
+        DONACION_ASIGNADA_DONANTE
+        MISION_CUMPLIDA
+        CAMBIO_CATEGORIA
+    }
+
+    class Evento {
+        - tipoEvento: TipoEvento
+        - descripcion: String
+        - rolesDestinatarios: List<String>
+        + validoParaNotificar(rol: String): boolean
+    }
+
+    class NotificacionFactory {
+        + {static} crearNotificacion(evento: Evento, destinatario: String, mensaje: String): Notificacion
+        + {static} crearNotificacion(evento: Evento, destinatario: String, mensaje: String, medio: String): Notificacion
+    }
+
+    class Notificacion {
+        - destinatario: String
+        - mensaje: String
+        - fechaEnvio: LocalDateTime
+        - completada: boolean
+        - evento: Evento
+        - medio: String
+        + Notificacion(destinatario: String, mensaje: String)
+        + Notificacion(destinatario: String, mensaje: String, evento: Evento, medio: String)
+    }
+
+    interface NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
+    }
+
+    class AdaptadorEmail implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
+    }
+
+    class AdaptadorSMS implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
+    }
+
+    class AdaptadorWhatsApp implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
+    }
+
+    ' Relaciones
+    NotificadorService --> NotificacionAdapter : utiliza >
+    NotificadorService ..> Notificacion : envía >
+
+    NotificacionFactory ..> Notificacion : crea >
+
+    Notificacion --> Evento : posee >
+    Evento --> TipoEvento : posee >
+}
+@enduml

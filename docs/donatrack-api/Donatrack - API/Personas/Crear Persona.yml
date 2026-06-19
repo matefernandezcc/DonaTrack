@@ -1,0 +1,22 @@
+info:
+  name: Crear Persona
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/donaciones/personas"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Juan Pérez",
+        "tipo": "HUMANA"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
