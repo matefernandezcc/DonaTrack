@@ -1,6 +1,6 @@
 package com.donatrack.incentivos.domain.model;
 
-import com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteEnum;
+import com.donatrack.incentivos.domain.model.categoria.CategoriaDonante;
 import com.donatrack.incentivos.domain.model.misiones.MisionesPorNivel;
 import com.donatrack.incentivos.domain.model.misiones.MisionesPorNivelColaborador;
 import com.donatrack.incentivos.domain.model.misiones.MisionesPorNivelSostenedor;
@@ -9,17 +9,17 @@ import com.donatrack.incentivos.domain.model.misiones.MisionesPorNivelTransforma
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfiguracionRecompensasFactory {
+public class MisionesFactory {
 
-    private static final Map<CategoriaDonanteEnum, MisionesPorNivel> PROTOTIPOS = new HashMap<>();
+    private static final Map<CategoriaDonante, MisionesPorNivel> PROTOTIPOS = new HashMap<>();
 
     static {
-        PROTOTIPOS.put(CategoriaDonanteEnum.COLABORADOR, new MisionesPorNivelColaborador());
-        PROTOTIPOS.put(CategoriaDonanteEnum.SOSTENEDOR, new MisionesPorNivelSostenedor());
-        PROTOTIPOS.put(CategoriaDonanteEnum.TRANSFORMADOR, new MisionesPorNivelTransformador());
+        PROTOTIPOS.put(CategoriaDonante.COLABORADOR, new MisionesPorNivelColaborador());
+        PROTOTIPOS.put(CategoriaDonante.SOSTENEDOR, new MisionesPorNivelSostenedor());
+        PROTOTIPOS.put(CategoriaDonante.TRANSFORMADOR, new MisionesPorNivelTransformador());
     }
 
-    public static MisionesPorNivel obtenerMisionesPara(PerfilDonante perfil, CategoriaDonanteEnum categoria) {
+    public static MisionesPorNivel obtenerMisionesPara(PerfilDonante perfil, CategoriaDonante categoria) {
         MisionesPorNivel prototipo = PROTOTIPOS.get(categoria);
         if (prototipo == null) {
             return null;

@@ -3,49 +3,37 @@ skinparam classAttributeIconSize 0
 
 package "Servicio de Incentivos" {
 
-    enum CategoriaDonanteEnum {
+    enum CategoriaDonante {
         COLABORADOR
         SOSTENEDOR
         TRANSFORMADOR
+        + {abstract} siguienteNivel(): CategoriaDonante
     }
 
-    enum tipoMetricaMision {
+    enum TipoMetricaMision {
         DONACIONES_EXITOSAS
         MAX_BIENES
         MESES_CONSECUTIVOS
         CATEGORIAS_DISTINTAS
-        -unidad: String
+        - unidad: String
+        + {abstract} extraerValor(perfil: PerfilDonante): int
     }
 
-    interface CategoriaDonanteState {
-        + avanzarCategoria()
-        + getValorEnum(): CategoriaDonanteEnum
-    }
-
-    class ColaboradorState implements CategoriaDonanteState {
-        - perfil: PerfilDonante
-        + avanzarCategoria()
-        + getValorEnum(): CategoriaDonanteEnum
-    }
-
-    class SostenedorState implements CategoriaDonanteState {
-        - perfil: PerfilDonante
-        + avanzarCategoria()
-        + getValorEnum(): CategoriaDonanteEnum
-    }
-
-    class TransformadorState implements CategoriaDonanteState {
-        - perfil: PerfilDonante
-        + avanzarCategoria()
-        + getValorEnum(): CategoriaDonanteEnum
-    }
 
     class PerfilDonante {
         - donanteId: UUID
-        - categoria: CategoriaDonanteState
+        - categoria: CategoriaDonante
         - insigniasObtenidas: List<Insignia>
         - misionesPorNivel: MisionesPorNivel
         - misionActual: Mision
+        - metricas: MetricasDonante
+        + cargarMisionesDeCategoriaActual()
+        + registrarDonacionExitosa(cantidadBienes: int, categorias: Set<String>, idEntidadBeneficiaria: UUID, mesDonacion: YearMonth)
+        + evaluarMisiones()
+        + getMisionesActivas(): List<Mision>
+    }
+
+    class MetricasDonante {
         - totalDonacionesHistoricas: int
         - mesesConsecutivosDonando: int
         - cantidadBienesDonados: int
@@ -55,35 +43,29 @@ package "Servicio de Incentivos" {
         - organizacionesUnicasAyudadas: Set<UUID>
         - historialDonacionesPorMes: Map<YearMonth, Integer>
         - ultimoMesDonacion: YearMonth
-        + PerfilDonante(donanteId: UUID)
-        + cargarMisionesDeCategoriaActual()
-        + registrarDonacionExitosa(actividad: ActividadDonacionDTO)
-        + evaluarMisiones()
-        + getMisionesActivas(): List<Mision>
+        + registrarDonacionExitosa(cantidadBienes: int, categorias: Set<String>, idEntidadBeneficiaria: UUID, mesDonacion: YearMonth)
+        - actualizarRacha(mesActual: YearMonth)
     }
 
     abstract class MisionesPorNivel {
         # misiones: List<Mision>
         # misionActual: Mision
         # perfilAsociado: PerfilDonante
-        # categoriaObtener: CategoriaDonanteEnum
+        # categoriaObtener: CategoriaDonante
         # fechaAsignacion: LocalDate
         + {abstract} clonar(): MisionesPorNivel
         + avanzarMision(): Mision
     }
 
     class MisionesPorNivelColaborador extends MisionesPorNivel {
-        + MisionesPorNivelColaborador()
         + clonar(): MisionesPorNivel
     }
 
     class MisionesPorNivelSostenedor extends MisionesPorNivel {
-        + MisionesPorNivelSostenedor()
         + clonar(): MisionesPorNivel
     }
 
     class MisionesPorNivelTransformador extends MisionesPorNivel {
-        + MisionesPorNivelTransformador()
         + clonar(): MisionesPorNivel
     }
 
@@ -95,7 +77,7 @@ package "Servicio de Incentivos" {
         - objetivo: int
         + evaluar(perfil: PerfilDonante): boolean
         + getProgresoActual(perfil: PerfilDonante): String
-        + extraerValor(perfil: PerfilDonante ): int
+        - extraerValor(perfil: PerfilDonante): int
     }
 
     class Insignia {
@@ -103,13 +85,20 @@ package "Servicio de Incentivos" {
         - descripcion: String
         - fechaObtencion: LocalDate
         - visiblePublicamente: boolean
-        + setVisible(visible: boolean)
+    }
+
+    class InsigniaObtenidaEvent {
+        - donanteId: UUID
+        - insignia: Insignia
+    }
+
+    class MisionesFactory {
+        - {static} PROTOTIPOS: Map<CategoriaDonante, MisionesPorNivel>
+        + {static} obtenerMisionesPara(perfil: PerfilDonante, categoria: CategoriaDonante): MisionesPorNivel
     }
 
     class RankingMensualService {
-        - repository: PerfilDonanteRepository
         - puntuacionStrategy: RankingPuntuacionStrategy
-        + RankingMensualService(repository: PerfilDonanteRepository, puntuacionStrategy: RankingPuntuacionStrategy)
         + obtenerTop5Mensual(): List<PerfilDonante>
     }
 
@@ -121,22 +110,25 @@ package "Servicio de Incentivos" {
         + calcularPuntaje(perfil: PerfilDonante): double
     }
 
-    interface PerfilDonanteRepository {
-        + findAll(): List<PerfilDonante>
-    }
+
 
     ' Relaciones
-    PerfilDonante "1" *-- "1" CategoriaDonanteState : posee >
+    PerfilDonante "1" *-- "1" CategoriaDonante : nivel actual >
     PerfilDonante "1" *-- "1" MisionesPorNivel : debe completar >
     PerfilDonante "1" *-- "0..*" Insignia : posee >
 
     MisionesPorNivel "1" *-- "0..*" Mision : contiene >
-    MisionesPorNivel --> CategoriaDonanteEnum : Objetivo >
+    MisionesPorNivel --> CategoriaDonante : Objetivo >
 
     Mision --> Insignia : recompensa >
-    Mision --> tipoMetricaMision : evalúa >
+    Mision --> TipoMetricaMision : evalúa >
+    PerfilDonante "1" *-- "1" MetricasDonante : delega métricas >
 
-    RankingMensualService --> PerfilDonanteRepository : consulta >
+    MisionesFactory ..> MisionesPorNivel : instancia >
+    MisionesFactory ..> CategoriaDonante : usa >
+
+    InsigniaObtenidaEvent --> Insignia : refiere >
+
     RankingMensualService --> RankingPuntuacionStrategy : utiliza >
     RankingPuntuacionStrategy ..> PerfilDonante : evalúa >
 }

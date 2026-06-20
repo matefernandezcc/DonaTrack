@@ -21,10 +21,10 @@ public class IncentivoController {
     private final NotificacionClient notificacionClient;
     private final ApplicationEventPublisher eventPublisher;
     private final com.donatrack.incentivos.domain.service.RankingMensualService rankingMensualService;
-    
-    public IncentivoController(NotificacionClient notificacionClient, 
-                               ApplicationEventPublisher eventPublisher,
-                               com.donatrack.incentivos.domain.service.RankingMensualService rankingMensualService) {
+
+    public IncentivoController(NotificacionClient notificacionClient,
+            ApplicationEventPublisher eventPublisher,
+            com.donatrack.incentivos.domain.service.RankingMensualService rankingMensualService) {
         this.notificacionClient = notificacionClient;
         this.eventPublisher = eventPublisher;
         this.rankingMensualService = rankingMensualService;
@@ -36,15 +36,17 @@ public class IncentivoController {
         PerfilDonante perfil = new PerfilDonante(id); // Mock
 
         MetricasDonanteDTO dto = MetricasDonanteDTO.builder()
-            .donanteId(perfil.getDonanteId())
-            .totalDonacionesHistoricas(perfil.getTotalDonacionesHistoricas())
-            .mesesConsecutivosDonando(perfil.getMesesConsecutivosDonando())
-            .cantidadBienesDonados(perfil.getCantidadBienesDonados())
-            .donacionesExitosas(perfil.getDonacionesExitosas())
-            .totalOrganizacionesAyudadas(perfil.getOrganizacionesUnicasAyudadas() != null ? perfil.getOrganizacionesUnicasAyudadas().size() : 0)
-            .historialDonacionesPorMes(perfil.getHistorialDonacionesPorMes())
-            .posicionRanking(5) // Mock
-            .build();
+                .donanteId(perfil.getDonanteId())
+                .totalDonacionesHistoricas(perfil.getMetricas().getTotalDonacionesHistoricas())
+                .mesesConsecutivosDonando(perfil.getMetricas().getMesesConsecutivosDonando())
+                .cantidadBienesDonados(perfil.getMetricas().getCantidadBienesDonados())
+                .donacionesExitosas(perfil.getMetricas().getDonacionesExitosas())
+                .totalOrganizacionesAyudadas(perfil.getMetricas().getOrganizacionesUnicasAyudadas() != null
+                        ? perfil.getMetricas().getOrganizacionesUnicasAyudadas().size()
+                        : 0)
+                .historialDonacionesPorMes(perfil.getMetricas().getHistorialDonacionesPorMes())
+                .posicionRanking(5) // Mock
+                .build();
 
         return ResponseEntity.ok(dto);
     }
@@ -64,12 +66,12 @@ public class IncentivoController {
     @GetMapping("/ranking/top5")
     public ResponseEntity<List<java.util.Map<String, Object>>> obtenerRankingMensual() {
         List<PerfilDonante> top5 = rankingMensualService.obtenerTop5Mensual();
-        
+
         List<java.util.Map<String, Object>> response = top5.stream().map(p -> {
             java.util.Map<String, Object> map = new java.util.HashMap<>();
             // n8n espera "user" y "totalDonations" (según su Format Podium Message)
             map.put("user", p.getDonanteId().toString());
-            map.put("totalDonations", p.getDonacionesExitosas());
+            map.put("totalDonations", p.getMetricas().getDonacionesExitosas());
             return map;
         }).collect(java.util.stream.Collectors.toList());
 
@@ -77,26 +79,31 @@ public class IncentivoController {
     }
 
     @PostMapping("/donantes/{id}/actividad")
-    public ResponseEntity<Void> registrarActividadDonacionExitosa(@PathVariable UUID id, @RequestBody ActividadDonacionDTO actividad) {
+    public ResponseEntity<Void> registrarActividadDonacionExitosa(@PathVariable UUID id,
+            @RequestBody ActividadDonacionDTO actividad) {
         // Mock
         PerfilDonante perfil = new PerfilDonante(id);
-        
+
         int insigniasAntes = perfil.getInsigniasObtenidas().size();
-        com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteEnum categoriaAntes = perfil.getCategoria().getValorEnum();
-        
-        perfil.registrarDonacionExitosa(actividad);
-        
+        com.donatrack.incentivos.domain.model.categoria.CategoriaDonante categoriaAntes = perfil.getCategoria();
+
+        perfil.registrarDonacionExitosa(
+                actividad.getCantidadBienes(),
+                actividad.getCategorias() != null ? new java.util.HashSet<>(actividad.getCategorias()) : null,
+                actividad.getIdEntidadBeneficiaria(),
+                java.time.YearMonth.from(actividad.getFecha()));
+
         int insigniasDespues = perfil.getInsigniasObtenidas().size();
-        com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteEnum categoriaDespues = perfil.getCategoria().getValorEnum();
-        
+        com.donatrack.incentivos.domain.model.categoria.CategoriaDonante categoriaDespues = perfil.getCategoria();
+
         boolean misionCompletada = insigniasDespues > insigniasAntes;
         boolean categoriaCambiada = categoriaAntes != categoriaDespues;
 
         if (misionCompletada) {
             notificacionClient.enviarNotificacion(
-                new NotificacionRequest("donante" + id + "@test.com", "¡Felicidades! Has completado una misión.", "EMAIL")
-            );
-            
+                    new NotificacionRequest("donante" + id + "@test.com", "¡Felicidades! Has completado una misión.",
+                            "EMAIL"));
+
             // Publicar el último evento de insignia (la nueva que ganó)
             Insignia ultimaInsignia = perfil.getInsigniasObtenidas().get(insigniasDespues - 1);
             eventPublisher.publishEvent(new InsigniaObtenidaEvent(perfil.getDonanteId(), ultimaInsignia));
@@ -104,8 +111,8 @@ public class IncentivoController {
 
         if (categoriaCambiada) {
             notificacionClient.enviarNotificacion(
-                new NotificacionRequest("donante" + id + "@test.com", "¡Increíble! Has subido de categoría a " + categoriaDespues.name(), "EMAIL")
-            );
+                    new NotificacionRequest("donante" + id + "@test.com",
+                            "¡Increíble! Has subido de categoría a " + categoriaDespues.name(), "EMAIL"));
         }
 
         return ResponseEntity.ok().build();

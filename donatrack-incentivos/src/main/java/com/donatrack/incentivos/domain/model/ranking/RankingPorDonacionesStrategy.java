@@ -9,16 +9,16 @@ public class RankingPorDonacionesStrategy implements RankingPuntuacionStrategy {
         double puntaje = 0;
         
         // Cada donación exitosa vale 10 puntos
-        puntaje += perfil.getDonacionesExitosas() * 10;
+        puntaje += perfil.getMetricas().getDonacionesExitosas() * 10;
         
         // Cada bien donado suma 1 punto
-        puntaje += perfil.getCantidadBienesDonados() * 1;
+        puntaje += perfil.getMetricas().getCantidadBienesDonados() * 1;
         
         // Bonus por racha de meses consecutivos (5 puntos por mes)
-        puntaje += perfil.getMesesConsecutivosDonando() * 5;
+        puntaje += perfil.getMetricas().getMesesConsecutivosDonando() * 5;
 
         // Multiplicador según categoría
-        double multiplicador = switch (perfil.getCategoria().getValorEnum()) {
+        double multiplicador = switch (perfil.getCategoria()) {
             case COLABORADOR -> 1.0;
             case SOSTENEDOR -> 1.2;
             case TRANSFORMADOR -> 1.5;

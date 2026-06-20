@@ -32,11 +32,6 @@ public class Mision {
     }
 
     private int extraerValor(PerfilDonante perfil) {
-        return switch (tipoMetrica) {
-            case DONACIONES_EXITOSAS -> perfil.getDonacionesExitosas();
-            case MAX_BIENES -> perfil.getMaxBienesEnUnaDonacion();
-            case MESES_CONSECUTIVOS -> perfil.getMesesConsecutivosDonando();
-            case CATEGORIAS_DISTINTAS -> perfil.getCategoriasUnicasDonadas() != null ? perfil.getCategoriasUnicasDonadas().size() : 0;
-        };
+        return tipoMetrica.extraerValor(perfil);
     }
 }

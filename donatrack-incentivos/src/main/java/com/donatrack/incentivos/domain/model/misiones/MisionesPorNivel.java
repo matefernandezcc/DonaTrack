@@ -1,7 +1,7 @@
 package com.donatrack.incentivos.domain.model.misiones;
 
 import com.donatrack.incentivos.domain.model.PerfilDonante;
-import com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteEnum;
+import com.donatrack.incentivos.domain.model.categoria.CategoriaDonante;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +15,7 @@ public abstract class MisionesPorNivel {
     protected List<Mision> misiones = new ArrayList<>();
     protected Mision misionActual;
     protected PerfilDonante perfilAsociado;
-    protected CategoriaDonanteEnum categoriaObtener;
+    protected CategoriaDonante categoriaObtener;
     protected LocalDate fechaAsignacion = LocalDate.now();
 
     public abstract MisionesPorNivel clonar();

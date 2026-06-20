@@ -391,7 +391,7 @@ package "servicio de donaciones"{
 }
 
 package "Servicio de Incentivos" {
-    enum CategoriaDonanteEnum {
+    enum CategoriaDonante {
         COLABORADOR
         SOSTENEDOR
         TRANSFORMADOR
@@ -399,25 +399,25 @@ package "Servicio de Incentivos" {
 
     interface CategoriaDonanteState {
         + avanzarCategoria()
-        + getValorEnum(): CategoriaDonanteEnum
+        + getValorEnum(): CategoriaDonante
     }
 
     class ColaboradorState implements CategoriaDonanteState {
         - perfil: PerfilDonante
         + avanzarCategoria()
-        + getValorEnum(): CategoriaDonanteEnum
+        + getValorEnum(): CategoriaDonante
     }
 
     class SostenedorState implements CategoriaDonanteState {
         - perfil: PerfilDonante
         + avanzarCategoria()
-        + getValorEnum(): CategoriaDonanteEnum
+        + getValorEnum(): CategoriaDonante
     }
 
     class TransformadorState implements CategoriaDonanteState {
         - perfil: PerfilDonante
         + avanzarCategoria()
-        + getValorEnum(): CategoriaDonanteEnum
+        + getValorEnum(): CategoriaDonante
     }
 
     class PerfilDonante {
@@ -446,7 +446,7 @@ package "Servicio de Incentivos" {
         # misiones: List<Mision>
         # misionActual: Mision
         # perfilAsociado: PerfilDonante
-        # categoriaObtener: CategoriaDonanteEnum
+        # categoriaObtener: CategoriaDonante
         # fechaAsignacion: LocalDate
         + {abstract} clonar(): MisionesPorNivel
         + avanzarMision(): Mision
@@ -603,7 +603,7 @@ PerfilDonante "1" *-- "1" MisionesPorNivel : debe completar >
 PerfilDonante "1" *-- "0..*" Insignia : posee >
 
 MisionesPorNivel "1" *-- "0..*" Mision : contiene >
-MisionesPorNivel --> CategoriaDonanteEnum : Objetivo >
+MisionesPorNivel --> CategoriaDonante : Objetivo >
 Mision --> Insignia : recompensa >
 
 RankingMensualService --> PerfilDonanteRepository : consulta >
