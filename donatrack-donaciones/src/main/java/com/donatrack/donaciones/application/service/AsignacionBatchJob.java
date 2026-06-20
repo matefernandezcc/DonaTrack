@@ -6,7 +6,6 @@ import com.donatrack.donaciones.domain.model.roles.Beneficiario;
 import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
 import com.donatrack.donaciones.domain.repository.DonacionRepository;
 import com.donatrack.donaciones.domain.service.MatchmakerService;
-
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

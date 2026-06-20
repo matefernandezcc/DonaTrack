@@ -4,15 +4,16 @@ import com.donatrack.donaciones.domain.model.donacion.Bien;
 import com.donatrack.donaciones.domain.model.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.enums.EstadoNecesidad;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class NecesidadExtraordinaria extends Necesidad {
-  @Getter @Setter private double cantidadRequerida;
-  @Getter private List<Donacion> donacionesParciales;
+  private double cantidadRequerida;
+  private List<Donacion> donacionesParciales;
 
   public NecesidadExtraordinaria(
       String descripcion, Subcategoria subcategoriaRequerida, double cantidadRequerida) {

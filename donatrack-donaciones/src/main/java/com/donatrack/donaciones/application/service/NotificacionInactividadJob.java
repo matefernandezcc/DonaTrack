@@ -10,12 +10,10 @@ import com.donatrack.donaciones.domain.repository.PersonaRepository;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.donacion.HistorialEstado;
 import com.donatrack.donaciones.domain.model.enums.MedioContacto;
-
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service

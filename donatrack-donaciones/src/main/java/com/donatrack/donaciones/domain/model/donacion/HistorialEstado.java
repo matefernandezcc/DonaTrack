@@ -6,11 +6,13 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class HistorialEstado {
-  @Getter @Setter private EstadoDonacion estado;
-  @Getter @Setter private LocalDate fecha;
-  @Getter @Setter private String observacion;
-  @Getter @Setter private Administrador usuario;
+  private EstadoDonacion estado;
+  private LocalDate fecha;
+  private String observacion;
+  private Administrador usuario;
 
   public HistorialEstado(EstadoDonacion estado, String observacion, Administrador usuario) {
     this.estado = estado;

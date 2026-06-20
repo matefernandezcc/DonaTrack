@@ -10,9 +10,11 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Beneficiario extends Rol {
-  @Getter @Setter private List<Donacion> donacionesAsignadas;
-  @Getter @Setter private List<Necesidad> necesidadesDeclaradas;
+  private List<Donacion> donacionesAsignadas;
+  private List<Necesidad> necesidadesDeclaradas;
 
   public Beneficiario() {
     super();

@@ -3,10 +3,12 @@ package com.donatrack.donaciones.domain.model.donacion;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Subcategoria {
-  @Getter @Setter private String nombre;
-  @Getter @Setter private String descripcion;
-  @Getter @Setter private Categoria categoriaPadre;
+  private String nombre;
+  private String descripcion;
+  private Categoria categoriaPadre;
 
   public Subcategoria(String nombre, String descripcion) {
     this.nombre = nombre;

@@ -5,10 +5,12 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Categoria {
-  @Getter @Setter private String nombre;
-  @Getter @Setter private String descripcion;
-  @Getter private List<Subcategoria> subcategorias;
+  private String nombre;
+  private String descripcion;
+  private List<Subcategoria> subcategorias;
 
   public Categoria(String nombre, String descripcion) {
     this.nombre = nombre;

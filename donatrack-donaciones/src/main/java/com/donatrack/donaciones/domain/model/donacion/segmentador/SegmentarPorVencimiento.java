@@ -1,12 +1,11 @@
 package com.donatrack.donaciones.domain.model.donacion.segmentador;
 
+import com.donatrack.donaciones.domain.model.donacion.Bien;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.donatrack.donaciones.domain.model.donacion.Bien;
 
 public class SegmentarPorVencimiento implements EstrategiaSegmentacion {
 

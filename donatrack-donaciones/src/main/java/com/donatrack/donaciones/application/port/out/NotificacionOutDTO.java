@@ -1,19 +1,19 @@
 package com.donatrack.donaciones.application.port.out;
 
+import com.donatrack.donaciones.domain.model.enums.MedioContacto;
 import java.time.LocalDate;
 import java.util.UUID;
-
-import com.donatrack.donaciones.domain.model.enums.MedioContacto;
-
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class NotificacionOutDTO {
-  @Getter @Setter private UUID id;
-  @Getter @Setter private String mensaje;
-  @Getter @Setter private LocalDate fechaEnvio;
-  @Getter @Setter private MedioContacto medio;
-  @Getter @Setter private boolean leida;
+  private UUID id;
+  private String mensaje;
+  private LocalDate fechaEnvio;
+  private MedioContacto medio;
+  private boolean leida;
 
   public NotificacionOutDTO(String mensaje, MedioContacto medio) {
     this.id = UUID.randomUUID();

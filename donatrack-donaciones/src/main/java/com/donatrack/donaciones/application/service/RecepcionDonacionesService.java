@@ -15,9 +15,8 @@ import com.donatrack.donaciones.domain.repository.PersonaRepository;
 import com.donatrack.donaciones.domain.repository.RecepcionDonacionRepository;
 import com.donatrack.donaciones.domain.service.ProcesadorCargaInicial;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {

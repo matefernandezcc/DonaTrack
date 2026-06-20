@@ -2,18 +2,19 @@ package com.donatrack.donaciones.domain.model.necesidades;
 
 import com.donatrack.donaciones.domain.model.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.model.enums.EstadoNecesidad;
-
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public abstract class Necesidad {
-  @Getter @Setter private String descripcion;
-  @Getter @Setter private EstadoNecesidad estado;
-  @Getter @Setter private Subcategoria subcategoriaRequerida;
-  @Getter private UUID id;
-  @Getter private LocalDate fechaSolicitud;
+  private String descripcion;
+  private EstadoNecesidad estado;
+  private Subcategoria subcategoriaRequerida;
+  private UUID id;
+  private LocalDate fechaSolicitud;
 
   protected Necesidad(String descripcion, Subcategoria subcategoriaRequerida) {
     this.descripcion = descripcion;

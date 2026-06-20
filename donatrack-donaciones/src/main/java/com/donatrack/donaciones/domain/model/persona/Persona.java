@@ -22,13 +22,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = PersonaHumana.class, name = "HUMANA"),
     @JsonSubTypes.Type(value = PersonaJuridica.class, name = "JURIDICA")
 })
+@Getter
+@Setter
 public abstract class Persona {
-  @Getter @Setter private UUID id;
-  @Getter @Setter private String email;
-  @Getter @Setter private Contacto contacto;
-  @Getter @Setter private Direccion direccion;
-  @Getter @Setter private List<Rol> roles;
-  @Getter private DocumentoIdentidad documento;
+  private UUID id;
+  private String email;
+  private Contacto contacto;
+  private Direccion direccion;
+  private List<Rol> roles;
+  private DocumentoIdentidad documento;
 
   protected Persona(
       String email, Contacto contacto, Direccion direccion, DocumentoIdentidad documento) {

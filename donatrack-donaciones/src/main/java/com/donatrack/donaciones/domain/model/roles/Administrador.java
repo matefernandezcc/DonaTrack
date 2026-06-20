@@ -8,11 +8,13 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Administrador extends Rol {
-  @Getter @Setter private UUID idDepositoAsignado;
+  private UUID idDepositoAsignado;
 
-  @Getter @Setter private ImportadorStrategy estrategiaImportador;
-  @Getter @Setter private List<UUID> camionesIds;
+  private ImportadorStrategy estrategiaImportador;
+  private List<UUID> camionesIds;
 
   public Administrador(UUID idDepositoAsignado) {
     super();

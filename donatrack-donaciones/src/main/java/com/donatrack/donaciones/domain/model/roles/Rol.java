@@ -5,9 +5,11 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public abstract class Rol {
-  @Getter @Setter private UUID id;
-  @Getter @Setter private LocalDate fechaAlta;
+  private UUID id;
+  private LocalDate fechaAlta;
 
   protected Rol() {
     this.id = UUID.randomUUID();

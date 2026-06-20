@@ -7,12 +7,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 
+@Getter
+@Setter
 public class Mision {
-    @Getter private UUID id = UUID.randomUUID();
-    @Getter @Setter private String nombre;
-    @Getter @Setter private Insignia recompensa;
-    @Getter @Setter private TipoMetricaMision tipoMetrica;
-    @Getter @Setter private int objetivo;
+    private UUID id = UUID.randomUUID();
+    private String nombre;
+    private Insignia recompensa;
+    private TipoMetricaMision tipoMetrica;
+    private int objetivo;
 
     public Mision(String nombre, Insignia recompensa, TipoMetricaMision tipoMetrica, int objetivo) {
         this.nombre = nombre;

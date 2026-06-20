@@ -1,7 +1,10 @@
 package com.donatrack.incentivos.domain.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteState;
+import com.donatrack.incentivos.domain.model.categoria.ColaboradorState;
+import com.donatrack.incentivos.domain.model.misiones.Mision;
+import com.donatrack.incentivos.domain.model.misiones.MisionesPorNivel;
+import com.donatrack.common.dto.ActividadDonacionDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,13 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Queue;
 import java.time.YearMonth;
-import com.donatrack.common.dto.ActividadDonacionDTO;
-import com.donatrack.incentivos.domain.model.categoria.CategoriaDonanteState;
-import com.donatrack.incentivos.domain.model.categoria.ColaboradorState;
-import com.donatrack.incentivos.domain.model.misiones.Mision;
-import com.donatrack.incentivos.domain.model.misiones.MisionesPorNivel;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter

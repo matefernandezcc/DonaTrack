@@ -4,14 +4,15 @@ import com.donatrack.donaciones.domain.model.donacion.Bien;
 import com.donatrack.donaciones.domain.model.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.model.donacion.Donacion;
 import com.donatrack.donaciones.domain.model.enums.EstadoNecesidad;
-
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class NecesidadRecurrente extends Necesidad {
-  @Getter @Setter private double cantidadObjetivo;
-  @Getter @Setter private double periodo;
+  private double cantidadObjetivo;
+  private double periodo;
 
   public NecesidadRecurrente(
       String descripcion,

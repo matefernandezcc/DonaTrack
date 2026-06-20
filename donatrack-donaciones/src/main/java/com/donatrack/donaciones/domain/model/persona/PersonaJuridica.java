@@ -10,11 +10,13 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class PersonaJuridica extends Persona {
-  @Getter @Setter private String razonSocial;
-  @Getter @Setter private TipoJuridica tipo;
-  @Getter @Setter private String rubro;
-  @Getter @Setter private List<Representante> representantes;
+  private String razonSocial;
+  private TipoJuridica tipo;
+  private String rubro;
+  private List<Representante> representantes;
 
   public PersonaJuridica(
       String email,

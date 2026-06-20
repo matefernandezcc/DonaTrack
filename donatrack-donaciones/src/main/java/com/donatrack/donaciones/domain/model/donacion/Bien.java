@@ -6,14 +6,16 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Bien {
-  @Getter @Setter private String descripcion;
-  @Getter @Setter private double cantidad;
-  @Getter @Setter private String unidadMedicion;
-  @Getter @Setter private Boolean esUsado;
-  @Getter @Setter private LocalDate fechaVencimiento;
-  @Getter @Setter private List<Foto> fotos;
-  @Getter @Setter private Subcategoria subcategoria;
+  private String descripcion;
+  private double cantidad;
+  private String unidadMedicion;
+  private Boolean esUsado;
+  private LocalDate fechaVencimiento;
+  private List<Foto> fotos;
+  private Subcategoria subcategoria;
 
   public Bien(
       String descripcion,

@@ -5,9 +5,11 @@ import com.donatrack.donaciones.domain.model.persona.PersonaJuridica;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Representante extends Rol {
-  @Getter @Setter private String cargo;
-  @Getter @Setter private PersonaJuridica organizacion;
+  private String cargo;
+  private PersonaJuridica organizacion;
 
   public Representante(String cargo, PersonaJuridica organizacion) {
     this.cargo = cargo;

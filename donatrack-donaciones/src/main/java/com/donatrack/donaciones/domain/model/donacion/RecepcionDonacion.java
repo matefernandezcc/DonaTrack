@@ -8,13 +8,15 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class RecepcionDonacion {
-  @Getter private UUID id;
-  @Getter @Setter private LocalDate fechaRecepcion;
-  @Getter @Setter private Donante donante;
-  @Getter @Setter private Administrador registradoPor;
-  @Getter private List<Donacion> donacionesResultantes;
-  @Getter private List<Bien> bienesBrutos;
+  private UUID id;
+  private LocalDate fechaRecepcion;
+  private Donante donante;
+  private Administrador registradoPor;
+  private List<Donacion> donacionesResultantes;
+  private List<Bien> bienesBrutos;
 
   public RecepcionDonacion(
       Donante donante, 

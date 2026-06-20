@@ -3,13 +3,15 @@ package com.donatrack.donaciones.domain.model.persona.ubicacion;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Direccion {
-  @Getter @Setter private String calle;
-  @Getter @Setter private double altura;
-  @Getter @Setter private String localidad;
-  @Getter @Setter private Provincia provincia;
-  @Getter @Setter private String codigoPostal;
-  @Getter @Setter private Coordenada coordenadas;
+  private String calle;
+  private double altura;
+  private String localidad;
+  private Provincia provincia;
+  private String codigoPostal;
+  private Coordenada coordenadas;
 
   public Direccion(
       String calle,

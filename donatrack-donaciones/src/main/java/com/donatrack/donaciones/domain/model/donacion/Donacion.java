@@ -10,15 +10,17 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Donacion {
-  @Getter @Setter private UUID id;
-  @Getter private EstadoDonacion estado;
-  @Getter @Setter private List<Bien> bienes;
-  @Getter @Setter private Subcategoria subCategoria;
-  @Getter @Setter private List<HistorialEstado> historial;
-  @Getter @Setter private LocalDate fechaVencimiento;
-  @Getter @Setter private Beneficiario entidadAsignada;
-  @Getter private List<Foto> fotos;
+  private UUID id;
+  private EstadoDonacion estado;
+  private List<Bien> bienes;
+  private Subcategoria subCategoria;
+  private List<HistorialEstado> historial;
+  private LocalDate fechaVencimiento;
+  private Beneficiario entidadAsignada;
+  private List<Foto> fotos;
 
   public Donacion(Subcategoria subcategoria) {
     this.id = UUID.randomUUID();

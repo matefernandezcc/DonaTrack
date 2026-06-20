@@ -5,11 +5,13 @@ import com.donatrack.donaciones.domain.model.enums.MedioContacto;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Contacto {
-  @Getter @Setter private String correoElectronico;
-  @Getter @Setter private String telefono;
-  @Getter @Setter private String whatsapp;
-  @Getter @Setter private MedioContacto medioPredeterminado;
+  private String correoElectronico;
+  private String telefono;
+  private String whatsapp;
+  private MedioContacto medioPredeterminado;
 
   public Contacto(
       String correoElectronico,

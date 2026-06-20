@@ -6,10 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.util.List;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Evento {
     private TipoEvento tipoEvento;
     private String descripcion;

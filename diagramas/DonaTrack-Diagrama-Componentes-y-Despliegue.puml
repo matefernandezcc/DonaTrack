@@ -1,4 +1,3 @@
-
 @startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue
 skinparam componentStyle uml2
 skinparam linetype ortho

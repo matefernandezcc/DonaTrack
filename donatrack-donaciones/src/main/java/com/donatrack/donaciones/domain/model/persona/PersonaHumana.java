@@ -6,10 +6,12 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class PersonaHumana extends Persona {
-  @Getter @Setter private String nombre;
-  @Getter @Setter private String apellido;
-  @Getter @Setter private int edad;
+  private String nombre;
+  private String apellido;
+  private int edad;
 
   public PersonaHumana(
       String email,

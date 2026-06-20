@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Camion {
-  @Getter @Setter private String patente;
-  @Getter String ubicacionActual;
-  @Getter @Setter private LocalDate ultimaActualizacion;
+  private String patente;
+  String ubicacionActual;
+  private LocalDate ultimaActualizacion;
 
   public Camion(String patente, String ubicacionActual) {
     this.patente = patente;
