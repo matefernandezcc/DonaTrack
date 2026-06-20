@@ -1,3 +1,6 @@
+@startuml ServicioDonaciones.puml
+skinparam classAttributeIconSize 0
+
 package "servicio de donaciones"{
     package "Gestión de Personas" {
         enum TipoDocumento {
