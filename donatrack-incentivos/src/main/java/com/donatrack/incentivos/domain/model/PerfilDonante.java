@@ -2,7 +2,6 @@ package com.donatrack.incentivos.domain.model;
 
 import com.donatrack.incentivos.domain.model.categoria.CategoriaDonante;
 import com.donatrack.incentivos.domain.model.misiones.Mision;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +39,12 @@ public class PerfilDonante {
     public void registrarDonacionExitosa(int cantidadBienes, Set<String> categorias, UUID idEntidadBeneficiaria,
             YearMonth mesDonacion) {
         this.metricas.registrarDonacionExitosa(cantidadBienes, categorias, idEntidadBeneficiaria, mesDonacion);
-        evaluarMisiones();
+        evaluarMisiones(mesDonacion);
     }
 
-    public void evaluarMisiones() {
+    public void evaluarMisiones(YearMonth mesActual) {
         if ((misionActual != null) && (misionActual.evaluar(this))) {
+            this.metricas.registrarMisionCompletada(mesActual);
             agregarInsignia(misionActual.getRecompensa());
             // Obtener siguiente misión
             misionActual = misionesPendientes.poll();

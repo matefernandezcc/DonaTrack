@@ -29,7 +29,7 @@ package "Servicio de Incentivos" {
         - metricas: MetricasDonante
         + cargarMisionesDeCategoriaActual()
         + registrarDonacionExitosa(cantidadBienes: int, categorias: Set<String>, idEntidadBeneficiaria: UUID, mesDonacion: YearMonth)
-        + evaluarMisiones()
+        + evaluarMisiones(mesActual: YearMonth)
         + getMisionesActivas(): List<Mision>
     }
 
@@ -44,6 +44,8 @@ package "Servicio de Incentivos" {
         - historialDonacionesPorMes: Map<YearMonth, Integer>
         - ultimoMesDonacion: YearMonth
         + registrarDonacionExitosa(cantidadBienes: int, categorias: Set<String>, idEntidadBeneficiaria: UUID, mesDonacion: YearMonth)
+        + registrarMisionCompletada(mes: YearMonth)
+        + getMisionesCompletadasEn(mes: YearMonth): int
         - actualizarRacha(mesActual: YearMonth)
     }
 
@@ -77,16 +79,16 @@ package "Servicio de Incentivos" {
     }
 
     class RankingMensualService {
-        - puntuacionStrategy: RankingPuntuacionStrategy
-        + obtenerTop5Mensual(): List<PerfilDonante>
+        - puntuacionStrategy: RankingStrategy
+        + obtenerTop3Mensual(mes: YearMonth): List<PerfilDonante>
     }
 
-    interface RankingPuntuacionStrategy {
-        + calcularPuntaje(perfil: PerfilDonante): double
+    interface RankingStrategy {
+        + calcularPuntaje(perfil: PerfilDonante, mes: YearMonth): double
     }
 
-    class RankingPorDonacionesStrategy implements RankingPuntuacionStrategy {
-        + calcularPuntaje(perfil: PerfilDonante): double
+    class RankingMisionesStrategy implements RankingStrategy {
+        + calcularPuntaje(perfil: PerfilDonante, mes: YearMonth): double
     }
 
 
@@ -105,7 +107,7 @@ package "Servicio de Incentivos" {
 
     InsigniaObtenidaEvent --> Insignia : refiere >
 
-    RankingMensualService --> RankingPuntuacionStrategy : utiliza >
-    RankingPuntuacionStrategy ..> PerfilDonante : evalúa >
+    RankingMensualService --> RankingStrategy : utiliza >
+    RankingStrategy ..> PerfilDonante : evalúa >
 }
 @enduml

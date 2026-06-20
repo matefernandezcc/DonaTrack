@@ -1,6 +1,6 @@
 package com.donatrack.incentivos.infrastructure.config;
 
-import com.donatrack.incentivos.domain.model.ranking.RankingPorDonacionesStrategy;
+import com.donatrack.incentivos.domain.model.ranking.RankingMisionesStrategy;
 import com.donatrack.incentivos.domain.repository.PerfilDonanteRepository;
 import com.donatrack.incentivos.domain.service.RankingMensualService;
 import org.springframework.context.annotation.Bean;
@@ -10,14 +10,14 @@ import org.springframework.context.annotation.Configuration;
 public class IncentivosDomainConfig {
 
     @Bean
-    public RankingPorDonacionesStrategy rankingPorDonacionesStrategy() {
-        return new RankingPorDonacionesStrategy();
+    public RankingMisionesStrategy RankingMisionesStrategy() {
+        return new RankingMisionesStrategy();
     }
 
     @Bean
     public RankingMensualService rankingMensualService(
             PerfilDonanteRepository repository,
-            RankingPorDonacionesStrategy strategy) {
+            RankingMisionesStrategy strategy) {
         return new RankingMensualService(repository, strategy);
     }
 }

@@ -21,6 +21,7 @@ public class MetricasDonante {
     private Set<UUID> organizacionesUnicasAyudadas;
     private Map<YearMonth, Integer> historialDonacionesPorMes;
     private YearMonth ultimoMesDonacion;
+    private Map<YearMonth, Integer> misionesCompletadasPorMes;
 
     public MetricasDonante() {
         this.totalDonacionesHistoricas = 0;
@@ -32,6 +33,7 @@ public class MetricasDonante {
         this.organizacionesUnicasAyudadas = new HashSet<>();
         this.historialDonacionesPorMes = new HashMap<>();
         this.ultimoMesDonacion = null;
+        this.misionesCompletadasPorMes = new HashMap<>();
     }
 
     public void registrarDonacionExitosa(int cantidadBienes, Set<String> categorias, UUID idEntidadBeneficiaria, YearMonth mesDonacion) {
@@ -69,5 +71,15 @@ public class MetricasDonante {
             this.mesesConsecutivosDonando = 1;
         }
         this.ultimoMesDonacion = mesActual;
+    }
+
+    public void registrarMisionCompletada(YearMonth mes) {
+        if (mes != null) {
+            misionesCompletadasPorMes.put(mes, misionesCompletadasPorMes.getOrDefault(mes, 0) + 1);
+        }
+    }
+
+    public int getMisionesCompletadasEn(YearMonth mes) {
+        return misionesCompletadasPorMes.getOrDefault(mes, 0);
     }
 }

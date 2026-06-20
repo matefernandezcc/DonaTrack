@@ -509,16 +509,16 @@ package "Servicio de Incentivos" {
 
     class RankingMensualService {
         - repository: PerfilDonanteRepository
-        - puntuacionStrategy: RankingPuntuacionStrategy
-        + RankingMensualService(repository: PerfilDonanteRepository, puntuacionStrategy: RankingPuntuacionStrategy)
+        - puntuacionStrategy: RankingStrategy
+        + RankingMensualService(repository: PerfilDonanteRepository, puntuacionStrategy: RankingStrategy)
         + obtenerTop5Mensual(): List<PerfilDonante>
     }
 
-    interface RankingPuntuacionStrategy {
+    interface RankingStrategy {
         + calcularPuntaje(perfil: PerfilDonante): double
     }
 
-    class RankingPorDonacionesStrategy implements RankingPuntuacionStrategy {
+    class RankingPorDonacionesStrategy implements RankingStrategy {
         + calcularPuntaje(perfil: PerfilDonante): double
     }
 
@@ -607,8 +607,8 @@ MisionesPorNivel --> CategoriaDonante : Objetivo >
 Mision --> Insignia : recompensa >
 
 RankingMensualService --> PerfilDonanteRepository : consulta >
-RankingMensualService --> RankingPuntuacionStrategy : utiliza >
-RankingPuntuacionStrategy ..> PerfilDonante : evalúa >
+RankingMensualService --> RankingStrategy : utiliza >
+RankingStrategy ..> PerfilDonante : evalúa >
 
 ' Conexiones Servicio de Notificaciones
 NotificadorService --> NotificacionAdapter : utiliza >

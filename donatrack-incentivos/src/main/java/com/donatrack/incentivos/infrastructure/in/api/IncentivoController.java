@@ -63,15 +63,16 @@ public class IncentivoController {
         return ResponseEntity.ok(perfil.getInsigniasObtenidas());
     }
 
-    @GetMapping("/ranking/top5")
+    @GetMapping("/ranking/top3")
     public ResponseEntity<List<java.util.Map<String, Object>>> obtenerRankingMensual() {
-        List<PerfilDonante> top5 = rankingMensualService.obtenerTop5Mensual();
+        java.time.YearMonth mesActual = java.time.YearMonth.now();
+        List<PerfilDonante> top3 = rankingMensualService.obtenerTop3Mensual(mesActual);
 
-        List<java.util.Map<String, Object>> response = top5.stream().map(p -> {
+        List<java.util.Map<String, Object>> response = top3.stream().map(p -> {
             java.util.Map<String, Object> map = new java.util.HashMap<>();
-            // n8n espera "user" y "totalDonations" (según su Format Podium Message)
+            // n8n espera "user" y "totalDonations" (según su Format Podium Message), pasamos el valor real del ranking
             map.put("user", p.getDonanteId().toString());
-            map.put("totalDonations", p.getMetricas().getDonacionesExitosas());
+            map.put("totalDonations", p.getMetricas().getMisionesCompletadasEn(mesActual));
             return map;
         }).collect(java.util.stream.Collectors.toList());
 
