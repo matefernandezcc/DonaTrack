@@ -2,7 +2,8 @@ package com.donatrack.incentivos.domain.model;
 
 import com.donatrack.incentivos.domain.model.categoria.CategoriaDonante;
 import com.donatrack.incentivos.domain.model.misiones.Mision;
-import com.donatrack.incentivos.domain.model.misiones.MisionesPorNivel;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +18,7 @@ public class PerfilDonante {
     private UUID donanteId;
     private CategoriaDonante categoria;
     private List<Insignia> insigniasObtenidas;
-    private MisionesPorNivel misionesPorNivel;
+    private Queue<Mision> misionesPendientes;
     private Mision misionActual;
     private MetricasDonante metricas; // Métricas
 
@@ -32,13 +33,8 @@ public class PerfilDonante {
     }
 
     public void cargarMisionesDeCategoriaActual() {
-        this.misionesPorNivel = MisionesFactory
-                .obtenerMisionesPara(this, this.categoria);
-        if (this.misionesPorNivel != null) {
-            this.misionActual = this.misionesPorNivel.getMisionActual();
-        } else {
-            this.misionActual = null;
-        }
+        this.misionesPendientes = MisionesFactory.crearMisionesPara(this.categoria);
+        this.misionActual = misionesPendientes.poll();
     }
 
     public void registrarDonacionExitosa(int cantidadBienes, Set<String> categorias, UUID idEntidadBeneficiaria,
@@ -51,11 +47,7 @@ public class PerfilDonante {
         if ((misionActual != null) && (misionActual.evaluar(this))) {
             agregarInsignia(misionActual.getRecompensa());
             // Obtener siguiente misión
-            if (misionesPorNivel != null) {
-                misionActual = misionesPorNivel.avanzarMision();
-            } else {
-                misionActual = null;
-            }
+            misionActual = misionesPendientes.poll();
             // Si ya no hay misiones, completó la categoría
             if (misionActual == null) {
                 this.categoria = this.categoria.siguienteNivel();

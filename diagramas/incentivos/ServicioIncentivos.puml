@@ -24,7 +24,7 @@ package "Servicio de Incentivos" {
         - donanteId: UUID
         - categoria: CategoriaDonante
         - insigniasObtenidas: List<Insignia>
-        - misionesPorNivel: MisionesPorNivel
+        - misionesPendientes: Queue<Mision>
         - misionActual: Mision
         - metricas: MetricasDonante
         + cargarMisionesDeCategoriaActual()
@@ -47,27 +47,7 @@ package "Servicio de Incentivos" {
         - actualizarRacha(mesActual: YearMonth)
     }
 
-    abstract class MisionesPorNivel {
-        # misiones: List<Mision>
-        # misionActual: Mision
-        # perfilAsociado: PerfilDonante
-        # categoriaObtener: CategoriaDonante
-        # fechaAsignacion: LocalDate
-        + {abstract} clonar(): MisionesPorNivel
-        + avanzarMision(): Mision
-    }
 
-    class MisionesPorNivelColaborador extends MisionesPorNivel {
-        + clonar(): MisionesPorNivel
-    }
-
-    class MisionesPorNivelSostenedor extends MisionesPorNivel {
-        + clonar(): MisionesPorNivel
-    }
-
-    class MisionesPorNivelTransformador extends MisionesPorNivel {
-        + clonar(): MisionesPorNivel
-    }
 
     class Mision {
         - id: UUID
@@ -93,8 +73,7 @@ package "Servicio de Incentivos" {
     }
 
     class MisionesFactory {
-        - {static} PROTOTIPOS: Map<CategoriaDonante, MisionesPorNivel>
-        + {static} obtenerMisionesPara(perfil: PerfilDonante, categoria: CategoriaDonante): MisionesPorNivel
+        + crearMisionesPara(categoria: CategoriaDonante): Queue<Mision>
     }
 
     class RankingMensualService {
@@ -114,17 +93,14 @@ package "Servicio de Incentivos" {
 
     ' Relaciones
     PerfilDonante "1" *-- "1" CategoriaDonante : nivel actual >
-    PerfilDonante "1" *-- "1" MisionesPorNivel : debe completar >
+    PerfilDonante "1" *-- "0..*" Mision : pendientes >
     PerfilDonante "1" *-- "0..*" Insignia : posee >
-
-    MisionesPorNivel "1" *-- "0..*" Mision : contiene >
-    MisionesPorNivel --> CategoriaDonante : Objetivo >
 
     Mision --> Insignia : recompensa >
     Mision --> TipoMetricaMision : evalúa >
     PerfilDonante "1" *-- "1" MetricasDonante : delega métricas >
 
-    MisionesFactory ..> MisionesPorNivel : instancia >
+    MisionesFactory ..> Mision : instancia >
     MisionesFactory ..> CategoriaDonante : usa >
 
     InsigniaObtenidaEvent --> Insignia : refiere >
