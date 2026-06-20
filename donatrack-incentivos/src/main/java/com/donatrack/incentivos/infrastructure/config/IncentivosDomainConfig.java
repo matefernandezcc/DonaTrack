@@ -3,6 +3,9 @@ package com.donatrack.incentivos.infrastructure.config;
 import com.donatrack.incentivos.domain.model.ranking.RankingMisionesStrategy;
 import com.donatrack.incentivos.domain.repository.PerfilDonanteRepository;
 import com.donatrack.incentivos.domain.service.RankingMensualService;
+import com.donatrack.incentivos.application.usecase.RegistrarActividadDonacionUseCase;
+import com.donatrack.incentivos.infrastructure.out.client.NotificacionClient;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,5 +22,12 @@ public class IncentivosDomainConfig {
             PerfilDonanteRepository repository,
             RankingMisionesStrategy strategy) {
         return new RankingMensualService(repository, strategy);
+    }
+
+    @Bean
+    public RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase(
+            NotificacionClient notificacionClient,
+            ApplicationEventPublisher eventPublisher) {
+        return new RegistrarActividadDonacionUseCase(notificacionClient, eventPublisher);
     }
 }

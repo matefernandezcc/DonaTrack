@@ -1,10 +1,9 @@
-package com.donatrack.incentivos.domain.model;
+package com.donatrack.incentivos.domain.model.misiones;
 
 import com.donatrack.incentivos.domain.model.categoria.CategoriaDonante;
+import com.donatrack.incentivos.domain.model.Insignia;
 import java.util.LinkedList;
 import java.util.Queue;
-import com.donatrack.incentivos.domain.model.misiones.Mision;
-import com.donatrack.incentivos.domain.model.misiones.TipoMetricaMision;
 
 public class MisionesFactory {
 

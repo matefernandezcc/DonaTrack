@@ -36,26 +36,26 @@ public class MetricasDonante {
         this.misionesCompletadasPorMes = new HashMap<>();
     }
 
-    public void registrarDonacionExitosa(int cantidadBienes, Set<String> categorias, UUID idEntidadBeneficiaria, YearMonth mesDonacion) {
+    public void registrarDonacionExitosa(RegistroDonacion donacion) {
         this.donacionesExitosas++;
         this.totalDonacionesHistoricas++;
-        this.cantidadBienesDonados += cantidadBienes;
+        this.cantidadBienesDonados += donacion.getCantidadBienes();
 
-        if (idEntidadBeneficiaria != null) {
-            this.organizacionesUnicasAyudadas.add(idEntidadBeneficiaria);
+        if (donacion.getIdEntidadBeneficiaria() != null) {
+            this.organizacionesUnicasAyudadas.add(donacion.getIdEntidadBeneficiaria());
         }
 
-        if (cantidadBienes > this.maxBienesEnUnaDonacion) {
-            this.maxBienesEnUnaDonacion = cantidadBienes;
+        if (donacion.getCantidadBienes() > this.maxBienesEnUnaDonacion) {
+            this.maxBienesEnUnaDonacion = donacion.getCantidadBienes();
         }
 
-        if (categorias != null && !categorias.isEmpty()) {
-            this.categoriasUnicasDonadas.addAll(categorias);
+        if (donacion.getCategorias() != null && !donacion.getCategorias().isEmpty()) {
+            this.categoriasUnicasDonadas.addAll(donacion.getCategorias());
         }
 
-        historialDonacionesPorMes.put(mesDonacion, historialDonacionesPorMes.getOrDefault(mesDonacion, 0) + 1);
+        historialDonacionesPorMes.put(donacion.getMesDonacion(), historialDonacionesPorMes.getOrDefault(donacion.getMesDonacion(), 0) + 1);
 
-        actualizarRacha(mesDonacion);
+        actualizarRacha(donacion.getMesDonacion());
     }
 
     private void actualizarRacha(YearMonth mesActual) {

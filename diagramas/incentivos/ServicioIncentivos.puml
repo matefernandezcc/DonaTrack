@@ -28,9 +28,8 @@ package "Servicio de Incentivos" {
         - misionActual: Mision
         - metricas: MetricasDonante
         + cargarMisionesDeCategoriaActual()
-        + registrarDonacionExitosa(cantidadBienes: int, categorias: Set<String>, idEntidadBeneficiaria: UUID, mesDonacion: YearMonth)
+        + registrarDonacionExitosa(donacion: RegistroDonacion)
         + evaluarMisiones(mesActual: YearMonth)
-        + getMisionesActivas(): List<Mision>
     }
 
     class MetricasDonante {
@@ -43,13 +42,18 @@ package "Servicio de Incentivos" {
         - organizacionesUnicasAyudadas: Set<UUID>
         - historialDonacionesPorMes: Map<YearMonth, Integer>
         - ultimoMesDonacion: YearMonth
-        + registrarDonacionExitosa(cantidadBienes: int, categorias: Set<String>, idEntidadBeneficiaria: UUID, mesDonacion: YearMonth)
+        + registrarDonacionExitosa(donacion: RegistroDonacion)
         + registrarMisionCompletada(mes: YearMonth)
         + getMisionesCompletadasEn(mes: YearMonth): int
         - actualizarRacha(mesActual: YearMonth)
     }
 
-
+    class RegistroDonacion {
+        - cantidadBienes: int
+        - categorias: Set<String>
+        - idEntidadBeneficiaria: UUID
+        - mesDonacion: YearMonth
+    }
 
     class Mision {
         - id: UUID
@@ -101,6 +105,8 @@ package "Servicio de Incentivos" {
     Mision --> Insignia : recompensa >
     Mision --> TipoMetricaMision : evalúa >
     PerfilDonante "1" *-- "1" MetricasDonante : delega métricas >
+    PerfilDonante ..> RegistroDonacion : usa >
+    MetricasDonante ..> RegistroDonacion : procesa >
 
     MisionesFactory ..> Mision : instancia >
     MisionesFactory ..> CategoriaDonante : usa >
