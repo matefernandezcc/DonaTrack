@@ -1,76 +1,89 @@
 @startuml ServicioLogistica.puml
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
-package "Servicio de Logística y Depósito" {
-
-    enum EstadoRuta {
-        PLANIFICADA
-        EN_CURSO
-        FINALIZADA
-    }
-
-    class GestorLogisticaYDeposito {
-        + registrarCamion(patente: String, modelo: String)
-        + ingresarDonacionADeposito(idDonacion: UUID)
-        + planificarRuta(fecha: LocalDate, patenteCamion: String, idDonaciones: List<UUID>)
-        + iniciarRuta(idRuta: UUID)
-        + actualizarUbicacionCamion(patente: String, lat: Double, lon: Double)
-    }
-
-    class Deposito {
-        - id: UUID
-        - nombre: String
-        - direccion: Direccion
-        - capacidadMaxima: Integer
-        - idDonacionesDisponibles: List<UUID>
-        + registrarIngreso(idDonacion: UUID)
-        + registrarSalida(idDonacion: UUID)
-        + auditarVencidos()
-    }
-
-    class Camion {
-        - patente: String
-        - modelo: String
-        - ubicacionActual: Coordenada
-        - ultimaActualizacion: LocalDateTime
-        - activo: boolean
-        + actualizarUbicacion(c: Coordenada)
-    }
-
-    class RutaEntrega {
-        - id: UUID
-        - fechaPlanificada: LocalDate
-        - fechaInicioReal: LocalDateTime
-        - estado: EstadoRuta
-        - donacionesAsignadas: List<UUID>
-        - camionAsignado: Camion
-        - depositoOrigen: Deposito
-        + iniciarRecorrido()
-        + finalizarRecorrido()
-    }
-
-    class Coordenada {
-        - latitud: Double
-        - longitud: Double
-    }
-    
-    class Direccion {
-        - calle: String
-        - altura: String
-        - localidad: String
-    }
-
-    ' Relaciones
-    GestorLogisticaYDeposito "1" *-- "0..*" Camion : administra >
-    GestorLogisticaYDeposito "1" *-- "0..*" RutaEntrega : planifica y monitorea >
-    GestorLogisticaYDeposito "1" *-- "1" Deposito : gestiona >
-    
-    RutaEntrega --> EstadoRuta : se encuentra en >
-    RutaEntrega "1" --> "1" Camion : ejecutada por >
-    RutaEntrega "0..*" --> "1" Deposito : parte desde >
-    
-    Camion "1" *-- "1" Coordenada : rastreado en >
-    Deposito "1" *-- "1" Direccion : ubicado en >
-
+enum EstadoEntrega {
+  PENDIENTE
+  EN_TRASLADO
+  ENTREGADA
+  NO_RECIBIDA
 }
+
+enum EstadoPlanificacion {
+  PENDIENTE
+  RECIBIDA
+  PROCESADA
+}
+
+class Camion {
+  - patente: String
+  - capacidadVolumen: Double
+  - altura: Double
+  - capacidadCarga: Double
+}
+
+class Chofer {
+  - legajo: String
+  - nombre: String
+}
+
+class SolicitudPlanificacion {
+  - id: UUID
+  - fechaSolicitud: LocalDateTime
+  - estado: EstadoPlanificacion
+  - idsDonaciones: List<UUID>
+  + procesarCallback(rutas: List<RutaDeReparto>)
+}
+
+class RutaDeReparto {
+  - id: UUID
+  - fechaOperativa: LocalDate
+  - iniciada: Boolean
+  + iniciarRuta()
+}
+
+class Parada {
+  - orden: Integer
+  - direccionDestino: String
+  - coordenadas: String
+}
+
+class Entrega {
+  - idDonacionOriginal: UUID
+  - estado: EstadoEntrega
+  - pesoEstimado: Double
+  - volumenEstimado: Double
+  + marcarEnTraslado()
+  + confirmarRecepcion(fotos: List<String>)
+  + marcarNoRecibida()
+  + volverAPendiente()
+}
+
+class ComprobanteRecepcion {
+  - fechaHora: LocalDateTime
+  - fotos: List<String>
+  - camionPatente: String
+}
+
+' Relaciones con multiplicidades estrictas
+SolicitudPlanificacion "1" --> "0..*" RutaDeReparto : genera >
+RutaDeReparto "1" --> "1" Camion : asignada a >
+RutaDeReparto "1" --> "1" Chofer : conducida por >
+RutaDeReparto "1" *-- "1..*" Parada : compuesta por >
+Parada "1" *-- "1..*" Entrega : contiene >
+Entrega "1" --> "1" EstadoEntrega : se encuentra en >
+Entrega "1" *-- "0..1" ComprobanteRecepcion : genera al entregar >
+SolicitudPlanificacion "1" --> "1" EstadoPlanificacion : se encuentra en >
+
+note right of Entrega
+  idDonacionOriginal referencia
+  al Servicio de Donaciones
+  (contexto externo)
+end note
+
+note right of SolicitudPlanificacion
+  El proveedor externo procesa
+  max. 100 donaciones por lote.
+  Notifica resultado vía callback URL.
+end note
 @enduml
