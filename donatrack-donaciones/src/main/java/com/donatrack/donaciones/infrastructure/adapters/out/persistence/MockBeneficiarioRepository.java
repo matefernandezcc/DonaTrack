@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.infrastructure.adapters.out.persistence;
 
-import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
+import com.donatrack.donaciones.application.ports.out.BeneficiarioRepository;
 
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 

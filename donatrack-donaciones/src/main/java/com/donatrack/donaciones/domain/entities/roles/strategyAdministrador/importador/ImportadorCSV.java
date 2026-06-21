@@ -9,7 +9,7 @@ import com.donatrack.donaciones.domain.entities.persona.PersonaFactory;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.persona.PersonaHumana;
 import com.donatrack.donaciones.domain.entities.persona.PersonaJuridica;
-import com.donatrack.donaciones.domain.repository.PersonaRepository;
+import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 
 import lombok.Getter;
 

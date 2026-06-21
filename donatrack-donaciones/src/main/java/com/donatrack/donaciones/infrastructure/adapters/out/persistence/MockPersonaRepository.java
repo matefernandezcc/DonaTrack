@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.infrastructure.adapters.out.persistence;
 
-import com.donatrack.donaciones.domain.repository.PersonaRepository;
+import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 
 import com.donatrack.donaciones.domain.entities.persona.Persona;
 

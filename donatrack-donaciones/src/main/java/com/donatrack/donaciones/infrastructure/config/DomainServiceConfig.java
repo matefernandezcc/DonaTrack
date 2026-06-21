@@ -5,8 +5,8 @@ import com.donatrack.donaciones.domain.entities.donacion.segmentador.EstrategiaS
 import com.donatrack.donaciones.domain.entities.donacion.segmentador.SegmentarPorEstado;
 import com.donatrack.donaciones.domain.entities.donacion.segmentador.SegmentarPorSubcategoria;
 import com.donatrack.donaciones.domain.entities.donacion.segmentador.SegmentarPorVencimiento;
-import com.donatrack.donaciones.domain.service.MatchmakerService;
-import com.donatrack.donaciones.domain.service.ProcesadorCargaInicial;
+import com.donatrack.donaciones.domain.services.MatchmakerService;
+import com.donatrack.donaciones.application.usecases.ProcesadorCargaInicial;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -45,7 +45,7 @@ public class ImportadorCSVTest {
         "Carlos",
         56);
 
-    com.donatrack.donaciones.domain.repository.PersonaRepository personaRepository = new com.donatrack.donaciones.infrastructure.adapters.out.persistence.MockPersonaRepository();
+    com.donatrack.donaciones.application.ports.out.PersonaRepository personaRepository = new com.donatrack.donaciones.infrastructure.adapters.out.persistence.MockPersonaRepository();
 
     ImportadorCSV importador = new ImportadorCSV(personaRepository);
 

@@ -3,9 +3,9 @@ package com.donatrack.donaciones.infrastructure.adapters.in.api;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
-import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
-import com.donatrack.donaciones.domain.repository.DonacionRepository;
-import com.donatrack.donaciones.domain.service.MatchmakerService;
+import com.donatrack.donaciones.application.ports.out.BeneficiarioRepository;
+import com.donatrack.donaciones.application.ports.out.DonacionRepository;
+import com.donatrack.donaciones.domain.services.MatchmakerService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-import com.donatrack.donaciones.application.port.out.NotificacionOutDTO;
-import com.donatrack.donaciones.application.port.out.ServicioNotificaciones;
+import com.donatrack.donaciones.application.ports.out.NotificacionOutDTO;
+import com.donatrack.donaciones.application.ports.out.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
 
-import com.donatrack.donaciones.application.port.in.RecepcionDonacionesUseCase;
-import com.donatrack.donaciones.application.port.in.CargaBienesRequestDTO;
+import com.donatrack.donaciones.application.ports.in.RecepcionDonacionesUseCase;
+import com.donatrack.donaciones.application.ports.in.CargaBienesRequestDTO;
 import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
 
-import com.donatrack.donaciones.application.port.in.DonacionResponseDTO;
-import com.donatrack.donaciones.application.port.in.DonacionRequestDTO;
-import com.donatrack.donaciones.application.port.in.BeneficiarioResponseDTO;
-import com.donatrack.donaciones.application.port.in.CambioEstadoRequestDTO;
+import com.donatrack.donaciones.application.ports.in.DonacionResponseDTO;
+import com.donatrack.donaciones.application.ports.in.DonacionRequestDTO;
+import com.donatrack.donaciones.application.ports.in.BeneficiarioResponseDTO;
+import com.donatrack.donaciones.application.ports.in.CambioEstadoRequestDTO;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,18 +37,18 @@ public class DonacionController {
     private final IncentivoClient incentivoClient;
     private final DonacionRepository donacionRepository;
     private final BeneficiarioRepository beneficiarioRepository;
-    private final com.donatrack.donaciones.application.service.AsignacionBatchJob asignacionBatchJob;
+    private final com.donatrack.donaciones.application.usecases.AsignacionBatchJob asignacionBatchJob;
     private final RecepcionDonacionesUseCase recepcionDonacionesUseCase;
-    private final com.donatrack.donaciones.application.service.AuditoriaDepositoJob auditoriaDepositoJob;
+    private final com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob auditoriaDepositoJob;
     
     public DonacionController(MatchmakerService matchmakerService, 
                               ServicioNotificaciones servicioNotificaciones,
                               IncentivoClient incentivoClient,
                               DonacionRepository donacionRepository,
                               BeneficiarioRepository beneficiarioRepository,
-                              com.donatrack.donaciones.application.service.AsignacionBatchJob asignacionBatchJob,
+                              com.donatrack.donaciones.application.usecases.AsignacionBatchJob asignacionBatchJob,
                               RecepcionDonacionesUseCase recepcionDonacionesUseCase,
-                              com.donatrack.donaciones.application.service.AuditoriaDepositoJob auditoriaDepositoJob) {
+                              com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob auditoriaDepositoJob) {
         this.matchmakerService = matchmakerService;
         this.servicioNotificaciones = servicioNotificaciones;
         this.incentivoClient = incentivoClient;
