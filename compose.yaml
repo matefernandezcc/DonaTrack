@@ -30,6 +30,86 @@ services:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/workflows # Carpeta local para importar/exportar los JSON de tus workflows
 
+  donatrack-donaciones:
+    build:
+      context: ./donatrack-donaciones
+    container_name: donatrack-donaciones
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres-donatrack
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=donaciones
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+
+  donatrack-incentivos:
+    build:
+      context: ./donatrack-incentivos
+    container_name: donatrack-incentivos
+    restart: always
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres-donatrack
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=incentivos
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+
+  donatrack-logistica:
+    build:
+      context: ./donatrack-logistica
+    container_name: donatrack-logistica
+    restart: always
+    ports:
+      - "8002:8002"
+    depends_on:
+      - postgres-donatrack
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=logistica
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+
+  donatrack-notificaciones:
+    build:
+      context: ./donatrack-notificaciones
+    container_name: donatrack-notificaciones
+    restart: always
+    ports:
+      - "8003:8003"
+    depends_on:
+      - postgres-donatrack
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=notificaciones
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+
+  donatrack-server:
+    build:
+      context: ./donatrack-server
+    container_name: donatrack-server
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-donatrack
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=public
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+
 volumes:
   postgres_data:
   n8n_data:
