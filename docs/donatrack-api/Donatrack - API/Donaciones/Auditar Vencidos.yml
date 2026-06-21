@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: "{{baseUrl}}/donaciones/auditoria/vencidos"
+  url: "{{donacionesUrl}}/donaciones/auditoria/vencidos"
   body:
     type: none
   auth: inherit

@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: "{{baseUrl}}/donaciones/beneficiarios"
+  url: "{{donacionesUrl}}/donaciones/beneficiarios"
   body:
     type: json
     data: |-

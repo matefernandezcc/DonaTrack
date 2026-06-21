@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/donaciones/beneficiarios"
+  url: "{{donacionesUrl}}/donaciones/beneficiarios"
   auth: inherit
 
 settings:

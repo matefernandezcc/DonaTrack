@@ -1,11 +1,11 @@
 info:
-  name: Eliminar Persona
+  name: Obtener Persona
   type: http
-  seq: 4
+  seq: 2
 
 http:
-  method: DELETE
-  url: "{{baseUrl}}/donaciones/personas/:id"
+  method: GET
+  url: "{{donacionesUrl}}/donaciones/personas/:id"
   params:
     - name: id
       value: 123e4567-e89b-12d3-a456-426614174000

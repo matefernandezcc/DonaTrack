@@ -1,21 +1,15 @@
 info:
-  name: Actualizar Beneficiario
+  name: Obtener Necesidades
   type: http
-  seq: 4
+  seq: 7
 
 http:
-  method: PUT
-  url: "{{baseUrl}}/donaciones/beneficiarios/:id"
+  method: GET
+  url: "{{donacionesUrl}}/donaciones/beneficiarios/:id/necesidades"
   params:
     - name: id
       value: 123e4567-e89b-12d3-a456-426614174000
       type: path
-  body:
-    type: json
-    data: |-
-      {
-        "nombre": "Entidad de Ayuda Mutua Modificada"
-      }
   auth: inherit
 
 settings:

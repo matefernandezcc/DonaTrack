@@ -5,7 +5,7 @@ info:
 
 http:
   method: PUT
-  url: "{{baseUrl}}/donaciones/:id/estado/entregada?idDonante=987f6543-e89b-12d3-a456-426614174000"
+  url: "{{donacionesUrl}}/donaciones/:id/estado/entregada?idDonante=987f6543-e89b-12d3-a456-426614174000"
   params:
     - name: idDonante
       value: 987f6543-e89b-12d3-a456-426614174000
