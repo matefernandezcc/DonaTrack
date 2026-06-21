@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@EnableFeignClients(basePackages = "com.donatrack")
+@EnableFeignClients(basePackages = "com.donatrack.donaciones")
 public class DonacionesApplication {
   public static void main(String[] args) {
     SpringApplication.run(DonacionesApplication.class, args);
