@@ -24,7 +24,7 @@ public class ConfirmarEntregaService implements ConfirmarEntregaUseCase {
     }
 
     @Override
-    public void confirmarEntrega(UUID idDonacion, List<String> fotos, String patenteCamion) {
+    public void confirmarEntrega(UUID idEntrega, List<String> fotos, String patenteCamion) {
         // Encontrar la ruta que contiene esta donación
         RutaDeReparto rutaEncontrada = null;
         Entrega entregaEncontrada = null;
@@ -34,7 +34,7 @@ public class ConfirmarEntregaService implements ConfirmarEntregaUseCase {
                 for (Parada parada : ruta.getParadas()) {
                     if (parada.getEntregas() != null) {
                         for (Entrega entrega : parada.getEntregas()) {
-                            if (entrega.getIdDonacionOriginal().equals(idDonacion)) {
+                            if (entrega.getIdEntrega().equals(idEntrega)) {
                                 rutaEncontrada = ruta;
                                 entregaEncontrada = entrega;
                                 break;
@@ -48,7 +48,7 @@ public class ConfirmarEntregaService implements ConfirmarEntregaUseCase {
         }
 
         if (entregaEncontrada == null) {
-            throw new IllegalArgumentException("Entrega de donación no encontrada en ninguna ruta");
+            throw new IllegalArgumentException("Entrega no encontrada en ninguna ruta");
         }
 
         String patente = (patenteCamion != null && !patenteCamion.isEmpty()) 
@@ -59,6 +59,6 @@ public class ConfirmarEntregaService implements ConfirmarEntregaUseCase {
         rutaRepository.guardar(rutaEncontrada);
 
         // Publicar evento
-        eventPublisher.publishEvent(new EntregaConfirmadaEvent(idDonacion, fotos, patente));
+        eventPublisher.publishEvent(new EntregaConfirmadaEvent(idEntrega, fotos, patente));
     }
 }

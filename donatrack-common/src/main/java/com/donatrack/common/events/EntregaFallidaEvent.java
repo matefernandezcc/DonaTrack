@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EntregaFallidaEvent {
-    private UUID idDonacionOriginal;
+    // Equivale al ID de la donación original para mantener trazabilidad entre módulos
+    private UUID idEntrega;
     private String motivo;
 }

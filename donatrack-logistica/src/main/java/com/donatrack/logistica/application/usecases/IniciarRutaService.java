@@ -38,7 +38,7 @@ public class IniciarRutaService implements IniciarRutaUseCase {
             for (Parada parada : ruta.getParadas()) {
                 if (parada.getEntregas() != null) {
                     for (Entrega entrega : parada.getEntregas()) {
-                        idsDonaciones.add(entrega.getIdDonacionOriginal());
+                        idsDonaciones.add(entrega.getIdEntrega());
                     }
                 }
             }

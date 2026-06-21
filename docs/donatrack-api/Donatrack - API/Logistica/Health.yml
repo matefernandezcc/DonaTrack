@@ -1,11 +1,11 @@
 info:
-  name: Healthcheck
+  name: Health
   type: http
   seq: 2
 
 http:
   method: GET
-  url: "{{baseUrl}}/healthcheck"
+  url: "{{logisticaUrl}}/actuator/health"
   auth: inherit
 
 settings:

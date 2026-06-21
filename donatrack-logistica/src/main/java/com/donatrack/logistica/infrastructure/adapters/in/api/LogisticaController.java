@@ -6,6 +6,7 @@ import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepository;
 import com.donatrack.logistica.application.ports.out.SolicitudPlanificacionRepository;
 import com.donatrack.logistica.domain.entities.RutaDeReparto;
 import com.donatrack.logistica.domain.entities.SolicitudPlanificacion;
+import com.donatrack.logistica.domain.entities.EstadoEntrega;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -97,29 +98,23 @@ public class LogisticaController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/entregas/{idDonacion:[a-fA-F0-9\\-]{36}}/confirmar")
-    @Operation(summary = "Confirmar Recepción de Entrega", description = "Permite a una entidad beneficiaria confirmar la recepción satisfactoria de una donación, registrando fotos y emitiendo el comprobante de entrega.")
+    @PatchMapping("/entregas/{idEntrega:[a-fA-F0-9\\-]{36}}")
+    @Operation(summary = "Actualizar Estado de Entrega", description = "Permite realizar transiciones de estado sobre una entrega específica (ej. a ENTREGADA adjuntando fotos, o a NO_RECIBIDA adjuntando el motivo de fallo).")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Recepción confirmada exitosamente"),
+            @ApiResponse(responseCode = "200", description = "Estado de la entrega actualizado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Datos de entrada o transición de estado inválida"),
             @ApiResponse(responseCode = "404", description = "Entrega no encontrada")
     })
-    public ResponseEntity<Void> confirmarEntrega(
-            @PathVariable UUID idDonacion,
-            @RequestBody ConfirmarEntregaRequest request) {
-        confirmarEntregaUseCase.confirmarEntrega(idDonacion, request.fotos(), request.patenteCamion());
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/entregas/{idDonacion:[a-fA-F0-9\\-]{36}}/no-recibida")
-    @Operation(summary = "Reportar Entrega No Recibida / Fallida", description = "Registra una entrega como fallida, indicando el motivo correspondiente para su posterior revisión administrativa.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Entrega marcada como no recibida exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Entrega no encontrada")
-    })
-    public ResponseEntity<Void> marcarNoRecibida(
-            @PathVariable UUID idDonacion,
-            @RequestBody EntregaFallidaRequest request) {
-        marcarEntregaFallidaUseCase.marcarEntregaFallida(idDonacion, request.motivo());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> actualizarEstadoEntrega(
+            @PathVariable UUID idEntrega,
+            @RequestBody ActualizarEstadoEntregaRequest request) {
+        if (request.estado() == EstadoEntrega.ENTREGADA) {
+            confirmarEntregaUseCase.confirmarEntrega(idEntrega, request.fotos(), request.patenteCamion());
+            return ResponseEntity.ok().build();
+        } else if (request.estado() == EstadoEntrega.NO_RECIBIDA) {
+            marcarEntregaFallidaUseCase.marcarEntregaFallida(idEntrega, request.motivo());
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 }

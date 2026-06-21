@@ -23,7 +23,7 @@ public class MarcarEntregaFallidaService implements MarcarEntregaFallidaUseCase 
     }
 
     @Override
-    public void marcarEntregaFallida(UUID idDonacion, String motivo) {
+    public void marcarEntregaFallida(UUID idEntrega, String motivo) {
         RutaDeReparto rutaEncontrada = null;
         Entrega entregaEncontrada = null;
 
@@ -32,7 +32,7 @@ public class MarcarEntregaFallidaService implements MarcarEntregaFallidaUseCase 
                 for (Parada parada : ruta.getParadas()) {
                     if (parada.getEntregas() != null) {
                         for (Entrega entrega : parada.getEntregas()) {
-                            if (entrega.getIdDonacionOriginal().equals(idDonacion)) {
+                            if (entrega.getIdEntrega().equals(idEntrega)) {
                                 rutaEncontrada = ruta;
                                 entregaEncontrada = entrega;
                                 break;
@@ -46,13 +46,13 @@ public class MarcarEntregaFallidaService implements MarcarEntregaFallidaUseCase 
         }
 
         if (entregaEncontrada == null) {
-            throw new IllegalArgumentException("Entrega de donación no encontrada en ninguna ruta");
+            throw new IllegalArgumentException("Entrega no encontrada en ninguna ruta");
         }
 
         entregaEncontrada.marcarNoRecibida();
         rutaRepository.guardar(rutaEncontrada);
 
         // Publicar evento
-        eventPublisher.publishEvent(new EntregaFallidaEvent(idDonacion, motivo));
+        eventPublisher.publishEvent(new EntregaFallidaEvent(idEntrega, motivo));
     }
 }

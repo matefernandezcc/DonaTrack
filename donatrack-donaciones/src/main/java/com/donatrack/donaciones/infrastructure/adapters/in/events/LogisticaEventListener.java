@@ -92,7 +92,7 @@ public class LogisticaEventListener {
 
     @EventListener
     public void handleEntregaConfirmada(EntregaConfirmadaEvent event) {
-        donacionRepository.buscarPorId(event.getIdDonacionOriginal()).ifPresent(donacion -> {
+        donacionRepository.buscarPorId(event.getIdEntrega()).ifPresent(donacion -> {
             donacion.cambiarEstado(EstadoDonacion.ENTREGADA, "Entregado a la entidad beneficiaria", null);
             if (event.getFotos() != null) {
                 for (String fotoUrl : event.getFotos()) {
@@ -101,7 +101,7 @@ public class LogisticaEventListener {
             }
             donacionRepository.guardar(donacion);
 
-            Persona donantePersona = buscarPersonaDonantePorDonacionId(event.getIdDonacionOriginal());
+            Persona donantePersona = buscarPersonaDonantePorDonacionId(event.getIdEntrega());
             if (donantePersona != null) {
                 Contacto contacto = donantePersona.getContacto();
                 if (contacto == null) {
@@ -146,11 +146,11 @@ public class LogisticaEventListener {
 
     @EventListener
     public void handleEntregaFallida(EntregaFallidaEvent event) {
-        donacionRepository.buscarPorId(event.getIdDonacionOriginal()).ifPresent(donacion -> {
+        donacionRepository.buscarPorId(event.getIdEntrega()).ifPresent(donacion -> {
             donacion.cambiarEstado(EstadoDonacion.ENTREGA_FALLIDA, event.getMotivo(), null);
             donacionRepository.guardar(donacion);
 
-            Persona donantePersona = buscarPersonaDonantePorDonacionId(event.getIdDonacionOriginal());
+            Persona donantePersona = buscarPersonaDonantePorDonacionId(event.getIdEntrega());
             if (donantePersona != null) {
                 Contacto contacto = donantePersona.getContacto();
                 if (contacto == null) {
@@ -174,7 +174,7 @@ public class LogisticaEventListener {
             // Notificar administrador
             Contacto contactoAdmin = new Contacto("admin@donatrack.com", null, null, MedioContacto.CORREO);
             servicioNotificaciones.enviar(
-                new NotificacionOutDTO("ATENCIÓN: Entrega fallida para la donación " + event.getIdDonacionOriginal() + ". Motivo: " + event.getMotivo(), MedioContacto.CORREO),
+                new NotificacionOutDTO("ATENCIÓN: Entrega fallida para la donación " + event.getIdEntrega() + ". Motivo: " + event.getMotivo(), MedioContacto.CORREO),
                 contactoAdmin
             );
         });

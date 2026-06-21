@@ -13,7 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Entrega {
-  private UUID idDonacionOriginal;
+  // Equivale al ID de la donación original para mantener trazabilidad entre módulos
+  private UUID idEntrega;
   private EstadoEntrega estado;
   private Double pesoEstimado;
   private Double volumenEstimado;

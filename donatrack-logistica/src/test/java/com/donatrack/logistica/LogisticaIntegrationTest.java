@@ -1,6 +1,6 @@
 package com.donatrack.logistica;
 
-import com.donatrack.logistica.application.ports.in.ConfirmarEntregaRequest;
+import com.donatrack.logistica.application.ports.in.ActualizarEstadoEntregaRequest;
 import com.donatrack.logistica.application.ports.in.PlanificarRutasRequest;
 import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepository;
 import com.donatrack.logistica.application.ports.out.SolicitudPlanificacionRepository;
@@ -21,6 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = LogisticaApplication.class)
@@ -93,11 +94,13 @@ public class LogisticaIntegrationTest {
         assertThat(entrega.getEstado()).isEqualTo(EstadoEntrega.EN_TRASLADO);
 
         // 4. Confirmar entrega por la entidad
-        ConfirmarEntregaRequest confirmarRequest = new ConfirmarEntregaRequest(
+        ActualizarEstadoEntregaRequest confirmarRequest = new ActualizarEstadoEntregaRequest(
+                EstadoEntrega.ENTREGADA,
                 List.of("http://foto1.com", "http://foto2.com"),
-                "AAA-123"
+                "AAA-123",
+                null
         );
-        mockMvc.perform(put("/api/entregas/" + donacionId + "/confirmar")
+        mockMvc.perform(patch("/api/entregas/" + donacionId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(confirmarRequest)))
                 .andExpect(status().isOk());

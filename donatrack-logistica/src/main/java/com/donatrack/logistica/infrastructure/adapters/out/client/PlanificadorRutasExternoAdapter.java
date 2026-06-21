@@ -54,8 +54,8 @@ public class PlanificadorRutasExternoAdapter implements PlanificadorRutasExterno
 
                 // Crear entregas
                 List<Entrega> entregas = new ArrayList<>();
-                for (UUID idDonacion : idsDonaciones) {
-                    entregas.add(new Entrega(idDonacion, EstadoEntrega.PENDIENTE, 10.0, 1.0, null));
+                for (UUID idEntrega : idsDonaciones) {
+                    entregas.add(new Entrega(idEntrega, EstadoEntrega.PENDIENTE, 10.0, 1.0, null));
                 }
 
                 // Parada mock
