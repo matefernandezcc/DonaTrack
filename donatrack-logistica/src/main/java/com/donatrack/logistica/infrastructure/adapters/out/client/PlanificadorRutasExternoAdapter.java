@@ -1,13 +1,11 @@
 package com.donatrack.logistica.infrastructure.adapters.out.client;
 
-import com.donatrack.common.events.PlanificacionProcesadaEvent;
+import com.donatrack.logistica.application.ports.in.ProcesarCallbackUseCase;
+import com.donatrack.logistica.application.ports.in.commands.ProcesarCallbackCommand;
 import com.donatrack.logistica.application.ports.out.CamionRepository;
 import com.donatrack.logistica.application.ports.out.ChoferRepository;
 import com.donatrack.logistica.application.ports.out.PlanificadorRutasExternoPort;
-import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepository;
-import com.donatrack.logistica.application.ports.out.SolicitudPlanificacionRepository;
 import com.donatrack.logistica.domain.entities.*;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -23,21 +21,15 @@ public class PlanificadorRutasExternoAdapter implements PlanificadorRutasExterno
 
     private final CamionRepository camionRepository;
     private final ChoferRepository choferRepository;
-    private final SolicitudPlanificacionRepository solicitudRepository;
-    private final RutaDeRepartoRepository rutaRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final ProcesarCallbackUseCase procesarCallbackUseCase;
 
     public PlanificadorRutasExternoAdapter(
             CamionRepository camionRepository,
             ChoferRepository choferRepository,
-            SolicitudPlanificacionRepository solicitudRepository,
-            RutaDeRepartoRepository rutaRepository,
-            ApplicationEventPublisher eventPublisher) {
+            ProcesarCallbackUseCase procesarCallbackUseCase) {
         this.camionRepository = camionRepository;
         this.choferRepository = choferRepository;
-        this.solicitudRepository = solicitudRepository;
-        this.rutaRepository = rutaRepository;
-        this.eventPublisher = eventPublisher;
+        this.procesarCallbackUseCase = procesarCallbackUseCase;
     }
 
     @Override
@@ -73,15 +65,8 @@ public class PlanificadorRutasExternoAdapter implements PlanificadorRutasExterno
                     Collections.singletonList(parada)
                 );
 
-                // Simular el callback llamando al procesamiento interno de la solicitud
-                solicitudRepository.buscarPorId(solicitudId).ifPresent(solicitud -> {
-                    solicitud.procesarCallback(Collections.singletonList(ruta));
-                    solicitudRepository.guardar(solicitud);
-                    rutaRepository.guardar(ruta);
-                    
-                    // Publicar el evento de planificación procesada para actualizar el módulo donaciones
-                    eventPublisher.publishEvent(new PlanificacionProcesadaEvent(solicitud.getIdsDonaciones()));
-                });
+                // Simular el callback llamando al caso de uso de forma limpia
+                procesarCallbackUseCase.procesarCallback(new ProcesarCallbackCommand(solicitudId, Collections.singletonList(ruta)));
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

@@ -30,6 +30,19 @@ services:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/workflows # Carpeta local para importar/exportar los JSON de tus workflows
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_donatrack
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
   donatrack-donaciones:
     build:
       context: ./donatrack-donaciones
@@ -113,3 +126,4 @@ services:
 volumes:
   postgres_data:
   n8n_data:
+  rabbitmq_data:

@@ -2,6 +2,7 @@ package com.donatrack.logistica;
 
 import com.donatrack.logistica.application.ports.in.ActualizarEstadoEntregaRequest;
 import com.donatrack.logistica.application.ports.in.PlanificarRutasRequest;
+import com.donatrack.logistica.application.ports.in.ProcesarPlanificacionesPendientesUseCase;
 import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepository;
 import com.donatrack.logistica.application.ports.out.SolicitudPlanificacionRepository;
 import com.donatrack.logistica.domain.entities.*;
@@ -40,6 +41,9 @@ public class LogisticaIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ProcesarPlanificacionesPendientesUseCase procesarPlanificacionesUseCase;
+
     private UUID donacionId;
 
     @BeforeEach
@@ -49,13 +53,13 @@ public class LogisticaIntegrationTest {
 
     @Test
     public void testFlujoCompletoLogistica() throws Exception {
-        // 1. Trigger de Planificación
+        // 1. Trigger de Planificación (espera 202 Accepted)
         PlanificarRutasRequest planificarRequest = new PlanificarRutasRequest(Collections.singletonList(donacionId));
         
         String resultJson = mockMvc.perform(post("/api/planificar")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(planificarRequest)))
-                .andExpect(status().isOk())
+                .andExpect(status().isAccepted())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -65,22 +69,35 @@ public class LogisticaIntegrationTest {
         assertThat(solicitud.getEstado()).isEqualTo(EstadoPlanificacion.PENDIENTE);
         assertThat(solicitud.getIdsDonaciones()).containsExactly(donacionId);
 
-        // 2. Simulación de Callback de forma asíncrona
+        // 2. Invocar el caso de uso diferido (Scheduler)
+        procesarPlanificacionesUseCase.procesarPlanificacionesPendientes();
+
+        // 3. Simulación de Callback de forma asíncrona
         // En nuestro adapter externo pusimos un CompletableFuture que después de 1 segundo actualiza la solicitud
         Thread.sleep(1500);
 
-        // Comprobar que la solicitud pasó a PROCESADA
-        SolicitudPlanificacion solicitudProcesada = solicitudRepository.buscarPorId(solicitud.getId()).orElse(null);
-        assertThat(solicitudProcesada).isNotNull();
-        assertThat(solicitudProcesada.getEstado()).isEqualTo(EstadoPlanificacion.PROCESADA);
-        assertThat(solicitudProcesada.getRutasGeneradas()).isNotEmpty();
+        // Comprobar que la solicitud original pasó a PROCESADA
+        SolicitudPlanificacion solicitudOriginal = solicitudRepository.buscarPorId(solicitud.getId()).orElse(null);
+        assertThat(solicitudOriginal).isNotNull();
+        assertThat(solicitudOriginal.getEstado()).isEqualTo(EstadoPlanificacion.PROCESADA);
+
+        // Buscar la solicitud de lote (sub-solicitud)
+        List<SolicitudPlanificacion> todas = solicitudRepository.buscarTodas();
+        SolicitudPlanificacion solicitudLote = todas.stream()
+                .filter(s -> !s.getId().equals(solicitud.getId()))
+                .findFirst()
+                .orElse(null);
+
+        assertThat(solicitudLote).isNotNull();
+        assertThat(solicitudLote.getEstado()).isEqualTo(EstadoPlanificacion.PROCESADA);
+        assertThat(solicitudLote.getRutasGeneradas()).isNotEmpty();
 
         // Obtener la ruta generada
-        RutaDeReparto ruta = solicitudProcesada.getRutasGeneradas().get(0);
+        RutaDeReparto ruta = solicitudLote.getRutasGeneradas().get(0);
         assertThat(ruta).isNotNull();
         assertThat(ruta.getIniciada()).isFalse();
 
-        // 3. Iniciar recorrido de ruta
+        // 4. Iniciar recorrido de ruta
         mockMvc.perform(put("/api/rutas/" + ruta.getId() + "/iniciar")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -93,7 +110,7 @@ public class LogisticaIntegrationTest {
         Entrega entrega = rutaIniciada.getParadas().get(0).getEntregas().get(0);
         assertThat(entrega.getEstado()).isEqualTo(EstadoEntrega.EN_TRASLADO);
 
-        // 4. Confirmar entrega por la entidad
+        // 5. Confirmar entrega por la entidad
         ActualizarEstadoEntregaRequest confirmarRequest = new ActualizarEstadoEntregaRequest(
                 EstadoEntrega.ENTREGADA,
                 List.of("http://foto1.com", "http://foto2.com"),
