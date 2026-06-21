@@ -51,7 +51,7 @@ public class LogisticaIntegrationTest {
         // 1. Trigger de Planificación
         PlanificarRutasRequest planificarRequest = new PlanificarRutasRequest(Collections.singletonList(donacionId));
         
-        String resultJson = mockMvc.perform(post("/logistica/planificar")
+        String resultJson = mockMvc.perform(post("/api/planificar")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(planificarRequest)))
                 .andExpect(status().isOk())
@@ -80,7 +80,7 @@ public class LogisticaIntegrationTest {
         assertThat(ruta.getIniciada()).isFalse();
 
         // 3. Iniciar recorrido de ruta
-        mockMvc.perform(put("/logistica/rutas/" + ruta.getId() + "/iniciar")
+        mockMvc.perform(put("/api/rutas/" + ruta.getId() + "/iniciar")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -97,7 +97,7 @@ public class LogisticaIntegrationTest {
                 List.of("http://foto1.com", "http://foto2.com"),
                 "AAA-123"
         );
-        mockMvc.perform(put("/logistica/entregas/" + donacionId + "/confirmar")
+        mockMvc.perform(put("/api/entregas/" + donacionId + "/confirmar")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(confirmarRequest)))
                 .andExpect(status().isOk());
