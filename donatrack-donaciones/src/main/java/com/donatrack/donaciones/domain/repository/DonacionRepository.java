@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.domain.repository;
 
-import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.enums.EstadoDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.Donacion;
+import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 
 import java.util.List;
 

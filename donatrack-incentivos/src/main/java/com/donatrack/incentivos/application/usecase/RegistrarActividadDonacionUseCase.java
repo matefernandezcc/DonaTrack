@@ -1,9 +1,9 @@
 package com.donatrack.incentivos.application.usecase;
 
 import com.donatrack.common.dto.ActividadDonacionDTO;
-import com.donatrack.incentivos.domain.model.Insignia;
-import com.donatrack.incentivos.domain.model.InsigniaObtenidaEvent;
-import com.donatrack.incentivos.domain.model.PerfilDonante;
+import com.donatrack.incentivos.domain.entities.Insignia;
+import com.donatrack.incentivos.domain.entities.InsigniaObtenidaEvent;
+import com.donatrack.incentivos.domain.entities.PerfilDonante;
 import com.donatrack.incentivos.infrastructure.out.client.NotificacionClient;
 import com.donatrack.incentivos.infrastructure.out.client.NotificacionRequest;
 import org.springframework.context.ApplicationEventPublisher;
@@ -27,9 +27,9 @@ public class RegistrarActividadDonacionUseCase {
         PerfilDonante perfil = new PerfilDonante(donanteId);
 
         int insigniasAntes = perfil.getInsigniasObtenidas().size();
-        com.donatrack.incentivos.domain.model.categoria.CategoriaDonante categoriaAntes = perfil.getCategoria();
+        com.donatrack.incentivos.domain.entities.categoria.CategoriaDonante categoriaAntes = perfil.getCategoria();
 
-        com.donatrack.incentivos.domain.model.RegistroDonacion donacion = new com.donatrack.incentivos.domain.model.RegistroDonacion(
+        com.donatrack.incentivos.domain.entities.RegistroDonacion donacion = new com.donatrack.incentivos.domain.entities.RegistroDonacion(
                 actividad.getCantidadBienes(),
                 actividad.getCategorias() != null ? new java.util.HashSet<>(actividad.getCategorias()) : null,
                 actividad.getIdEntidadBeneficiaria(),
@@ -38,7 +38,7 @@ public class RegistrarActividadDonacionUseCase {
         perfil.registrarDonacionExitosa(donacion);
 
         int insigniasDespues = perfil.getInsigniasObtenidas().size();
-        com.donatrack.incentivos.domain.model.categoria.CategoriaDonante categoriaDespues = perfil.getCategoria();
+        com.donatrack.incentivos.domain.entities.categoria.CategoriaDonante categoriaDespues = perfil.getCategoria();
 
         boolean misionCompletada = insigniasDespues > insigniasAntes;
         boolean categoriaCambiada = categoriaAntes != categoriaDespues;

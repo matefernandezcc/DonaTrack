@@ -2,7 +2,7 @@ package com.donatrack.donaciones.infrastructure.adapters.out.persistence;
 
 import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
 
-import com.donatrack.donaciones.domain.model.roles.Beneficiario;
+import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 
 import org.springframework.stereotype.Repository;
 

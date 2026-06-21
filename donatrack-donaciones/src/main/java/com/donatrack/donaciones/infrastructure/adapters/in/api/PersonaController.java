@@ -3,7 +3,7 @@ package com.donatrack.donaciones.infrastructure.adapters.in.api;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.donatrack.donaciones.domain.model.persona.Persona;
+import com.donatrack.donaciones.domain.entities.persona.Persona;
 
 import java.util.UUID;
 

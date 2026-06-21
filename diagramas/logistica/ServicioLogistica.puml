@@ -44,8 +44,17 @@ class RutaDeReparto {
 
 class Parada {
   - orden: Integer
-  - direccionDestino: String
-  - coordenadas: String
+}
+
+class Direccion <<Value Object>> {
+  - calle: String
+  - altura: String
+  - localidad: String
+}
+
+class Coordenada <<Value Object>> {
+  - latitud: Double
+  - longitud: Double
 }
 
 class Entrega {
@@ -70,7 +79,11 @@ SolicitudPlanificacion "1" --> "0..*" RutaDeReparto : genera >
 RutaDeReparto "1" --> "1" Camion : asignada a >
 RutaDeReparto "1" --> "1" Chofer : conducida por >
 RutaDeReparto "1" *-- "1..*" Parada : compuesta por >
+
+Parada "1" *-- "1" Direccion : se ubica en >
+Parada "1" *-- "1" Coordenada : geolocalizada en >
 Parada "1" *-- "1..*" Entrega : contiene >
+
 Entrega "1" --> "1" EstadoEntrega : se encuentra en >
 Entrega "1" *-- "0..1" ComprobanteRecepcion : genera al entregar >
 SolicitudPlanificacion "1" --> "1" EstadoPlanificacion : se encuentra en >

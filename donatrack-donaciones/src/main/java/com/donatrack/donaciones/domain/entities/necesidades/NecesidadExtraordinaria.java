@@ -1,0 +1,50 @@
+package com.donatrack.donaciones.domain.entities.necesidades;
+
+import com.donatrack.donaciones.domain.entities.donacion.Bien;
+import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
+import com.donatrack.donaciones.domain.entities.donacion.Donacion;
+import com.donatrack.donaciones.domain.entities.enums.EstadoNecesidad;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class NecesidadExtraordinaria extends Necesidad {
+  private double cantidadRequerida;
+  private List<Donacion> donacionesParciales;
+
+  public NecesidadExtraordinaria(
+      String descripcion, Subcategoria subcategoriaRequerida, double cantidadRequerida) {
+    super(descripcion, subcategoriaRequerida);
+    this.cantidadRequerida = cantidadRequerida;
+    this.donacionesParciales = new ArrayList<>();
+  }
+
+  public void acumularDonacionesParciales(Donacion nuevaDonacion) {
+    this.donacionesParciales.add(nuevaDonacion);
+    double totalAcumulado = 0;
+
+    for (Donacion d : this.donacionesParciales) {
+      for (Bien b : d.getBienes()) {
+        totalAcumulado += b.getCantidad();
+      }
+    }
+
+    if (totalAcumulado >= this.cantidadRequerida) {
+      this.setEstado(EstadoNecesidad.CUBIERTA);
+    }
+  }
+
+  public double cantidadAcumulada() {
+    return this.donacionesParciales.stream()
+        .flatMap(donacion -> donacion.getBienes().stream())
+        .mapToDouble(Bien::getCantidad)
+        .sum();
+  }
+
+  public double cantidadPendiente() {
+    return this.cantidadRequerida - this.cantidadAcumulada();
+  }
+}

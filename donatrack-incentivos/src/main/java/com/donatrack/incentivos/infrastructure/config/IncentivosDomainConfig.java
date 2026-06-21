@@ -1,6 +1,6 @@
 package com.donatrack.incentivos.infrastructure.config;
 
-import com.donatrack.incentivos.domain.model.ranking.RankingMisionesStrategy;
+import com.donatrack.incentivos.domain.entities.ranking.RankingMisionesStrategy;
 import com.donatrack.incentivos.domain.repository.PerfilDonanteRepository;
 import com.donatrack.incentivos.domain.service.RankingMensualService;
 import com.donatrack.incentivos.application.usecase.RegistrarActividadDonacionUseCase;

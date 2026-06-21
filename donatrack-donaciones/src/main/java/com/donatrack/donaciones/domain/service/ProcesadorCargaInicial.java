@@ -1,9 +1,9 @@
 package com.donatrack.donaciones.domain.service;
 
-import com.donatrack.donaciones.domain.model.donacion.Bien;
-import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.donacion.DonacionFactory;
-import com.donatrack.donaciones.domain.model.donacion.segmentador.EstrategiaSegmentacion;
+import com.donatrack.donaciones.domain.entities.donacion.Bien;
+import com.donatrack.donaciones.domain.entities.donacion.Donacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionFactory;
+import com.donatrack.donaciones.domain.entities.donacion.segmentador.EstrategiaSegmentacion;
 
 import java.util.ArrayList;
 import java.util.List;

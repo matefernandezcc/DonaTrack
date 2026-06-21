@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.repository;
 
-import com.donatrack.donaciones.domain.model.persona.Persona;
+import com.donatrack.donaciones.domain.entities.persona.Persona;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

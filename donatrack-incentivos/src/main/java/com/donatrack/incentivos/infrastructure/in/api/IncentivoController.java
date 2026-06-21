@@ -1,8 +1,8 @@
 package com.donatrack.incentivos.infrastructure.in.api;
 
-import com.donatrack.incentivos.domain.model.Insignia;
-import com.donatrack.incentivos.domain.model.PerfilDonante;
-import com.donatrack.incentivos.domain.model.misiones.Mision;
+import com.donatrack.incentivos.domain.entities.Insignia;
+import com.donatrack.incentivos.domain.entities.PerfilDonante;
+import com.donatrack.incentivos.domain.entities.misiones.Mision;
 import com.donatrack.incentivos.application.usecase.RegistrarActividadDonacionUseCase;
 import com.donatrack.common.dto.ActividadDonacionDTO;
 

@@ -1,7 +1,7 @@
 package com.donatrack.notificaciones.application.service;
 
 import com.donatrack.notificaciones.domain.port.out.NotificacionAdapter;
-import com.donatrack.notificaciones.domain.model.Notificacion;
+import com.donatrack.notificaciones.domain.entities.Notificacion;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

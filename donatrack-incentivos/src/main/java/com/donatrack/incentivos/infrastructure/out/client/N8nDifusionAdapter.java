@@ -1,6 +1,6 @@
 package com.donatrack.incentivos.infrastructure.out.client;
 
-import com.donatrack.incentivos.domain.model.InsigniaObtenidaEvent;
+import com.donatrack.incentivos.domain.entities.InsigniaObtenidaEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

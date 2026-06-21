@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.application.service;
 
-import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.enums.EstadoDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.Donacion;
+import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.repository.DonacionRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;

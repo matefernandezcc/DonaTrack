@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.application.port.in;
 
-import com.donatrack.donaciones.domain.model.enums.EstadoDonacion;
+import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 import java.util.UUID;
 
 public record CambioEstadoRequestDTO(

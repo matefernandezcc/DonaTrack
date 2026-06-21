@@ -1,7 +1,7 @@
 package com.donatrack.notificaciones.infrastructure.out.messaging;
 
 import com.donatrack.notificaciones.domain.port.out.NotificacionAdapter;
-import com.donatrack.notificaciones.domain.model.Notificacion;
+import com.donatrack.notificaciones.domain.entities.Notificacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

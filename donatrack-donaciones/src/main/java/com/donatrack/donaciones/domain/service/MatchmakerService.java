@@ -1,8 +1,8 @@
 package com.donatrack.donaciones.domain.service;
 
-import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.roles.Beneficiario;
-import com.donatrack.donaciones.domain.model.roles.strategyAdministrador.asignador.*;
+import com.donatrack.donaciones.domain.entities.donacion.Donacion;
+import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
+import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.asignador.*;
 
 import java.util.List;
 import java.util.Set;

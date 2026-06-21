@@ -1,6 +1,6 @@
 package com.donatrack.incentivos.domain.repository;
 
-import com.donatrack.incentivos.domain.model.PerfilDonante;
+import com.donatrack.incentivos.domain.entities.PerfilDonante;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

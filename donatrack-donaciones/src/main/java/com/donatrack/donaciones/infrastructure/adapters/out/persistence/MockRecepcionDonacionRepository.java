@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.infrastructure.adapters.out.persistence;
 
-import com.donatrack.donaciones.domain.model.donacion.RecepcionDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
 import com.donatrack.donaciones.domain.repository.RecepcionDonacionRepository;
 import org.springframework.stereotype.Repository;
 

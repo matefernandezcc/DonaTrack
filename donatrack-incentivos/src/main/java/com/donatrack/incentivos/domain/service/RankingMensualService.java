@@ -1,7 +1,7 @@
 package com.donatrack.incentivos.domain.service;
 
-import com.donatrack.incentivos.domain.model.PerfilDonante;
-import com.donatrack.incentivos.domain.model.ranking.RankingStrategy;
+import com.donatrack.incentivos.domain.entities.PerfilDonante;
+import com.donatrack.incentivos.domain.entities.ranking.RankingStrategy;
 import com.donatrack.incentivos.domain.repository.PerfilDonanteRepository;
 
 import java.util.List;

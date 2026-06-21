@@ -1,8 +1,8 @@
 package com.donatrack.donaciones.infrastructure.adapters.in.api;
 
-import com.donatrack.donaciones.domain.model.donacion.Donacion;
-import com.donatrack.donaciones.domain.model.enums.MedioContacto;
-import com.donatrack.donaciones.domain.model.roles.Beneficiario;
+import com.donatrack.donaciones.domain.entities.donacion.Donacion;
+import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
+import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import com.donatrack.donaciones.domain.repository.BeneficiarioRepository;
 import com.donatrack.donaciones.domain.repository.DonacionRepository;
 import com.donatrack.donaciones.domain.service.MatchmakerService;
@@ -15,12 +15,12 @@ import java.util.UUID;
 
 import com.donatrack.donaciones.application.port.out.NotificacionOutDTO;
 import com.donatrack.donaciones.application.port.out.ServicioNotificaciones;
-import com.donatrack.donaciones.domain.model.persona.Contacto;
+import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
 
 import com.donatrack.donaciones.application.port.in.RecepcionDonacionesUseCase;
 import com.donatrack.donaciones.application.port.in.CargaBienesRequestDTO;
-import com.donatrack.donaciones.domain.model.donacion.RecepcionDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
 
 import com.donatrack.donaciones.application.port.in.DonacionResponseDTO;
 import com.donatrack.donaciones.application.port.in.DonacionRequestDTO;

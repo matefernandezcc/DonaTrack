@@ -1,6 +1,6 @@
 package com.donatrack.donaciones.domain.repository;
 
-import com.donatrack.donaciones.domain.model.roles.Beneficiario;
+import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 
 import java.util.List;
 

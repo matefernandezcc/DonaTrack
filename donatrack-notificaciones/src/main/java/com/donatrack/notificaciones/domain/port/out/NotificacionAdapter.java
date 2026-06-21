@@ -1,6 +1,6 @@
 package com.donatrack.notificaciones.domain.port.out;
 
-import com.donatrack.notificaciones.domain.model.Notificacion;
+import com.donatrack.notificaciones.domain.entities.Notificacion;
 
 public interface NotificacionAdapter {
     /**
