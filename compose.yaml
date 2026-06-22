@@ -38,8 +38,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: donatrack
+      RABBITMQ_DEFAULT_PASS: donatrack
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
@@ -90,6 +90,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=logistica
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=donatrack
+      - SPRING_RABBITMQ_PASSWORD=donatrack
 
   donatrack-notificaciones:
     build:
@@ -106,6 +109,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=notificaciones
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=donatrack
+      - SPRING_RABBITMQ_PASSWORD=donatrack
 
   donatrack-server:
     build:

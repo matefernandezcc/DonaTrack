@@ -13,7 +13,8 @@ build:
 	mvn clean install
 
 package:
-	mvn clean package
+	mvn clean package -Dskiptest
+	docker compose up --build -d
 
 # =========================
 # TEST
