@@ -64,7 +64,7 @@ class Coordenada <<Value Object>> {
 }
 
 class Entrega {
-  - idDonacionOriginal: UUID
+  - idEntrega: UUID
   - estado: EstadoEntrega
   - pesoEstimado: Double
   - volumenEstimado: Double
