@@ -2,12 +2,12 @@ package com.donatrack.logistica.infrastructure.adapters.out.persistence;
 
 import com.donatrack.logistica.application.ports.out.ItemPlanificacionRepositoryPort;
 import com.donatrack.logistica.domain.entities.ItemPlanificacion;
-import org.springframework.stereotype.Repository;
+//import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+//@Repository
 public class MockItemPlanificacionRepository implements ItemPlanificacionRepositoryPort {
 
     private final List<ItemPlanificacion> baseDeDatosMock = new ArrayList<>();

@@ -1,7 +1,7 @@
 services:
-  postgres-donatrack:
+  postgres:
     image: postgres:15-alpine
-    container_name: db_donatrack
+    container_name: postgres_donatrack
     restart: always
     env_file:
       - .env
@@ -31,7 +31,7 @@ services:
       - ./n8n/workflows:/workflows # Carpeta local para importar/exportar los JSON de tus workflows
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:4.3.2-management-alpine
     container_name: rabbitmq_donatrack
     restart: always
     ports:
@@ -43,7 +43,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  donatrack-donaciones:
+  donaciones:
     build:
       context: ./donatrack-donaciones
     container_name: donatrack-donaciones
@@ -51,15 +51,15 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - postgres-donatrack
+      - postgres
     env_file:
       - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=donaciones
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_donatrack:5432/${POSTGRES_DB}?currentSchema=donaciones
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
 
-  donatrack-incentivos:
+  incentivos:
     build:
       context: ./donatrack-incentivos
     container_name: donatrack-incentivos
@@ -67,15 +67,15 @@ services:
     ports:
       - "8001:8001"
     depends_on:
-      - postgres-donatrack
+      - postgres
     env_file:
       - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=incentivos
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_donatrack:5432/${POSTGRES_DB}?currentSchema=incentivos
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
 
-  donatrack-logistica:
+  logistica:
     build:
       context: ./donatrack-logistica
     container_name: donatrack-logistica
@@ -83,18 +83,19 @@ services:
     ports:
       - "8002:8002"
     depends_on:
-      - postgres-donatrack
+      - postgres
     env_file:
       - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=logistica
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_donatrack:5432/${POSTGRES_DB}?currentSchema=logistica
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_PROFILES_ACTIVE=default
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_USERNAME=donatrack
       - SPRING_RABBITMQ_PASSWORD=donatrack
 
-  donatrack-notificaciones:
+  notificaciones:
     build:
       context: ./donatrack-notificaciones
     container_name: donatrack-notificaciones
@@ -102,18 +103,18 @@ services:
     ports:
       - "8003:8003"
     depends_on:
-      - postgres-donatrack
+      - postgres
     env_file:
       - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=notificaciones
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_donatrack:5432/${POSTGRES_DB}?currentSchema=notificaciones
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_USERNAME=donatrack
       - SPRING_RABBITMQ_PASSWORD=donatrack
 
-  donatrack-server:
+  server:
     build:
       context: ./donatrack-server
     container_name: donatrack-server
@@ -121,11 +122,11 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres-donatrack
+      - postgres
     env_file:
       - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=public
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_donatrack:5432/${POSTGRES_DB}?currentSchema=public
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
 
