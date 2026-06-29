@@ -18,5 +18,8 @@ public class RegistroDonacion {
     private Set<String> categorias;
     private UUID idEntidadBeneficiaria;
     private YearMonth mesDonacion;
-    private boolean exitosa;
+
+    public boolean esExitosa() {
+        return idEntidadBeneficiaria != null;
+    }
 }
