@@ -13,7 +13,8 @@ build:
 	mvn clean install
 
 package:
-	mvn clean package
+	mvn clean package -Dskiptest
+	docker compose up --build -d
 
 # =========================
 # TEST
@@ -37,27 +38,29 @@ git-clean:
 	git fetch --prune
 	git branch -vv | grep 'gone' | awk '{print $1}' | xargs -r git branch -D 
 
+PROFILE ?= local
+
 # =========================
 # RUN APP
 # =========================
 
 run:
-	mvn spring-boot:run -pl $(SERVER_MODULE)
+	mvn install -pl $(SERVER_MODULE) -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl $(SERVER_MODULE)
 
 donaciones:
-	mvn spring-boot:run -pl donatrack-donaciones
+	mvn install -pl donatrack-donaciones -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-donaciones
 
 incentivos:
-	mvn spring-boot:run -pl donatrack-incentivos
+	mvn install -pl donatrack-incentivos -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-incentivos
 
 logistica:
-	mvn spring-boot:run -pl donatrack-logistica
+	mvn install -pl donatrack-logistica -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-logistica
 
 notificaciones:
-	mvn spring-boot:run -pl donatrack-notificaciones
+	mvn install -pl donatrack-notificaciones -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-notificaciones
 
 server:
-	mvn spring-boot:run -pl donatrack-server
+	mvn install -pl donatrack-server -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-server
 
 ngrok:
 	ngrok http --url=exclude-stoplight-registrar.ngrok-free.dev 8080

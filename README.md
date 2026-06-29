@@ -12,6 +12,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 [![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?logo=swagger&logoColor=black)](https://swagger.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
 
 </div>
 
@@ -56,6 +57,7 @@ El sistema está diseñado como una **arquitectura distribuida de microservicios
 | **Build** | Maven (multi-módulo) |
 | **API Docs** | SpringDoc OpenAPI (Swagger UI) |
 | **Base de Datos** | PostgreSQL 15 / H2 (desarrollo) |
+| **Mensajería** | RabbitMQ (Message Broker) |
 | **Contenedores** | Docker + Docker Compose |
 | **Automatización** | n8n (flujos low-code) |
 | **Testing** | JUnit 5 |

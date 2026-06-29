@@ -35,6 +35,12 @@ class SolicitudPlanificacion {
   + procesarCallback(rutas: List<RutaDeReparto>)
 }
 
+class ItemPlanificacion <<Value Object>> {
+  - idDonacionOriginal: UUID
+  - pesoEstimado: Double
+  - volumenEstimado: Double
+}
+
 class RutaDeReparto {
   - id: UUID
   - fechaOperativa: LocalDate
@@ -58,7 +64,7 @@ class Coordenada <<Value Object>> {
 }
 
 class Entrega {
-  - idDonacionOriginal: UUID
+  - idEntrega: UUID
   - estado: EstadoEntrega
   - pesoEstimado: Double
   - volumenEstimado: Double
@@ -87,6 +93,9 @@ Parada "1" *-- "1..*" Entrega : contiene >
 Entrega "1" --> "1" EstadoEntrega : se encuentra en >
 Entrega "1" *-- "0..1" ComprobanteRecepcion : genera al entregar >
 SolicitudPlanificacion "1" --> "1" EstadoPlanificacion : se encuentra en >
+
+SolicitudPlanificacion "1" *-- "1..100" ItemPlanificacion : contiene >
+ItemPlanificacion "1" --> "1" Direccion : destino >
 
 note right of Entrega
   idDonacionOriginal referencia

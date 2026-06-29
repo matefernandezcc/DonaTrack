@@ -15,6 +15,9 @@ Este documento detalla los puertos y URLs de Swagger para cada uno de los micros
 ### Servicios de Terceros
 - **n8n**: `http://localhost:5678` (Plataforma de automatización de workflows)
 - **Base de Datos PostgreSQL**: `localhost:5432` (Mismo contenedor de base de datos compartida, utilizando diferentes esquemas en base a la variable `currentSchema`).
+- **RabbitMQ**:
+  - Puerto de AMQP (mensajería): `5672`
+  - Consola de Administración (Management UI): [http://localhost:15672](http://localhost:15672) (Credenciales por defecto: `donatrack` / `donatrack`)
 
 ---
 
