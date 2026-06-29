@@ -38,6 +38,13 @@ public class MetricasDonante {
     }
 
     public void registrarDonacion(RegistroDonacion donacion) {
+        // Buscar si ya existe un registro con el mismo idDonacion
+        for (int i = 0; i < registrosDonacion.size(); i++) {
+            if (registrosDonacion.get(i).getIdDonacion().equals(donacion.getIdDonacion())) {
+                registrosDonacion.set(i, donacion);
+                return;
+            }
+        }
         this.registrosDonacion.add(donacion);
     }
 
