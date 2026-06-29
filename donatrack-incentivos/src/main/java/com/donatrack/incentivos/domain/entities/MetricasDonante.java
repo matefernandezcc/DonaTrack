@@ -91,11 +91,7 @@ public class MetricasDonante {
     }
 
     public int totalDonacionesExitosas() {
-        return 0;
-        // Hay que incluir en RegistroDonacion, un atributo que contemple si fue exitosa
-        // o no (su estado)
-        // la donacion. Con un verificador que deberá actualizarlo al momento de cambiar
-        // ese estado en la donacion (de pendiente a exitosa)
+        return (int) this.registrosDonacion.stream().filter(RegistroDonacion::esExitosa).count();
     }
 
     public int maxBienesEnUnaDonacion() {
