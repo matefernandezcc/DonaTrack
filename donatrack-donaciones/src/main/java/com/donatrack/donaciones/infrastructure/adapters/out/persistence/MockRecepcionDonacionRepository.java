@@ -26,4 +26,12 @@ public class MockRecepcionDonacionRepository implements RecepcionDonacionReposit
                 .filter(r -> r.getId().equals(id))
                 .findFirst();
     }
+
+    @Override
+    public Optional<RecepcionDonacion> buscarPorIdDonacion(UUID idDonacion) {
+        return baseDeDatosMock.stream()
+                .filter(r -> r.getDonacionesResultantes() != null && 
+                             r.getDonacionesResultantes().stream().anyMatch(d -> d.getId().equals(idDonacion)))
+                .findFirst();
+    }
 }

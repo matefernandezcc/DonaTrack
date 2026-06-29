@@ -1,4 +1,12 @@
 services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_donatrack
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   postgres-donatrack:
     image: postgres:15-alpine
     container_name: db_donatrack
@@ -39,12 +47,14 @@ services:
       - "8000:8000"
     depends_on:
       - postgres-donatrack
+      - rabbitmq
     env_file:
       - .env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=donaciones
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_RABBITMQ_HOST=rabbitmq
 
   donatrack-incentivos:
     build:
@@ -55,12 +65,14 @@ services:
       - "8001:8001"
     depends_on:
       - postgres-donatrack
+      - rabbitmq
     env_file:
       - .env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=incentivos
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_RABBITMQ_HOST=rabbitmq
 
   donatrack-logistica:
     build:
@@ -71,12 +83,14 @@ services:
       - "8002:8002"
     depends_on:
       - postgres-donatrack
+      - rabbitmq
     env_file:
       - .env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=logistica
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_RABBITMQ_HOST=rabbitmq
 
   donatrack-notificaciones:
     build:
@@ -87,12 +101,14 @@ services:
       - "8003:8003"
     depends_on:
       - postgres-donatrack
+      - rabbitmq
     env_file:
       - .env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_donatrack:5432/${POSTGRES_DB}?currentSchema=notificaciones
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_RABBITMQ_HOST=rabbitmq
 
   donatrack-server:
     build:
