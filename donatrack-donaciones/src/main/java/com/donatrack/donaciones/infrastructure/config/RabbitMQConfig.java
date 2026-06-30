@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Configuration
+@Configuration("donacionesRabbitMQConfig")
 public class RabbitMQConfig {
 
     public static final String DONACIONES_EXCHANGE = "donaciones.exchange";
@@ -49,7 +49,19 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(entregaRealizadaQueue).to(logisticaExchange).with("entrega.realizada");
     }
 
+    public static final String ENTREGA_FALLIDA_QUEUE = "donaciones.entrega_fallida.queue";
+
     @Bean
+    public Queue entregaFallidaQueue() {
+        return new Queue(ENTREGA_FALLIDA_QUEUE);
+    }
+
+    @Bean
+    public Binding bindingEntregaFallida(Queue entregaFallidaQueue, TopicExchange logisticaExchange) {
+        return BindingBuilder.bind(entregaFallidaQueue).to(logisticaExchange).with("entrega.fallida");
+    }
+
+    @Bean("donacionesJsonMessageConverter")
     public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
         return new Jackson2JsonMessageConverter(objectMapper);
     }

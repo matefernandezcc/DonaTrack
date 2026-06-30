@@ -2,6 +2,7 @@ package com.donatrack.logistica.infrastructure.adapters.out.messaging;
 
 import com.donatrack.common.events.RutaIniciadaEvent;
 import com.donatrack.common.events.EntregaRealizadaEvent;
+import com.donatrack.common.events.EntregaNoSatisfactoriaEvent;
 import com.donatrack.logistica.infrastructure.config.RabbitMQConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.event.EventListener;
@@ -30,5 +31,12 @@ public class LogisticaRabbitMQAdapter {
         log.info("Recibido evento local EntregaRealizadaEvent para donacionId: {}. Publicando en RabbitMQ...", event.getIdDonacion());
         rabbitTemplate.convertAndSend(RabbitMQConfig.LOGISTICA_EXCHANGE, "entrega.realizada", event);
         log.info("Evento EntregaRealizadaEvent publicado exitosamente en RabbitMQ.");
+    }
+
+    @EventListener
+    public void handleEntregaNoSatisfactoriaEvent(EntregaNoSatisfactoriaEvent event) {
+        log.info("Recibido evento local EntregaNoSatisfactoriaEvent para donacionId: {}. Publicando en RabbitMQ...", event.getIdDonacion());
+        rabbitTemplate.convertAndSend(RabbitMQConfig.LOGISTICA_EXCHANGE, "entrega.fallida", event);
+        log.info("Evento EntregaNoSatisfactoriaEvent publicado exitosamente en RabbitMQ.");
     }
 }
