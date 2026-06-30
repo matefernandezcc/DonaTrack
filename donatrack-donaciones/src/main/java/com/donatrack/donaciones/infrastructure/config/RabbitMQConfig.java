@@ -37,6 +37,18 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(rutaIniciadaQueue).to(logisticaExchange).with("ruta.iniciada");
     }
 
+    public static final String ENTREGA_REALIZADA_QUEUE = "donaciones.entrega_realizada.queue";
+
+    @Bean
+    public Queue entregaRealizadaQueue() {
+        return new Queue(ENTREGA_REALIZADA_QUEUE);
+    }
+
+    @Bean
+    public Binding bindingEntregaRealizada(Queue entregaRealizadaQueue, TopicExchange logisticaExchange) {
+        return BindingBuilder.bind(entregaRealizadaQueue).to(logisticaExchange).with("entrega.realizada");
+    }
+
     @Bean
     public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
         return new Jackson2JsonMessageConverter(objectMapper);

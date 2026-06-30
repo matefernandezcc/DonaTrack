@@ -31,6 +31,18 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(rutaIniciadaNotifQueue).to(donacionesExchange).with("notificacion.inicio.ruta");
     }
 
+    public static final String ENTREGA_EXITOSA_NOTIF_QUEUE = "notificaciones.entrega_exitosa.queue";
+
+    @Bean
+    public Queue entregaExitosaNotifQueue() {
+        return new Queue(ENTREGA_EXITOSA_NOTIF_QUEUE);
+    }
+
+    @Bean
+    public Binding bindingNotifEntregaExitosa(Queue entregaExitosaNotifQueue, TopicExchange donacionesExchange) {
+        return BindingBuilder.bind(entregaExitosaNotifQueue).to(donacionesExchange).with("notificacion.entrega.exitosa");
+    }
+
     @Bean
     public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
         return new Jackson2JsonMessageConverter(objectMapper);
