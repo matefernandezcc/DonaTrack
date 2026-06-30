@@ -11,23 +11,23 @@ public enum TipoMetricaMision {
             return perfil.getMetricas() != null ? perfil.getMetricas().totalDonacionesExitosas() : 0;
         }
     },
-    MAX_BIENES("max bienes en una donación") {
+    MAX_BIENES("max bienes por donación") {
         @Override
         public int extraerValor(PerfilDonante perfil) {
-            return perfil.getMetricas() != null ? perfil.getMetricas().maxBienesEnUnaDonacion() : 0;
+            return perfil.getMetricas() != null ? perfil.getMetricas().maxBienesPorDonacion() : 0;
         }
     },
     MESES_CONSECUTIVOS("meses consecutivos") {
         @Override
         public int extraerValor(PerfilDonante perfil) {
-            return perfil.getMetricas() != null ? perfil.getMetricas().mesesConsecutivosDonando() : 0;
+            return perfil.getMetricas() != null ? perfil.getMetricas().rachaDeMeses() : 0;
         }
     },
     CATEGORIAS_DISTINTAS("categorías distintas") {
         @Override
         public int extraerValor(PerfilDonante perfil) {
-            return (perfil.getMetricas() != null && perfil.getMetricas().categoriasUnicasDonadas() != null)
-                    ? perfil.getMetricas().categoriasUnicasDonadas().size()
+            return (perfil.getMetricas() != null && perfil.getMetricas().categoriasDonadas() != null)
+                    ? perfil.getMetricas().categoriasDonadas().size()
                     : 0;
         }
     };

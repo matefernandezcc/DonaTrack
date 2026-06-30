@@ -11,11 +11,11 @@ import lombok.Data;
 public class MetricasDonanteDTO {
     private UUID donanteId;
     private int totalDonacionesHistoricas;
-    private int mesesConsecutivosDonando;
+    private int rachaDeMeses;
     private int cantidadBienesDonados;
     private int donacionesExitosas;
     private int totalOrganizacionesAyudadas;
     private Map<YearMonth, Integer> historialDonacionesPorMes;
     // mock ranking
-    private int posicionRanking; 
+    private int posicionRanking;
 }

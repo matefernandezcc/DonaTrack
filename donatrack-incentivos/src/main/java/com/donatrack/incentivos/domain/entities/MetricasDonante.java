@@ -2,12 +2,14 @@ package com.donatrack.incentivos.domain.entities;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.donatrack.incentivos.domain.entities.misiones.Mision;
@@ -52,7 +54,7 @@ public class MetricasDonante {
         this.misionesCompletadas.put(mision, mesCompletado);
     }
 
-    public int mesesConsecutivosDonando() {
+    public int rachaDeMeses() {
         // Caso 0: No hay donaciones
         if (registrosDonacion.isEmpty()) {
             return 0;
@@ -87,24 +89,35 @@ public class MetricasDonante {
     }
 
     public int totalBienesDonados() {
-        return this.registrosDonacion.stream().mapToInt(RegistroDonacion::getCantidadBienes).sum();
+        return this.registrosDonacion.stream()
+                .mapToInt(RegistroDonacion::getCantidadBienes)
+                .sum();
     }
 
     public int totalDonacionesExitosas() {
-        return (int) this.registrosDonacion.stream().filter(RegistroDonacion::esExitosa).count();
+        return (int) this.registrosDonacion.stream()
+                .filter(RegistroDonacion::esExitosa)
+                .count();
     }
 
-    public int maxBienesEnUnaDonacion() {
-        return this.registrosDonacion.stream().mapToInt(RegistroDonacion::getCantidadBienes).max().orElse(0);
+    public int maxBienesPorDonacion() {
+        return this.registrosDonacion.stream()
+                .mapToInt(RegistroDonacion::getCantidadBienes).max().orElse(0);
     }
 
-    public Set<String> categoriasUnicasDonadas() {
-        return this.registrosDonacion.stream().flatMap(r -> r.getCategorias().stream())
+    public Set<String> categoriasDonadas() {
+        return this.registrosDonacion.stream()
+                .map(RegistroDonacion::getCategorias)
+                .filter(Objects::nonNull)
+                .flatMap(Set::stream)
                 .collect(Collectors.toSet());
     }
 
-    public Set<UUID> totalOrganizacionesAyudadas() {
-        return null;
+    public Set<UUID> organizacionesBeneficiadas() {
+        return registrosDonacion.stream()
+                .map(RegistroDonacion::getIdEntidadBeneficiaria)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     public HashMap<YearMonth, Integer> historialDonacionesPorMes() {
@@ -116,14 +129,19 @@ public class MetricasDonante {
     }
 
     public YearMonth ultimoMesDonacion() {
-        return this.registrosDonacion.stream().map(RegistroDonacion::getMesDonacion)
+        return this.registrosDonacion.stream()
+                .map(RegistroDonacion::getMesDonacion)
                 .max(Comparator.naturalOrder()).orElse(null);
     }
 
-    public Map<YearMonth, List<Mision>> getMisionesCompletadasPorMes() {
+    public Map<YearMonth, List<Mision>> misionesCompletadasPorMes() {
         return misionesCompletadas.entrySet().stream()
                 .collect(Collectors.groupingBy(
                         Map.Entry::getValue,
                         Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
+    }
+
+    public int totalMisionesCompletadasEn(YearMonth mes) {
+        return (int) this.misionesCompletadasPorMes().getOrDefault(mes, Collections.emptyList()).size();
     }
 }

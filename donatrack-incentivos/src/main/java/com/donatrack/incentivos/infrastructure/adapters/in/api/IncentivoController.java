@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-
 @RestController
 @RequestMapping("/incentivos")
 public class IncentivoController {
@@ -33,14 +32,12 @@ public class IncentivoController {
 
         MetricasDonanteDTO dto = MetricasDonanteDTO.builder()
                 .donanteId(perfil.getDonanteId())
-                .totalDonacionesHistoricas(perfil.getMetricas().getTotalDonacionesHistoricas())
-                .mesesConsecutivosDonando(perfil.getMetricas().getMesesConsecutivosDonando())
-                .cantidadBienesDonados(perfil.getMetricas().getCantidadBienesDonados())
-                .donacionesExitosas(perfil.getMetricas().getDonacionesExitosas())
-                .totalOrganizacionesAyudadas(perfil.getMetricas().getOrganizacionesUnicasAyudadas() != null
-                        ? perfil.getMetricas().getOrganizacionesUnicasAyudadas().size()
-                        : 0)
-                .historialDonacionesPorMes(perfil.getMetricas().getHistorialDonacionesPorMes())
+                .totalDonacionesHistoricas(perfil.getMetricas().totalDonacionesHistoricas())
+                .rachaDeMeses(perfil.getMetricas().rachaDeMeses())
+                .cantidadBienesDonados(perfil.getMetricas().totalBienesDonados())
+                .donacionesExitosas(perfil.getMetricas().totalDonacionesExitosas())
+                .totalOrganizacionesAyudadas(perfil.getMetricas().organizacionesBeneficiadas().size())
+                .historialDonacionesPorMes(perfil.getMetricas().historialDonacionesPorMes())
                 .posicionRanking(5) // Mock
                 .build();
 
@@ -50,8 +47,8 @@ public class IncentivoController {
     @GetMapping("/donantes/{id}/misiones")
     public ResponseEntity<List<Mision>> obtenerMisionesDisponibles(@PathVariable UUID id) {
         PerfilDonante perfil = new PerfilDonante(id); // Mock
-        List<Mision> respuesta = perfil.getMisionActual() != null ? 
-            java.util.List.of(perfil.getMisionActual()) : new java.util.ArrayList<>();
+        List<Mision> respuesta = perfil.getMisionActual() != null ? java.util.List.of(perfil.getMisionActual())
+                : new java.util.ArrayList<>();
         return ResponseEntity.ok(respuesta);
     }
 
@@ -68,9 +65,10 @@ public class IncentivoController {
 
         List<java.util.Map<String, Object>> response = top3.stream().map(p -> {
             java.util.Map<String, Object> map = new java.util.HashMap<>();
-            // n8n espera "user" y "totalDonations" (según su Format Podium Message), pasamos el valor real del ranking
+            // n8n espera "user" y "totalDonations" (según su Format Podium Message),
+            // pasamos el valor real del ranking
             map.put("user", p.getDonanteId().toString());
-            map.put("totalDonations", p.getMetricas().getMisionesCompletadasEn(mesActual));
+            map.put("totalDonations", p.getMetricas().totalMisionesCompletadasEn(mesActual));
             return map;
         }).collect(java.util.stream.Collectors.toList());
 

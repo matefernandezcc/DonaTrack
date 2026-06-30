@@ -34,8 +34,8 @@ public class PerfilDonante {
         this.misionActual = misionesPendientes.poll();
     }
 
-    public void registrarDonacionExitosa(RegistroDonacion donacion) {
-        this.metricas.registrarDonacionExitosa(donacion);
+    public void registrarDonacion(RegistroDonacion donacion) {
+        this.metricas.registrarDonacion(donacion);
         evaluarMisiones(donacion.getMesDonacion());
     }
 
