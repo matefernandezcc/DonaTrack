@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 @Builder
 public class MetricasDonanteDTO {
+    private UUID donacionId;
     private UUID donanteId;
     private int totalDonacionesHistoricas;
     private int rachaDeMeses;

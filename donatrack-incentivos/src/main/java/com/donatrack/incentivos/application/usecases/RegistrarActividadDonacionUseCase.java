@@ -30,12 +30,13 @@ public class RegistrarActividadDonacionUseCase {
         com.donatrack.incentivos.domain.entities.categoria.CategoriaDonante categoriaAntes = perfil.getCategoria();
 
         com.donatrack.incentivos.domain.entities.RegistroDonacion donacion = new com.donatrack.incentivos.domain.entities.RegistroDonacion(
+                actividad.getIdDonacion(),
                 actividad.getCantidadBienes(),
                 actividad.getCategorias() != null ? new java.util.HashSet<>(actividad.getCategorias()) : null,
                 actividad.getIdEntidadBeneficiaria(),
                 java.time.YearMonth.from(actividad.getFecha()));
 
-        perfil.registrarDonacionExitosa(donacion);
+        perfil.registrarDonacion(donacion);
 
         int insigniasDespues = perfil.getInsigniasObtenidas().size();
         com.donatrack.incentivos.domain.entities.categoria.CategoriaDonante categoriaDespues = perfil.getCategoria();
@@ -45,7 +46,8 @@ public class RegistrarActividadDonacionUseCase {
 
         if (misionCompletada) {
             notificacionPort.enviarNotificacion(
-                    new NotificacionRequest("donante" + donanteId + "@test.com", "¡Felicidades! Has completado una misión.",
+                    new NotificacionRequest("donante" + donanteId + "@test.com",
+                            "¡Felicidades! Has completado una misión.",
                             "EMAIL"));
 
             // Publicar el último evento de insignia (la nueva que ganó)
