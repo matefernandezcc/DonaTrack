@@ -13,7 +13,6 @@ import com.donatrack.donaciones.domain.entities.roles.Donante;
 import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 import com.donatrack.donaciones.application.ports.out.RecepcionDonacionRepository;
-import com.donatrack.donaciones.application.usecases.ProcesadorCargaInicial;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 import java.util.List;

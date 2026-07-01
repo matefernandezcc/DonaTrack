@@ -6,15 +6,11 @@ import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
 import com.donatrack.donaciones.domain.entities.enums.TipoDocumento;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.DocumentoIdentidad;
-import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.persona.PersonaHumana;
 import com.donatrack.donaciones.domain.entities.persona.ubicacion.*;
 import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.importador.ImportadorCSV;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 
-;
 
 public class ImportadorCSVTest {
 
