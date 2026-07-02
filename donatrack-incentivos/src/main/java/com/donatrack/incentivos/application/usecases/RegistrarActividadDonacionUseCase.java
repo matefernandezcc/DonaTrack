@@ -6,6 +6,8 @@ import com.donatrack.incentivos.domain.entities.InsigniaObtenidaEvent;
 import com.donatrack.incentivos.domain.entities.PerfilDonante;
 import com.donatrack.incentivos.application.ports.out.IncentivosNotificacionPort;
 import com.donatrack.incentivos.application.ports.out.NotificacionRequest;
+import com.donatrack.incentivos.application.ports.out.PerfilDonanteRepository;
+
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.UUID;
@@ -14,17 +16,18 @@ public class RegistrarActividadDonacionUseCase {
 
     private final IncentivosNotificacionPort notificacionPort;
     private final ApplicationEventPublisher eventPublisher;
+    private final PerfilDonanteRepository perfilDonanteRepository;
 
     public RegistrarActividadDonacionUseCase(IncentivosNotificacionPort notificacionPort,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher, PerfilDonanteRepository perfilDonanteRepository) {
         this.notificacionPort = notificacionPort;
         this.eventPublisher = eventPublisher;
+        this.perfilDonanteRepository = perfilDonanteRepository;
     }
 
     public void ejecutar(UUID donanteId, ActividadDonacionDTO actividad) {
-        // En un entorno real se trae el PerfilDonante de la base de datos
-        // usando un PerfilDonanteRepository
-        PerfilDonante perfil = new PerfilDonante(donanteId);
+        PerfilDonante perfil = perfilDonanteRepository.findById(donanteId)
+                .orElse(new PerfilDonante(donanteId));
 
         int insigniasAntes = perfil.getInsigniasObtenidas().size();
         com.donatrack.incentivos.domain.entities.categoria.CategoriaDonante categoriaAntes = perfil.getCategoria();

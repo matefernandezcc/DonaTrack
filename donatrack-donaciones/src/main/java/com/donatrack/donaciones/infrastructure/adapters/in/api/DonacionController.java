@@ -10,6 +10,7 @@ import com.donatrack.donaciones.domain.services.MatchmakerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -76,6 +77,30 @@ public class DonacionController {
         // Lógica de obtención (mocked)
         DonacionResponseDTO response = new DonacionResponseDTO(id, null, null);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado/en_deposito")
+    public ResponseEntity<Void> donacionEnDeposito(@PathVariable UUID id) {
+
+        Donacion donacion = donacionRepository.buscarPorId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Donacion no encontrada"));
+
+        UUID idDonante = UUID.randomUUID(); // idDonante mockeado
+
+        // Extraer datos reales de la entidad
+        int cantidadBienes = donacion.getBienes().size();
+        List<String> categorias = donacion.getCategoriasString();
+
+        // EN_DEPOSITO : Aun no hay entidad asignada
+        UUID idEntidadBeneficiaria = null;
+
+        LocalDate fecha = LocalDate.now();
+
+        com.donatrack.common.dto.ActividadDonacionDTO dto = new com.donatrack.common.dto.ActividadDonacionDTO(
+                id, idDonante, cantidadBienes, categorias, idEntidadBeneficiaria, fecha);
+
+        incentivoClient.registrarActividadDonacionEnDeposito(id, dto);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado/asignar")
