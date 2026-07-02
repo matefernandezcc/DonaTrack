@@ -33,8 +33,8 @@ public class PerfilDonante {
         this.misionActual = misionesPendientes.poll();
     }
 
-    public void registrarDonacionExitosa(RegistroDonacion donacion) {
-        this.metricas.registrarDonacionExitosa(donacion);
+    public void registrarDonacion(RegistroDonacion donacion) {
+        this.metricas.registrarDonacion(donacion);
         evaluarMisiones(donacion.getMesDonacion());
     }
 
@@ -45,7 +45,7 @@ public class PerfilDonante {
     }
 
     private void completarMisionActual(YearMonth mesActual) {
-        this.metricas.registrarMisionCompletada(mesActual);
+        this.metricas.registrarMisionCompletada(this.misionActual, mesActual);
         agregarInsignia(misionActual.getRecompensa());
 
         misionActual = misionesPendientes.poll();

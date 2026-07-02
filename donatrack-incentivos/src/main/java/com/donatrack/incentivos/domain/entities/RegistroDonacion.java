@@ -13,8 +13,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegistroDonacion {
+    private UUID idDonacion;
     private int cantidadBienes;
     private Set<String> categorias;
     private UUID idEntidadBeneficiaria;
     private YearMonth mesDonacion;
+
+    public boolean esExitosa() {
+        return idEntidadBeneficiaria != null;
+    }
 }

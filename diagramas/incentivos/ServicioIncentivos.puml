@@ -33,26 +33,31 @@ package "Servicio de Incentivos" {
     }
 
     class MetricasDonante {
-        - totalDonacionesHistoricas: int
-        - mesesConsecutivosDonando: int
-        - cantidadBienesDonados: int
-        - donacionesExitosas: int
-        - maxBienesEnUnaDonacion: int
-        - categoriasUnicasDonadas: Set<String>
-        - organizacionesUnicasAyudadas: Set<UUID>
-        - historialDonacionesPorMes: Map<YearMonth, Integer>
-        - ultimoMesDonacion: YearMonth
-        + registrarDonacionExitosa(donacion: RegistroDonacion)
-        + registrarMisionCompletada(mes: YearMonth)
-        + getMisionesCompletadasEn(mes: YearMonth): int
-        - actualizarRacha(mesActual: YearMonth)
+        - donanteId : UUID
+        - registrosDonacion: List<RegistroDonacion>
+        - misionesCompletadas: Map<Mision, YearMonth>
+        + totalDonacionesHistorias() : int
+        + registrarDonacion(donacion: RegistroDonacion) : void
+        + registrarMisionCompletada(mes: YearMonth) : void
+        + rachaDeMeses() : int
+        + totalBienesDonados() : int
+        + totalDonacionesExitosas() : int
+        + maxBienesPorDonacion() : int
+        + categoriasDonadas() : Set<String>
+        + organizacionesBeneficiadas() : Set<UUID>
+        + historialDonacionesPorMes() : Map<YearMonth, Integer>
+        + ultimoMesDonacion() : YearMonth
+        + misionesCompletadasPorMes() : Map<YearMonth, List<Mision>>
+        + totalMisionesCompletadasEn(mes: YearMonth) : int
     }
 
     class RegistroDonacion {
+        - idDonacion : UUID
         - cantidadBienes: int
         - categorias: Set<String>
         - idEntidadBeneficiaria: UUID
         - mesDonacion: YearMonth
+        + esExitosa() : boolean
     }
 
     class Mision {

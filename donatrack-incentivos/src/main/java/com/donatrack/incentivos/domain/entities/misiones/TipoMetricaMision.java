@@ -1,4 +1,5 @@
 package com.donatrack.incentivos.domain.entities.misiones;
+
 import lombok.Getter;
 import com.donatrack.incentivos.domain.entities.PerfilDonante;
 
@@ -7,26 +8,27 @@ public enum TipoMetricaMision {
     DONACIONES_EXITOSAS("donaciones exitosas") {
         @Override
         public int extraerValor(PerfilDonante perfil) {
-            return perfil.getMetricas() != null ? perfil.getMetricas().getDonacionesExitosas() : 0;
+            return perfil.getMetricas() != null ? perfil.getMetricas().totalDonacionesExitosas() : 0;
         }
     },
-    MAX_BIENES("max bienes en una donación") {
+    MAX_BIENES("max bienes por donación") {
         @Override
         public int extraerValor(PerfilDonante perfil) {
-            return perfil.getMetricas() != null ? perfil.getMetricas().getMaxBienesEnUnaDonacion() : 0;
+            return perfil.getMetricas() != null ? perfil.getMetricas().maxBienesPorDonacion() : 0;
         }
     },
     MESES_CONSECUTIVOS("meses consecutivos") {
         @Override
         public int extraerValor(PerfilDonante perfil) {
-            return perfil.getMetricas() != null ? perfil.getMetricas().getMesesConsecutivosDonando() : 0;
+            return perfil.getMetricas() != null ? perfil.getMetricas().rachaDeMeses() : 0;
         }
     },
     CATEGORIAS_DISTINTAS("categorías distintas") {
         @Override
         public int extraerValor(PerfilDonante perfil) {
-            return (perfil.getMetricas() != null && perfil.getMetricas().getCategoriasUnicasDonadas() != null) 
-                    ? perfil.getMetricas().getCategoriasUnicasDonadas().size() : 0;
+            return (perfil.getMetricas() != null && perfil.getMetricas().categoriasDonadas() != null)
+                    ? perfil.getMetricas().categoriasDonadas().size()
+                    : 0;
         }
     };
 

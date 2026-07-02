@@ -52,4 +52,12 @@ public class Donacion {
   public void addFoto(Foto foto) {
     this.fotos.add(foto);
   }
+
+  public List<String> getCategoriasString() {
+    List<String> categorias = new ArrayList<>();
+    for (Bien bien : bienes) {
+      categorias.add(bien.getSubcategoria().getNombre());
+    }
+    return categorias;
+  }
 }

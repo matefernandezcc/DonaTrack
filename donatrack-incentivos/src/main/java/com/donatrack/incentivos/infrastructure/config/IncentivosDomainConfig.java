@@ -27,7 +27,8 @@ public class IncentivosDomainConfig {
     @Bean
     public RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase(
             IncentivosNotificacionPort notificacionPort,
-            ApplicationEventPublisher eventPublisher) {
-        return new RegistrarActividadDonacionUseCase(notificacionPort, eventPublisher);
+            ApplicationEventPublisher eventPublisher,
+            PerfilDonanteRepository perfilDonanteRepository) {
+        return new RegistrarActividadDonacionUseCase(notificacionPort, eventPublisher, perfilDonanteRepository);
     }
 }

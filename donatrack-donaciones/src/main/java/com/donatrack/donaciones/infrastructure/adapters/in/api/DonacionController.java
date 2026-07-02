@@ -10,6 +10,7 @@ import com.donatrack.donaciones.domain.services.MatchmakerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,15 +41,15 @@ public class DonacionController {
     private final com.donatrack.donaciones.application.usecases.AsignacionBatchJob asignacionBatchJob;
     private final RecepcionDonacionesUseCase recepcionDonacionesUseCase;
     private final com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob auditoriaDepositoJob;
-    
-    public DonacionController(MatchmakerService matchmakerService, 
-                              ServicioNotificaciones servicioNotificaciones,
-                              IncentivoClient incentivoClient,
-                              DonacionRepository donacionRepository,
-                              BeneficiarioRepository beneficiarioRepository,
-                              com.donatrack.donaciones.application.usecases.AsignacionBatchJob asignacionBatchJob,
-                              RecepcionDonacionesUseCase recepcionDonacionesUseCase,
-                              com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob auditoriaDepositoJob) {
+
+    public DonacionController(MatchmakerService matchmakerService,
+            ServicioNotificaciones servicioNotificaciones,
+            IncentivoClient incentivoClient,
+            DonacionRepository donacionRepository,
+            BeneficiarioRepository beneficiarioRepository,
+            com.donatrack.donaciones.application.usecases.AsignacionBatchJob asignacionBatchJob,
+            RecepcionDonacionesUseCase recepcionDonacionesUseCase,
+            com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob auditoriaDepositoJob) {
         this.matchmakerService = matchmakerService;
         this.servicioNotificaciones = servicioNotificaciones;
         this.incentivoClient = incentivoClient;
@@ -78,34 +79,62 @@ public class DonacionController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado/en_deposito")
+    public ResponseEntity<Void> donacionEnDeposito(@PathVariable UUID id) {
+
+        Donacion donacion = donacionRepository.buscarPorId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Donacion no encontrada"));
+
+        UUID idDonante = UUID.randomUUID(); // idDonante mockeado
+
+        // Extraer datos reales de la entidad
+        int cantidadBienes = donacion.getBienes().size();
+        List<String> categorias = donacion.getCategoriasString();
+
+        // EN_DEPOSITO : Aun no hay entidad asignada
+        UUID idEntidadBeneficiaria = null;
+
+        LocalDate fecha = LocalDate.now();
+
+        com.donatrack.common.dto.ActividadDonacionDTO dto = new com.donatrack.common.dto.ActividadDonacionDTO(
+                id, idDonante, cantidadBienes, categorias, idEntidadBeneficiaria, fecha);
+
+        incentivoClient.registrarActividadDonacionEnDeposito(id, dto);
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado/asignar")
-    public ResponseEntity<Void> asignarDonacion(@PathVariable UUID id, @RequestBody BeneficiarioResponseDTO beneficiarioDTO) {
+    public ResponseEntity<Void> asignarDonacion(@PathVariable UUID id,
+            @RequestBody BeneficiarioResponseDTO beneficiarioDTO) {
         // Mocking assignment logic
-        
+
         // 1. Notificar a la entidad (beneficiario)
         Contacto contactoBeneficiario = new Contacto("entidad@test.com", null, null, MedioContacto.CORREO);
-        servicioNotificaciones.enviar(new NotificacionOutDTO("Donación asignada", MedioContacto.CORREO), contactoBeneficiario);
-        
+        servicioNotificaciones.enviar(new NotificacionOutDTO("Donación asignada", MedioContacto.CORREO),
+                contactoBeneficiario);
+
         // 2. Notificar al donante
         Contacto contactoDonante = new Contacto("donante@test.com", null, null, MedioContacto.CORREO);
-        servicioNotificaciones.enviar(new NotificacionOutDTO("Tu donación ha sido asignada a una entidad", MedioContacto.CORREO), contactoDonante);
+        servicioNotificaciones.enviar(
+                new NotificacionOutDTO("Tu donación ha sido asignada a una entidad", MedioContacto.CORREO),
+                contactoDonante);
 
         return ResponseEntity.ok().build();
     }
-    
+
     @PutMapping("/{id:[a-fA-F0-9\\-]{36}}/estado/entregada")
     public ResponseEntity<Void> donacionEntregada(@PathVariable UUID id, @RequestParam UUID idDonante) {
         // Cuando se entrega y finaliza exitosamente
-        // En una app real recuperaríamos la donación de BD para obtener detalles (bienes, entidad)
-        
+        // En una app real recuperaríamos la donación de BD para obtener detalles
+        // (bienes, entidad)
+
         int cantidadBienesMock = 5;
         List<String> categoriasMock = List.of("Alimentos", "Vestimenta");
-        UUID idEntidadMock = UUID.randomUUID(); 
+        UUID idEntidadMock = UUID.randomUUID();
         java.time.LocalDate fechaMock = java.time.LocalDate.now();
 
         com.donatrack.common.dto.ActividadDonacionDTO dto = new com.donatrack.common.dto.ActividadDonacionDTO(
-            idDonante, cantidadBienesMock, categoriasMock, idEntidadMock, fechaMock
-        );
+                id, idDonante, cantidadBienesMock, categoriasMock, idEntidadMock, fechaMock);
 
         // Informar al modulo de incentivos pasándole el contexto completo
         incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
@@ -114,7 +143,8 @@ public class DonacionController {
 
     @GetMapping("/{id:[a-fA-F0-9\\-]{36}}/matchmaking")
     public ResponseEntity<List<BeneficiarioResponseDTO>> sugerirBeneficiarios(@PathVariable UUID id) {
-        // En una aplicación real usaríamos donacionRepository.findById(id).orElseThrow(...)
+        // En una aplicación real usaríamos
+        // donacionRepository.findById(id).orElseThrow(...)
         // Aquí mockeamos la donación hasta tener DB conectada
         Donacion donacionMock = new Donacion(null);
         donacionMock.setId(id);
@@ -125,12 +155,13 @@ public class DonacionController {
         List<BeneficiarioResponseDTO> sugerenciasDTO = sugerencias.stream()
                 .map(b -> new BeneficiarioResponseDTO(b.getId()))
                 .collect(Collectors.toList());
-        
+
         return ResponseEntity.ok(sugerenciasDTO);
     }
 
     @PutMapping("/{id:[a-fA-F0-9\\-]{36}}")
-    public ResponseEntity<DonacionResponseDTO> actualizarDonacion(@PathVariable UUID id, @RequestBody DonacionRequestDTO requestDTO) {
+    public ResponseEntity<DonacionResponseDTO> actualizarDonacion(@PathVariable UUID id,
+            @RequestBody DonacionRequestDTO requestDTO) {
         // Lógica de actualización (mocked)
         DonacionResponseDTO response = new DonacionResponseDTO(id, null, null);
         return ResponseEntity.ok(response);

@@ -1,85 +1,147 @@
 package com.donatrack.incentivos.domain.entities;
 
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.donatrack.incentivos.domain.entities.misiones.Mision;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class MetricasDonante {
 
-    private int totalDonacionesHistoricas;
-    private int mesesConsecutivosDonando;
-    private int cantidadBienesDonados;
-    private int donacionesExitosas;
-    private int maxBienesEnUnaDonacion;
-    private Set<String> categoriasUnicasDonadas;
-    private Set<UUID> organizacionesUnicasAyudadas;
-    private Map<YearMonth, Integer> historialDonacionesPorMes;
-    private YearMonth ultimoMesDonacion;
-    private Map<YearMonth, Integer> misionesCompletadasPorMes;
+    private UUID donanteId;
+    private List<RegistroDonacion> registrosDonacion;
+    private Map<Mision, YearMonth> misionesCompletadas;
 
-    public MetricasDonante() {
-        this.totalDonacionesHistoricas = 0;
-        this.mesesConsecutivosDonando = 0;
-        this.cantidadBienesDonados = 0;
-        this.donacionesExitosas = 0;
-        this.maxBienesEnUnaDonacion = 0;
-        this.categoriasUnicasDonadas = new HashSet<>();
-        this.organizacionesUnicasAyudadas = new HashSet<>();
-        this.historialDonacionesPorMes = new HashMap<>();
-        this.ultimoMesDonacion = null;
-        this.misionesCompletadasPorMes = new HashMap<>();
+    public MetricasDonante(UUID donanteId) {
+        this.donanteId = donanteId;
+        this.registrosDonacion = new ArrayList<>();
+        this.misionesCompletadas = new HashMap<>();
     }
 
-    public void registrarDonacionExitosa(RegistroDonacion donacion) {
-        this.donacionesExitosas++;
-        this.totalDonacionesHistoricas++;
-        this.cantidadBienesDonados += donacion.getCantidadBienes();
-
-        if (donacion.getIdEntidadBeneficiaria() != null) {
-            this.organizacionesUnicasAyudadas.add(donacion.getIdEntidadBeneficiaria());
-        }
-
-        if (donacion.getCantidadBienes() > this.maxBienesEnUnaDonacion) {
-            this.maxBienesEnUnaDonacion = donacion.getCantidadBienes();
-        }
-
-        if (donacion.getCategorias() != null && !donacion.getCategorias().isEmpty()) {
-            this.categoriasUnicasDonadas.addAll(donacion.getCategorias());
-        }
-
-        historialDonacionesPorMes.put(donacion.getMesDonacion(), historialDonacionesPorMes.getOrDefault(donacion.getMesDonacion(), 0) + 1);
-
-        actualizarRacha(donacion.getMesDonacion());
+    public int totalDonacionesHistoricas() {
+        return this.registrosDonacion.size();
     }
 
-    private void actualizarRacha(YearMonth mesActual) {
-        if (ultimoMesDonacion == null || ultimoMesDonacion.plusMonths(1).equals(mesActual)) {
-            // Aumenta racha si es el primer mes o es un mes exactamente posterior
-            if (ultimoMesDonacion != null && !ultimoMesDonacion.equals(mesActual)) {
-                this.mesesConsecutivosDonando++;
-            } else if (ultimoMesDonacion == null) {
-                this.mesesConsecutivosDonando = 1;
+    public void registrarDonacion(RegistroDonacion donacion) {
+        // Buscar si ya existe un registro con el mismo idDonacion
+        for (int i = 0; i < registrosDonacion.size(); i++) {
+            if (registrosDonacion.get(i).getIdDonacion().equals(donacion.getIdDonacion())) {
+                registrosDonacion.set(i, donacion);
+                return;
             }
-        } else if (mesActual.isAfter(ultimoMesDonacion.plusMonths(1))) {
-            // Perdió la racha
-            this.mesesConsecutivosDonando = 1;
         }
-        this.ultimoMesDonacion = mesActual;
+        this.registrosDonacion.add(donacion);
     }
 
-    public void registrarMisionCompletada(YearMonth mes) {
-        if (mes != null) {
-            misionesCompletadasPorMes.put(mes, misionesCompletadasPorMes.getOrDefault(mes, 0) + 1);
-        }
+    public void registrarMisionCompletada(Mision mision, YearMonth mesCompletado) {
+        this.misionesCompletadas.put(mision, mesCompletado);
     }
 
-    public int getMisionesCompletadasEn(YearMonth mes) {
-        return misionesCompletadasPorMes.getOrDefault(mes, 0);
+    public int rachaDeMeses() {
+        // Caso 0: No hay donaciones
+        if (registrosDonacion.isEmpty()) {
+            return 0;
+        }
+
+        List<YearMonth> mesesDonando = registrosDonacion.stream()
+                .map(RegistroDonacion::getMesDonacion)
+                .distinct()
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
+
+        // Caso A: Si el mes más reciente no es el actual, la racha está rota
+        if (!mesesDonando.get(0).equals(YearMonth.now())) {
+            return 0;
+        }
+
+        // Caso B: El mes actual si hubo donacion
+        int mesesConsecutivos = 1;
+
+        for (int i = 0; i < mesesDonando.size() - 1; i++) {
+            YearMonth mesIterado = mesesDonando.get(i);
+            YearMonth mesSiguiente = mesesDonando.get(i + 1);
+
+            if (mesIterado.minusMonths(1).equals(mesSiguiente)) {
+                mesesConsecutivos++;
+            } else {
+                break;
+            }
+        }
+
+        return mesesConsecutivos;
+    }
+
+    public int totalBienesDonados() {
+        return this.registrosDonacion.stream()
+                .mapToInt(RegistroDonacion::getCantidadBienes)
+                .sum();
+    }
+
+    public int totalDonacionesExitosas() {
+        return (int) this.registrosDonacion.stream()
+                .filter(RegistroDonacion::esExitosa)
+                .count();
+    }
+
+    public int maxBienesPorDonacion() {
+        return this.registrosDonacion.stream()
+                .mapToInt(RegistroDonacion::getCantidadBienes).max().orElse(0);
+    }
+
+    public Set<String> categoriasDonadas() {
+        return this.registrosDonacion.stream()
+                .map(RegistroDonacion::getCategorias)
+                .filter(Objects::nonNull)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<UUID> organizacionesBeneficiadas() {
+        return registrosDonacion.stream()
+                .map(RegistroDonacion::getIdEntidadBeneficiaria)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    public HashMap<YearMonth, Integer> historialDonacionesPorMes() {
+        HashMap<YearMonth, Integer> donacionesPorMes = new HashMap<>();
+        for (RegistroDonacion donacion : registrosDonacion) {
+            donacionesPorMes.merge(donacion.getMesDonacion(), 1, Integer::sum);
+        }
+        return donacionesPorMes;
+    }
+
+    public YearMonth ultimoMesDonacion() {
+        return this.registrosDonacion.stream()
+                .map(RegistroDonacion::getMesDonacion)
+                .max(Comparator.naturalOrder()).orElse(null);
+    }
+
+    public Map<YearMonth, List<Mision>> misionesCompletadasPorMes() {
+        return misionesCompletadas.entrySet().stream()
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getValue,
+                        Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
+    }
+
+    public int totalMisionesCompletadasEn(YearMonth mes) {
+        return (int) this.misionesCompletadasPorMes().getOrDefault(mes, Collections.emptyList()).size();
     }
 }
