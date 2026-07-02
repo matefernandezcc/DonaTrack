@@ -13,5 +13,6 @@ public interface IncentivoClient {
     @PostMapping("/donantes/{id}/actividad")
     void registrarActividadDonacionExitosa(@PathVariable("id") UUID id, @RequestBody ActividadDonacionDTO actividad);
 
+    @PostMapping("/entidades/{id}/actividad")
     void registrarActividadDonacionEnDeposito(@PathVariable("id") UUID id, @RequestBody ActividadDonacionDTO actividad);
 }
