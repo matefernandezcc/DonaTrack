@@ -310,3 +310,4 @@ RecepcionDonacion --> Administrador
 Beneficiario "1" *--- "0..*" Necesidad : "declara"
 Necesidad "*" ---> "1" Subcategoria : "demanda"
 Necesidad "1" o-- "0..*" Donacion : "tiene"
+@enduml
