@@ -52,10 +52,12 @@ package "Servicio de Incentivos" {
     }
 
     class RegistroDonacion {
+        - idDonacion : UUID
         - cantidadBienes: int
         - categorias: Set<String>
         - idEntidadBeneficiaria: UUID
         - mesDonacion: YearMonth
+        + esExitosa() : boolean
     }
 
     class Mision {
