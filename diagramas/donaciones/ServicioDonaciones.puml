@@ -17,7 +17,7 @@ package "Servicio de Donaciones" {
 
         DocumentoIdentidad --> TipoDocumento
 
-        enum TipoPersonaJuridica {
+        enum TipoJuridica {
             GUBERNAMENTAL
             ONG
             EMPRESA
@@ -37,11 +37,11 @@ package "Servicio de Donaciones" {
             - direccion: Direccion
             - documento: DocumentoIdentidad
             - roles: List<Rol>
-            + agregarRol(Rol r)
-            + validarRol(Rol r)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + setDocumento(DocumentoIdentidad documento)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            + agregarRol(r: Rol): boolean
+            # {abstract} validarRol(r: Rol): boolean
+            + validar(validador: PersonaValidator): boolean
+            + setDocumento(documento: DocumentoIdentidad): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         class Contacto {
@@ -79,9 +79,8 @@ package "Servicio de Donaciones" {
             - nombre: String
             - apellido: String
             - edad: int
-            + validarRol(r: Rol)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            # validarRol(r: Rol): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         note top of PersonaHumana
@@ -94,13 +93,12 @@ package "Servicio de Donaciones" {
 
         class PersonaJuridica extends Persona {
             - razonSocial: String
-            - tipo: TipoPersonaJuridica
+            - tipo: TipoJuridica
             - representantes: List<Representante>
             - rubro: String
-            + agregarRepresentante(Representante r)
-            + validarRol(Rol r)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            + agregarRepresentante(r: Representante)
+            # validarRol(r: Rol): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         note top of PersonaJuridica
@@ -118,22 +116,26 @@ package "Servicio de Donaciones" {
         Persona "1" *-- "1" Contacto : "tiene"
         Contacto --> MedioContacto : "define"
         Persona --> DocumentoIdentidad : "tiene"
-        PersonaJuridica --> TipoPersonaJuridica : "se clasifica en"
+        PersonaJuridica --> TipoJuridica : "se clasifica en"
     }
 
     package "Gestion de Roles" {
         abstract class Rol {
+            - id: UUID
             - fechaAlta: LocalDate
+            + {abstract} esValidoParaHumana(): boolean
+            + {abstract} esValidoParaJuridica(): boolean
         }
 
         class Donante extends Rol {
             - donacionesRealizadas: List<Donacion>
             - historialRecepciones: List<RecepcionDonacion>
-            + agregarDonacion(Donacion d)
-            + agregarRecepcion(RecepcionDonacion r)
-            + consultarEstadoDonacion(Donacion d)
+            + agregarDonacion(d: Donacion)
+            + agregarRecepcion(r: RecepcionDonacion)
+            + consultarEstadoDonacion(d: Donacion): EstadoDonacion
+            + consultarEstadoTodasLasDonaciones(donacionesRealizadas: List<Donacion>): List<EstadoDonacion>
             + filtrarDonaciones(estado: EstadoDonacion, categoria: String)
-            + UbicacionCamion()
+            + verUbicacionCamion()
         }
 
         class Representante extends Rol {
@@ -144,23 +146,21 @@ package "Servicio de Donaciones" {
         class Beneficiario extends Rol {
             - donacionesAsignadas: List<Donacion>
             - necesidadesDeclaradas: List<Necesidad>
-            - correoRepresentante: String
             + registrarNecesidad(n: Necesidad)
-            + confirmarRecepcion(d: Donacion, fotos: List<String>)
-            + EstadoDonaciones()
-            + UbicacionCamion()
+            + confirmarRecepcion(d: Donacion, fotosComprobante: List<Foto>): boolean
+            + verEstadoDonaciones(donacionesAsignadas: List<Donacion>): List<EstadoDonacion>
+            + verUbicacionCamion()
         }
 
         class Administrador extends Rol {
-            - estrategiaAsignacion: AsignacionStrategy
+            - idDepositoAsignado: UUID
+            - camionesIds: List<UUID>
             - estrategiaImportador: ImportadorStrategy
-            + importarDonantesMasivos(String rutaArchivo)
-            + obtenerRecomendacionAsignacion(List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas)
-            + asociarDonacion(d: Donacion, p: Persona)
-            + actualizarDonacionesVencidas()
-            + asignarDonacionFinal(d: Donacion, e: Beneficiario)
+            + importarDonantesMasivos(rutaArchivo: String): boolean
+            + asociarDonacion(d: Donacion, donante: Donante)
+            + asignarDonacionFinal(d: Donacion, b: Beneficiario)
             + administrarCamiones()
-            + RankingMensual()
+            + verRankingMensual()
         }
 
         class CorreoRegistro {
@@ -210,10 +210,19 @@ package "Servicio de Donaciones" {
 
         class Donacion {
             - id: UUID
-            - fechaCreacion: Date
             - estado: EstadoDonacion
             - bienes: List<Bien>
-            - categoria: Categoria
+            - subCategoria: Subcategoria
+            - historial: List<HistorialEstado>
+            - fechaVencimiento: LocalDate
+            - entidadAsignada: Beneficiario
+            - fotos: List<Foto>
+            + agregarBien(b: Bien)
+            + registrarCambioEstado(nuevoRegistro: HistorialEstado)
+            + cambiarEstado(nuevoEstado: EstadoDonacion, observacion: String, usuario: Administrador)
+            + asignar(beneficiario: Beneficiario)
+            + addFoto(foto: Foto)
+            + getCategoriasString(): List<String>
         }
 
         enum EstadoDonacion {
@@ -311,5 +320,4 @@ package "Servicio de Donaciones" {
     Necesidad "*" ---> "1" Subcategoria : "demanda"
     Necesidad "1" o-- "0..*" Donacion : "tiene"
 }
-
 @enduml

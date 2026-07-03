@@ -54,17 +54,6 @@ package "Servicio de Logistica" {
     class Parada {
       - orden: Integer
     }
-
-    class Direccion <<Value Object>> {
-      - calle: String
-      - altura: String
-      - localidad: String
-    }
-
-    class Coordenada <<Value Object>> {
-      - latitud: Double
-      - longitud: Double
-    }
   }
 
   package "Gestion Entregas" {
@@ -97,6 +86,17 @@ package "Servicio de Logistica" {
       - fotos: List<String>
       - camionPatente: String
     }
+  }
+
+  class Direccion <<Value Object>> {
+    - calle: String
+    - altura: String
+    - localidad: String
+  }
+
+  class Coordenada <<Value Object>> {
+    - latitud: Double
+    - longitud: Double
   }
 
   ' Relaciones con multiplicidades estrictas

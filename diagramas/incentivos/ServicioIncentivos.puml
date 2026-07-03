@@ -29,7 +29,7 @@ package "Servicio de Incentivos" {
         - misionActual: Mision
         - metricas: MetricasDonante
         + cargarMisionesDeCategoriaActual()
-        + registrarDonacionExitosa(donacion: RegistroDonacion)
+        + registrarDonacion(donacion: RegistroDonacion)
         + evaluarMisiones(mesActual: YearMonth)
     }
 
@@ -39,7 +39,7 @@ package "Servicio de Incentivos" {
         - misionesCompletadas: Map<Mision, YearMonth>
         + totalDonacionesHistorias() : int
         + registrarDonacion(donacion: RegistroDonacion) : void
-        + registrarMisionCompletada(mes: YearMonth) : void
+        + registrarMisionCompletada(mision: Mision, mes: YearMonth) : void
         + rachaDeMeses() : int
         + totalBienesDonados() : int
         + totalDonacionesExitosas() : int
@@ -73,10 +73,10 @@ package "Servicio de Incentivos" {
     }
 
     class Insignia {
+        - id: UUID
         - nombre: String
         - descripcion: String
-        - fechaObtencion: LocalDate
-        - visiblePublicamente: boolean
+        - urlImagen: String
     }
 
     class InsigniaObtenidaEvent {

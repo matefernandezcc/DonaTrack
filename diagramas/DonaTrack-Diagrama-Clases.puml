@@ -2,8 +2,9 @@
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 
-package ConexionPorFuera{
-    class ConeccionIngresoInicial{}
+package "Comunicacion Inter-Servicios" {
+    class APIGateway <<REST>>
+    class MessageBroker <<RabbitMQ>>
 }
 
 package "Servicio de Donaciones" {
@@ -21,7 +22,7 @@ package "Servicio de Donaciones" {
 
         DocumentoIdentidad --> TipoDocumento
 
-        enum TipoPersonaJuridica {
+        enum TipoJuridica {
             GUBERNAMENTAL
             ONG
             EMPRESA
@@ -41,11 +42,11 @@ package "Servicio de Donaciones" {
             - direccion: Direccion
             - documento: DocumentoIdentidad
             - roles: List<Rol>
-            + agregarRol(Rol r)
-            + validarRol(Rol r)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + setDocumento(DocumentoIdentidad documento)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            + agregarRol(r: Rol): boolean
+            # {abstract} validarRol(r: Rol): boolean
+            + validar(validador: PersonaValidator): boolean
+            + setDocumento(documento: DocumentoIdentidad): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         class Contacto {
@@ -83,9 +84,8 @@ package "Servicio de Donaciones" {
             - nombre: String
             - apellido: String
             - edad: int
-            + validarRol(r: Rol)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            # validarRol(r: Rol): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         note top of PersonaHumana
@@ -98,13 +98,12 @@ package "Servicio de Donaciones" {
 
         class PersonaJuridica extends Persona {
             - razonSocial: String
-            - tipo: TipoPersonaJuridica
+            - tipo: TipoJuridica
             - representantes: List<Representante>
             - rubro: String
-            + agregarRepresentante(Representante r)
-            + validarRol(Rol r)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            + agregarRepresentante(r: Representante)
+            # validarRol(r: Rol): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         note top of PersonaJuridica
@@ -122,22 +121,26 @@ package "Servicio de Donaciones" {
         Persona "1" *-- "1" Contacto : "tiene"
         Contacto --> MedioContacto : "define"
         Persona --> DocumentoIdentidad : "tiene"
-        PersonaJuridica --> TipoPersonaJuridica : "se clasifica en"
+        PersonaJuridica --> TipoJuridica : "se clasifica en"
     }
 
     package "Gestion de Roles" {
         abstract class Rol {
+            - id: UUID
             - fechaAlta: LocalDate
+            + {abstract} esValidoParaHumana(): boolean
+            + {abstract} esValidoParaJuridica(): boolean
         }
 
         class Donante extends Rol {
             - donacionesRealizadas: List<Donacion>
             - historialRecepciones: List<RecepcionDonacion>
-            + agregarDonacion(Donacion d)
-            + agregarRecepcion(RecepcionDonacion r)
-            + consultarEstadoDonacion(Donacion d)
+            + agregarDonacion(d: Donacion)
+            + agregarRecepcion(r: RecepcionDonacion)
+            + consultarEstadoDonacion(d: Donacion): EstadoDonacion
+            + consultarEstadoTodasLasDonaciones(donacionesRealizadas: List<Donacion>): List<EstadoDonacion>
             + filtrarDonaciones(estado: EstadoDonacion, categoria: String)
-            + UbicacionCamion()
+            + verUbicacionCamion()
         }
 
         class Representante extends Rol {
@@ -148,23 +151,21 @@ package "Servicio de Donaciones" {
         class Beneficiario extends Rol {
             - donacionesAsignadas: List<Donacion>
             - necesidadesDeclaradas: List<Necesidad>
-            - correoRepresentante: String
             + registrarNecesidad(n: Necesidad)
-            + confirmarRecepcion(d: Donacion, fotos: List<String>)
-            + EstadoDonaciones()
-            + UbicacionCamion()
+            + confirmarRecepcion(d: Donacion, fotosComprobante: List<Foto>): boolean
+            + verEstadoDonaciones(donacionesAsignadas: List<Donacion>): List<EstadoDonacion>
+            + verUbicacionCamion()
         }
 
         class Administrador extends Rol {
-            - estrategiaAsignacion: AsignacionStrategy
+            - idDepositoAsignado: UUID
+            - camionesIds: List<UUID>
             - estrategiaImportador: ImportadorStrategy
-            + importarDonantesMasivos(String rutaArchivo)
-            + obtenerRecomendacionAsignacion(List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas)
-            + asociarDonacion(d: Donacion, p: Persona)
-            + actualizarDonacionesVencidas()
-            + asignarDonacionFinal(d: Donacion, e: Beneficiario)
+            + importarDonantesMasivos(rutaArchivo: String): boolean
+            + asociarDonacion(d: Donacion, donante: Donante)
+            + asignarDonacionFinal(d: Donacion, b: Beneficiario)
             + administrarCamiones()
-            + RankingMensual()
+            + verRankingMensual()
         }
 
         class CorreoRegistro {
@@ -214,10 +215,19 @@ package "Servicio de Donaciones" {
 
         class Donacion {
             - id: UUID
-            - fechaCreacion: Date
             - estado: EstadoDonacion
             - bienes: List<Bien>
-            - categoria: Categoria
+            - subCategoria: Subcategoria
+            - historial: List<HistorialEstado>
+            - fechaVencimiento: LocalDate
+            - entidadAsignada: Beneficiario
+            - fotos: List<Foto>
+            + agregarBien(b: Bien)
+            + registrarCambioEstado(nuevoRegistro: HistorialEstado)
+            + cambiarEstado(nuevoEstado: EstadoDonacion, observacion: String, usuario: Administrador)
+            + asignar(beneficiario: Beneficiario)
+            + addFoto(foto: Foto)
+            + getCategoriasString(): List<String>
         }
 
         enum EstadoDonacion {
@@ -343,7 +353,7 @@ package "Servicio de Incentivos" {
         - misionActual: Mision
         - metricas: MetricasDonante
         + cargarMisionesDeCategoriaActual()
-        + registrarDonacionExitosa(donacion: RegistroDonacion)
+        + registrarDonacion(donacion: RegistroDonacion)
         + evaluarMisiones(mesActual: YearMonth)
     }
 
@@ -353,7 +363,7 @@ package "Servicio de Incentivos" {
         - misionesCompletadas: Map<Mision, YearMonth>
         + totalDonacionesHistorias() : int
         + registrarDonacion(donacion: RegistroDonacion) : void
-        + registrarMisionCompletada(mes: YearMonth) : void
+        + registrarMisionCompletada(mision: Mision, mes: YearMonth) : void
         + rachaDeMeses() : int
         + totalBienesDonados() : int
         + totalDonacionesExitosas() : int
@@ -387,10 +397,10 @@ package "Servicio de Incentivos" {
     }
 
     class Insignia {
+        - id: UUID
         - nombre: String
         - descripcion: String
-        - fechaObtencion: LocalDate
-        - visiblePublicamente: boolean
+        - urlImagen: String
     }
 
     class InsigniaObtenidaEvent {
@@ -451,6 +461,7 @@ package "Servicio de Notificaciones" {
         DONACION_ASIGNADA_DONANTE
         MISION_CUMPLIDA
         CAMBIO_CATEGORIA
+        INICIO_RUTA_LOGISTICA
     }
 
     class Evento {
@@ -492,124 +503,139 @@ package "Servicio de Notificaciones" {
         + enviar(notificacion: Notificacion)
     }
 
-    ' Relaciones
-    NotificadorService --> NotificacionAdapter : utiliza >
-    NotificadorService ..> Notificacion : envía >
-
-    NotificacionFactory ..> Notificacion : crea >
-
-    Notificacion --> Evento : posee >
-    Evento --> TipoEvento : posee >
+    ' Relaciones de Aplicacion y Adaptadores
+    NotificadorService "1" *-- "0..*" NotificacionAdapter : "utiliza >"
+    NotificadorService ..> Notificacion : "envía >"
+    NotificacionFactory ..> Notificacion : "crea >"
+    Notificacion --> Evento : "posee >"
+    Evento --> TipoEvento : "posee >"
 }
 
 package "Servicio de Logistica" {
-
-    enum EstadoEntrega {
-        PENDIENTE
-        EN_TRASLADO
-        ENTREGADA
-        NO_RECIBIDA
-    }
-
+  package "Gestion Planificacion" {
     enum EstadoPlanificacion {
-        PENDIENTE
-        RECIBIDA
-        PROCESADA
-    }
-
-    class Camion {
-        - patente: String
-        - capacidadVolumen: Double
-        - altura: Double
-        - capacidadCarga: Double
-    }
-
-    class Chofer {
-        - legajo: String
-        - nombre: String
+      PENDIENTE
+      RECIBIDA
+      PROCESADA
     }
 
     class SolicitudPlanificacion {
-        - id: UUID
-        - fechaSolicitud: LocalDateTime
-        - estado: EstadoPlanificacion
-        - idsDonaciones: List<UUID>
-        + procesarCallback(rutas: List<RutaDeReparto>)
+      - id: UUID
+      - fechaSolicitud: LocalDateTime
+      - estado: EstadoPlanificacion
+      - idsDonaciones: List<UUID>
+      + procesarCallback(rutas: List<RutaDeReparto>)
     }
 
+    note right of SolicitudPlanificacion
+      El proveedor externo procesa
+      max. 100 donaciones por lote.
+      Notifica resultado vía callback URL.
+    end note
+
     class ItemPlanificacion <<Value Object>> {
-        - idDonacionOriginal: UUID
-        - pesoEstimado: Double
-        - volumenEstimado: Double
+      - idDonacionOriginal: UUID
+      - pesoEstimado: Double
+      - volumenEstimado: Double
+    }
+  }
+
+  package "Gestion Reparto" {
+    class Camion {
+      - patente: String
+      - capacidadVolumen: Double
+      - altura: Double
+      - capacidadCarga: Double
+    }
+
+    class Chofer {
+      - legajo: String
+      - nombre: String
     }
 
     class RutaDeReparto {
-        - id: UUID
-        - fechaOperativa: LocalDate
-        - iniciada: Boolean
-        + iniciarRuta()
+      - id: UUID
+      - fechaOperativa: LocalDate
+      - iniciada: Boolean
+      + iniciarRuta()
     }
 
     class Parada {
-        - orden: Integer
+      - orden: Integer
     }
+  }
 
-    class Direccion <<Value Object>> {
-        - calle: String
-        - altura: String
-        - localidad: String
-    }
-
-    class Coordenada <<Value Object>> {
-        - latitud: Double
-        - longitud: Double
+  package "Gestion Entregas" {
+    enum EstadoEntrega {
+      PENDIENTE
+      EN_TRASLADO
+      ENTREGADA
+      NO_RECIBIDA
     }
 
     class Entrega {
-        - idEntrega: UUID
-        - estado: EstadoEntrega
-        - pesoEstimado: Double
-        - volumenEstimado: Double
-        + marcarEnTraslado()
-        + confirmarRecepcion(fotos: List<String>)
-        + marcarNoRecibida()
-        + volverAPendiente()
+      - idEntrega: UUID
+      - estado: EstadoEntrega
+      - pesoEstimado: Double
+      - volumenEstimado: Double
+      + marcarEnTraslado()
+      + confirmarRecepcion(fotos: List<String>)
+      + marcarNoRecibida()
+      + volverAPendiente()
     }
-
-    class ComprobanteRecepcion {
-        - fechaHora: LocalDateTime
-        - fotos: List<String>
-        - camionPatente: String
-    }
-
-    ' Relaciones con multiplicidades estrictas
-    SolicitudPlanificacion "1" --> "0..*" RutaDeReparto : genera >
-    RutaDeReparto "1" --> "1" Camion : asignada a >
-    RutaDeReparto "1" --> "1" Chofer : conducida por >
-    RutaDeReparto "1" *-- "1..*" Parada : compuesta por >
-
-    Parada "1" *-- "1" Direccion : se ubica en >
-    Parada "1" *-- "1" Coordenada : geolocalizada en >
-    Parada "1" *-- "1..*" Entrega : contiene >
-
-    Entrega "1" --> "1" EstadoEntrega : se encuentra en >
-    Entrega "1" *-- "0..1" ComprobanteRecepcion : genera al entregar >
-    SolicitudPlanificacion "1" --> "1" EstadoPlanificacion : se encuentra en >
-
-    SolicitudPlanificacion "1" *-- "1..100" ItemPlanificacion : contiene >
-    ItemPlanificacion "1" --> "1" Direccion : destino >
 
     note right of Entrega
-        idDonacionOriginal referencia
-        al Servicio de Donaciones
-        (contexto externo)
+      idDonacionOriginal referencia
+      al Servicio de Donaciones
+      (contexto externo)
     end note
 
-    note right of SolicitudPlanificacion
-        El proveedor externo procesa
-        max. 100 donaciones por lote.
-        Notifica resultado vía callback URL.
-    end note
+    class ComprobanteRecepcion {
+      - fechaHora: LocalDateTime
+      - fotos: List<String>
+      - camionPatente: String
+    }
+  }
+
+  class Direccion <<Value Object>> {
+    - calle: String
+    - altura: String
+    - localidad: String
+  }
+
+  class Coordenada <<Value Object>> {
+    - latitud: Double
+    - longitud: Double
+  }
+
+  ' Relaciones con multiplicidades estrictas
+  SolicitudPlanificacion "1" --> "0..*" RutaDeReparto : genera >
+  RutaDeReparto "1" --> "1" Camion : asignada a >
+  RutaDeReparto "1" --> "1" Chofer : conducida por >
+  RutaDeReparto "1" *-- "1..*" Parada : compuesta por >
+
+  Parada "1" *-- "1" Direccion : se ubica en >
+  Parada "1" *-- "1" Coordenada : geolocalizada en >
+  Parada "1" *-- "1..*" Entrega : contiene >
+
+  Entrega "1" --> "1" EstadoEntrega : se encuentra en >
+  Entrega "1" *-- "0..1" ComprobanteRecepcion : genera al entregar >
+  SolicitudPlanificacion "1" --> "1" EstadoPlanificacion : se encuentra en >
+
+  SolicitudPlanificacion "1" *-- "1..100" ItemPlanificacion : contiene >
+  ItemPlanificacion "1" --> "1" Direccion : destino >
 }
+
+' ==========================================
+' Conexiones entre Servicios (Infraestructura)
+' ==========================================
+"Servicio de Donaciones" ..> MessageBroker : Publica/Consume
+"Servicio de Logistica" ..> MessageBroker : Publica/Consume
+"Servicio de Incentivos" ..> MessageBroker : Consume
+"Servicio de Notificaciones" ..> MessageBroker : Consume
+
+"Servicio de Donaciones" ..> APIGateway : API REST
+"Servicio de Logistica" ..> APIGateway : API REST
+"Servicio de Incentivos" ..> APIGateway : API REST
 
 @enduml
