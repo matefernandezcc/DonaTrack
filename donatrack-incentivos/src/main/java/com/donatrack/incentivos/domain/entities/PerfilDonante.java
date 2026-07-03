@@ -56,8 +56,20 @@ public class PerfilDonante {
     }
 
     private void avanzarCategoria() {
-        this.categoria = this.categoria.siguienteNivel();
+        this.categoria = calcularSiguienteCategoria(this.categoria);
         cargarMisionesDeCategoriaActual();
+    }
+
+    private CategoriaDonante calcularSiguienteCategoria(CategoriaDonante actual) {
+        switch (actual) {
+            case COLABORADOR:
+                return CategoriaDonante.SOSTENEDOR;
+            case SOSTENEDOR:
+            case TRANSFORMADOR:
+                return CategoriaDonante.TRANSFORMADOR;
+            default:
+                return actual;
+        }
     }
 
     private void agregarInsignia(Insignia insignia) {

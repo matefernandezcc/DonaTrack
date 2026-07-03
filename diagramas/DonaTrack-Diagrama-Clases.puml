@@ -332,7 +332,6 @@ package "Servicio de Incentivos" {
         COLABORADOR
         SOSTENEDOR
         TRANSFORMADOR
-        + {abstract} siguienteNivel(): CategoriaDonante
     }
 
     enum TipoMetricaMision {
@@ -340,8 +339,6 @@ package "Servicio de Incentivos" {
         MAX_BIENES
         MESES_CONSECUTIVOS
         CATEGORIAS_DISTINTAS
-        - unidad: String
-        + {abstract} extraerValor(perfil: PerfilDonante): int
     }
 
 
@@ -355,6 +352,8 @@ package "Servicio de Incentivos" {
         + cargarMisionesDeCategoriaActual()
         + registrarDonacion(donacion: RegistroDonacion)
         + evaluarMisiones(mesActual: YearMonth)
+        - avanzarCategoria()
+        - calcularSiguienteCategoria(actual: CategoriaDonante): CategoriaDonante
     }
 
     class MetricasDonante {
@@ -394,6 +393,7 @@ package "Servicio de Incentivos" {
         + evaluar(perfil: PerfilDonante): boolean
         + getProgresoActual(perfil: PerfilDonante): String
         - extraerValor(perfil: PerfilDonante): int
+        - getUnidadMetrica(): String
     }
 
     class Insignia {
