@@ -1,8 +1,7 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence;
 
 import com.donatrack.logistica.application.ports.out.ItemPlanificacionRepositoryPort;
-import com.donatrack.logistica.domain.entities.ItemPlanificacion;
-//import org.springframework.stereotype.Repository;
+import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
 
 import java.util.ArrayList;
 import java.util.List;

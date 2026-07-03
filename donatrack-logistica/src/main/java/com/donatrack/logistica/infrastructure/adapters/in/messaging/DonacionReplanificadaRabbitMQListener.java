@@ -2,7 +2,7 @@ package com.donatrack.logistica.infrastructure.adapters.in.messaging;
 
 import com.donatrack.common.events.DonacionReplanificadaEvent;
 import com.donatrack.logistica.application.ports.out.EntregaRepositoryPort;
-import com.donatrack.logistica.domain.entities.Entrega;
+import com.donatrack.logistica.domain.entities.entregas.Entrega;
 import com.donatrack.logistica.infrastructure.config.RabbitMQConfig;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;

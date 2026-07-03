@@ -1,6 +1,9 @@
-package com.donatrack.logistica.domain.entities;
+package com.donatrack.logistica.domain.entities.planificacion;
 
 import java.util.UUID;
+
+import com.donatrack.logistica.domain.entities.reparto.Direccion;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

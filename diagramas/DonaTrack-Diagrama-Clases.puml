@@ -611,6 +611,5 @@ package "Servicio de Logistica" {
         Notifica resultado vía callback URL.
     end note
 }
+
 @enduml
-
-

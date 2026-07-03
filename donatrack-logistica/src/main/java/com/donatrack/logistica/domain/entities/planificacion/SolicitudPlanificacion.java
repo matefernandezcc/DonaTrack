@@ -1,8 +1,11 @@
-package com.donatrack.logistica.domain.entities;
+package com.donatrack.logistica.domain.entities.planificacion;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import com.donatrack.logistica.domain.entities.reparto.RutaDeReparto;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

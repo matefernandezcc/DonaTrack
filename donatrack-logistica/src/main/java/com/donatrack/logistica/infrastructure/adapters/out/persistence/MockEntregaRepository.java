@@ -1,7 +1,8 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence;
 
 import com.donatrack.logistica.application.ports.out.EntregaRepositoryPort;
-import com.donatrack.logistica.domain.entities.Entrega;
+import com.donatrack.logistica.domain.entities.entregas.Entrega;
+
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

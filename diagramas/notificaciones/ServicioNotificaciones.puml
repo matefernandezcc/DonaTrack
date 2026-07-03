@@ -16,6 +16,7 @@ package "Servicio de Notificaciones" {
         DONACION_ASIGNADA_DONANTE
         MISION_CUMPLIDA
         CAMBIO_CATEGORIA
+        INICIO_RUTA_LOGISTICA
     }
 
     class Evento {
@@ -57,13 +58,11 @@ package "Servicio de Notificaciones" {
         + enviar(notificacion: Notificacion)
     }
 
-    ' Relaciones
-    NotificadorService --> NotificacionAdapter : utiliza >
-    NotificadorService ..> Notificacion : envía >
-
-    NotificacionFactory ..> Notificacion : crea >
-
-    Notificacion --> Evento : posee >
-    Evento --> TipoEvento : posee >
+    ' Relaciones de Aplicacion y Adaptadores
+    NotificadorService "1" *-- "0..*" NotificacionAdapter : "utiliza >"
+    NotificadorService ..> Notificacion : "envía >"
+    NotificacionFactory ..> Notificacion : "crea >"
+    Notificacion --> Evento : "posee >"
+    Evento --> TipoEvento : "posee >"
 }
 @enduml

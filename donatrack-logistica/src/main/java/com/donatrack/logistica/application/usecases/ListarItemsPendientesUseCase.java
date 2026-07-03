@@ -2,7 +2,8 @@ package com.donatrack.logistica.application.usecases;
 
 import com.donatrack.logistica.application.ports.in.ListarItemsPendientesPort;
 import com.donatrack.logistica.application.ports.out.ItemPlanificacionRepositoryPort;
-import com.donatrack.logistica.domain.entities.ItemPlanificacion;
+import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;

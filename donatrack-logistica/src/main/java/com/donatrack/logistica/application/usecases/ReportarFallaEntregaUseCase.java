@@ -3,9 +3,10 @@ package com.donatrack.logistica.application.usecases;
 import com.donatrack.common.events.EntregaNoSatisfactoriaEvent;
 import com.donatrack.logistica.application.ports.out.EntregaRepositoryPort;
 import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepositoryPort;
-import com.donatrack.logistica.domain.entities.Entrega;
-import com.donatrack.logistica.domain.entities.Parada;
-import com.donatrack.logistica.domain.entities.RutaDeReparto;
+import com.donatrack.logistica.domain.entities.entregas.Entrega;
+import com.donatrack.logistica.domain.entities.reparto.Parada;
+import com.donatrack.logistica.domain.entities.reparto.RutaDeReparto;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 

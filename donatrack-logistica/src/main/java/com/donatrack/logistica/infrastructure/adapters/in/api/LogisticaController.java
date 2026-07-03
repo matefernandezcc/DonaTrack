@@ -1,7 +1,8 @@
 package com.donatrack.logistica.infrastructure.adapters.in.api;
 
 import com.donatrack.logistica.application.ports.in.ListarItemsPendientesPort;
-import com.donatrack.logistica.domain.entities.ItemPlanificacion;
+import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
