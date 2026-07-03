@@ -1,4 +1,4 @@
-@startuml ServicioNotificaciones.puml
+@startuml DonaTrack_ServicioNotificaciones_DiagramaClases
 skinparam classAttributeIconSize 0
 
 package "Servicio de Notificaciones" {
@@ -15,6 +15,10 @@ package "Servicio de Notificaciones" {
         DONACION_ASIGNADA_DONANTE
         MISION_CUMPLIDA
         CAMBIO_CATEGORIA
+        ' --- Agregados de la Entrega 3 ---
+        INICIO_RUTA_LOGISTICA
+        ENTREGA_EXITOSA
+        ENTREGA_NO_SATISFACTORIA
     }
 
     class Evento {
@@ -38,6 +42,7 @@ package "Servicio de Notificaciones" {
         - medio: String
         + Notificacion(destinatario: String, mensaje: String)
         + Notificacion(destinatario: String, mensaje: String, evento: Evento, medio: String)
+        + marcarComoCompletada()
     }
 
     interface NotificacionAdapter {

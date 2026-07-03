@@ -1,4 +1,4 @@
-@startuml ServicioDonaciones.puml
+@startuml DonaTrack_ServicioDonaciones_DiagramaClases
 skinparam classAttributeIconSize 0
 
 package "servicio de donaciones"{
@@ -87,8 +87,7 @@ package "servicio de donaciones"{
         **Regla de negocio:**
         Tira excepción de invalidez de 
         rol si el rol es Beneficiario 
-        (acepta solo Donante,
-        Representante o Administrador)
+        (acepta solo Donante o Representante)
         end note
 
         class PersonaJuridica extends Persona {
@@ -106,7 +105,7 @@ package "servicio de donaciones"{
         **Regla de negocio:**
         Tira excepción de 
         invalidez de rol si el rol es 
-        Representante o Administrador
+        Representante
         end note
 
         'relaciones
@@ -126,10 +125,8 @@ package "servicio de donaciones"{
         }
 
         class Donante extends Rol {
-            - donacionesRealizadas: List<Donacion>
-            - historialRecepciones: List<RecepcionDonacion>
-            + agregarDonacion(Donacion d)
-            + agregarRecepcion(RecepcionDonacion r)
+            - donacionesRealizadas: List<DonacionOriginal>
+            + agregarDonacion(DonacionOriginal d)
             + consultarEstadoDonacion(Donacion d)
             + filtrarDonaciones(estado: EstadoDonacion, categoria: String)
             + UbicacionCamion()
@@ -149,62 +146,75 @@ package "servicio de donaciones"{
             + EstadoDonaciones()
             + UbicacionCamion()
         }
+    }
 
-        class Administrador extends Rol {
-            - estrategiaAsignacion: AsignacionStrategy
-            - estrategiaImportador: ImportadorStrategy
-            + importarDonantesMasivos(String rutaArchivo)
-            + obtenerRecomendacionAsignacion(List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas)
-            + asociarDonacion(d: Donacion, p: Persona)
-            + actualizarDonacionesVencidas()
-            + asignarDonacionFinal(d: Donacion, e: Beneficiario)
-            + administrarCamiones()
-            + RankingMensual()
+ package "Algoritmos y Servicios de Dominio" {
+        ' --- SERVICIOS DE DOMINIO (Clases sin estado, solo lógica) ---
+        class AsignadorDonaciones <<Domain Service>> {
+            + ejecutarMatchmaking(donaciones: List<Donacion>, necesidades: List<Necesidad>): List<ResultadoMatch>
+        }
+        
+        
+        ' --- INTEGRACIÓN EXTERNA (Entrega 3) ---
+        interface NotificadorPort {
+            + notificar(destinatario: Contacto, mensaje: String, medio: MedioContacto)
         }
 
-        class CorreoRegistro {
-            - Destinatario: String
-            - mensaje: String
-            - fechaEnvio: Date
+        class GestorEventosLogistica <<Domain Service>> {
+            + procesarInicioRuta(idRuta: UUID, donacionesEnRuta: List<UUID>)
+            + procesarEntregaExitosa(idDonacion: UUID, comprobante: String)
+            + procesarEntregaFallida(idDonacion: UUID, motivo: String)
         }
 
-        interface AsignacionStrategy {
+        ' Relaciones de eventos
+        GestorEventosLogistica --> NotificadorPort : "usa para avisar >"
+        GestorEventosLogistica ..> Donacion : "actualiza estado de"
+        
+        class PersonaFactory <<Factory>> {
+            + {static} crearPersona(datosCrudos: Map<String, String>): Persona
+        }
+        
+        class MigradorDonantes <<Domain Service>> {
+            + procesarMigracion(archivo: Archivo): List<Persona>
+        }
+
+        ' --- INTERFACES DE ESTRATEGIA ---
+        interface AlgoritmoAsignacion {
             + recomendarNecesidades(donaciones, necesidades)
         }
 
-        class PorPrioridad
-        class PorCercania
-
+        class CompatibilidadSemantica implements AlgoritmoAsignacion
+        class PrioridadASubAtendidos implements AlgoritmoAsignacion
+        
         interface ImportadorStrategy {
             + importar(Archivo)
         }
 
-        class ImportadorCSV
+        class ImportadorCSV implements ImportadorStrategy
 
-        Administrador --> ImportadorStrategy
-        Administrador --> AsignacionStrategy
-        PorPrioridad ..up|> AsignacionStrategy
-        PorCercania ..up|> AsignacionStrategy
-        ImportadorCSV ..up|> ImportadorStrategy
-        Administrador --> CorreoRegistro : "genera"
+        ' --- RELACIONES QUE EXPLICAN EL FLUJO ---
+        MigradorDonantes ..> PersonaFactory : "invoca"
+        AsignadorDonaciones --> AlgoritmoAsignacion : "utiliza"
+        MigradorDonantes --> ImportadorStrategy : "utiliza"
     }
 
     package "Gestion de Ingreso y Segmentación" {
-        class RecepcionDonacion {
+        class DonacionOriginal {
             - id: UUID
+            - descripcionGeneral: String
             - fechaRecepcion: Date
             - donante: Donante
             - donacionesSegmentadas: List<Donacion>
-            - registradoPor: Administrador
+            - usuarioId: String
             + segmentarBienes(bienesBrutos)
         }
 
-        note left of RecepcionDonacion 
+        note left of DonacionOriginal 
         **Regla de negocio:**
-        Representa la "única carga" 
-        física en el depósito. A partir 
-        de los bienes, se generan las 
-        Donaciones independientes.
+        Representa la "donación original" o 
+        carga física única en el depósito. A partir 
+        de los bienes, genera de forma automatizada 
+        las Donaciones independientes segmentadas.
         end note
 
         class Donacion {
@@ -212,7 +222,7 @@ package "servicio de donaciones"{
             - fechaCreacion: Date
             - estado: EstadoDonacion
             - bienes: List<Bien>
-            - categoria: Categoria
+            - subcategoria: Subcategoria
         }
 
         enum EstadoDonacion {
@@ -230,7 +240,7 @@ package "servicio de donaciones"{
             - estado: EstadoDonacion
             - fecha: Date
             - observacion: String
-            - usuario: Administrador
+            - usuarioId: String
         }
 
         class Bien {
@@ -245,7 +255,6 @@ package "servicio de donaciones"{
         class Categoria {
             - nombre: String
             - descripcion: String
-            - subcategorias: List<Subcategoria>
             + agregarSubcategoria(Subcategoria)
         }
 
@@ -263,11 +272,12 @@ package "servicio de donaciones"{
 
         Bien --> Subcategoria
         Bien --> Foto
-        Categoria --> Subcategoria
+        Categoria "1" *-- "0..*" Subcategoria : "contiene"
         Donacion *-- HistorialEstado
+        Donacion --> Subcategoria : "corresponde a una única >"
         Donacion "1" *-- "1..*" Bien : "agrupa"
         Donacion --> EstadoDonacion : "se encuentra en"
-        RecepcionDonacion *-- Donacion : segmenta >
+        DonacionOriginal "1" *-- "0..*" Donacion : "segmenta en >"
     }
 
     package "Gestion de Necesidades" {
@@ -276,38 +286,57 @@ package "servicio de donaciones"{
             SATISFECHA
         }
 
+        enum TipoPeriodo {
+            SEMANAL
+            MENSUAL
+        }
+
         abstract class Necesidad {
-            - descripcion: String
-            - estado: EstadoNecesidad
-            - subcategoriaRequerida: Subcategoria
             - id: UUID
+            - descripcion: String
             - fechaSolicitud: Date
+            - subcategoriaRequerida: Subcategoria
+        }
+
+        class NecesidadExtraordinaria extends Necesidad {
+            - cantidadRequerida: double
+            - estado: EstadoNecesidad
+            - donacionesRecibidas: List<Donacion>
+            + acumularDonacionesParciales(d: Donacion)
             + estaCubierta(): Boolean
         }
 
         class NecesidadRecurrente extends Necesidad {
             - cantidadObjetivo: double
-            - periodo: String
+            - activa: Boolean
+            - historialPeriodos: List<PeriodoNecesidad>
+            - periodoActual: PeriodoNecesidad
+            + cerrarPeriodoYCrearSiguiente(): PeriodoNecesidad
+            + darDeBaja()
         }
 
-        class NecesidadExtraordinaria extends Necesidad {
-            - cantidadRequerida: double
-            + acumularDonacionesParciales()
+        class PeriodoNecesidad {
+            - id: UUID
+            - fechaInicio: LocalDate
+            - fechaFin: LocalDate
+            - estado: EstadoNecesidad
+            - donacionesAsignadas: List<Donacion>
+            + asignarDonacion(d: Donacion, objetivo: double)
+            + estaCubierta(objetivo: double): Boolean
         }
-
-        Necesidad --> EstadoNecesidad : "se encuentra en"
+        
+        NecesidadRecurrente --> TipoPeriodo : "frecuencia de"
+        NecesidadRecurrente "1" *-- "0..*" PeriodoNecesidad : "gestiona"
+        PeriodoNecesidad --> EstadoNecesidad : "se encuentra en"
+        NecesidadExtraordinaria --> EstadoNecesidad : "se encuentra en"
     }
 }
 
 ' Gestión de Personas y Roles
 Persona "1" *--down--- "1..*" Rol : "asume"
 
-' Conexiones de Dominio (Roles y Donaciones)
-Beneficiario "1" ---> "0..*" Donacion : "tiene asignadas"
-Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
-Donacion -up-> Administrador : "es gestionada por"
-RecepcionDonacion --> Administrador
+' Conexiones de Dominio (Roles, Necesidades y Donaciones)
+Donante "1" -- "0..*" DonacionOriginal
 Beneficiario "1" *--- "0..*" Necesidad : "declara"
 Necesidad "*" ---> "1" Subcategoria : "demanda"
-Necesidad "1" o-- "0..*" Donacion : "tiene"
 @enduml

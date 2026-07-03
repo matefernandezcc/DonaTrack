@@ -1,4 +1,4 @@
-@startuml ServicioLogistica.puml
+@startuml DonaTrack_ServicioLogistica_DiagramaClases
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 
@@ -98,9 +98,9 @@ SolicitudPlanificacion "1" *-- "1..100" ItemPlanificacion : contiene >
 ItemPlanificacion "1" --> "1" Direccion : destino >
 
 note right of Entrega
-  idDonacionOriginal referencia
+  idEntrega referencia
   al Servicio de Donaciones
-  (contexto externo)
+  (externo)
 end note
 
 note right of SolicitudPlanificacion
