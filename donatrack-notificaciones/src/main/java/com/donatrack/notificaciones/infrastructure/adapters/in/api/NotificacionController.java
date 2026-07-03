@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/notificaciones")
+@RequestMapping("/api")
 public class NotificacionController {
 
     private final NotificadorService notificadorService;
@@ -16,7 +16,7 @@ public class NotificacionController {
         this.notificadorService = notificadorService;
     }
 
-    @PostMapping("/enviar")
+    @PostMapping("/mensajes")
     public ResponseEntity<Void> enviarNotificacion(@RequestBody NotificacionRequest request) {
         notificadorService.enviarNotificacion(request.destinatario(), request.mensaje(), request.medio());
         return ResponseEntity.ok().build();
