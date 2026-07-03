@@ -1,0 +1,24 @@
+info:
+  name: Crear Camion
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{logisticaUrl}}/api/camiones"
+  body:
+    type: json
+    data: |-
+      {
+        "patente": "EE555FF",
+        "capacidadCarga": 1500.0,
+        "capacidadVolumen": 3.5,
+        "autonomiaEstimada": 650.0
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

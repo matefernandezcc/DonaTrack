@@ -1,18 +1,18 @@
 info:
-  name: Crear Beneficiario
+  name: Enviar Mensaje
   type: http
   seq: 1
 
 http:
   method: POST
-  url: "{{donacionesUrl}}/api/beneficiarios"
+  url: "{{notificacionesUrl}}/api/mensajes"
   body:
     type: json
     data: |-
       {
-        "correoRepresentante": "representante@ong.org",
-        "donacionesAsignadas": [],
-        "necesidadesDeclaradas": []
+        "destinatario": "donante@test.com",
+        "mensaje": "¡Tu donación está en camino!",
+        "medio": "CORREO"
       }
   auth: inherit
 

@@ -5,13 +5,28 @@ info:
 
 http:
   method: POST
-  url: "{{donacionesUrl}}/donaciones/personas"
+  url: "{{donacionesUrl}}/api/personas"
   body:
     type: json
     data: |-
       {
-        "nombre": "Juan Pérez",
-        "tipo": "HUMANA"
+        "email": "donante@test.com",
+        "contacto": {
+          "correoElectronico": "donante@test.com",
+          "telefono": "+5411223344",
+          "whatsapp": "+5411223344",
+          "medioPredeterminado": "WHATSAPP"
+        },
+        "direccion": {
+          "calle": "Av. Siempreviva",
+          "numero": "742",
+          "localidad": "Springfield",
+          "codigoPostal": "1602"
+        },
+        "documento": {
+          "tipo": "DNI",
+          "numero": "40123456"
+        }
       }
   auth: inherit
 

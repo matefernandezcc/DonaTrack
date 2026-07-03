@@ -5,11 +5,8 @@ info:
 
 http:
   method: DELETE
-  url: "{{donacionesUrl}}/donaciones/personas/:id"
-  params:
-    - name: id
-      value: 123e4567-e89b-12d3-a456-426614174000
-      type: path
+  url: "{{donacionesUrl}}/api/personas/d3b07384-d113-4ec6-a51d-402f06c1af0b"
+  body: none
   auth: inherit
 
 settings:

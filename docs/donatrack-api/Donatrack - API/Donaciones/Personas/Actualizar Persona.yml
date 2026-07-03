@@ -5,17 +5,17 @@ info:
 
 http:
   method: PUT
-  url: "{{donacionesUrl}}/donaciones/personas/:id"
-  params:
-    - name: id
-      value: 123e4567-e89b-12d3-a456-426614174000
-      type: path
+  url: "{{donacionesUrl}}/api/personas/d3b07384-d113-4ec6-a51d-402f06c1af0b"
   body:
     type: json
     data: |-
       {
-        "nombre": "Juan Pérez Modificado",
-        "tipo": "HUMANA"
+        "contacto": {
+          "correoElectronico": "donante_nuevo@test.com",
+          "telefono": "+5411223344",
+          "whatsapp": "+5411223344",
+          "medioPredeterminado": "CORREO"
+        }
       }
   auth: inherit
 

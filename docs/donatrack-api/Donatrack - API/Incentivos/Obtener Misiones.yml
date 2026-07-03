@@ -1,11 +1,11 @@
 info:
-  name: Obtener Beneficiario
+  name: Obtener Misiones
   type: http
-  seq: 3
+  seq: 2
 
 http:
   method: GET
-  url: "{{donacionesUrl}}/api/beneficiarios/e4b07384-d113-4ec6-a51d-402f06c1af0c"
+  url: "{{incentivosUrl}}/api/donantes/d3b07384-d113-4ec6-a51d-402f06c1af0b/misiones"
   body: none
   auth: inherit
 

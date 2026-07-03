@@ -5,11 +5,8 @@ info:
 
 http:
   method: GET
-  url: "{{donacionesUrl}}/donaciones/:id"
-  params:
-    - name: id
-      value: 123e4567-e89b-12d3-a456-426614174000
-      type: path
+  url: "{{donacionesUrl}}/api/donaciones/31008064-071a-4d7a-ac37-33318f7d9841"
+  body: none
   auth: inherit
 
 settings:
