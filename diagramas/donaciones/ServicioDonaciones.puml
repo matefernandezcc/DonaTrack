@@ -1,7 +1,8 @@
 @startuml ServicioDonaciones.puml
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
-package "servicio de donaciones"{
+package "Servicio de Donaciones" {
     package "Gestión de Personas" {
         enum TipoDocumento {
             DNI
@@ -84,11 +85,11 @@ package "servicio de donaciones"{
         }
 
         note top of PersonaHumana
-        **Regla de negocio:**
-        Tira excepción de invalidez de 
-        rol si el rol es Beneficiario 
-        (acepta solo Donante,
-        Representante o Administrador)
+            **Regla de negocio:**
+            Tira excepción de invalidez de
+            rol si el rol es Beneficiario
+            (acepta solo Donante,
+            Representante o Administrador)
         end note
 
         class PersonaJuridica extends Persona {
@@ -103,10 +104,10 @@ package "servicio de donaciones"{
         }
 
         note top of PersonaJuridica
-        **Regla de negocio:**
-        Tira excepción de 
-        invalidez de rol si el rol es 
-        Representante o Administrador
+            **Regla de negocio:**
+            Tira excepción de
+            invalidez de rol si el rol es
+            Representante o Administrador
         end note
 
         'relaciones
@@ -199,12 +200,12 @@ package "servicio de donaciones"{
             + segmentarBienes(bienesBrutos)
         }
 
-        note left of RecepcionDonacion 
-        **Regla de negocio:**
-        Representa la "única carga" 
-        física en el depósito. A partir 
-        de los bienes, se generan las 
-        Donaciones independientes.
+        note left of RecepcionDonacion
+            **Regla de negocio:**
+            Representa la "única carga"
+            física en el depósito. A partir
+            de los bienes, se generan las
+            Donaciones independientes.
         end note
 
         class Donacion {
@@ -297,17 +298,18 @@ package "servicio de donaciones"{
 
         Necesidad --> EstadoNecesidad : "se encuentra en"
     }
+
+    ' Gestión de Personas y Roles
+    Persona "1" *--down--- "1..*" Rol : "asume"
+
+    ' Conexiones de Dominio (Roles y Donaciones)
+    Beneficiario "1" ---> "0..*" Donacion : "tiene asignadas"
+    Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
+    Donacion -up-> Administrador : "es gestionada por"
+    RecepcionDonacion --> Administrador
+    Beneficiario "1" *--- "0..*" Necesidad : "declara"
+    Necesidad "*" ---> "1" Subcategoria : "demanda"
+    Necesidad "1" o-- "0..*" Donacion : "tiene"
 }
 
-' Gestión de Personas y Roles
-Persona "1" *--down--- "1..*" Rol : "asume"
-
-' Conexiones de Dominio (Roles y Donaciones)
-Beneficiario "1" ---> "0..*" Donacion : "tiene asignadas"
-Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
-Donacion -up-> Administrador : "es gestionada por"
-RecepcionDonacion --> Administrador
-Beneficiario "1" *--- "0..*" Necesidad : "declara"
-Necesidad "*" ---> "1" Subcategoria : "demanda"
-Necesidad "1" o-- "0..*" Donacion : "tiene"
 @enduml

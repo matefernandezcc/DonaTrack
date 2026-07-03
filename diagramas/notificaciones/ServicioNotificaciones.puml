@@ -1,5 +1,6 @@
 @startuml ServicioNotificaciones.puml
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
 package "Servicio de Notificaciones" {
 

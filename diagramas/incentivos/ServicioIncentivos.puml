@@ -1,5 +1,6 @@
 @startuml ServicioIncentivos.puml
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
 package "Servicio de Incentivos" {
 
