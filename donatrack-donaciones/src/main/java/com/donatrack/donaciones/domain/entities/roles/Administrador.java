@@ -1,6 +1,8 @@
 package com.donatrack.donaciones.domain.entities.roles;
 
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
+import com.donatrack.donaciones.domain.entities.donacion.Archivo;
 import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.importador.ImportadorStrategy;
 
 import java.util.List;
@@ -12,7 +14,6 @@ import lombok.Setter;
 @Setter
 public class Administrador extends Rol {
   private UUID idDepositoAsignado;
-
   private ImportadorStrategy estrategiaImportador;
   private List<UUID> camionesIds;
 
@@ -31,9 +32,9 @@ public class Administrador extends Rol {
     return false; // Una persona jurídica no puede ser administrador
   }
 
-  public boolean importarDonantesMasivos(String rutaArchivo) {
+  public boolean importarDonantesMasivos(Archivo archivo) {
     if (this.estrategiaImportador != null) {
-      this.estrategiaImportador.importar(rutaArchivo);
+      this.estrategiaImportador.importar(archivo);
       return true;
     } else {
       return false;
@@ -42,10 +43,10 @@ public class Administrador extends Rol {
 
   public void asignarDonacionFinal(Donacion d, Beneficiario b) {
     b.getDonacionesAsignadas().add(d);
-    d.asignar(b);
+    d.setEntidadAsignada(b);
   }
 
-  public void asociarDonacion(Donacion d, Donante donante) {
+  public void asociarDonacion(DonacionOriginal d, Donante donante) {
     donante.agregarDonacion(d);
   }
 

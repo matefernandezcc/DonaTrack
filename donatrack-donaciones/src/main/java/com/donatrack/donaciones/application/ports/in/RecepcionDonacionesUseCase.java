@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.application.ports.in;
 
-import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 
 public interface RecepcionDonacionesUseCase {
-    RecepcionDonacion recibir(CargaBienesRequestDTO requestDTO);
+    DonacionOriginal recibir(CargaBienesRequestDTO requestDTO);
 }

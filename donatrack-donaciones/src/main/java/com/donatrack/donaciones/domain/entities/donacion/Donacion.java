@@ -14,6 +14,7 @@ import lombok.Setter;
 @Setter
 public class Donacion {
   private UUID id;
+  private LocalDate fechaCreacion;
   private EstadoDonacion estado;
   private List<Bien> bienes;
   private Subcategoria subCategoria;
@@ -24,6 +25,7 @@ public class Donacion {
 
   public Donacion(Subcategoria subcategoria) {
     this.id = UUID.randomUUID();
+    this.fechaCreacion = LocalDate.now();
     this.estado = EstadoDonacion.EN_DEPOSITO;
     this.bienes = new ArrayList<>();
     this.subCategoria = subcategoria;

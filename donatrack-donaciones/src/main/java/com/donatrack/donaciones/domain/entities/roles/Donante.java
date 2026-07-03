@@ -1,7 +1,7 @@
 package com.donatrack.donaciones.domain.entities.roles;
 
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 
 import java.util.ArrayList;
@@ -12,13 +12,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Donante extends Rol {
-  private List<Donacion> donacionesRealizadas;
-  private List<RecepcionDonacion> historialRecepciones;
+  private List<DonacionOriginal> donacionesRealizadas;
 
   public Donante() {
     super();
     this.donacionesRealizadas = new ArrayList<>();
-    this.historialRecepciones = new ArrayList<>();
   }
 
   @Override
@@ -31,19 +29,10 @@ public class Donante extends Rol {
     return true; 
   }
 
-  // --- Métodos de comportamiento ---
+  // --- Métodos del Diagrama de Clases ---
 
-  public void agregarDonacion(Donacion d) {
+  public void agregarDonacion(DonacionOriginal d) {
     this.donacionesRealizadas.add(d);
-  }
-
-  public void agregarRecepcion(RecepcionDonacion r) {
-    this.historialRecepciones.add(r);
-  }
-
-  public List<EstadoDonacion> consultarEstadoTodasLasDonaciones(
-      List<Donacion> donacionesRealizadas) {
-    return donacionesRealizadas.stream().map(d -> d.getEstado()).toList();
   }
 
   public EstadoDonacion consultarEstadoDonacion(Donacion d) {
@@ -51,10 +40,10 @@ public class Donante extends Rol {
   }
 
   public void filtrarDonaciones(EstadoDonacion estado, String categoria) {
-    // Lógica para filtrar el historial de donaciones realizadas por este usuario
+    // Lógica de filtrado en base al historial de donaciones
   }
 
-  public void verUbicacionCamion() {
-    // Lógica para consultar la ubicación en tiempo real del camión asignado
+  public void UbicacionCamion() {
+    // Integración futura de GPS
   }
 }

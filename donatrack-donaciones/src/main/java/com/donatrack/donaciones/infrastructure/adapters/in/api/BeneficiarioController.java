@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.List;
 
 @RestController
-@RequestMapping("/donaciones/beneficiarios")
+@RequestMapping("/api/beneficiarios")
 public class BeneficiarioController {
 
     private static final List<Beneficiario> beneficiarios = new java.util.concurrent.CopyOnWriteArrayList<>();

@@ -2,10 +2,12 @@ package com.donatrack.donaciones.domain.services;
 
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
+import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
 import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.asignador.*;
 
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class MatchmakerService {
@@ -23,15 +25,19 @@ public class MatchmakerService {
         this.algoritmoSecundario = algoritmoSecundario;
     }
 
-    /**
-     * Ejecuta ambos algoritmos y retorna las entidades que coinciden en ambos rankings.
-     * Si no hay coincidencias, puede retornar los resultados de ambos (o la unión, dependiendo de la política).
-     * En la consigna dice: "filtrar automáticamente las entidades que hayan aparecido en la ejecución de ambos... 
-     * Si no hubo coincidencias, entonces mostrará ambas ejecuciones."
-     */
     public List<Beneficiario> obtenerSugerencias(Donacion donacion, List<Beneficiario> disponibles) {
-        List<Beneficiario> sugerenciasPrimarias = algoritmoPrimario.sugerirBeneficiarios(donacion, disponibles);
-        List<Beneficiario> sugerenciasSecundarias = algoritmoSecundario.sugerirBeneficiarios(donacion, disponibles);
+        List<Necesidad> necesidades = disponibles.stream()
+                .flatMap(b -> b.getNecesidadesDeclaradas().stream())
+                .collect(Collectors.toList());
+
+        List<Donacion> donaciones = List.of(donacion);
+
+        List<ResultadoMatch> matchesPrimarios = algoritmoPrimario.recomendarNecesidades(donaciones, necesidades);
+        List<ResultadoMatch> matchesSecundarios = algoritmoSecundario.recomendarNecesidades(donaciones, necesidades);
+
+        // Mapear los matches de necesidades de vuelta a sus beneficiarios declarantes
+        List<Beneficiario> sugerenciasPrimarias = buscarBeneficiariosDeNecesidades(matchesPrimarios, disponibles);
+        List<Beneficiario> sugerenciasSecundarias = buscarBeneficiariosDeNecesidades(matchesSecundarios, disponibles);
 
         Set<Beneficiario> interseccion = sugerenciasPrimarias.stream()
                 .filter(sugerenciasSecundarias::contains)
@@ -40,10 +46,23 @@ public class MatchmakerService {
         if (!interseccion.isEmpty()) {
             return List.copyOf(interseccion);
         } else {
-            // Unir ambos sin duplicados
             Set<Beneficiario> union = sugerenciasPrimarias.stream().collect(Collectors.toSet());
             union.addAll(sugerenciasSecundarias);
             return List.copyOf(union);
         }
+    }
+
+    private List<Beneficiario> buscarBeneficiariosDeNecesidades(List<ResultadoMatch> matches, List<Beneficiario> disponibles) {
+        List<Beneficiario> resultado = new ArrayList<>();
+        for (ResultadoMatch match : matches) {
+            for (Beneficiario b : disponibles) {
+                if (b.getNecesidadesDeclaradas().contains(match.getNecesidad())) {
+                    if (!resultado.contains(b)) {
+                        resultado.add(b);
+                    }
+                }
+            }
+        }
+        return resultado;
     }
 }

@@ -6,13 +6,13 @@ import com.donatrack.donaciones.application.ports.in.RecepcionDonacionesUseCase;
 import com.donatrack.donaciones.domain.entities.donacion.Bien;
 import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.Administrador;
 import com.donatrack.donaciones.domain.entities.roles.Donante;
 import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
-import com.donatrack.donaciones.application.ports.out.RecepcionDonacionRepository;
+import com.donatrack.donaciones.application.ports.out.DonacionOriginalRepository;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -23,13 +23,13 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
     private final PersonaRepository personaRepository;
     private final ProcesadorCargaInicial procesadorCargaInicial;
     private final DonacionRepository donacionRepository;
-    private final RecepcionDonacionRepository recepcionDonacionRepository;
+    private final DonacionOriginalRepository recepcionDonacionRepository;
 
     public RecepcionDonacionesService(
             PersonaRepository personaRepository,
             ProcesadorCargaInicial procesadorCargaInicial,
             DonacionRepository donacionRepository,
-            RecepcionDonacionRepository recepcionDonacionRepository) {
+            DonacionOriginalRepository recepcionDonacionRepository) {
         this.personaRepository = personaRepository;
         this.procesadorCargaInicial = procesadorCargaInicial;
         this.donacionRepository = donacionRepository;
@@ -37,7 +37,7 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
     }
 
     @Override
-    public RecepcionDonacion recibir(CargaBienesRequestDTO requestDTO) {
+    public DonacionOriginal recibir(CargaBienesRequestDTO requestDTO) {
         // 1. Obtener entidades
         Persona donantePersona = personaRepository.buscarPorId(requestDTO.idDonante())
                 .orElseThrow(() -> new IllegalArgumentException("Donante no encontrado"));
@@ -59,14 +59,14 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
         // 2. Mapear DTOs a Entidades de Dominio
         List<Bien> bienesBrutos = requestDTO.bienesBrutos().stream().map(this::mapearBien).collect(Collectors.toList());
 
-        // 3. Procesar Carga Inicial (Dominio orquesta estrategias)
-        List<Donacion> donacionesResultantes = procesadorCargaInicial.procesar(bienesBrutos);
+        // 3. Crear acta de Recepción (Entidad)
+        DonacionOriginal recepcion = new DonacionOriginal("Carga de donación original", donante, requestDTO.idAdministrador().toString());
 
-        // 4. Crear acta de Recepción (Entidad)
-        RecepcionDonacion recepcion = new RecepcionDonacion(donante, administrador, bienesBrutos, donacionesResultantes);
+        // 4. Procesar Carga Inicial delegando en la entidad DonacionOriginal
+        recepcion.segmentarBienes(bienesBrutos, procesadorCargaInicial);
 
-        // 5. Persistir (Orquestación de infraestructura)
-        donacionesResultantes.forEach(donacionRepository::guardar);
+        // 5. Persistir
+        recepcion.getDonacionesSegmentadas().forEach(donacionRepository::guardar);
         recepcionDonacionRepository.guardar(recepcion);
 
         return recepcion;
@@ -80,7 +80,6 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
                 dto.esUsado(),
                 dto.fechaVencimiento()
         );
-        // En una app real, buscaríamos la Subcategoria en un repositorio
         Subcategoria subcategoriaMock = new Subcategoria(dto.nombreSubcategoria(), "Subcategoría generada");
         bien.setSubcategoria(subcategoriaMock);
         return bien;

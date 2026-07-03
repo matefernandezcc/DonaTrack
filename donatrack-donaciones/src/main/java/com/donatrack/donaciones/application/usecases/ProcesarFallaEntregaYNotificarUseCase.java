@@ -5,9 +5,9 @@ import com.donatrack.common.events.NotificacionEntregaFallidaEvent;
 import com.donatrack.common.events.NotificacionInicioRutaEvent;
 import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
-import com.donatrack.donaciones.application.ports.out.RecepcionDonacionRepository;
+import com.donatrack.donaciones.application.ports.out.DonacionOriginalRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
@@ -26,12 +26,12 @@ import java.util.Optional;
 public class ProcesarFallaEntregaYNotificarUseCase {
 
     private final DonacionRepository donacionRepository;
-    private final RecepcionDonacionRepository recepcionRepository;
+    private final DonacionOriginalRepository recepcionRepository;
     private final PersonaRepository personaRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public ProcesarFallaEntregaYNotificarUseCase(DonacionRepository donacionRepository,
-                                                 RecepcionDonacionRepository recepcionRepository,
+                                                 DonacionOriginalRepository recepcionRepository,
                                                  PersonaRepository personaRepository,
                                                  ApplicationEventPublisher eventPublisher) {
         this.donacionRepository = donacionRepository;
@@ -70,7 +70,7 @@ public class ProcesarFallaEntregaYNotificarUseCase {
 
     private List<NotificacionInicioRutaEvent.ContactoInfo> extraerContactosDonante(Donacion donacion) {
         List<NotificacionInicioRutaEvent.ContactoInfo> contactos = new ArrayList<>();
-        Optional<RecepcionDonacion> recepcionOpt = recepcionRepository.buscarPorIdDonacion(donacion.getId());
+        Optional<DonacionOriginal> recepcionOpt = recepcionRepository.buscarPorIdDonacion(donacion.getId());
         if (recepcionOpt.isPresent()) {
             Donante donante = recepcionOpt.get().getDonante();
             if (donante != null) {
@@ -102,7 +102,7 @@ public class ProcesarFallaEntregaYNotificarUseCase {
                 for (Rol rol : persona.getRoles()) {
                     if (rol instanceof Administrador) {
                         contactos.addAll(extraerContactos(persona, "ADMINISTRADOR"));
-                        break; // No extraer duplicados para esta persona
+                        break;
                     }
                 }
             }

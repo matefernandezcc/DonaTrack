@@ -1,20 +1,23 @@
 package com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.asignador;
 
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
+import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
+import com.donatrack.donaciones.domain.services.ResultadoMatch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PrioridadASubAtendidos implements AlgoritmoAsignacion {
 
     @Override
-    public List<Beneficiario> sugerirBeneficiarios(Donacion donacion, List<Beneficiario> beneficiariosDisponibles) {
-        // Implementación dummy.
-        // Aquí se asigna prioridad a organizaciones que hayan recibido menos 
-        // donaciones en el último trimestre.
-        return beneficiariosDisponibles.stream()
-            // .sorted(Comparator.comparingInt(b -> b.getDonacionesRecibidasUltimoTrimestre()))
-            .limit(10)
-            .toList();
+    public List<ResultadoMatch> recomendarNecesidades(List<Donacion> donaciones, List<Necesidad> necesidades) {
+        List<ResultadoMatch> matches = new ArrayList<>();
+        
+        // Asignación simple por orden de lista (para convalidar el tipo de retorno)
+        int minSize = Math.min(donaciones.size(), necesidades.size());
+        for (int i = 0; i < minSize; i++) {
+            matches.add(new ResultadoMatch(donaciones.get(i), null, necesidades.get(i)));
+        }
+        return matches;
     }
 }

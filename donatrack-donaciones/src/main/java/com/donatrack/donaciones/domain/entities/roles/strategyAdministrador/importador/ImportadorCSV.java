@@ -1,7 +1,8 @@
 package com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.importador;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +11,7 @@ import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.persona.PersonaHumana;
 import com.donatrack.donaciones.domain.entities.persona.PersonaJuridica;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
-
+import com.donatrack.donaciones.domain.entities.donacion.Archivo;
 
 public class ImportadorCSV implements ImportadorStrategy {
   
@@ -26,24 +27,26 @@ public class ImportadorCSV implements ImportadorStrategy {
   }
 
   @Override
-  public void importar(String rutaArchivo) {
-    String linea;
-    String separador = ","; // Formato CSV separado por comas
+  public void importar(Archivo archivo) {
+    if (archivo == null || archivo.getContenido() == null) {
+        return;
+    }
 
-    try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+    String linea;
+    String separador = ",";
+
+    try (BufferedReader br = new BufferedReader(
+            new InputStreamReader(new ByteArrayInputStream(archivo.getContenido())))) {
       br.readLine(); // Saltar encabezado
 
       while ((linea = br.readLine()) != null) {
-        // Según el formato: TipoPersona, TipoDoc, Documento, Nombre/Razón Social, Email, Teléfono
         String[] datos = linea.split(separador);
         if (datos.length < 5) continue;
         String email = datos[4];
 
-        // 1. Validar si el registro ya existe buscando por correo electrónico utilizando el repositorio
         Optional<Persona> personaExistenteOpt = personaRepository.buscarPorEmail(email);
 
         if (personaExistenteOpt.isPresent()) {
-          // 2. Si ya existe, se deberá actualizar su información
           System.out.println("El email " + email + " ya existe. Actualizando información...");
           Persona personaExistente = personaExistenteOpt.get();
           Persona datosNuevos = personaFactory.crearDesdeCSV(datos);
@@ -62,7 +65,6 @@ public class ImportadorCSV implements ImportadorStrategy {
           personaExistente.actualizarInformacion(map);
           personaRepository.guardar(personaExistente);
         } else {
-          // 3. En caso contrario, crearlo y enviarle sus credenciales de acceso
           System.out.println("Creando nuevo donante para: " + email);
           Persona nuevaPersona = personaFactory.crearDesdeCSV(datos);
           personaRepository.guardar(nuevaPersona);
@@ -70,7 +72,7 @@ public class ImportadorCSV implements ImportadorStrategy {
         }
       }
     } catch (IOException e) {
-      System.err.println("Error al intentar leer el archivo CSV: " + e.getMessage());
+      System.err.println("Error al intentar leer el contenido CSV: " + e.getMessage());
     }
   }
 }

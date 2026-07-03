@@ -2,7 +2,7 @@ package com.donatrack.donaciones.domain.entities.persona;
 
 import com.donatrack.donaciones.domain.entities.roles.Rol;
 import com.donatrack.donaciones.domain.entities.roles.Representante;
-import com.donatrack.donaciones.domain.entities.enums.TipoJuridica;
+import com.donatrack.donaciones.domain.entities.enums.TipoPersonaJuridica;
 import com.donatrack.donaciones.domain.entities.persona.ubicacion.Direccion;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 public class PersonaJuridica extends Persona {
   private String razonSocial;
-  private TipoJuridica tipo;
+  private TipoPersonaJuridica tipo;
   private String rubro;
   private List<Representante> representantes;
 
@@ -24,9 +24,8 @@ public class PersonaJuridica extends Persona {
       Direccion direccion,
       DocumentoIdentidad documento,
       String razonSocial,
-      TipoJuridica tipo,
+      TipoPersonaJuridica tipo,
       String rubro) {
-    // Pasamos el documento al constructor padre
     super(email, contacto, direccion, documento);
     this.razonSocial = razonSocial;
     this.tipo = tipo;
@@ -41,13 +40,10 @@ public class PersonaJuridica extends Persona {
   @Override
   protected boolean validarRol(Rol r) {
     if (!r.esValidoParaJuridica()) {
-      // Error: Una persona jurídica no puede asumir este rol.
       return false;
     }
     return true;
   }
-
-
 
   @Override
   public void actualizarInformacion(Map<String, Object> datosNuevos) {
