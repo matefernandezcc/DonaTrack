@@ -35,6 +35,18 @@ public class MockRutaDeRepartoRepository implements RutaDeRepartoRepositoryPort 
     }
 
     @Override
+    public Optional<RutaDeReparto> buscarPorId(UUID idRuta) {
+        return baseDeDatosMock.stream()
+                .filter(r -> r.getId().equals(idRuta))
+                .findFirst();
+    }
+
+    @Override
+    public List<RutaDeReparto> obtenerTodas() {
+        return new ArrayList<>(baseDeDatosMock);
+    }
+
+    @Override
     public void guardar(RutaDeReparto ruta) {
         baseDeDatosMock.removeIf(r -> r.getId().equals(ruta.getId()));
         baseDeDatosMock.add(ruta);

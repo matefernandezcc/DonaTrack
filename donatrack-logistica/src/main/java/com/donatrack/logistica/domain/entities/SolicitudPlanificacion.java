@@ -17,10 +17,8 @@ public class SolicitudPlanificacion {
   private LocalDateTime fechaSolicitud;
   private EstadoPlanificacion estado;
   private List<UUID> idsDonaciones;
-  private List<RutaDeReparto> rutasGeneradas;
 
   public void procesarCallback(List<RutaDeReparto> rutas) {
-    this.rutasGeneradas = rutas;
     this.estado = EstadoPlanificacion.PROCESADA;
   }
 }
