@@ -13,6 +13,7 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   n8n:
     image: docker.n8n.io/n8nio/n8n:latest
@@ -60,6 +61,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=donatrack
+      - SPRING_RABBITMQ_PASSWORD=donatrack
 
   incentivos:
     build:
@@ -78,6 +81,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=donatrack
+      - SPRING_RABBITMQ_PASSWORD=donatrack
 
   logistica:
     build:
