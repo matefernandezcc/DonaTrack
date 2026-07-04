@@ -1,6 +1,5 @@
 @startuml DonaTrack_ServicioIncentivos_DiagramaClases
 skinparam classAttributeIconSize 0
-skinparam linetype ortho
 
 package "Servicio de Incentivos" {
 
@@ -76,10 +75,10 @@ package "Servicio de Incentivos" {
     end note
 
     class Insignia {
-        - id: UUID
         - nombre: String
         - descripcion: String
-        - urlImagen: String
+        - fechaObtencion: LocalDate
+        - visiblePublicamente: boolean
     }
 
     class InsigniaObtenidaEvent {

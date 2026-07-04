@@ -1,6 +1,5 @@
 @startuml DonaTrack_ServicioNotificaciones_DiagramaClases
 skinparam classAttributeIconSize 0
-skinparam linetype ortho
 
 package "Servicio de Notificaciones" {
 
@@ -62,11 +61,13 @@ package "Servicio de Notificaciones" {
         + enviar(notificacion: Notificacion)
     }
 
-    ' Relaciones de Aplicacion y Adaptadores
-    NotificadorService "1" *-- "0..*" NotificacionAdapter : "utiliza >"
-    NotificadorService ..> Notificacion : "envía >"
-    NotificacionFactory ..> Notificacion : "crea >"
-    Notificacion --> Evento : "posee >"
-    Evento --> TipoEvento : "posee >"
+    ' Relaciones
+    NotificadorService --> NotificacionAdapter : utiliza >
+    NotificadorService ..> Notificacion : envía >
+
+    NotificacionFactory ..> Notificacion : crea >
+
+    Notificacion --> Evento : posee >
+    Evento --> TipoEvento : posee >
 }
 @enduml

@@ -2,116 +2,97 @@
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 
-package "Servicio de Logistica" {
-  package "Gestion Planificacion" {
-    enum EstadoPlanificacion {
-      PENDIENTE
-      RECIBIDA
-      PROCESADA
-    }
+enum EstadoEntrega {
+  PENDIENTE
+  EN_TRASLADO
+  ENTREGADA
+  NO_RECIBIDA
+}
 
-    class SolicitudPlanificacion {
-      - id: UUID
-      - fechaSolicitud: LocalDateTime
-      - estado: EstadoPlanificacion
-      - idsDonaciones: List<UUID>
-      + procesarCallback(rutas: List<RutaDeReparto>)
-    }
+enum EstadoPlanificacion {
+  PENDIENTE
+  RECIBIDA
+  PROCESADA
+}
 
-    note right of SolicitudPlanificacion
-      El proveedor externo procesa
-      max. 100 donaciones por lote.
-      Notifica resultado vía callback URL.
-    end note
+class Camion {
+  - patente: String
+  - capacidadVolumen: Double
+  - altura: Double
+  - capacidadCarga: Double
+}
 
-    class ItemPlanificacion <<Value Object>> {
-      - idDonacionOriginal: UUID
-      - pesoEstimado: Double
-      - volumenEstimado: Double
-    }
-  }
+class Chofer {
+  - legajo: String
+  - nombre: String
+}
 
-  package "Gestion Reparto" {
-    class Camion {
-      - patente: String
-      - capacidadVolumen: Double
-      - altura: Double
-      - capacidadCarga: Double
-    }
+class SolicitudPlanificacion {
+  - id: UUID
+  - fechaSolicitud: LocalDateTime
+  - estado: EstadoPlanificacion
+  - idsDonaciones: List<UUID>
+  + procesarCallback(rutas: List<RutaDeReparto>)
+}
 
-    class Chofer {
-      - legajo: String
-      - nombre: String
-    }
+class ItemPlanificacion <<Value Object>> {
+  - idDonacionOriginal: UUID
+  - pesoEstimado: Double
+  - volumenEstimado: Double
+}
 
-    class RutaDeReparto {
-      - id: UUID
-      - fechaOperativa: LocalDate
-      - iniciada: Boolean
-      + iniciarRuta()
-    }
+class RutaDeReparto {
+  - id: UUID
+  - fechaOperativa: LocalDate
+  - iniciada: Boolean
+  + iniciarRuta()
+}
 
-    class Parada {
-      - orden: Integer
-    }
-  }
+class Parada {
+  - orden: Integer
+}
 
-  package "Gestion Entregas" {
-    enum EstadoEntrega {
-      PENDIENTE
-      EN_TRASLADO
-      ENTREGADA
-      NO_RECIBIDA
-    }
+class Direccion <<Value Object>> {
+  - calle: String
+  - altura: String
+  - localidad: String
+}
 
-    class Entrega {
-      - idEntrega: UUID
-      - estado: EstadoEntrega
-      - pesoEstimado: Double
-      - volumenEstimado: Double
-      + marcarEnTraslado()
-      + confirmarRecepcion(fotos: List<String>)
-      + marcarNoRecibida()
-      + volverAPendiente()
-    }
+class Coordenada <<Value Object>> {
+  - latitud: Double
+  - longitud: Double
+}
 
-    note right of Entrega
-      idDonacionOriginal referencia
-      al Servicio de Donaciones
-      (contexto externo)
-    end note
+class Entrega {
+  - idEntrega: UUID
+  - estado: EstadoEntrega
+  - pesoEstimado: Double
+  - volumenEstimado: Double
+  + marcarEnTraslado()
+  + confirmarRecepcion(fotos: List<String>)
+  + marcarNoRecibida()
+  + volverAPendiente()
+}
 
-    class ComprobanteRecepcion {
-      - fechaHora: LocalDateTime
-      - fotos: List<String>
-      - camionPatente: String
-    }
-  }
+class ComprobanteRecepcion {
+  - fechaHora: LocalDateTime
+  - fotos: List<String>
+  - camionPatente: String
+}
 
-  class Direccion <<Value Object>> {
-    - calle: String
-    - altura: String
-    - localidad: String
-  }
+' Relaciones con multiplicidades estrictas
+SolicitudPlanificacion "1" --> "0..*" RutaDeReparto : genera >
+RutaDeReparto "1" --> "1" Camion : asignada a >
+RutaDeReparto "1" --> "1" Chofer : conducida por >
+RutaDeReparto "1" *-- "1..*" Parada : compuesta por >
 
-  class Coordenada <<Value Object>> {
-    - latitud: Double
-    - longitud: Double
-  }
+Parada "1" *-- "1" Direccion : se ubica en >
+Parada "1" *-- "1" Coordenada : geolocalizada en >
+Parada "1" *-- "1..*" Entrega : contiene >
 
-  ' Relaciones con multiplicidades estrictas
-  SolicitudPlanificacion "1" --> "0..*" RutaDeReparto : genera >
-  RutaDeReparto "1" --> "1" Camion : asignada a >
-  RutaDeReparto "1" --> "1" Chofer : conducida por >
-  RutaDeReparto "1" *-- "1..*" Parada : compuesta por >
-
-  Parada "1" *-- "1" Direccion : se ubica en >
-  Parada "1" *-- "1" Coordenada : geolocalizada en >
-  Parada "1" *-- "1..*" Entrega : contiene >
-
-  Entrega "1" --> "1" EstadoEntrega : se encuentra en >
-  Entrega "1" *-- "0..1" ComprobanteRecepcion : genera al entregar >
-  SolicitudPlanificacion "1" --> "1" EstadoPlanificacion : se encuentra en >
+Entrega "1" --> "1" EstadoEntrega : se encuentra en >
+Entrega "1" *-- "0..1" ComprobanteRecepcion : genera al entregar >
+SolicitudPlanificacion "1" --> "1" EstadoPlanificacion : se encuentra en >
 
 SolicitudPlanificacion "1" *-- "1..100" ItemPlanificacion : contiene >
 ItemPlanificacion "1" --> "1" Direccion : destino >
