@@ -1,0 +1,62 @@
+package com.donatrack.notificaciones.infrastructure.config;
+
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Configuration("notificacionesRabbitMQConfig")
+public class RabbitMQConfig {
+
+    public static final String DONACIONES_EXCHANGE = "donaciones.exchange";
+    public static final String RUTA_INICIADA_NOTIF_QUEUE = "notificaciones.ruta_iniciada.queue";
+
+    @Bean
+    public TopicExchange donacionesExchange() {
+        return new TopicExchange(DONACIONES_EXCHANGE);
+    }
+
+    @Bean
+    public Queue rutaIniciadaNotifQueue() {
+        return new Queue(RUTA_INICIADA_NOTIF_QUEUE);
+    }
+
+    @Bean
+    public Binding bindingNotifRutaIniciada(Queue rutaIniciadaNotifQueue, TopicExchange donacionesExchange) {
+        return BindingBuilder.bind(rutaIniciadaNotifQueue).to(donacionesExchange).with("notificacion.inicio.ruta");
+    }
+
+    public static final String ENTREGA_EXITOSA_NOTIF_QUEUE = "notificaciones.entrega_exitosa.queue";
+
+    @Bean
+    public Queue entregaExitosaNotifQueue() {
+        return new Queue(ENTREGA_EXITOSA_NOTIF_QUEUE);
+    }
+
+    @Bean
+    public Binding bindingNotifEntregaExitosa(Queue entregaExitosaNotifQueue, TopicExchange donacionesExchange) {
+        return BindingBuilder.bind(entregaExitosaNotifQueue).to(donacionesExchange).with("notificacion.entrega.exitosa");
+    }
+
+    public static final String ENTREGA_FALLIDA_NOTIF_QUEUE = "notificaciones.entrega_fallida.queue";
+
+    @Bean
+    public Queue entregaFallidaNotifQueue() {
+        return new Queue(ENTREGA_FALLIDA_NOTIF_QUEUE);
+    }
+
+    @Bean
+    public Binding bindingNotifEntregaFallida(Queue entregaFallidaNotifQueue, TopicExchange donacionesExchange) {
+        return BindingBuilder.bind(entregaFallidaNotifQueue).to(donacionesExchange).with("notificacion.entrega.fallida");
+    }
+
+    @Bean("notificacionesJsonMessageConverter")
+    public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
+        return new Jackson2JsonMessageConverter(objectMapper);
+    }
+}

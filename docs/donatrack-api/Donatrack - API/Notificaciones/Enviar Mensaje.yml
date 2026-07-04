@@ -1,0 +1,23 @@
+info:
+  name: Enviar Mensaje
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{notificacionesUrl}}/api/mensajes"
+  body:
+    type: json
+    data: |-
+      {
+        "destinatario": "donante@test.com",
+        "mensaje": "¡Tu donación está en camino!",
+        "medio": "CORREO"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

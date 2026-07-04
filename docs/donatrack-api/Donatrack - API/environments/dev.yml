@@ -1,4 +1,12 @@
 name: dev
 variables:
   - name: baseUrl
-    value: 127.0.0.1:8080
+    value: http://localhost:8080
+  - name: donacionesUrl
+    value: http://localhost:8000
+  - name: incentivosUrl
+    value: http://localhost:8001
+  - name: logisticaUrl
+    value: http://localhost:8002
+  - name: notificacionesUrl
+    value: http://localhost:8003

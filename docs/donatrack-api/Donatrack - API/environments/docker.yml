@@ -1,0 +1,12 @@
+name: docker
+variables:
+  - name: baseUrl
+    value: http://donatrack-server:8080
+  - name: donacionesUrl
+    value: http://donatrack-donaciones:8000
+  - name: incentivosUrl
+    value: http://donatrack-incentivos:8001
+  - name: logisticaUrl
+    value: http://donatrack-logistica:8002
+  - name: notificacionesUrl
+    value: http://donatrack-notificaciones:8003

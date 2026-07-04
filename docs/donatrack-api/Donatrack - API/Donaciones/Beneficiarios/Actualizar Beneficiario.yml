@@ -1,0 +1,21 @@
+info:
+  name: Actualizar Beneficiario
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{donacionesUrl}}/api/beneficiarios/e4b07384-d113-4ec6-a51d-402f06c1af0c"
+  body:
+    type: json
+    data: |-
+      {
+        "correoRepresentante": "nuevo_representante@ong.org"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

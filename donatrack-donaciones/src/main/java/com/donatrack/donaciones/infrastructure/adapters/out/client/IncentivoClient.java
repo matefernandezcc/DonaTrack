@@ -10,6 +10,9 @@ import com.donatrack.common.dto.ActividadDonacionDTO;
 @FeignClient(name = "incentivos", url = "http://localhost:8080/incentivos")
 public interface IncentivoClient {
 
-    @PostMapping("/donantes/{id}/actividad")
+    @PostMapping("/donantes/{id}/actividad-entregada")
     void registrarActividadDonacionExitosa(@PathVariable("id") UUID id, @RequestBody ActividadDonacionDTO actividad);
+
+    @PostMapping("/entidades/{id}/actividad-deposito")
+    void registrarActividadDonacionEnDeposito(@PathVariable("id") UUID id, @RequestBody ActividadDonacionDTO actividad);
 }

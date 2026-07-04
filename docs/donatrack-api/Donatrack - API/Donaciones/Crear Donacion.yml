@@ -5,14 +5,23 @@ info:
 
 http:
   method: POST
-  url: "{{baseUrl}}/donaciones"
+  url: "{{donacionesUrl}}/api/recepciones"
   body:
     type: json
     data: |-
       {
-        "descripcion": "Ropa de abrigo",
-        "cantidad": 5,
-        "estado": "PENDIENTE"
+        "idDonante": "d3b07384-d113-4ec6-a51d-402f06c1af0b",
+        "idAdministrador": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        "bienesBrutos": [
+          {
+            "descripcion": "Alimentos no perecederos",
+            "cantidad": 10.0,
+            "unidadMedicion": "KILOS",
+            "esUsado": false,
+            "fechaVencimiento": "2026-12-31",
+            "nombreSubcategoria": "Alimentos"
+          }
+        ]
       }
   auth: inherit
 

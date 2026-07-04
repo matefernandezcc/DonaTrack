@@ -1,4 +1,4 @@
-@startuml DonaTrack_CasosDeUso
+@startuml DonaTrack_ServicioDonaciones_CasosDeUso
 left to right direction
 skinparam packageStyle rectangle
 
@@ -7,34 +7,29 @@ actor "Persona Donante" as Donante
 actor "Beneficiario" as Entidad
 actor "Persona Administradora" as Admin
 
-package "DonaTrack - Sistema de Gestión de Donaciones" {
+package "Microservicio de Gestión de Donaciones" {
     
-    ' --- Casos de Uso de Multiple individuos ---
-    usecase "Registrarse Persona" as UC_Registro
+    ' --- Casos de Uso Generales ---
+    usecase "Registrarse en la plataforma" as UC_Registro
     usecase "Iniciar Sesión" as UC_Login
-
-    ' --- Casos de Uso de Acceso ---
     usecase "Ver landing page" as UC_Publico1
 
     ' --- Casos de Uso de Persona Donante ---
     usecase "Filtrar donaciones realizadas" as UC_D1
     usecase "Navegar entidades beneficiarias" as UC_D2
-    usecase "Consultar misiones e insignias" as UC_D3
-    usecase "Seguir entregas activas en mapa" as UC_SeguirMapa
 
     ' --- Casos de Uso de Beneficiario ---
-    usecase "Registrar necesidad" as UC_E1
-    usecase "Visualizar Donaciones Asignadas" as UC_E2
-    usecase "Confirmar Donación" as UC_E3
-    usecase "Cargar Fotos" as UC_E4
+    usecase "Registrar necesidad material" as UC_E1
+    usecase "Visualizar donaciones asignadas" as UC_E2
+    usecase "Confirmar recepción de entrega" as UC_E3
+    usecase "Cargar fotos de recepción" as UC_E4
 
-    ' --- Casos de Uso de Persona Administradora ---
-    usecase "Registrar recepción de donación" as UC_A2
-    usecase "Actualizar donaciones" as UC_A3
-    usecase "Asignar donación" as UC_A4
-    usecase "Administrar camiones" as UC_A5
-    usecase "Visualizar ranking" as UC_A6
-    usecase "Importar CSV" as UC_A7
+    ' --- Casos de Uso de Persona Administradora (en el Depósito) ---
+    usecase "Registrar donación original (carga única)" as UC_A2
+    usecase "Actualizar estado de donaciones vencidas" as UC_A3
+    usecase "Confirmar destino final de donación (Matchmaking)" as UC_A4
+    usecase "Ejecutar algoritmos de asignación a demanda" as UC_A4_2
+    usecase "Importar donantes masivos mediante CSV" as UC_A7
 }
 
 ' --- Relaciones del Usuario Público ---
@@ -46,18 +41,15 @@ Publico --> UC_Login
 Donante --> UC_Login
 Donante --> UC_D1
 Donante --> UC_D2
-Donante --> UC_D3
-Donante --> UC_SeguirMapa
 
 ' --- Relaciones de Beneficiario ---
 Entidad --> UC_Login
 Entidad --> UC_E1
 Entidad --> UC_E2
 Entidad --> UC_E3
-Entidad --> UC_SeguirMapa
 
-' Relación de extensión para subir fotos opcionales/comprobantes
-UC_E3 <.. UC_E4 : <<extend>>
+' Relaciones de inclusión y extensión
+UC_E3 <.. UC_E4 : <<include>>
 UC_A2 <.. UC_Registro : <<extend>>
 
 ' --- Relaciones de Persona Administradora ---
@@ -65,8 +57,8 @@ Admin --> UC_Login
 Admin --> UC_A2
 Admin --> UC_A3
 Admin --> UC_A4
-Admin --> UC_A5
-Admin --> UC_A6
+Admin --> UC_A4_2
 Admin --> UC_A7
 
+@endif
 @enduml

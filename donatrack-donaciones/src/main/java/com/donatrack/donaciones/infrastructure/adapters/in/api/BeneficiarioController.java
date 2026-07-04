@@ -3,14 +3,14 @@ package com.donatrack.donaciones.infrastructure.adapters.in.api;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.donatrack.donaciones.domain.model.roles.Beneficiario;
-import com.donatrack.donaciones.domain.model.necesidades.Necesidad;
+import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
+import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
 
 import java.util.UUID;
 import java.util.List;
 
 @RestController
-@RequestMapping("/donaciones/beneficiarios")
+@RequestMapping("/api/beneficiarios")
 public class BeneficiarioController {
 
     private static final List<Beneficiario> beneficiarios = new java.util.concurrent.CopyOnWriteArrayList<>();

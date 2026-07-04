@@ -1,0 +1,23 @@
+info:
+  name: Crear Beneficiario
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{donacionesUrl}}/api/beneficiarios"
+  body:
+    type: json
+    data: |-
+      {
+        "correoRepresentante": "representante@ong.org",
+        "donacionesAsignadas": [],
+        "necesidadesDeclaradas": []
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

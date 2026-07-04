@@ -1,15 +1,12 @@
 info:
   name: Sugerir Beneficiarios
   type: http
-  seq: 5
+  seq: 4
 
 http:
   method: GET
-  url: "{{baseUrl}}/donaciones/:id/matchmaking"
-  params:
-    - name: id
-      value: 123e4567-e89b-12d3-a456-426614174000
-      type: path
+  url: "{{donacionesUrl}}/api/donaciones/31008064-071a-4d7a-ac37-33318f7d9841/matchmaking"
+  body: none
   auth: inherit
 
 settings:

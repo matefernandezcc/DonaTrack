@@ -1,0 +1,28 @@
+info:
+  name: Registrar Actividad
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{incentivosUrl}}/api/donantes/d3b07384-d113-4ec6-a51d-402f06c1af0b/actividad"
+  body:
+    type: json
+    data: |-
+      {
+        "idDonacion": "31008064-071a-4d7a-ac37-33318f7d9841",
+        "cantidadBienes": 5,
+        "categorias": [
+          "Alimentos",
+          "Vestimenta"
+        ],
+        "idEntidadBeneficiaria": "e4b07384-d113-4ec6-a51d-402f06c1af0c",
+        "fecha": "2026-07-03"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

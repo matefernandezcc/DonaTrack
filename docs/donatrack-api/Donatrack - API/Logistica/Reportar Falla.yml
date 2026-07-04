@@ -1,0 +1,22 @@
+info:
+  name: Reportar Falla
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{logisticaUrl}}/api/entregas/31008064-071a-4d7a-ac37-33318f7d9841/falla"
+  body:
+    type: json
+    data: |-
+      {
+        "motivo": "El beneficiario no se encontraba en el domicilio",
+        "puedeReplanificarse": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

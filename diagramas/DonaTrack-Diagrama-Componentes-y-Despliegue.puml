@@ -1,0 +1,76 @@
+@startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #333333
+}
+
+' Componente de API REST expuesto por el Backend
+component "API REST (HTTPS)" as ModuloAPI
+
+' Interfaz Frontend
+component "Frontend SPA\n(Cliente Web/Móvil)" as Frontend
+
+' --- BACKEND MULTIMÓDULO (MICROSERVICIOS) ---
+package "DonaTrack Backend (Aplicación Multimódulo)" {
+    
+    component "Módulo de Donaciones" as ModDonaciones
+    component "Módulo de Incentivos" as ModIncentivos
+    component "Módulo de Logística" as ModLogistica
+    component "Módulo de Notificaciones" as ModNotificaciones
+    
+    ' Layout hints para evitar superposición
+    ModDonaciones -[hidden]right- ModIncentivos
+    ModIncentivos -[hidden]right- ModLogistica
+    
+    ' Dependencias sincrónicas directas (vía REST / OpenFeign)
+    ModDonaciones ..(0.. ModNotificaciones : "REST (Feign)"
+    ModIncentivos ..(0.. ModNotificaciones : "REST (Feign)"
+    
+    ' Exposición de la API hacia el exterior
+    ModuloAPI --(0-- ModDonaciones
+    ModuloAPI --(0-- ModIncentivos
+    ModuloAPI --(0-- ModLogistica
+    ModuloAPI --(0-- ModNotificaciones
+}
+
+' --- MIDDLEWARE CENTRALIZADO ---
+queue "RabbitMQ\n(Message Broker)" as Broker
+
+' --- SISTEMAS EXTERNOS ---
+database "Base de Datos\n(PostgreSQL)" as DB
+
+component "Servidor n8n\n(Automatización)" as n8n
+
+component "APIs Notificaciones\n(Twilio, SendGrid, Meta)" as SaaSNotif
+
+
+' --- CONEXIONES EXTERNAS ---
+
+Frontend -(0- ModuloAPI : <<consume>>
+
+' Conexiones a BD (Esquemas Lógicos Aislados)
+ModDonaciones --> DB : "JPA (Schema: donaciones)"
+ModIncentivos --> DB : "JPA (Schema: incentivos)"
+ModLogistica --> DB : "JPA (Schema: logistica)"
+ModNotificaciones --> DB : "JPA (Schema: notificaciones)"
+
+' Integraciones n8n y Redes
+ModIncentivos --> n8n : "POST Webhook\n(Insignia obtenida)"
+n8n --> ModuloAPI : "PATCH / PUT\n(Actualiza estado)"
+
+' Integraciones SaaS
+ModNotificaciones --> SaaSNotif : "Despacha SMS/WA/Email"
+
+' --- COMUNICACIÓN ASINCRÓNICA BASADA EN EVENTOS (RABBITMQ) ---
+ModLogistica --> Broker : "Publica: ruta.iniciada, entrega.realizada, entrega.fallida"
+Broker --> ModDonaciones : "Consume eventos de entrega/ruta"
+
+ModDonaciones --> Broker : "Publica: donacion.replanificada"
+Broker --> ModLogistica : "Consume: donacion.replanificada"
+
+ModDonaciones --> Broker : "Publica: notificacion.*"
+Broker --> ModNotificaciones : "Consume: notificacion.*"
+
+@enduml

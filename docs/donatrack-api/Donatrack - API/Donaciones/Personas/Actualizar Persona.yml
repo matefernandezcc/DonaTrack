@@ -1,0 +1,26 @@
+info:
+  name: Actualizar Persona
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{donacionesUrl}}/api/personas/d3b07384-d113-4ec6-a51d-402f06c1af0b"
+  body:
+    type: json
+    data: |-
+      {
+        "contacto": {
+          "correoElectronico": "donante_nuevo@test.com",
+          "telefono": "+5411223344",
+          "whatsapp": "+5411223344",
+          "medioPredeterminado": "CORREO"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

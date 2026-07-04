@@ -1,13 +1,12 @@
 info:
   name: Auditar Vencidos
   type: http
-  seq: 6
+  seq: 5
 
 http:
   method: POST
-  url: "{{baseUrl}}/donaciones/auditoria/vencidos"
-  body:
-    type: none
+  url: "{{donacionesUrl}}/api/donaciones/auditoria/vencidos"
+  body: none
   auth: inherit
 
 settings:

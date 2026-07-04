@@ -1,0 +1,26 @@
+info:
+  name: Agregar Necesidad
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{donacionesUrl}}/api/beneficiarios/e4b07384-d113-4ec6-a51d-402f06c1af0c/necesidades"
+  body:
+    type: json
+    data: |-
+      {
+        "descripcion": "Leche para merendero",
+        "cantidadRequerida": 100.0,
+        "subcategoriaRequerida": {
+          "nombre": "Alimentos",
+          "descripcion": "Comida y bebida"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
