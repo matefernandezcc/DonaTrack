@@ -1,9 +1,10 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence;
 
 import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepositoryPort;
-import com.donatrack.logistica.domain.entities.RutaDeReparto;
-import com.donatrack.logistica.domain.entities.Parada;
-import com.donatrack.logistica.domain.entities.Entrega;
+import com.donatrack.logistica.domain.entities.entregas.Entrega;
+import com.donatrack.logistica.domain.entities.reparto.Parada;
+import com.donatrack.logistica.domain.entities.reparto.RutaDeReparto;
+
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

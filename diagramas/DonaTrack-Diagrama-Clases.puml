@@ -2,11 +2,12 @@
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 
-package ConexionPorFuera{
-    class ConeccionIngresoInicial{}
+package "Comunicacion Inter-Servicios" {
+    class APIGateway <<REST>>
+    class MessageBroker <<RabbitMQ>>
 }
 
-package "servicio de donaciones"{
+package "Servicio de Donaciones" {
     package "Gestión de Personas" {
         enum TipoDocumento {
             DNI
@@ -14,7 +15,14 @@ package "servicio de donaciones"{
             PASAPORTE
         }
 
-        enum TipoPersonaJuridica {
+        class DocumentoIdentidad {
+            - tipo: TipoDocumento
+            - numero: String
+        }
+
+        DocumentoIdentidad --> TipoDocumento
+
+        enum TipoJuridica {
             GUBERNAMENTAL
             ONG
             EMPRESA
@@ -27,123 +35,112 @@ package "servicio de donaciones"{
             WHATSAPP
         }
 
-        package validadorDatosPersona{
-            class DocumentoIdentidad {
-                - tipo: TipoDocumento
-                - numero: String
-            }
-
-            abstract class Persona {
-                - id: UUID
-                - email: String
-                - contacto: Contacto
-                - direccion: Direccion
-                - documento: DocumentoIdentidad
-                - roles: List<Rol>
-                + agregarRol(Rol r)
-                + validarRol(Rol r)
-                + validarDocumentacion(DocumentoIdentidad d)
-                + setDocumento(DocumentoIdentidad documento)
-                + actualizarInformacion(Map<String, Object> datosNuevos)
-            }
-
-            class Contacto {
-                - correoElectronico: String
-                - telefono: String
-                - whatsapp: String
-                - medioPredeterminado: MedioContacto
-            }
-
-            
-        class PersonaHumana extends Persona {
-            - nombre: String
-            - apellido: String
-            - edad: int
-            + validarRol(r: Rol)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+        abstract class Persona {
+            - id: UUID
+            - email: String
+            - contacto: Contacto
+            - direccion: Direccion
+            - documento: DocumentoIdentidad
+            - roles: List<Rol>
+            + agregarRol(r: Rol): boolean
+            # {abstract} validarRol(r: Rol): boolean
+            + validar(validador: PersonaValidator): boolean
+            + setDocumento(documento: DocumentoIdentidad): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
-        note top of PersonaHumana
-        **Regla de negocio:**
-        Tira excepción de invalidez de 
-        rol si el rol es Beneficiario 
-        (acepta solo Donante,
-        Representante o Administrador)
-        end note
-
-        class PersonaJuridica extends Persona {
-            - razonSocial: String
-            - tipo: TipoPersonaJuridica
-            - representantes: List<Representante>
-            - rubro: String
-            + agregarRepresentante(Representante r)
-            + validarRol(Rol r)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+        class Contacto {
+            - correoElectronico: String
+            - telefono: String
+            - whatsapp: String
+            - medioPredeterminado: MedioContacto
         }
 
-        note top of PersonaJuridica
-        **Regla de negocio:**
-        Tira excepción de 
-        invalidez de rol si el rol es 
-        Representante o Administrador
-        end note
-
-        'relaciones
-        Persona "1" *-- "1" Contacto : "tiene"
-        Contacto --> MedioContacto : "define"
-        Persona --> DocumentoIdentidad : "tiene"
-        PersonaJuridica --> TipoPersonaJuridica : "se clasifica en"
-        DocumentoIdentidad --> TipoDocumento
-        }
-
-        package Ubicacion{
-            class Direccion {
+        class Direccion {
             - calle: String
             - altura: Decimal
             - localidad: String
             - pais: Pais
             - codigoPostal: String
             - coordenadas: Coordenada
-            }
-
-            class Coordenada {
-                - latitud: Decimal
-                - longitud: Decimal
-            }
-
-            class Provincia{
-                - nombreProvincia: String
-                - Pais: Pais
-            }
-
-            class Pais {
-                - nombrePais: String
-                - nacionalidad: String
-            }
-
-            Direccion --> Provincia : "es de un"
-            Provincia --> Pais : "forma parte de"
-            Direccion --> Coordenada : "se encuentra"
         }
 
+        class Coordenada {
+            - latitud: Decimal
+            - longitud: Decimal
+        }
+
+        class Provincia{
+            - nombreProvincia: String
+            - Pais: Pais
+        }
+
+        class Pais {
+            - nombrePais: String
+            - nacionalidad: String
+        }
+
+        class PersonaHumana extends Persona {
+            - nombre: String
+            - apellido: String
+            - edad: int
+            # validarRol(r: Rol): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
+        }
+
+        note top of PersonaHumana
+            **Regla de negocio:**
+            Tira excepción de invalidez de
+            rol si el rol es Beneficiario
+            (acepta solo Donante,
+            Representante o Administrador)
+        end note
+
+        class PersonaJuridica extends Persona {
+            - razonSocial: String
+            - tipo: TipoJuridica
+            - representantes: List<Representante>
+            - rubro: String
+            + agregarRepresentante(r: Representante)
+            # validarRol(r: Rol): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
+        }
+
+        note top of PersonaJuridica
+            **Regla de negocio:**
+            Tira excepción de
+            invalidez de rol si el rol es
+            Representante o Administrador
+        end note
+
+        'relaciones
+        Direccion --> Provincia : "es de un"
+        Provincia --> Pais : "forma parte de"
+        Direccion --> Coordenada : "se encuentra"
         Persona --> Direccion : "tiene"
+        Persona "1" *-- "1" Contacto : "tiene"
+        Contacto --> MedioContacto : "define"
+        Persona --> DocumentoIdentidad : "tiene"
+        PersonaJuridica --> TipoJuridica : "se clasifica en"
     }
 
     package "Gestion de Roles" {
         abstract class Rol {
+            - id: UUID
             - fechaAlta: LocalDate
+            + {abstract} esValidoParaHumana(): boolean
+            + {abstract} esValidoParaJuridica(): boolean
         }
 
         class Donante extends Rol {
             - donacionesRealizadas: List<Donacion>
             - historialRecepciones: List<RecepcionDonacion>
-            + agregarDonacion(Donacion d)
-            + agregarRecepcion(RecepcionDonacion r)
-            + consultarEstadoDonacion(Donacion d)
+            + agregarDonacion(d: Donacion)
+            + agregarRecepcion(r: RecepcionDonacion)
+            + consultarEstadoDonacion(d: Donacion): EstadoDonacion
+            + consultarEstadoTodasLasDonaciones(donacionesRealizadas: List<Donacion>): List<EstadoDonacion>
             + filtrarDonaciones(estado: EstadoDonacion, categoria: String)
-            + UbicacionCamion()
+            + verUbicacionCamion()
         }
 
         class Representante extends Rol {
@@ -154,23 +151,21 @@ package "servicio de donaciones"{
         class Beneficiario extends Rol {
             - donacionesAsignadas: List<Donacion>
             - necesidadesDeclaradas: List<Necesidad>
-            - correoRepresentante: String
             + registrarNecesidad(n: Necesidad)
-            + confirmarRecepcion(d: Donacion, fotos: List<String>)
-            + EstadoDonaciones()
-            + UbicacionCamion()
+            + confirmarRecepcion(d: Donacion, fotosComprobante: List<Foto>): boolean
+            + verEstadoDonaciones(donacionesAsignadas: List<Donacion>): List<EstadoDonacion>
+            + verUbicacionCamion()
         }
 
         class Administrador extends Rol {
-            - estrategiaAsignacion: AsignacionStrategy
+            - idDepositoAsignado: UUID
+            - camionesIds: List<UUID>
             - estrategiaImportador: ImportadorStrategy
-            + importarDonantesMasivos(String rutaArchivo)
-            + obtenerRecomendacionAsignacion(List<Donacion> donacionesDisponibles, List<Necesidad> necesidadesDeclaradas)
-            + asociarDonacion(d: Donacion, p: Persona)
-            + actualizarDonacionesVencidas()
-            + asignarDonacionFinal(d: Donacion, e: Beneficiario)
+            + importarDonantesMasivos(rutaArchivo: String): boolean
+            + asociarDonacion(d: Donacion, donante: Donante)
+            + asignarDonacionFinal(d: Donacion, b: Beneficiario)
             + administrarCamiones()
-            + RankingMensual()
+            + verRankingMensual()
         }
 
         class CorreoRegistro {
@@ -179,28 +174,24 @@ package "servicio de donaciones"{
             - fechaEnvio: Date
         }
 
-        package StrategyAdministrador{
-
-            package asignador{
-                interface AlgoritmoAsignacion {
-                    + recomendarNecesidades(donaciones, necesidades)
-                }
-                
-                class PrioridadASubAtendidos implements AlgoritmoAsignacion
-                class CompatibilidadSemantica implements AlgoritmoAsignacion
-            }
-
-            package importador{
-                interface ImportadorStrategy {
-                    + importar(Archivo)
-                }
-
-                class ImportadorCSV implements ImportadorStrategy
-            }     
+        interface AsignacionStrategy {
+            + recomendarNecesidades(donaciones, necesidades)
         }
 
+        class PorPrioridad
+        class PorCercania
+
+        interface ImportadorStrategy {
+            + importar(Archivo)
+        }
+
+        class ImportadorCSV
+
         Administrador --> ImportadorStrategy
-        Administrador --> AlgoritmoAsignacion
+        Administrador --> AsignacionStrategy
+        PorPrioridad ..up|> AsignacionStrategy
+        PorCercania ..up|> AsignacionStrategy
+        ImportadorCSV ..up|> ImportadorStrategy
         Administrador --> CorreoRegistro : "genera"
     }
 
@@ -211,108 +202,42 @@ package "servicio de donaciones"{
             - donante: Donante
             - donacionesSegmentadas: List<Donacion>
             - registradoPor: Administrador
+            + segmentarBienes(bienesBrutos)
         }
 
-        class SegmentadorDeBienes {
-            - bienesBrutos : List<Bien>
-            - estrategiasSegmentacion : List<estrategiaSegmentacion>
-            - donacionesResultantes : List<Donacion>
-            + procesar(bienesBrutos)
-        }
-
-        note left of SegmentadorDeBienes 
-        *Regla de negocio:*
-        A partir de la "carga única" 
-        de bienes, se generan las 
-        Donaciones independientes.
-        end note
-
-        note left of RecepcionDonacion 
-        **Regla de negocio:**
-        Representa la "única carga" 
-        física en el depósito. A partir 
-        de los bienes, se generan las 
-        Donaciones independientes.
+        note left of RecepcionDonacion
+            **Regla de negocio:**
+            Representa la "única carga"
+            física en el depósito. A partir
+            de los bienes, se generan las
+            Donaciones independientes.
         end note
 
         class Donacion {
             - id: UUID
-            - fechaCreacion: Date
             - estado: EstadoDonacion
             - bienes: List<Bien>
-            - categoria: Categoria
+            - subCategoria: Subcategoria
+            - historial: List<HistorialEstado>
+            - fechaVencimiento: LocalDate
+            - entidadAsignada: Beneficiario
+            - fotos: List<Foto>
+            + agregarBien(b: Bien)
+            + registrarCambioEstado(nuevoRegistro: HistorialEstado)
+            + cambiarEstado(nuevoEstado: EstadoDonacion, observacion: String, usuario: Administrador)
+            + asignar(beneficiario: Beneficiario)
+            + addFoto(foto: Foto)
+            + getCategoriasString(): List<String>
         }
 
-    package Segmentacion{
-        interface EstrategiaSegmentacion{
-            +segmentar(List<List<Bien>> bienes)
-        } 
-
-        class segmentarPorEstado implements EstrategiaSegmentacion{
-            +segmentar(List<List<Bien>> listasDeBienes)
-        }
-        
-        class SegmentarPorSubcategoria implements EstrategiaSegmentacion{
-            + segmentar(List<List<Bien>> listasDeBienes)
-        }
-
-        class SegmentarPorVencimiento implements EstrategiaSegmentacion{
-            + segmentar(List<List<Bien>> listasDeBienes)
-        }
-    }
-
-    package Estado{
         enum EstadoDonacion {
-            PENDIENTE
-            ASIGNADA
-            ENTREGADA
             EN_DEPOSITO
+            ASIGNADA
+            LISTA_PARA_ENTREGAR
+            EN_TRASLADO
+            ENTREGADA
+            ENTREGA_FALLIDA
             VENCIDA
-        }
-
-        abstract class EstadoDonacionState{
-            + asignar(Beneficiario beneficiario)
-            + planificarRuta()
-            + iniciarTraslado()
-            + entregar()
-            + fallarEntrega(String justificacion)
-            + marcarVencida()
-            + recibirEnDeposito()
-        }
-
-        class Asignada implements EstadoDonacionState{
-            + planificarRuta()
-            + EstadoDonacion getValorEnum()
-        }
-
-        class Endeposito implements EstadoDonacionState{
-            + asignar(Beneficiario beneficiario)
-            + marcarVencida()
-            + getValorEnum()
-        }
-
-        class EnTraslado implements EstadoDonacionState{
-            + entregar()
-            + fallarEntrega(String justificacion)
-            + getValorEnum()
-        }
-
-        class EntregaFallida implements EstadoDonacionState{
-            + recibirEnDeposito()
-            + getValorEnum()
-        }
-
-        class Entregada implements EstadoDonacionState{
-            + getValorEnum()
-        }
-
-        class ListaParaEntregar implements EstadoDonacionState{
-            + iniciarTraslado()
-            + getValorEnum()
-        }
-
-        class Vencida implements EstadoDonacionState{
-            + getValorEnum()
         }
 
         class HistorialEstado {
@@ -322,7 +247,6 @@ package "servicio de donaciones"{
             - observacion: String
             - usuario: Administrador
         }
-    }
 
         class Bien {
             - descripcion: String
@@ -336,8 +260,14 @@ package "servicio de donaciones"{
         class Categoria {
             - nombre: String
             - descripcion: String
-            - subcategorias: List<Categoria>
-            + agregarSubcategoria(categoria)
+            - subcategorias: List<Subcategoria>
+            + agregarSubcategoria(Subcategoria)
+        }
+
+        class Subcategoria {
+            - nombre: String
+            - descripcion: String
+            - categoriaPadre: Categoria
             + esSubcategoriaDe(categoria)
         }
 
@@ -346,19 +276,13 @@ package "servicio de donaciones"{
             - Url: String
         }
 
-        Bien --> Categoria
+        Bien --> Subcategoria
         Bien --> Foto
-        Categoria --> Categoria
-
+        Categoria --> Subcategoria
         Donacion *-- HistorialEstado
         Donacion "1" *-- "1..*" Bien : "agrupa"
         Donacion --> EstadoDonacion : "se encuentra en"
-        Donacion --> EstadoDonacionState : "se encuentra en"
-
-        RecepcionDonacion --> Donante
-
-        SegmentadorDeBienes *-- Donacion : segmenta >
-        SegmentadorDeBienes -- EstrategiaSegmentacion : usa >
+        RecepcionDonacion *-- Donacion : segmenta >
     }
 
     package "Gestion de Necesidades" {
@@ -370,164 +294,161 @@ package "servicio de donaciones"{
         abstract class Necesidad {
             - descripcion: String
             - estado: EstadoNecesidad
-            - subcategoriaRequerida: Categoria
+            - subcategoriaRequerida: Subcategoria
             - id: UUID
             - fechaSolicitud: Date
             + estaCubierta(): Boolean
         }
 
-        class NecesidadRecurrente implements Necesidad {
+        class NecesidadRecurrente extends Necesidad {
             - cantidadObjetivo: double
             - periodo: String
         }
 
-        class NecesidadExtraordinaria implements Necesidad {
+        class NecesidadExtraordinaria extends Necesidad {
             - cantidadRequerida: double
             + acumularDonacionesParciales()
         }
 
         Necesidad --> EstadoNecesidad : "se encuentra en"
     }
+
+    ' Gestión de Personas y Roles
+    Persona "1" *--down--- "1..*" Rol : "asume"
+
+    ' Conexiones de Dominio (Roles y Donaciones)
+    Beneficiario "1" ---> "0..*" Donacion : "tiene asignadas"
+    Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
+    Donacion -up-> Administrador : "es gestionada por"
+    RecepcionDonacion --> Administrador
+    Beneficiario "1" *--- "0..*" Necesidad : "declara"
+    Necesidad "*" ---> "1" Subcategoria : "demanda"
+    Necesidad "1" o-- "0..*" Donacion : "tiene"
 }
 
 package "Servicio de Incentivos" {
+
     enum CategoriaDonante {
         COLABORADOR
         SOSTENEDOR
         TRANSFORMADOR
     }
 
-    interface CategoriaDonanteState {
-        + avanzarCategoria()
-        + getValorEnum(): CategoriaDonante
+    enum TipoMetricaMision {
+        DONACIONES_EXITOSAS
+        MAX_BIENES
+        MESES_CONSECUTIVOS
+        CATEGORIAS_DISTINTAS
     }
 
-    class ColaboradorState implements CategoriaDonanteState {
-        - perfil: PerfilDonante
-        + avanzarCategoria()
-        + getValorEnum(): CategoriaDonante
-    }
-
-    class SostenedorState implements CategoriaDonanteState {
-        - perfil: PerfilDonante
-        + avanzarCategoria()
-        + getValorEnum(): CategoriaDonante
-    }
-
-    class TransformadorState implements CategoriaDonanteState {
-        - perfil: PerfilDonante
-        + avanzarCategoria()
-        + getValorEnum(): CategoriaDonante
-    }
 
     class PerfilDonante {
         - donanteId: UUID
-        - categoria: CategoriaDonanteState
+        - categoria: CategoriaDonante
         - insigniasObtenidas: List<Insignia>
-        - misionesPorNivel: MisionesPorNivel
+        - misionesPendientes: Queue<Mision>
         - misionActual: Mision
-        - totalDonacionesHistoricas: int
-        - mesesConsecutivosDonando: int
-        - cantidadBienesDonados: int
-        - donacionesExitosas: int
-        - maxBienesEnUnaDonacion: int
-        - categoriasUnicasDonadas: Set<String>
-        - organizacionesUnicasAyudadas: Set<UUID>
-        - historialDonacionesPorMes: Map<YearMonth, Integer>
-        - ultimoMesDonacion: YearMonth
-        + PerfilDonante(donanteId: UUID)
+        - metricas: MetricasDonante
         + cargarMisionesDeCategoriaActual()
-        + registrarDonacionExitosa(actividad: ActividadDonacionDTO)
-        + evaluarMisiones()
-        + getMisionesActivas(): List<Mision>
+        + registrarDonacion(donacion: RegistroDonacion)
+        + evaluarMisiones(mesActual: YearMonth)
+        - avanzarCategoria()
+        - calcularSiguienteCategoria(actual: CategoriaDonante): CategoriaDonante
     }
 
-    abstract class MisionesPorNivel {
-        # misiones: List<Mision>
-        # misionActual: Mision
-        # perfilAsociado: PerfilDonante
-        # categoriaObtener: CategoriaDonante
-        # fechaAsignacion: LocalDate
-        + {abstract} clonar(): MisionesPorNivel
-        + avanzarMision(): Mision
+    class MetricasDonante {
+        - donanteId : UUID
+        - registrosDonacion: List<RegistroDonacion>
+        - misionesCompletadas: Map<Mision, YearMonth>
+        + totalDonacionesHistorias() : int
+        + registrarDonacion(donacion: RegistroDonacion) : void
+        + registrarMisionCompletada(mision: Mision, mes: YearMonth) : void
+        + rachaDeMeses() : int
+        + totalBienesDonados() : int
+        + totalDonacionesExitosas() : int
+        + maxBienesPorDonacion() : int
+        + categoriasDonadas() : Set<String>
+        + organizacionesBeneficiadas() : Set<UUID>
+        + historialDonacionesPorMes() : Map<YearMonth, Integer>
+        + ultimoMesDonacion() : YearMonth
+        + misionesCompletadasPorMes() : Map<YearMonth, List<Mision>>
+        + totalMisionesCompletadasEn(mes: YearMonth) : int
     }
 
-    class MisionesPorNivelColaborador extends MisionesPorNivel {
-        + MisionesPorNivelColaborador()
-        + clonar(): MisionesPorNivel
+    class RegistroDonacion {
+        - idDonacion : UUID
+        - cantidadBienes: int
+        - categorias: Set<String>
+        - idEntidadBeneficiaria: UUID
+        - mesDonacion: YearMonth
+        + esExitosa() : boolean
     }
 
-    class MisionesPorNivelSostenedor extends MisionesPorNivel {
-        + MisionesPorNivelSostenedor()
-        + clonar(): MisionesPorNivel
-    }
-
-    class MisionesPorNivelTransformador extends MisionesPorNivel {
-        + MisionesPorNivelTransformador()
-        + clonar(): MisionesPorNivel
-    }
-
-    abstract class Mision {
+    class Mision {
+        - id: UUID
         - nombre: String
         - recompensa: Insignia
-        + Mision(nombre: String, recompensa: Insignia)
-        + {abstract} evaluar(perfil: PerfilDonante): boolean
-        + {abstract} getProgresoActual(perfil: PerfilDonante): String
-    }
-
-    class RachaMision extends Mision {
-        - mesesObjetivo: int
+        - tipoMetrica: TipoMetricaMision
+        - objetivo: int
         + evaluar(perfil: PerfilDonante): boolean
         + getProgresoActual(perfil: PerfilDonante): String
-    }
-
-    class CompletitudMision extends Mision {
-        - categoriasObjetivo: int
-        + evaluar(perfil: PerfilDonante): boolean
-        + getProgresoActual(perfil: PerfilDonante): String
-    }
-
-    class HabilDonadorMision extends Mision {
-        - cantidadMinimaBienes: int
-        + evaluar(perfil: PerfilDonante): boolean
-        + getProgresoActual(perfil: PerfilDonante): String
-    }
-
-    class DonacionesExitosasMision extends Mision {
-        - donacionesObjetivo: int
-        + evaluar(perfil: PerfilDonante): boolean
-        + getProgresoActual(perfil: PerfilDonante): String
+        - extraerValor(perfil: PerfilDonante): int
+        - getUnidadMetrica(): String
     }
 
     class Insignia {
+        - id: UUID
         - nombre: String
         - descripcion: String
-        - fechaObtencion: LocalDate
-        - visiblePublicamente: boolean
-        + setVisible(visible: boolean)
+        - urlImagen: String
+    }
+
+    class InsigniaObtenidaEvent {
+        - donanteId: UUID
+        - insignia: Insignia
+    }
+
+    class MisionesFactory {
+        + crearMisionesPara(categoria: CategoriaDonante): Queue<Mision>
     }
 
     class RankingMensualService {
-        - repository: PerfilDonanteRepository
         - puntuacionStrategy: RankingStrategy
-        + RankingMensualService(repository: PerfilDonanteRepository, puntuacionStrategy: RankingStrategy)
-        + obtenerTop5Mensual(): List<PerfilDonante>
+        + obtenerTop3Mensual(mes: YearMonth): List<PerfilDonante>
     }
 
     interface RankingStrategy {
-        + calcularPuntaje(perfil: PerfilDonante): double
+        + calcularPuntaje(perfil: PerfilDonante, mes: YearMonth): double
     }
 
-    class RankingPorDonacionesStrategy implements RankingStrategy {
-        + calcularPuntaje(perfil: PerfilDonante): double
+    class RankingMisionesStrategy implements RankingStrategy {
+        + calcularPuntaje(perfil: PerfilDonante, mes: YearMonth): double
     }
 
-    interface PerfilDonanteRepository {
-        + findAll(): List<PerfilDonante>
-    }
+
+
+    ' Relaciones
+    PerfilDonante "1" *-- "1" CategoriaDonante : nivel actual >
+    PerfilDonante "1" *-- "0..*" Mision : pendientes >
+    PerfilDonante "1" *-- "0..*" Insignia : posee >
+
+    Mision --> Insignia : recompensa >
+    Mision --> TipoMetricaMision : evalúa >
+    PerfilDonante "1" *-- "1" MetricasDonante : delega métricas >
+    PerfilDonante ..> RegistroDonacion : usa >
+    MetricasDonante ..> RegistroDonacion : procesa >
+
+    MisionesFactory ..> Mision : instancia >
+    MisionesFactory ..> CategoriaDonante : usa >
+
+    InsigniaObtenidaEvent --> Insignia : refiere >
+
+    RankingMensualService --> RankingStrategy : utiliza >
+    RankingStrategy ..> PerfilDonante : evalúa >
 }
 
 package "Servicio de Notificaciones" {
+
     class NotificadorService {
         - adaptadores: Map<String, NotificacionAdapter>
         + NotificadorService(adaptadores: Map<String, NotificacionAdapter>)
@@ -540,6 +461,7 @@ package "Servicio de Notificaciones" {
         DONACION_ASIGNADA_DONANTE
         MISION_CUMPLIDA
         CAMBIO_CATEGORIA
+        INICIO_RUTA_LOGISTICA
     }
 
     class Evento {
@@ -580,43 +502,140 @@ package "Servicio de Notificaciones" {
     class AdaptadorWhatsApp implements NotificacionAdapter {
         + enviar(notificacion: Notificacion)
     }
+
+    ' Relaciones de Aplicacion y Adaptadores
+    NotificadorService "1" *-- "0..*" NotificacionAdapter : "utiliza >"
+    NotificadorService ..> Notificacion : "envía >"
+    NotificacionFactory ..> Notificacion : "crea >"
+    Notificacion --> Evento : "posee >"
+    Evento --> TipoEvento : "posee >"
 }
 
-' --- CONEXIONES ARQUITECTÓNICAS ENTRE PAQUETES ---
+package "Servicio de Logistica" {
+  package "Gestion Planificacion" {
+    enum EstadoPlanificacion {
+      PENDIENTE
+      RECIBIDA
+      PROCESADA
+    }
 
-' Gestión de Personas y Roles
-Persona "1" *--down--- "1..*" Rol : "asume"
+    class SolicitudPlanificacion {
+      - id: UUID
+      - fechaSolicitud: LocalDateTime
+      - estado: EstadoPlanificacion
+      - idsDonaciones: List<UUID>
+      + procesarCallback(rutas: List<RutaDeReparto>)
+    }
 
-' Conexiones de Dominio (Roles y Donaciones)
-Beneficiario "1" ---> "0..*" Donacion : "tiene asignadas"
-Donante "1" --> "0..*" Donacion : "realiza (asoc. por Admin)"
-Donacion -up-> Administrador : "es gestionada por"
-RecepcionDonacion --> Administrador
-Beneficiario "1" *--- "0..*" Necesidad : "declara"
-Necesidad "*" ---> "1" Categoria : "demanda"
-Necesidad "1" o-- "0..*" Donacion : "tiene"
+    note right of SolicitudPlanificacion
+      El proveedor externo procesa
+      max. 100 donaciones por lote.
+      Notifica resultado vía callback URL.
+    end note
 
-' Conexiones Servicio de Incentivos
-Donante "1" --> "1" PerfilDonante : "tiene asociado"
-PerfilDonante "1" *-- "1" CategoriaDonanteState : posee >
-PerfilDonante "1" *-- "1" MisionesPorNivel : debe completar >
-PerfilDonante "1" *-- "0..*" Insignia : posee >
+    class ItemPlanificacion <<Value Object>> {
+      - idDonacionOriginal: UUID
+      - pesoEstimado: Double
+      - volumenEstimado: Double
+    }
+  }
 
-MisionesPorNivel "1" *-- "0..*" Mision : contiene >
-MisionesPorNivel --> CategoriaDonante : Objetivo >
-Mision --> Insignia : recompensa >
+  package "Gestion Reparto" {
+    class Camion {
+      - patente: String
+      - capacidadVolumen: Double
+      - altura: Double
+      - capacidadCarga: Double
+    }
 
-RankingMensualService --> PerfilDonanteRepository : consulta >
-RankingMensualService --> RankingStrategy : utiliza >
-RankingStrategy ..> PerfilDonante : evalúa >
+    class Chofer {
+      - legajo: String
+      - nombre: String
+    }
 
-' Conexiones Servicio de Notificaciones
-NotificadorService --> NotificacionAdapter : utiliza >
-NotificadorService ..> Notificacion : envía >
-NotificacionFactory ..> Notificacion : crea >
-Notificacion --> Evento : posee >
-Evento --> TipoEvento : posee >
+    class RutaDeReparto {
+      - id: UUID
+      - fechaOperativa: LocalDate
+      - iniciada: Boolean
+      + iniciarRuta()
+    }
+
+    class Parada {
+      - orden: Integer
+    }
+  }
+
+  package "Gestion Entregas" {
+    enum EstadoEntrega {
+      PENDIENTE
+      EN_TRASLADO
+      ENTREGADA
+      NO_RECIBIDA
+    }
+
+    class Entrega {
+      - idEntrega: UUID
+      - estado: EstadoEntrega
+      - pesoEstimado: Double
+      - volumenEstimado: Double
+      + marcarEnTraslado()
+      + confirmarRecepcion(fotos: List<String>)
+      + marcarNoRecibida()
+      + volverAPendiente()
+    }
+
+    note right of Entrega
+      idDonacionOriginal referencia
+      al Servicio de Donaciones
+      (contexto externo)
+    end note
+
+    class ComprobanteRecepcion {
+      - fechaHora: LocalDateTime
+      - fotos: List<String>
+      - camionPatente: String
+    }
+  }
+
+  class Direccion <<Value Object>> {
+    - calle: String
+    - altura: String
+    - localidad: String
+  }
+
+  class Coordenada <<Value Object>> {
+    - latitud: Double
+    - longitud: Double
+  }
+
+  ' Relaciones con multiplicidades estrictas
+  SolicitudPlanificacion "1" --> "0..*" RutaDeReparto : genera >
+  RutaDeReparto "1" --> "1" Camion : asignada a >
+  RutaDeReparto "1" --> "1" Chofer : conducida por >
+  RutaDeReparto "1" *-- "1..*" Parada : compuesta por >
+
+  Parada "1" *-- "1" Direccion : se ubica en >
+  Parada "1" *-- "1" Coordenada : geolocalizada en >
+  Parada "1" *-- "1..*" Entrega : contiene >
+
+  Entrega "1" --> "1" EstadoEntrega : se encuentra en >
+  Entrega "1" *-- "0..1" ComprobanteRecepcion : genera al entregar >
+  SolicitudPlanificacion "1" --> "1" EstadoPlanificacion : se encuentra en >
+
+  SolicitudPlanificacion "1" *-- "1..100" ItemPlanificacion : contiene >
+  ItemPlanificacion "1" --> "1" Direccion : destino >
+}
+
+' ==========================================
+' Conexiones entre Servicios (Infraestructura)
+' ==========================================
+"Servicio de Donaciones" ..> MessageBroker : Publica/Consume
+"Servicio de Logistica" ..> MessageBroker : Publica/Consume
+"Servicio de Incentivos" ..> MessageBroker : Consume
+"Servicio de Notificaciones" ..> MessageBroker : Consume
+
+"Servicio de Donaciones" ..> APIGateway : API REST
+"Servicio de Logistica" ..> APIGateway : API REST
+"Servicio de Incentivos" ..> APIGateway : API REST
 
 @enduml
-
-

@@ -1,7 +1,8 @@
 @startuml DonaTrack_ServicioDonaciones_DiagramaClases
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
-package "servicio de donaciones"{
+package "Servicio de Donaciones" {
     package "Gestión de Personas" {
         enum TipoDocumento {
             DNI
@@ -16,7 +17,7 @@ package "servicio de donaciones"{
 
         DocumentoIdentidad --> TipoDocumento
 
-        enum TipoPersonaJuridica {
+        enum TipoJuridica {
             GUBERNAMENTAL
             ONG
             EMPRESA
@@ -36,11 +37,11 @@ package "servicio de donaciones"{
             - direccion: Direccion
             - documento: DocumentoIdentidad
             - roles: List<Rol>
-            + agregarRol(Rol r)
-            + validarRol(Rol r)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + setDocumento(DocumentoIdentidad documento)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            + agregarRol(r: Rol): boolean
+            # {abstract} validarRol(r: Rol): boolean
+            + validar(validador: PersonaValidator): boolean
+            + setDocumento(documento: DocumentoIdentidad): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         class Contacto {
@@ -78,9 +79,8 @@ package "servicio de donaciones"{
             - nombre: String
             - apellido: String
             - edad: int
-            + validarRol(r: Rol)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            # validarRol(r: Rol): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         note top of PersonaHumana
@@ -92,13 +92,12 @@ package "servicio de donaciones"{
 
         class PersonaJuridica extends Persona {
             - razonSocial: String
-            - tipo: TipoPersonaJuridica
+            - tipo: TipoJuridica
             - representantes: List<Representante>
             - rubro: String
-            + agregarRepresentante(Representante r)
-            + validarRol(Rol r)
-            + validarDocumentacion(DocumentoIdentidad d)
-            + actualizarInformacion(Map<String, Object> datosNuevos)
+            + agregarRepresentante(r: Representante)
+            # validarRol(r: Rol): boolean
+            + actualizarInformacion(datosNuevos: Map<String, Object>)
         }
 
         note top of PersonaJuridica
@@ -116,12 +115,15 @@ package "servicio de donaciones"{
         Persona "1" *-- "1" Contacto : "tiene"
         Contacto --> MedioContacto : "define"
         Persona --> DocumentoIdentidad : "tiene"
-        PersonaJuridica --> TipoPersonaJuridica : "se clasifica en"
+        PersonaJuridica --> TipoJuridica : "se clasifica en"
     }
 
     package "Gestion de Roles" {
         abstract class Rol {
+            - id: UUID
             - fechaAlta: LocalDate
+            + {abstract} esValidoParaHumana(): boolean
+            + {abstract} esValidoParaJuridica(): boolean
         }
 
         class Donante extends Rol {
@@ -129,7 +131,7 @@ package "servicio de donaciones"{
             + agregarDonacion(DonacionOriginal d)
             + consultarEstadoDonacion(Donacion d)
             + filtrarDonaciones(estado: EstadoDonacion, categoria: String)
-            + UbicacionCamion()
+            + verUbicacionCamion()
         }
 
         class Representante extends Rol {
@@ -140,11 +142,10 @@ package "servicio de donaciones"{
         class Beneficiario extends Rol {
             - donacionesAsignadas: List<Donacion>
             - necesidadesDeclaradas: List<Necesidad>
-            - correoRepresentante: String
             + registrarNecesidad(n: Necesidad)
-            + confirmarRecepcion(d: Donacion, fotos: List<String>)
-            + EstadoDonaciones()
-            + UbicacionCamion()
+            + confirmarRecepcion(d: Donacion, fotosComprobante: List<Foto>): boolean
+            + verEstadoDonaciones(donacionesAsignadas: List<Donacion>): List<EstadoDonacion>
+            + verUbicacionCamion()
         }
     }
 
@@ -219,7 +220,6 @@ package "servicio de donaciones"{
 
         class Donacion {
             - id: UUID
-            - fechaCreacion: Date
             - estado: EstadoDonacion
             - bienes: List<Bien>
             - subcategoria: Subcategoria
@@ -332,8 +332,8 @@ package "servicio de donaciones"{
     }
 }
 
-' Gestión de Personas y Roles
-Persona "1" *--down--- "1..*" Rol : "asume"
+    ' Gestión de Personas y Roles
+    Persona "1" *--down--- "1..*" Rol : "asume"
 
 ' Conexiones de Dominio (Roles, Necesidades y Donaciones)
 Donante "1" -- "0..*" DonacionOriginal

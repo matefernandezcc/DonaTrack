@@ -1,8 +1,8 @@
 package com.donatrack.logistica.infrastructure.adapters.in.messaging;
 
 import com.donatrack.logistica.application.ports.in.RecepcionarDonacionListaPort;
-import com.donatrack.logistica.domain.entities.Direccion;
-import com.donatrack.logistica.domain.entities.ItemPlanificacion;
+import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
+import com.donatrack.logistica.domain.entities.reparto.Direccion;
 import com.donatrack.logistica.infrastructure.adapters.in.messaging.dtos.MensajeDonacionListaDTO;
 
 import lombok.extern.slf4j.Slf4j;

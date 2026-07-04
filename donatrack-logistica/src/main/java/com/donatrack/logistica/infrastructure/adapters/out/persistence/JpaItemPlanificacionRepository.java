@@ -1,7 +1,7 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence;
 
 import com.donatrack.logistica.application.ports.out.ItemPlanificacionRepositoryPort;
-import com.donatrack.logistica.domain.entities.ItemPlanificacion;
+import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers.ItemPlanificacionMapper;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.repositories.ItemPlanificacionJpaRepository;
 import java.util.List;

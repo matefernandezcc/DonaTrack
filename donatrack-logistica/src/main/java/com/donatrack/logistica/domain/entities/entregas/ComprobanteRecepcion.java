@@ -1,4 +1,4 @@
-package com.donatrack.logistica.domain.entities;
+package com.donatrack.logistica.domain.entities.entregas;
 
 import java.time.LocalDateTime;
 import java.util.List;

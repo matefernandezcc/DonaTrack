@@ -1,4 +1,4 @@
-package com.donatrack.logistica.domain.entities;
+package com.donatrack.logistica.domain.entities.reparto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Coordenada {
-  private Double latitud;
-  private Double longitud;
+public class Chofer {
+  private String legajo;
+  private String nombre;
 }

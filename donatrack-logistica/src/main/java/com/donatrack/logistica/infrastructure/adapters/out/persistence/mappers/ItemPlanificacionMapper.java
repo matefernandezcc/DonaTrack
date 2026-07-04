@@ -1,7 +1,7 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers;
 
-import com.donatrack.logistica.domain.entities.Direccion;
-import com.donatrack.logistica.domain.entities.ItemPlanificacion;
+import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
+import com.donatrack.logistica.domain.entities.reparto.Direccion;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.DireccionEmbeddable;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ItemPlanificacionEntity;
 

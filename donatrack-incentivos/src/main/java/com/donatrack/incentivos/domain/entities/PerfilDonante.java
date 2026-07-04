@@ -50,7 +50,8 @@ public class PerfilDonante {
                 .max(YearMonth::compareTo)
                 .orElse(mesActual);
 
-        // Si pasó más de un mes completo de diferencia, se resetean los registros (racha cortada)
+        // Si pasó más de un mes completo de diferencia, se resetean los registros
+        // (racha cortada)
         if (ultimoMes.plusMonths(1).isBefore(mesActual)) {
             this.metricas.getRegistrosDonacion().clear();
         }
@@ -74,12 +75,20 @@ public class PerfilDonante {
     }
 
     private void avanzarCategoria() {
-        if (this.categoria == CategoriaDonante.COLABORADOR) {
-            this.categoria = CategoriaDonante.SOSTENEDOR;
-        } else if (this.categoria == CategoriaDonante.SOSTENEDOR) {
-            this.categoria = CategoriaDonante.TRANSFORMADOR;
-        }
+        this.categoria = calcularSiguienteCategoria(this.categoria);
         cargarMisionesDeCategoriaActual();
+    }
+
+    private CategoriaDonante calcularSiguienteCategoria(CategoriaDonante actual) {
+        switch (actual) {
+            case COLABORADOR:
+                return CategoriaDonante.SOSTENEDOR;
+            case SOSTENEDOR:
+            case TRANSFORMADOR:
+                return CategoriaDonante.TRANSFORMADOR;
+            default:
+                return actual;
+        }
     }
 
     private void agregarInsignia(Insignia insignia) {

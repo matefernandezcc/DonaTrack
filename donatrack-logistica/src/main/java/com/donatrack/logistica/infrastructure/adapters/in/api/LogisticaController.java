@@ -30,13 +30,13 @@ public class LogisticaController {
     private final ProcesarPlanificacionesPendientesUseCase planificacionUseCase;
 
     public LogisticaController(ListarItemsPendientesPort listarItemsPendientesPort,
-                               CamionRepositoryPort camionRepository,
-                               ChoferRepositoryPort choferRepository,
-                               RutaDeRepartoRepositoryPort rutaRepository,
-                               IniciarRutaUseCase iniciarRutaUseCase,
-                               ConfirmarRecepcionUseCase confirmarRecepcionUseCase,
-                               ReportarFallaEntregaUseCase reportarFallaEntregaUseCase,
-                               ProcesarPlanificacionesPendientesUseCase planificacionUseCase) {
+            CamionRepositoryPort camionRepository,
+            ChoferRepositoryPort choferRepository,
+            RutaDeRepartoRepositoryPort rutaRepository,
+            IniciarRutaUseCase iniciarRutaUseCase,
+            ConfirmarRecepcionUseCase confirmarRecepcionUseCase,
+            ReportarFallaEntregaUseCase reportarFallaEntregaUseCase,
+            ProcesarPlanificacionesPendientesUseCase planificacionUseCase) {
         this.listarItemsPendientesPort = listarItemsPendientesPort;
         this.camionRepository = camionRepository;
         this.choferRepository = choferRepository;
@@ -116,13 +116,15 @@ public class LogisticaController {
 
     // --- Confirmar y fallar entregas ---
     @PostMapping("/entregas/{idDonacion}/confirmar")
-    public ResponseEntity<Void> confirmarEntrega(@PathVariable UUID idDonacion, @RequestBody ConfirmarRecepcionRequest request) {
+    public ResponseEntity<Void> confirmarEntrega(@PathVariable UUID idDonacion,
+            @RequestBody ConfirmarRecepcionRequest request) {
         confirmarRecepcionUseCase.procesar(idDonacion, request.getFotos(), request.getPatenteCamion());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/entregas/{idDonacion}/falla")
-    public ResponseEntity<Void> fallarEntrega(@PathVariable UUID idDonacion, @RequestBody ReportarFallaRequest request) {
+    public ResponseEntity<Void> fallarEntrega(@PathVariable UUID idDonacion,
+            @RequestBody ReportarFallaRequest request) {
         reportarFallaEntregaUseCase.procesar(idDonacion, request.getMotivo(), request.isPuedeReplanificarse());
         return ResponseEntity.ok().build();
     }

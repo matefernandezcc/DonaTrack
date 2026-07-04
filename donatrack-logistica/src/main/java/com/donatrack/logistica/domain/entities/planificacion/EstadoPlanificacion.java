@@ -1,4 +1,4 @@
-package com.donatrack.logistica.domain.entities;
+package com.donatrack.logistica.domain.entities.planificacion;
 
 public enum EstadoPlanificacion {
   PENDIENTE,
