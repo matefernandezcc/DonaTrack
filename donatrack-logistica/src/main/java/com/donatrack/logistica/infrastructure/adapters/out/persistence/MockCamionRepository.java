@@ -1,7 +1,7 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence;
 
 import com.donatrack.logistica.application.ports.out.CamionRepositoryPort;
-import com.donatrack.logistica.domain.entities.Camion;
+import com.donatrack.logistica.domain.entities.reparto.Camion;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

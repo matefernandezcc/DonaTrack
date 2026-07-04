@@ -8,7 +8,9 @@ import com.donatrack.logistica.application.ports.out.ChoferRepositoryPort;
 import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepositoryPort;
 import com.donatrack.logistica.application.usecases.ConfirmarRecepcionUseCase;
 import com.donatrack.logistica.application.usecases.ReportarFallaEntregaUseCase;
-import com.donatrack.logistica.domain.entities.*;
+import com.donatrack.logistica.domain.entities.reparto.*;
+import com.donatrack.logistica.domain.entities.entregas.*;
+import com.donatrack.logistica.domain.entities.planificacion.*;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

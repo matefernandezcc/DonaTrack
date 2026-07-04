@@ -1,6 +1,6 @@
 package com.donatrack.logistica.application.ports.out;
 
-import com.donatrack.logistica.domain.entities.Camion;
+import com.donatrack.logistica.domain.entities.reparto.Camion;
 import java.util.List;
 import java.util.Optional;
 

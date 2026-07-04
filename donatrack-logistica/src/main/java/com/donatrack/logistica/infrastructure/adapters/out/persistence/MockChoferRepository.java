@@ -1,7 +1,7 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence;
 
 import com.donatrack.logistica.application.ports.out.ChoferRepositoryPort;
-import com.donatrack.logistica.domain.entities.Chofer;
+import com.donatrack.logistica.domain.entities.reparto.Chofer;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
