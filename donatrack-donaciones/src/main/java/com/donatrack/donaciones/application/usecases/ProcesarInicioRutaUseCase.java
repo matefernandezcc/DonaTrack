@@ -3,9 +3,9 @@ package com.donatrack.donaciones.application.usecases;
 import com.donatrack.common.events.NotificacionInicioRutaEvent;
 import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
-import com.donatrack.donaciones.application.ports.out.RecepcionDonacionRepository;
+import com.donatrack.donaciones.application.ports.out.DonacionOriginalRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 public class ProcesarInicioRutaUseCase {
 
     private final DonacionRepository donacionRepository;
-    private final RecepcionDonacionRepository recepcionRepository;
+    private final DonacionOriginalRepository recepcionRepository;
     private final PersonaRepository personaRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public ProcesarInicioRutaUseCase(DonacionRepository donacionRepository, 
-                                     RecepcionDonacionRepository recepcionRepository,
+                                     DonacionOriginalRepository recepcionRepository,
                                      PersonaRepository personaRepository,
                                      ApplicationEventPublisher eventPublisher) {
         this.donacionRepository = donacionRepository;
@@ -61,7 +61,7 @@ public class ProcesarInicioRutaUseCase {
             }
 
             // 3. Extract Donor Contacts
-            Optional<RecepcionDonacion> recepcionOpt = recepcionRepository.buscarPorIdDonacion(idDonacion);
+            Optional<DonacionOriginal> recepcionOpt = recepcionRepository.buscarPorIdDonacion(idDonacion);
             if (recepcionOpt.isPresent()) {
                 Donante donante = recepcionOpt.get().getDonante();
                 if (donante != null) {

@@ -1,19 +1,10 @@
 package com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.asignador;
 
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
-
+import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
+import com.donatrack.donaciones.domain.services.ResultadoMatch;
 import java.util.List;
 
 public interface AlgoritmoAsignacion {
-
-    /**
-     * Evalúa a las entidades beneficiarias y genera un ranking (hasta 10 entidades)
-     * en función de qué tanto corresponde que reciban la donación.
-     *
-     * @param donacion La donación que se desea asignar.
-     * @param beneficiariosDisponibles La lista de beneficiarios candidatos.
-     * @return Lista rankeada de hasta 10 beneficiarios.
-     */
-    List<Beneficiario> sugerirBeneficiarios(Donacion donacion, List<Beneficiario> beneficiariosDisponibles);
+    List<ResultadoMatch> recomendarNecesidades(List<Donacion> donaciones, List<Necesidad> necesidades);
 }

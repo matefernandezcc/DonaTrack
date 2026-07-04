@@ -8,7 +8,7 @@ import com.donatrack.donaciones.domain.entities.persona.Persona;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/donaciones/personas")
+@RequestMapping("/api/personas")
 public class PersonaController {
 
     @PostMapping

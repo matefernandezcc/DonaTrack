@@ -26,4 +26,8 @@ public class Notificacion {
         this.evento = evento;
         this.medio = medio;
     }
+
+    public void marcarComoCompletada() {
+        this.completada = true;
+    }
 }

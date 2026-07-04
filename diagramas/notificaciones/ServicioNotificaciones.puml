@@ -1,6 +1,5 @@
-@startuml ServicioNotificaciones.puml
+@startuml DonaTrack_ServicioNotificaciones_DiagramaClases
 skinparam classAttributeIconSize 0
-skinparam linetype ortho
 
 package "Servicio de Notificaciones" {
 
@@ -16,7 +15,10 @@ package "Servicio de Notificaciones" {
         DONACION_ASIGNADA_DONANTE
         MISION_CUMPLIDA
         CAMBIO_CATEGORIA
+        ' --- Agregados de la Entrega 3 ---
         INICIO_RUTA_LOGISTICA
+        ENTREGA_EXITOSA
+        ENTREGA_NO_SATISFACTORIA
     }
 
     class Evento {
@@ -40,6 +42,7 @@ package "Servicio de Notificaciones" {
         - medio: String
         + Notificacion(destinatario: String, mensaje: String)
         + Notificacion(destinatario: String, mensaje: String, evento: Evento, medio: String)
+        + marcarComoCompletada()
     }
 
     interface NotificacionAdapter {
@@ -58,11 +61,13 @@ package "Servicio de Notificaciones" {
         + enviar(notificacion: Notificacion)
     }
 
-    ' Relaciones de Aplicacion y Adaptadores
-    NotificadorService "1" *-- "0..*" NotificacionAdapter : "utiliza >"
-    NotificadorService ..> Notificacion : "envía >"
-    NotificacionFactory ..> Notificacion : "crea >"
-    Notificacion --> Evento : "posee >"
-    Evento --> TipoEvento : "posee >"
+    ' Relaciones
+    NotificadorService --> NotificacionAdapter : utiliza >
+    NotificadorService ..> Notificacion : envía >
+
+    NotificacionFactory ..> Notificacion : crea >
+
+    Notificacion --> Evento : posee >
+    Evento --> TipoEvento : posee >
 }
 @enduml

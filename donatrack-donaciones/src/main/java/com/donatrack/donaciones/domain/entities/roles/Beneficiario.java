@@ -2,7 +2,6 @@ package com.donatrack.donaciones.domain.entities.roles;
 
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
-import com.donatrack.donaciones.domain.entities.donacion.Foto;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import lombok.Setter;
 public class Beneficiario extends Rol {
   private List<Donacion> donacionesAsignadas;
   private List<Necesidad> necesidadesDeclaradas;
+  private String correoRepresentante;
 
   public Beneficiario() {
     super();
@@ -32,30 +32,32 @@ public class Beneficiario extends Rol {
     return true; 
   }
 
-  // se registra la necesidad del beneficiario
+  // --- Métodos del Diagrama de Clases ---
+
   public void registrarNecesidad(Necesidad n) {
     this.necesidadesDeclaradas.add(n);
   }
 
-  // Se confirma que el beneficiario recibió la donación asignada que le fue asignada
-  public boolean confirmarRecepcion(Donacion d, List<Foto> fotosComprobante) {
-    // Verificamos que la donación estuviera asignada a este beneficiario
+  public boolean confirmarRecepcion(Donacion d, List<String> fotos) {
     if (this.donacionesAsignadas.contains(d)) {
       d.cambiarEstado(EstadoDonacion.ENTREGADA, "Confirmada por beneficiario", null);
-      // (Opcional) Las fotos se podrían guardar en la donación como comprobante de que el
-      // beneficiario firmó la recepción.
+      // Se asocian las urls de las fotos a la donación
+      if (fotos != null) {
+          for (String url : fotos) {
+              d.addFoto(new com.donatrack.donaciones.domain.entities.donacion.Foto("", url));
+          }
+      }
       return true;
     } else {
-      // Error: La donación no pertenece a este beneficiario.
       return false;
     }
   }
 
-  public List<EstadoDonacion> verEstadoDonaciones(List<Donacion> donacionesAsignadas) {
+  public List<EstadoDonacion> EstadoDonaciones() {
     return donacionesAsignadas.stream().map(d -> d.getEstado()).toList();
   }
 
-  public void verUbicacionCamion() {
-    // Queda vacío. Requerirá integración con API de mapas en el frontend.
+  public void UbicacionCamion() {
+    // Requerirá integración de mapas
   }
 }

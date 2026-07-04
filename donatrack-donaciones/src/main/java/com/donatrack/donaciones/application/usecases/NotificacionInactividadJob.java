@@ -7,8 +7,7 @@ import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.application.ports.out.NotificacionOutDTO;
 import com.donatrack.donaciones.application.ports.out.ServicioNotificaciones;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
-import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.donacion.HistorialEstado;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -54,21 +53,17 @@ public class NotificacionInactividadJob {
     }
 
     private boolean estaInactivo(Donante donante, LocalDate hoy) {
-        List<Donacion> donaciones = donante.getDonacionesRealizadas();
+        List<DonacionOriginal> donaciones = donante.getDonacionesRealizadas();
         if (donaciones == null || donaciones.isEmpty()) {
-            return false; // Nunca interactuó o acaba de registrarse, podríamos manejarlo diferente, pero por ahora false
+            return false; // Nunca interactuó
         }
 
         LocalDate ultimaInteraccion = LocalDate.MIN;
 
-        for (Donacion d : donaciones) {
-            List<HistorialEstado> historial = d.getHistorial();
-            if (historial != null && !historial.isEmpty()) {
-                // Obtenemos la fecha del estado inicial (cuando se registró la donación en depósito)
-                LocalDate fechaRegistro = historial.get(0).getFecha();
-                if (fechaRegistro.isAfter(ultimaInteraccion)) {
-                    ultimaInteraccion = fechaRegistro;
-                }
+        for (DonacionOriginal d : donaciones) {
+            LocalDate fechaRegistro = d.getFechaRecepcion();
+            if (fechaRegistro != null && fechaRegistro.isAfter(ultimaInteraccion)) {
+                ultimaInteraccion = fechaRegistro;
             }
         }
 

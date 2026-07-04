@@ -39,7 +39,7 @@ public class RegistrarActividadDonacionUseCase {
                 actividad.getIdEntidadBeneficiaria(),
                 java.time.YearMonth.from(actividad.getFecha()));
 
-        perfil.registrarDonacion(donacion);
+        perfil.registrarDonacionExitosa(donacion);
 
         int insigniasDespues = perfil.getInsigniasObtenidas().size();
         com.donatrack.incentivos.domain.entities.categoria.CategoriaDonante categoriaDespues = perfil.getCategoria();

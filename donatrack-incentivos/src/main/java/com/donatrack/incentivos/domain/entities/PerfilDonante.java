@@ -18,12 +18,12 @@ public class PerfilDonante {
     private List<Insignia> insigniasObtenidas;
     private Queue<Mision> misionesPendientes;
     private Mision misionActual;
-    private MetricasDonante metricas; // Métricas
+    private MetricasDonante metricas;
 
     public PerfilDonante(UUID donanteId) {
         this.donanteId = donanteId;
         this.insigniasObtenidas = new ArrayList<>();
-        this.metricas = new MetricasDonante();
+        this.metricas = new MetricasDonante(donanteId);
         this.categoria = CategoriaDonante.COLABORADOR;
         cargarMisionesDeCategoriaActual();
     }
@@ -33,9 +33,28 @@ public class PerfilDonante {
         this.misionActual = misionesPendientes.poll();
     }
 
-    public void registrarDonacion(RegistroDonacion donacion) {
+    public void registrarDonacionExitosa(RegistroDonacion donacion) {
         this.metricas.registrarDonacion(donacion);
         evaluarMisiones(donacion.getMesDonacion());
+    }
+
+    public void procesarInactividad(YearMonth mesActual) {
+        List<RegistroDonacion> donaciones = metricas.obtenerTodasLasDonaciones();
+        if (donaciones.isEmpty()) {
+            return;
+        }
+
+        // Buscar el mes de la donación más reciente
+        YearMonth ultimoMes = donaciones.stream()
+                .map(RegistroDonacion::getMesDonacion)
+                .max(YearMonth::compareTo)
+                .orElse(mesActual);
+
+        // Si pasó más de un mes completo de diferencia, se resetean los registros
+        // (racha cortada)
+        if (ultimoMes.plusMonths(1).isBefore(mesActual)) {
+            this.metricas.getRegistrosDonacion().clear();
+        }
     }
 
     public void evaluarMisiones(YearMonth mesActual) {

@@ -5,7 +5,8 @@ info:
 
 http:
   method: GET
-  url: "{{donacionesUrl}}/donaciones/beneficiarios"
+  url: "{{donacionesUrl}}/api/beneficiarios"
+  body: none
   auth: inherit
 
 settings:

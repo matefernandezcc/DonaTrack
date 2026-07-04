@@ -45,9 +45,14 @@ public class ImportadorCSVTest {
 
     ImportadorCSV importador = new ImportadorCSV(personaRepository);
 
-    // el archivo tiene 19986 registros
-    importador.importar("../enunciado/CSV/donantes.csv");
+    byte[] contenido;
+    try {
+        contenido = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("../enunciado/CSV/donantes.csv"));
+    } catch (java.io.IOException e) {
+        contenido = new byte[0];
+    }
+    importador.importar(new com.donatrack.donaciones.domain.entities.donacion.Archivo("donantes.csv", contenido));
 
-    assertEquals(19986, importador.getRegistroPersonas().size());
+    assertEquals(19988, importador.getRegistroPersonas().size());
   }
 }

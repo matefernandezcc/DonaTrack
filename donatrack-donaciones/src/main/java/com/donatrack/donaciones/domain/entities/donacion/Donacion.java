@@ -1,7 +1,6 @@
 package com.donatrack.donaciones.domain.entities.donacion;
 
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
-import com.donatrack.donaciones.domain.entities.roles.Administrador;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import lombok.Setter;
 @Setter
 public class Donacion {
   private UUID id;
+  private LocalDate fechaCreacion;
   private EstadoDonacion estado;
   private List<Bien> bienes;
   private Subcategoria subCategoria;
@@ -24,6 +24,7 @@ public class Donacion {
 
   public Donacion(Subcategoria subcategoria) {
     this.id = UUID.randomUUID();
+    this.fechaCreacion = LocalDate.now();
     this.estado = EstadoDonacion.EN_DEPOSITO;
     this.bienes = new ArrayList<>();
     this.subCategoria = subcategoria;
@@ -39,9 +40,9 @@ public class Donacion {
     this.historial.add(nuevoRegistro);
   }
 
-  public void cambiarEstado(EstadoDonacion nuevoEstado, String observacion, Administrador usuario) {
+  public void cambiarEstado(EstadoDonacion nuevoEstado, String observacion, String usuarioId) {
     this.estado = nuevoEstado;
-    this.historial.add(new HistorialEstado(nuevoEstado, observacion, usuario));
+    this.historial.add(new HistorialEstado(nuevoEstado, observacion, usuarioId));
   }
 
   public void asignar(Beneficiario beneficiario) {

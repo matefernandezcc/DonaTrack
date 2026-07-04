@@ -5,10 +5,9 @@ import com.donatrack.common.events.NotificacionEntregaExitosaEvent;
 import com.donatrack.common.events.NotificacionInicioRutaEvent;
 import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
-import com.donatrack.donaciones.application.ports.out.RecepcionDonacionRepository;
+import com.donatrack.donaciones.application.ports.out.DonacionOriginalRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.donacion.Foto;
-import com.donatrack.donaciones.domain.entities.donacion.RecepcionDonacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
@@ -24,12 +23,12 @@ import java.util.Optional;
 public class ConfirmarRecepcionYNotificarUseCase {
 
     private final DonacionRepository donacionRepository;
-    private final RecepcionDonacionRepository recepcionRepository;
+    private final DonacionOriginalRepository recepcionRepository;
     private final PersonaRepository personaRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public ConfirmarRecepcionYNotificarUseCase(DonacionRepository donacionRepository,
-                                               RecepcionDonacionRepository recepcionRepository,
+                                               DonacionOriginalRepository recepcionRepository,
                                                PersonaRepository personaRepository,
                                                ApplicationEventPublisher eventPublisher) {
         this.donacionRepository = donacionRepository;
@@ -46,13 +45,8 @@ public class ConfirmarRecepcionYNotificarUseCase {
         Beneficiario beneficiario = donacion.getEntidadAsignada();
 
         if (beneficiario != null) {
-            // Convertimos las URLs de fotos a objetos Foto del dominio
-            List<Foto> fotosComprobante = event.getFotos().stream()
-                .map(url -> new Foto("Comprobante de entrega", url))
-                .toList();
-
-            // Actualizamos el estado a ENTREGADA mediante la lógica de dominio
-            boolean confirmado = beneficiario.confirmarRecepcion(donacion, fotosComprobante);
+            // Pasamos las URLs de fotos directamente como List<String>
+            boolean confirmado = beneficiario.confirmarRecepcion(donacion, event.getFotos());
             if (confirmado) {
                 donacionRepository.guardar(donacion);
             }
@@ -75,7 +69,7 @@ public class ConfirmarRecepcionYNotificarUseCase {
 
     private List<NotificacionInicioRutaEvent.ContactoInfo> extraerContactosDonante(Donacion donacion) {
         List<NotificacionInicioRutaEvent.ContactoInfo> contactos = new ArrayList<>();
-        Optional<RecepcionDonacion> recepcionOpt = recepcionRepository.buscarPorIdDonacion(donacion.getId());
+        Optional<DonacionOriginal> recepcionOpt = recepcionRepository.buscarPorIdDonacion(donacion.getId());
         if (recepcionOpt.isPresent()) {
             Donante donante = recepcionOpt.get().getDonante();
             if (donante != null) {

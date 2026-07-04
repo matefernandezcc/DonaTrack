@@ -1,6 +1,5 @@
-@startuml ServicioIncentivos.puml
+@startuml DonaTrack_ServicioIncentivos_DiagramaClases
 skinparam classAttributeIconSize 0
-skinparam linetype ortho
 
 package "Servicio de Incentivos" {
 
@@ -17,7 +16,6 @@ package "Servicio de Incentivos" {
         CATEGORIAS_DISTINTAS
     }
 
-
     class PerfilDonante {
         - donanteId: UUID
         - categoria: CategoriaDonante
@@ -26,29 +24,27 @@ package "Servicio de Incentivos" {
         - misionActual: Mision
         - metricas: MetricasDonante
         + cargarMisionesDeCategoriaActual()
-        + registrarDonacion(donacion: RegistroDonacion)
+        + registrarDonacionExitosa(donacion: RegistroDonacion)
+        + procesarInactividad(mesActual: YearMonth)
         + evaluarMisiones(mesActual: YearMonth)
-        - avanzarCategoria()
-        - calcularSiguienteCategoria(actual: CategoriaDonante): CategoriaDonante
     }
+
+    note right of PerfilDonante
+      **Regla de negocio:**
+      procesarInactividad() resetea
+      las métricas como la "racha" si 
+      pasa un mes completo sin donar.
+    end note
 
     class MetricasDonante {
         - donanteId : UUID
         - registrosDonacion: List<RegistroDonacion>
         - misionesCompletadas: Map<Mision, YearMonth>
-        + totalDonacionesHistorias() : int
         + registrarDonacion(donacion: RegistroDonacion) : void
-        + registrarMisionCompletada(mision: Mision, mes: YearMonth) : void
-        + rachaDeMeses() : int
-        + totalBienesDonados() : int
-        + totalDonacionesExitosas() : int
-        + maxBienesPorDonacion() : int
-        + categoriasDonadas() : Set<String>
-        + organizacionesBeneficiadas() : Set<UUID>
-        + historialDonacionesPorMes() : Map<YearMonth, Integer>
-        + ultimoMesDonacion() : YearMonth
-        + misionesCompletadasPorMes() : Map<YearMonth, List<Mision>>
-        + totalMisionesCompletadasEn(mes: YearMonth) : int
+        + registrarMisionCompletada(mes: YearMonth) : void
+        + obtenerTodasLasDonaciones() : List<RegistroDonacion>
+        + obtenerDonacionesExitosas() : List<RegistroDonacion>
+        + obtenerMisionesCompletadasEn(mes: YearMonth) : List<Mision>
     }
 
     class RegistroDonacion {
@@ -68,15 +64,21 @@ package "Servicio de Incentivos" {
         - objetivo: int
         + evaluar(perfil: PerfilDonante): boolean
         + getProgresoActual(perfil: PerfilDonante): String
-        - extraerValor(perfil: PerfilDonante): int
-        - getUnidadMetrica(): String
     }
+    
+    note left of Mision
+      **Regla de negocio:**
+      El método evaluar() utiliza un 
+      switch(tipoMetrica) y procesa las 
+      listas de MetricasDonante para 
+      calcular el progreso.
+    end note
 
     class Insignia {
-        - id: UUID
         - nombre: String
         - descripcion: String
-        - urlImagen: String
+        - fechaObtencion: LocalDate
+        - visiblePublicamente: boolean
     }
 
     class InsigniaObtenidaEvent {
@@ -100,8 +102,6 @@ package "Servicio de Incentivos" {
     class RankingMisionesStrategy implements RankingStrategy {
         + calcularPuntaje(perfil: PerfilDonante, mes: YearMonth): double
     }
-
-
 
     ' Relaciones
     PerfilDonante "1" *-- "1" CategoriaDonante : nivel actual >

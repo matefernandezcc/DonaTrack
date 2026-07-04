@@ -1,10 +1,9 @@
 package com.donatrack.donaciones.domain.entities.necesidades;
 
-import com.donatrack.donaciones.domain.entities.donacion.Bien;
 import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
-import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.enums.EstadoNecesidad;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,29 +11,41 @@ import lombok.Setter;
 @Setter
 public class NecesidadRecurrente extends Necesidad {
   private double cantidadObjetivo;
-  private double periodo;
+  private Boolean activa;
+  private List<PeriodoNecesidad> historialPeriodos;
+  private PeriodoNecesidad periodoActual;
+  private TipoPeriodo tipoPeriodo;
 
   public NecesidadRecurrente(
       String descripcion,
       Subcategoria subcategoriaRequerida,
       double cantidadObjetivo,
-      double periodo) {
+      TipoPeriodo tipoPeriodo) {
     super(descripcion, subcategoriaRequerida);
     this.cantidadObjetivo = cantidadObjetivo;
-    this.periodo = periodo;
+    this.tipoPeriodo = tipoPeriodo;
+    this.activa = true;
+    this.historialPeriodos = new ArrayList<>();
+    
+    // Inicializar el período actual
+    LocalDate inicio = LocalDate.now();
+    LocalDate fin = inicio.plusDays(tipoPeriodo.getDias() - 1);
+    this.periodoActual = new PeriodoNecesidad(inicio, fin);
   }
 
-  public LocalDate fechaVencimientoPeriodo() {
-    return this.getFechaSolicitud().plusDays((long) this.periodo);
-  }
-
-  public void cumplirObjetivo(Donacion nuevaDonacion) {
-    if (this.cantidadAcumulada(nuevaDonacion) >= this.cantidadObjetivo) {
-      this.setEstado(EstadoNecesidad.CUBIERTA);
+  public PeriodoNecesidad cerrarPeriodoYCrearSiguiente() {
+    if (!this.activa) {
+      return null;
     }
+    this.historialPeriodos.add(this.periodoActual);
+    
+    LocalDate nuevoInicio = this.periodoActual.getFechaFin().plusDays(1);
+    LocalDate nuevoFin = nuevoInicio.plusDays(this.tipoPeriodo.getDias() - 1);
+    this.periodoActual = new PeriodoNecesidad(nuevoInicio, nuevoFin);
+    return this.periodoActual;
   }
 
-  public double cantidadAcumulada(Donacion nuevaDonacion) {
-    return nuevaDonacion.getBienes().stream().mapToDouble(Bien::getCantidad).sum();
+  public void darDeBaja() {
+    this.activa = false;
   }
 }

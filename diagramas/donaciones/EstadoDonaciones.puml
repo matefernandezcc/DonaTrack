@@ -1,0 +1,31 @@
+@startuml DonaTrack_ServicioDonaciones_EstadoDonaciones
+
+hide empty description
+
+state "En depósito" as EnDeposito
+state "Asignación realizada" as Asignacion
+state "Lista para entregar" as Lista
+state "En traslado" as Traslado
+state "Entregada" as Entregada
+state "Entrega fallida" as Fallida
+state "Vencida" as Vencida
+
+[*] --> EnDeposito : Donación registrada
+
+EnDeposito --> Asignacion : Algoritmo asigna\nentidad beneficiaria
+
+Asignacion --> Lista : Hay una ruta planificada\nque incluye la donación
+
+Lista --> Traslado : Camión inicia el recorrido
+
+Traslado --> Entregada : Entidad beneficiaria\nconfirma entrega
+Traslado --> Fallida : No se pudo entregar
+
+Fallida --> EnDeposito : Retorna al depósito
+
+EnDeposito --> Vencida : Se vence la donación
+
+Entregada --> [*]
+Vencida --> [*]
+
+@enduml

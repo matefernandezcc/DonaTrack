@@ -17,7 +17,7 @@ public class BeneficiarioTest {
     Subcategoria categoriaPrueba = new Subcategoria("Ropa", "esta Bien");
     Donacion donacionPrueba = new Donacion(categoriaPrueba);
 
-    List<Foto> fotos = new ArrayList<>();
+    List<String> fotos = new ArrayList<>();
 
     Beneficiario beneficiario = new Beneficiario();
 

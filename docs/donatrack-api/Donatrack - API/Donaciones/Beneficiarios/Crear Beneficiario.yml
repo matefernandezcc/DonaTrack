@@ -5,12 +5,14 @@ info:
 
 http:
   method: POST
-  url: "{{donacionesUrl}}/donaciones/beneficiarios"
+  url: "{{donacionesUrl}}/api/beneficiarios"
   body:
     type: json
     data: |-
       {
-        "nombre": "Entidad de Ayuda Mutua"
+        "correoRepresentante": "representante@ong.org",
+        "donacionesAsignadas": [],
+        "necesidadesDeclaradas": []
       }
   auth: inherit
 

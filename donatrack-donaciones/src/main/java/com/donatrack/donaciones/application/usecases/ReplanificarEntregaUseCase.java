@@ -4,7 +4,6 @@ import com.donatrack.common.events.DonacionReplanificadaEvent;
 import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
-import com.donatrack.donaciones.domain.entities.roles.Administrador;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +21,7 @@ public class ReplanificarEntregaUseCase {
         this.eventPublisher = eventPublisher;
     }
 
-    public void replanificar(UUID idDonacion, Administrador adminResponsable) {
+    public void replanificar(UUID idDonacion, String adminResponsableId) {
         Optional<Donacion> donacionOpt = donacionRepository.buscarPorId(idDonacion);
         if (donacionOpt.isEmpty()) {
             throw new IllegalArgumentException("No se encontró la donación para replanificar.");
@@ -34,7 +33,7 @@ public class ReplanificarEntregaUseCase {
         }
 
         // Vuelve al estado ASIGNADA para que el sistema de ruteo pueda volver a considerarla
-        donacion.cambiarEstado(EstadoDonacion.ASIGNADA, "Replanificación solicitada", adminResponsable);
+        donacion.cambiarEstado(EstadoDonacion.ASIGNADA, "Replanificación solicitada", adminResponsableId);
         donacionRepository.guardar(donacion);
 
         DonacionReplanificadaEvent event = new DonacionReplanificadaEvent(idDonacion);

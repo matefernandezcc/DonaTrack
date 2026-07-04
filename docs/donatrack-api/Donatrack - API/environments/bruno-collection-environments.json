@@ -1,0 +1,89 @@
+{
+  "info": {
+    "type": "bruno-environment",
+    "exportedAt": "2026-07-03T10:04:51.560Z",
+    "exportedUsing": "Bruno/v1.0.0"
+  },
+  "environments": [
+    {
+      "name": "dev",
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "http://localhost:8080",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "donacionesUrl",
+          "value": "http://localhost:8000",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "incentivosUrl",
+          "value": "http://localhost:8001",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "logisticaUrl",
+          "value": "http://localhost:8002",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "notificacionesUrl",
+          "value": "http://localhost:8003",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        }
+      ]
+    },
+    {
+      "name": "docker",
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "http://donatrack-server:8080",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "donacionesUrl",
+          "value": "http://donatrack-donaciones:8000",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "incentivosUrl",
+          "value": "http://donatrack-incentivos:8001",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "logisticaUrl",
+          "value": "http://donatrack-logistica:8002",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "notificacionesUrl",
+          "value": "http://donatrack-notificaciones:8003",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        }
+      ]
+    }
+  ]
+}
