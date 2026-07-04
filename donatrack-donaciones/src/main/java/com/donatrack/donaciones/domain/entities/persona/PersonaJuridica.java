@@ -46,6 +46,11 @@ public class PersonaJuridica extends Persona {
   }
 
   @Override
+  public boolean validarDocumentacion(DocumentoIdentidad d) {
+    return super.validarDocumentacion(d);
+  }
+
+  @Override
   public void actualizarInformacion(Map<String, Object> datosNuevos) {
     super.actualizarInformacion(datosNuevos);
     if (datosNuevos.containsKey("razonSocial")) {

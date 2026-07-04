@@ -22,8 +22,8 @@ public class ProcesarConfirmacionEntregaUseCase {
     private final ApplicationEventPublisher eventPublisher;
 
     public ProcesarConfirmacionEntregaUseCase(EntregaRepositoryPort entregaRepository,
-                                              RutaDeRepartoRepositoryPort rutaRepository,
-                                              ApplicationEventPublisher eventPublisher) {
+            RutaDeRepartoRepositoryPort rutaRepository,
+            ApplicationEventPublisher eventPublisher) {
         this.entregaRepository = entregaRepository;
         this.rutaRepository = rutaRepository;
         this.eventPublisher = eventPublisher;
@@ -32,21 +32,22 @@ public class ProcesarConfirmacionEntregaUseCase {
     public void procesar(UUID idDonacion, List<String> fotos) {
         // En nuestra lógica, idDonacion es igual a idEntrega
         Optional<Entrega> entregaOpt = entregaRepository.buscarPorId(idDonacion);
-        
+
         Entrega entrega;
         String patenteCamion = "DESCONOCIDO";
 
         if (entregaOpt.isPresent()) {
             entrega = entregaOpt.get();
         } else {
-            // Intentar buscarla dentro de una ruta activa si no está en el repo de entregas sueltas
+            // Intentar buscarla dentro de una ruta activa si no está en el repo de entregas
+            // sueltas
             Optional<RutaDeReparto> rutaOpt = rutaRepository.buscarPorIdDonacion(idDonacion);
             if (rutaOpt.isEmpty()) {
                 throw new IllegalArgumentException("Entrega no encontrada para idDonacion: " + idDonacion);
             }
             RutaDeReparto ruta = rutaOpt.get();
             patenteCamion = ruta.getCamion() != null ? ruta.getCamion().getPatente() : "DESCONOCIDO";
-            
+
             entrega = extraerEntregaDeRuta(ruta, idDonacion);
         }
 
@@ -55,11 +56,10 @@ public class ProcesarConfirmacionEntregaUseCase {
 
         // Emitimos el evento que viajará por RabbitMQ hacia Donaciones
         EntregaRealizadaEvent event = new EntregaRealizadaEvent(
-                idDonacion, 
-                entrega.getComprobanteRecepcion().getFotos(), 
+                idDonacion,
+                entrega.getComprobanteRecepcion().getFotos(),
                 entrega.getComprobanteRecepcion().getCamionPatente(),
-                entrega.getComprobanteRecepcion().getFechaHora()
-        );
+                entrega.getComprobanteRecepcion().getFechaHora());
         eventPublisher.publishEvent(event);
     }
 

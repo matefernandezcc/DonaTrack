@@ -11,7 +11,6 @@ import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
-import com.donatrack.donaciones.domain.entities.roles.Administrador;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import com.donatrack.donaciones.domain.entities.roles.Donante;
 import com.donatrack.donaciones.domain.entities.roles.Rol;
@@ -98,13 +97,8 @@ public class ProcesarFallaEntregaYNotificarUseCase {
         List<NotificacionInicioRutaEvent.ContactoInfo> contactos = new ArrayList<>();
         List<Persona> todasLasPersonas = personaRepository.obtenerTodas();
         for (Persona persona : todasLasPersonas) {
-            if (persona.getRoles() != null) {
-                for (Rol rol : persona.getRoles()) {
-                    if (rol instanceof Administrador) {
-                        contactos.addAll(extraerContactos(persona, "ADMINISTRADOR"));
-                        break;
-                    }
-                }
+            if (persona.getEmail() != null && persona.getEmail().toLowerCase().contains("admin")) {
+                contactos.addAll(extraerContactos(persona, "ADMINISTRADOR"));
             }
         }
         return contactos;

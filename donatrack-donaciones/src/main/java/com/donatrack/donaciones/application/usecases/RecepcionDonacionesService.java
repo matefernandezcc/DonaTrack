@@ -8,7 +8,6 @@ import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
-import com.donatrack.donaciones.domain.entities.roles.Administrador;
 import com.donatrack.donaciones.domain.entities.roles.Donante;
 import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
@@ -49,12 +48,6 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
                 .map(r -> (Donante) r)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("La persona no tiene rol Donante"));
-
-        Administrador administrador = adminPersona.getRoles().stream()
-                .filter(r -> r instanceof Administrador)
-                .map(r -> (Administrador) r)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("La persona no tiene rol Administrador"));
 
         // 2. Mapear DTOs a Entidades de Dominio
         List<Bien> bienesBrutos = requestDTO.bienesBrutos().stream().map(this::mapearBien).collect(Collectors.toList());

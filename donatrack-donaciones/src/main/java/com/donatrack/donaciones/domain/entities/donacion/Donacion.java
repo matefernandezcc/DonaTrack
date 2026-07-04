@@ -1,7 +1,6 @@
 package com.donatrack.donaciones.domain.entities.donacion;
 
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
-import com.donatrack.donaciones.domain.entities.roles.Administrador;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,9 +40,9 @@ public class Donacion {
     this.historial.add(nuevoRegistro);
   }
 
-  public void cambiarEstado(EstadoDonacion nuevoEstado, String observacion, Administrador usuario) {
+  public void cambiarEstado(EstadoDonacion nuevoEstado, String observacion, String usuarioId) {
     this.estado = nuevoEstado;
-    this.historial.add(new HistorialEstado(nuevoEstado, observacion, usuario));
+    this.historial.add(new HistorialEstado(nuevoEstado, observacion, usuarioId));
   }
 
   public void asignar(Beneficiario beneficiario) {

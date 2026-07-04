@@ -37,7 +37,10 @@ public class PersonaHumana extends Persona {
     return true;
   }
 
-
+  @Override
+  public boolean validarDocumentacion(DocumentoIdentidad d) {
+    return super.validarDocumentacion(d);
+  }
 
   @Override
   public void actualizarInformacion(Map<String, Object> datosNuevos) {

@@ -61,6 +61,13 @@ public abstract class Persona {
     return true;
   }
 
+  public boolean validarDocumentacion(DocumentoIdentidad d) {
+    if (d == null) return false;
+    return this.documento != null 
+        && this.documento.getNumero().equals(d.getNumero()) 
+        && this.documento.getTipo() == d.getTipo();
+  }
+
   public boolean validar(PersonaValidator validador) {
     return validador.validar(this);
   }

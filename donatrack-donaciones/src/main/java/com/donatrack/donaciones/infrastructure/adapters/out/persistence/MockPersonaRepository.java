@@ -8,7 +8,6 @@ import com.donatrack.donaciones.domain.entities.persona.DocumentoIdentidad;
 import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
 import com.donatrack.donaciones.domain.entities.enums.TipoDocumento;
 import com.donatrack.donaciones.domain.entities.roles.Donante;
-import com.donatrack.donaciones.domain.entities.roles.Administrador;
 
 import org.springframework.stereotype.Repository;
 
@@ -35,7 +34,7 @@ public class MockPersonaRepository implements PersonaRepository {
         donante.agregarRol(new Donante());
         baseDeDatosMock.add(donante);
 
-        // Inicializar Administrador de prueba
+        // Inicializar Persona de prueba (sin rol de dominio ya que Administrador es actor externo)
         PersonaHumana admin = new PersonaHumana(
             "admin@test.com",
             new Contacto("admin@test.com", "987654321", "987654321", MedioContacto.CORREO),
@@ -44,7 +43,6 @@ public class MockPersonaRepository implements PersonaRepository {
             "Pedro", "Perez", 45
         );
         admin.setId(UUID.fromString("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"));
-        admin.agregarRol(new Administrador(UUID.randomUUID()));
         baseDeDatosMock.add(admin);
     }
 
