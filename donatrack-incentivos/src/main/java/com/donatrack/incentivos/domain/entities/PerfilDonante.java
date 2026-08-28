@@ -38,21 +38,35 @@ public class PerfilDonante {
         evaluarMisiones(donacion.getMesDonacion());
     }
 
-    public void procesarInactividad(YearMonth mesActual) {
+    /**
+     * Procesa la inactividad del donante verificando si pasaron más de 30 días
+     * desde su última donación. Si es así, se resetean los registros (racha cortada).
+     *
+     * Corrección: antes se comparaba por YearMonth (mes calendario), ahora se usa
+     * LocalDate para calcular exactamente 30 días como pidió el profesor.
+     *
+     * @param fechaActual la fecha actual contra la cual se evalúa la inactividad
+     */
+    public void procesarInactividad(java.time.LocalDate fechaActual) {
         List<RegistroDonacion> donaciones = metricas.obtenerTodasLasDonaciones();
         if (donaciones.isEmpty()) {
             return;
         }
 
-        // Buscar el mes de la donación más reciente
-        YearMonth ultimoMes = donaciones.stream()
-                .map(RegistroDonacion::getMesDonacion)
-                .max(YearMonth::compareTo)
-                .orElse(mesActual);
+        // Buscar la fecha exacta de la donación más reciente
+        java.time.LocalDate ultimaFecha = donaciones.stream()
+                .map(RegistroDonacion::getFechaDonacion)
+                .filter(f -> f != null)
+                .max(java.time.LocalDate::compareTo)
+                .orElse(null);
 
-        // Si pasó más de un mes completo de diferencia, se resetean los registros
-        // (racha cortada)
-        if (ultimoMes.plusMonths(1).isBefore(mesActual)) {
+        if (ultimaFecha == null) {
+            return;
+        }
+
+        // Si pasaron más de 30 días desde la última donación, se corta la racha
+        long diasSinDonar = java.time.temporal.ChronoUnit.DAYS.between(ultimaFecha, fechaActual);
+        if (diasSinDonar > 30) {
             this.metricas.getRegistrosDonacion().clear();
         }
     }

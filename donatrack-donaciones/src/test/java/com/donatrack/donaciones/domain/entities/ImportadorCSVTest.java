@@ -1,58 +1,89 @@
 package com.donatrack.donaciones.domain.entities;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
-import com.donatrack.donaciones.domain.entities.enums.TipoDocumento;
-import com.donatrack.donaciones.domain.entities.persona.Contacto;
-import com.donatrack.donaciones.domain.entities.persona.DocumentoIdentidad;
+import com.donatrack.donaciones.application.ports.out.PersonaRepository;
+import com.donatrack.donaciones.domain.entities.donacion.Archivo;
+import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.persona.PersonaHumana;
-import com.donatrack.donaciones.domain.entities.persona.ubicacion.*;
 import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.importador.ImportadorCSV;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
 
+/**
+ * Tests unitarios autocontenidos para ImportadorCSV.
+ *
+ * Valida la importación de donantes (PersonaHumana y PersonaJuridica) desde CSV
+ * sin depender de archivos externos del sistema de archivos.
+ */
 public class ImportadorCSVTest {
 
-  Pais Argentina = new Pais("Argentina", "Argentino");
-  Provincia provinciaPrueba = new Provincia("Buenos Aires", Argentina);
-  Coordenada coordenadaPrueba = new Coordenada(-34.6037, -58.3816);
-  Direccion direccionPrueba = new Direccion(
-      "calleFalsa", 123, "Springfield", provinciaPrueba, "1234", coordenadaPrueba);
-  DocumentoIdentidad documentoPrueba = new DocumentoIdentidad(TipoDocumento.DNI, "43637832");
+    private PersonaRepository mockRepository;
+    private ImportadorCSV importador;
 
-  PersonaHumana personaPrueba = new PersonaHumana(
-      "emailprueba@prueba.com",
-      new Contacto("emailprueba@prueba.com", "123456789", "987654321", MedioContacto.CORREO),
-      direccionPrueba,
-      documentoPrueba,
-      "Dario",
-      "Dardo",
-      23);
-
-  @Test
-  public void testImportar() {
-    PersonaHumana personaPrueba2 = new PersonaHumana(
-        "emailABuscar@prueba.com",
-        new Contacto("emailABuscar@prueba.com", "123456789", "987654321", MedioContacto.CORREO),
-        direccionPrueba,
-        documentoPrueba,
-        "Roberto",
-        "Carlos",
-        56);
-
-    com.donatrack.donaciones.application.ports.out.PersonaRepository personaRepository = new com.donatrack.donaciones.infrastructure.adapters.out.persistence.MockPersonaRepository();
-
-    ImportadorCSV importador = new ImportadorCSV(personaRepository);
-
-    byte[] contenido;
-    try {
-        contenido = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("../enunciado/CSV/donantes.csv"));
-    } catch (java.io.IOException e) {
-        contenido = new byte[0];
+    @BeforeEach
+    void setUp() {
+        mockRepository = mock(PersonaRepository.class);
+        importador = new ImportadorCSV(mockRepository);
     }
-    importador.importar(new com.donatrack.donaciones.domain.entities.donacion.Archivo("donantes.csv", contenido));
 
-    assertEquals(19988, importador.getRegistroPersonas().size());
-  }
+    @Test
+    public void testImportarNuevasPersonasDesdeCSV() {
+        String csvContent = "TipoPersona,TipoDoc,Documento,Nombre/Razón Social,Email,Teléfono\n"
+                + "HUMANA,DNI,28456905,Ana Navarro,ananavarro@test.com,+54 11 5181-9600\n"
+                + "JURIDICA,CUIT,30711223344,Fundación Esperanza,contacto@fundacion.org,+54 11 4321-8888\n";
+
+        Archivo archivo = new Archivo("donantes.csv", csvContent.getBytes(StandardCharsets.UTF_8));
+
+        when(mockRepository.buscarPorEmail(anyString())).thenReturn(Optional.empty());
+
+        importador.importar(archivo);
+
+        // Se deben haber guardado 2 personas nuevas en el repositorio
+        verify(mockRepository, times(2)).guardar(any(Persona.class));
+        verify(mockRepository).buscarPorEmail("ananavarro@test.com");
+        verify(mockRepository).buscarPorEmail("contacto@fundacion.org");
+    }
+
+    @Test
+    public void testImportarActualizaPersonaExistente() {
+        String csvContent = "TipoPersona,TipoDoc,Documento,Nombre/Razón Social,Email,Teléfono\n"
+                + "HUMANA,DNI,28456905,Ana Navarro Actualizada,ananavarro@test.com,+54 11 9999-0000\n";
+
+        Archivo archivo = new Archivo("donantes.csv", csvContent.getBytes(StandardCharsets.UTF_8));
+
+        PersonaHumana existente = new PersonaHumana("ananavarro@test.com", null, null, null, "Ana", "Navarro", 30);
+        when(mockRepository.buscarPorEmail("ananavarro@test.com")).thenReturn(Optional.of(existente));
+
+        importador.importar(archivo);
+
+        // Debe buscar por email y guardar la persona existente actualizada
+        verify(mockRepository).buscarPorEmail("ananavarro@test.com");
+        verify(mockRepository).guardar(existente);
+    }
+
+    @Test
+    public void testImportarArchivoNullOSinContenidoNoHaceNada() {
+        assertDoesNotThrow(() -> importador.importar(null));
+        assertDoesNotThrow(() -> importador.importar(new Archivo("vacio.csv", null)));
+        assertDoesNotThrow(() -> importador.importar(new Archivo("vacio.csv", new byte[0])));
+
+        verify(mockRepository, never()).guardar(any());
+    }
+
+    @Test
+    public void testGetRegistroPersonasDelegaAlRepositorio() {
+        when(mockRepository.obtenerTodas()).thenReturn(List.of());
+
+        List<Persona> resultado = importador.getRegistroPersonas();
+
+        assertNotNull(resultado);
+        verify(mockRepository).obtenerTodas();
+    }
 }
