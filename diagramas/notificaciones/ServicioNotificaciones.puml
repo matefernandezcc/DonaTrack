@@ -1,5 +1,6 @@
 @startuml DonaTrack_ServicioNotificaciones_DiagramaClases
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
 package "Servicio de Notificaciones" {
 

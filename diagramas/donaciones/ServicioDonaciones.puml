@@ -1,5 +1,6 @@
 @startuml DonaTrack_ServicioDonaciones_DiagramaClases
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
 package "servicio de donaciones"{
     package "Gestión de Personas" {
@@ -148,7 +149,7 @@ package "servicio de donaciones"{
         }
     }
 
- package "Algoritmos y Servicios de Dominio" {
+    package "Algoritmos y Servicios de Dominio" {
         ' --- SERVICIOS DE DOMINIO (Clases sin estado, solo lógica) ---
         class AsignadorDonaciones <<Domain Service>> {
             + ejecutarMatchmaking(donaciones: List<Donacion>, necesidades: List<Necesidad>): List<ResultadoMatch>

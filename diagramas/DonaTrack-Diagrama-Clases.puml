@@ -7,7 +7,7 @@ package "Comunicacion Inter-Servicios" {
     class MessageBroker <<RabbitMQ>>
 }
 
-package "Servicio de Donaciones" {
+package "servicio de Donaciones"{
     package "Gestión de Personas" {
         enum TipoDocumento {
             DNI
@@ -19,6 +19,8 @@ package "Servicio de Donaciones" {
             - tipo: TipoDocumento
             - numero: String
         }
+
+        DocumentoIdentidad --> TipoDocumento
 
         enum TipoPersonaJuridica {
             GUBERNAMENTAL
@@ -88,10 +90,10 @@ package "Servicio de Donaciones" {
         }
 
         note top of PersonaHumana
-        **Regla de negocio:**
-        Tira excepción de invalidez de 
-        rol si el rol es Beneficiario 
-        (acepta solo Donante o Representante o Administrador)
+            **Regla de negocio:**
+            Tira excepción de invalidez de
+            rol si el rol es Beneficiario
+            (acepta solo Donante o Representante)
         end note
 
         class PersonaJuridica extends Persona {
@@ -106,14 +108,13 @@ package "Servicio de Donaciones" {
         }
 
         note top of PersonaJuridica
-        **Regla de negocio:**
-        Tira excepción de 
-        invalidez de rol si el rol es 
-        Representante o Administrador
+            **Regla de negocio:**
+            Tira excepción de
+            invalidez de rol si el rol es
+            Representante
         end note
 
         'relaciones
-        DocumentoIdentidad --> TipoDocumento
         Direccion --> Provincia : "es de un"
         Provincia --> Pais : "forma parte de"
         Direccion --> Coordenada : "se encuentra"
@@ -126,10 +127,7 @@ package "Servicio de Donaciones" {
 
     package "Gestion de Roles" {
         abstract class Rol {
-            - id: UUID
             - fechaAlta: LocalDate
-            + {abstract} esValidoParaHumana(): boolean
-            + {abstract} esValidoParaJuridica(): boolean
         }
 
         class Donante extends Rol {
@@ -137,7 +135,7 @@ package "Servicio de Donaciones" {
             + agregarDonacion(DonacionOriginal d)
             + consultarEstadoDonacion(Donacion d)
             + filtrarDonaciones(estado: EstadoDonacion, categoria: String)
-            + verUbicacionCamion()
+            + UbicacionCamion()
         }
 
         class Representante extends Rol {
@@ -148,29 +146,22 @@ package "Servicio de Donaciones" {
         class Beneficiario extends Rol {
             - donacionesAsignadas: List<Donacion>
             - necesidadesDeclaradas: List<Necesidad>
+            - correoRepresentante: String
             + registrarNecesidad(n: Necesidad)
-            + confirmarRecepcion(d: Donacion, fotosComprobante: List<Foto>): boolean
-            + verEstadoDonaciones(donacionesAsignadas: List<Donacion>): List<EstadoDonacion>
-            + verUbicacionCamion()
-        }
-
-        class Administrador extends Rol {
-            - idDepositoAsignado: UUID
-            - estrategiaImportador: ImportadorStrategy
-            - camionesIds: List<UUID>
-            + importarDonantesMasivos(Archivo archivo): boolean
-            + asignarDonacionFinal(Donacion d, Beneficiario b)
-            + asociarDonacion(DonacionOriginal d, Donante donante)
-            + administrarCamiones()
-            + verRankingMensual()
+            + confirmarRecepcion(d: Donacion, fotos: List<String>)
+            + EstadoDonaciones()
+            + UbicacionCamion()
         }
     }
 
     package "Algoritmos y Servicios de Dominio" {
+        ' --- SERVICIOS DE DOMINIO (Clases sin estado, solo lógica) ---
         class AsignadorDonaciones <<Domain Service>> {
             + ejecutarMatchmaking(donaciones: List<Donacion>, necesidades: List<Necesidad>): List<ResultadoMatch>
         }
 
+
+        ' --- INTEGRACIÓN EXTERNA (Entrega 3) ---
         interface NotificadorPort {
             + notificar(destinatario: Contacto, mensaje: String, medio: MedioContacto)
         }
@@ -181,6 +172,10 @@ package "Servicio de Donaciones" {
             + procesarEntregaFallida(idDonacion: UUID, motivo: String)
         }
 
+        ' Relaciones de eventos
+        GestorEventosLogistica --> NotificadorPort : "usa para avisar >"
+        GestorEventosLogistica ..> Donacion : "actualiza estado de"
+
         class PersonaFactory <<Factory>> {
             + {static} crearPersona(datosCrudos: Map<String, String>): Persona
         }
@@ -189,6 +184,7 @@ package "Servicio de Donaciones" {
             + procesarMigracion(archivo: Archivo): List<Persona>
         }
 
+        ' --- INTERFACES DE ESTRATEGIA ---
         interface AlgoritmoAsignacion {
             + recomendarNecesidades(donaciones, necesidades)
         }
@@ -202,12 +198,10 @@ package "Servicio de Donaciones" {
 
         class ImportadorCSV implements ImportadorStrategy
 
-        ' Relaciones internas
+        ' --- RELACIONES QUE EXPLICAN EL FLUJO ---
         MigradorDonantes ..> PersonaFactory : "invoca"
         AsignadorDonaciones --> AlgoritmoAsignacion : "utiliza"
         MigradorDonantes --> ImportadorStrategy : "utiliza"
-        GestorEventosLogistica --> NotificadorPort : "usa para avisar >"
-        GestorEventosLogistica ..> Donacion : "actualiza estado de"
     }
 
     package "Gestion de Ingreso y Segmentación" {
@@ -218,19 +212,20 @@ package "Servicio de Donaciones" {
             - donante: Donante
             - donacionesSegmentadas: List<Donacion>
             - usuarioId: String
-            + segmentarBienes(bienesBrutos, procesador)
+            + segmentarBienes(bienesBrutos)
         }
 
-        note left of DonacionOriginal 
-        **Regla de negocio:**
-        Representa la "donación original" o 
-        carga física única en el depósito. A partir 
-        de los bienes, genera de forma automatizada 
-        las Donaciones independientes segmentadas.
+        note left of DonacionOriginal
+            **Regla de negocio:**
+            Representa la "donación original" o
+            carga física única en el depósito. A partir
+            de los bienes, genera de forma automatizada
+            las Donaciones independientes segmentadas.
         end note
 
         class Donacion {
             - id: UUID
+            - fechaCreacion: Date
             - estado: EstadoDonacion
             - bienes: List<Bien>
             - subcategoria: Subcategoria
@@ -341,6 +336,14 @@ package "Servicio de Donaciones" {
         PeriodoNecesidad --> EstadoNecesidad : "se encuentra en"
         NecesidadExtraordinaria --> EstadoNecesidad : "se encuentra en"
     }
+
+    ' Gestión de Personas y Roles
+    Persona "1" *--down--- "1..*" Rol : "asume"
+
+    ' Conexiones de Dominio (Roles, Necesidades y Donaciones)
+    Donante "1" -- "0..*" DonacionOriginal
+    Beneficiario "1" *--- "0..*" Necesidad : "declara"
+    Necesidad "*" ---> "1" Subcategoria : "demanda"
 }
 
 package "Servicio de Logística" {
@@ -440,15 +443,15 @@ package "Servicio de Logística" {
     ItemPlanificacion "1" --> "1" DireccionLogistica : destino >
 
     note right of Entrega
-      idEntrega referencia
-      al Servicio de Donaciones
-      (externo)
+        idEntrega referencia
+        al Servicio de Donaciones
+        (externo)
     end note
 
     note right of SolicitudPlanificacion
-      El proveedor externo procesa
-      max. 100 donaciones por lote.
-      Notifica resultado vía callback URL.
+        El proveedor externo procesa
+        max. 100 donaciones por lote.
+        Notifica resultado vía callback URL.
     end note
 }
 
@@ -481,10 +484,10 @@ package "Servicio de Incentivos" {
     }
 
     note right of PerfilDonante
-      **Regla de negocio:**
-      procesarInactividad() resetea
-      las métricas como la "racha" si 
-      pasa un mes completo sin donar.
+        **Regla de negocio:**
+        procesarInactividad() resetea
+        las métricas como la "racha" si
+        pasa un mes completo sin donar.
     end note
 
     class MetricasDonante {
@@ -516,13 +519,13 @@ package "Servicio de Incentivos" {
         + evaluar(perfil: PerfilDonante): boolean
         + getProgresoActual(perfil: PerfilDonante): String
     }
-    
+
     note left of Mision
-      **Regla de negocio:**
-      El método evaluar() utiliza un 
-      switch(tipoMetrica) y procesa las 
-      listas de MetricasDonante para 
-      calcular el progreso.
+        **Regla de negocio:**
+        El método evaluar() utiliza un
+        switch(tipoMetrica) y procesa las
+        listas de MetricasDonante para
+        calcular el progreso.
     end note
 
     class Insignia {
@@ -641,26 +644,5 @@ package "Servicio de Notificaciones" {
     Notificacion --> Evento : posee >
     Evento --> TipoEvento : posee >
 }
-
-' --- CONEXIONES ARQUITECTÓNICAS ENTRE PAQUETES ---
-
-' Gestión de Personas y Roles
-Persona "1" *--down--- "1..*" Rol : "asume"
-
-' Conexiones de Dominio (Roles y Donaciones)
-Beneficiario "1" ---> "0..*" Donacion : "tiene asignadas"
-Donante "1" -- "0..*" DonacionOriginal : "realiza"
-DonacionOriginal "1" *-- "0..*" Donacion : "segmenta en"
-Administrador --> ImportadorStrategy
-Administrador --> CorreoRegistro : "genera" (obsoleto/en desuso)
-Beneficiario "1" *--- "0..*" Necesidad : "declara"
-Necesidad "*" ---> "1" Subcategoria : "demanda"
-Necesidad "1" o-- "0..*" Donacion : "tiene"
-
-' Conexiones Servicio de Incentivos
-Donante "1" --> "1" PerfilDonante : "tiene asociado"
-
-' Conexiones Servicio de Logística (Trazabilidad)
-Entrega "1" ..> Donacion : "referencia por idEntrega a"
 
 @enduml
