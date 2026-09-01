@@ -21,4 +21,11 @@ public class MockItemPlanificacionRepository implements ItemPlanificacionReposit
     public List<ItemPlanificacion> obtenerTodos() {
         return baseDeDatosMock;
     }
+
+    @Override
+    public void eliminarTodos(List<ItemPlanificacion> items) {
+        for (ItemPlanificacion item : items) {
+            baseDeDatosMock.removeIf(i -> i.getIdDonacionOriginal().equals(item.getIdDonacionOriginal()));
+        }
+    }
 }

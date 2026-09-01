@@ -2,6 +2,7 @@ package com.donatrack.logistica.infrastructure.adapters.in.api;
 
 import com.donatrack.logistica.application.ports.in.ListarItemsPendientesPort;
 import com.donatrack.logistica.application.ports.in.IniciarRutaUseCase;
+import com.donatrack.logistica.application.ports.in.ProcesarCallbackPlanificacionUseCase;
 import com.donatrack.logistica.application.ports.in.ProcesarPlanificacionesPendientesUseCase;
 import com.donatrack.logistica.application.ports.out.CamionRepositoryPort;
 import com.donatrack.logistica.application.ports.out.ChoferRepositoryPort;
@@ -30,6 +31,7 @@ public class LogisticaController {
     private final ConfirmarRecepcionUseCase confirmarRecepcionUseCase;
     private final ReportarFallaEntregaUseCase reportarFallaEntregaUseCase;
     private final ProcesarPlanificacionesPendientesUseCase planificacionUseCase;
+    private final ProcesarCallbackPlanificacionUseCase procesarCallbackPlanificacionUseCase;
 
     public LogisticaController(ListarItemsPendientesPort listarItemsPendientesPort,
             CamionRepositoryPort camionRepository,
@@ -38,7 +40,8 @@ public class LogisticaController {
             IniciarRutaUseCase iniciarRutaUseCase,
             ConfirmarRecepcionUseCase confirmarRecepcionUseCase,
             ReportarFallaEntregaUseCase reportarFallaEntregaUseCase,
-            ProcesarPlanificacionesPendientesUseCase planificacionUseCase) {
+            ProcesarPlanificacionesPendientesUseCase planificacionUseCase,
+            ProcesarCallbackPlanificacionUseCase procesarCallbackPlanificacionUseCase) {
         this.listarItemsPendientesPort = listarItemsPendientesPort;
         this.camionRepository = camionRepository;
         this.choferRepository = choferRepository;
@@ -47,6 +50,7 @@ public class LogisticaController {
         this.confirmarRecepcionUseCase = confirmarRecepcionUseCase;
         this.reportarFallaEntregaUseCase = reportarFallaEntregaUseCase;
         this.planificacionUseCase = planificacionUseCase;
+        this.procesarCallbackPlanificacionUseCase = procesarCallbackPlanificacionUseCase;
     }
 
     @GetMapping("/planificacion/pendientes")
@@ -139,9 +143,8 @@ public class LogisticaController {
     }
 
     @PostMapping("/planificacion/callback")
-    public ResponseEntity<Void> procesarCallbackPlanificacion(@RequestBody List<RutaDeReparto> rutas) {
-        // Callback dummy para convalidar endpoint externo
-        System.out.println("Callback de planificación externa recibido con " + rutas.size() + " rutas.");
+    public ResponseEntity<Void> procesarCallbackPlanificacion(@RequestBody com.donatrack.logistica.infrastructure.adapters.in.api.dto.CallbackPlanificacionRequest request) {
+        procesarCallbackPlanificacionUseCase.procesarCallback(request.getIdSolicitud(), request.getRutas());
         return ResponseEntity.ok().build();
     }
 
