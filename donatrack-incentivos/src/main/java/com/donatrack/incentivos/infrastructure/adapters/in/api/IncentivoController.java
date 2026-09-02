@@ -7,6 +7,9 @@ import com.donatrack.incentivos.domain.entities.misiones.Mision;
 import com.donatrack.incentivos.application.usecases.RegistrarActividadDonacionUseCase;
 import com.donatrack.common.dto.ActividadDonacionDTO;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Incentivos", description = "Métricas de donantes, insignias, misiones y ranking mensual")
 public class IncentivoController {
 
     private final com.donatrack.incentivos.domain.services.RankingMensualService rankingMensualService;
@@ -27,6 +31,8 @@ public class IncentivoController {
         this.registrarActividadDonacionUseCase = registrarActividadDonacionUseCase;
     }
 
+    @Operation(summary = "Obtener métricas del donante", description = "Devuelve las métricas de donación: historial, racha, bienes donados, organizaciones ayudadas y posición en el ranking")
+    @ApiResponse(responseCode = "200", description = "Métricas del donante")
     @GetMapping("/donantes/{id}/metricas")
     public ResponseEntity<MetricasDonanteDTO> obtenerMetricas(@PathVariable UUID id) {
         PerfilDonante perfil = new PerfilDonante(id); // Mock
@@ -64,6 +70,8 @@ public class IncentivoController {
         return ResponseEntity.ok(dto);
     }
 
+    @Operation(summary = "Obtener misiones disponibles", description = "Devuelve las misiones activas para un donante")
+    @ApiResponse(responseCode = "200", description = "Lista de misiones")
     @GetMapping("/donantes/{id}/misiones")
     public ResponseEntity<List<Mision>> obtenerMisionesDisponibles(@PathVariable UUID id) {
         PerfilDonante perfil = new PerfilDonante(id); // Mock
@@ -72,12 +80,16 @@ public class IncentivoController {
         return ResponseEntity.ok(respuesta);
     }
 
+    @Operation(summary = "Obtener insignias del donante", description = "Devuelve las insignias obtenidas por un donante")
+    @ApiResponse(responseCode = "200", description = "Lista de insignias")
     @GetMapping("/donantes/{id}/insignias")
     public ResponseEntity<List<Insignia>> obtenerInsignias(@PathVariable UUID id) {
         PerfilDonante perfil = new PerfilDonante(id); // Mock
         return ResponseEntity.ok(perfil.getInsigniasObtenidas());
     }
 
+    @Operation(summary = "Obtener ranking Top 3 mensual", description = "Devuelve los 3 donantes con más actividad en el mes actual")
+    @ApiResponse(responseCode = "200", description = "Top 3 donantes del mes")
     @GetMapping("/ranking/top3")
     public ResponseEntity<List<java.util.Map<String, Object>>> obtenerRankingMensual() {
         java.time.YearMonth mesActual = java.time.YearMonth.now();
@@ -93,6 +105,8 @@ public class IncentivoController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Registrar actividad de donación exitosa", description = "Registra una actividad de donación exitosa para un donante, actualizando sus métricas e insignias")
+    @ApiResponse(responseCode = "200", description = "Actividad registrada")
     @PostMapping("/donantes/{id}/actividad")
     public ResponseEntity<Void> registrarActividadDonacionExitosa(@PathVariable UUID id,
             @RequestBody ActividadDonacionDTO actividad) {
