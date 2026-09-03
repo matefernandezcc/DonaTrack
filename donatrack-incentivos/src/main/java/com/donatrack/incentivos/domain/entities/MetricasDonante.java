@@ -24,6 +24,7 @@ public class MetricasDonante {
     private UUID donanteId;
     private List<RegistroDonacion> registrosDonacion;
     private Map<Mision, YearMonth> misionesCompletadas;
+    private java.time.LocalDate fechaCorteRacha;
 
     public MetricasDonante(UUID donanteId) {
         this.donanteId = donanteId;

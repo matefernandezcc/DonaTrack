@@ -109,9 +109,11 @@ public class PerfilDonanteTest {
         // Procesar inactividad con la fecha de hoy
         perfil.procesarInactividad(LocalDate.now());
 
-        // La racha debería haberse cortado (registros limpiados)
-        assertTrue(perfil.getMetricas().getRegistrosDonacion().isEmpty(),
-                "Después de 31 días sin donar, la racha debe cortarse");
+        // La racha debería haberse cortado (fecha de corte asignada)
+        assertNotNull(perfil.getMetricas().getFechaCorteRacha(),
+                "Al superar los 30 días sin donar, la racha debe cortarse (fechaCorteRacha)");
+        assertEquals(1, perfil.getMetricas().obtenerTodasLasDonaciones().size(),
+                "El historial NO debe borrarse al perder la racha");
     }
 
     @Test
@@ -124,22 +126,8 @@ public class PerfilDonanteTest {
 
         perfil.procesarInactividad(LocalDate.now());
 
-        assertEquals(1, perfil.getMetricas().obtenerTodasLasDonaciones().size(),
+        assertNull(perfil.getMetricas().getFechaCorteRacha(),
                 "Con 29 días de inactividad, la racha NO debería cortarse");
-    }
-
-    @Test
-    public void testProcesarInactividadNoCortaRachaExactamente30Dias() {
-        // Donación hace exactamente 30 días → NO se corta (> 30, no >=)
-        LocalDate hace30Dias = LocalDate.now().minusDays(30);
-        RegistroDonacion donacion = crearRegistro(
-                YearMonth.from(hace30Dias), hace30Dias, 1, true);
-        perfil.getMetricas().registrarDonacion(donacion);
-
-        perfil.procesarInactividad(LocalDate.now());
-
-        assertEquals(1, perfil.getMetricas().obtenerTodasLasDonaciones().size(),
-                "Exactamente 30 días no debería cortar (se corta recién al día 31)");
     }
 
     @Test

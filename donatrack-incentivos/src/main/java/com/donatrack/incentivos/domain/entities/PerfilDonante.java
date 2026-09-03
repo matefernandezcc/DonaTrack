@@ -67,7 +67,7 @@ public class PerfilDonante {
         // Si pasaron más de 30 días desde la última donación, se corta la racha
         long diasSinDonar = java.time.temporal.ChronoUnit.DAYS.between(ultimaFecha, fechaActual);
         if (diasSinDonar > 30) {
-            this.metricas.getRegistrosDonacion().clear();
+            this.metricas.setFechaCorteRacha(fechaActual);
         }
     }
 

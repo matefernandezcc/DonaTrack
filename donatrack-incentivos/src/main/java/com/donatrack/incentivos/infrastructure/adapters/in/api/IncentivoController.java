@@ -41,7 +41,7 @@ public class IncentivoController {
         List<RegistroDonacion> exitosas = perfil.getMetricas().obtenerDonacionesExitosas();
 
         int totalHistorico = todasLasDonaciones.size();
-        int racha = calcularRacha(todasLasDonaciones);
+        int racha = calcularRacha(todasLasDonaciones, perfil.getMetricas().getFechaCorteRacha());
         int bienesDonados = todasLasDonaciones.stream().mapToInt(RegistroDonacion::getCantidadBienes).sum();
         int totalExitosas = exitosas.size();
         
@@ -114,11 +114,23 @@ public class IncentivoController {
         return ResponseEntity.ok().build();
     }
 
-    private int calcularRacha(List<RegistroDonacion> donaciones) {
+    private int calcularRacha(List<RegistroDonacion> donaciones, java.time.LocalDate fechaCorteRacha) {
         if (donaciones.isEmpty()) {
             return 0;
         }
-        List<YearMonth> meses = donaciones.stream()
+
+        List<RegistroDonacion> donacionesValidas = donaciones;
+        if (fechaCorteRacha != null) {
+            donacionesValidas = donaciones.stream()
+                    .filter(d -> d.getFechaDonacion() != null && !d.getFechaDonacion().isBefore(fechaCorteRacha))
+                    .collect(Collectors.toList());
+        }
+
+        if (donacionesValidas.isEmpty()) {
+            return 0;
+        }
+
+        List<YearMonth> meses = donacionesValidas.stream()
                 .map(RegistroDonacion::getMesDonacion)
                 .distinct()
                 .sorted(Comparator.reverseOrder())
