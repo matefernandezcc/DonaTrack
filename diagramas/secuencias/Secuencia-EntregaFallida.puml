@@ -1,0 +1,62 @@
+@startuml Secuencia-EntregaFallida
+title Reporte de Entrega Fallida y Replanificación
+
+actor "Chofer" as chofer
+participant "LogísticaController" as logCtrl
+participant "ReportarFallaEntregaUseCase" as fallaEntrega
+participant "ApplicationEventPublisher" as logPub
+queue "RabbitMQ" as mq
+participant "DonacionesListener" as donListener
+participant "ProcesarFallaEntregaYNotificarUseCase" as procFalla
+participant "ApplicationEventPublisher" as donPub
+participant "NotificacionesListener" as notiListener
+participant "LogísticaListener" as logListener
+participant "ReplanificarEntregaUseCase" as replanUseCase
+
+chofer -> logCtrl: POST /api/rutas/{id}/entregas/{idEntrega}/falla
+activate logCtrl
+logCtrl -> fallaEntrega: reportarFalla(idEntrega, motivo)
+activate fallaEntrega
+fallaEntrega -> fallaEntrega: Marca entrega como FALLIDA
+fallaEntrega -> logPub: publishEvent(EntregaFallidaEvent)
+logPub -> mq: publish("entrega.fallida")
+fallaEntrega --> logCtrl: OK
+deactivate fallaEntrega
+logCtrl --> chofer: 200 OK
+deactivate logCtrl
+
+mq -> donListener: consume("entrega.fallida")
+activate donListener
+donListener -> procFalla: ejecutar(EntregaFallidaEvent)
+activate procFalla
+procFalla -> procFalla: Analiza motivo y reintentos
+alt Puede Replanificarse
+    procFalla -> procFalla: Estado = EN_DEPOSITO (para reintento)
+    procFalla -> donPub: publishEvent(DonacionReplanificadaEvent)
+    donPub -> mq: publish("donacion.replanificada")
+else No puede replanificarse
+    procFalla -> procFalla: Estado = FALLIDA
+end
+procFalla -> donPub: publishEvent(NotificacionEntregaFallidaEvent)
+donPub -> mq: publish("notificacion.entrega_fallida")
+procFalla --> donListener: DONE
+deactivate procFalla
+deactivate donListener
+
+par Replanificación en Logística (si aplica)
+    mq -> logListener: consume("donacion.replanificada")
+    activate logListener
+    logListener -> replanUseCase: ejecutar(DonacionReplanificadaEvent)
+    activate replanUseCase
+    replanUseCase -> replanUseCase: Agrega entrega a pendientes
+    replanUseCase --> logListener: DONE
+    deactivate replanUseCase
+    deactivate logListener
+else Notificación al usuario
+    mq -> notiListener: consume("notificacion.entrega_fallida")
+    activate notiListener
+    notiListener -> notiListener: Enviar email con motivo de falla
+    deactivate notiListener
+end
+
+@enduml
