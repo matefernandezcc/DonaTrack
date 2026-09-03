@@ -1,0 +1,22 @@
+info:
+  name: Cambiar Estado Donacion
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{donacionesUrl}}/api/donaciones/31008064-071a-4d7a-ac37-33318f7d9841/estado"
+  body:
+    type: json
+    data: |-
+      {
+        "nuevoEstado": "EN_TRASLADO",
+        "observacion": "Cambio de estado manual por administrador"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

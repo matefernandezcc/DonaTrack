@@ -1,0 +1,16 @@
+info:
+  name: Obtener Ruta
+  type: http
+  seq: 11
+
+http:
+  method: GET
+  url: "{{logisticaUrl}}/api/rutas/31008064-071a-4d7a-ac37-33318f7d9842"
+  body: none
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
