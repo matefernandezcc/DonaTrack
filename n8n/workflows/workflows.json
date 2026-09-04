@@ -1,11 +1,502 @@
 [
     {
+        "updatedAt": "2026-05-30T01:36:17.376Z",
+        "createdAt": "2026-05-28T02:10:03.173Z",
+        "id": "Psv5TyU4pTNyUbxK",
+        "name": "DonaTrack - Insignias roto",
+        "description": null,
+        "active": false,
+        "isArchived": false,
+        "nodes": [
+            {
+                "parameters": {
+                    "httpMethod": "POST",
+                    "path": "insignias",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.webhook",
+                "typeVersion": 2.1,
+                "position": [
+                    0,
+                    0
+                ],
+                "id": "24a61303-5726-4750-9a00-14d0c3c04155",
+                "name": "Webhook",
+                "webhookId": "947b5b1a-29e3-45de-bc95-7c8b65e4e10f"
+            },
+            {
+                "parameters": {
+                    "mode": "runOnceForEachItem",
+                    "jsCode": "// Obtenemos los datos que nos pasó el Webhook (¡agregamos .body al final!)\nconst datos = $input.item.json.body;\n\n// Armamos el texto para la red social\nconst mensajePublicable = `¡Felicidades a ${datos.user}! 🎉 Acaba de obtener la insignia \"${datos.badge}\" por su compromiso con DonaTrack. ${datos.description}. ¡Sumate vos también a ayudar!`;\n\n// Retornamos el nuevo mensaje\nreturn {\n  json: {\n    mensajeRedes: mensajePublicable\n  }\n};"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    208,
+                    0
+                ],
+                "id": "a3db6c30-605f-4237-947c-1c12de799dd9",
+                "name": "Code in JavaScript"
+            }
+        ],
+        "connections": {
+            "Webhook": {
+                "main": [
+                    [
+                        {
+                            "node": "Code in JavaScript",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Code in JavaScript": {
+                "main": [
+                    []
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1",
+            "binaryMode": "separate"
+        },
+        "staticData": null,
+        "meta": {
+            "templateCredsSetupCompleted": true
+        },
+        "pinData": {},
+        "versionId": "851a2efe-7fbb-4257-a32d-f2f67b093c8f",
+        "activeVersionId": null,
+        "versionCounter": 312,
+        "triggerCount": 0,
+        "tags": [],
+        "shared": [
+            {
+                "updatedAt": "2026-05-28T02:10:03.178Z",
+                "createdAt": "2026-05-28T02:10:03.178Z",
+                "role": "workflow:owner",
+                "workflowId": "Psv5TyU4pTNyUbxK",
+                "projectId": "aUAwLVlEtsTFzDRX",
+                "project": {
+                    "updatedAt": "2026-05-28T01:42:24.179Z",
+                    "createdAt": "2026-05-28T01:39:13.389Z",
+                    "id": "aUAwLVlEtsTFzDRX",
+                    "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+                    "type": "personal",
+                    "icon": null,
+                    "description": null,
+                    "creatorId": "c2b9a27b-1aee-479f-87b0-2027812789e1"
+                }
+            }
+        ],
+        "versionMetadata": {
+            "name": null,
+            "description": null
+        }
+    },
+    {
+        "updatedAt": "2026-09-04T02:36:28.551Z",
+        "createdAt": "2026-06-07T00:29:50.533Z",
+        "id": "donatrack-insignias",
+        "name": "DonaTrack - Insignias",
+        "description": null,
+        "active": true,
+        "isArchived": false,
+        "nodes": [
+            {
+                "parameters": {
+                    "httpMethod": "POST",
+                    "path": "donatrack/badge-earned",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.webhook",
+                "typeVersion": 2.1,
+                "position": [
+                    0,
+                    208
+                ],
+                "id": "webhook-trigger-node",
+                "name": "Webhook Trigger",
+                "webhookId": "7ffc8885-05b7-4fea-aed4-ce24bda78f41"
+            },
+            {
+                "parameters": {
+                    "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const user = item.json.user || 'Usuario';\n  const badge = item.json.badge || 'Insignia';\n  const description = item.json.description || '';\n  return {\n    json: {\n      text: `🏆 ¡Felicitaciones a ${user}! Ha ganado la insignia \"${badge}\"${description ? ` (${description})` : ''}. ¡Gracias por apoyar a DonaTrack! 🌟 #DonaTrack`,\n      badgeName: badge\n    }\n  };\n});"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    224,
+                    208
+                ],
+                "id": "transform-code-node",
+                "name": "Transform Message"
+            },
+            {
+                "parameters": {
+                    "url": "={{ \"https://api.dicebear.com/9.x/bottts/png?seed=\" + encodeURIComponent($json.badgeName) + \"&size=128\" }}",
+                    "options": {
+                        "response": {
+                            "response": {
+                                "responseFormat": "file",
+                                "outputPropertyName": "image"
+                            }
+                        }
+                    }
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    448,
+                    208
+                ],
+                "id": "generate-badge-image-node",
+                "name": "Generate Badge Image"
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "https://discord.com/api/webhooks/1545253873785118740/fQ46oGTgcP5UZbcZmiVL7JIUblz71AUCVjzIDq7WnXYTCR-kT217cPlgGdNiGWnGm6jR",
+                    "sendBody": true,
+                    "contentType": "multipart-form-data",
+                    "bodyParameters": {
+                        "parameters": [
+                            {
+                                "name": "content",
+                                "value": "={{ $('Transform Message').first().json.text }}"
+                            },
+                            {
+                                "parameterType": "formBinaryData",
+                                "name": "file",
+                                "inputDataFieldName": "image"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    672,
+                    208
+                ],
+                "id": "publish-discord-node",
+                "name": "Publish to Discord Webhook"
+            }
+        ],
+        "connections": {
+            "Webhook Trigger": {
+                "main": [
+                    [
+                        {
+                            "node": "Transform Message",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Transform Message": {
+                "main": [
+                    [
+                        {
+                            "node": "Generate Badge Image",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Generate Badge Image": {
+                "main": [
+                    [
+                        {
+                            "node": "Publish to Discord Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1",
+            "binaryMode": "separate",
+            "availableInMCP": true
+        },
+        "staticData": null,
+        "meta": null,
+        "pinData": {},
+        "versionId": "10ea8ef8-aab2-4e04-af4c-97c0791363e4",
+        "activeVersionId": "10ea8ef8-aab2-4e04-af4c-97c0791363e4",
+        "versionCounter": 5,
+        "triggerCount": 1,
+        "tags": [],
+        "shared": [
+            {
+                "updatedAt": "2026-05-30T00:12:40.185Z",
+                "createdAt": "2026-05-30T00:12:40.185Z",
+                "role": "workflow:owner",
+                "workflowId": "donatrack-insignias",
+                "projectId": "aUAwLVlEtsTFzDRX",
+                "project": {
+                    "updatedAt": "2026-05-28T01:42:24.179Z",
+                    "createdAt": "2026-05-28T01:39:13.389Z",
+                    "id": "aUAwLVlEtsTFzDRX",
+                    "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+                    "type": "personal",
+                    "icon": null,
+                    "description": null,
+                    "creatorId": "c2b9a27b-1aee-479f-87b0-2027812789e1"
+                }
+            }
+        ],
+        "versionMetadata": {
+            "name": "Version 60309d4e",
+            "description": ""
+        }
+    },
+    {
+        "updatedAt": "2026-09-04T02:50:27.629Z",
+        "createdAt": "2026-06-07T00:29:50.535Z",
+        "id": "donatrack-ranking",
+        "name": "DonaTrack - Ranking",
+        "description": null,
+        "active": true,
+        "isArchived": false,
+        "nodes": [
+            {
+                "parameters": {
+                    "rule": {
+                        "interval": [
+                            {
+                                "field": "cronExpression",
+                                "expression": "0 10 1 * *"
+                            }
+                        ]
+                    }
+                },
+                "type": "n8n-nodes-base.scheduleTrigger",
+                "typeVersion": 1.1,
+                "position": [
+                    0,
+                    208
+                ],
+                "id": "schedule-node",
+                "name": "Schedule Trigger"
+            },
+            {
+                "parameters": {
+                    "jsCode": "return [\n  { json: { user: 'Juan', donations: 5 } },\n  { json: { user: 'Maria', donations: 12 } },\n  { json: { user: 'Pedro', donations: 3 } },\n  { json: { user: 'Ana', donations: 8 } },\n  { json: { user: 'Luis', donations: 1 } },\n  { json: { user: 'Juan', donations: 2 } },\n  { json: { user: 'Ana', donations: 4 } }\n];"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    208,
+                    208
+                ],
+                "id": "mock-data-node",
+                "name": "Mock Data Source"
+            },
+            {
+                "parameters": {
+                    "jsCode": "const items = $input.all();\nconst totals = {};\n\nfor (const item of items) {\n  const user = item.json.user;\n  const donations = item.json.donations;\n  if (!totals[user]) totals[user] = 0;\n  totals[user] += donations;\n}\n\nconst ranking = Object.keys(totals).map(user => ({\n  user: user,\n  totalDonations: totals[user]\n}));\n\nranking.sort((a, b) => b.totalDonations - a.totalDonations);\n\nreturn ranking.map(r => ({ json: r }));"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    400,
+                    208
+                ],
+                "id": "calculate-ranking-node",
+                "name": "Calculate Ranking"
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "https://httpbin.org/post",
+                    "sendBody": true,
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    608,
+                    208
+                ],
+                "id": "persist-results-node",
+                "name": "Persist Results (Mock API)"
+            },
+            {
+                "parameters": {
+                    "operation": "limit"
+                },
+                "type": "n8n-nodes-base.itemLists",
+                "typeVersion": 3,
+                "position": [
+                    800,
+                    208
+                ],
+                "id": "filter-top-3-node",
+                "name": "Filter Top 3"
+            },
+            {
+                "parameters": {
+                    "jsCode": "const items = $(\"Calculate Ranking\").all().slice(0, 3);\nconst medals = ['\\u{1F947}', '\\u{1F948}', '\\u{1F949}']; // 🥇 🥈 🥉\nlet message = '\\u{1F4E2} ¡Ranking Mensual de DonaTrack! \\u{1F4E2}\\n\\n';\n\nfor (let i = 0; i < items.length; i++) {\n  const user = items[i].json.user;\n  const donations = items[i].json.totalDonations;\n  message += `${medals[i] || ''} ${i + 1}º Lugar: ${user} con ${donations} donaciones.\\n`;\n}\n\nmessage += '\\n¡Gracias a todos por su solidaridad!';\n\nreturn [{ json: { content: message } }];"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    1008,
+                    208
+                ],
+                "id": "format-message-node",
+                "name": "Format Podium Message"
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "https://discord.com/api/webhooks/1545253873785118740/fQ46oGTgcP5UZbcZmiVL7JIUblz71AUCVjzIDq7WnXYTCR-kT217cPlgGdNiGWnGm6jR",
+                    "sendBody": true,
+                    "bodyParameters": {
+                        "parameters": [
+                            {
+                                "name": "content",
+                                "value": "=={{ $json.content }}"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    1200,
+                    208
+                ],
+                "id": "publish-discord-node",
+                "name": "Publish to Discord Webhook"
+            }
+        ],
+        "connections": {
+            "Schedule Trigger": {
+                "main": [
+                    [
+                        {
+                            "node": "Mock Data Source",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Mock Data Source": {
+                "main": [
+                    [
+                        {
+                            "node": "Calculate Ranking",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Calculate Ranking": {
+                "main": [
+                    [
+                        {
+                            "node": "Persist Results (Mock API)",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Persist Results (Mock API)": {
+                "main": [
+                    [
+                        {
+                            "node": "Filter Top 3",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Filter Top 3": {
+                "main": [
+                    [
+                        {
+                            "node": "Format Podium Message",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Format Podium Message": {
+                "main": [
+                    [
+                        {
+                            "node": "Publish to Discord Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1",
+            "availableInMCP": true,
+            "binaryMode": "separate"
+        },
+        "staticData": {
+            "node:Schedule Trigger": {
+                "recurrenceRules": []
+            }
+        },
+        "meta": null,
+        "pinData": {},
+        "versionId": "ed7a3926-fb8b-47de-8718-99cd349012f2",
+        "activeVersionId": "ed7a3926-fb8b-47de-8718-99cd349012f2",
+        "versionCounter": 14,
+        "triggerCount": 1,
+        "tags": [],
+        "shared": [
+            {
+                "updatedAt": "2026-05-30T01:28:29.750Z",
+                "createdAt": "2026-05-30T01:28:29.750Z",
+                "role": "workflow:owner",
+                "workflowId": "donatrack-ranking",
+                "projectId": "aUAwLVlEtsTFzDRX",
+                "project": {
+                    "updatedAt": "2026-05-28T01:42:24.179Z",
+                    "createdAt": "2026-05-28T01:39:13.389Z",
+                    "id": "aUAwLVlEtsTFzDRX",
+                    "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+                    "type": "personal",
+                    "icon": null,
+                    "description": null,
+                    "creatorId": "c2b9a27b-1aee-479f-87b0-2027812789e1"
+                }
+            }
+        ],
+        "versionMetadata": {
+            "name": "Version ed7a3926",
+            "description": ""
+        }
+    },
+    {
         "updatedAt": "2026-06-07T01:00:28.109Z",
         "createdAt": "2026-06-07T00:29:50.529Z",
         "id": "2zpu451nLHxitRhz",
         "name": "Chatbot",
         "description": "This workflow is for the chatbot in the frontend UI of the webpage",
-        "active": true,
+        "active": false,
         "isArchived": false,
         "nodes": [
             {
@@ -589,430 +1080,34 @@
             "aiBuilderA ssisted": true,
             "builderVariant": "mcp"
         },
-        "nodeGroups": [],
         "pinData": {},
-        "versionId": "fc7c8832-6bcc-4df7-820a-954ceac85f97",
-        "activeVersionId": "692e1792-8c00-4f3a-959e-63ba93b794c4",
+        "versionId": "55320d91-4a0f-4048-a091-b22b2ac981c3",
+        "activeVersionId": null,
         "versionCounter": 4,
         "triggerCount": 1,
         "tags": [],
         "shared": [
             {
-                "updatedAt": "2026-06-07T00:29:50.531Z",
-                "createdAt": "2026-06-07T00:29:50.531Z",
+                "updatedAt": "2026-05-31T22:47:12.240Z",
+                "createdAt": "2026-05-31T22:47:12.240Z",
                 "role": "workflow:owner",
                 "workflowId": "2zpu451nLHxitRhz",
-                "projectId": "3pbv9z02HovpAivd",
+                "projectId": "aUAwLVlEtsTFzDRX",
                 "project": {
-                    "updatedAt": "2026-06-07T00:24:56.425Z",
-                    "createdAt": "2026-06-04T21:12:55.461Z",
-                    "id": "3pbv9z02HovpAivd",
-                    "name": "Mateo Fernandez <matefernandezc+donatrack@gmail.com>",
+                    "updatedAt": "2026-05-28T01:42:24.179Z",
+                    "createdAt": "2026-05-28T01:39:13.389Z",
+                    "id": "aUAwLVlEtsTFzDRX",
+                    "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
                     "type": "personal",
                     "icon": null,
                     "description": null,
-                    "creatorId": "bbc8cc32-e61e-48ee-bcd3-73bc771303a1"
+                    "creatorId": "c2b9a27b-1aee-479f-87b0-2027812789e1"
                 }
             }
         ],
         "versionMetadata": {
             "name": null,
             "description": null
-        }
-    },
-    {
-        "updatedAt": "2026-06-07T00:47:45.122Z",
-        "createdAt": "2026-06-07T00:29:50.533Z",
-        "id": "donatrack-insignias",
-        "name": "DonaTrack - Insignias",
-        "description": null,
-        "active": true,
-        "isArchived": false,
-        "nodes": [
-            {
-                "parameters": {
-                    "httpMethod": "POST",
-                    "path": "donatrack/badge-earned",
-                    "responseMode": "onReceived",
-                    "options": {}
-                },
-                "type": "n8n-nodes-base.webhook",
-                "typeVersion": 2.1,
-                "position": [
-                    0,
-                    200
-                ],
-                "id": "webhook-trigger-node",
-                "name": "Webhook Trigger"
-            },
-            {
-                "parameters": {
-                    "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const user = item.json.user || 'Usuario';\n  const badge = item.json.badge || 'Insignia';\n  const description = item.json.description || '';\n  return {\n    json: {\n      text: `🏆 ¡Felicitaciones a ${user}! Ha ganado la insignia \"${badge}\"${description ? ` (${description})` : ''}. ¡Gracias por apoyar a DonaTrack! 🌟 #DonaTrack`,\n      badgeName: badge\n    }\n  };\n});"
-                },
-                "type": "n8n-nodes-base.code",
-                "typeVersion": 2,
-                "position": [
-                    220,
-                    200
-                ],
-                "id": "transform-code-node",
-                "name": "Transform Message"
-            },
-            {
-                "parameters": {
-                    "url": "={{ \"https://api.dicebear.com/9.x/bottts/svg?seed=\" + encodeURIComponent($json.badgeName) }}",
-                    "responseFormat": "file",
-                    "outputPropertyName": "image",
-                    "options": {}
-                },
-                "type": "n8n-nodes-base.httpRequest",
-                "typeVersion": 4.2,
-                "position": [
-                    440,
-                    200
-                ],
-                "id": "generate-badge-image-node",
-                "name": "Generate Badge Image"
-            },
-            {
-                "parameters": {
-                    "method": "POST",
-                    "url": "={{ $env.DISCORD_WEBHOOK_URL || \"https://discord.com/api/webhooks/YOUR_MOCK_DISCORD_WEBHOOK_URL\" }}",
-                    "sendBody": true,
-                    "contentType": "multipart-form-data",
-                    "bodyFormat": "multipart",
-                    "bodyParameters": {
-                        "parameters": [
-                            {
-                                "name": "content",
-                                "value": "={{ $json.text }}"
-                            },
-                            {
-                                "name": "file",
-                                "parameterType": "formBinaryData",
-                                "inputDataFieldName": "image"
-                            }
-                        ]
-                    },
-                    "options": {}
-                },
-                "type": "n8n-nodes-base.httpRequest",
-                "typeVersion": 4.2,
-                "position": [
-                    660,
-                    200
-                ],
-                "id": "publish-discord-node",
-                "name": "Publish to Discord Webhook"
-            }
-        ],
-        "connections": {
-            "Webhook Trigger": {
-                "main": [
-                    [
-                        {
-                            "node": "Transform Message",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Transform Message": {
-                "main": [
-                    [
-                        {
-                            "node": "Generate Badge Image",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Generate Badge Image": {
-                "main": [
-                    [
-                        {
-                            "node": "Publish to Discord Webhook",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            }
-        },
-        "settings": {
-            "executionOrder": "v1",
-            "binaryMode": "separate",
-            "availableInMCP": true
-        },
-        "staticData": null,
-        "meta": null,
-        "nodeGroups": [],
-        "pinData": {},
-        "versionId": "1f8bcb60-35bb-48f5-b260-96a9dbfbbcc1",
-        "activeVersionId": "1f8bcb60-35bb-48f5-b260-96a9dbfbbcc1",
-        "versionCounter": 2,
-        "triggerCount": 1,
-        "tags": [],
-        "shared": [
-            {
-                "updatedAt": "2026-06-07T00:29:50.534Z",
-                "createdAt": "2026-06-07T00:29:50.534Z",
-                "role": "workflow:owner",
-                "workflowId": "donatrack-insignias",
-                "projectId": "3pbv9z02HovpAivd",
-                "project": {
-                    "updatedAt": "2026-06-07T00:24:56.425Z",
-                    "createdAt": "2026-06-04T21:12:55.461Z",
-                    "id": "3pbv9z02HovpAivd",
-                    "name": "Mateo Fernandez <matefernandezc+donatrack@gmail.com>",
-                    "type": "personal",
-                    "icon": null,
-                    "description": null,
-                    "creatorId": "bbc8cc32-e61e-48ee-bcd3-73bc771303a1"
-                }
-            }
-        ],
-        "versionMetadata": {
-            "name": "Version 1f8bcb60",
-            "description": ""
-        }
-    },
-    {
-        "updatedAt": "2026-06-07T00:47:47.672Z",
-        "createdAt": "2026-06-07T00:29:50.535Z",
-        "id": "donatrack-ranking",
-        "name": "DonaTrack - Ranking",
-        "description": null,
-        "active": true,
-        "isArchived": false,
-        "nodes": [
-            {
-                "parameters": {
-                    "rule": {
-                        "interval": [
-                            {
-                                "field": "cronExpression",
-                                "expression": "0 10 1 * *"
-                            }
-                        ]
-                    }
-                },
-                "type": "n8n-nodes-base.scheduleTrigger",
-                "typeVersion": 1.1,
-                "position": [
-                    0,
-                    200
-                ],
-                "id": "schedule-node",
-                "name": "Schedule Trigger"
-            },
-            {
-                "parameters": {
-                    "jsCode": "return [\n  { json: { user: 'Juan', donations: 5 } },\n  { json: { user: 'Maria', donations: 12 } },\n  { json: { user: 'Pedro', donations: 3 } },\n  { json: { user: 'Ana', donations: 8 } },\n  { json: { user: 'Luis', donations: 1 } },\n  { json: { user: 'Juan', donations: 2 } },\n  { json: { user: 'Ana', donations: 4 } }\n];"
-                },
-                "type": "n8n-nodes-base.code",
-                "typeVersion": 2,
-                "position": [
-                    200,
-                    200
-                ],
-                "id": "mock-data-node",
-                "name": "Mock Data Source"
-            },
-            {
-                "parameters": {
-                    "jsCode": "const items = $input.all();\nconst totals = {};\n\nfor (const item of items) {\n  const user = item.json.user;\n  const donations = item.json.donations;\n  if (!totals[user]) totals[user] = 0;\n  totals[user] += donations;\n}\n\nconst ranking = Object.keys(totals).map(user => ({\n  user: user,\n  totalDonations: totals[user]\n}));\n\nranking.sort((a, b) => b.totalDonations - a.totalDonations);\n\nreturn ranking.map(r => ({ json: r }));"
-                },
-                "type": "n8n-nodes-base.code",
-                "typeVersion": 2,
-                "position": [
-                    400,
-                    200
-                ],
-                "id": "calculate-ranking-node",
-                "name": "Calculate Ranking"
-            },
-            {
-                "parameters": {
-                    "method": "POST",
-                    "url": "https://httpbin.org/post",
-                    "sendBody": true,
-                    "specifyBody": "json",
-                    "jsonBody": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
-                    "options": {}
-                },
-                "type": "n8n-nodes-base.httpRequest",
-                "typeVersion": 4.2,
-                "position": [
-                    600,
-                    200
-                ],
-                "id": "persist-results-node",
-                "name": "Persist Results (Mock API)"
-            },
-            {
-                "parameters": {
-                    "operation": "limit",
-                    "limit": 3
-                },
-                "type": "n8n-nodes-base.itemLists",
-                "typeVersion": 3,
-                "position": [
-                    800,
-                    200
-                ],
-                "id": "filter-top-3-node",
-                "name": "Filter Top 3"
-            },
-            {
-                "parameters": {
-                    "jsCode": "const items = $input.all();\nconst medals = ['\\u{1F947}', '\\u{1F948}', '\\u{1F949}']; // 🥇 🥈 🥉\nlet message = '\\u{1F4E2} ¡Ranking Mensual de DonaTrack! \\u{1F4E2}\\n\\n';\n\nfor (let i = 0; i < items.length; i++) {\n  const user = items[i].json.user;\n  const donations = items[i].json.totalDonations;\n  message += `${medals[i] || ''} ${i + 1}º Lugar: ${user} con ${donations} donaciones.\\n`;\n}\n\nmessage += '\\n¡Gracias a todos por su solidaridad!';\n\nreturn [{ json: { content: message } }];"
-                },
-                "type": "n8n-nodes-base.code",
-                "typeVersion": 2,
-                "position": [
-                    1000,
-                    200
-                ],
-                "id": "format-message-node",
-                "name": "Format Podium Message"
-            },
-            {
-                "parameters": {
-                    "method": "POST",
-                    "url": "https://httpbin.org/post",
-                    "sendBody": true,
-                    "contentType": "multipart-form-data",
-                    "bodyFormat": "multipart",
-                    "bodyParameters": {
-                        "parameters": [
-                            {
-                                "name": "content",
-                                "value": "={{ $json.content }}"
-                            }
-                        ]
-                    },
-                    "options": {}
-                },
-                "type": "n8n-nodes-base.httpRequest",
-                "typeVersion": 4.2,
-                "position": [
-                    1200,
-                    200
-                ],
-                "id": "publish-discord-node",
-                "name": "Publish to Discord Webhook"
-            }
-        ],
-        "connections": {
-            "Schedule Trigger": {
-                "main": [
-                    [
-                        {
-                            "node": "Mock Data Source",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Mock Data Source": {
-                "main": [
-                    [
-                        {
-                            "node": "Calculate Ranking",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Calculate Ranking": {
-                "main": [
-                    [
-                        {
-                            "node": "Persist Results (Mock API)",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Persist Results (Mock API)": {
-                "main": [
-                    [
-                        {
-                            "node": "Filter Top 3",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Filter Top 3": {
-                "main": [
-                    [
-                        {
-                            "node": "Format Podium Message",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Format Podium Message": {
-                "main": [
-                    [
-                        {
-                            "node": "Publish to Discord Webhook",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            }
-        },
-        "settings": {
-            "executionOrder": "v1",
-            "availableInMCP": true
-        },
-        "staticData": {
-            "node:Schedule Trigger": {
-                "recurrenceRules": []
-            }
-        },
-        "meta": null,
-        "nodeGroups": [],
-        "pinData": null,
-        "versionId": "a68302c1-55c2-4012-a43e-c0a5ba9c0511",
-        "activeVersionId": "a68302c1-55c2-4012-a43e-c0a5ba9c0511",
-        "versionCounter": 2,
-        "triggerCount": 1,
-        "tags": [],
-        "shared": [
-            {
-                "updatedAt": "2026-06-07T00:29:50.536Z",
-                "createdAt": "2026-06-07T00:29:50.536Z",
-                "role": "workflow:owner",
-                "workflowId": "donatrack-ranking",
-                "projectId": "3pbv9z02HovpAivd",
-                "project": {
-                    "updatedAt": "2026-06-07T00:24:56.425Z",
-                    "createdAt": "2026-06-04T21:12:55.461Z",
-                    "id": "3pbv9z02HovpAivd",
-                    "name": "Mateo Fernandez <matefernandezc+donatrack@gmail.com>",
-                    "type": "personal",
-                    "icon": null,
-                    "description": null,
-                    "creatorId": "bbc8cc32-e61e-48ee-bcd3-73bc771303a1"
-                }
-            }
-        ],
-        "versionMetadata": {
-            "name": "Version a68302c1",
-            "description": ""
         }
     }
 ]
