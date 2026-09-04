@@ -60,3 +60,51 @@ Para construir y mantener el flujo `DonaTrack - Insignias`, el agente debe usar 
    - Conectar con el microservicio correspondiente (`donatrack-incentivos` o base de datos).
 4. **Pruebas Locales:** Ejecutar el flujo manualmente en el canvas de n8n y verificar los payloads de entrada y salida.
 5. **Persistencia:** Correr `make n8n-export` en la terminal para guardar los cambios en el archivo del proyecto y hacer commit.
+
+---
+
+## 🧪 Pruebas Manuales de Workflows
+
+### Workflow: `DonaTrack - Insignias`
+
+Este workflow se dispara vía **HTTP POST** al webhook de n8n. Simula el evento que lanza el microservicio `donatrack-incentivos` cuando un donante gana una insignia.
+
+> [!IMPORTANT]
+> Antes de ejecutar el curl, asegurate de que el workflow esté **activo** (toggle ON en la esquina superior derecha del editor). Los webhooks de producción solo funcionan con el workflow activo.
+
+**Comando para simular el evento de insignia ganada:**
+
+```bash
+curl -X POST http://localhost:5678/webhook/donatrack/badge-earned \
+  -H "Content-Type: application/json" \
+  -d '{"user": "Juan Pérez", "badge": "Donador Estrella", "description": "Completó 5 donaciones exitosas"}'
+```
+
+**Campos del payload:**
+
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `user` | `string` | Nombre del donante que ganó la insignia |
+| `badge` | `string` | Nombre de la insignia obtenida |
+| `description` | `string` | Descripción del logro (opcional) |
+
+**Respuesta esperada:**
+```json
+{"message": "Workflow was started"}
+```
+Esta respuesta es correcta — el workflow corre de forma **asíncrona** (en segundo plano). Para ver el resultado de la ejecución, ir a **http://localhost:5678 → Executions**.
+
+**Resultado en Discord:** El canal configurado recibirá un mensaje con el texto del logro y una imagen de badge generada automáticamente por DiceBear.
+
+---
+
+### Workflow: `DonaTrack - Ranking`
+
+Este workflow se dispara por un **cron** automático el día 1 de cada mes a las 10:00 hs. Para probarlo manualmente:
+
+1. Abrir **http://localhost:5678** → workflow `DonaTrack - Ranking`
+2. Activarlo con el toggle (ON)
+3. Hacer click en **▶️ Execute workflow** en la barra inferior del canvas
+
+**Resultado en Discord:** El canal recibirá el ranking mensual con los top 3 donantes (🥇🥈🥉).
+
