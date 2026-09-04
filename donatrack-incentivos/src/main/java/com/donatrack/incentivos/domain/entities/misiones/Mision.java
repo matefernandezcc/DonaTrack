@@ -55,7 +55,9 @@ public class Mision {
                         .orElse(0);
 
             case MESES_CONSECUTIVOS:
-                List<RegistroDonacion> donaciones = perfil.getMetricas().obtenerTodasLasDonaciones();
+                // Se usa obtenerDonacionesDesdeCorte() para ignorar donaciones previas al último
+                // corte de racha (>30 días de inactividad), evitando contar rachas viejas.
+                List<RegistroDonacion> donaciones = perfil.getMetricas().obtenerDonacionesDesdeCorte();
                 if (donaciones.isEmpty()) {
                     return 0;
                 }
@@ -80,6 +82,7 @@ public class Mision {
                     }
                 }
                 return racha;
+
 
             case CATEGORIAS_DISTINTAS:
                 Set<String> cats = perfil.getMetricas().obtenerTodasLasDonaciones().stream()
