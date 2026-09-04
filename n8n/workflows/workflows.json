@@ -1,101 +1,5 @@
 [
     {
-        "updatedAt": "2026-05-30T01:36:17.376Z",
-        "createdAt": "2026-05-28T02:10:03.173Z",
-        "id": "Psv5TyU4pTNyUbxK",
-        "name": "DonaTrack - Insignias roto",
-        "description": null,
-        "active": false,
-        "isArchived": false,
-        "nodes": [
-            {
-                "parameters": {
-                    "httpMethod": "POST",
-                    "path": "insignias",
-                    "options": {}
-                },
-                "type": "n8n-nodes-base.webhook",
-                "typeVersion": 2.1,
-                "position": [
-                    0,
-                    0
-                ],
-                "id": "24a61303-5726-4750-9a00-14d0c3c04155",
-                "name": "Webhook",
-                "webhookId": "947b5b1a-29e3-45de-bc95-7c8b65e4e10f"
-            },
-            {
-                "parameters": {
-                    "mode": "runOnceForEachItem",
-                    "jsCode": "// Obtenemos los datos que nos pasó el Webhook (¡agregamos .body al final!)\nconst datos = $input.item.json.body;\n\n// Armamos el texto para la red social\nconst mensajePublicable = `¡Felicidades a ${datos.user}! 🎉 Acaba de obtener la insignia \"${datos.badge}\" por su compromiso con DonaTrack. ${datos.description}. ¡Sumate vos también a ayudar!`;\n\n// Retornamos el nuevo mensaje\nreturn {\n  json: {\n    mensajeRedes: mensajePublicable\n  }\n};"
-                },
-                "type": "n8n-nodes-base.code",
-                "typeVersion": 2,
-                "position": [
-                    208,
-                    0
-                ],
-                "id": "a3db6c30-605f-4237-947c-1c12de799dd9",
-                "name": "Code in JavaScript"
-            }
-        ],
-        "connections": {
-            "Webhook": {
-                "main": [
-                    [
-                        {
-                            "node": "Code in JavaScript",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Code in JavaScript": {
-                "main": [
-                    []
-                ]
-            }
-        },
-        "settings": {
-            "executionOrder": "v1",
-            "binaryMode": "separate"
-        },
-        "staticData": null,
-        "meta": {
-            "templateCredsSetupCompleted": true
-        },
-        "pinData": {},
-        "versionId": "851a2efe-7fbb-4257-a32d-f2f67b093c8f",
-        "activeVersionId": null,
-        "versionCounter": 312,
-        "triggerCount": 0,
-        "tags": [],
-        "shared": [
-            {
-                "updatedAt": "2026-05-28T02:10:03.178Z",
-                "createdAt": "2026-05-28T02:10:03.178Z",
-                "role": "workflow:owner",
-                "workflowId": "Psv5TyU4pTNyUbxK",
-                "projectId": "aUAwLVlEtsTFzDRX",
-                "project": {
-                    "updatedAt": "2026-05-28T01:42:24.179Z",
-                    "createdAt": "2026-05-28T01:39:13.389Z",
-                    "id": "aUAwLVlEtsTFzDRX",
-                    "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
-                    "type": "personal",
-                    "icon": null,
-                    "description": null,
-                    "creatorId": "c2b9a27b-1aee-479f-87b0-2027812789e1"
-                }
-            }
-        ],
-        "versionMetadata": {
-            "name": null,
-            "description": null
-        }
-    },
-    {
         "updatedAt": "2026-09-04T02:36:28.551Z",
         "createdAt": "2026-06-07T00:29:50.533Z",
         "id": "donatrack-insignias",
@@ -122,7 +26,7 @@
             },
             {
                 "parameters": {
-                    "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const user = item.json.user || 'Usuario';\n  const badge = item.json.badge || 'Insignia';\n  const description = item.json.description || '';\n  return {\n    json: {\n      text: `🏆 ¡Felicitaciones a ${user}! Ha ganado la insignia \"${badge}\"${description ? ` (${description})` : ''}. ¡Gracias por apoyar a DonaTrack! 🌟 #DonaTrack`,\n      badgeName: badge\n    }\n  };\n});"
+                    "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const user = body.user || body.usuario || body.nombre || 'Donante DonaTrack';\n  const badge = body.badge || body.insignia || 'Insignia de Honor';\n  const description = body.description || body.descripcion || body.detalle || '¡Gracias por apoyar a DonaTrack y marcar la diferencia!';\n  const timestamp = new Date().toISOString();\n\n  const discordPayload = {\n    username: \"DonaTrack Bot\",\n    embeds: [\n      {\n        title: \"🏆 ¡Nueva Insignia Otorgada!\",\n        description: `¡Felicitaciones a **${user}** por obtener un nuevo reconocimiento en **DonaTrack**! 🌟`,\n        color: 15844367,\n        fields: [\n          {\n            name: \"🎖️ Insignia\",\n            value: `**${badge}**`,\n            inline: true\n          },\n          {\n            name: \"👤 Donante\",\n            value: `**${user}**`,\n            inline: true\n          },\n          {\n            name: \"📝 Logro\",\n            value: description,\n            inline: false\n          }\n        ],\n        thumbnail: {\n          url: \"attachment://badge.png\"\n        },\n        footer: {\n          text: \"DonaTrack • Plataforma de Gestión y Trazabilidad\"\n        },\n        timestamp: timestamp\n      }\n    ]\n  };\n\n  return {\n    json: {\n      userName: user,\n      badgeName: badge,\n      description: description,\n      discordPayload: discordPayload\n    }\n  };\n});"
                 },
                 "type": "n8n-nodes-base.code",
                 "typeVersion": 2,
@@ -135,7 +39,7 @@
             },
             {
                 "parameters": {
-                    "url": "={{ \"https://api.dicebear.com/9.x/bottts/png?seed=\" + encodeURIComponent($json.badgeName) + \"&size=128\" }}",
+                    "url": "={{ \"https://api.dicebear.com/9.x/bottts/png?seed=\" + encodeURIComponent(($json.userName || 'Usuario') + \"-\" + ($json.badgeName || 'Insignia')) + \"&size=256\" }}",
                     "options": {
                         "response": {
                             "response": {
@@ -163,12 +67,12 @@
                     "bodyParameters": {
                         "parameters": [
                             {
-                                "name": "content",
-                                "value": "={{ $('Transform Message').first().json.text }}"
+                                "name": "payload_json",
+                                "value": "={{ JSON.stringify($json.discordPayload) }}"
                             },
                             {
                                 "parameterType": "formBinaryData",
-                                "name": "file",
+                                "name": "files[0]",
                                 "inputDataFieldName": "image"
                             }
                         ]
@@ -345,7 +249,7 @@
             },
             {
                 "parameters": {
-                    "jsCode": "const items = $(\"Calculate Ranking\").all().slice(0, 3);\nconst medals = ['\\u{1F947}', '\\u{1F948}', '\\u{1F949}']; // 🥇 🥈 🥉\nlet message = '\\u{1F4E2} ¡Ranking Mensual de DonaTrack! \\u{1F4E2}\\n\\n';\n\nfor (let i = 0; i < items.length; i++) {\n  const user = items[i].json.user;\n  const donations = items[i].json.totalDonations;\n  message += `${medals[i] || ''} ${i + 1}º Lugar: ${user} con ${donations} donaciones.\\n`;\n}\n\nmessage += '\\n¡Gracias a todos por su solidaridad!';\n\nreturn [{ json: { content: message } }];"
+                    "jsCode": "const ranking = $(\"Calculate Ranking\").all().map(item => item.json);\nconst top3 = ranking.slice(0, 3);\nconst rest = ranking.slice(3);\n\nconst medals = ['🥇 1º Puesto — Líder del Mes', '🥈 2º Puesto', '🥉 3º Puesto'];\nconst fields = [];\n\ntop3.forEach((item, index) => {\n  fields.push({\n    name: medals[index] || `${index + 1}º Puesto`,\n    value: `👤 **${item.user}** • \\`${item.totalDonations} donaciones\\``,\n    inline: index > 0\n  });\n});\n\nif (rest.length > 0) {\n  const restNames = rest.map(r => `**${r.user}** (${r.totalDonations})`).join(', ');\n  fields.push({\n    name: \"👏 Menciones de Honor\",\n    value: `Gracias a ${restNames} y a cada voluntario por su apoyo incondicional.`,\n    inline: false\n  });\n}\n\nconst discordPayload = {\n  username: \"DonaTrack Bot\",\n  embeds: [\n    {\n      title: \"📢 ¡Podio & Ranking Mensual de DonaTrack! 🏆\",\n      description: \"Reconocimiento especial a los donantes con mayor impacto de este mes. ¡Gracias por hacer la diferencia! 🌟\",\n      color: 3447003,\n      fields: fields,\n      thumbnail: {\n        url: \"https://api.dicebear.com/9.x/bottts/png?seed=DonaTrackPodium&size=256\"\n      },\n      footer: {\n        text: \"DonaTrack • Plataforma de Gestión y Trazabilidad\"\n      },\n      timestamp: new Date().toISOString()\n    }\n  ]\n};\n\nreturn [{ json: { discordPayload: discordPayload } }];"
                 },
                 "type": "n8n-nodes-base.code",
                 "typeVersion": 2,
@@ -361,14 +265,8 @@
                     "method": "POST",
                     "url": "https://discord.com/api/webhooks/1545253873785118740/fQ46oGTgcP5UZbcZmiVL7JIUblz71AUCVjzIDq7WnXYTCR-kT217cPlgGdNiGWnGm6jR",
                     "sendBody": true,
-                    "bodyParameters": {
-                        "parameters": [
-                            {
-                                "name": "content",
-                                "value": "=={{ $json.content }}"
-                            }
-                        ]
-                    },
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify($json.discordPayload) }}",
                     "options": {}
                 },
                 "type": "n8n-nodes-base.httpRequest",
