@@ -14,9 +14,11 @@ import com.donatrack.incentivos.domain.entities.RegistroDonacion;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
 @Getter
 @Setter
+@EqualsAndHashCode(of = "nombre")
 public class Mision {
     private UUID id = UUID.randomUUID();
     private String nombre;
