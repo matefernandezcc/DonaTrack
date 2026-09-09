@@ -120,4 +120,61 @@ Cada requerimiento será analizado para verificar su correcta implementación en
 2. En el mismo workflow, el nodo `Publish to Discord Webhook` debe usar la variable `$env.DISCORD_WEBHOOK_URL` (consistente con el de Insignias) en lugar de `httpbin.org/post`.
 
 ---
+### Requerimiento 8: Endpoints del Servicio de Incentivos
+
+**Descripción:** Que esté correcta la exposición de las operaciones del servicio de incentivos (entrega 2).
+
+**Estado:** ✅ **Cumplido**
+
+**Evidencia / Análisis:**
+- **Controlador REST:** El archivo `IncentivoController.java` en `donatrack-incentivos` maneja la capa web.
+- **Endpoints y Verbos HTTP:** Se exponen rutas REST consistentes y semánticas bajo `/api`:
+  - `GET /donantes/{id}/metricas`: Consulta historial, racha y ranking del donante.
+  - `GET /donantes/{id}/misiones`: Devuelve misiones activas.
+  - `GET /donantes/{id}/insignias`: Lista insignias obtenidas.
+  - `GET /ranking/top3`: Retorna el podio de los donantes destacados del mes.
+  - `POST /donantes/{id}/actividad`: Para asentar una donación exitosa.
+- **Manejo de DTOs:** Retorna datos estructurados usando `MetricasDonanteDTO`, evitando exponer directamente entidades internas o de base de datos.
+- **OpenAPI / Swagger:** Utiliza extensivamente anotaciones (`@Tag`, `@Operation`, `@ApiResponse`) para autogenerar documentación precisa de la API.
+
+**Correcciones necesarias:** Ninguna. El diseño sigue buenas prácticas REST y está bien documentado.
+
+---
+### Requerimiento 9: Cálculo de progreso impactado por donaciones
+
+**Descripción:** Las donaciones deben impactar en el cálculo de progreso (entrega 2).
+
+**Estado:** ✅ **Cumplido**
+
+**Evidencia / Análisis:**
+Este requerimiento impacta en dos áreas clave del sistema y en ambas se resolvió de forma orientada a objetos:
+
+1. **Progreso de Misiones (Servicio de Incentivos):**
+   - En la clase `PerfilDonante`, el método `registrarDonacionExitosa(RegistroDonacion donacion)` realiza dos acciones: registra la donación en el historial (`metricas`) e inmediatamente dispara `evaluarMisiones()`.
+   - La evaluación itera sobre la `misionActual` y llama a su método `evaluar(this)`. Si el cálculo del progreso alcanza el objetivo (ej. 3 donaciones mensuales, monto total, racha), automáticamente se avanza de misión y se otorga la insignia correspondiente.
+
+2. **Progreso de Necesidades (Servicio de Donaciones):**
+   - El progreso de una campaña/necesidad se maneja dinámicamente mediante la sumatoria de los bienes donados.
+   - En `PeriodoNecesidad`, el progreso se calcula en tiempo real con el método `cantidadAcumulada()`, que itera sobre la lista `donacionesAsignadas` sumando las cantidades.
+   - Existe el método `estaCubierta()`, que compara la cantidad objetivo con la cantidad acumulada, permitiendo saber si la necesidad alcanzó su 100% de progreso.
+
+**Correcciones necesarias:** Ninguna. El impacto del progreso está diseñado de manera reactiva (al registrar una donación, el estado del dominio responde en consecuencia).
+
+---
+### Requerimiento 10: Diversos medios de envío (Notificaciones)
+
+**Descripción:** Que pueda enviar por diversos medios utilizando algún strategy o similar (entrega 2).
+
+**Estado:** ✅ **Cumplido**
+
+**Evidencia / Análisis:**
+- **Uso de Patrón Strategy:** Se constató la implementación pura del patrón Strategy integrado con las capacidades de inyección de dependencias de Spring Boot.
+- **Interfaz (Estrategia):** Existe el puerto de salida `NotificacionAdapter` con el contrato `enviar(Notificacion notificacion)`.
+- **Implementaciones Concretas:** En el paquete `infrastructure.adapters.out.messaging` existen 3 implementaciones distintas: `AdaptadorEmail`, `AdaptadorSMS` y `AdaptadorWhatsApp`. Cada una tiene la anotación `@Component("TIPO")` correspondiente.
+- **Clase Contexto:** El caso de uso `NotificadorService` declara en su constructor un mapa `Map<String, NotificacionAdapter> adaptadores`. Spring inyecta automáticamente todas las estrategias en este mapa usando los nombres de los componentes como llaves. 
+- **Resolución dinámica:** Al invocar `enviarNotificacion(...)`, el servicio busca el adaptador deseado (`adaptadores.get(medio.toUpperCase())`) y delega la responsabilidad sin sentencias condicionales acopladas (`switch`/`if-else`), respetando el principio Open/Closed (OCP).
+
+**Correcciones necesarias:** Ninguna. Arquitectura impecable.
+
+---
 *(Aquí se irán agregando los próximos requerimientos evaluados)*
