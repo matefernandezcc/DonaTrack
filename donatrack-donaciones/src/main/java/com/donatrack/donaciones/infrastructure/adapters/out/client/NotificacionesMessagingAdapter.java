@@ -3,15 +3,16 @@ package com.donatrack.donaciones.infrastructure.adapters.out.client;
 import com.donatrack.donaciones.application.ports.out.NotificacionOutDTO;
 import com.donatrack.donaciones.application.ports.out.ServicioNotificaciones;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotificacionesFeignAdapter implements ServicioNotificaciones {
+public class NotificacionesMessagingAdapter implements ServicioNotificaciones {
 
-    private final NotificacionClient notificacionClient;
+    private final RabbitTemplate rabbitTemplate;
 
-    public NotificacionesFeignAdapter(NotificacionClient notificacionClient) {
-        this.notificacionClient = notificacionClient;
+    public NotificacionesMessagingAdapter(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Override
@@ -39,10 +40,14 @@ public class NotificacionesFeignAdapter implements ServicioNotificaciones {
         );
         
         try {
-            notificacionClient.enviarNotificacion(request);
+            // Using a default exchange for donaciones internal events
+            rabbitTemplate.convertAndSend(
+                "donaciones.exchange",
+                "notificacion.general",
+                request
+            );
         } catch (Exception e) {
-            // Log de error temporal
-            System.err.println("Error al enviar notificación: " + e.getMessage());
+            System.err.println("Error al enviar notificación a RabbitMQ: " + e.getMessage());
         }
     }
 }

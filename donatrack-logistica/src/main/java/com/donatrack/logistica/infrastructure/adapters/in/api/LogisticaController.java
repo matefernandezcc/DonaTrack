@@ -4,6 +4,7 @@ import com.donatrack.logistica.application.ports.in.ListarItemsPendientesPort;
 import com.donatrack.logistica.application.ports.in.IniciarRutaUseCase;
 import com.donatrack.logistica.application.ports.in.ProcesarCallbackPlanificacionUseCase;
 import com.donatrack.logistica.application.ports.in.ProcesarPlanificacionesPendientesUseCase;
+import com.donatrack.logistica.application.ports.in.RecepcionarDonacionListaPort;
 import com.donatrack.logistica.application.ports.out.CamionRepositoryPort;
 import com.donatrack.logistica.application.ports.out.ChoferRepositoryPort;
 import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepositoryPort;
@@ -36,6 +37,7 @@ public class LogisticaController {
     private final ReportarFallaEntregaUseCase reportarFallaEntregaUseCase;
     private final ProcesarPlanificacionesPendientesUseCase planificacionUseCase;
     private final ProcesarCallbackPlanificacionUseCase procesarCallbackPlanificacionUseCase;
+    private final RecepcionarDonacionListaPort recepcionarDonacionListaPort;
 
     public LogisticaController(ListarItemsPendientesPort listarItemsPendientesPort,
             CamionRepositoryPort camionRepository,
@@ -45,7 +47,8 @@ public class LogisticaController {
             ConfirmarRecepcionUseCase confirmarRecepcionUseCase,
             ReportarFallaEntregaUseCase reportarFallaEntregaUseCase,
             ProcesarPlanificacionesPendientesUseCase planificacionUseCase,
-            ProcesarCallbackPlanificacionUseCase procesarCallbackPlanificacionUseCase) {
+            ProcesarCallbackPlanificacionUseCase procesarCallbackPlanificacionUseCase,
+            RecepcionarDonacionListaPort recepcionarDonacionListaPort) {
         this.listarItemsPendientesPort = listarItemsPendientesPort;
         this.camionRepository = camionRepository;
         this.choferRepository = choferRepository;
@@ -55,6 +58,7 @@ public class LogisticaController {
         this.reportarFallaEntregaUseCase = reportarFallaEntregaUseCase;
         this.planificacionUseCase = planificacionUseCase;
         this.procesarCallbackPlanificacionUseCase = procesarCallbackPlanificacionUseCase;
+        this.recepcionarDonacionListaPort = recepcionarDonacionListaPort;
     }
 
     @Operation(summary = "Listar ítems de planificación pendientes", description = "Devuelve todos los ítems de donación pendientes de ser incluidos en una ruta")
@@ -183,6 +187,20 @@ public class LogisticaController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Recepcionar donación para planificación", description = "Endpoint para que Donaciones envíe un ítem a planificar")
+    @ApiResponse(responseCode = "200", description = "Ítem recepcionado")
+    @PostMapping("/planificacion/items")
+    public ResponseEntity<Void> recepcionarDonacionLista(@RequestBody ItemPlanificacionRequest request) {
+        ItemPlanificacion item = new ItemPlanificacion(
+                request.getIdDonacion(),
+                request.getPeso(),
+                request.getVolumen(),
+                new Direccion(request.getCalleDestino(), request.getAlturaDestino(), request.getLocalidadDestino())
+        );
+        recepcionarDonacionListaPort.recepcionar(item);
+        return ResponseEntity.ok().build();
+    }
+
     // --- DTOs estáticos ---
     @lombok.Data
     @lombok.NoArgsConstructor
@@ -202,5 +220,16 @@ public class LogisticaController {
     public static class ReportarFallaRequest {
         private String motivo;
         private boolean puedeReplanificarse;
+    }
+
+    @lombok.Data
+    @lombok.NoArgsConstructor
+    public static class ItemPlanificacionRequest {
+        private UUID idDonacion;
+        private double peso;
+        private double volumen;
+        private String calleDestino;
+        private String alturaDestino;
+        private String localidadDestino;
     }
 }
