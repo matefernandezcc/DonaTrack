@@ -27,6 +27,8 @@ services:
       - TZ=America/Argentina/Buenos_Aires
       # Habilita peticiones cruzadas para la API de n8n
       - N8N_CORS_ALLOWED_ORIGINS=*
+      # Webhook de Discord para publicar notificaciones de insignias y rankings
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1545253873785118740/fQ46oGTgcP5UZbcZmiVL7JIUblz71AUCVjzIDq7WnXYTCR-kT217cPlgGdNiGWnGm6jR
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/workflows # Carpeta local para importar/exportar los JSON de tus workflows

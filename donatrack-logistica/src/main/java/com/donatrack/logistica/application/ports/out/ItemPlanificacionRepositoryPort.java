@@ -8,4 +8,6 @@ public interface ItemPlanificacionRepositoryPort {
     void guardar(ItemPlanificacion item);
 
     List<ItemPlanificacion> obtenerTodos();
+
+    void eliminarTodos(List<ItemPlanificacion> items);
 }

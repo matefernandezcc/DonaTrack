@@ -1,0 +1,135 @@
+@startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue_Entrega4
+left to right direction
+skinparam componentStyle uml2
+skinparam nodesep 40
+skinparam ranksep 80
+
+' Colores
+skinparam node {
+    BackgroundColor #AED6F1
+    BorderColor #5D6D7E
+}
+skinparam component {
+    BackgroundColor #FADBD8
+    BorderColor #5D6D7E
+}
+skinparam interface {
+    BackgroundColor #FFFFFF
+    BorderColor #5D6D7E
+}
+
+node "Servidor Frontend" as N_Frontend {
+    component "Frontend SPA\n(Cliente Web/Móvil)" as Frontend
+}
+
+rectangle "FrontEnd y Orquestación" #line.dashed {
+    node "Servidor API" as N_API {
+        component "API REST (HTTPS)" as ModuloAPI
+    }
+}
+
+' Interfaz entre Frontend y API
+interface "HTTPS" as Int_HTTPS
+Frontend -- Int_HTTPS
+Int_HTTPS -- ModuloAPI
+
+' Interfaces API REST para los microservicios
+interface "HTTP - API REST" as Int_API_Don
+interface "HTTP - API REST" as Int_API_Inc
+interface "HTTP - API REST" as Int_API_Log
+interface "HTTP - API REST" as Int_API_Not
+
+ModuloAPI -- Int_API_Don
+ModuloAPI -- Int_API_Inc
+ModuloAPI -- Int_API_Log
+ModuloAPI -- Int_API_Not
+
+' ----- BACKEND MultiServicio (MicroServidores) -----
+rectangle "Dominio (DonaTrack Backend)" #line.dashed {
+    node "Servidor de Donaciones" as N_Donaciones {
+        component "Servicio de Donaciones" as ModDonaciones
+        component "Broker de Logística\n(LogisticaBrokerAdapter)" as BrokerLogistica
+        
+        ModDonaciones --> BrokerLogistica : usa
+    }
+    node "Servidor de Incentivos" as N_Incentivos {
+        component "Servicio de Incentivos" as ModIncentivos
+    }
+    
+    node "Servidor de Logística (Local - Fallback)" as N_Logistica_Local {
+        component "Servicio de Logística" as ModLogisticaLocal
+    }
+    
+    node "Servidor de Notificaciones" as N_Notificaciones {
+        component "Servicio de Notificaciones" as ModNotificaciones
+    }
+}
+
+' Nodo de Nube para Logistica Principal
+node "Servidor en Nube (Render)" as N_Logistica_Nube {
+    component "Servicio de Logística\n(Principal)" as ModLogisticaNube
+}
+
+Int_API_Don -- ModDonaciones
+Int_API_Inc -- ModIncentivos
+Int_API_Log -- ModLogisticaLocal
+Int_API_Log -- ModLogisticaNube
+Int_API_Not -- ModNotificaciones
+
+' Resto de los servidores externos y persistencia
+rectangle "Persistencia" #line.dashed {
+    node "Servidor de la Base de Datos" as N_DB {
+        component "Base de Datos PostgreSQL" as DB
+    }
+}  
+rectangle "Mensajería" #line.dashed { 
+    node "Servidor RabbitMQ" as N_BrokerMQ {
+        component "Message Broker" as RabbitMQ
+    }
+}
+
+node "Servidor de n8n" as N_n8n {
+    component "Servidor n8n\n(Automatización)" as n8n
+}
+
+node "Servidores de APIs 1....N" as N_SaaSNotif {
+    component "APIs Notificaciones\n(Twilio, SendGrid, Meta)" as SaaSNotif
+}
+
+node "Servidor de Planificación Externo" as N_Planificador {
+    component "Motor de Rutas (Simulado)" as PlanificadorExterno
+}
+
+' ==========================================
+' CONEXIONES 
+' ==========================================
+
+' 1. Conexiones a BD
+ModDonaciones --- DB : "JPA (schema: donaciones)"
+ModIncentivos --- DB : "JPA (schema: incentivos)"
+ModLogisticaLocal --- DB : "JPA (schema: logistica)"
+ModLogisticaNube --- DB : "JPA (schema: logistica)"
+ModNotificaciones --- DB : "JPA (schema: notificaciones)"
+
+' 2. Conexiones RabbitMQ
+ModDonaciones <--> RabbitMQ : "Publica: donaciones.exchange\nConsume: logistica.exchange"
+ModIncentivos --> RabbitMQ : "Publica: incentivos.exchange"
+ModLogisticaLocal <--> RabbitMQ : "Publica: logistica.exchange\nConsume: donaciones.exchange"
+ModLogisticaNube <--> RabbitMQ : "Publica: logistica.exchange\nConsume: donaciones.exchange"
+RabbitMQ --> ModNotificaciones : "Consume: donaciones.exchange\ny incentivos.exchange"
+
+' 3. Broker de Logística (Feign Clients)
+BrokerLogistica ..> ModLogisticaNube : "HTTP POST (Prioridad 1)"
+BrokerLogistica ..> ModLogisticaLocal : "HTTP POST (Fallback)"
+
+' 4. Planificador Externo (Callback)
+ModLogisticaNube --> PlanificadorExterno : "HTTP POST (Solicitud)"
+PlanificadorExterno --> ModuloAPI : "HTTP POST (Callback)"
+ModLogisticaLocal --> PlanificadorExterno : "HTTP POST (Solicitud)"
+
+' 5. Integraciones n8n y Redes
+ModIncentivos --> n8n : "POST Webhook"
+n8n --> ModuloAPI : "PATCH / PUT"
+ModNotificaciones --> SaaSNotif : "Despacha SMS/WA/Email"
+
+@enduml

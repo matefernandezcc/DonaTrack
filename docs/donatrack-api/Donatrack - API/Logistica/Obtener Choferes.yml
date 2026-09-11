@@ -1,0 +1,16 @@
+info:
+  name: Obtener Choferes
+  type: http
+  seq: 12
+
+http:
+  method: GET
+  url: "{{logisticaUrl}}/api/choferes"
+  body: none
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

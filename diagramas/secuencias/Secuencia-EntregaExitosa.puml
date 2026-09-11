@@ -1,0 +1,55 @@
+@startuml Secuencia-EntregaExitosa
+title Confirmación de Entrega Exitosa
+
+actor "Entidad Beneficiaria" as ong
+participant "LogísticaController" as logCtrl
+participant "ConfirmarRecepcionUseCase" as confRecepcion
+participant "ApplicationEventPublisher" as logPublisher
+queue "RabbitMQ" as mq
+participant "DonacionesListener" as donListener
+participant "ConfirmarRecepcionYNotificarUseCase" as donConf
+participant "ApplicationEventPublisher" as donPublisher
+participant "IncentivosListener" as incListener
+participant "RegistrarActividadDonacionUseCase" as incUseCase
+participant "NotificacionesListener" as notiListener
+
+ong -> logCtrl: POST /api/rutas/{id}/entregas/{idEntrega}/confirmar
+activate logCtrl
+logCtrl -> confRecepcion: confirmar(idEntrega, firma)
+activate confRecepcion
+confRecepcion -> confRecepcion: Marca entrega como ENTREGADA
+confRecepcion -> logPublisher: publishEvent(EntregaRealizadaEvent)
+logPublisher -> mq: publish("entrega.realizada")
+confRecepcion --> logCtrl: OK
+deactivate confRecepcion
+logCtrl --> ong: 200 OK
+deactivate logCtrl
+
+mq -> donListener: consume("entrega.realizada")
+activate donListener
+donListener -> donConf: ejecutar(EntregaRealizadaEvent)
+activate donConf
+donConf -> donConf: Marca donación como ENTREGADA
+donConf -> donPublisher: publishEvent(DonacionEntregadaEvent)
+donPublisher -> mq: publish("donacion.entregada")
+donConf --> donListener: DONE
+deactivate donConf
+deactivate donListener
+
+par Notificaciones e Incentivos
+    mq -> incListener: consume("donacion.entregada")
+    activate incListener
+    incListener -> incUseCase: ejecutar(donanteId, ActividadDonacion)
+    activate incUseCase
+    incUseCase -> incUseCase: Actualiza métricas e insignias
+    incUseCase --> incListener: DONE
+    deactivate incUseCase
+    deactivate incListener
+else Notificaciones
+    mq -> notiListener: consume("donacion.entregada")
+    activate notiListener
+    notiListener -> notiListener: Enviar Notificación a Donante
+    deactivate notiListener
+end
+
+@enduml

@@ -9,34 +9,42 @@ import com.donatrack.logistica.domain.entities.reparto.*;
 import com.donatrack.logistica.domain.entities.entregas.*;
 import com.donatrack.logistica.domain.entities.planificacion.*;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@Slf4j
 public class PlanificacionRutasUseCase implements ProcesarPlanificacionesPendientesUseCase {
+
+    private static final int MAX_DONACIONES_POR_LOTE = 100;
 
     private final ItemPlanificacionRepositoryPort itemPlanificacionRepository;
     private final CamionRepositoryPort camionRepository;
     private final ChoferRepositoryPort choferRepository;
     private final RutaDeRepartoRepositoryPort rutaRepository;
+    private final com.donatrack.logistica.application.ports.out.SolicitudPlanificacionRepositoryPort solicitudRepository;
 
     public PlanificacionRutasUseCase(ItemPlanificacionRepositoryPort itemPlanificacionRepository,
                                      CamionRepositoryPort camionRepository,
                                      ChoferRepositoryPort choferRepository,
-                                     RutaDeRepartoRepositoryPort rutaRepository) {
+                                     RutaDeRepartoRepositoryPort rutaRepository,
+                                     com.donatrack.logistica.application.ports.out.SolicitudPlanificacionRepositoryPort solicitudRepository) {
         this.itemPlanificacionRepository = itemPlanificacionRepository;
         this.camionRepository = camionRepository;
         this.choferRepository = choferRepository;
         this.rutaRepository = rutaRepository;
+        this.solicitudRepository = solicitudRepository;
     }
 
     @Override
     public void procesarPlanificacionesPendientes() {
         List<ItemPlanificacion> itemsPendientes = itemPlanificacionRepository.obtenerTodos();
         if (itemsPendientes.isEmpty()) {
-            System.out.println("No hay ítems de planificación pendientes.");
+            log.info("No hay ítems de planificación pendientes.");
             return;
         }
 
@@ -44,10 +52,46 @@ public class PlanificacionRutasUseCase implements ProcesarPlanificacionesPendien
         List<Chofer> choferes = choferRepository.obtenerTodos();
 
         if (camiones.isEmpty() || choferes.isEmpty()) {
-            System.err.println("No hay suficientes camiones o choferes para planificar rutas.");
+            log.error("No hay suficientes camiones o choferes para planificar rutas.");
             return;
         }
 
+        int totalItems = itemsPendientes.size();
+        log.info("Iniciando procesamiento de {} ítems de planificación", totalItems);
+
+        List<ItemPlanificacion> itemsProcesadosTotal = new ArrayList<>();
+
+        for (int i = 0; i < totalItems; i += MAX_DONACIONES_POR_LOTE) {
+            int endIndex = Math.min(i + MAX_DONACIONES_POR_LOTE, totalItems);
+            List<ItemPlanificacion> lote = itemsPendientes.subList(i, endIndex);
+
+            log.info("Procesando lote de {} ítems (índice {} al {})", lote.size(), i, endIndex - 1);
+            
+            // Crear SolicitudPlanificacion para el lote
+            SolicitudPlanificacion solicitud = new SolicitudPlanificacion(
+                    UUID.randomUUID(),
+                    LocalDateTime.now(),
+                    EstadoPlanificacion.PENDIENTE,
+                    lote.stream().map(ItemPlanificacion::getIdDonacionOriginal).toList()
+            );
+            solicitudRepository.guardar(solicitud);
+            log.info("Generada SolicitudPlanificacion con ID {}", solicitud.getId());
+
+            // Procesar el lote
+            procesarLote(lote, camiones, choferes);
+            
+            itemsProcesadosTotal.addAll(lote);
+            
+            // TODO: Enviar solicitud al proveedor externo (simulado por ahora)
+            log.info("Enviada solicitud {} al proveedor externo.", solicitud.getId());
+        }
+
+        // Limpiar los ítems procesados
+        itemPlanificacionRepository.eliminarTodos(itemsProcesadosTotal);
+        log.info("Se eliminaron {} ítems de planificación procesados.", itemsProcesadosTotal.size());
+    }
+    
+    private void procesarLote(List<ItemPlanificacion> lote, List<Camion> camiones, List<Chofer> choferes) {
         // Algoritmo de asignación (Bin Packing simplificado)
         int camionIndex = 0;
         int choferIndex = 0;
@@ -59,7 +103,7 @@ public class PlanificacionRutasUseCase implements ProcesarPlanificacionesPendien
         Map<Direccion, Parada> paradasDeRutaActual = new HashMap<>();
         int ordenParada = 1;
 
-        for (ItemPlanificacion item : itemsPendientes) {
+        for (ItemPlanificacion item : lote) {
             Camion camionActual = camiones.get(camionIndex);
 
             // Validar si excede capacidad de peso o volumen del camión actual
@@ -110,14 +154,11 @@ public class PlanificacionRutasUseCase implements ProcesarPlanificacionesPendien
         guardarRutaYAsociarParadas(rutaActual, paradasDeRutaActual);
         rutasCreadas.add(rutaActual);
 
-        // Guardar todas las rutas y limpiar los ítems pendientes procesados
+        // En una implementación real, estas rutas se enviarían al proveedor.
+        // Aquí solo simulamos la generación.
         for (RutaDeReparto ruta : rutasCreadas) {
-            rutaRepository.guardar(ruta);
-            System.out.println("Ruta planificada exitosamente: ID " + ruta.getId() + " con " + ruta.getParadas().size() + " paradas.");
+            log.info("Ruta planificada (simulada) exitosamente: ID {} con {} paradas.", ruta.getId(), ruta.getParadas().size());
         }
-
-        // Limpiar los ítems procesados de la base de datos mock
-        itemsPendientes.clear();
     }
 
     private RutaDeReparto crearNuevaRuta(Camion camion, Chofer chofer) {

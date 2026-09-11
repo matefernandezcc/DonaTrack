@@ -16,6 +16,9 @@ public class N8nDifusionAdapter implements DifusionPort {
     private static final Logger LOGGER = LoggerFactory.getLogger(N8nDifusionAdapter.class);
     private final RestTemplate restTemplate;
 
+    @org.springframework.beans.factory.annotation.Value("${n8n.webhook.url:http://n8n:5678/webhook/donatrack/badge-earned}")
+    private String webhookUrl;
+
     public N8nDifusionAdapter() {
         this.restTemplate = new RestTemplate();
     }
@@ -23,7 +26,6 @@ public class N8nDifusionAdapter implements DifusionPort {
     @Override
     @EventListener
     public void difundirInsignia(InsigniaObtenidaEvent evento) {
-        String webhookUrl = "http://localhost:5678/webhook/donatrack/badge-earned";
         java.util.Map<String, Object> payload = new java.util.HashMap<>();
         payload.put("user", evento.getDonanteId().toString());
         payload.put("badge", evento.getInsignia().getNombre());

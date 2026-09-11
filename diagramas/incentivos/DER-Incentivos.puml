@@ -1,0 +1,72 @@
+@startuml DER-Incentivos
+!theme plain
+hide circle
+skinparam linetype ortho
+
+note as db_note
+  **Esquema:** incentivos
+  **Motor:** PostgreSQL
+end note
+
+entity "perfil_donante" as perfil {
+  * donante_id : UUID [PK]
+  --
+  categoria : VARCHAR(50)
+  mision_actual_id : UUID [FK -> mision.id]
+}
+
+entity "insignia" as insignia {
+  * id : UUID [PK]
+  --
+  nombre : VARCHAR(255)
+  descripcion : VARCHAR(255)
+  fecha_obtencion : DATE
+  visible_publicamente : BOOLEAN
+  perfil_id : UUID [FK -> perfil_donante.donante_id]
+}
+
+entity "mision" as mision {
+  * id : UUID [PK]
+  --
+  perfil_id : UUID [FK -> perfil_donante.donante_id]
+  nombre : VARCHAR(255)
+  recompensa_id : UUID [FK -> insignia.id]
+  tipo_metrica : VARCHAR(50)
+  objetivo : INTEGER
+  orden_ejecucion : INTEGER
+}
+
+entity "metricas_donante" as metricas {
+  * id : UUID [PK]
+  --
+  perfil_id : UUID [FK -> perfil_donante.donante_id]
+}
+
+entity "registro_donacion" as registro {
+  * id : UUID [PK]
+  --
+  metricas_id : UUID [FK -> metricas_donante.id]
+  id_donacion : UUID
+  cantidad_bienes : INTEGER
+  categorias : TEXT
+  id_entidad_beneficiaria : UUID
+  mes_donacion : VARCHAR(20)
+}
+
+entity "mision_completada" as mision_completada {
+  * id : UUID [PK]
+  --
+  metricas_id : UUID [FK -> metricas_donante.id]
+  mision_id : UUID [FK -> mision.id]
+  mes_completada : VARCHAR(20)
+}
+
+' Relaciones
+perfil ||--o{ insignia : "1:N"
+perfil ||--o{ mision : "1:N"
+perfil ||--|| metricas : "1:1"
+mision ||--|| insignia : "1:1 (Recompensa)"
+metricas ||--o{ registro : "1:N"
+metricas ||--o{ mision_completada : "1:N"
+
+@enduml

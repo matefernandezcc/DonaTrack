@@ -1,0 +1,46 @@
+info:
+  name: Callback Planificacion
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{logisticaUrl}}/api/planificacion/callback"
+  body:
+    type: json
+    data: |-
+      {
+        "idSolicitud": "31008064-071a-4d7a-ac37-33318f7d9843",
+        "rutas": [
+          {
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "fechaOperativa": "2026-09-03",
+            "camionPatente": "AA123BB",
+            "choferLegajo": "CH-001",
+            "paradas": [
+              {
+                "orden": 1,
+                "direccion": {
+                  "calle": "Av. Corrientes",
+                  "altura": "1234",
+                  "localidad": "CABA"
+                },
+                "coordenada": {
+                  "latitud": -34.6037,
+                  "longitud": -58.3816
+                },
+                "idsDonaciones": [
+                  "31008064-071a-4d7a-ac37-33318f7d9841"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
