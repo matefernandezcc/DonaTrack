@@ -1,5 +1,4 @@
 @startuml DER-Logistica
-!theme plain
 hide circle
 skinparam linetype ortho
 
@@ -8,83 +7,112 @@ note as db_note
   **Motor:** PostgreSQL
 end note
 
-entity "camion" as camion {
-  * camion_id : UUID [PK]
+entity "Camion" as Camion {
+  [PK] camion_id
   --
   patente : VARCHAR(255)
+  --
   capacidad_volumen : DOUBLE PRECISION
+  --
   altura : DOUBLE PRECISION
+  --
   capacidad_carga : DOUBLE PRECISION
 }
 
-entity "chofer" as chofer {
-  * chofer_id : UUID [PK]
+entity "Chofer" as Chofer {
+  [PK] chofer_id
   --
   legajo : VARCHAR(255)
+  --
   nombre : VARCHAR(255)
 }
 
-entity "solicitud_planificacion" as solicitud {
-  * id_solicitud : UUID [PK]
+entity "SolicitudPlanificacion" as SolicitudPlanificacion {
+  [PK] solicitud_planificacion_id
   --
   fecha_solicitud : TIMESTAMP
+  --
   estado : VARCHAR(50)
-  ids_donaciones : TEXT
 }
 
-entity "ruta_reparto" as ruta {
-  * ruta_id : UUID [PK]
+entity "RutaReparto" as RutaReparto {
+  [PK] ruta_reparto_id
   --
-  solicitud_id : UUID [FK]
-  camion_id : UUID [FK]
-  chofer_id : UUID [FK]
+  [FK] solicitud_planificacion_id
+  --
+  [FK] camion_id
+  --
+  [FK] chofer_id
+  --
   fecha_operativa : DATE
+  --
   iniciada : BOOLEAN
 }
 
-entity "parada" as parada {
-  * parada_id : UUID [PK]
+entity "Parada" as Parada {
+  [PK] parada_id
   --
-  ruta_id : UUID [FK]
+  [FK] ruta_reparto_id
+  --
   orden : INTEGER
+  --
   calle : VARCHAR(255)
+  --
   altura : VARCHAR(255)
+  --
   localidad : VARCHAR(255)
+  --
   latitud : DOUBLE PRECISION
+  --
   longitud : DOUBLE PRECISION
 }
 
-entity "entrega" as entrega {
-  * entrega_id : UUID [PK]
+entity "Entrega" as Entrega {
+  [PK] entrega_id
   --
-  parada_id : UUID [FK]
-  donacion_id : UUID
+  [FK] parada_id
+  --
+  id_donacion : UUID
+  --
   estado : VARCHAR(50)
+  --
   peso_estimado : DOUBLE PRECISION
+  --
   volumen_estimado : DOUBLE PRECISION
+  --
   comprobante_fecha_hora : TIMESTAMP
+  --
   comprobante_fotos : TEXT
+  --
   comprobante_camion_patente : VARCHAR(255)
+  --
+  justificacion_fallo : TEXT
 }
 
-entity "item_planificacion" as item {
-  * item_id : UUID [PK]
+entity "ItemPlanificacion" as ItemPlanificacion {
+  [PK] item_planificacion_id
   --
-  solicitud_id : UUID [FK]
-  id_donacion_original : UUID
+  [FK] solicitud_planificacion_id
+  --
+  id_donacion : UUID
+  --
   peso_estimado : DOUBLE PRECISION
+  --
   volumen_estimado : DOUBLE PRECISION
+  --
   calle_destino : VARCHAR(255)
+  --
   altura_destino : VARCHAR(255)
+  --
   localidad_destino : VARCHAR(255)
 }
 
 ' Relaciones
-solicitud ||--o{ ruta : "1:N"
-ruta ||--|| camion : "1:1"
-ruta ||--|| chofer : "1:1"
-ruta ||--o{ parada : "1:N"
-parada ||--o{ entrega : "1:N"
-solicitud ||--o{ item : "1:N"
+SolicitudPlanificacion ||--o{ RutaReparto 
+RutaReparto ||--|| Camion 
+RutaReparto ||--|| Chofer 
+RutaReparto ||--o{ Parada 
+Parada ||--o{ Entrega 
+SolicitudPlanificacion ||--o{ ItemPlanificacion 
 
 @enduml

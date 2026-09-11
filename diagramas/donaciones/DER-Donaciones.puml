@@ -1,5 +1,4 @@
 @startuml DER-Donaciones
-!theme plain
 hide circle
 skinparam linetype ortho
 
@@ -12,187 +11,258 @@ note as db_note
   - Necesidad: SINGLE_TABLE
 end note
 
-entity "persona" as persona {
-  * id : UUID [PK]
+entity "Direccion" as Direccion {
+  [PK] direccion_id
+  --
+  calle : VARCHAR(255)
+  --
+  altura : DOUBLE PRECISION
+  --
+  localidad : VARCHAR(255)
+  --
+  provincia : VARCHAR(255)
+  --
+  pais : VARCHAR(255)
+  --
+  cp : VARCHAR(50)
+  --
+  latitud : DOUBLE PRECISION
+  --
+  longitud : DOUBLE PRECISION
+}
+
+entity "Persona" as Persona {
+  [PK] persona_id
+  --
+  [FK] direccion_id
   --
   email : VARCHAR(255)
-  contacto_correo : VARCHAR(255)
-  contacto_telefono : VARCHAR(255)
-  contacto_whatsapp : VARCHAR(255)
-  contacto_medio_predeterminado : VARCHAR(50)
-  direccion_calle : VARCHAR(255)
-  direccion_altura : DOUBLE PRECISION
-  direccion_localidad : VARCHAR(255)
-  direccion_pais : VARCHAR(255)
-  direccion_nacionalidad : VARCHAR(255)
-  direccion_provincia : VARCHAR(255)
-  direccion_cp : VARCHAR(50)
-  direccion_latitud : DOUBLE PRECISION
-  direccion_longitud : DOUBLE PRECISION
+  --
   doc_tipo : VARCHAR(50)
+  --
   doc_numero : VARCHAR(255)
+  --
+  contacto_correo : VARCHAR(255)
+  --
+  contacto_telefono : VARCHAR(255)
+  --
+  contacto_whatsapp : VARCHAR(255)
+  --
+  contacto_medio_predeterminado : VARCHAR(50)
+  --
+  nacionalidad : VARCHAR(255)
 }
 
-entity "persona_humana" as persona_humana {
-  * id : UUID [PK, FK -> persona.id]
+entity "PersonaHumana" as PersonaHumana {
+  [PK] persona_humana_id
+  --
+  [FK] persona_id
   --
   nombre : VARCHAR(255)
+  --
   apellido : VARCHAR(255)
+  --
   edad : INTEGER
+  --
+  genero : VARCHAR(50)
 }
 
-entity "persona_juridica" as persona_juridica {
-  * id : UUID [PK, FK -> persona.id]
+entity "PersonaJuridica" as PersonaJuridica {
+  [PK] persona_juridica_id
+  --
+  [FK] persona_id
   --
   razon_social : VARCHAR(255)
+  --
   tipo : VARCHAR(50)
+  --
   rubro : VARCHAR(255)
 }
 
-entity "rol" as rol {
-  * id : UUID [PK]
+entity "Rol" as Rol {
+  [PK] rol_id
   --
-  persona_id : UUID [FK]
+  [FK] persona_id
+  --
   fecha_alta : DATE
+  --
   dtype : VARCHAR(31) <<Discriminator>>
 }
 
-entity "rol_donante" as rol_donante {
-  * id : UUID [PK, FK -> rol.id]
+entity "RolDonante" as RolDonante {
+  [PK] rol_donante_id
+  --
+  [FK] rol_id
 }
 
-entity "rol_representante" as rol_representante {
-  * id : UUID [PK, FK -> rol.id]
+entity "RolRepresentante" as RolRepresentante {
+  [PK] rol_representante_id
+  --
+  [FK] rol_id
   --
   cargo : VARCHAR(255)
-  organizacion_id : UUID [FK -> persona_juridica.id]
-}
-
-entity "rol_beneficiario" as rol_beneficiario {
-  * id : UUID [PK, FK -> rol.id]
   --
-  correo_representante : VARCHAR(255)
+  [FK] organizacion_id
 }
 
-entity "categoria" as categoria {
-  * id : UUID [PK]
+entity "RolBeneficiario" as RolBeneficiario {
+  [PK] rol_beneficiario_id
+  --
+  [FK] rol_id
+}
+
+entity "Categoria" as Categoria {
+  [PK] categoria_id
   --
   nombre : VARCHAR(255)
+  --
   descripcion : VARCHAR(255)
 }
 
-entity "subcategoria" as subcategoria {
-  * id : UUID [PK]
+entity "Subcategoria" as Subcategoria {
+  [PK] subcategoria_id
   --
-  categoria_id : UUID [FK]
+  [FK] categoria_id
+  --
   nombre : VARCHAR(255)
+  --
   descripcion : VARCHAR(255)
 }
 
-entity "donacion_original" as donacion_original {
-  * id : UUID [PK]
+entity "DonacionOriginal" as DonacionOriginal {
+  [PK] donacion_original_id
   --
-  donante_id : UUID [FK -> rol_donante.id]
+  [FK] donante_id
+  --
   descripcion_general : TEXT
+  --
   fecha_recepcion : TIMESTAMP
+  --
   usuario_id : VARCHAR(255)
 }
 
-entity "donacion" as donacion {
-  * id : UUID [PK]
+entity "Donacion" as Donacion {
+  [PK] donacion_id
   --
-  donacion_original_id : UUID [FK]
-  subcategoria_id : UUID [FK]
-  necesidad_id : UUID [FK -> necesidad.id]
-  periodo_id : UUID [FK -> periodo_necesidad.id]
+  [FK] donacion_original_id
+  --
+  [FK] subcategoria_id
+  --
+  [FK] necesidad_id
+  --
+  [FK] periodo_id
+  --
   estado : VARCHAR(50)
+  --
   fecha_creacion : TIMESTAMP
 }
 
-entity "bien" as bien {
-  * id : UUID [PK]
+entity "Bien" as Bien {
+  [PK] bien_id
   --
-  donacion_id : UUID [FK]
+  [FK] donacion_id
+  --
   descripcion : VARCHAR(255)
+  --
   cantidad : DOUBLE PRECISION
+  --
   unidad_medicion : VARCHAR(50)
+  --
   es_usado : BOOLEAN
+  --
   fecha_vencimiento : DATE
 }
 
-entity "foto" as foto {
-  * id : UUID [PK]
+entity "Foto" as Foto {
+  [PK] foto_id
   --
-  bien_id : UUID [FK]
+  [FK] bien_id
+  --
   descripcion : VARCHAR(255)
+  --
   url : VARCHAR(500)
 }
 
-entity "historial_estado" as historial_estado {
-  * id : UUID [PK]
+entity "HistorialEstado" as HistorialEstado {
+  [PK] historial_estado_id
   --
-  donacion_id : UUID [FK]
+  [FK] donacion_id
+  --
   estado : VARCHAR(50)
+  --
   fecha : TIMESTAMP
+  --
   observacion : TEXT
+  --
   usuario_id : VARCHAR(255)
 }
 
-entity "necesidad" as necesidad {
-  * id : UUID [PK]
+entity "Necesidad" as Necesidad {
+  [PK] necesidad_id
   --
-  beneficiario_id : UUID [FK -> rol_beneficiario.id]
-  subcategoria_id : UUID [FK]
+  [FK] beneficiario_id
+  --
+  [FK] subcategoria_id
+  --
   descripcion : TEXT
+  --
   fecha_solicitud : TIMESTAMP
+  --
   dtype : VARCHAR(31) <<Discriminator>>
-  
-  -- Para NecesidadExtraordinaria --
+  --
   estado : VARCHAR(50)
+  --
   cantidad_requerida : DOUBLE PRECISION
-  
-  -- Para NecesidadRecurrente --
+  --
   activa : BOOLEAN
+  --
   cantidad_objetivo : DOUBLE PRECISION
+  --
   tipo_periodo : VARCHAR(50)
 }
 
-entity "periodo_necesidad" as periodo_necesidad {
-  * id : UUID [PK]
+entity "PeriodoNecesidad" as PeriodoNecesidad {
+  [PK] periodo_necesidad_id
   --
-  necesidad_id : UUID [FK -> necesidad.id]
+  [FK] necesidad_id
+  --
   fecha_inicio : DATE
+  --
   fecha_fin : DATE
+  --
   estado : VARCHAR(50)
 }
 
+' Relaciones Personas y Direccion
+Persona }o--|| Direccion 
+
 ' Relaciones Personas y Roles
-persona ||--|| persona_humana : "1:1"
-persona ||--|| persona_juridica : "1:1"
-persona ||--o{ rol : "1:N"
+Persona ||--|| PersonaHumana 
+Persona ||--|| PersonaJuridica 
+Persona ||--o{ Rol 
 
-rol ||--|| rol_donante : "1:1"
-rol ||--|| rol_representante : "1:1"
-rol ||--|| rol_beneficiario : "1:1"
+Rol ||--|| RolDonante 
+Rol ||--|| RolRepresentante 
+Rol ||--|| RolBeneficiario 
 
-rol_representante }o--|| persona_juridica : "N:1"
+RolRepresentante }o--|| PersonaJuridica 
 
 ' Relaciones Donaciones
-rol_donante ||--o{ donacion_original : "1:N"
-donacion_original ||--o{ donacion : "1:N"
-donacion ||--|| subcategoria : "N:1"
-donacion ||--o{ bien : "1:N"
-donacion ||--o{ historial_estado : "1:N"
-bien ||--o{ foto : "1:N"
+RolDonante ||--o{ DonacionOriginal 
+DonacionOriginal ||--o{ Donacion 
+Donacion }o--|| Subcategoria 
+Donacion ||--o{ Bien 
+Donacion ||--o{ HistorialEstado 
+Bien ||--o{ Foto 
 
 ' Relaciones Necesidades
-rol_beneficiario ||--o{ necesidad : "1:N"
-necesidad ||--|| subcategoria : "N:1"
-necesidad ||--o{ periodo_necesidad : "1:N (si es Recurrente)"
-donacion }o--|| necesidad : "N:1 (Extraordinaria)"
-donacion }o--|| periodo_necesidad : "N:1 (Recurrente)"
+RolBeneficiario ||--o{ Necesidad 
+Necesidad }o--|| Subcategoria 
+Necesidad ||--o{ PeriodoNecesidad 
+Donacion }o--|| Necesidad 
+Donacion }o--|| PeriodoNecesidad 
 
 ' Categorias
-categoria ||--o{ subcategoria : "1:N"
+Categoria ||--o{ Subcategoria 
 
 @enduml
