@@ -52,8 +52,8 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 - Carpetas `donaciones/`, `incentivos/`, `notificaciones/` existen en diagramas.
 
 **Pendiente:**
-- [ ] Actualizar diagramas de clases reflejando las entities JPA (capas de persistencia).
-- [ ] Incluir las clases de integración (listeners RabbitMQ, broker, adapters).
+- [x] Actualizar diagramas de clases reflejando las entities JPA (capas de persistencia).
+- [x] Incluir las clases de integración (listeners RabbitMQ, broker, adapters).
 
 ---
 
@@ -65,10 +65,10 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 **El enfoque correcto (según el profesor):** el DER sale como mapeo directo del modelo de objetos. Tomar cada clase → tabla, cada atributo → columna, resolver herencias y relaciones.
 
 **Lo que falta:**
-- [ ] DER físico para **Logística** (schema `logistica`) — Ya tiene entities JPA, es el más fácil de generar
-- [ ] DER físico para **Donaciones** (schema `donaciones`)
-- [ ] DER físico para **Incentivos** (schema `incentivos`)
-- [ ] DER físico para **Notificaciones** (schema `notificaciones`)
+- [x] DER físico para **Logística** (schema `logistica`) — Ya tiene entities JPA, es el más fácil de generar
+- [x] DER físico para **Donaciones** (schema `donaciones`)
+- [x] DER físico para **Incentivos** (schema `incentivos`)
+- [x] DER físico para **Notificaciones** (schema `notificaciones`)
 
 **Decisiones a tomar para los DERs:**
 - Estrategia de herencia para `Necesidad` (RecurrenteExtraordinaria): `SINGLE_TABLE`, `JOINED`, o `TABLE_PER_CLASS`
@@ -83,7 +83,7 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 **Estado actual:** Existe [revision_entrega_requerimiento.md](file:///home/maximo-hidalgo/Documentos/Diseño%20de%20Sistemas/DonaTrack/_notas_y_borradores/revision_entrega_requerimiento.md) como revisión de entregas anteriores, pero no es un documento de justificaciones de diseño para la entrega 4.
 
 **Lo que falta:**
-- [ ] Documento que justifique las decisiones de diseño específicas de esta entrega:
+- [x] Documento que justifique las decisiones de diseño específicas de esta entrega:
   - ¿Por qué RabbitMQ y no otro mecanismo para las notificaciones?
   - ¿Por qué un broker para logística y cómo funciona la selección?
   - ¿Qué estrategias de herencia ORM se eligieron y por qué?
@@ -101,10 +101,10 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 - Existe [DonaTrack-Diagrama-Componentes-y-Despliegue.puml](file:///home/maximo-hidalgo/Documentos/Diseño%20de%20Sistemas/DonaTrack/diagramas/DonaTrack-Diagrama-Componentes-y-Despliegue.puml) — bastante completo, pero le faltan cosas.
 
 **Lo que falta agregar:**
-- [ ] El **Broker de Integración** entre Donaciones y Logística
+- [x] El **Broker de Integración** entre Donaciones y Logística
 - [ ] El **componente externo de planificación de rutas** + callback
-- [ ] Diferenciar: nodo local de logística vs. nodo desplegado de logística
-- [ ] Verificar que estén **todas** las integraciones reflejadas (n8n, Discord webhooks, APIs de notificación)
+- [x] Diferenciar: nodo local de logística vs. nodo desplegado de logística
+- [x] Verificar que estén **todas** las integraciones reflejadas (n8n, Discord webhooks, APIs de notificación)
 
 ---
 
@@ -114,7 +114,7 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 > Completamente faltante. El profesor confirmó que es **un documento general** (no uno por servicio). Quiere que sea sobre los componentes, comunicaciones, y justificaciones técnicas.
 
 **Lo que falta:**
-- [ ] Crear `docs/arquitectura.md` que cubra:
+- [x] Crear `docs/arquitectura.md` que cubra:
   - **Estilo arquitectónico**: Arquitectura orientada a servicios con Hexagonal por servicio
   - **Patrones de integración**: 
     - Cola de mensajes (RabbitMQ): para desacoplar servicios de dominio ↔ notificaciones
@@ -135,8 +135,8 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 - Notificaciones consume vía listeners RabbitMQ ✅
 
 **Pendiente menor:**
-- [ ] Verificar que **Incentivos → Notificaciones** también use RabbitMQ (actualmente parece usar REST directo vía `IncentivosNotificacionAdapter` / `NotificacionClient`)
-- [ ] Verificar que **Donaciones → Notificaciones** para notificaciones de inactividad (20 días sin donar) también use RabbitMQ
+- [x] Verificar que **Incentivos → Notificaciones** también use RabbitMQ (actualmente parece usar REST directo vía `IncentivosNotificacionAdapter` / `NotificacionClient`)
+- [x] Verificar que **Donaciones → Notificaciones** para notificaciones de inactividad (20 días sin donar) también use RabbitMQ
 
 ---
 
@@ -152,9 +152,9 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 - "Métan acá algo que haga de broker, que decida cuál servicio uso"
 
 **Lo que falta implementar:**
-- [ ] Crear interfaz `LogisticaServiceBroker` con un método que encapsule las llamadas a logística
-- [ ] Implementar la lógica de selección (health check, configuración, fallback)
-- [ ] Configurar las URLs de ambos servicios de logística (local y remoto)
+- [x] Crear interfaz `LogisticaBrokerAdapter` con un método que encapsule las llamadas a logística
+- [x] Implementar la lógica de selección (health check, configuración, fallback)
+- [x] Configurar las URLs de ambos servicios de logística (local y remoto)
 - [ ] Integrar el broker en los puntos donde Donaciones necesita comunicarse con Logística
 
 ---
@@ -167,7 +167,7 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 - Docker Compose funcional ✅
 
 **Lo que falta:**
-- [ ] Elegir plataforma de despliegue (Render, Railway, Fly.io, etc.) — Investigar cuál ofrece tier gratuito para Java
+- [x] Elegir plataforma de despliegue (Render, Railway, Fly.io, etc.) — Investigar cuál ofrece tier gratuito para Java
 - [ ] Desplegar el servicio de logística allí
 - [ ] Obtener la URL pública del servicio
 - [ ] Verificar que los endpoints responden (Swagger UI accesible)
@@ -191,27 +191,27 @@ De la transcripción de la clase se extraen estos puntos clave que ajustan cómo
 ### Trabajo de persistencia pendiente:
 
 #### Logística (poco trabajo):
-- [ ] Migrar `MockCamionRepository` → JPA (entity `CamionEntity` ya existe)
-- [ ] Migrar `MockChoferRepository` → JPA (entity `ChoferEntity` ya existe)
-- [ ] Migrar `MockEntregaRepository` → JPA (entity `EntregaEntity` ya existe)
-- [ ] Migrar `MockRutaDeRepartoRepository` → JPA (entity `RutaDeRepartoEntity` ya existe)
-- [ ] Verificar los mappers domain ↔ entity existentes
+- [x] Migrar `MockCamionRepository` → JPA (entity `CamionEntity` ya existe)
+- [x] Migrar `MockChoferRepository` → JPA (entity `ChoferEntity` ya existe)
+- [x] Migrar `MockEntregaRepository` → JPA (entity `EntregaEntity` ya existe)
+- [x] Migrar `MockRutaDeRepartoRepository` → JPA (entity `RutaDeRepartoEntity` ya existe)
+- [x] Verificar los mappers domain ↔ entity existentes
 
 #### Donaciones (trabajo pesado):
-- [ ] Crear entities JPA para todas las clases de dominio: `Donacion`, `DonacionOriginal`, `Bien`, `Categoria`, `Subcategoria`, `Persona`, `Contacto`, `Donante`, `Beneficiario`, `Representante`, `Necesidad`, `NecesidadRecurrente`, `NecesidadExtraordinaria`, `PeriodoNecesidad`, `HistorialEstado`, `Foto`, `Archivo`
-- [ ] Resolver herencias JPA (Necesidad, Persona, Rol)
-- [ ] Crear JPA repositories
-- [ ] Crear mappers domain ↔ entity
-- [ ] Migrar Mocks a JPA
+- [x] Crear entities JPA para todas las clases de dominio: `Donacion`, `DonacionOriginal`, `Bien`, `Categoria`, `Subcategoria`, `Persona`, `Contacto`, `Donante`, `Beneficiario`, `Representante`, `Necesidad`, `NecesidadRecurrente`, `NecesidadExtraordinaria`, `PeriodoNecesidad`, `HistorialEstado`, `Foto`, `Archivo`
+- [x] Resolver herencias JPA (Necesidad, Persona, Rol)
+- [x] Crear JPA repositories
+- [x] Crear mappers domain ↔ entity
+- [x] Migrar Mocks a JPA
 
 #### Incentivos:
-- [ ] Crear entities JPA para: `PerfilDonante`, `MetricasDonante`, `Mision`, `Insignia`, `RegistroDonacion`, `CategoriaDonante`
-- [ ] Crear JPA repositories
-- [ ] Migrar `MockPerfilDonanteRepository` → JPA
+- [x] Crear entities JPA para: `PerfilDonante`, `MetricasDonante`, `Mision`, `Insignia`, `RegistroDonacion`, `CategoriaDonante`
+- [x] Crear JPA repositories
+- [x] Migrar `MockPerfilDonanteRepository` → JPA
 
 #### Notificaciones:
-- [ ] Evaluar si necesita persistencia (puede justificarse que solo procesa y despacha)
-- [ ] Si se persiste: crear entities para `Notificacion` y `Evento`
+- [x] Evaluar si necesita persistencia (puede justificarse que solo procesa y despacha)
+- [x] Si se persiste: crear entities para `Notificacion` y `Evento`
 
 ---
 
