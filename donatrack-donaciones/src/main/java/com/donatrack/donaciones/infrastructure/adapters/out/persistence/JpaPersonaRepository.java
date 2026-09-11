@@ -50,4 +50,9 @@ public class JpaPersonaRepository implements PersonaRepository {
         .findFirst()
         .map(PersonaMapper::toDomain);
   }
+
+  @Override
+  public void eliminar(UUID id) {
+    jpaRepository.deleteById(id);
+  }
 }

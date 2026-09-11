@@ -9,4 +9,5 @@ public interface DonacionRepository {
     List<Donacion> buscarPorEstado(EstadoDonacion estado);
     java.util.Optional<Donacion> buscarPorId(java.util.UUID id);
     void guardar(Donacion donacion);
+    void eliminar(java.util.UUID id);
 }

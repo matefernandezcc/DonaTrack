@@ -94,11 +94,11 @@ public class LogisticaController {
     }
 
     @Operation(summary = "Eliminar camión", description = "Da de baja un camión por su patente")
-    @ApiResponse(responseCode = "200", description = "Camión eliminado")
+    @ApiResponse(responseCode = "204", description = "Camión eliminado")
     @DeleteMapping("/camiones/{patente}")
     public ResponseEntity<Void> eliminarCamion(@PathVariable String patente) {
         camionRepository.eliminar(patente);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     // --- CRUD Choferes ---
@@ -118,11 +118,11 @@ public class LogisticaController {
     }
 
     @Operation(summary = "Eliminar chofer", description = "Da de baja un chofer por su legajo")
-    @ApiResponse(responseCode = "200", description = "Chofer eliminado")
+    @ApiResponse(responseCode = "204", description = "Chofer eliminado")
     @DeleteMapping("/choferes/{legajo}")
     public ResponseEntity<Void> eliminarChofer(@PathVariable String legajo) {
         choferRepository.eliminar(legajo);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     // --- Control de Rutas ---

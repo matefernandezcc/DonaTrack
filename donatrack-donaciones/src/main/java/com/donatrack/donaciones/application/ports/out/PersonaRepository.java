@@ -10,5 +10,6 @@ public interface PersonaRepository {
     Optional<Persona> buscarPorEmail(String email);
     List<Persona> obtenerTodas();
     void guardar(Persona persona);
+    void eliminar(UUID id);
     Optional<Persona> buscarPorRolId(UUID rolId);
 }

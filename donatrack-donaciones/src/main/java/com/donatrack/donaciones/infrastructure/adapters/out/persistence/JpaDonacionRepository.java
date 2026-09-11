@@ -35,4 +35,9 @@ public class JpaDonacionRepository implements DonacionRepository {
   public void guardar(Donacion donacion) {
     jpaRepository.save(DonacionMapper.toEntity(donacion));
   }
+
+  @Override
+  public void eliminar(UUID id) {
+    jpaRepository.deleteById(id);
+  }
 }
