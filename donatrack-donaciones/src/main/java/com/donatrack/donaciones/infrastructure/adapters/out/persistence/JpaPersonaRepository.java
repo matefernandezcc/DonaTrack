@@ -25,10 +25,8 @@ public class JpaPersonaRepository implements PersonaRepository {
 
   @Override
   public Optional<Persona> buscarPorEmail(String email) {
-    // Necesitaremos un query method en el repo, pero por ahora lo buscamos iterando o podemos agregarlo.
-    // Lo agrego filtrando por ahora, asumiendo que lo agregaremos al JpaRepository.
     return jpaRepository.findAll().stream()
-        .filter(p -> p.getContacto() != null && email.equals(p.getContacto().getCorreo()))
+        .filter(p -> email.equals(p.getEmail()) || email.equals(p.getContactoCorreo()))
         .findFirst()
         .map(PersonaMapper::toDomain);
   }
@@ -46,7 +44,7 @@ public class JpaPersonaRepository implements PersonaRepository {
   @Override
   public Optional<Persona> buscarPorRolId(UUID rolId) {
     return jpaRepository.findAll().stream()
-        .filter(p -> p.getRoles().stream().anyMatch(r -> r.getId().equals(rolId)))
+        .filter(p -> p.getRoles() != null && p.getRoles().stream().anyMatch(r -> r.getId().equals(rolId)))
         .findFirst()
         .map(PersonaMapper::toDomain);
   }

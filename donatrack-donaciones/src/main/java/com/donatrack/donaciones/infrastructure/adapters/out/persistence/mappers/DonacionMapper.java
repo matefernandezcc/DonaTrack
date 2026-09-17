@@ -12,13 +12,8 @@ public class DonacionMapper {
 
     DonacionEntity entity = new DonacionEntity();
     entity.setId(domain.getId());
-    entity.setEstado(domain.getEstado().name());
-    
-    // El resto de los mapeos (bienes, subcategoria, etc.) se irían completando aquí
-    // pero para cumplir con el repositorio básico mapearemos lo esencial
-    
-    if (domain.getEntidadAsignada() != null) {
-      entity.setBeneficiario((com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.BeneficiarioEntity) RolMapper.toEntity(domain.getEntidadAsignada()));
+    if (domain.getEstado() != null) {
+      entity.setEstado(domain.getEstado().name());
     }
 
     return entity;
@@ -29,10 +24,12 @@ public class DonacionMapper {
 
     Donacion domain = new Donacion(null);
     domain.setId(entity.getId());
-    domain.setEstado(EstadoDonacion.valueOf(entity.getEstado()));
+    if (entity.getEstado() != null) {
+      domain.setEstado(EstadoDonacion.valueOf(entity.getEstado()));
+    }
 
-    if (entity.getBeneficiario() != null) {
-      domain.setEntidadAsignada((Beneficiario) RolMapper.toDomain(entity.getBeneficiario()));
+    if (entity.getNecesidad() != null && entity.getNecesidad().getBeneficiario() != null) {
+      domain.setEntidadAsignada((Beneficiario) RolMapper.toDomain(entity.getNecesidad().getBeneficiario()));
     }
 
     return domain;

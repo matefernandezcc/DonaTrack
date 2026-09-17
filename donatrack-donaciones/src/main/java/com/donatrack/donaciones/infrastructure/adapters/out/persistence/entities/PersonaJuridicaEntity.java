@@ -1,14 +1,15 @@
 package com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import java.time.LocalDate;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@DiscriminatorValue("JURIDICA")
+@Table(name = "personas_juridicas", schema = "donaciones")
+@PrimaryKeyJoinColumn(name = "persona_juridica_id", referencedColumnName = "persona_id")
 @Getter
 @Setter
 public class PersonaJuridicaEntity extends PersonaEntity {
@@ -16,12 +17,9 @@ public class PersonaJuridicaEntity extends PersonaEntity {
   @Column(name = "razon_social")
   private String razonSocial;
 
-  @Column(name = "tipo_juridica")
+  @Column(name = "tipo")
   private String tipo;
 
-  @Column(name = "cuit")
-  private String cuit;
-
-  @Column(name = "fecha_constitucion")
-  private LocalDate fechaConstitucion;
+  @Column(name = "rubro")
+  private String rubro;
 }
