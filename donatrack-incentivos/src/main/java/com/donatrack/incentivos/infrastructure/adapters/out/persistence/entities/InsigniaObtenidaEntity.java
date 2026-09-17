@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,34 +16,29 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "registros_donacion", schema = "incentivos")
+@Table(name = "insignias_obtenidas", schema = "incentivos")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegistroDonacionEntity {
+public class InsigniaObtenidaEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "registro_donacion_id")
+  @Column(name = "insignia_obtenida_id")
   private UUID id;
 
   @ManyToOne
-  @JoinColumn(name = "metricas_donante_id", nullable = false)
-  private MetricasDonanteEntity metricas;
+  @JoinColumn(name = "perfil_donante_id", nullable = false)
+  private PerfilDonanteEntity perfil;
 
-  @Column(name = "id_donacion_origen")
-  private UUID idDonacionOrigen;
+  @ManyToOne
+  @JoinColumn(name = "insignia_id", nullable = false)
+  private InsigniaEntity insignia;
 
-  @Column(name = "cantidad_bienes")
-  private Integer cantidadBienes;
+  @Column(name = "fecha_obtencion")
+  private LocalDate fechaObtencion;
 
-  @Column(name = "categorias", columnDefinition = "TEXT")
-  private String categorias;
-
-  @Column(name = "id_entidad_beneficiaria_origen")
-  private UUID idEntidadBeneficiariaOrigen;
-
-  @Column(name = "mes_donacion", length = 20)
-  private String mesDonacion;
+  @Column(name = "visible_publicamente")
+  private Boolean visiblePublicamente;
 }

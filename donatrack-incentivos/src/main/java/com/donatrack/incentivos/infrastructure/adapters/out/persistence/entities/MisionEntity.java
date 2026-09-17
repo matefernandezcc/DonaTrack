@@ -15,34 +15,31 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "registros_donacion", schema = "incentivos")
+@Table(name = "misiones", schema = "incentivos")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegistroDonacionEntity {
+public class MisionEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "registro_donacion_id")
+  @Column(name = "mision_id")
   private UUID id;
 
+  @Column(name = "nombre", nullable = false)
+  private String nombre;
+
   @ManyToOne
-  @JoinColumn(name = "metricas_donante_id", nullable = false)
-  private MetricasDonanteEntity metricas;
+  @JoinColumn(name = "recompensa_insignia_id")
+  private InsigniaEntity recompensaInsignia;
 
-  @Column(name = "id_donacion_origen")
-  private UUID idDonacionOrigen;
+  @Column(name = "tipo_metrica")
+  private String tipoMetrica;
 
-  @Column(name = "cantidad_bienes")
-  private Integer cantidadBienes;
+  @Column(name = "objetivo")
+  private Integer objetivo;
 
-  @Column(name = "categorias", columnDefinition = "TEXT")
-  private String categorias;
-
-  @Column(name = "id_entidad_beneficiaria_origen")
-  private UUID idEntidadBeneficiariaOrigen;
-
-  @Column(name = "mes_donacion", length = 20)
-  private String mesDonacion;
+  @Column(name = "orden_ejecucion")
+  private Integer ordenEjecucion;
 }
