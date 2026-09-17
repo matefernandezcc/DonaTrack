@@ -1,21 +1,16 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers;
 
-import com.donatrack.logistica.domain.entities.reparto.Camion;
-import com.donatrack.logistica.domain.entities.reparto.Chofer;
 import com.donatrack.logistica.domain.entities.reparto.Coordenada;
 import com.donatrack.logistica.domain.entities.reparto.Direccion;
 import com.donatrack.logistica.domain.entities.reparto.Parada;
 import com.donatrack.logistica.domain.entities.reparto.RutaDeReparto;
-import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.CoordenadaEmbeddable;
-import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.DireccionEmbeddable;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ParadaEntity;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.RutaDeRepartoEntity;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mapper bidireccional entre RutaDeReparto (dominio) y RutaDeRepartoEntity (JPA). Incluye el mapeo
- * recursivo de Paradas, Entregas, Direcciones y Coordenadas.
+ * Mapper bidireccional entre RutaDeReparto (dominio) y RutaDeRepartoEntity (JPA).
  */
 public final class RutaDeRepartoMapper {
 
@@ -42,7 +37,7 @@ public final class RutaDeRepartoMapper {
       List<ParadaEntity> paradasEntity = new ArrayList<>();
       for (Parada parada : domain.getParadas()) {
         ParadaEntity pe = toParadaEntity(parada);
-        pe.setRuta(entity); // Establece la relación bidireccional
+        pe.setRuta(entity);
         paradasEntity.add(pe);
       }
       entity.setParadas(paradasEntity);
@@ -84,17 +79,14 @@ public final class RutaDeRepartoMapper {
     entity.setOrden(domain.getOrden());
 
     if (domain.getDireccion() != null) {
-      entity.setDireccion(
-          new DireccionEmbeddable(
-              domain.getDireccion().getCalle(),
-              domain.getDireccion().getAltura(),
-              domain.getDireccion().getLocalidad()));
+      entity.setCalle(domain.getDireccion().getCalle());
+      entity.setAltura(domain.getDireccion().getAltura());
+      entity.setLocalidad(domain.getDireccion().getLocalidad());
     }
 
     if (domain.getCoordenada() != null) {
-      entity.setCoordenada(
-          new CoordenadaEmbeddable(
-              domain.getCoordenada().getLatitud(), domain.getCoordenada().getLongitud()));
+      entity.setLatitud(domain.getCoordenada().getLatitud());
+      entity.setLongitud(domain.getCoordenada().getLongitud());
     }
 
     if (domain.getEntregas() != null) {
@@ -103,7 +95,7 @@ public final class RutaDeRepartoMapper {
               .map(
                   e -> {
                     var ee = EntregaMapper.toEntity(e);
-                    ee.setParada(entity); // Relación bidireccional
+                    ee.setParada(entity);
                     return ee;
                   })
               .toList();
@@ -117,17 +109,17 @@ public final class RutaDeRepartoMapper {
     Parada domain = new Parada();
     domain.setOrden(entity.getOrden());
 
-    if (entity.getDireccion() != null) {
+    if (entity.getCalle() != null || entity.getAltura() != null || entity.getLocalidad() != null) {
       domain.setDireccion(
           new Direccion(
-              entity.getDireccion().getCalle(),
-              entity.getDireccion().getAlturaDir(),
-              entity.getDireccion().getLocalidad()));
+              entity.getCalle(),
+              entity.getAltura(),
+              entity.getLocalidad()));
     }
 
-    if (entity.getCoordenada() != null) {
+    if (entity.getLatitud() != null && entity.getLongitud() != null) {
       domain.setCoordenada(
-          new Coordenada(entity.getCoordenada().getLatitud(), entity.getCoordenada().getLongitud()));
+          new Coordenada(entity.getLatitud(), entity.getLongitud()));
     }
 
     if (entity.getEntregas() != null) {

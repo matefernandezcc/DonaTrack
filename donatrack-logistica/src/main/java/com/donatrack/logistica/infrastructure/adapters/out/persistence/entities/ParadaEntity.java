@@ -2,7 +2,6 @@ package com.donatrack.logistica.infrastructure.adapters.out.persistence.entities
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -28,20 +28,31 @@ public class ParadaEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "id")
+  @Column(name = "parada_id")
   private UUID id;
 
   @ManyToOne
-  @JoinColumn(name = "ruta_id", nullable = false)
+  @JoinColumn(name = "ruta_reparto_id", nullable = false)
   private RutaDeRepartoEntity ruta;
 
   @Column(name = "orden", nullable = false)
   private Integer orden;
 
-  @Embedded private DireccionEmbeddable direccion;
+  @Column(name = "calle", length = 255)
+  private String calle;
 
-  @Embedded private CoordenadaEmbeddable coordenada;
+  @Column(name = "altura", length = 255)
+  private String altura;
+
+  @Column(name = "localidad", length = 255)
+  private String localidad;
+
+  @Column(name = "latitud")
+  private Double latitud;
+
+  @Column(name = "longitud")
+  private Double longitud;
 
   @OneToMany(mappedBy = "parada", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<EntregaEntity> entregas;
+  private List<EntregaEntity> entregas = new ArrayList<>();
 }

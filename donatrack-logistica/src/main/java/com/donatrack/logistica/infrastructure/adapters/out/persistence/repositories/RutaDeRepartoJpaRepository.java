@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface RutaDeRepartoJpaRepository extends JpaRepository<RutaDeRepartoEntity, UUID> {
 
   /** Busca la ruta que contiene una entrega con el ID de donación dado. */
-  Optional<RutaDeRepartoEntity> findByParadas_Entregas_IdEntrega(UUID idEntrega);
+  Optional<RutaDeRepartoEntity> findByParadas_Entregas_IdDonacion(UUID idDonacion);
 }

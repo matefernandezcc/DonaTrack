@@ -2,6 +2,7 @@ package com.donatrack.logistica.infrastructure.adapters.out.persistence;
 
 import com.donatrack.logistica.application.ports.out.ChoferRepositoryPort;
 import com.donatrack.logistica.domain.entities.reparto.Chofer;
+import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ChoferEntity;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers.ChoferMapper;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.repositories.ChoferJpaRepository;
 import java.util.List;
@@ -19,12 +20,21 @@ public class JpaChoferRepository implements ChoferRepositoryPort {
 
   @Override
   public void guardar(Chofer chofer) {
-    jpaRepository.save(ChoferMapper.toEntity(chofer));
+    if (chofer == null) return;
+    Optional<ChoferEntity> existing = jpaRepository.findByLegajo(chofer.getLegajo());
+    ChoferEntity entity;
+    if (existing.isPresent()) {
+      entity = existing.get();
+      entity.setNombre(chofer.getNombre());
+    } else {
+      entity = ChoferMapper.toEntity(chofer);
+    }
+    jpaRepository.save(entity);
   }
 
   @Override
   public Optional<Chofer> buscarPorLegajo(String legajo) {
-    return jpaRepository.findById(legajo).map(ChoferMapper::toDomain);
+    return jpaRepository.findByLegajo(legajo).map(ChoferMapper::toDomain);
   }
 
   @Override
@@ -34,6 +44,6 @@ public class JpaChoferRepository implements ChoferRepositoryPort {
 
   @Override
   public void eliminar(String legajo) {
-    jpaRepository.deleteById(legajo);
+    jpaRepository.deleteByLegajo(legajo);
   }
 }

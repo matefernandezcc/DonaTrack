@@ -1,7 +1,6 @@
 package com.donatrack.logistica.infrastructure.adapters.out.persistence.entities;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,15 +24,15 @@ public class ItemPlanificacionEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "id")
+  @Column(name = "item_planificacion_id")
   private UUID id;
 
   @ManyToOne
-  @JoinColumn(name = "solicitud_id")
+  @JoinColumn(name = "solicitud_planificacion_id")
   private SolicitudPlanificacionEntity solicitud;
 
-  @Column(name = "id_donacion_original", nullable = false)
-  private UUID idDonacionOriginal;
+  @Column(name = "id_donacion")
+  private UUID idDonacion;
 
   @Column(name = "peso_estimado")
   private Double pesoEstimado;
@@ -41,5 +40,12 @@ public class ItemPlanificacionEntity {
   @Column(name = "volumen_estimado")
   private Double volumenEstimado;
 
-  @Embedded private DireccionEmbeddable destino;
+  @Column(name = "calle_destino", length = 255)
+  private String calleDestino;
+
+  @Column(name = "altura_destino", length = 255)
+  private String alturaDestino;
+
+  @Column(name = "localidad_destino", length = 255)
+  private String localidadDestino;
 }
