@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: "{{logisticaUrl}}/api/entregas/31008064-071a-4d7a-ac37-33318f7d9841/falla"
+  url: "{{logisticaUrl}}/api/entregas/{{donacionId}}/falla"
   body:
     type: json
     data: |-

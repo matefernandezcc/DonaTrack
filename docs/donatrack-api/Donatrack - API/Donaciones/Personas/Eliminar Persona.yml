@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: "{{donacionesUrl}}/api/personas/d3b07384-d113-4ec6-a51d-402f06c1af0b"
+  url: "{{donacionesUrl}}/api/personas/{{personaId}}"
   body: none
   auth: inherit
 

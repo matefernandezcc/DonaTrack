@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{donacionesUrl}}/api/donaciones/31008064-071a-4d7a-ac37-33318f7d9841/matchmaking"
+  url: "{{donacionesUrl}}/api/donaciones/{{donacionId}}/matchmaking"
   body: none
   auth: inherit
 

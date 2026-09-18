@@ -1,0 +1,21 @@
+info:
+  name: Importar CSV
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{donacionesUrl}}/api/personas/importar-csv"
+  body:
+    type: multipartForm
+    data:
+      - name: file
+        type: file
+        value: ../../../../../enunciado/CSV/donantes.csv
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{logisticaUrl}}/api/rutas/31008064-071a-4d7a-ac37-33318f7d9842"
+  url: "{{logisticaUrl}}/api/rutas/{{rutaId}}"
   body: none
   auth: inherit
 
