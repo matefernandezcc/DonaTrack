@@ -11,6 +11,7 @@ import com.donatrack.donaciones.infrastructure.adapters.out.persistence.reposito
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.repositories.PersonaJpaRepository;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.repositories.SubcategoriaJpaRepository;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,7 @@ class JpaPersistenceTest {
     dir.setLocalidad("CABA");
 
     PersonaHumanaEntity persona = new PersonaHumanaEntity();
+    persona.setId(UUID.randomUUID());
     persona.setNombre("Juan");
     persona.setApellido("Perez");
     persona.setEdad(30);
