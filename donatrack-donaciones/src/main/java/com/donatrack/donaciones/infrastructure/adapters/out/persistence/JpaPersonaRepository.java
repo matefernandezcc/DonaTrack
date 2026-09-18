@@ -2,17 +2,24 @@ package com.donatrack.donaciones.infrastructure.adapters.out.persistence;
 
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
+import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.PersonaEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.mappers.PersonaMapper;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.repositories.PersonaJpaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class JpaPersonaRepository implements PersonaRepository {
 
   private final PersonaJpaRepository jpaRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   public JpaPersonaRepository(PersonaJpaRepository jpaRepository) {
     this.jpaRepository = jpaRepository;
@@ -37,8 +44,17 @@ public class JpaPersonaRepository implements PersonaRepository {
   }
 
   @Override
+  @Transactional
   public void guardar(Persona persona) {
-    jpaRepository.save(PersonaMapper.toEntity(persona));
+    PersonaEntity entity = PersonaMapper.toEntity(persona);
+    if (entity.getId() == null || !jpaRepository.existsById(entity.getId())) {
+      if (entity.getId() == null) {
+        entity.setId(UUID.randomUUID());
+      }
+      entityManager.persist(entity);
+    } else {
+      entityManager.merge(entity);
+    }
   }
 
   @Override

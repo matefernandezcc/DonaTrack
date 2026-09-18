@@ -26,7 +26,6 @@ import lombok.Setter;
 public abstract class PersonaEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "persona_id")
   private UUID id;
 
