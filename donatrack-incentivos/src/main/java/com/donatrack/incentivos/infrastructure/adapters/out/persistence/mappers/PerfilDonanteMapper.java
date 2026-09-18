@@ -112,7 +112,11 @@ public class PerfilDonanteMapper {
     PerfilDonante domain = new PerfilDonante(entity.getPerfilDonanteId());
 
     if (entity.getCategoria() != null) {
-      domain.setCategoria(CategoriaDonante.valueOf(entity.getCategoria()));
+      try {
+        domain.setCategoria(CategoriaDonante.valueOf(entity.getCategoria().trim().toUpperCase()));
+      } catch (Exception e) {
+        domain.setCategoria(CategoriaDonante.COLABORADOR);
+      }
       domain.cargarMisionesDeCategoriaActual();
     }
 

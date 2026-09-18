@@ -6,6 +6,7 @@ import com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
 import com.donatrack.incentivos.infrastructure.adapters.out.persistence.mappers.PerfilDonanteMapper;
 import com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.PerfilDonanteJpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
+@Transactional(readOnly = true)
 public class JpaPerfilDonanteRepository implements PerfilDonanteRepository {
 
     private final PerfilDonanteJpaRepository jpaRepository;
@@ -28,6 +30,7 @@ public class JpaPerfilDonanteRepository implements PerfilDonanteRepository {
     }
 
     @Override
+    @Transactional
     public void save(PerfilDonante perfil) {
         if (perfil == null) return;
         PerfilDonanteEntity entity = PerfilDonanteMapper.toEntity(perfil);
