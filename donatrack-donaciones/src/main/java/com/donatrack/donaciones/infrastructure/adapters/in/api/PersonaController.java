@@ -1,18 +1,23 @@
 package com.donatrack.donaciones.infrastructure.adapters.in.api;
 
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
+import com.donatrack.donaciones.domain.entities.donacion.Archivo;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
+import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.importador.ImportadorCSV;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/personas")
-@Tag(name = "Personas", description = "CRUD de personas (humanas y jurídicas)")
+@Tag(name = "Personas", description = "CRUD de personas (humanas y jurídicas) e importación CSV")
 public class PersonaController {
 
   private final PersonaRepository personaRepository;
@@ -30,6 +35,19 @@ public class PersonaController {
     }
     personaRepository.guardar(persona);
     return ResponseEntity.ok(persona);
+  }
+
+  @Operation(summary = "Importar personas desde archivo CSV", description = "Procesa e inserta personas humanas y jurídicas desde un archivo CSV")
+  @ApiResponse(responseCode = "200", description = "Personas importadas correctamente")
+  @PostMapping(value = "/importar-csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<String> importarCSV(@RequestParam("file") MultipartFile file) throws IOException {
+    if (file.isEmpty()) {
+      return ResponseEntity.badRequest().body("El archivo CSV está vacío.");
+    }
+    ImportadorCSV importador = new ImportadorCSV(personaRepository);
+    Archivo archivo = new Archivo(file.getOriginalFilename(), file.getBytes());
+    importador.importar(archivo);
+    return ResponseEntity.ok("CSV procesado e importado con éxito a la base de datos.");
   }
 
   @Operation(summary = "Listar personas", description = "Obtiene todas las personas registradas")
@@ -71,7 +89,6 @@ public class PersonaController {
   @ApiResponse(responseCode = "204", description = "Persona eliminada")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> eliminarPersona(@PathVariable UUID id) {
-    // Implementación idempotente
     return ResponseEntity.noContent().build();
   }
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional(readOnly = true)
 public class JpaPersonaRepository implements PersonaRepository {
 
   private final PersonaJpaRepository jpaRepository;
@@ -32,10 +33,7 @@ public class JpaPersonaRepository implements PersonaRepository {
 
   @Override
   public Optional<Persona> buscarPorEmail(String email) {
-    return jpaRepository.findAll().stream()
-        .filter(p -> email.equals(p.getEmail()) || email.equals(p.getContactoCorreo()))
-        .findFirst()
-        .map(PersonaMapper::toDomain);
+    return jpaRepository.findByEmail(email).map(PersonaMapper::toDomain);
   }
 
   @Override
