@@ -5,7 +5,11 @@ info:
 
 http:
   method: PUT
-  url: "{{donacionesUrl}}/api/personas/{{personaId}}"
+  url: "{{donacionesUrl}}/api/personas/:personaId"
+  params:
+    - name: personaId
+      value: 5c8e8956-c21f-4d19-a3d7-30f4d69cc434
+      type: path
   body:
     type: json
     data: |-

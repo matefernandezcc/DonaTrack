@@ -5,8 +5,14 @@ info:
 
 http:
   method: PUT
-  url: "{{donacionesUrl}}/api/donaciones/{{donacionId}}/estado/entregada?idDonante={{donanteId}}"
-  body: none
+  url: "{{donacionesUrl}}/api/donaciones/:donacionId/estado/entregada?idDonante=d3333333-3333-4333-8333-333333333333"
+  params:
+    - name: idDonante
+      value: d3333333-3333-4333-8333-333333333333
+      type: query
+    - name: donacionId
+      value: 31008064-071a-4d7a-ac37-33318f7d9841
+      type: path
   auth: inherit
 
 settings:

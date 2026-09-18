@@ -5,7 +5,11 @@ info:
 
 http:
   method: POST
-  url: "{{logisticaUrl}}/api/rutas/{{rutaId}}/iniciar"
+  url: "{{logisticaUrl}}/api/rutas/:rutaId/iniciar"
+  params:
+    - name: rutaId
+      value: 31008064-071a-4d7a-ac37-33318f7d9842
+      type: path
   body:
     type: json
     data: |-

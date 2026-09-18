@@ -5,7 +5,11 @@ info:
 
 http:
   method: POST
-  url: "{{logisticaUrl}}/api/entregas/{{donacionId}}/falla"
+  url: "{{logisticaUrl}}/api/entregas/:donacionId/falla"
+  params:
+    - name: donacionId
+      value: 31008064-071a-4d7a-ac37-33318f7d9841
+      type: path
   body:
     type: json
     data: |-

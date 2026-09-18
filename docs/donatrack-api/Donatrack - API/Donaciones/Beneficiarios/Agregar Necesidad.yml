@@ -5,7 +5,11 @@ info:
 
 http:
   method: POST
-  url: "{{donacionesUrl}}/api/beneficiarios/{{beneficiarioId}}/necesidades"
+  url: "{{donacionesUrl}}/api/beneficiarios/:beneficiarioId/necesidades"
+  params:
+    - name: beneficiarioId
+      value: b2222222-2222-4222-8222-222222222222
+      type: path
   body:
     type: json
     data: |-

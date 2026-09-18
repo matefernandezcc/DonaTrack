@@ -5,7 +5,11 @@ info:
 
 http:
   method: GET
-  url: "{{incentivosUrl}}/api/donantes/{{donanteId}}/metricas"
+  url: "{{incentivosUrl}}/api/donantes/:donanteId/metricas"
+  params:
+    - name: donanteId
+      value: d3333333-3333-4333-8333-333333333333
+      type: path
   body: none
   auth: inherit
 
