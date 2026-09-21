@@ -33,7 +33,10 @@ build/
 
 ### VS Code ###
 .vscode/
-
-
 TODO.md
 .env.example
+
+
+### Agents ###
+.agents/
+*skills-lock.json
