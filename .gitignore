@@ -35,3 +35,7 @@ build/
 .vscode/
 
 TODO.md
+
+### Agents ###
+.agents/
+*skills-lock.json

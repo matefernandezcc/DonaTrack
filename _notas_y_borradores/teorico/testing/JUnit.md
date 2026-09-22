@@ -1,10 +1,18 @@
 # Guía Práctica: JUnit y Testing en DonaTrack
 
-Esta guía detalla cómo utilizar JUnit 5 (junto con Mockito) para realizar pruebas unitarias, cómo está estructurado el testing dentro de la arquitectura hexagonal del proyecto DonaTrack, y dónde ubicar/ejecutar estos tests.
+Esta guía detalla qué es JUnit, cómo utilizar JUnit 5 (junto con Mockito) para realizar pruebas unitarias, cómo está estructurado el testing dentro de la arquitectura hexagonal del proyecto DonaTrack, y dónde ubicar/ejecutar estos tests.
 
-## 1. Conceptos Básicos de JUnit 5 y Mockito
+## 1. ¿Qué es JUnit 5?
 
-JUnit 5 (también conocido como JUnit Jupiter) es el framework estándar de Java para pruebas unitarias. En aplicaciones Spring Boot empresariales, suele usarse en conjunto con Mockito, una librería para crear objetos simulados ("mocks") y probar componentes de forma aislada.
+JUnit 5 (también conocido como JUnit Jupiter) es el framework estándar y nativo de Java para escribir y ejecutar pruebas (testing). A diferencia de sus versiones anteriores, JUnit 5 no es un solo bloque monolítico, sino que está compuesto por tres subproyectos distintos que mejoran la flexibilidad de tu código:
+
+1. **JUnit Platform**: Es la base (el motor) que se encarga de lanzar los tests en la Máquina Virtual de Java (JVM). Sirve de puente entre el código y herramientas de construcción (como Maven).
+2. **JUnit Jupiter**: Es el corazón que usás vos como desarrollador. Contiene la nueva API, las aserciones y las anotaciones (`@Test`) que se usan para escribir las pruebas modernas.
+3. **JUnit Vintage**: Es un componente de retrocompatibilidad. Permite ejecutar tests viejísimos escritos en JUnit 3 o JUnit 4 sobre la nueva plataforma.
+
+En aplicaciones Spring Boot empresariales como DonaTrack, JUnit 5 suele usarse en conjunto con **Mockito**, una librería para crear objetos simulados ("mocks") y probar componentes de forma aislada.
+
+## 2. Conceptos Básicos y Anotaciones
 
 ### Anotaciones principales de JUnit:
 *   `@Test`: Indica que el método es un caso de prueba.
@@ -27,7 +35,7 @@ En arquitectura hexagonal, rara vez probamos todo el sistema junto. Probamos un 
 
 ---
 
-## 2. Testing en la Arquitectura de DonaTrack
+## 3. Testing en la Arquitectura de DonaTrack
 
 DonaTrack utiliza Arquitectura Hexagonal. Esto significa que los tests se enfocan en diferentes capas con distintos propósitos:
 
@@ -48,7 +56,7 @@ Probamos que los endpoints mapeen bien JSONs o que los listeners de RabbitMQ rea
 
 ---
 
-## 3. Maven vs JUnit: ¿Cuál es la diferencia?
+## 4. Maven vs JUnit: ¿Cuál es la diferencia?
 
 Antes de avanzar, es fundamental entender la diferencia entre estas dos herramientas, ya que trabajan en conjunto pero tienen propósitos totalmente distintos:
 
@@ -59,46 +67,35 @@ En resumen: **Tú escribes los tests usando JUnit, y Maven es el motor que compi
 
 ---
 
-## 4. ¿Dónde encontrar los tests en el proyecto?
+## 5. ¿Dónde encontrar los tests en el proyecto?
 
 Los tests en los proyectos gestionados por Maven siempre se ubican en la carpeta `src/test/java` paralela a `src/main/java`. En DonaTrack, al ser un proyecto multi-módulo, cada microservicio tiene su propia carpeta de tests.
 
 Aquí tienes ejemplos clave de dónde buscar:
 
-*   **Donaciones:**
-    *   `/donatrack-donaciones/src/test/java/com/donatrack/donaciones/...`
-    *   Contiene tests para `SegmentadorTest`, `ImportadorCSVTest`, `MatchmakerServiceTest`, etc.
-*   **Logística:**
-    *   `/donatrack-logistica/src/test/java/com/donatrack/logistica/...`
-    *   Contiene tests para rutas, entregas y los Use Cases de planificación (`PlanificacionRutasUseCaseTest`).
-*   **Incentivos:**
-    *   `/donatrack-incentivos/src/test/java/com/donatrack/incentivos/...`
-    *   Contiene tests para misiones, rachas (`PerfilDonanteTest`) y ranking mensual.
-*   **Notificaciones:**
-    *   `/donatrack-notificaciones/src/test/java/com/donatrack/notificaciones/...`
-    *   Contiene tests para fábricas de notificaciones y estrategias (Email, WhatsApp).
+*   **Donaciones:** `/donatrack-donaciones/src/test/java/com/donatrack/donaciones/...`
+*   **Logística:** `/donatrack-logistica/src/test/java/com/donatrack/logistica/...`
+*   **Incentivos:** `/donatrack-incentivos/src/test/java/com/donatrack/incentivos/...`
+*   **Notificaciones:** `/donatrack-notificaciones/src/test/java/com/donatrack/notificaciones/...`
 
 ---
 
-## 5. ¿Cómo ejecutar los tests?
+## 6. ¿Cómo ejecutar los tests?
 
 ### Desde la Terminal (Maven)
 Situado en la raíz del proyecto (`DonaTrack/`):
-1.  **Correr todos los tests de todos los módulos:**
-    ```bash
-    mvn test
-    ```
-2.  **Limpiar compilaciones viejas y correr tests:**
-    ```bash
-    mvn clean test
-    ```
-3.  **Correr tests de un solo módulo (ej: logística):**
-    ```bash
-    mvn test -pl donatrack-logistica
-    ```
+1.  **Correr todos los tests de todos los módulos:** `mvn test`
+2.  **Limpiar compilaciones viejas y correr tests:** `mvn clean test`
+3.  **Correr tests de un solo módulo:** `mvn test -pl donatrack-logistica`
 
 ### Desde el IDE (IntelliJ IDEA / Eclipse / VS Code)
 1.  Ve a cualquier archivo en `src/test/java`.
 2.  Haz clic derecho sobre la clase o el método anotado con `@Test`.
 3.  Selecciona **Run 'NombreDelTest'**.
-4.  También puedes hacer clic derecho en la carpeta `test` completa y ejecutar todos los tests de ese paquete simultáneamente.
+
+---
+
+## Referencias
+
+- JUnit. (2024). *JUnit 5 User Guide: Overview & Architecture*. https://junit.org/junit5/docs/current/user-guide/
+- Estructura y Código Local: Ver módulos en `*/src/test/java/com/donatrack/*`
