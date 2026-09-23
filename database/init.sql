@@ -278,7 +278,7 @@ CREATE TABLE IF NOT EXISTS logistica.entregas (
     peso_estimado DOUBLE PRECISION,
     volumen_estimado DOUBLE PRECISION,
     comprobante_fecha_hora TIMESTAMP,
-    comprobante_fotos TEXT,
+    comprobante_fotos VARCHAR(255)[],
     comprobante_camion_patente VARCHAR(255),
     justificacion_fallo TEXT
 );
