@@ -14,9 +14,11 @@ import com.donatrack.incentivos.domain.entities.RegistroDonacion;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
 @Getter
 @Setter
+@EqualsAndHashCode(of = "nombre")
 public class Mision {
     private UUID id = UUID.randomUUID();
     private String nombre;
@@ -55,7 +57,9 @@ public class Mision {
                         .orElse(0);
 
             case MESES_CONSECUTIVOS:
-                List<RegistroDonacion> donaciones = perfil.getMetricas().obtenerTodasLasDonaciones();
+                // Se usa obtenerDonacionesDesdeCorte() para ignorar donaciones previas al último
+                // corte de racha (>30 días de inactividad), evitando contar rachas viejas.
+                List<RegistroDonacion> donaciones = perfil.getMetricas().obtenerDonacionesDesdeCorte();
                 if (donaciones.isEmpty()) {
                     return 0;
                 }
@@ -80,6 +84,7 @@ public class Mision {
                     }
                 }
                 return racha;
+
 
             case CATEGORIAS_DISTINTAS:
                 Set<String> cats = perfil.getMetricas().obtenerTodasLasDonaciones().stream()

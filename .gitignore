@@ -26,13 +26,17 @@ HELP.md
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
+/nb-gradle/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
-
-
 TODO.md
+.env.example
+TODO.md
+
+### Agents ###
+.agents/
+*skills-lock.json

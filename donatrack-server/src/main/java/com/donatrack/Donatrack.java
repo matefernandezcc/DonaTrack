@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableFeignClients(basePackages = "com.donatrack")
 @EnableAsync
+@org.springframework.scheduling.annotation.EnableScheduling
 public class Donatrack {
   public static void main(String[] args) {
     SpringApplication.run(Donatrack.class, args);

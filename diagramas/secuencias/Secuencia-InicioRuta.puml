@@ -1,0 +1,58 @@
+@startuml Secuencia-InicioRuta
+title Inicio de Ruta de Reparto
+
+actor "Chofer" as chofer
+participant "LogísticaController" as logCtrl
+participant "IniciarRutaService" as initRuta
+participant "ApplicationEventPublisher" as logPublisher
+participant "LogisticaRabbitMQAdapter" as logMQAdapter
+queue "RabbitMQ\n(exchange: donatrack.events)" as mq
+participant "DonacionesListener" as donListener
+participant "ProcesarInicioRutaUseCase" as procInicio
+participant "ApplicationEventPublisher" as donPublisher
+participant "DonacionesRabbitMQAdapter" as donMQAdapter
+participant "NotificacionesListener" as notiListener
+participant "NotificadorService" as notiSvc
+
+chofer -> logCtrl: POST /api/rutas/{id}/iniciar
+activate logCtrl
+logCtrl -> initRuta: iniciarRuta(idRuta, idChofer)
+activate initRuta
+initRuta -> initRuta: Actualiza estado a EN_PROGRESO
+initRuta -> logPublisher: publishEvent(RutaIniciadaEvent)
+activate logPublisher
+logPublisher -> logMQAdapter: handle(RutaIniciadaEvent)
+activate logMQAdapter
+logMQAdapter -> mq: publish("ruta.iniciada", event)
+deactivate logMQAdapter
+deactivate logPublisher
+initRuta --> logCtrl: OK
+deactivate initRuta
+logCtrl --> chofer: 200 OK
+deactivate logCtrl
+
+mq -> donListener: consume("ruta.iniciada")
+activate donListener
+donListener -> procInicio: ejecutar(RutaIniciadaEvent)
+activate procInicio
+procInicio -> procInicio: Actualiza estado de donaciones a EN_VIAJE
+procInicio -> donPublisher: publishEvent(DonacionesEnViajeEvent)
+activate donPublisher
+donPublisher -> donMQAdapter: handle(DonacionesEnViajeEvent)
+activate donMQAdapter
+donMQAdapter -> mq: publish("donacion.en_viaje", event)
+deactivate donMQAdapter
+deactivate donPublisher
+procInicio --> donListener: DONE
+deactivate procInicio
+deactivate donListener
+
+mq -> notiListener: consume("donacion.en_viaje")
+activate notiListener
+notiListener -> notiSvc: enviarNotificacion(...)
+activate notiSvc
+notiSvc --> notiListener: Notificación enviada
+deactivate notiSvc
+deactivate notiListener
+
+@enduml

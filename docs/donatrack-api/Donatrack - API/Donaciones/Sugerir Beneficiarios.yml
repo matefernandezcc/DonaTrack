@@ -5,7 +5,11 @@ info:
 
 http:
   method: GET
-  url: "{{donacionesUrl}}/api/donaciones/31008064-071a-4d7a-ac37-33318f7d9841/matchmaking"
+  url: "{{donacionesUrl}}/api/donaciones/:donacionId/matchmaking"
+  params:
+    - name: donacionId
+      value: 31008064-071a-4d7a-ac37-33318f7d9841
+      type: path
   body: none
   auth: inherit
 

@@ -24,6 +24,7 @@ public class MetricasDonante {
     private UUID donanteId;
     private List<RegistroDonacion> registrosDonacion;
     private Map<Mision, YearMonth> misionesCompletadas;
+    private java.time.LocalDate fechaCorteRacha;
 
     public MetricasDonante(UUID donanteId) {
         this.donanteId = donanteId;
@@ -53,6 +54,19 @@ public class MetricasDonante {
 
     public List<RegistroDonacion> obtenerTodasLasDonaciones() {
         return new ArrayList<>(this.registrosDonacion);
+    }
+
+    /**
+     * Devuelve únicamente las donaciones realizadas desde la última vez que se cortó la racha.
+     * Si nunca se cortó (fechaCorteRacha == null), devuelve el historial completo.
+     */
+    public List<RegistroDonacion> obtenerDonacionesDesdeCorte() {
+        if (fechaCorteRacha == null) {
+            return obtenerTodasLasDonaciones();
+        }
+        return this.registrosDonacion.stream()
+                .filter(d -> d.getFechaDonacion() != null && !d.getFechaDonacion().isBefore(fechaCorteRacha))
+                .collect(java.util.stream.Collectors.toList());
     }
 
     public List<RegistroDonacion> obtenerDonacionesExitosas() {

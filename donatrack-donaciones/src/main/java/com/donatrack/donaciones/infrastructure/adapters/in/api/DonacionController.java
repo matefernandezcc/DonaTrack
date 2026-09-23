@@ -21,6 +21,9 @@ import com.donatrack.donaciones.application.ports.out.ServicioNotificaciones;
 import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
 import com.donatrack.donaciones.domain.services.MatchmakerService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Donaciones", description = "Gestión de donaciones, recepción de bienes, asignación y estados")
 public class DonacionController {
 
     private final MatchmakerService matchmakerService;
@@ -60,18 +64,24 @@ public class DonacionController {
         this.auditoriaDepositoJob = auditoriaDepositoJob;
     }
 
+    @Operation(summary = "Auditar donaciones vencidas", description = "Ejecuta la auditoría de donaciones que han superado su fecha de vencimiento en depósito")
+    @ApiResponse(responseCode = "200", description = "Auditoría ejecutada")
     @PostMapping("/donaciones/auditoria/vencidos")
     public ResponseEntity<Void> auditarVencidos() {
         auditoriaDepositoJob.auditarVencidos();
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Recibir bienes brutos", description = "Registra una nueva recepción de bienes y los segmenta en donaciones individuales")
+    @ApiResponse(responseCode = "200", description = "Recepción creada con sus donaciones segmentadas")
     @PostMapping("/recepciones")
     public ResponseEntity<DonacionOriginal> recibirBienesBrutos(@RequestBody CargaBienesRequestDTO requestDTO) {
         DonacionOriginal recepcion = recepcionDonacionesUseCase.recibir(requestDTO);
         return ResponseEntity.ok(recepcion);
     }
 
+    @Operation(summary = "Obtener donación por ID", description = "Devuelve el estado y la asignación de una donación específica")
+    @ApiResponse(responseCode = "200", description = "Donación encontrada")
     @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
     public ResponseEntity<DonacionResponseDTO> obtenerDonacion(@PathVariable UUID id) {
         return donacionRepository.buscarPorId(id).map(donacion -> {
@@ -87,6 +97,8 @@ public class DonacionController {
         });
     }
 
+    @Operation(summary = "Registrar donación en depósito", description = "Notifica al servicio de incentivos que una donación fue recibida en depósito")
+    @ApiResponse(responseCode = "200", description = "Actividad registrada en incentivos")
     @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/en_deposito")
     public ResponseEntity<Void> donacionEnDeposito(@PathVariable UUID id) {
         Donacion donacion = donacionRepository.buscarPorId(id)
@@ -106,6 +118,8 @@ public class DonacionController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Asignar donación a beneficiario", description = "Asigna una donación a una entidad beneficiaria y notifica a las partes")
+    @ApiResponse(responseCode = "200", description = "Donación asignada y notificaciones enviadas")
     @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/asignar")
     public ResponseEntity<Void> asignarDonacion(@PathVariable UUID id,
             @RequestBody BeneficiarioResponseDTO beneficiarioDTO) {
@@ -121,6 +135,8 @@ public class DonacionController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Registrar donación entregada", description = "Notifica al servicio de incentivos que una donación fue entregada exitosamente")
+    @ApiResponse(responseCode = "200", description = "Actividad de entrega registrada")
     @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/entregada")
     public ResponseEntity<Void> donacionEntregada(@PathVariable UUID id, @RequestParam UUID idDonante) {
         int cantidadBienesMock = 5;
@@ -135,6 +151,8 @@ public class DonacionController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Sugerir beneficiarios (matchmaking)", description = "Ejecuta el algoritmo de matchmaking para sugerir beneficiarios compatibles con la donación")
+    @ApiResponse(responseCode = "200", description = "Lista de beneficiarios sugeridos")
     @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/matchmaking")
     public ResponseEntity<List<BeneficiarioResponseDTO>> sugerirBeneficiarios(@PathVariable UUID id) {
         Donacion donacionMock = new Donacion(null);
@@ -150,6 +168,8 @@ public class DonacionController {
         return ResponseEntity.ok(sugerenciasDTO);
     }
 
+    @Operation(summary = "Actualizar donación", description = "Actualiza los datos de una donación existente")
+    @ApiResponse(responseCode = "200", description = "Donación actualizada")
     @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
     public ResponseEntity<DonacionResponseDTO> actualizarDonacion(@PathVariable UUID id,
             @RequestBody DonacionRequestDTO requestDTO) {
@@ -157,11 +177,16 @@ public class DonacionController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Eliminar donación", description = "Elimina una donación del sistema")
+    @ApiResponse(responseCode = "204", description = "Donación eliminada")
     @DeleteMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
     public ResponseEntity<Void> eliminarDonacion(@PathVariable UUID id) {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Cambiar estado de donación", description = "Cambia el estado de una donación registrando la transición en el historial")
+    @ApiResponse(responseCode = "200", description = "Estado cambiado")
+    @ApiResponse(responseCode = "404", description = "Donación no encontrada")
     @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado")
     public ResponseEntity<Void> cambiarEstado(@PathVariable UUID id, @RequestBody CambioEstadoRequestDTO request) {
         return donacionRepository.buscarPorId(id).map(donacion -> {
@@ -171,6 +196,8 @@ public class DonacionController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Ejecutar asignación batch", description = "Ejecuta el proceso batch de asignación automática de donaciones en depósito a beneficiarios")
+    @ApiResponse(responseCode = "200", description = "Proceso de asignación ejecutado")
     @PostMapping("/donaciones/asignacion-batch")
     public ResponseEntity<Void> ejecutarAsignacionBatch() {
         asignacionBatchJob.asignarDonacionesEnDeposito();

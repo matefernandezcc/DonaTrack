@@ -17,13 +17,19 @@ public class AsignacionBatchJob {
     private final DonacionRepository donacionRepository;
     private final BeneficiarioRepository beneficiarioRepository;
     private final MatchmakerService matchmakerService;
+    private final com.donatrack.donaciones.application.ports.out.LogisticaPort logisticaPort;
+    private final com.donatrack.donaciones.application.ports.out.PersonaRepository personaRepository;
 
     public AsignacionBatchJob(DonacionRepository donacionRepository,
                               BeneficiarioRepository beneficiarioRepository,
-                              MatchmakerService matchmakerService) {
+                              MatchmakerService matchmakerService,
+                              com.donatrack.donaciones.application.ports.out.LogisticaPort logisticaPort,
+                              com.donatrack.donaciones.application.ports.out.PersonaRepository personaRepository) {
         this.donacionRepository = donacionRepository;
         this.beneficiarioRepository = beneficiarioRepository;
         this.matchmakerService = matchmakerService;
+        this.logisticaPort = logisticaPort;
+        this.personaRepository = personaRepository;
     }
 
     /**
@@ -43,11 +49,27 @@ public class AsignacionBatchJob {
             if (!sugerencias.isEmpty()) {
                 Beneficiario mejorCandidato = sugerencias.get(0);
                 donacion.asignar(mejorCandidato);
-                // Si la relación es bidireccional, deberíamos agregarlo al beneficiario también.
                 mejorCandidato.getDonacionesAsignadas().add(donacion);
                 
                 donacionRepository.guardar(donacion);
-                // Aquí se podría guardar el beneficiario si fuera necesario según el ORM
+                
+                // Solicitar retiro a Logística (usando el Broker de Integración)
+                var personaOpt = personaRepository.buscarPorRolId(mejorCandidato.getId());
+                if (personaOpt.isPresent() && personaOpt.get().getDireccion() != null) {
+                    var dir = personaOpt.get().getDireccion();
+                    // Valores mockeados para peso/volumen para simplificar, en un caso real se calcularían
+                    double pesoTotal = donacion.getBienes().size() * 2.5; 
+                    double volumenTotal = donacion.getBienes().size() * 0.5;
+                    
+                    logisticaPort.solicitarRetiro(
+                            donacion.getId(), 
+                            pesoTotal, 
+                            volumenTotal, 
+                            dir.getCalle(), 
+                            String.valueOf(dir.getAltura()), 
+                            dir.getLocalidad()
+                    );
+                }
             }
         }
     }

@@ -64,6 +64,6 @@ public class RegistrarActividadDonacionUseCase {
                             "¡Increíble! Has subido de categoría a " + categoriaDespues.name(), "EMAIL"));
         }
 
-        // Aquí iría el perfilDonanteRepository.save(perfil);
+        perfilDonanteRepository.save(perfil);
     }
 }

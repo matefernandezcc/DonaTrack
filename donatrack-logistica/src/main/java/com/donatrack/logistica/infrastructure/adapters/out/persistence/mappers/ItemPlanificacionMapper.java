@@ -2,46 +2,40 @@ package com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers;
 
 import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
 import com.donatrack.logistica.domain.entities.reparto.Direccion;
-import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.DireccionEmbeddable;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ItemPlanificacionEntity;
 
-/**
- * Mapper bidireccional entre las domain entities y las JPA entities. Mantiene la capa de dominio
- * desacoplada de JPA.
- */
 public final class ItemPlanificacionMapper {
 
   private ItemPlanificacionMapper() {}
 
   public static ItemPlanificacionEntity toEntity(ItemPlanificacion domain) {
+    if (domain == null) return null;
     ItemPlanificacionEntity entity = new ItemPlanificacionEntity();
-    entity.setIdDonacionOriginal(domain.getIdDonacionOriginal());
+    entity.setIdDonacion(domain.getIdDonacionOriginal());
     entity.setPesoEstimado(domain.getPesoEstimado());
     entity.setVolumenEstimado(domain.getVolumenEstimado());
 
     if (domain.getDestino() != null) {
-      DireccionEmbeddable dir = new DireccionEmbeddable();
-      dir.setCalle(domain.getDestino().getCalle());
-      dir.setAlturaDir(domain.getDestino().getAltura());
-      dir.setLocalidad(domain.getDestino().getLocalidad());
-      entity.setDestino(dir);
+      entity.setCalleDestino(domain.getDestino().getCalle());
+      entity.setAlturaDestino(domain.getDestino().getAltura());
+      entity.setLocalidadDestino(domain.getDestino().getLocalidad());
     }
 
     return entity;
   }
 
   public static ItemPlanificacion toDomain(ItemPlanificacionEntity entity) {
+    if (entity == null) return null;
     Direccion destino = null;
-    if (entity.getDestino() != null) {
-      destino =
-          new Direccion(
-              entity.getDestino().getCalle(),
-              entity.getDestino().getAlturaDir(),
-              entity.getDestino().getLocalidad());
+    if (entity.getCalleDestino() != null || entity.getAlturaDestino() != null || entity.getLocalidadDestino() != null) {
+      destino = new Direccion(
+          entity.getCalleDestino(),
+          entity.getAlturaDestino(),
+          entity.getLocalidadDestino());
     }
 
     return new ItemPlanificacion(
-        entity.getIdDonacionOriginal(),
+        entity.getIdDonacion(),
         entity.getPesoEstimado(),
         entity.getVolumenEstimado(),
         destino);

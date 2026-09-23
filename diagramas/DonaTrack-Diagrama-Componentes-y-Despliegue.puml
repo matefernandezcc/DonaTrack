@@ -1,76 +1,220 @@
 @startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue
 skinparam componentStyle uml2
 skinparam linetype ortho
+' Aumenta el espacio entre nodos para dar lugar a las líneas rectas
+skinparam nodesep 60
+skinparam ranksep 70
+' Colores extraídos de la imagen de referencia
+skinparam node {
+    BackgroundColor #AED6F1
+    BorderColor #5D6D7E
+}
 skinparam component {
+    BackgroundColor #FADBD8
+    BorderColor #5D6D7E
+}
+skinparam interface {
     BackgroundColor #FFFFFF
-    BorderColor #333333
+    BorderColor #5D6D7E
 }
 
-' Componente de API REST expuesto por el Backend
-component "API REST (HTTPS)" as ModuloAPI
+node "Servidor Frontend" as N_Frontend {
+    ' Interfaz Frontend
+    component "Frontend SPA\n(Cliente Web/Móvil)" as Frontend
+}
 
-' Interfaz Frontend
-component "Frontend SPA\n(Cliente Web/Móvil)" as Frontend
+node "Servidor API" as N_API {
+    ' Componente de API REST expuesto por el Backend
+    component "API REST (HTTPS)" as ModuloAPI
+}
 
-' --- BACKEND MULTIMÓDULO (MICROSERVICIOS) ---
-package "DonaTrack Backend (Aplicación Multimódulo)" {
-    
-    component "Módulo de Donaciones" as ModDonaciones
-    component "Módulo de Incentivos" as ModIncentivos
-    component "Módulo de Logística" as ModLogistica
-    component "Módulo de Notificaciones" as ModNotificaciones
-    
+' ----- BACKEND MultiServicio (MicroServidores) -----
+rectangle "DonaTrack Backend (Aplicación MultiServicio)" #line.dashed {
+
+    node "Servidor de Donaciones" as N_Donaciones {
+        component "Servicio de Donaciones" as ModDonaciones
+    }
+
+    node "Servidor de Incentivos" as N_Incentivos {
+        component "Servicio de Incentivos" as ModIncentivos
+    }
+
+    node "Servidor de Logística" as N_Logistica {
+        component "Servicio de Logística" as ModLogistica
+    }
+
+    node "Servidor de Notificaciones" as N_Notificaciones {
+        component "Servicio de Notificaciones" as ModNotificaciones
+    }
+
     ' Layout hints para evitar superposición
-    ModDonaciones -[hidden]right- ModIncentivos
-    ModIncentivos -[hidden]right- ModLogistica
-    
+    N_Donaciones -[hidden]right- N_Incentivos
+    N_Incentivos -[hidden]right- N_Logistica
+    N_Logistica -[hidden]right- N_Notificaciones
+
     ' Dependencias sincrónicas directas (vía REST / OpenFeign)
-    ModDonaciones ..(0.. ModNotificaciones : "REST (Feign)"
-    ModIncentivos ..(0.. ModNotificaciones : "REST (Feign)"
-    
+    N_Donaciones ..(0.. N_Notificaciones : "REST (Feign)"
+    N_Incentivos ..(0.. N_Notificaciones : "REST (Feign)"
+
     ' Exposición de la API hacia el exterior
-    ModuloAPI --(0-- ModDonaciones
-    ModuloAPI --(0-- ModIncentivos
-    ModuloAPI --(0-- ModLogistica
-    ModuloAPI --(0-- ModNotificaciones
+    N_API ----(0---- N_Donaciones
+    N_API ----(0---- N_Incentivos
+    N_API ----(0---- N_Logistica
+    N_API ----(0---- N_Notificaciones
 }
 
-' --- MIDDLEWARE CENTRALIZADO ---
-queue "RabbitMQ\n(Message Broker)" as Broker
 
-' --- SISTEMAS EXTERNOS ---
-database "Base de Datos\n(PostgreSQL)" as DB
-
-component "Servidor n8n\n(Automatización)" as n8n
-
-component "APIs Notificaciones\n(Twilio, SendGrid, Meta)" as SaaSNotif
+node "Servidor de Mensajeria Asincronica" as N_Broker {
+    ' ----- MIDDLEWARE CENTRALIZADO -----
+    component "RabbitMQ\n(Message Broker)" as Broker
+}
 
 
-' --- CONEXIONES EXTERNAS ---
+node "Servidor de la Base de Datos" as N_DB {
+    component "Base de Datos\n(PostgreSQL)" as DB
+}
 
-Frontend -(0- ModuloAPI : <<consume>>
+' ----- SISTEMAS EXTERNOS -----
+node "Servidor de n8n" as N_n8n {
+    component "Servidor n8n\n(Automatización)" as n8n
+}
+
+node "Servidores de APIs 1....N" as N_SaaSNotif {
+    component "APIs Notificaciones\n(Twilio, SendGrid, Meta)" as SaaSNotif
+}
+
+' ----- CONEXIONES EXTERNAS -----
+N_Frontend --(0-- N_API : <<consume>>
 
 ' Conexiones a BD (Esquemas Lógicos Aislados)
-ModDonaciones --> DB : "JPA (Schema: donaciones)"
-ModIncentivos --> DB : "JPA (Schema: incentivos)"
-ModLogistica --> DB : "JPA (Schema: logistica)"
-ModNotificaciones --> DB : "JPA (Schema: notificaciones)"
+N_Donaciones ----(0---- N_DB : "JPA (Schema: donaciones)"
+N_Incentivos ----(0---- N_DB : "JPA (Schema: incentivos)"
+N_Logistica ----(0---- N_DB : "JPA (Schema: logistica)"
+N_Notificaciones ----(0---- N_DB : "JPA (Schema: notificaciones)"
 
 ' Integraciones n8n y Redes
-ModIncentivos --> n8n : "POST Webhook\n(Insignia obtenida)"
-n8n --> ModuloAPI : "PATCH / PUT\n(Actualiza estado)"
+N_Incentivos ----(0---- N_n8n : "POST Webhook\n(Insignia obtenida)"
+N_n8n ----(0---- N_API : "PATCH / PUT\n(Actualiza estado)"
 
 ' Integraciones SaaS
+N_Notificaciones ----(0---- N_SaaSNotif : "Despacha SMS/WA/Email"
+
+' ----- COMUNICACIÓN ASINCRÓNICA BASADA EN EVENTOS (RABBITMQ) -----
+N_Logistica ----(0---- N_Broker : "Publica: ruta.iniciada, entrega.realizada, entrega.fallida"
+N_Broker ----(0---- N_Donaciones : "Consume eventos de entrega/ruta"
+N_Donaciones ----(0---- N_Broker : "Publica: donacion.replanificada"
+N_Broker ----(0---- N_Logistica : "Consume: donacion.replanificada"
+N_Donaciones ----(0---- N_Broker : "Publica: notificacion.*"
+N_Broker ----(0---- N_Notificaciones : "Consume: notificacion.*"
+
+@enduml
+
+
+@startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue_VersionVisual
+left to right direction
+skinparam componentStyle uml2
+skinparam nodesep 40
+skinparam ranksep 80
+
+' Colores extraídos de la imagen de referencia
+skinparam node {
+    BackgroundColor #AED6F1
+    BorderColor #5D6D7E
+}
+skinparam component {
+    BackgroundColor #FADBD8
+    BorderColor #5D6D7E
+}
+skinparam interface {
+    BackgroundColor #FFFFFF
+    BorderColor #5D6D7E
+}
+
+node "Servidor Frontend" as N_Frontend {
+    component "Frontend SPA\n(Cliente Web/Móvil)" as Frontend
+}
+
+rectangle "FrontEnd y Orquestación" #line.dashed {
+    node "Servidor API" as N_API {
+        component "API REST (HTTPS)" as ModuloAPI
+    }
+}
+
+' Interfaz entre Frontend y API
+interface "HTTPS" as Int_HTTPS
+Frontend -- Int_HTTPS
+Int_HTTPS -- ModuloAPI
+
+' Interfaces API REST para los microservicios
+interface "HTTP - API REST" as Int_API_Don
+interface "HTTP - API REST" as Int_API_Inc
+interface "HTTP - API REST" as Int_API_Log
+interface "HTTP - API REST" as Int_API_Not
+
+ModuloAPI -- Int_API_Don
+ModuloAPI -- Int_API_Inc
+ModuloAPI -- Int_API_Log
+ModuloAPI -- Int_API_Not
+
+' ----- BACKEND MultiServicio (MicroServidores) -----
+rectangle "Dominio (DonaTrack Backend)" #line.dashed {
+    node "Servidor de Donaciones" as N_Donaciones {
+        component "Servicio de Donaciones" as ModDonaciones
+    }
+    node "Servidor de Incentivos" as N_Incentivos {
+        component "Servicio de Incentivos" as ModIncentivos
+    }
+    node "Servidor de Logística" as N_Logistica {
+        component "Servicio de Logística" as ModLogistica
+    }
+    node "Servidor de Notificaciones" as N_Notificaciones {
+        component "Servicio de Notificaciones" as ModNotificaciones
+    }
+}
+
+Int_API_Don -- ModDonaciones
+Int_API_Inc -- ModIncentivos
+Int_API_Log -- ModLogistica
+Int_API_Not -- ModNotificaciones
+
+' Resto de los servidores externos y persistencia
+rectangle "Persistencia" #line.dashed {
+    node "Servidor de la Base de Datos" as N_DB {
+        component "Base de Datos\n(PostgreSQL)" as DB
+    }
+}  
+rectangle "Mensajería" #line.dashed { 
+    node "Servidor de Mensajeria Asincronica" as N_Broker {
+        component "RabbitMQ\n(Broker)" as Broker
+    }
+}
+
+node "Servidor de n8n" as N_n8n {
+    component "Servidor n8n\n(Automatización)" as n8n
+}
+
+node "Servidores de APIs 1....N" as N_SaaSNotif {
+    component "APIs Notificaciones\n(Twilio, SendGrid, Meta)" as SaaSNotif
+}
+
+' ==========================================
+' CONEXIONES CONSOLIDADAS (FIX DEL ESPAGUETI)
+' ==========================================
+
+' 1. Conexiones a BD
+ModDonaciones --- DB : "JPA (donaciones)"
+ModIncentivos --- DB : "JPA (incentivos)"
+ModLogistica --- DB : "JPA (logistica)"
+ModNotificaciones --- DB : "JPA (notificaciones)"
+
+' 2. Conexiones RabbitMQ (Consolidadas con saltos de línea y bidireccionalidad)
+ModDonaciones <--> Broker : "Publica: replanificada, notificacion.*\nConsume: eventos entrega/ruta"
+ModLogistica <--> Broker : "Publica: ruta/entrega\nConsume: donacion.replanificada"
+ModNotificaciones <--> Broker : "Consume: notificacion.*"
+
+' 3. Integraciones n8n y Redes (Direccionadas)
+ModIncentivos --> n8n : "POST Webhook"
+n8n --> ModuloAPI : "PATCH / PUT"
 ModNotificaciones --> SaaSNotif : "Despacha SMS/WA/Email"
-
-' --- COMUNICACIÓN ASINCRÓNICA BASADA EN EVENTOS (RABBITMQ) ---
-ModLogistica --> Broker : "Publica: ruta.iniciada, entrega.realizada, entrega.fallida"
-Broker --> ModDonaciones : "Consume eventos de entrega/ruta"
-
-ModDonaciones --> Broker : "Publica: donacion.replanificada"
-Broker --> ModLogistica : "Consume: donacion.replanificada"
-
-ModDonaciones --> Broker : "Publica: notificacion.*"
-Broker --> ModNotificaciones : "Consume: notificacion.*"
 
 @enduml

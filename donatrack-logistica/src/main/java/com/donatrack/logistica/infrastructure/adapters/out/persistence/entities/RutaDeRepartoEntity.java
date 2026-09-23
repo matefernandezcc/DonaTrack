@@ -3,6 +3,8 @@ package com.donatrack.logistica.infrastructure.adapters.out.persistence.entities
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -10,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -26,12 +29,21 @@ import lombok.Setter;
 public class RutaDeRepartoEntity {
 
   @Id
-  @Column(name = "id")
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "ruta_reparto_id")
   private UUID id;
 
   @ManyToOne
-  @JoinColumn(name = "solicitud_id")
+  @JoinColumn(name = "solicitud_planificacion_id")
   private SolicitudPlanificacionEntity solicitud;
+
+  @ManyToOne
+  @JoinColumn(name = "camion_id")
+  private CamionEntity camion;
+
+  @ManyToOne
+  @JoinColumn(name = "chofer_id")
+  private ChoferEntity chofer;
 
   @Column(name = "fecha_operativa", nullable = false)
   private LocalDate fechaOperativa;
@@ -39,15 +51,7 @@ public class RutaDeRepartoEntity {
   @Column(name = "iniciada", nullable = false)
   private Boolean iniciada = false;
 
-  @ManyToOne
-  @JoinColumn(name = "camion_patente")
-  private CamionEntity camion;
-
-  @ManyToOne
-  @JoinColumn(name = "chofer_legajo")
-  private ChoferEntity chofer;
-
   @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
   @OrderBy("orden ASC")
-  private List<ParadaEntity> paradas;
+  private List<ParadaEntity> paradas = new ArrayList<>();
 }

@@ -1,0 +1,268 @@
+@startuml DER-Donaciones
+hide circle
+skinparam linetype ortho
+
+note as db_note
+  **Esquema:** donaciones
+  **Motor:** PostgreSQL
+  **Estrategias ORM:**
+  - Persona: JOINED
+  - Rol: JOINED
+  - Necesidad: SINGLE_TABLE
+end note
+
+entity "Direccion" as Direccion {
+  [PK] direccion_id
+  --
+  calle : VARCHAR(255)
+  --
+  altura : DOUBLE PRECISION
+  --
+  localidad : VARCHAR(255)
+  --
+  provincia : VARCHAR(255)
+  --
+  pais : VARCHAR(255)
+  --
+  cp : VARCHAR(50)
+  --
+  latitud : DOUBLE PRECISION
+  --
+  longitud : DOUBLE PRECISION
+}
+
+entity "Persona" as Persona {
+  [PK] persona_id
+  --
+  [FK] direccion_id
+  --
+  email : VARCHAR(255)
+  --
+  doc_tipo : VARCHAR(50)
+  --
+  doc_numero : VARCHAR(255)
+  --
+  contacto_correo : VARCHAR(255)
+  --
+  contacto_telefono : VARCHAR(255)
+  --
+  contacto_whatsapp : VARCHAR(255)
+  --
+  contacto_medio_predeterminado : VARCHAR(50)
+  --
+  nacionalidad : VARCHAR(255)
+}
+
+entity "PersonaHumana" as PersonaHumana {
+  [PK] persona_humana_id
+  --
+  [FK] persona_id
+  --
+  nombre : VARCHAR(255)
+  --
+  apellido : VARCHAR(255)
+  --
+  edad : INTEGER
+  --
+  genero : VARCHAR(50)
+}
+
+entity "PersonaJuridica" as PersonaJuridica {
+  [PK] persona_juridica_id
+  --
+  [FK] persona_id
+  --
+  razon_social : VARCHAR(255)
+  --
+  tipo : VARCHAR(50)
+  --
+  rubro : VARCHAR(255)
+}
+
+entity "Rol" as Rol {
+  [PK] rol_id
+  --
+  [FK] persona_id
+  --
+  fecha_alta : DATE
+  --
+  dtype : VARCHAR(31) <<Discriminator>>
+}
+
+entity "RolDonante" as RolDonante {
+  [PK] rol_donante_id
+  --
+  [FK] rol_id
+}
+
+entity "RolRepresentante" as RolRepresentante {
+  [PK] rol_representante_id
+  --
+  [FK] rol_id
+  --
+  cargo : VARCHAR(255)
+  --
+  [FK] organizacion_id
+}
+
+entity "RolBeneficiario" as RolBeneficiario {
+  [PK] rol_beneficiario_id
+  --
+  [FK] rol_id
+}
+
+entity "Categoria" as Categoria {
+  [PK] categoria_id
+  --
+  nombre : VARCHAR(255)
+  --
+  descripcion : VARCHAR(255)
+}
+
+entity "Subcategoria" as Subcategoria {
+  [PK] subcategoria_id
+  --
+  [FK] categoria_id
+  --
+  nombre : VARCHAR(255)
+  --
+  descripcion : VARCHAR(255)
+}
+
+entity "DonacionOriginal" as DonacionOriginal {
+  [PK] donacion_original_id
+  --
+  [FK] donante_id
+  --
+  descripcion_general : TEXT
+  --
+  fecha_recepcion : TIMESTAMP
+  --
+  usuario_id : VARCHAR(255)
+}
+
+entity "Donacion" as Donacion {
+  [PK] donacion_id
+  --
+  [FK] donacion_original_id
+  --
+  [FK] subcategoria_id
+  --
+  [FK] necesidad_id
+  --
+  [FK] periodo_id
+  --
+  estado : VARCHAR(50)
+  --
+  fecha_creacion : TIMESTAMP
+}
+
+entity "Bien" as Bien {
+  [PK] bien_id
+  --
+  [FK] donacion_id
+  --
+  descripcion : VARCHAR(255)
+  --
+  cantidad : DOUBLE PRECISION
+  --
+  unidad_medicion : VARCHAR(50)
+  --
+  es_usado : BOOLEAN
+  --
+  fecha_vencimiento : DATE
+}
+
+entity "Foto" as Foto {
+  [PK] foto_id
+  --
+  [FK] bien_id
+  --
+  descripcion : VARCHAR(255)
+  --
+  url : VARCHAR(500)
+}
+
+entity "HistorialEstado" as HistorialEstado {
+  [PK] historial_estado_id
+  --
+  [FK] donacion_id
+  --
+  estado : VARCHAR(50)
+  --
+  fecha : TIMESTAMP
+  --
+  observacion : TEXT
+  --
+  usuario_id : VARCHAR(255)
+}
+
+entity "Necesidad" as Necesidad {
+  [PK] necesidad_id
+  --
+  [FK] beneficiario_id
+  --
+  [FK] subcategoria_id
+  --
+  descripcion : TEXT
+  --
+  fecha_solicitud : TIMESTAMP
+  --
+  dtype : VARCHAR(31) <<Discriminator>>
+  --
+  estado : VARCHAR(50)
+  --
+  cantidad_requerida : DOUBLE PRECISION
+  --
+  activa : BOOLEAN
+  --
+  cantidad_objetivo : DOUBLE PRECISION
+  --
+  tipo_periodo : VARCHAR(50)
+}
+
+entity "PeriodoNecesidad" as PeriodoNecesidad {
+  [PK] periodo_necesidad_id
+  --
+  [FK] necesidad_id
+  --
+  fecha_inicio : DATE
+  --
+  fecha_fin : DATE
+  --
+  estado : VARCHAR(50)
+}
+
+' Relaciones Personas y Direccion
+Persona }o--|| Direccion 
+
+' Relaciones Personas y Roles
+Persona ||--|| PersonaHumana 
+Persona ||--|| PersonaJuridica 
+Persona ||--o{ Rol 
+
+Rol ||--|| RolDonante 
+Rol ||--|| RolRepresentante 
+Rol ||--|| RolBeneficiario 
+
+RolRepresentante }o--|| PersonaJuridica 
+
+' Relaciones Donaciones
+RolDonante ||--o{ DonacionOriginal 
+DonacionOriginal ||--o{ Donacion 
+Donacion }o--|| Subcategoria 
+Donacion ||--o{ Bien 
+Donacion ||--o{ HistorialEstado 
+Bien ||--o{ Foto 
+
+' Relaciones Necesidades
+RolBeneficiario ||--o{ Necesidad 
+Necesidad }o--|| Subcategoria 
+Necesidad ||--o{ PeriodoNecesidad 
+Donacion }o--|| Necesidad 
+Donacion }o--|| PeriodoNecesidad 
+
+' Categorias
+Categoria ||--o{ Subcategoria 
+
+@enduml

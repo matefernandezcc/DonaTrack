@@ -23,6 +23,21 @@ package:
 test:
 	mvn test
 
+test-donaciones:
+	mvn test -pl donatrack-donaciones
+
+test-incentivos:
+	mvn test -pl donatrack-incentivos
+
+test-logistica:
+	mvn test -pl donatrack-logistica
+
+test-notificaciones:
+	mvn test -pl donatrack-notificaciones
+
+test-server:
+	mvn test -pl donatrack-server
+
 # =========================
 # QUALITY / FORMAT
 # =========================
@@ -120,15 +135,19 @@ setup:
 
 help:
 	@echo "Commands:"
-	@echo "  make build           -> build full project"
-	@echo "  make test            -> run tests"
-	@echo "  make format          -> format code"
-	@echo "  make run             -> start server"
-	@echo "  make donaciones      -> start donaciones service (port 8000)"
-	@echo "  make incentivos      -> start incentivos service (port 8001)"
-	@echo "  make logistica       -> start logistica service (port 8002)"
-	@echo "  make notificaciones  -> start notificaciones service (port 8003)"
-	@echo "  make server          -> start general server service (port 8080)"
-	@echo "  make ci              -> full pipeline"
-	@echo "  make setup           -> start docker and import n8n workflows"
-	@echo "  make n8n-export      -> export workflows to repo"
+	@echo "  make build               -> build full project"
+	@echo "  make test                -> run all tests"
+	@echo "  make test-donaciones     -> run donaciones tests"
+	@echo "  make test-incentivos     -> run incentivos tests"
+	@echo "  make test-logistica      -> run logistica tests"
+	@echo "  make test-notificaciones -> run notificaciones tests"
+	@echo "  make format              -> format code"
+	@echo "  make run                 -> start server"
+	@echo "  make donaciones          -> start donaciones service (port 8000)"
+	@echo "  make incentivos          -> start incentivos service (port 8001)"
+	@echo "  make logistica           -> start logistica service (port 8002)"
+	@echo "  make notificaciones      -> start notificaciones service (port 8003)"
+	@echo "  make server              -> start general server service (port 8080)"
+	@echo "  make ci                  -> full pipeline"
+	@echo "  make setup               -> start docker and import n8n workflows"
+	@echo "  make n8n-export          -> export workflows to repo"

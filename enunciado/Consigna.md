@@ -59,14 +59,17 @@
    - Requerimientos detallados
    - Entregables
 - ENTREGA 3: Arquitectura y Modelado en Objetos - Parte III
-   - Objetivos de la entrega
-   - Alcance
-   - Unidades del Programa Vinculadas
-   - Revisión general de aspectos destacados de Entrega 1 y
-   - Dominio
       - Servicio de Logística - Entrega y planificación de rutas
       - Servicio de Logística - Trazabilidad de las entregas de las donaciones
       - Servicio de Donaciones – Notificaciones de Eventos por Logística
+- ENTREGA 4: Persistencia, Integración y Despliegue
+   - Objetivos de la entrega
+   - Requerimientos de Integración
+      - Cola de mensajes para notificaciones
+      - Broker de Integración con Logística
+   - Requerimiento de Despliegue
+      - Despliegue de servicio de logística
+   - Entregables
 - Anexo - Links de interés
 
 
@@ -269,10 +272,9 @@ Interfaz de Usuario
 ```
 2 Arquitectura y Modelado en Objetos - Parte II 19 de Junio
 3 Arquitectura y Modelado en Objetos - Parte III 3 de Julio
-4 Arquitectura e Integración Agosto
-5 Persistencia y Maquetado de Interfaz de Usuario Semana del 14 de Septiembre
-6 Arquitectura Web MVC Semana del 19 de Octubre
-7 Despliegue, Observabilidad y Seguridad Semana del 23 de Noviembre
+4 Persistencia y Maquetado de Interfaz de Usuario Semana del 14 de Septiembre
+5 Arquitectura Web MVC Semana del 19 de Octubre
+6 Despliegue, Observabilidad y Seguridad Semana del 23 de Noviembre
 (*) - Estas fechas son a modo de referencia, se podrán realizar modificaciones a medida que avance el curso. Las
 consignas específicas de cada entrega estarán disponibles en fechas a definir en el curso.
 ```
@@ -751,20 +753,19 @@ final.
 
 ## ENTREGA 3: Arquitectura y Modelado en Objetos - Parte III
 
-### Objetivos de la entrega
+_Objetivos de la entrega_
 
 ```
 ● Diseñar e implementar, de manera incremental, las nuevas funcionalidades.
 ● Exponer un servicio a través de un protocolo de red.
+● Incorporar flujos de trabajo asincrónicos.
 ```
-### Alcance
+_Alcance_
+● Servicio de Logística - Entrega y planificación de rutas.
+● Servicio de Logística - Monitoreo de camiones en tiempo real.
+● Exposición REST de los servicios.
 
-```
-● Revisión general de aspectos destacados de Entrega 1 y 2
-● Servicio de Logística
-● Servicio de Donaciones – Notificaciones
-```
-### Unidades del Programa Vinculadas
+_Unidades del Programa Vinculadas_
 
 ```
 ● Unidad 2: Herramientas de Concepción y Comunicación del Diseño.
@@ -773,7 +774,7 @@ final.
 ● Unidad 7: Integración de Sistemas.
 ● Unidad 8: Validación del Diseño.
 ```
-### Revisión general de aspectos destacados de Entrega 1 y
+_Revisión general de aspectos destacados de Entrega 1 y 2_
 
 Es importante que para esta entrega los requerimientos y decisiones de entregas 1 y 2 estén maduros y
 pondremos especialmente foco en los aspectos mencionados a continuación. :
@@ -798,8 +799,8 @@ pondremos especialmente foco en los aspectos mencionados a continuación. :
 
 **Workflow de publicación (Código y N8N)**
 
-
 7. Que ejecuten la integración con redes sociales vía N8N (entrega 2)
+
 
 **Endpoints servicio de incentivos (Código)**
 
@@ -819,7 +820,7 @@ pondremos especialmente foco en los aspectos mencionados a continuación. :
 
 15. Que esté correcta la exposición de las operaciones del servicio de notificaciones (entrega 2)
 
-### Dominio
+_Dominio_
 
 #### Servicio de Logística - Entrega y planificación de rutas
 
@@ -827,11 +828,12 @@ Para realizar las entregas, la organización cuenta con una flota de camiones. D
 patente, la capacidad en volumen (m³), la altura (m) y la capacidad de carga (kg). Todos los camiones pueden
 transportar cualquier tipo de bien y parten siempre desde el depósito para realizar las entregas del día.
 
-Este servicio será el encargado de generar las rutas de reparto del día siguiente para la flota. Este
-componente recibirá, por ejecución, un conjunto de donaciones en estado _Asignación Realizada_ junto con la
-información de los camiones disponibles. Devolverá, por cada camión, una lista ordenada de destinos
-(direcciones de las entidades beneficiarias) con las entregas que debe realizar en cada una. Al completar la
-planificación, las rutas asignadas quedan disponibles para los choferes en su aplicación.
+La plataforma contará con la integración de un componente externo encargado de generar las rutas de
+reparto del día siguiente para la flota. Este componente recibirá, por ejecución, un conjunto de donaciones
+en estado _Asignación Realizada_ junto con la información de los camiones disponibles. Devolverá, por cada
+camión, una lista ordenada de destinos (direcciones de las entidades beneficiarias) con las entregas que
+debe realizar en cada una. Al completar la planificación, las rutas asignadas quedan disponibles para los
+choferes en su aplicación.
 
 #### Servicio de Logística - Trazabilidad de las entregas de las donaciones
 
@@ -887,18 +889,66 @@ _Requerimientos de implementación:_
     la información
 4. El servicio de logística no debe comunicarse con el servicio de notificaciones
 
-
 _Documentación e implementación sobre el sistema en general_
 
-Para cada uno de los servicios que componen el sistema:
+Para cada uno de los servicios que componente el sistema:
 
-- Modelo del Dominio: diagrama de clases por servicio que contemple las funcionalidades requeridas.
-- Justificaciones de Diseño: Documento y Diagramas Complementarios.
 - Presentar en Postman (o similar) los diferentes endpoints de los servicios
 - Documentar en Swagger (o similar) los diferentes endpoints de los servicios
 - Generar contenedores (utilizando Docker o similar) y desplegar allí cada uno de los servicios
 
-Además, debe presentarse el diagrama de componentes y diagrama de despliegue de la solución completa.
+
+_Entregables_
+
+**1. Modelo del Dominio** : diagrama de clases por servicio que contemple las funcionalidades requeridas.
+**2. Justificaciones de Diseño** : Documento y Diagramas Complementarios.
+**3. Implementación** de los requerimientos de esta entrega.
+**4. Diagrama de despliegue** actualizado (incluir integraciones concretas entre los servicios).
+
+
+## ENTREGA 4: Persistencia, Integración y Despliegue
+
+### Objetivos de la entrega
+
+```
+● Incorporar nociones de persistencia de datos en un medio relacional.
+● Incorporar nociones de la técnica de mapeo objeto – relacional.
+● Incorporar nociones respecto a diferentes estrategias y patrones de integración
+```
+### Requerimientos de Integración
+
+#### Cola de mensajes para notificaciones
+
+La integración entre los servicios de dominio y el Servicio de Notificaciones deberá realizarse de forma
+asincrónica, a través de una cola de mensajes, a fin de no afectar la disponibilidad del sistema ante picos de
+carga o fallas transitorias.
+
+#### Broker de Integración con Logística
+
+Para la integración entre el servicio de donaciones y el servicio de logistica deberá implementarse un broker.
+Este broker deberá permitir seleccionar entre más de 1 servicio de logistica disponible, entendiendo que esta
+el propio servicio construido y otro servicio potencial que cumple igual objetivo.
+
+### Requerimiento de Despliegue
+
+#### Despliegue de servicio de logística
+
+El servicio de logística deberá ser desplegado para ser accesible vía web a través de sus URIs.
+El despliegue puede encontrarse pausado para reducir consumos hasta que sea presentado en la defensa.
+
+### Entregables
+
+1. **Modelo de Clases** actualizado para cada Servicio
+2. **Modelo de datos** : Diagrama de entidad-relación físico por cada Servicio.
+3. **Justificaciones de Diseño** : Documento y Diagramas Complementarios.
+4. **Diagrama de Componentes** actualizado incluyendo los componentes de integración previstos en la
+    presente entrega
+5. Documento explicativo de la arquitectura utilizada (patrones, capas, etc.) sin detalle de los
+    componentes, pero justificando las decisiones tomadas respecto a esa arquitectura
+6. Implementación de los requerimientos de integración de la presente entrega
+7. **Despliegue** de servicio de logística
+
+Los puntos 5 y 6 serán trabajados durante el mes de Agosto en el curso.
 
 
 ## Anexo - Links de interés

@@ -1,0 +1,41 @@
+@startuml DER-Notificaciones
+hide circle
+skinparam linetype ortho
+
+note as db_note
+  **Esquema:** notificaciones
+  **Motor:** PostgreSQL
+  **Nota:** Aunque el módulo opera de forma reactiva (consumiendo de RabbitMQ), 
+  se persiste un registro de auditoría de las notificaciones enviadas.
+end note
+
+entity "EventoNotificacion" as EventoNotificacion {
+  [PK] evento_notificacion_id
+  --
+  tipo_evento : VARCHAR(50)
+  --
+  descripcion : VARCHAR(255)
+  --
+  fecha_recepcion : TIMESTAMP
+}
+
+entity "Notificacion" as Notificacion {
+  [PK] notificacion_id
+  --
+  [FK] evento_notificacion_id
+  --
+  destinatario : VARCHAR(255)
+  --
+  medio : VARCHAR(50)
+  --
+  mensaje : TEXT
+  --
+  fecha_envio : TIMESTAMP
+  --
+  completada : BOOLEAN
+}
+
+' Relaciones
+EventoNotificacion ||--o{ Notificacion 
+
+@enduml
