@@ -1,59 +1,52 @@
-# Resumen de Avance: Entrega 4 (Persistencia, Integración y Despliegue)
+# Estado y Resumen de Avance: Entrega 4 (Persistencia, Integración y Despliegue)
 
-Este documento detalla todo el progreso realizado hasta el momento para la **Entrega 4** del sistema DonaTrack, consolidando el trabajo de persistencia de datos, integración entre servicios, diseño arquitectónico y documentación, así como los pendientes necesarios para finalizar esta fase.
+Este documento consolida el estado actual, los avances logrados y las notas de la cátedra para la **Entrega 4** del sistema DonaTrack.
+
+---
+
+## 📌 Aclaraciones Clave del Profesor (Clase)
+* **El DER es un mapeo directo:** Las tablas salen directamente de las clases de dominio. Debe ser FÍSICO y COMPLETO (con PKs, FKs, campos de control, etc.).
+* **Broker de Logística:** No es un microservicio separado, sino una clase/componente dentro de Donaciones que decide si llamar a la logística local o a la desplegada en la nube si la principal cae.
+* **Estrategia de Despliegue:** Desplegar logística en la nube (Render/Railway), pero apagarlo para no gastar. Tener copia local de backup (Broker permite esto).
+* **Documento de Arquitectura:** Es un único documento general para todo el sistema, detallando el diagrama de componentes actualizado y las justificaciones.
+* **Imágenes/Archivos:** Se guardan como URL, no como binarios en la BD.
+* **Frontend:** No se requiere para la Entrega 4 (se pide en la 5). Por ahora, probar con Swagger o Postman/Bruno.
 
 ---
 
 ## 🟢 Lo que ya se completó
 
 ### Fase 1: Persistencia y Bases de Datos (JPA)
-Se migró todo el modelo de objetos (Mocks en memoria) a una persistencia física utilizando **PostgreSQL** y **Spring Data JPA**. Se mantuvo el patrón de **schemas lógicos aislados** (`logistica`, `donaciones`, `incentivos`, `notificaciones`).
-* [x] Se mapearon todas las entidades de negocio de los 4 servicios hacia `@Entity`.
-* [x] Se implementaron estrategias de herencia del ORM:
-  * `JOINED` para la jerarquía de Personas y Roles en Donaciones.
-  * `SINGLE_TABLE` para la jerarquía de Necesidades (Extraordinarias y Recurrentes).
-* [x] Se eliminaron todos los MockRepositories.
-* [x] **Refactorización de Bugs:** Se arreglaron problemas en el mapeo y de tipo de datos (ej. `altura` en las direcciones) durante la carga del contexto.
-* [x] **Fidelidad DER ↔ JPA ↔ SQL verificada:** Las 36 tablas de los 4 schemas están alineadas al 100% entre DERs, entities JPA e `init.sql`.
-* [x] **Perfiles de conexión:** `application-local.properties` (Postgres local, `ddl-auto=update`), `application-prod.properties` (Supabase, `ddl-auto=validate`), `application-test.properties` (H2 in-memory).
-* [x] **Datos de prueba locales:** `local-seed-data.sql` con datos para testing manual.
-* [x] **Tests de persistencia JPA:** Tests con H2 in-memory para los 4 servicios. Bug corregido: `PersonaEntity` usa IDs asignados manualmente — se agregó `UUID.randomUUID()` al test.
+Se migró todo el modelo de objetos a **PostgreSQL** y **Spring Data JPA** manteniendo schemas aislados (`logistica`, `donaciones`, `incentivos`, `notificaciones`).
+* [x] Mapeo de entidades de negocio a `@Entity`.
+* [x] Estrategias de herencia: `JOINED` (Personas/Roles) y `SINGLE_TABLE` (Necesidades).
+* [x] **Fidelidad DER ↔ JPA ↔ SQL:** Las 36 tablas están 100% alineadas.
+* [x] Eliminación de Mocks y refactorización de bugs (ej. `PersonaEntity` sin ID autogenerado requirió UUID manual en tests).
+* [x] Perfiles de conexión (`local`, `prod`, `test`) y tests con H2 in-memory.
 
 ### Fase 2: Integración de Microservicios y Mensajería
-Se eliminó el acoplamiento síncrono donde no era estrictamente necesario, abrazando una arquitectura orientada a eventos.
-* [x] **Integración Asíncrona (RabbitMQ):** 
-  * Se configuraron *Topic Exchanges* (`donaciones.exchange`, `incentivos.exchange`).
-  * Los módulos de `donaciones` e `incentivos` publican eventos de dominio asíncronos en lugar de llamar síncronamente al servicio de notificaciones.
-  * Se actualizaron los Listeners en `donatrack-notificaciones` con `@QueueBinding` explícitos para reaccionar a estos eventos.
-* [x] **Broker de Logística:**
-  * Se implementó un patrón Broker en `donatrack-donaciones` (`LogisticaBrokerAdapter`).
-  * Cuenta con mecanismo de Fallback: intenta pegarle a un servicio remoto (nube) usando Feign, y si falla o da timeout, conmuta automáticamente hacia el servicio de Logística local (`localhost:8002`).
-* [x] **Verificación:** Los tests de integración con `mvn clean test` pasan correctamente (BUILD SUCCESS).
+* [x] **RabbitMQ (Asíncrono):** Topic Exchanges para `donaciones` e `incentivos`. Los servicios publican eventos (ej. inicio de ruta) y `notificaciones` consume.
+* [x] **Broker de Logística:** Implementado en `donatrack-donaciones` (`LogisticaBrokerAdapter`). Usa Feign con Fallback al servicio local (`localhost:8002`).
 
-### Fase 3: Documentación (Arquitectura y Diagramas)
-De acuerdo a las aclaraciones del profesor, se generó la documentación técnica reflejando con exactitud la base de código actual. Todos los documentos fueron alojados en la carpeta `diagramas/`.
-* [x] **Documento de Arquitectura (`docs/arquitectura.md`):** Describe la arquitectura SOA + Hexagonal, las decisiones de aislamiento (schemas), uso de RabbitMQ, el broker de integración y las justificaciones correspondientes.
-* [x] **Diagrama de Componentes (`DonaTrack-Diagrama-Componentes-y-Despliegue-Entrega4.puml`):** Refleja la topología del backend, los clientes REST (API Gateway vs. Microservicios), las conexiones directas a JPA, el bus de RabbitMQ y las integraciones de SaaS/n8n/Planificador de Rutas.
-* [x] **Diagrama de Clases (`DonaTrack-Diagrama-Clases-Entrega4.puml`):** Actualización para marcar explícitamente el uso de `@Entity` y la aplicación de las estrategias de herencia en la capa de datos.
-* [x] **Modelos Físicos DER (`DER-*.puml`):** Siguiendo la regla de "mapeo directo del modelo de objetos", se crearon 4 diagramas PlantUML (`DER-Donaciones`, `DER-Logistica`, `DER-Incentivos`, `DER-Notificaciones`) detallando tablas reales, Foreign Keys y tipos de datos SQL.
-* [x] **Swagger/OpenAPI:** Se configuró `OpenApiConfig.java` y `springdoc` en los 4 servicios. Swagger UI disponible en cada puerto.
-* [x] **Colección Bruno:** Requests parametrizados con variables de entorno en `docs/donatrack-api/`.
+### Fase 3: Arquitectura y Documentación
+* [x] **Doc Arquitectura:** Creado en `docs/arquitectura.md` (SOA + Hexagonal).
+* [x] **Diagramas de Componentes y Clases:** Actualizados en `diagramas/` reflejando persistencia y RabbitMQ.
+* [x] **DER Físicos:** 4 diagramas (`DER-Donaciones`, `DER-Logistica`, `DER-Incentivos`, `DER-Notificaciones`).
+* [x] **Swagger y Bruno:** Configuraciones listas para pruebas.
 
 ### Fase 3.5: Infraestructura Docker
-* [x] **Docker Compose** (`compose.yaml`): Postgres, RabbitMQ, n8n + los 5 servicios Java.
-* [x] **Dockerfiles** en los 5 módulos (`donaciones`, `incentivos`, `logistica`, `notificaciones`, `server`).
+* [x] `compose.yaml` (Postgres, RabbitMQ, n8n, 5 servicios Java) y Dockerfiles actualizados.
 
 ---
 
 ## 🔴 Lo que falta por resolver (Fase 4: Despliegue)
 
-El último gran paso para cerrar la entrega es el **despliegue en la nube**. Con esto se demostrará el funcionamiento del *Broker de Logística* en un escenario real:
+El último gran paso para cerrar la entrega es el **despliegue en la nube** para demostrar el funcionamiento del Broker:
 
-1. **Despliegue del Servicio de Logística:** 
-   * [ ] Tomar el módulo `donatrack-logistica` y publicarlo remotamente (Render o Railway) apoyándose en su `Dockerfile`.
-   * [ ] Verificar que se comunique correctamente con la BD externa (Supabase) en producción mediante las variables del entorno.
-   * Nota: "El despliegue puede encontrarse pausado para reducir consumos hasta que sea presentado en la defensa."
+1. **Despliegue de Logística:** 
+   * [ ] Publicar `donatrack-logistica` remotamente (Render/Railway).
+   * [ ] Conectar con BD Supabase.
 2. **Configuración del Broker:**
-   * [ ] Actualizar el archivo `application.yml` de `donatrack-donaciones` con la URL real del servicio de Logística remoto.
-3. **Colección de Postman final:**
-   * [ ] Generar el export final de la colección (o asegurar que el Swagger-UI general quede accesible) con todas las trazas actualizadas.
+   * [ ] Actualizar `application.yml` de `donaciones` con la URL del servicio remoto.
+3. **Pruebas Finales:**
+   * [ ] Generar export de colección de Postman/Bruno final para pruebas.

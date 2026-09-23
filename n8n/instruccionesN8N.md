@@ -21,7 +21,7 @@ El proyecto cuenta con un `Makefile` en la raíz para facilitar las tareas de do
 
 | Acción | Comando | Descripción |
 | :--- | :--- | :--- |
-| **Levantar Entorno** | `sudo docker compose up -d` o `make setup` | Levanta los contenedores e importa los workflows preconfigurados. |
+| **Levantar Entorno** | `docker compose up -d` o `make setup` | Levanta los contenedores e importa los workflows preconfigurados. |
 | **Bajar Entorno** | `make docker-down` | Detiene y remueve los contenedores de n8n y la base de datos. |
 | **Exportar Flujo** | `make n8n-export` | Extrae los flujos activos del contenedor y los guarda localmente en `./n8n/workflows/`. |
 | **Importar Flujo** | `make n8n-import` | Carga el flujo guardado desde `./n8n/workflows/` hacia la instancia activa de n8n. |

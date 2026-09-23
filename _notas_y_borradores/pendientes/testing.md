@@ -343,11 +343,11 @@ SELECT * FROM incentivos.registros_donacion ORDER BY mes_donacion DESC;
 ## Checklist Rápido de Verificación ✅
 
 ```
-[ ] TEST 1: Crear persona → aparece en donaciones.personas + personas_humanas
-[ ] TEST 2: Importar CSV → aparecen ~10 personas nuevas
-[ ] TEST 2b: Re-importar CSV → no se duplican (mismo count)
-[ ] TEST 3: GET /api/personas → devuelve la lista completa
-[ ] TEST 4: Crear camión/chofer → aparecen en logistica.camiones/choferes
+[x] TEST 1: Crear persona → aparece en donaciones.personas + personas_humanas
+[x] TEST 2: Importar CSV → aparecen ~10 personas nuevas
+[x] TEST 2b: Re-importar CSV → no se duplican (mismo count)
+[x] TEST 3: GET /api/personas → devuelve la lista completa
+[x] TEST 4: Crear camión/chofer → aparecen en logistica.camiones/choferes
 [ ] TEST 5: Recibir bienes → donaciones_originales + donaciones + bienes creados
 [ ] TEST 6: Item planificación → aparece en logistica.items_planificacion
 [ ] TEST 7: Actividad incentivos → registros en incentivos.perfiles_donante
