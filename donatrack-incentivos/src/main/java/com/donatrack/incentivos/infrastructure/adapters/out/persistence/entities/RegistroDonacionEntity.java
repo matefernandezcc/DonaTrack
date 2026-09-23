@@ -1,15 +1,18 @@
 package com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "registros_donacion", schema = "incentivos")
@@ -19,35 +22,27 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RegistroDonacionEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "registro_donacion_id")
+  private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "donante_id", nullable = false)
-    private PerfilDonanteEntity perfil;
+  @ManyToOne
+  @JoinColumn(name = "metricas_donante_id", nullable = false)
+  private MetricasDonanteEntity metricas;
 
-    @Column(name = "id_donacion", nullable = false)
-    private UUID idDonacion;
+  @Column(name = "id_donacion_origen")
+  private UUID idDonacionOrigen;
 
-    @Column(name = "cantidad_bienes")
-    private Integer cantidadBienes;
+  @Column(name = "cantidad_bienes")
+  private Integer cantidadBienes;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "registro_donacion_categorias",
-            schema = "incentivos",
-            joinColumns = @JoinColumn(name = "registro_id")
-    )
-    @Column(name = "categoria")
-    private Set<String> categorias = new HashSet<>();
+  @Column(name = "categorias", columnDefinition = "TEXT")
+  private String categorias;
 
-    @Column(name = "id_entidad_beneficiaria")
-    private UUID idEntidadBeneficiaria;
+  @Column(name = "id_entidad_beneficiaria_origen")
+  private UUID idEntidadBeneficiariaOrigen;
 
-    @Column(name = "mes_donacion")
-    private String mesDonacion; // Stored as YYYY-MM
-
-    @Column(name = "fecha_donacion")
-    private LocalDate fechaDonacion;
+  @Column(name = "mes_donacion", length = 20)
+  private String mesDonacion;
 }

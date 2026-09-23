@@ -22,7 +22,7 @@ public class ComprobanteRecepcionEmbeddable {
   private LocalDateTime comprobanteFechaHora;
 
   @JdbcTypeCode(SqlTypes.ARRAY)
-  @Column(name = "comprobante_fotos", columnDefinition = "text[]")
+  @Column(name = "comprobante_fotos")
   private List<String> comprobanteFotos;
 
   @Column(name = "comprobante_camion_patente", length = 10)

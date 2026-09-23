@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -24,10 +25,14 @@ public class BienEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "id")
+  @Column(name = "bien_id")
   private UUID id;
 
-  @Column(name = "descripcion", nullable = false)
+  @ManyToOne
+  @JoinColumn(name = "donacion_id")
+  private DonacionEntity donacion;
+
+  @Column(name = "descripcion")
   private String descripcion;
 
   @Column(name = "cantidad")
@@ -42,14 +47,6 @@ public class BienEntity {
   @Column(name = "fecha_vencimiento")
   private LocalDate fechaVencimiento;
 
-  @ManyToOne
-  @JoinColumn(name = "subcategoria_id")
-  private SubcategoriaEntity subcategoria;
-
   @OneToMany(mappedBy = "bien", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<FotoEntity> fotos;
-
-  @ManyToOne
-  @JoinColumn(name = "donacion_id")
-  private DonacionEntity donacion;
+  private List<FotoEntity> fotos = new ArrayList<>();
 }

@@ -3,6 +3,7 @@ package com.donatrack.donaciones.infrastructure.adapters.out.persistence.mappers
 import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.roles.Donante;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.DonacionOriginalEntity;
+import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.DonanteEntity;
 
 public class DonacionOriginalMapper {
 
@@ -10,12 +11,23 @@ public class DonacionOriginalMapper {
     if (domain == null) return null;
 
     DonacionOriginalEntity entity = new DonacionOriginalEntity();
-    entity.setId(domain.getId());
-    entity.setFechaRecepcion(domain.getFechaRecepcion().atStartOfDay()); // Domain has LocalDate, Entity has LocalDateTime
+    // No setear ID: @GeneratedValue lo genera al persistir
+    entity.setDescripcionGeneral(domain.getDescripcionGeneral());
+    entity.setUsuarioId(domain.getUsuarioId());
+    if (domain.getFechaRecepcion() != null) {
+      entity.setFechaRecepcion(domain.getFechaRecepcion().atStartOfDay());
+    }
 
-    // The donante is mapped as RolEntity (DonanteEntity)
-    if (domain.getDonante() != null) {
-      entity.setDonante((com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.DonanteEntity) RolMapper.toEntity(domain.getDonante()));
+    // El donante se asigna en el Repository con getReference() para evitar entidad detached
+
+    if (domain.getDonacionesSegmentadas() != null) {
+      domain.getDonacionesSegmentadas().forEach(donacion -> {
+        var donacionEntity = DonacionMapper.toEntity(donacion);
+        if (donacionEntity != null) {
+          donacionEntity.setDonacionOriginal(entity);
+          entity.getDonaciones().add(donacionEntity);
+        }
+      });
     }
 
     return entity;
@@ -25,15 +37,26 @@ public class DonacionOriginalMapper {
     if (entity == null) return null;
 
     DonacionOriginal domain = new DonacionOriginal(
-        null, // descripcionGeneral
-        null, // donante
-        null  // usuarioId
+        entity.getDescripcionGeneral(),
+        null,
+        entity.getUsuarioId()
     );
     domain.setId(entity.getId());
-    domain.setFechaRecepcion(entity.getFechaRecepcion().toLocalDate());
+    if (entity.getFechaRecepcion() != null) {
+      domain.setFechaRecepcion(entity.getFechaRecepcion().toLocalDate());
+    }
 
     if (entity.getDonante() != null) {
       domain.setDonante((Donante) RolMapper.toDomain(entity.getDonante()));
+    }
+
+    if (entity.getDonaciones() != null) {
+      entity.getDonaciones().forEach(donacionEntity -> {
+        var donacion = DonacionMapper.toDomain(donacionEntity);
+        if (donacion != null) {
+          domain.getDonacionesSegmentadas().add(donacion);
+        }
+      });
     }
 
     return domain;

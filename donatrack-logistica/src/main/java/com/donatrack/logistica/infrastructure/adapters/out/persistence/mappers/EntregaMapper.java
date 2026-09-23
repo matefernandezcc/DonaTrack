@@ -7,8 +7,7 @@ import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.EntregaEntity;
 
 /**
- * Mapper bidireccional entre Entrega (dominio) y EntregaEntity (JPA). Incluye el mapeo del
- * ComprobanteRecepcion embeddable.
+ * Mapper bidireccional entre Entrega (dominio) y EntregaEntity (JPA).
  */
 public final class EntregaMapper {
 
@@ -18,7 +17,7 @@ public final class EntregaMapper {
     if (domain == null) return null;
 
     EntregaEntity entity = new EntregaEntity();
-    entity.setIdEntrega(domain.getIdEntrega());
+    entity.setIdDonacion(domain.getIdEntrega());
     entity.setPesoEstimado(domain.getPesoEstimado());
     entity.setVolumenEstimado(domain.getVolumenEstimado());
 
@@ -40,7 +39,7 @@ public final class EntregaMapper {
     if (entity == null) return null;
 
     Entrega domain = new Entrega();
-    domain.setIdEntrega(entity.getIdEntrega());
+    domain.setIdEntrega(entity.getIdDonacion() != null ? entity.getIdDonacion() : entity.getId());
     domain.setPesoEstimado(entity.getPesoEstimado());
     domain.setVolumenEstimado(entity.getVolumenEstimado());
 

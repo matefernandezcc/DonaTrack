@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -17,17 +19,17 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "roles", schema = "donaciones")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "tipo_rol", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 @Getter
 @Setter
 public abstract class RolEntity {
 
   @Id
-  @Column(name = "id")
+  @Column(name = "rol_id")
   private UUID id;
 
-  @Column(name = "fecha_alta", nullable = false)
+  @Column(name = "fecha_alta")
   private LocalDate fechaAlta;
 
   @ManyToOne

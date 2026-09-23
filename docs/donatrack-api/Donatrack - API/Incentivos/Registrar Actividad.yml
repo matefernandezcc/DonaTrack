@@ -5,7 +5,11 @@ info:
 
 http:
   method: POST
-  url: "{{incentivosUrl}}/api/donantes/d3b07384-d113-4ec6-a51d-402f06c1af0b/actividad"
+  url: "{{incentivosUrl}}/api/donantes/:donanteId/actividad"
+  params:
+    - name: donanteId
+      value: d3333333-3333-4333-8333-333333333333
+      type: path
   body:
     type: json
     data: |-

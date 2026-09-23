@@ -2,9 +2,11 @@ package com.donatrack.donaciones.infrastructure.adapters.out.persistence.mappers
 
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import com.donatrack.donaciones.domain.entities.roles.Donante;
+import com.donatrack.donaciones.domain.entities.roles.Representante;
 import com.donatrack.donaciones.domain.entities.roles.Rol;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.BeneficiarioEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.DonanteEntity;
+import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.RepresentanteEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.RolEntity;
 
 public class RolMapper {
@@ -15,12 +17,13 @@ public class RolMapper {
     RolEntity entity;
     if (domain instanceof Donante) {
       entity = new DonanteEntity();
-    } else if (domain instanceof Beneficiario b) {
-      BeneficiarioEntity be = new BeneficiarioEntity();
-      be.setCorreoRepresentante(b.getCorreoRepresentante());
-      entity = be;
+    } else if (domain instanceof Beneficiario) {
+      entity = new BeneficiarioEntity();
+    } else if (domain instanceof Representante r) {
+      RepresentanteEntity re = new RepresentanteEntity();
+      re.setCargo(r.getCargo());
+      entity = re;
     } else {
-      // Representante is another role, but for brevity, we handle basic ones
       throw new IllegalArgumentException("Rol no soportado: " + domain.getClass().getSimpleName());
     }
 
@@ -35,12 +38,12 @@ public class RolMapper {
     Rol domain;
     if (entity instanceof DonanteEntity) {
       domain = new Donante();
-    } else if (entity instanceof BeneficiarioEntity be) {
-      Beneficiario b = new Beneficiario();
-      b.setCorreoRepresentante(be.getCorreoRepresentante());
-      domain = b;
+    } else if (entity instanceof BeneficiarioEntity) {
+      domain = new Beneficiario();
+    } else if (entity instanceof RepresentanteEntity re) {
+      domain = new Representante(re.getCargo(), null);
     } else {
-      throw new IllegalArgumentException("RolEntity no soportado");
+      throw new IllegalArgumentException("RolEntity no soportado: " + entity.getClass().getSimpleName());
     }
 
     domain.setId(entity.getId());

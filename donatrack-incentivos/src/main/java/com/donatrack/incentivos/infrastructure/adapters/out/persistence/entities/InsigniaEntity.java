@@ -1,13 +1,16 @@
 package com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "insignias", schema = "incentivos")
@@ -17,25 +20,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class InsigniaEntity {
 
-    @Id
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "insignia_id")
+  private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "donante_id", nullable = false)
-    private PerfilDonanteEntity perfil;
+  @Column(name = "nombre", nullable = false)
+  private String nombre;
 
-    @Column(name = "nombre", nullable = false)
-    private String nombre;
-
-    @Column(name = "descripcion", length = 500)
-    private String descripcion;
-
-    @Column(name = "url_imagen")
-    private String urlImagen;
-
-    @Column(name = "fecha_obtencion")
-    private LocalDate fechaObtencion;
-
-    @Column(name = "visible_publicamente")
-    private Boolean visiblePublicamente;
+  @Column(name = "descripcion")
+  private String descripcion;
 }

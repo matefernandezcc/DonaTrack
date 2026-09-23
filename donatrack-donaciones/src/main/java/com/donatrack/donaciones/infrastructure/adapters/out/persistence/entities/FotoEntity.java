@@ -20,20 +20,16 @@ public class FotoEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "id")
+  @Column(name = "foto_id")
   private UUID id;
-
-  @Column(name = "descripcion")
-  private String descripcion;
-
-  @Column(name = "url", nullable = false)
-  private String url;
 
   @ManyToOne
   @JoinColumn(name = "bien_id")
   private BienEntity bien;
 
-  @ManyToOne
-  @JoinColumn(name = "donacion_id")
-  private DonacionEntity donacion;
+  @Column(name = "descripcion")
+  private String descripcion;
+
+  @Column(name = "url", length = 500)
+  private String url;
 }

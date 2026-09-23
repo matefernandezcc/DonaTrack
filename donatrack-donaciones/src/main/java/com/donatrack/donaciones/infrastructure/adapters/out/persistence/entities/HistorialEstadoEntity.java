@@ -21,19 +21,22 @@ public class HistorialEstadoEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "id")
+  @Column(name = "historial_estado_id")
   private UUID id;
 
-  @Column(name = "estado", nullable = false)
+  @ManyToOne
+  @JoinColumn(name = "donacion_id")
+  private DonacionEntity donacion;
+
+  @Column(name = "estado")
   private String estado;
 
-  @Column(name = "fecha_hora", nullable = false)
-  private LocalDateTime fechaHora;
+  @Column(name = "fecha")
+  private LocalDateTime fecha;
 
-  @Column(name = "comentarios")
-  private String comentarios;
+  @Column(name = "observacion", columnDefinition = "TEXT")
+  private String observacion;
 
-  @ManyToOne
-  @JoinColumn(name = "donacion_id", nullable = false)
-  private DonacionEntity donacion;
+  @Column(name = "usuario_id")
+  private String usuarioId;
 }

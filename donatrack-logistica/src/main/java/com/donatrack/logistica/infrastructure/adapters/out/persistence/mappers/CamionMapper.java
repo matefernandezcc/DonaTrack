@@ -3,10 +3,6 @@ package com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers;
 import com.donatrack.logistica.domain.entities.reparto.Camion;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.CamionEntity;
 
-/**
- * Mapper bidireccional entre Camion (dominio) y CamionEntity (JPA). Mantiene la capa de dominio
- * desacoplada de JPA.
- */
 public final class CamionMapper {
 
   private CamionMapper() {}
@@ -14,6 +10,7 @@ public final class CamionMapper {
   public static CamionEntity toEntity(Camion domain) {
     if (domain == null) return null;
     return new CamionEntity(
+        null,
         domain.getPatente(),
         domain.getCapacidadVolumen(),
         domain.getAltura(),

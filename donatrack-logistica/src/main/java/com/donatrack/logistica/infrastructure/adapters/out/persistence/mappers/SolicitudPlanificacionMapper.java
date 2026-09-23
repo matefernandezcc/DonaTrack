@@ -2,6 +2,8 @@ package com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers;
 
 import com.donatrack.logistica.domain.entities.planificacion.SolicitudPlanificacion;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.SolicitudPlanificacionEntity;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public final class SolicitudPlanificacionMapper {
 
@@ -16,7 +18,6 @@ public final class SolicitudPlanificacionMapper {
     if (domain.getEstado() != null) {
       entity.setEstado(SolicitudPlanificacionEntity.EstadoPlanificacionEnum.valueOf(domain.getEstado().name()));
     }
-    entity.setIdsDonaciones(domain.getIdsDonaciones());
     return entity;
   }
 
@@ -29,7 +30,11 @@ public final class SolicitudPlanificacionMapper {
     if (entity.getEstado() != null) {
       domain.setEstado(com.donatrack.logistica.domain.entities.planificacion.EstadoPlanificacion.valueOf(entity.getEstado().name()));
     }
-    domain.setIdsDonaciones(entity.getIdsDonaciones());
+    if (entity.getItems() != null) {
+      domain.setIdsDonaciones(entity.getItems().stream().map(com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ItemPlanificacionEntity::getIdDonacion).collect(Collectors.toList()));
+    } else {
+      domain.setIdsDonaciones(new ArrayList<>());
+    }
     return domain;
   }
 }
