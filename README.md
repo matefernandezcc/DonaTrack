@@ -13,6 +13,7 @@
 [![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?logo=swagger&logoColor=black)](https://swagger.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
+[![Render](https://img.shields.io/badge/Render-Deploy%20Live-46E3B7?logo=render&logoColor=black)](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html)
 
 </div>
 
@@ -23,6 +24,16 @@
 **DonaTrack** es una solución digital desarrollada para [**UTN Solidaria**](https://www.frba.utn.edu.ar/), orientada a organizar, registrar y monitorear donaciones de bienes materiales desde su recepción en el depósito hasta su entrega a entidades beneficiarias.
 
 La plataforma resuelve los desafíos de gestión y trazabilidad que enfrenta la organización, mejorando la distribución de recursos y fortaleciendo la transparencia frente a donantes y beneficiarios.
+
+---
+
+## 🌐 Despliegue en la Nube (Entrega 4)
+
+El microservicio de **Logística** se encuentra desplegado de forma independiente en la nube, conectado a una base de datos PostgreSQL en Supabase:
+
+- 🚀 **Swagger UI (Producción):** [`https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html)
+- 📡 **Health Check:** [`https://donatrack-logistica-50xn.onrender.com/actuator/health`](https://donatrack-logistica-50xn.onrender.com/actuator/health)
+- 🗄️ **Base de Datos Cloud:** PostgreSQL en Supabase (Schema `logistica`, Connection Pooler AWS US-East-1)
 
 ---
 
@@ -39,28 +50,33 @@ El sistema está diseñado como una **arquitectura distribuida de microservicios
 ├──────────────┴──────────────┴──────────────┴───────────────────────┤
 │                     Server / Gateway :8080                          │
 ├────────────────────────────────┬────────────────────────────────────┤
-│     PostgreSQL :5432           │         n8n :5678                  │
-│     (schemas por servicio)     │     (automatización de flujos)     │
-└────────────────────────────────┴────────────────────────────────────┘
+│     PostgreSQL :5432           │         RabbitMQ :5672             │
+│     (schemas por servicio)     │         (Message Broker)           │
+├────────────────────────────────┴────────────────────────────────────┤
+│                             n8n :5678                               │
+│                     (automatización de flujos)                      │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 > Para más detalles sobre puertos, URLs de Swagger y comandos de ejecución, consultá [`SERVICIOS.md`](SERVICIOS.md).
+> Para el detalle del diseño SOA y arquitectura hexagonal, consultá [`docs/arquitectura.md`](docs/arquitectura.md).
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Capa | Tecnología |
-|---|---|
-| **Lenguaje** | Java 21 |
-| **Framework** | Spring Boot 3.5 |
-| **Build** | Maven (multi-módulo) |
-| **API Docs** | SpringDoc OpenAPI (Swagger UI) |
-| **Base de Datos** | PostgreSQL 15 / H2 (desarrollo) |
-| **Mensajería** | RabbitMQ (Message Broker) |
-| **Contenedores** | Docker + Docker Compose |
-| **Automatización** | n8n (flujos low-code) |
-| **Testing** | JUnit 5 |
+| Capa | Tecnología | Detalle |
+|---|---|---|
+| **Lenguaje** | Java 21 | Long-Term Support (LTS) |
+| **Framework** | Spring Boot 3.5 | Spring Data JPA, OpenFeign, Springdoc OpenAPI |
+| **Build** | Maven (multi-módulo) | Gestión centralizada de dependencias en `pom.xml` padre |
+| **API Docs** | SpringDoc OpenAPI | Swagger UI interactivo por microservicio y unificado |
+| **Base de Datos** | PostgreSQL 15 / Supabase / H2 | Schemas aislados (`donaciones`, `logistica`, `incentivos`, `notificaciones`) |
+| **Mensajería** | RabbitMQ | Topic Exchanges y colas asíncronas |
+| **Contenedores** | Docker + Docker Compose | Builds multi-stage optimizados para local y Render |
+| **Despliegue** | Render | Docker Web Service en la nube |
+| **Automatización** | n8n | Flujos low-code para difusión en redes sociales |
+| **Testing** | JUnit 5 + Mockito + H2 | Tests unitarios y de persistencia JPA |
 
 ---
 
@@ -81,7 +97,7 @@ El sistema está diseñado como una **arquitectura distribuida de microservicios
 
 ## 🚀 Entregas del Proyecto
 
-El trabajo práctico se construye de manera evolutiva e incremental a lo largo de 7 entregas. Cada entrega amplía y refina decisiones de diseño previas.
+El trabajo práctico se construye de manera evolutiva e incremental a lo largo de 6 entregas (según el cronograma oficial de la cátedra):
 
 ---
 
@@ -150,50 +166,46 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 
 ---
 
-### 🔄 Entrega 3 — Arquitectura y Modelado en Objetos (Parte III)
+### ✅ Entrega 3 — Arquitectura y Modelado en Objetos (Parte III)
 > 📅 3 de Julio
 
 <details>
 <summary><b>Ver alcance completo</b></summary>
 
 #### Alcance
-- **Revisión general** de aspectos destacados de Entrega 1 y 2.
-- **Servicio de Logística** — Planificación de rutas y trazabilidad de entregas.
-- **Servicio de Donaciones** — Notificaciones de Eventos por Logística.
+- **Servicio de Logística** — Flota de camiones, choferes, planificación externa de rutas y trazabilidad de entregas.
+- **Servicio de Donaciones** — Eventos de logística y notificaciones a donantes/entidades.
+- **Revisión y maduración de Entregas 1 y 2** — Refactorización con patrones de diseño y desacoplamiento.
+- **Exposición REST & Contenerización** — Documentación Swagger completa y Dockerización de cada servicio.
 
 #### Dominio abordado
-- Gestión de flota de camiones (patente, capacidad de volumen, altura, capacidad de carga) y choferes.
-- Generación de rutas de reparto integrándose con un componente externo de planificación vía callback URL (máx. 100 donaciones por lote).
-- Trazabilidad de entregas: Pendiente → En traslado → Entregada / No recibida.
-- Comprobante de recepción con fotos, fecha/hora y camión responsable.
-- Notificaciones por inicio de ruta, entrega exitosa y entrega no satisfactoria.
-- Documentación Swagger de todos los endpoints por servicio.
-- Contenerización con Docker de cada servicio.
+- **Flota y Logística**: Modelado de camiones (patente, capacidad en volumen m³, altura m, capacidad de carga kg) y choferes con legajo.
+- **Planificación de Rutas Asíncrona**: Integración con componente externo en lotes de hasta 100 donaciones mediante endpoint de **Callback** (`/api/planificacion/callback`).
+- **Trazabilidad de Entregas**: Ciclo de vida de la entrega (`Pendiente` → `En traslado` → `Entregada` / `No recibida`).
+- **Comprobante de Recepción**: Registro de fecha/hora, camión responsable y fotos de la donación recibida.
+- **Eventos Logísticos**: Notificaciones por inicio de ruta con enlace a mapa interactivo, entrega realizada exitosamente con comprobante, y reporte de entregas fallidas con justificación.
 
-#### Revisión E1 y E2
-1. Segmentación de donaciones correctamente separada.
-2. Necesidades recurrentes bien definidas.
-3. Importación masiva de CSV funcional.
-4. Proceso de asignación con pattern Strategy.
-5. Exposición correcta de endpoints REST (Donaciones, Incentivos, Notificaciones).
-6. Manejo de pérdida de progreso en misiones (ej. "Racha").
-7. Integración con redes sociales vía n8n.
-8. Impacto de donaciones en el cálculo de progreso de misiones.
-9. Notificaciones por diversos medios con Strategy.
+#### Maduración y Patrones aplicados (E1 y E2)
+- **Segmentación clara**: Separación entre `DonacionOriginal` y donaciones segmentadas (`Donacion`), delegada mediante fachada (`ProcesadorCargaInicial`) y Strategy de segmentación.
+- **Necesidades Recurrentes**: Modelo temporal con `PeriodoNecesidad` (`ABIERTA`, `SATISFECHA`) y renovación periódica automática (`RenovacionPeriodosJob`).
+- **Importador CSV**: Detección y actualización de donantes duplicados por email (+10.000 filas) probado con tests unitarios.
+- **Matchmaking**: Asignación con patrón Strategy (`CompatibilidadSemantica` y `PrioridadASubAtendidos`).
+- **Incentivos y Gamificación**: Manejo de reset de progreso en misiones por inactividad ("Racha") e impacto directo de donaciones en el progreso.
+- **Notificaciones**: Despacho multicanal con patrón Strategy (`EmailStrategy`, `SmsStrategy`, `WhatsAppStrategy`).
 
 #### Entregables
-1. Modelo del Dominio (diagrama de clases por servicio).
-2. Justificaciones de Diseño y Diagramas Complementarios.
-3. Endpoints presentados en Postman y documentados en Swagger.
-4. Contenedores Docker para cada servicio.
-5. Diagrama de componentes y despliegue de la solución completa.
+1. **Modelo del Dominio**: Diagrama de clases por servicio en [`diagramas/`](diagramas/).
+2. **Justificaciones de Diseño**: Revisión detallada en [`_notas_y_borradores/pendientes/entrega_3/revision_entrega_requerimiento.md`](_notas_y_borradores/pendientes/entrega_3/revision_entrega_requerimiento.md).
+3. **APIs REST documentadas**: Swagger UI interactivo para cada microservicio y colección en [`docs/donatrack-api`](docs/donatrack-api).
+4. **Contenerización Docker**: Dockerfiles multi-stage por módulo y orquestación con [`compose.yaml`](compose.yaml).
+5. **Diagrama de Componentes y Despliegue**: Diagrama general de la solución en [`diagramas/`](diagramas/).
 
 </details>
 
 ---
 
 ### ✅ Entrega 4 — Persistencia, Integración y Despliegue
-> 📅 Semana del 23 de Septiembre
+> 📅 Semana del 14 de Septiembre
 
 <details>
 <summary><b>Ver alcance completo</b></summary>
@@ -224,21 +236,14 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 
 ---
 
-### ⏳ Entrega 5 — Persistencia y Maquetado de Interfaz de Usuario
-> 📅 Semana del 14 de Septiembre
-
-*Los detalles de esta etapa se actualizarán próximamente.*
-
----
-
-### ⏳ Entrega 6 — Arquitectura Web MVC
+### ⏳ Entrega 5 — Arquitectura Web MVC
 > 📅 Semana del 19 de Octubre
 
 *Los detalles de esta etapa se actualizarán próximamente.*
 
 ---
 
-### ⏳ Entrega 7 — Despliegue, Observabilidad y Seguridad
+### ⏳ Entrega 6 — Despliegue, Observabilidad y Seguridad
 > 📅 Semana del 23 de Noviembre
 
 *Los detalles de esta etapa se actualizarán próximamente.*
@@ -262,8 +267,10 @@ make logistica       # Puerto 8002
 make notificaciones  # Puerto 8003
 make server          # Puerto 8080
 
-# Levantar todo con Docker
+# Levantar toda la plataforma con Docker (Postgres, RabbitMQ, n8n y servicios)
 docker compose up --build -d
 ```
 
 > 📄 Ver [`SERVICIOS.md`](SERVICIOS.md) para la guía completa de puertos, Swagger y comandos.
+> 📄 Ver [`docs/arquitectura.md`](docs/arquitectura.md) para la documentación técnica de arquitectura y diseño.
+
