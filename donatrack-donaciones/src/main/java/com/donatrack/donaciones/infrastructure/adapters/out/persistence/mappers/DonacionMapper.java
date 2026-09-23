@@ -11,9 +11,19 @@ public class DonacionMapper {
     if (domain == null) return null;
 
     DonacionEntity entity = new DonacionEntity();
-    entity.setId(domain.getId());
+    // No setear ID: @GeneratedValue lo genera al persistir
     if (domain.getEstado() != null) {
       entity.setEstado(domain.getEstado().name());
+    }
+
+    if (domain.getBienes() != null) {
+      domain.getBienes().forEach(bien -> {
+        var bienEntity = BienMapper.toEntity(bien);
+        if (bienEntity != null) {
+          bienEntity.setDonacion(entity);
+          entity.getBienes().add(bienEntity);
+        }
+      });
     }
 
     return entity;
@@ -30,6 +40,15 @@ public class DonacionMapper {
 
     if (entity.getNecesidad() != null && entity.getNecesidad().getBeneficiario() != null) {
       domain.setEntidadAsignada((Beneficiario) RolMapper.toDomain(entity.getNecesidad().getBeneficiario()));
+    }
+
+    if (entity.getBienes() != null) {
+      entity.getBienes().forEach(bienEntity -> {
+        var bien = BienMapper.toDomain(bienEntity);
+        if (bien != null) {
+          domain.agregarBien(bien);
+        }
+      });
     }
 
     return domain;

@@ -11,15 +11,23 @@ public class DonacionOriginalMapper {
     if (domain == null) return null;
 
     DonacionOriginalEntity entity = new DonacionOriginalEntity();
-    entity.setId(domain.getId());
+    // No setear ID: @GeneratedValue lo genera al persistir
     entity.setDescripcionGeneral(domain.getDescripcionGeneral());
     entity.setUsuarioId(domain.getUsuarioId());
     if (domain.getFechaRecepcion() != null) {
       entity.setFechaRecepcion(domain.getFechaRecepcion().atStartOfDay());
     }
 
-    if (domain.getDonante() != null) {
-      entity.setDonante((DonanteEntity) RolMapper.toEntity(domain.getDonante()));
+    // El donante se asigna en el Repository con getReference() para evitar entidad detached
+
+    if (domain.getDonacionesSegmentadas() != null) {
+      domain.getDonacionesSegmentadas().forEach(donacion -> {
+        var donacionEntity = DonacionMapper.toEntity(donacion);
+        if (donacionEntity != null) {
+          donacionEntity.setDonacionOriginal(entity);
+          entity.getDonaciones().add(donacionEntity);
+        }
+      });
     }
 
     return entity;
@@ -40,6 +48,15 @@ public class DonacionOriginalMapper {
 
     if (entity.getDonante() != null) {
       domain.setDonante((Donante) RolMapper.toDomain(entity.getDonante()));
+    }
+
+    if (entity.getDonaciones() != null) {
+      entity.getDonaciones().forEach(donacionEntity -> {
+        var donacion = DonacionMapper.toDomain(donacionEntity);
+        if (donacion != null) {
+          domain.getDonacionesSegmentadas().add(donacion);
+        }
+      });
     }
 
     return domain;
