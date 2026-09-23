@@ -37,9 +37,9 @@ INSERT INTO donaciones.personas_juridicas (persona_juridica_id, razon_social, ti
 ON CONFLICT (persona_juridica_id) DO NOTHING;
 
 -- Roles (Donante y Beneficiario)
-INSERT INTO donaciones.roles (rol_id, fecha_alta, persona_id) VALUES
-('b1111111-1111-4111-8111-111111111111', '2026-01-15', 'a1111111-1111-4111-8111-111111111111'),
-('b2222222-2222-4222-8222-222222222222', '2026-02-01', 'a2222222-2222-4222-8222-222222222222')
+INSERT INTO donaciones.roles (rol_id, fecha_alta, persona_id, dtype) VALUES
+('b1111111-1111-4111-8111-111111111111', '2026-01-15', 'a1111111-1111-4111-8111-111111111111', 'Donante'),
+('b2222222-2222-4222-8222-222222222222', '2026-02-01', 'a2222222-2222-4222-8222-222222222222', 'Beneficiario')
 ON CONFLICT (rol_id) DO NOTHING;
 
 INSERT INTO donaciones.roles_donante (rol_donante_id) VALUES
