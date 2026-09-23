@@ -220,23 +220,23 @@ SELECT * FROM logistica.choferes WHERE legajo = 'CH-TEST-01';
 
 ### Paso 1: Necesitás un ID de donante existente
 
-```sql
--- En DBeaver, buscá un rol_donante existente (o el seed data)
-SELECT rd.rol_donante_id, p.email
-FROM donaciones.roles_donante rd
-JOIN donaciones.roles r ON rd.rol_donante_id = r.rol_id
-JOIN donaciones.personas p ON r.persona_id = p.persona_id;
-```
+## TEST 5: Donaciones — Recibir Donación Física (Bienes)
 
-Si no hay donantes, saltá este test o creá uno primero con el Test 1 y agregale un rol donante.
+**Qué probamos:** Que el endpoint procese una donación física, la segmente automáticamente en las categorías correspondientes (Ropa y Alimentos en este caso) y guarde los bienes.
 
-### Paso 2: Ejecutar:
+> [!IMPORTANT]
+> **IDs requeridos**: Los campos `idDonante` e `idAdministrador` **DEBEN ser los `persona_id`** (UUIDs de la tabla `personas`), NO los IDs del rol.
+> Podés obtener IDs válidos con esta query en DBeaver:
+> ```sql
+> SELECT persona_id, dtype FROM donaciones.roles WHERE dtype IN ('Donante', 'Administrador');
+> ```
+
 ```bash
 curl -X POST http://localhost:8000/api/recepciones \
   -H "Content-Type: application/json" \
   -d '{
-    "idDonante": "PONER-UUID-DONANTE-ACA",
-    "idAdministrador": "00000000-0000-0000-0000-000000000001",
+    "idDonante": "a1111111-1111-4111-8111-111111111111",
+    "idAdministrador": "a2222222-2222-4222-8222-222222222222",
     "bienesBrutos": [
       {
         "descripcion": "Paquete de arroz 1kg",
@@ -264,9 +264,9 @@ curl -X POST http://localhost:8000/api/recepciones \
 SELECT * FROM donaciones.donaciones_originales ORDER BY fecha_recepcion DESC LIMIT 5;
 
 -- Las donaciones segmentadas
-SELECT d.donacion_id, d.estado, d.fecha_creacion, do.descripcion_general
+SELECT d.donacion_id, d.estado, d.fecha_creacion, dorig.descripcion_general
 FROM donaciones.donaciones d
-JOIN donaciones.donaciones_originales do ON d.donacion_original_id = do.donacion_original_id
+JOIN donaciones.donaciones_originales dorig ON d.donacion_original_id = dorig.donacion_original_id
 ORDER BY d.fecha_creacion DESC LIMIT 10;
 
 -- Los bienes asociados
@@ -282,11 +282,17 @@ ORDER BY d.fecha_creacion DESC LIMIT 10;
 
 **Qué probamos:** Que logística reciba un ítem de donación para planificar rutas.
 
+> [!TIP]
+> **ID de Donación Real**: Para hacer un test end-to-end realista, reemplazá el `idDonacion` en el JSON por un UUID real generado en el Test 5. Podés obtener la última donación generada con esta query:
+> ```sql
+> SELECT d.donacion_id, b.descripcion FROM donaciones.donaciones d JOIN donaciones.bienes b ON d.donacion_id = b.donacion_id ORDER BY d.fecha_creacion DESC LIMIT 1;
+> ```
+
 ```bash
 curl -X POST http://localhost:8002/api/planificacion/items \
   -H "Content-Type: application/json" \
   -d '{
-    "idDonacion": "11111111-1111-1111-1111-111111111111",
+    "idDonacion": "76f9706f-8369-43cd-aaca-cc1603bf67f7",
     "peso": 25.5,
     "volumen": 0.5,
     "calleDestino": "Av. Santa Fe",
@@ -305,15 +311,31 @@ ORDER BY solicitud_planificacion_id DESC;
 
 ## TEST 7: Incentivos — Registrar Actividad
 
+**Qué probamos:** Que cuando un donante realiza una actividad, se actualicen sus métricas, puntos y pueda desbloquear misiones/insignias.
+
+> [!IMPORTANT]
+> **Requisitos Previos y UUIDs**:
+> 1. Asegurate de tener corriendo el servidor de **Incentivos** (`donatrack-incentivos` en el puerto 8001).
+> 2. El UUID en la **URL del endpoint** (`/api/donantes/.../actividad`) **DEBE ser exactamente el mismo** que el campo `"idDonante"` del JSON.
+> 3. Para conseguir los 3 UUIDs necesarios para este test, ejecutá la siguiente query en DBeaver:
+> ```sql
+> SELECT d.donacion_id AS id_donacion, r_don.persona_id AS id_donante, r_ben.persona_id AS id_entidad_beneficiaria
+> FROM donaciones.donaciones d
+> JOIN donaciones.donaciones_originales dorig ON d.donacion_original_id = dorig.donacion_original_id
+> JOIN donaciones.roles r_don ON dorig.donante_id = r_don.rol_id 
+> CROSS JOIN (SELECT persona_id FROM donaciones.roles WHERE dtype = 'Beneficiario' LIMIT 1) r_ben
+> ORDER BY d.fecha_creacion DESC LIMIT 1;
+> ```
+
 ```bash
-curl -X POST http://localhost:8001/api/donantes/22222222-2222-2222-2222-222222222222/actividad \
+curl -X POST http://localhost:8001/api/donantes/a1111111-1111-4111-8111-111111111111/actividad \
   -H "Content-Type: application/json" \
   -d '{
-    "idDonacion": "33333333-3333-3333-3333-333333333333",
-    "idDonante": "22222222-2222-2222-2222-222222222222",
+    "idDonacion": "76f9706f-8369-43cd-aaca-cc1603bf67f7",
+    "idDonante": "a1111111-1111-4111-8111-111111111111",
     "cantidadBienes": 5,
     "categorias": ["Alimentos", "Ropa"],
-    "idEntidadBeneficiaria": "44444444-4444-4444-4444-444444444444",
+    "idEntidadBeneficiaria": "a2222222-2222-4222-8222-222222222222",
     "fecha": "2026-09-18"
   }'
 ```
@@ -323,6 +345,45 @@ curl -X POST http://localhost:8001/api/donantes/22222222-2222-2222-2222-22222222
 SELECT * FROM incentivos.perfiles_donante;
 SELECT * FROM incentivos.metricas_donante;
 SELECT * FROM incentivos.registros_donacion ORDER BY mes_donacion DESC;
+```
+
+---
+
+## 🔄 Reset Total y Cambios en Caliente
+
+### 1. Reset Total ("Volver a Empezar")
+Si rompiste la base de datos haciendo pruebas o querés arrancar desde cero como si recién hubieras clonado el repo, seguí este paso a paso:
+
+```bash
+# 1. Bajar todos los microservicios Java
+# Apretá Ctrl+C en todas las terminales donde tengas un Spring Boot corriendo.
+
+# 2. Bajar Docker y BORRAR los datos persistidos (elimina la DB y RabbitMQ)
+docker compose down -v
+
+# 3. Levantar Docker desde cero con Postgres + RabbitMQ  (esto vuelve a crear las tablas y corre el local-seed-data.sql)
+docker compose up -d postgres-donatrack rabbitmq
+
+# 4. Limpiar compilaciones viejas por las dudas (opcional pero recomendado)
+../mvnw clean
+
+# 5. Volver a levantar los microservicios
+cd donatrack-donaciones && ../mvnw spring-boot:run -Dspring-boot.run.profiles=local
+cd donatrack-logistica && ../mvnw spring-boot:run -Dspring-boot.run.profiles=local
+cd donatrack-incentivos && ../mvnw spring-boot:run -Dspring-boot.run.profiles=local
+cd donatrack-notificaciones && ../mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+### 2. Cambiar Código "En Caliente"
+Si tocás un archivo `.java` mientras el servidor está levantado, a veces Spring Boot recompila automáticamente y funciona perfecto. **Pero**, si tenés un error raro al reiniciar o ves un `java.lang.NoClassDefFoundError`, significa que Maven se hizo un lío con la caché en la carpeta `target`. 
+
+**Para solucionarlo sin bajar la base de datos:**
+```bash
+# 1. Frená el microservicio fallado con Ctrl+C
+# 2. Forzá una recompilación limpia
+../mvnw clean compile
+# 3. Volvelo a levantar
+../mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ---
@@ -348,7 +409,7 @@ SELECT * FROM incentivos.registros_donacion ORDER BY mes_donacion DESC;
 [x] TEST 2b: Re-importar CSV → no se duplican (mismo count)
 [x] TEST 3: GET /api/personas → devuelve la lista completa
 [x] TEST 4: Crear camión/chofer → aparecen en logistica.camiones/choferes
-[ ] TEST 5: Recibir bienes → donaciones_originales + donaciones + bienes creados
-[ ] TEST 6: Item planificación → aparece en logistica.items_planificacion
-[ ] TEST 7: Actividad incentivos → registros en incentivos.perfiles_donante
+[x] TEST 5: Recibir bienes → donaciones_originales + donaciones + bienes creados
+[x] TEST 6: Item planificación → aparece en logistica.items_planificacion
+[x] TEST 7: Actividad incentivos → registros en incentivos.perfiles_donante
 ```
