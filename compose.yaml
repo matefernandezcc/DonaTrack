@@ -80,7 +80,8 @@ services:
 
   logistica:
     build:
-      context: ./donatrack-logistica
+      context: ./
+      dockerfile: donatrack-logistica/Dockerfile
     container_name: donatrack-logistica
     restart: always
     ports:
