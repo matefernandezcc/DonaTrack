@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.UUID;
 
-@FeignClient(name = "logisticaRemotoClient", url = "${logistica.url.remota:https://dona-logistica.onrender.com}")
+@FeignClient(name = "logisticaRemotoClient", url = "${logistica.url.remota:https://donatrack-logistica-50xn.onrender.com}")
 public interface LogisticaRemotoClient {
 
     @PostMapping("/api/planificacion/items")

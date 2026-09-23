@@ -192,10 +192,35 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 
 ---
 
-### ⏳ Entrega 4 — Arquitectura e Integración
-> 📅 Agosto
+### ✅ Entrega 4 — Persistencia, Integración y Despliegue
+> 📅 Semana del 23 de Septiembre
 
-*Los detalles de esta etapa se actualizarán próximamente.*
+<details>
+<summary><b>Ver alcance completo</b></summary>
+
+#### Alcance
+- **Persistencia Relacional y ORM (JPA / Hibernate)** — Mapeo de entidades de dominio de todos los servicios a PostgreSQL con esquemas aislados (`donaciones`, `logistica`, `incentivos`, `notificaciones`).
+- **Integración Asíncrona (RabbitMQ)** — Publicación y consumo de eventos desacoplados (`donaciones.exchange`, `logistica.exchange`) para notificaciones automáticas y trazabilidad.
+- **Broker de Integración con Logística** — Componente `LogisticaBrokerAdapter` con patrón Broker y fallback automático entre servicio remoto en la nube y copia local.
+- **Despliegue del Servicio de Logística en la Nube** — Desplegado y operativo en Render con conexión a PostgreSQL en Supabase.
+- **Documentación de Arquitectura y DER Físicos** — Documento explicativo de arquitectura SOA/Hexagonal y diagramas de clases, componentes, despliegue y DER físicos por módulo.
+
+#### Dominio y Arquitectura abordados
+- Migración de todo el modelo de objetos a JPA con estrategias de herencia (`JOINED` para roles/personas y `SINGLE_TABLE` para necesidades).
+- Aislamiento estricto por schemas PostgreSQL y soporte multi-entorno (`local`, `prod`, `test` con H2).
+- Comunicación asíncrona mediante Topic Exchanges en RabbitMQ para eventos como inicio de ruta, entregas exitosas, cambios de estado y recompensas.
+- Patrón Broker en `donatrack-donaciones` (`LogisticaBrokerAdapter`) con cliente Feign hacia la nube y fallback transparente a `localhost:8002`.
+- Despliegue independiente del microservicio `donatrack-logistica` en Render conectado a Supabase.
+
+#### Entregables
+1. **Modelo de Clases actualizado**: [`DonaTrack-Diagrama-Clases-Entrega4.puml`](diagramas/DonaTrack-Diagrama-Clases-Entrega4.puml).
+2. **Modelo de Datos (DER Físicos)**: Diagramas entidad-relación físicos por servicio en [`diagramas/`](diagramas/) (`DER-Donaciones`, `DER-Logistica`, `DER-Incentivos`, `DER-Notificaciones`).
+3. **Justificaciones de Diseño y Documento de Arquitectura**: [`docs/arquitectura.md`](docs/arquitectura.md) (justificación de arquitectura SOA, hexagonal, capas y patrones).
+4. **Diagrama de Componentes y Despliegue**: [`DonaTrack-Diagrama-Componentes-y-Despliegue-Entrega4.puml`](diagramas/DonaTrack-Diagrama-Componentes-y-Despliegue-Entrega4.puml).
+5. **Implementación de requerimientos de integración**: Mensajería con RabbitMQ y Broker de logística con fallback.
+6. **Despliegue del Servicio de Logística**: Operativo y accesible vía Swagger en [`https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html).
+
+</details>
 
 ---
 

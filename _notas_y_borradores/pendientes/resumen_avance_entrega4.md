@@ -39,14 +39,16 @@ Se migró todo el modelo de objetos a **PostgreSQL** y **Spring Data JPA** mante
 
 ---
 
-## 🔴 Lo que falta por resolver (Fase 4: Despliegue)
+## 🟢 Fase 4: Despliegue en la Nube (Completada)
 
-El último gran paso para cerrar la entrega es el **despliegue en la nube** para demostrar el funcionamiento del Broker:
+El despliegue en la nube y la integración con el Broker han sido completados exitosamente:
 
 1. **Despliegue de Logística:** 
-   * [ ] Publicar `donatrack-logistica` remotamente (Render/Railway).
-   * [ ] Conectar con BD Supabase.
+   * [x] Publicar `donatrack-logistica` remotamente en Render: `https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`
+   * [x] Conectar con BD Supabase PostgreSQL (schema `logistica` con pooler AWS US-East-1).
 2. **Configuración del Broker:**
-   * [ ] Actualizar `application.yml` de `donaciones` con la URL del servicio remoto.
-3. **Pruebas Finales:**
-   * [ ] Generar export de colección de Postman/Bruno final para pruebas.
+   * [x] Configurar `logistica.url.remota` en `donatrack-donaciones` (`LogisticaRemotoClient` apuntando a Render).
+   * [x] Soporte de fallback automático a Logística local (`localhost:8002`) si el servicio remoto está suspendido o inalcanzable.
+3. **Pruebas y Documentación:**
+   * [x] Colección de endpoints documentada en Swagger UI y disponible para pruebas en Bruno (`docs/donatrack-api`).
+   * [x] Verificación de suite de tests unitarios y de persistencia JPA pasando al 100%.
