@@ -1,0 +1,382 @@
+{
+    "id":  "donatrack-notificador-real",
+    "name":  "DonaTrack - Notificador Real",
+    "active":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "httpMethod":  "POST",
+                                         "path":  "donatrack/notificaciones/real",
+                                         "responseMode":  "responseNode",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       0,
+                                       200
+                                   ],
+                      "id":  "webhook-trigger",
+                      "name":  "Webhook Trigger"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const input = $input.all();\nreturn input.map(item =\u003e {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || \u0027General\u0027;\n  const mensaje = body.mensaje || body.message || body.description || \u0027Notificación sin mensaje\u0027;\n  let medio = (body.medio || body.channel || \u0027DISCORD\u0027).toUpperCase();\n  if (medio === \u0027CORREO\u0027) medio = \u0027EMAIL\u0027;\n  if (medio === \u0027TELEFONO\u0027) medio = \u0027SMS\u0027;\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: body.discordPayload\n    }\n  };\n});"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       220,
+                                       200
+                                   ],
+                      "id":  "code-normalizar",
+                      "name":  "Normalizar Mensaje"
+                  },
+                  {
+                      "parameters":  {
+                                         "rules":  {
+                                                       "values":  [
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "strict",
+                                                                                                             "version":  3
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.medio }}",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 },
+                                                                                                                    "rightValue":  "DISCORD"
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "Discord"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "strict",
+                                                                                                             "version":  3
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.medio }}",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 },
+                                                                                                                    "rightValue":  "EMAIL"
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "Email"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "strict",
+                                                                                                             "version":  3
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.medio }}",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 },
+                                                                                                                    "rightValue":  "WHATSAPP"
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "WhatsApp"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "strict",
+                                                                                                             "version":  3
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.medio }}",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 },
+                                                                                                                    "rightValue":  "SMS"
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "SMS"
+                                                                      }
+                                                                  ]
+                                                   }
+                                     },
+                      "type":  "n8n-nodes-base.switch",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       460,
+                                       200
+                                   ],
+                      "id":  "switch-medio",
+                      "name":  "Switch Medio"
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://discord.com/api/webhooks/TU_ID/TU_TOKEN",
+                                         "sendBody":  true,
+                                         "contentType":  "json",
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={\n  \"username\": \"DonaTrack • Comunidad Oficial\",\n  \"embeds\": [\n    {\n      \"title\": \"🎮 Alerta Oficial en Discord\",\n      \"description\": \"\u003e 📢 **Mensaje al Canal:**\\n\u003e *\" + $json.mensaje + \"*\",\n      \"color\": 5793266\n    }\n  ]\n}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       760,
+                                       40
+                                   ],
+                      "id":  "http-enviar-discord",
+                      "name":  "Enviar Discord"
+                  },
+                  {
+                      "parameters":  {
+                                         "fromEmail":  "donatracksoporte@gmail.com",
+                                         "toEmail":  "={{ $json.destinatario }}",
+                                         "subject":  "Notificación Oficial de DonaTrack",
+                                         "text":  "={{ $json.mensaje }}",
+                                         "emailFormat":  "text"
+                                     },
+                      "type":  "n8n-nodes-base.emailSend",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       760,
+                                       150
+                                   ],
+                      "id":  "email-real",
+                      "name":  "Enviar Correo Real",
+                      "credentials":  {
+                                          "smtp":  {
+                                                       "id":  "QrDHYpFztzj4hwz2",
+                                                       "name":  "gmail-app"
+                                                   }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://api.twilio.com/2010-04-01/Accounts/TU_TWILIO_ACCOUNT_SID/Messages.json",
+                                         "authentication":  "none",
+                                         "sendBody":  true,
+                                         "contentType":  "form-urlencoded",
+                                         "specifyBody":  "keypair",
+                                         "bodyParameters":  {
+                                                                "parameters":  [
+                                                                                   {
+                                                                                       "value":  "whatsapp:+14155238886",
+                                                                                       "name":  "From"
+                                                                                   },
+                                                                                   {
+                                                                                       "value":  "={{ $json.destinatario.startsWith(\u0027whatsapp:\u0027) ? $json.destinatario : \u0027whatsapp:\u0027 + ($json.destinatario.startsWith(\u0027+\u0027) ? $json.destinatario : \u0027+\u0027 + $json.destinatario).replace(\u0027+5411\u0027, \u0027+54911\u0027) }}",
+                                                                                       "name":  "To"
+                                                                                   },
+                                                                                   {
+                                                                                       "value":  "TU_TWILIO_CONTENT_SID",
+                                                                                       "name":  "ContentSid"
+                                                                                   },
+                                                                                   {
+                                                                                       "value":  "={{ JSON.stringify({\u00271\u0027: \u0027hoy\u0027, \u00272\u0027: \u0027ahora\u0027}) }}",
+                                                                                       "name":  "ContentVariables"
+                                                                                   }
+                                                                               ]
+                                                            },
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "Basic TU_TWILIO_AUTH_TOKEN_BASE64"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       760,
+                                       260
+                                   ],
+                      "id":  "http-whatsapp-real",
+                      "name":  "Enviar WhatsApp Real"
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://discord.com/api/webhooks/TU_ID/TU_TOKEN",
+                                         "sendBody":  true,
+                                         "contentType":  "json",
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={\n  \"username\": \"DonaTrack • Pasarela SMS Móvil\",\n  \"embeds\": [\n    {\n      \"title\": \"📱 SMS Transaccional Despachado\",\n      \"description\": \"```txt\\n[DONATRACK-SMS] \" + $json.mensaje + \"\\n```\",\n      \"color\": 15965202\n    }\n  ]\n}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       760,
+                                       370
+                                   ],
+                      "id":  "http-sms-simulado",
+                      "name":  "Enviar SMS Simulado"
+                  },
+                  {
+                      "parameters":  {
+                                         "respondWith":  "json",
+                                         "responseBody":  "={{ { \"success\": true, \"canal\": $json.medio, \"destinatario\": $json.destinatario, \"mensaje\": $json.mensaje } }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.respondToWebhook",
+                      "typeVersion":  1.5,
+                      "position":  [
+                                       1020,
+                                       200
+                                   ],
+                      "id":  "respond-webhook-node",
+                      "name":  "Respond to Webhook"
+                  }
+              ],
+    "connections":  {
+                        "Webhook Trigger":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Normalizar Mensaje",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Normalizar Mensaje":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Switch Medio",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Switch Medio":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Enviar Discord",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ],
+                                                          [
+                                                              {
+                                                                  "node":  "Enviar Correo Real",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ],
+                                                          [
+                                                              {
+                                                                  "node":  "Enviar WhatsApp Real",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ],
+                                                          [
+                                                              {
+                                                                  "node":  "Enviar SMS Simulado",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Enviar Discord":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "Respond to Webhook",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "Enviar Correo Real":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Respond to Webhook",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Enviar WhatsApp Real":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Respond to Webhook",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Enviar SMS Simulado":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Respond to Webhook",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "availableInMCP":  true
+                 }
+}

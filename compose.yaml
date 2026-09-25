@@ -26,7 +26,7 @@ services:
       - GENERIC_TIMEZONE=America/Argentina/Buenos_Aires
       - TZ=America/Argentina/Buenos_Aires
       - N8N_CORS_ALLOWED_ORIGINS=*
-      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/TU_ID/TU_TOKEN
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/workflows

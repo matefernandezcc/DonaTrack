@@ -61,7 +61,7 @@
             {
                 "parameters": {
                     "method": "POST",
-                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "url": "https://discord.com/api/webhooks/TU_ID/TU_TOKEN",
                     "sendBody": true,
                     "contentType": "multipart-form-data",
                     "bodyParameters": {
@@ -263,7 +263,7 @@
             {
                 "parameters": {
                     "method": "POST",
-                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "url": "https://discord.com/api/webhooks/TU_ID/TU_TOKEN",
                     "sendBody": true,
                     "specifyBody": "json",
                     "jsonBody": "={{ JSON.stringify($json.discordPayload) }}",
@@ -1158,7 +1158,7 @@
             {
                 "parameters": {
                     "method": "POST",
-                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "url": "https://discord.com/api/webhooks/TU_ID/TU_TOKEN",
                     "sendBody": true,
                     "contentType": "json",
                     "specifyBody": "json",
@@ -1177,7 +1177,7 @@
             {
                 "parameters": {
                     "method": "POST",
-                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "url": "https://discord.com/api/webhooks/TU_ID/TU_TOKEN",
                     "sendBody": true,
                     "contentType": "json",
                     "specifyBody": "json",
@@ -1196,7 +1196,7 @@
             {
                 "parameters": {
                     "method": "POST",
-                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "url": "https://discord.com/api/webhooks/TU_ID/TU_TOKEN",
                     "sendBody": true,
                     "contentType": "json",
                     "specifyBody": "json",
@@ -1215,7 +1215,7 @@
             {
                 "parameters": {
                     "method": "POST",
-                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "url": "https://discord.com/api/webhooks/TU_ID/TU_TOKEN",
                     "sendBody": true,
                     "contentType": "json",
                     "specifyBody": "json",
