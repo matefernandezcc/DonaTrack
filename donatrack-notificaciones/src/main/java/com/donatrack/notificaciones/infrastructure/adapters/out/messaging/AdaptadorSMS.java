@@ -2,6 +2,7 @@ package com.donatrack.notificaciones.infrastructure.adapters.out.messaging;
 
 import com.donatrack.notificaciones.application.ports.out.NotificacionAdapter;
 import com.donatrack.notificaciones.domain.entities.Notificacion;
+import com.donatrack.notificaciones.infrastructure.adapters.out.client.N8nNotificationClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -10,12 +11,18 @@ import org.springframework.stereotype.Component;
 public class AdaptadorSMS implements NotificacionAdapter {
 
   private static final Logger logger = LoggerFactory.getLogger(AdaptadorSMS.class);
+  private final N8nNotificationClient n8nClient;
+
+  public AdaptadorSMS(N8nNotificationClient n8nClient) {
+    this.n8nClient = n8nClient;
+  }
 
   @Override
   public void enviar(Notificacion notificacion) {
-    // Simulación de envío por SMS
     logger.info(
         "Enviando SMS al {}: {}", notificacion.getDestinatario(), notificacion.getMensaje());
-    notificacion.setCompletada(true);
+    boolean enviado =
+        n8nClient.enviar(notificacion.getDestinatario(), notificacion.getMensaje(), "SMS");
+    notificacion.setCompletada(enviado);
   }
 }

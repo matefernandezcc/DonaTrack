@@ -16,9 +16,14 @@ public class NotificadorService {
 
   public void enviarNotificacion(String destinatario, String mensaje, String medio) {
     Notificacion notificacion = new Notificacion(destinatario, mensaje);
-    NotificacionAdapter adaptador =
-        adaptadores.getOrDefault(
-            medio != null ? medio.toUpperCase() : "EMAIL", adaptadores.get("EMAIL"));
+    String clave = medio != null ? medio.trim().toUpperCase() : "EMAIL";
+    if ("CORREO".equals(clave)) {
+      clave = "EMAIL";
+    } else if ("TELEFONO".equals(clave)) {
+      clave = "SMS";
+    }
+
+    NotificacionAdapter adaptador = adaptadores.getOrDefault(clave, adaptadores.get("EMAIL"));
 
     if (adaptador != null) {
       adaptador.enviar(notificacion);

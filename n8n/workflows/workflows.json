@@ -1036,7 +1036,7 @@
             },
             {
                 "parameters": {
-                    "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || 'General';\n  const mensaje = body.mensaje || body.message || body.description || 'Notificación sin mensaje';\n  const medio = (body.medio || body.channel || 'DISCORD').toUpperCase();\n  const timestamp = new Date().toISOString();\n  const avatarUrl = 'https://api.dicebear.com/9.x/bottts/png?seed=' + encodeURIComponent(destinatario) + '&size=128';\n\n  const discordPayload = {\n    username: 'DonaTrack • Notificaciones',\n    avatar_url: 'https://api.dicebear.com/9.x/icons/png?seed=donatrack-bell&size=128',\n    embeds: [\n      {\n        author: {\n          name: 'DonaTrack — Centro de Notificaciones Multicanal',\n          icon_url: 'https://api.dicebear.com/9.x/shapes/png?seed=donatrack&size=64'\n        },\n        title: '📢 Nueva Notificación de Evento',\n        description: '> 💬 **Mensaje:**\\n> *' + mensaje + '*',\n        color: 5793266,\n        fields: [\n          {\n            name: '👤 Destinatario',\n            value: '`' + destinatario + '`',\n            inline: true\n          },\n          {\n            name: '📡 Medio',\n            value: '`' + medio + '`',\n            inline: true\n          },\n          {\n            name: '⚡ Estado',\n            value: '🟢 `ENTREGADO`',\n            inline: true\n          }\n        ],\n        thumbnail: {\n          url: avatarUrl\n        },\n        footer: {\n          text: 'DonaTrack • Plataforma de Gestión y Trazabilidad de Donaciones',\n          icon_url: 'https://api.dicebear.com/9.x/identicon/png?seed=donatrack-footer&size=32'\n        },\n        timestamp: timestamp\n      }\n    ]\n  };\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: discordPayload\n    }\n  };\n});"
+                    "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || 'General';\n  const mensaje = body.mensaje || body.message || body.description || 'Notificación sin mensaje';\n  let medio = (body.medio || body.channel || 'DISCORD').toUpperCase();\n  if (medio === 'CORREO') medio = 'EMAIL';\n  if (medio === 'TELEFONO') medio = 'SMS';\n\n  const timestamp = new Date().toISOString();\n  const avatarUrl = 'https://api.dicebear.com/9.x/bottts/png?seed=' + encodeURIComponent(destinatario) + '&size=128';\n  let discordPayload = {};\n\n  if (medio === 'EMAIL') {\n    discordPayload = {\n      username: 'DonaTrack • Servidor de Correo',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/732/732200.png',\n      embeds: [\n        {\n          author: {\n            name: 'DonaTrack Mailer Daemon',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/732/732200.png'\n          },\n          title: '📧 Notificación por Correo Electrónico',\n          description: '> 📄 **Asunto:** Notificación Oficial — Plataforma DonaTrack\\n\\n**Estimado/a donante:**\\n*' + mensaje.replace(/\"/g, '\\\\\"') + '*',\n          color: 2851545,\n          fields: [\n            {\n              name: '📬 Para (Buzón)',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '📡 Canal',\n              value: '📧 `EMAIL / SMTP`',\n              inline: true\n            },\n            {\n              name: '⚡ Estado',\n              value: '📬 `ENTREGADO EN INBOX`',\n              inline: true\n            },\n            {\n              name: '🔒 Seguridad',\n              value: '🛡️ `TLS 1.3 / DKIM Verificado`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack SMTP Gateway • Despachado vía n8n Mail Hub'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else if (medio === 'WHATSAPP') {\n    discordPayload = {\n      username: 'DonaTrack • WhatsApp Business',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',\n      embeds: [\n        {\n          author: {\n            name: 'WhatsApp Cloud API • DonaTrack Gateway',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/733/733585.png'\n          },\n          title: '💬 Mensaje de WhatsApp Entregado',\n          description: '> 📱 *Mensaje recibido en chat móvil:*\\n\\n> \" **' + mensaje.replace(/\"/g, '\\\\\"') + '** \"',\n          color: 2479078,\n          fields: [\n            {\n              name: '📱 Contacto / Teléfono',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '📡 Canal',\n              value: '💬 `WHATSAPP BUSINESS`',\n              inline: true\n            },\n            {\n              name: '⚡ Estado',\n              value: '✓✓ `ENTREGADO Y LEÍDO`',\n              inline: true\n            },\n            {\n              name: '🔐 Privacidad',\n              value: '`Cifrado de extremo a extremo (E2EE)`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack WhatsApp Cloud • Meta API vía n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else if (medio === 'SMS') {\n    discordPayload = {\n      username: 'DonaTrack • Pasarela SMS Móvil',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/889/889140.png',\n      embeds: [\n        {\n          author: {\n            name: 'Telecom SMS Gateway • DonaTrack',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/889/889140.png'\n          },\n          title: '📱 SMS Transaccional Despachado',\n          description: '```txt\\n[DONATRACK-SMS] ' + mensaje.replace(/`/g, '') + '\\n```',\n          color: 15965202,\n          fields: [\n            {\n              name: '📞 Línea Móvil',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '📡 Canal',\n              value: '📱 `SMS / GSM`',\n              inline: true\n            },\n            {\n              name: '⚡ Estado',\n              value: '📶 `TRANSMISIÓN COMPLETADA`',\n              inline: true\n            },\n            {\n              name: '📊 Longitud',\n              value: '`' + mensaje.length + ' / 160 caracteres`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack Cellular Gateway • SMS Gateway vía n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else {\n    discordPayload = {\n      username: 'DonaTrack • Comunidad Oficial',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/3670/3670157.png',\n      embeds: [\n        {\n          author: {\n            name: 'DonaTrack Community Bot',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/3670/3670157.png'\n          },\n          title: '🎮 Alerta Oficial en Discord',\n          description: '> 📢 **Mensaje al Canal:**\\n> *' + mensaje.replace(/\"/g, '\\\\\"') + '*',\n          color: 5793266,\n          fields: [\n            {\n              name: '👤 Mención / Destinatario',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '📡 Canal',\n              value: '🎮 `DISCORD WEBHOOK`',\n              inline: true\n            },\n            {\n              name: '⚡ Estado',\n              value: '🟢 `PUBLICADO EN SERVIDOR`',\n              inline: true\n            },\n            {\n              name: '⚡ Prioridad',\n              value: '`ALTA / TIEMPO REAL`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack Discord Integration • Webhook n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  }\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: discordPayload\n    }\n  };\n});"
                 },
                 "type": "n8n-nodes-base.code",
                 "typeVersion": 2,
@@ -1172,123 +1172,69 @@
                     40
                 ],
                 "id": "http-enviar-discord",
-                "name": "Enviar a Discord"
+                "name": "Enviar Discord"
             },
             {
                 "parameters": {
-                    "assignments": {
-                        "assignments": [
-                            {
-                                "name": "canal",
-                                "value": "EMAIL",
-                                "type": "string"
-                            },
-                            {
-                                "name": "status",
-                                "value": "Simulado (Pendiente integración SMTP / Gmail)",
-                                "type": "string"
-                            },
-                            {
-                                "name": "destinatario",
-                                "value": "={{ $json.destinatario }}",
-                                "type": "string"
-                            },
-                            {
-                                "name": "mensaje",
-                                "value": "={{ $json.mensaje }}",
-                                "type": "string"
-                            }
-                        ]
-                    },
+                    "method": "POST",
+                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "sendBody": true,
+                    "contentType": "json",
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify($json.discordPayload) }}",
                     "options": {}
                 },
-                "type": "n8n-nodes-base.set",
-                "typeVersion": 3.4,
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
                 "position": [
                     760,
                     150
                 ],
-                "id": "mock-email-node",
-                "name": "Simular Email"
+                "id": "http-enviar-email",
+                "name": "Enviar Correo (Discord)"
             },
             {
                 "parameters": {
-                    "assignments": {
-                        "assignments": [
-                            {
-                                "name": "canal",
-                                "value": "WHATSAPP",
-                                "type": "string"
-                            },
-                            {
-                                "name": "status",
-                                "value": "Simulado (Pendiente integración Twilio / WhatsApp Cloud API)",
-                                "type": "string"
-                            },
-                            {
-                                "name": "destinatario",
-                                "value": "={{ $json.destinatario }}",
-                                "type": "string"
-                            },
-                            {
-                                "name": "mensaje",
-                                "value": "={{ $json.mensaje }}",
-                                "type": "string"
-                            }
-                        ]
-                    },
+                    "method": "POST",
+                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "sendBody": true,
+                    "contentType": "json",
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify($json.discordPayload) }}",
                     "options": {}
                 },
-                "type": "n8n-nodes-base.set",
-                "typeVersion": 3.4,
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
                 "position": [
                     760,
                     260
                 ],
-                "id": "mock-whatsapp-node",
-                "name": "Simular WhatsApp"
+                "id": "http-enviar-whatsapp",
+                "name": "Enviar WhatsApp (Discord)"
             },
             {
                 "parameters": {
-                    "assignments": {
-                        "assignments": [
-                            {
-                                "name": "canal",
-                                "value": "SMS",
-                                "type": "string"
-                            },
-                            {
-                                "name": "status",
-                                "value": "Simulado (Pendiente integración Twilio SMS)",
-                                "type": "string"
-                            },
-                            {
-                                "name": "destinatario",
-                                "value": "={{ $json.destinatario }}",
-                                "type": "string"
-                            },
-                            {
-                                "name": "mensaje",
-                                "value": "={{ $json.mensaje }}",
-                                "type": "string"
-                            }
-                        ]
-                    },
+                    "method": "POST",
+                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "sendBody": true,
+                    "contentType": "json",
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify($json.discordPayload) }}",
                     "options": {}
                 },
-                "type": "n8n-nodes-base.set",
-                "typeVersion": 3.4,
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
                 "position": [
                     760,
                     370
                 ],
-                "id": "mock-sms-node",
-                "name": "Simular SMS"
+                "id": "http-enviar-sms",
+                "name": "Enviar SMS (Discord)"
             },
             {
                 "parameters": {
                     "respondWith": "json",
-                    "responseBody": "={{ { \"success\": true, \"canal\": $json.canal || $json.medio, \"destinatario\": $json.destinatario, \"mensaje\": $json.mensaje } }}",
+                    "responseBody": "={{ { \"success\": true, \"canal\": $json.medio, \"destinatario\": $json.destinatario, \"mensaje\": $json.mensaje } }}",
                     "options": {}
                 },
                 "type": "n8n-nodes-base.respondToWebhook",
@@ -1328,35 +1274,35 @@
                 "main": [
                     [
                         {
-                            "node": "Enviar a Discord",
+                            "node": "Enviar Discord",
                             "type": "main",
                             "index": 0
                         }
                     ],
                     [
                         {
-                            "node": "Simular Email",
+                            "node": "Enviar Correo (Discord)",
                             "type": "main",
                             "index": 0
                         }
                     ],
                     [
                         {
-                            "node": "Simular WhatsApp",
+                            "node": "Enviar WhatsApp (Discord)",
                             "type": "main",
                             "index": 0
                         }
                     ],
                     [
                         {
-                            "node": "Simular SMS",
+                            "node": "Enviar SMS (Discord)",
                             "type": "main",
                             "index": 0
                         }
                     ]
                 ]
             },
-            "Enviar a Discord": {
+            "Enviar Discord": {
                 "main": [
                     [
                         {
@@ -1367,7 +1313,7 @@
                     ]
                 ]
             },
-            "Simular Email": {
+            "Enviar Correo (Discord)": {
                 "main": [
                     [
                         {
@@ -1378,7 +1324,7 @@
                     ]
                 ]
             },
-            "Simular WhatsApp": {
+            "Enviar WhatsApp (Discord)": {
                 "main": [
                     [
                         {
@@ -1389,7 +1335,7 @@
                     ]
                 ]
             },
-            "Simular SMS": {
+            "Enviar SMS (Discord)": {
                 "main": [
                     [
                         {
