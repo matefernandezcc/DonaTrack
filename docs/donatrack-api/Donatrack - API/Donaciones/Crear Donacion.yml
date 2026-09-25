@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "idDonante": "d3b07384-d113-4ec6-a51d-402f06c1af0b",
-        "idAdministrador": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        "idDonante": "90f7ff33-c108-4999-a3db-e24fee2d776a",
+        "idAdministrador": "880c87ab-7946-47af-962c-e7e8e50d6b90",
         "bienesBrutos": [
           {
             "descripcion": "Alimentos no perecederos",

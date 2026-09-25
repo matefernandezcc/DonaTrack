@@ -7,11 +7,12 @@ http:
   method: POST
   url: "{{donacionesUrl}}/api/personas/importar-csv"
   body:
-    type: multipartForm
+    type: multipart-form
     data:
       - name: file
         type: file
-        value: ../../../../../enunciado/CSV/donantes.csv
+        value:
+          - ./donantes_sample.csv
   auth: inherit
 
 settings:
