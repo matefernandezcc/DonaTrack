@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Notificaciones", description = "Envío de notificaciones por email, SMS y WhatsApp")
+@Tag(
+    name = "Notificaciones",
+    description = "Envío de notificaciones multicanal (Email, SMS, WhatsApp y Discord vía n8n)")
 public class NotificacionController {
 
   private final NotificadorService notificadorService;
@@ -25,7 +27,7 @@ public class NotificacionController {
   @Operation(
       summary = "Enviar notificación",
       description =
-          "Envía una notificación a un destinatario por el medio especificado (email, SMS o WhatsApp)")
+          "Envía una notificación a un destinatario por el medio especificado (EMAIL, SMS, WHATSAPP o DISCORD vía n8n)")
   @ApiResponse(responseCode = "200", description = "Notificación enviada exitosamente")
   @ApiResponse(
       responseCode = "400",

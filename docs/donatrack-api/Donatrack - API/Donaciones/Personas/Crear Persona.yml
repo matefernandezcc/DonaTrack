@@ -11,14 +11,14 @@ http:
     data: |-
       {
           "tipo": "HUMANA",
-          "email": "test.manual@donatrack.com",
-          "nombre": "Carlos",
-          "apellido": "Test",
-          "edad": 35,
+          "email": "mateo@donatrack.com",
+          "nombre": "Mateo",
+          "apellido": "Fernandez",
+          "edad": 23,
           "contacto": {
-            "correoElectronico": "test.manual@donatrack.com",
+            "correoElectronico": "mateo@donatrack.com",
             "telefono": "+54 11 1234-5678",
-            "whatsapp": null,
+            "whatsapp": "+54 11 1234-5678",
             "medioPredeterminado": "CORREO"
           },
           "documento": {
@@ -27,13 +27,13 @@ http:
           },
           "direccion": {
             "calle": "Av. Corrientes",
-            "altura": 1234,
+            "altura": 4303,
             "localidad": "CABA",
             "provincia": {
               "nombreProvincia": "Buenos Aires",
               "pais": { "nombre": "Argentina" }
             },
-            "codigoPostal": "C1043",
+            "codigoPostal": "C1181",
             "coordenadas": null
           }
         }
@@ -44,3 +44,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

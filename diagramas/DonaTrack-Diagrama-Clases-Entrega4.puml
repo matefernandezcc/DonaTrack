@@ -40,6 +40,7 @@ package "servicio de Donaciones"{
             CORREO
             TELEFONO
             WHATSAPP
+            DISCORD
         }
 
         abstract class Persona {
@@ -641,6 +642,10 @@ package "Servicio de Notificaciones" {
     }
 
     class AdaptadorWhatsApp implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
+    }
+
+    class AdaptadorDiscord implements NotificacionAdapter {
         + enviar(notificacion: Notificacion)
     }
 
@@ -689,6 +694,7 @@ package "servicio de Donaciones"{
             CORREO
             TELEFONO
             WHATSAPP
+            DISCORD
         }
 
         abstract class Persona {
@@ -1290,6 +1296,10 @@ package "Servicio de Notificaciones" {
     }
 
     class AdaptadorWhatsApp implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
+    }
+
+    class AdaptadorDiscord implements NotificacionAdapter {
         + enviar(notificacion: Notificacion)
     }
 

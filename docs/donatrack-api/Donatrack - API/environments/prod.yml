@@ -1,4 +1,17 @@
 name: prod
 variables:
+  - name: baseUrl
+    value: http://localhost:8080
+    description: ""
+  - name: donacionesUrl
+    value: http://localhost:8000
+    description: ""
+  - name: incentivosUrl
+    value: http://localhost:8001
+    description: ""
   - name: logisticaUrl
     value: https://donatrack-logistica-50xn.onrender.com
+    description: ""
+  - name: notificacionesUrl
+    value: http://localhost:8003
+    description: ""

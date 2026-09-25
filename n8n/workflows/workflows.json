@@ -61,7 +61,7 @@
             {
                 "parameters": {
                     "method": "POST",
-                    "url": "https://discord.com/api/webhooks/1545253873785118740/fQ46oGTgcP5UZbcZmiVL7JIUblz71AUCVjzIDq7WnXYTCR-kT217cPlgGdNiGWnGm6jR",
+                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
                     "sendBody": true,
                     "contentType": "multipart-form-data",
                     "bodyParameters": {
@@ -263,7 +263,7 @@
             {
                 "parameters": {
                     "method": "POST",
-                    "url": "https://discord.com/api/webhooks/1545253873785118740/fQ46oGTgcP5UZbcZmiVL7JIUblz71AUCVjzIDq7WnXYTCR-kT217cPlgGdNiGWnGm6jR",
+                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
                     "sendBody": true,
                     "specifyBody": "json",
                     "jsonBody": "={{ JSON.stringify($json.discordPayload) }}",
@@ -1006,6 +1006,403 @@
         "versionMetadata": {
             "name": null,
             "description": null
+        }
+    },
+    {
+        "updatedAt": "2026-09-25T10:00:00.000Z",
+        "createdAt": "2026-09-25T10:00:00.000Z",
+        "id": "donatrack-notificador",
+        "name": "DonaTrack - Notificador",
+        "description": "Workflow central de notificaciones multicanal con switch de canales (Discord, Email, WhatsApp, SMS)",
+        "active": true,
+        "isArchived": false,
+        "nodes": [
+            {
+                "parameters": {
+                    "httpMethod": "POST",
+                    "path": "donatrack/notificaciones",
+                    "responseMode": "responseNode",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.webhook",
+                "typeVersion": 2.1,
+                "position": [
+                    0,
+                    200
+                ],
+                "id": "webhook-notificaciones-trigger",
+                "name": "Webhook Trigger",
+                "webhookId": "9a38f322-921c-4b55-a249-f03e22394f91"
+            },
+            {
+                "parameters": {
+                    "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || 'General';\n  const mensaje = body.mensaje || body.message || body.description || 'Notificación sin mensaje';\n  const medio = (body.medio || body.channel || 'DISCORD').toUpperCase();\n  const timestamp = new Date().toISOString();\n  const avatarUrl = 'https://api.dicebear.com/9.x/bottts/png?seed=' + encodeURIComponent(destinatario) + '&size=128';\n\n  const discordPayload = {\n    username: 'DonaTrack • Notificaciones',\n    avatar_url: 'https://api.dicebear.com/9.x/icons/png?seed=donatrack-bell&size=128',\n    embeds: [\n      {\n        author: {\n          name: 'DonaTrack — Centro de Notificaciones Multicanal',\n          icon_url: 'https://api.dicebear.com/9.x/shapes/png?seed=donatrack&size=64'\n        },\n        title: '📢 Nueva Notificación de Evento',\n        description: '> 💬 **Mensaje:**\\n> *' + mensaje + '*',\n        color: 5793266,\n        fields: [\n          {\n            name: '👤 Destinatario',\n            value: '`' + destinatario + '`',\n            inline: true\n          },\n          {\n            name: '📡 Medio',\n            value: '`' + medio + '`',\n            inline: true\n          },\n          {\n            name: '⚡ Estado',\n            value: '🟢 `ENTREGADO`',\n            inline: true\n          }\n        ],\n        thumbnail: {\n          url: avatarUrl\n        },\n        footer: {\n          text: 'DonaTrack • Plataforma de Gestión y Trazabilidad de Donaciones',\n          icon_url: 'https://api.dicebear.com/9.x/identicon/png?seed=donatrack-footer&size=32'\n        },\n        timestamp: timestamp\n      }\n    ]\n  };\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: discordPayload\n    }\n  };\n});"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    220,
+                    200
+                ],
+                "id": "code-normalizar-notificacion",
+                "name": "Normalizar Mensaje"
+            },
+            {
+                "parameters": {
+                    "rules": {
+                        "values": [
+                            {
+                                "conditions": {
+                                    "combinator": "and",
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.medio }}",
+                                            "operator": {
+                                                "operation": "equals",
+                                                "type": "string"
+                                            },
+                                            "rightValue": "DISCORD"
+                                        }
+                                    ],
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 3
+                                    }
+                                },
+                                "outputKey": "Discord",
+                                "renameOutput": true
+                            },
+                            {
+                                "conditions": {
+                                    "combinator": "and",
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.medio }}",
+                                            "operator": {
+                                                "operation": "equals",
+                                                "type": "string"
+                                            },
+                                            "rightValue": "EMAIL"
+                                        }
+                                    ],
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 3
+                                    }
+                                },
+                                "outputKey": "Email",
+                                "renameOutput": true
+                            },
+                            {
+                                "conditions": {
+                                    "combinator": "and",
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.medio }}",
+                                            "operator": {
+                                                "operation": "equals",
+                                                "type": "string"
+                                            },
+                                            "rightValue": "WHATSAPP"
+                                        }
+                                    ],
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 3
+                                    }
+                                },
+                                "outputKey": "WhatsApp",
+                                "renameOutput": true
+                            },
+                            {
+                                "conditions": {
+                                    "combinator": "and",
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.medio }}",
+                                            "operator": {
+                                                "operation": "equals",
+                                                "type": "string"
+                                            },
+                                            "rightValue": "SMS"
+                                        }
+                                    ],
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 3
+                                    }
+                                },
+                                "outputKey": "SMS",
+                                "renameOutput": true
+                            }
+                        ]
+                    }
+                },
+                "type": "n8n-nodes-base.switch",
+                "typeVersion": 3.4,
+                "position": [
+                    460,
+                    200
+                ],
+                "id": "switch-medio-notificacion",
+                "name": "Switch Medio"
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK",
+                    "sendBody": true,
+                    "contentType": "json",
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify($json.discordPayload) }}",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    760,
+                    40
+                ],
+                "id": "http-enviar-discord",
+                "name": "Enviar a Discord"
+            },
+            {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "name": "canal",
+                                "value": "EMAIL",
+                                "type": "string"
+                            },
+                            {
+                                "name": "status",
+                                "value": "Simulado (Pendiente integración SMTP / Gmail)",
+                                "type": "string"
+                            },
+                            {
+                                "name": "destinatario",
+                                "value": "={{ $json.destinatario }}",
+                                "type": "string"
+                            },
+                            {
+                                "name": "mensaje",
+                                "value": "={{ $json.mensaje }}",
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    760,
+                    150
+                ],
+                "id": "mock-email-node",
+                "name": "Simular Email"
+            },
+            {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "name": "canal",
+                                "value": "WHATSAPP",
+                                "type": "string"
+                            },
+                            {
+                                "name": "status",
+                                "value": "Simulado (Pendiente integración Twilio / WhatsApp Cloud API)",
+                                "type": "string"
+                            },
+                            {
+                                "name": "destinatario",
+                                "value": "={{ $json.destinatario }}",
+                                "type": "string"
+                            },
+                            {
+                                "name": "mensaje",
+                                "value": "={{ $json.mensaje }}",
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    760,
+                    260
+                ],
+                "id": "mock-whatsapp-node",
+                "name": "Simular WhatsApp"
+            },
+            {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "name": "canal",
+                                "value": "SMS",
+                                "type": "string"
+                            },
+                            {
+                                "name": "status",
+                                "value": "Simulado (Pendiente integración Twilio SMS)",
+                                "type": "string"
+                            },
+                            {
+                                "name": "destinatario",
+                                "value": "={{ $json.destinatario }}",
+                                "type": "string"
+                            },
+                            {
+                                "name": "mensaje",
+                                "value": "={{ $json.mensaje }}",
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    760,
+                    370
+                ],
+                "id": "mock-sms-node",
+                "name": "Simular SMS"
+            },
+            {
+                "parameters": {
+                    "respondWith": "json",
+                    "responseBody": "={{ { \"success\": true, \"canal\": $json.canal || $json.medio, \"destinatario\": $json.destinatario, \"mensaje\": $json.mensaje } }}",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.respondToWebhook",
+                "typeVersion": 1.5,
+                "position": [
+                    1020,
+                    200
+                ],
+                "id": "respond-webhook-node",
+                "name": "Respond to Webhook"
+            }
+        ],
+        "connections": {
+            "Webhook Trigger": {
+                "main": [
+                    [
+                        {
+                            "node": "Normalizar Mensaje",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Normalizar Mensaje": {
+                "main": [
+                    [
+                        {
+                            "node": "Switch Medio",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Switch Medio": {
+                "main": [
+                    [
+                        {
+                            "node": "Enviar a Discord",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Simular Email",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Simular WhatsApp",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Simular SMS",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Enviar a Discord": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Simular Email": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Simular WhatsApp": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Simular SMS": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1"
         }
     }
 ]

@@ -27,6 +27,12 @@ public class NotificacionesMessagingAdapter implements ServicioNotificaciones {
       case TELEFONO:
         destinatario = contactoDestino.getTelefono();
         break;
+      case DISCORD:
+        destinatario =
+            contactoDestino.getCorreoElectronico() != null
+                ? contactoDestino.getCorreoElectronico()
+                : contactoDestino.getTelefono();
+        break;
       case CORREO:
       default:
         destinatario = contactoDestino.getCorreoElectronico();
