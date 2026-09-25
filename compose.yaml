@@ -13,8 +13,8 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./local-seed-data.sql:/docker-entrypoint-initdb.d/z-local-seed-data.sql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/local-seed-data.sql:/docker-entrypoint-initdb.d/z-local-seed-data.sql
 
   n8n:
     image: docker.n8n.io/n8nio/n8n:2.39.7

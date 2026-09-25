@@ -1,0 +1,4 @@
+name: prod
+variables:
+  - name: logisticaUrl
+    value: https://donatrack-logistica-50xn.onrender.com
