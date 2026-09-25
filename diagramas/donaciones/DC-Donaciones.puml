@@ -28,6 +28,7 @@ package "servicio de donaciones"{
             CORREO
             TELEFONO
             WHATSAPP
+            DISCORD
         }
 
         abstract class Persona {
