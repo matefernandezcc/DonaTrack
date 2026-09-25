@@ -12,7 +12,9 @@ import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Persona registrada en el sistema. Campo 'tipo' obligatorio: 'HUMANA' o 'JURIDICA'")
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY,
