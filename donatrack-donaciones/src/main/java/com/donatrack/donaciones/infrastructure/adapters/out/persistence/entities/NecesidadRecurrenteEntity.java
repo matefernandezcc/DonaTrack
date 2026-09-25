@@ -9,5 +9,4 @@ import lombok.Setter;
 @DiscriminatorValue("Recurrente")
 @Getter
 @Setter
-public class NecesidadRecurrenteEntity extends NecesidadEntity {
-}
+public class NecesidadRecurrenteEntity extends NecesidadEntity {}

@@ -1,9 +1,8 @@
 package com.donatrack.donaciones.domain.entities.roles;
 
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
-
+import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -23,13 +22,13 @@ public class Beneficiario extends Rol {
   }
 
   @Override
-  public boolean esValidoParaHumana() { 
+  public boolean esValidoParaHumana() {
     return false; // Una persona humana no puede ser beneficiaria
   }
 
   @Override
-  public boolean esValidoParaJuridica() { 
-    return true; 
+  public boolean esValidoParaJuridica() {
+    return true;
   }
 
   // --- Métodos del Diagrama de Clases ---
@@ -43,9 +42,9 @@ public class Beneficiario extends Rol {
       d.cambiarEstado(EstadoDonacion.ENTREGADA, "Confirmada por beneficiario", null);
       // Se asocian las urls de las fotos a la donación
       if (fotos != null) {
-          for (String url : fotos) {
-              d.addFoto(new com.donatrack.donaciones.domain.entities.donacion.Foto("", url));
-          }
+        for (String url : fotos) {
+          d.addFoto(new com.donatrack.donaciones.domain.entities.donacion.Foto("", url));
+        }
       }
       return true;
     } else {

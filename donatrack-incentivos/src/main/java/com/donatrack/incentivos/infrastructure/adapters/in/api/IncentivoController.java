@@ -1,154 +1,208 @@
 package com.donatrack.incentivos.infrastructure.adapters.in.api;
 
+import com.donatrack.common.dto.ActividadDonacionDTO;
+import com.donatrack.common.dto.ErrorResponse;
+import com.donatrack.incentivos.application.usecases.RegistrarActividadDonacionUseCase;
 import com.donatrack.incentivos.domain.entities.Insignia;
 import com.donatrack.incentivos.domain.entities.PerfilDonante;
 import com.donatrack.incentivos.domain.entities.RegistroDonacion;
 import com.donatrack.incentivos.domain.entities.misiones.Mision;
-import com.donatrack.incentivos.application.usecases.RegistrarActividadDonacionUseCase;
-import com.donatrack.common.dto.ActividadDonacionDTO;
-
+import com.donatrack.incentivos.domain.services.RankingMensualService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Incentivos", description = "Métricas de donantes, insignias, misiones y ranking mensual")
+@Tag(
+    name = "Incentivos",
+    description = "Métricas de donantes, insignias, misiones y ranking mensual")
 public class IncentivoController {
 
-    private final com.donatrack.incentivos.domain.services.RankingMensualService rankingMensualService;
-    private final RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase;
+  private final RankingMensualService rankingMensualService;
+  private final RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase;
 
-    public IncentivoController(com.donatrack.incentivos.domain.services.RankingMensualService rankingMensualService,
-            RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase) {
-        this.rankingMensualService = rankingMensualService;
-        this.registrarActividadDonacionUseCase = registrarActividadDonacionUseCase;
+  public IncentivoController(
+      RankingMensualService rankingMensualService,
+      RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase) {
+    this.rankingMensualService = rankingMensualService;
+    this.registrarActividadDonacionUseCase = registrarActividadDonacionUseCase;
+  }
+
+  @Operation(
+      summary = "Obtener métricas del donante",
+      description =
+          "Devuelve las métricas de donación: historial, racha, bienes donados, organizaciones ayudadas y posición en el ranking")
+  @ApiResponse(responseCode = "200", description = "Métricas del donante")
+  @ApiResponse(
+      responseCode = "400",
+      description = "ID de donante con formato inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @GetMapping("/donantes/{id}/metricas")
+  public ResponseEntity<MetricasDonanteDTO> obtenerMetricas(@PathVariable UUID id) {
+    PerfilDonante perfil = new PerfilDonante(id); // Mock
+
+    List<RegistroDonacion> todasLasDonaciones = perfil.getMetricas().obtenerTodasLasDonaciones();
+    List<RegistroDonacion> exitosas = perfil.getMetricas().obtenerDonacionesExitosas();
+
+    int totalHistorico = todasLasDonaciones.size();
+    int racha = calcularRacha(todasLasDonaciones, perfil.getMetricas().getFechaCorteRacha());
+    int bienesDonados =
+        todasLasDonaciones.stream().mapToInt(RegistroDonacion::getCantidadBienes).sum();
+    int totalExitosas = exitosas.size();
+
+    long organizacionesAyudadas =
+        todasLasDonaciones.stream()
+            .map(RegistroDonacion::getIdEntidadBeneficiaria)
+            .filter(Objects::nonNull)
+            .distinct()
+            .count();
+
+    Map<YearMonth, Integer> historialMap = new HashMap<>();
+    for (RegistroDonacion d : todasLasDonaciones) {
+      historialMap.merge(d.getMesDonacion(), 1, Integer::sum);
     }
 
-    @Operation(summary = "Obtener métricas del donante", description = "Devuelve las métricas de donación: historial, racha, bienes donados, organizaciones ayudadas y posición en el ranking")
-    @ApiResponse(responseCode = "200", description = "Métricas del donante")
-    @GetMapping("/donantes/{id}/metricas")
-    public ResponseEntity<MetricasDonanteDTO> obtenerMetricas(@PathVariable UUID id) {
-        PerfilDonante perfil = new PerfilDonante(id); // Mock
+    MetricasDonanteDTO dto =
+        MetricasDonanteDTO.builder()
+            .donanteId(perfil.getDonanteId())
+            .totalDonacionesHistoricas(totalHistorico)
+            .rachaDeMeses(racha)
+            .cantidadBienesDonados(bienesDonados)
+            .donacionesExitosas(totalExitosas)
+            .totalOrganizacionesAyudadas((int) organizacionesAyudadas)
+            .historialDonacionesPorMes(historialMap)
+            .posicionRanking(5) // Mock
+            .build();
 
-        List<RegistroDonacion> todasLasDonaciones = perfil.getMetricas().obtenerTodasLasDonaciones();
-        List<RegistroDonacion> exitosas = perfil.getMetricas().obtenerDonacionesExitosas();
+    return ResponseEntity.ok(dto);
+  }
 
-        int totalHistorico = todasLasDonaciones.size();
-        int racha = calcularRacha(todasLasDonaciones, perfil.getMetricas().getFechaCorteRacha());
-        int bienesDonados = todasLasDonaciones.stream().mapToInt(RegistroDonacion::getCantidadBienes).sum();
-        int totalExitosas = exitosas.size();
-        
-        long organizacionesAyudadas = todasLasDonaciones.stream()
-                .map(RegistroDonacion::getIdEntidadBeneficiaria)
-                .filter(Objects::nonNull)
-                .distinct()
-                .count();
+  @Operation(
+      summary = "Obtener misiones disponibles",
+      description = "Devuelve las misiones activas para un donante")
+  @ApiResponse(responseCode = "200", description = "Lista de misiones")
+  @ApiResponse(
+      responseCode = "400",
+      description = "ID de donante con formato inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @GetMapping("/donantes/{id}/misiones")
+  public ResponseEntity<List<Mision>> obtenerMisionesDisponibles(@PathVariable UUID id) {
+    PerfilDonante perfil = new PerfilDonante(id); // Mock
+    List<Mision> respuesta =
+        perfil.getMisionActual() != null
+            ? java.util.List.of(perfil.getMisionActual())
+            : new java.util.ArrayList<>();
+    return ResponseEntity.ok(respuesta);
+  }
 
-        Map<YearMonth, Integer> historialMap = new HashMap<>();
-        for (RegistroDonacion d : todasLasDonaciones) {
-            historialMap.merge(d.getMesDonacion(), 1, Integer::sum);
-        }
+  @Operation(
+      summary = "Obtener insignias del donante",
+      description = "Devuelve las insignias obtenidas por un donante")
+  @ApiResponse(responseCode = "200", description = "Lista de insignias")
+  @ApiResponse(
+      responseCode = "400",
+      description = "ID de donante con formato inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @GetMapping("/donantes/{id}/insignias")
+  public ResponseEntity<List<Insignia>> obtenerInsignias(@PathVariable UUID id) {
+    PerfilDonante perfil = new PerfilDonante(id); // Mock
+    return ResponseEntity.ok(perfil.getInsigniasObtenidas());
+  }
 
-        MetricasDonanteDTO dto = MetricasDonanteDTO.builder()
-                .donanteId(perfil.getDonanteId())
-                .totalDonacionesHistoricas(totalHistorico)
-                .rachaDeMeses(racha)
-                .cantidadBienesDonados(bienesDonados)
-                .donacionesExitosas(totalExitosas)
-                .totalOrganizacionesAyudadas((int) organizacionesAyudadas)
-                .historialDonacionesPorMes(historialMap)
-                .posicionRanking(5) // Mock
-                .build();
+  @Operation(
+      summary = "Obtener ranking Top 3 mensual",
+      description = "Devuelve los 3 donantes con más actividad en el mes actual")
+  @ApiResponse(responseCode = "200", description = "Top 3 donantes del mes")
+  @ApiResponse(
+      responseCode = "500",
+      description = "Error interno calculando ranking",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @GetMapping("/ranking/top3")
+  public ResponseEntity<List<java.util.Map<String, Object>>> obtenerRankingMensual() {
+    java.time.YearMonth mesActual = java.time.YearMonth.now();
+    List<PerfilDonante> top3 = rankingMensualService.obtenerTop3Mensual(mesActual);
 
-        return ResponseEntity.ok(dto);
+    List<java.util.Map<String, Object>> response =
+        top3.stream()
+            .map(
+                p -> {
+                  java.util.Map<String, Object> map = new java.util.HashMap<>();
+                  map.put("user", p.getDonanteId().toString());
+                  map.put(
+                      "totalDonations",
+                      p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size());
+                  return map;
+                })
+            .collect(java.util.stream.Collectors.toList());
+
+    return ResponseEntity.ok(response);
+  }
+
+  @Operation(
+      summary = "Registrar actividad de donación exitosa",
+      description =
+          "Registra una actividad de donación exitosa para un donante, actualizando sus métricas e insignias")
+  @ApiResponse(responseCode = "200", description = "Actividad registrada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Datos de actividad o ID inválidos",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PostMapping("/donantes/{id}/actividad")
+  public ResponseEntity<Void> registrarActividadDonacionExitosa(
+      @PathVariable UUID id, @RequestBody ActividadDonacionDTO actividad) {
+    registrarActividadDonacionUseCase.ejecutar(id, actividad);
+    return ResponseEntity.ok().build();
+  }
+
+  private int calcularRacha(
+      List<RegistroDonacion> donaciones, java.time.LocalDate fechaCorteRacha) {
+    if (donaciones.isEmpty()) {
+      return 0;
     }
 
-    @Operation(summary = "Obtener misiones disponibles", description = "Devuelve las misiones activas para un donante")
-    @ApiResponse(responseCode = "200", description = "Lista de misiones")
-    @GetMapping("/donantes/{id}/misiones")
-    public ResponseEntity<List<Mision>> obtenerMisionesDisponibles(@PathVariable UUID id) {
-        PerfilDonante perfil = new PerfilDonante(id); // Mock
-        List<Mision> respuesta = perfil.getMisionActual() != null ? java.util.List.of(perfil.getMisionActual())
-                : new java.util.ArrayList<>();
-        return ResponseEntity.ok(respuesta);
+    List<RegistroDonacion> donacionesValidas = donaciones;
+    if (fechaCorteRacha != null) {
+      donacionesValidas =
+          donaciones.stream()
+              .filter(
+                  d ->
+                      d.getFechaDonacion() != null
+                          && !d.getFechaDonacion().isBefore(fechaCorteRacha))
+              .collect(Collectors.toList());
     }
 
-    @Operation(summary = "Obtener insignias del donante", description = "Devuelve las insignias obtenidas por un donante")
-    @ApiResponse(responseCode = "200", description = "Lista de insignias")
-    @GetMapping("/donantes/{id}/insignias")
-    public ResponseEntity<List<Insignia>> obtenerInsignias(@PathVariable UUID id) {
-        PerfilDonante perfil = new PerfilDonante(id); // Mock
-        return ResponseEntity.ok(perfil.getInsigniasObtenidas());
+    if (donacionesValidas.isEmpty()) {
+      return 0;
     }
 
-    @Operation(summary = "Obtener ranking Top 3 mensual", description = "Devuelve los 3 donantes con más actividad en el mes actual")
-    @ApiResponse(responseCode = "200", description = "Top 3 donantes del mes")
-    @GetMapping("/ranking/top3")
-    public ResponseEntity<List<java.util.Map<String, Object>>> obtenerRankingMensual() {
-        java.time.YearMonth mesActual = java.time.YearMonth.now();
-        List<PerfilDonante> top3 = rankingMensualService.obtenerTop3Mensual(mesActual);
+    List<YearMonth> meses =
+        donacionesValidas.stream()
+            .map(RegistroDonacion::getMesDonacion)
+            .distinct()
+            .sorted(Comparator.reverseOrder())
+            .collect(Collectors.toList());
 
-        List<java.util.Map<String, Object>> response = top3.stream().map(p -> {
-            java.util.Map<String, Object> map = new java.util.HashMap<>();
-            map.put("user", p.getDonanteId().toString());
-            map.put("totalDonations", p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size());
-            return map;
-        }).collect(java.util.stream.Collectors.toList());
-
-        return ResponseEntity.ok(response);
+    YearMonth mesActual = YearMonth.now();
+    if (!meses.contains(mesActual) && !meses.contains(mesActual.minusMonths(1))) {
+      return 0;
     }
 
-    @Operation(summary = "Registrar actividad de donación exitosa", description = "Registra una actividad de donación exitosa para un donante, actualizando sus métricas e insignias")
-    @ApiResponse(responseCode = "200", description = "Actividad registrada")
-    @PostMapping("/donantes/{id}/actividad")
-    public ResponseEntity<Void> registrarActividadDonacionExitosa(@PathVariable UUID id,
-            @RequestBody ActividadDonacionDTO actividad) {
-        registrarActividadDonacionUseCase.ejecutar(id, actividad);
-        return ResponseEntity.ok().build();
+    int racha = 1;
+    for (int i = 0; i < meses.size() - 1; i++) {
+      if (meses.get(i).minusMonths(1).equals(meses.get(i + 1))) {
+        racha++;
+      } else {
+        break;
+      }
     }
-
-    private int calcularRacha(List<RegistroDonacion> donaciones, java.time.LocalDate fechaCorteRacha) {
-        if (donaciones.isEmpty()) {
-            return 0;
-        }
-
-        List<RegistroDonacion> donacionesValidas = donaciones;
-        if (fechaCorteRacha != null) {
-            donacionesValidas = donaciones.stream()
-                    .filter(d -> d.getFechaDonacion() != null && !d.getFechaDonacion().isBefore(fechaCorteRacha))
-                    .collect(Collectors.toList());
-        }
-
-        if (donacionesValidas.isEmpty()) {
-            return 0;
-        }
-
-        List<YearMonth> meses = donacionesValidas.stream()
-                .map(RegistroDonacion::getMesDonacion)
-                .distinct()
-                .sorted(Comparator.reverseOrder())
-                .collect(Collectors.toList());
-
-        YearMonth mesActual = YearMonth.now();
-        if (!meses.contains(mesActual) && !meses.contains(mesActual.minusMonths(1))) {
-            return 0;
-        }
-
-        int racha = 1;
-        for (int i = 0; i < meses.size() - 1; i++) {
-            if (meses.get(i).minusMonths(1).equals(meses.get(i + 1))) {
-                racha++;
-            } else {
-                break;
-            }
-        }
-        return racha;
-    }
+    return racha;
+  }
 }

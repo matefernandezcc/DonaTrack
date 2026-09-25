@@ -16,5 +16,7 @@ public record CargaBienesRequestDTO(
             example = "a2222222-2222-4222-8222-222222222222",
             requiredMode = Schema.RequiredMode.REQUIRED)
         UUID idAdministrador,
-    @Schema(description = "Lista de bienes a registrar (mínimo 1)", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(
+            description = "Lista de bienes a registrar (mínimo 1)",
+            requiredMode = Schema.RequiredMode.REQUIRED)
         List<BienDTO> bienesBrutos) {}

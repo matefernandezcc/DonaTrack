@@ -5,11 +5,11 @@ import lombok.Getter;
 
 @Getter
 public class InsigniaObtenidaEvent {
-    private final UUID donanteId;
-    private final Insignia insignia;
+  private final UUID donanteId;
+  private final Insignia insignia;
 
-    public InsigniaObtenidaEvent(UUID donanteId, Insignia insignia) {
-        this.donanteId = donanteId;
-        this.insignia = insignia;
-    }
+  public InsigniaObtenidaEvent(UUID donanteId, Insignia insignia) {
+    this.donanteId = donanteId;
+    this.insignia = insignia;
+  }
 }

@@ -13,5 +13,4 @@ import lombok.Setter;
 @DiscriminatorValue("Donante")
 @Getter
 @Setter
-public class DonanteEntity extends RolEntity {
-}
+public class DonanteEntity extends RolEntity {}

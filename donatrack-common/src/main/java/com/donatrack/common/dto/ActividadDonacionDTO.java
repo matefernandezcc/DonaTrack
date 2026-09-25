@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ActividadDonacionDTO {
-    private UUID idDonacion;
-    private UUID idDonante;
-    private int cantidadBienes;
-    private List<String> categorias;
-    private UUID idEntidadBeneficiaria;
-    private LocalDate fecha;
+  private UUID idDonacion;
+  private UUID idDonante;
+  private int cantidadBienes;
+  private List<String> categorias;
+  private UUID idEntidadBeneficiaria;
+  private LocalDate fecha;
 }

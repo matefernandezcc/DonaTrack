@@ -39,7 +39,7 @@ public class PersonaMapper {
 
     entity.setId(domain.getId());
     entity.setEmail(domain.getEmail());
-    
+
     if (domain.getContacto() != null) {
       entity.setContactoCorreo(domain.getContacto().getCorreoElectronico());
       entity.setContactoTelefono(domain.getContacto().getTelefono());
@@ -50,7 +50,8 @@ public class PersonaMapper {
     }
 
     if (domain.getDocumento() != null) {
-      entity.setDocTipo(domain.getDocumento().getTipo() != null ? domain.getDocumento().getTipo().name() : null);
+      entity.setDocTipo(
+          domain.getDocumento().getTipo() != null ? domain.getDocumento().getTipo().name() : null);
       entity.setDocNumero(domain.getDocumento().getNumero());
     }
 
@@ -79,13 +80,14 @@ public class PersonaMapper {
     if (domain.getRoles() != null) {
       entity.setRoles(
           domain.getRoles().stream()
-              .map(rol -> {
-                var rolEntity = RolMapper.toEntity(rol);
-                if (rolEntity != null) {
-                  rolEntity.setPersona(entity);
-                }
-                return rolEntity;
-              })
+              .map(
+                  rol -> {
+                    var rolEntity = RolMapper.toEntity(rol);
+                    if (rolEntity != null) {
+                      rolEntity.setPersona(entity);
+                    }
+                    return rolEntity;
+                  })
               .filter(java.util.Objects::nonNull)
               .collect(Collectors.toList()));
     }
@@ -96,57 +98,58 @@ public class PersonaMapper {
   public static Persona toDomain(PersonaEntity entity) {
     if (entity == null) return null;
 
-    Contacto contacto = new Contacto(
-        entity.getContactoCorreo(),
-        entity.getContactoTelefono(),
-        entity.getContactoWhatsapp(),
-        entity.getContactoMedioPredeterminado() != null
-            ? MedioContacto.valueOf(entity.getContactoMedioPredeterminado())
-            : null
-    );
+    Contacto contacto =
+        new Contacto(
+            entity.getContactoCorreo(),
+            entity.getContactoTelefono(),
+            entity.getContactoWhatsapp(),
+            entity.getContactoMedioPredeterminado() != null
+                ? MedioContacto.valueOf(entity.getContactoMedioPredeterminado())
+                : null);
 
     Direccion direccion = null;
     if (entity.getDireccion() != null) {
       DireccionEntity de = entity.getDireccion();
-      direccion = new Direccion(
-          de.getCalle(),
-          de.getAltura() != null ? de.getAltura() : 0.0,
-          de.getLocalidad(),
-          null, // provincia
-          de.getCp(),
-          null  // coordenadas
-      );
+      direccion =
+          new Direccion(
+              de.getCalle(),
+              de.getAltura() != null ? de.getAltura() : 0.0,
+              de.getLocalidad(),
+              null, // provincia
+              de.getCp(),
+              null // coordenadas
+              );
     }
 
     DocumentoIdentidad documento = null;
     if (entity.getDocTipo() != null || entity.getDocNumero() != null) {
-      documento = new DocumentoIdentidad(
-          entity.getDocTipo() != null ? TipoDocumento.valueOf(entity.getDocTipo()) : null,
-          entity.getDocNumero()
-      );
+      documento =
+          new DocumentoIdentidad(
+              entity.getDocTipo() != null ? TipoDocumento.valueOf(entity.getDocTipo()) : null,
+              entity.getDocNumero());
     }
 
     Persona domain;
     if (entity instanceof PersonaHumanaEntity phEntity) {
-      domain = new PersonaHumana(
-          entity.getEmail(),
-          contacto,
-          direccion,
-          documento,
-          phEntity.getNombre(),
-          phEntity.getApellido(),
-          phEntity.getEdad() != null ? phEntity.getEdad() : 0
-      );
+      domain =
+          new PersonaHumana(
+              entity.getEmail(),
+              contacto,
+              direccion,
+              documento,
+              phEntity.getNombre(),
+              phEntity.getApellido(),
+              phEntity.getEdad() != null ? phEntity.getEdad() : 0);
     } else if (entity instanceof PersonaJuridicaEntity pjEntity) {
-      domain = new PersonaJuridica(
-          entity.getEmail(),
-          contacto,
-          direccion,
-          documento,
-          pjEntity.getRazonSocial(),
-          pjEntity.getTipo() != null ? TipoPersonaJuridica.valueOf(pjEntity.getTipo()) : null,
-          pjEntity.getRubro()
-      );
+      domain =
+          new PersonaJuridica(
+              entity.getEmail(),
+              contacto,
+              direccion,
+              documento,
+              pjEntity.getRazonSocial(),
+              pjEntity.getTipo() != null ? TipoPersonaJuridica.valueOf(pjEntity.getTipo()) : null,
+              pjEntity.getRubro());
     } else {
       throw new IllegalArgumentException("Tipo de persona entity desconocido");
     }
@@ -154,10 +157,11 @@ public class PersonaMapper {
     domain.setId(entity.getId());
 
     if (entity.getRoles() != null) {
-      domain.setRoles(entity.getRoles().stream()
-          .map(RolMapper::toDomain)
-          .filter(java.util.Objects::nonNull)
-          .collect(Collectors.toList()));
+      domain.setRoles(
+          entity.getRoles().stream()
+              .map(RolMapper::toDomain)
+              .filter(java.util.Objects::nonNull)
+              .collect(Collectors.toList()));
     }
 
     return domain;

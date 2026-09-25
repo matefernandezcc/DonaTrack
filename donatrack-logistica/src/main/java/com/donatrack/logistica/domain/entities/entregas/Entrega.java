@@ -3,7 +3,6 @@ package com.donatrack.logistica.domain.entities.entregas;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

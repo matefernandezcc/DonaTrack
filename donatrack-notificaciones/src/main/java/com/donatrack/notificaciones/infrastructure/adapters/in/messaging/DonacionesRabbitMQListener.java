@@ -12,33 +12,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class DonacionesRabbitMQListener {
 
-    private final NotificadorService notificadorService;
+  private final NotificadorService notificadorService;
 
-    public DonacionesRabbitMQListener(NotificadorService notificadorService) {
-        this.notificadorService = notificadorService;
-    }
+  public DonacionesRabbitMQListener(NotificadorService notificadorService) {
+    this.notificadorService = notificadorService;
+  }
 
-    @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(value = "notificacion_general_queue", durable = "true"),
-            exchange = @Exchange(value = "donaciones.exchange", type = "topic"),
-            key = "notificacion.general"
-    ))
-    public void onNotificacionGeneral(NotificacionRequestDTO request) {
-        log.info("Recibido evento de notificación general (Donaciones) para: {}", request.destinatario);
+  @RabbitListener(
+      bindings =
+          @QueueBinding(
+              value = @Queue(value = "notificacion_general_queue", durable = "true"),
+              exchange = @Exchange(value = "donaciones.exchange", type = "topic"),
+              key = "notificacion.general"))
+  public void onNotificacionGeneral(NotificacionRequestDTO request) {
+    log.info("Recibido evento de notificación general (Donaciones) para: {}", request.destinatario);
 
-        notificadorService.enviarNotificacion(
-                request.destinatario,
-                request.mensaje,
-                request.medio != null ? request.medio : "EMAIL"
-        );
-    }
+    notificadorService.enviarNotificacion(
+        request.destinatario, request.mensaje, request.medio != null ? request.medio : "EMAIL");
+  }
 
-    public static class NotificacionRequestDTO {
-        public String destinatario;
-        public String asunto;
-        public String mensaje;
-        public String medio;
-        
-        public NotificacionRequestDTO() {}
-    }
+  public static class NotificacionRequestDTO {
+    public String destinatario;
+    public String asunto;
+    public String mensaje;
+    public String medio;
+
+    public NotificacionRequestDTO() {}
+  }
 }

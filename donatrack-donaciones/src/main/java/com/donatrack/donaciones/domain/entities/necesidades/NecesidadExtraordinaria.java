@@ -1,11 +1,10 @@
 package com.donatrack.donaciones.domain.entities.necesidades;
 
 import com.donatrack.donaciones.domain.entities.donacion.Bien;
-import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.enums.EstadoNecesidad;
+import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
-
+import com.donatrack.donaciones.domain.entities.enums.EstadoNecesidad;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -28,8 +27,9 @@ public class NecesidadExtraordinaria extends Necesidad {
 
   public void acumularDonacionesParciales(Donacion nuevaDonacion) {
     this.donacionesRecibidas.add(nuevaDonacion);
-    nuevaDonacion.cambiarEstado(EstadoDonacion.ASIGNADA, "Asignada a necesidad extraordinaria", null);
-    
+    nuevaDonacion.cambiarEstado(
+        EstadoDonacion.ASIGNADA, "Asignada a necesidad extraordinaria", null);
+
     if (this.estaCubierta()) {
       this.estado = EstadoNecesidad.SATISFECHA;
     }

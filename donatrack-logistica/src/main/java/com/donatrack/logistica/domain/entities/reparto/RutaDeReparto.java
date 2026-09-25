@@ -1,11 +1,9 @@
 package com.donatrack.logistica.domain.entities.reparto;
 
+import com.donatrack.logistica.domain.entities.entregas.Entrega;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
-import com.donatrack.logistica.domain.entities.entregas.Entrega;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

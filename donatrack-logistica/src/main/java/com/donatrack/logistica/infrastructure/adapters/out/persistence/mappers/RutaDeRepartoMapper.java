@@ -9,9 +9,7 @@ import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Mapper bidireccional entre RutaDeReparto (dominio) y RutaDeRepartoEntity (JPA).
- */
+/** Mapper bidireccional entre RutaDeReparto (dominio) y RutaDeRepartoEntity (JPA). */
 public final class RutaDeRepartoMapper {
 
   private RutaDeRepartoMapper() {}
@@ -111,15 +109,11 @@ public final class RutaDeRepartoMapper {
 
     if (entity.getCalle() != null || entity.getAltura() != null || entity.getLocalidad() != null) {
       domain.setDireccion(
-          new Direccion(
-              entity.getCalle(),
-              entity.getAltura(),
-              entity.getLocalidad()));
+          new Direccion(entity.getCalle(), entity.getAltura(), entity.getLocalidad()));
     }
 
     if (entity.getLatitud() != null && entity.getLongitud() != null) {
-      domain.setCoordenada(
-          new Coordenada(entity.getLatitud(), entity.getLongitud()));
+      domain.setCoordenada(new Coordenada(entity.getLatitud(), entity.getLongitud()));
     }
 
     if (entity.getEntregas() != null) {

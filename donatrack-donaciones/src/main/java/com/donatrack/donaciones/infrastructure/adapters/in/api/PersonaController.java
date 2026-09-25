@@ -1,10 +1,13 @@
 package com.donatrack.donaciones.infrastructure.adapters.in.api;
 
+import com.donatrack.common.dto.ErrorResponse;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Archivo;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.importador.ImportadorCSV;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
@@ -26,8 +29,19 @@ public class PersonaController {
     this.personaRepository = personaRepository;
   }
 
-  @Operation(summary = "Crear persona", description = "Registra una nueva persona en el sistema")
+  @Operation(
+      summary = "Crear persona",
+      description =
+          "Registra una nueva persona en el sistema. Debe incluir el campo 'tipo' ('HUMANA' o 'JURIDICA')")
   @ApiResponse(responseCode = "200", description = "Persona creada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Falta campo 'tipo' o datos inválidos",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @ApiResponse(
+      responseCode = "409",
+      description = "Documento o email duplicado",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @PostMapping
   public ResponseEntity<Persona> crearPersona(@RequestBody Persona persona) {
     if (persona.getId() == null) {
@@ -37,10 +51,21 @@ public class PersonaController {
     return ResponseEntity.ok(persona);
   }
 
-  @Operation(summary = "Importar personas desde archivo CSV", description = "Procesa e inserta personas humanas y jurídicas desde un archivo CSV")
+  @Operation(
+      summary = "Importar personas desde archivo CSV",
+      description = "Procesa e inserta personas humanas y jurídicas desde un archivo CSV")
   @ApiResponse(responseCode = "200", description = "Personas importadas correctamente")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Archivo vacío o formato de datos CSV incorrecto",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @ApiResponse(
+      responseCode = "415",
+      description = "Tipo de medio no soportado (se requiere multipart/form-data)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @PostMapping(value = "/importar-csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<String> importarCSV(@RequestParam("file") MultipartFile file) throws IOException {
+  public ResponseEntity<String> importarCSV(@RequestParam("file") MultipartFile file)
+      throws IOException {
     if (file.isEmpty()) {
       return ResponseEntity.badRequest().body("El archivo CSV está vacío.");
     }
@@ -57,9 +82,18 @@ public class PersonaController {
     return ResponseEntity.ok(personaRepository.obtenerTodas());
   }
 
-  @Operation(summary = "Obtener persona por ID", description = "Devuelve los datos de una persona específica")
+  @Operation(
+      summary = "Obtener persona por ID",
+      description = "Devuelve los datos de una persona específica")
   @ApiResponse(responseCode = "200", description = "Persona encontrada")
-  @ApiResponse(responseCode = "404", description = "Persona no encontrada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "ID con formato inválido (debe ser UUID)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @ApiResponse(
+      responseCode = "404",
+      description = "Persona no encontrada",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/{id}")
   public ResponseEntity<Persona> obtenerPersona(@PathVariable UUID id) {
     return personaRepository
@@ -68,9 +102,18 @@ public class PersonaController {
         .orElse(ResponseEntity.notFound().build());
   }
 
-  @Operation(summary = "Actualizar persona", description = "Actualiza los datos de una persona existente")
+  @Operation(
+      summary = "Actualizar persona",
+      description = "Actualiza los datos de una persona existente")
   @ApiResponse(responseCode = "200", description = "Persona actualizada")
-  @ApiResponse(responseCode = "404", description = "Persona no encontrada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Datos o formato inválidos",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @ApiResponse(
+      responseCode = "404",
+      description = "Persona no encontrada",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @PutMapping("/{id}")
   public ResponseEntity<Persona> actualizarPersona(
       @PathVariable UUID id, @RequestBody Persona persona) {
@@ -87,6 +130,10 @@ public class PersonaController {
 
   @Operation(summary = "Eliminar persona", description = "Elimina una persona del sistema")
   @ApiResponse(responseCode = "204", description = "Persona eliminada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "ID con formato inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> eliminarPersona(@PathVariable UUID id) {
     return ResponseEntity.noContent().build();

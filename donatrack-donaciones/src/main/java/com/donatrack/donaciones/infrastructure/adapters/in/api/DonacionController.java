@@ -1,206 +1,313 @@
 package com.donatrack.donaciones.infrastructure.adapters.in.api;
 
-import com.donatrack.donaciones.application.ports.in.RecepcionDonacionesUseCase;
-import com.donatrack.donaciones.application.ports.in.CargaBienesRequestDTO;
-import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
-
-import com.donatrack.donaciones.application.ports.in.DonacionResponseDTO;
-import com.donatrack.donaciones.application.ports.in.DonacionRequestDTO;
-import com.donatrack.donaciones.application.ports.in.CambioEstadoRequestDTO;
+import com.donatrack.common.dto.ActividadDonacionDTO;
+import com.donatrack.common.dto.ErrorResponse;
 import com.donatrack.donaciones.application.ports.in.BeneficiarioResponseDTO;
-
-import com.donatrack.donaciones.domain.entities.donacion.Donacion;
-import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
-import com.donatrack.donaciones.domain.entities.persona.Contacto;
-import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
-import com.donatrack.donaciones.application.ports.out.NotificacionOutDTO;
-
-import com.donatrack.donaciones.application.ports.out.DonacionRepository;
+import com.donatrack.donaciones.application.ports.in.CambioEstadoRequestDTO;
+import com.donatrack.donaciones.application.ports.in.CargaBienesRequestDTO;
+import com.donatrack.donaciones.application.ports.in.DonacionRequestDTO;
+import com.donatrack.donaciones.application.ports.in.DonacionResponseDTO;
+import com.donatrack.donaciones.application.ports.in.RecepcionDonacionesUseCase;
 import com.donatrack.donaciones.application.ports.out.BeneficiarioRepository;
+import com.donatrack.donaciones.application.ports.out.DonacionRepository;
+import com.donatrack.donaciones.application.ports.out.NotificacionOutDTO;
 import com.donatrack.donaciones.application.ports.out.ServicioNotificaciones;
-import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
+import com.donatrack.donaciones.application.usecases.AsignacionBatchJob;
+import com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob;
+import com.donatrack.donaciones.domain.entities.donacion.Donacion;
+import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
+import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
+import com.donatrack.donaciones.domain.entities.persona.Contacto;
+import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import com.donatrack.donaciones.domain.services.MatchmakerService;
-
+import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Donaciones", description = "Gestión de donaciones, recepción de bienes, asignación y estados")
+@Tag(
+    name = "Donaciones",
+    description = "Gestión de donaciones, recepción de bienes, asignación y estados")
 public class DonacionController {
 
-    private final MatchmakerService matchmakerService;
-    private final ServicioNotificaciones servicioNotificaciones;
-    private final IncentivoClient incentivoClient;
-    private final DonacionRepository donacionRepository;
-    private final BeneficiarioRepository beneficiarioRepository;
-    private final com.donatrack.donaciones.application.usecases.AsignacionBatchJob asignacionBatchJob;
-    private final RecepcionDonacionesUseCase recepcionDonacionesUseCase;
-    private final com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob auditoriaDepositoJob;
+  private final MatchmakerService matchmakerService;
+  private final ServicioNotificaciones servicioNotificaciones;
+  private final IncentivoClient incentivoClient;
+  private final DonacionRepository donacionRepository;
+  private final BeneficiarioRepository beneficiarioRepository;
+  private final AsignacionBatchJob asignacionBatchJob;
+  private final RecepcionDonacionesUseCase recepcionDonacionesUseCase;
+  private final AuditoriaDepositoJob auditoriaDepositoJob;
 
-    public DonacionController(MatchmakerService matchmakerService,
-            ServicioNotificaciones servicioNotificaciones,
-            IncentivoClient incentivoClient,
-            DonacionRepository donacionRepository,
-            BeneficiarioRepository beneficiarioRepository,
-            com.donatrack.donaciones.application.usecases.AsignacionBatchJob asignacionBatchJob,
-            RecepcionDonacionesUseCase recepcionDonacionesUseCase,
-            com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob auditoriaDepositoJob) {
-        this.matchmakerService = matchmakerService;
-        this.servicioNotificaciones = servicioNotificaciones;
-        this.incentivoClient = incentivoClient;
-        this.donacionRepository = donacionRepository;
-        this.beneficiarioRepository = beneficiarioRepository;
-        this.asignacionBatchJob = asignacionBatchJob;
-        this.recepcionDonacionesUseCase = recepcionDonacionesUseCase;
-        this.auditoriaDepositoJob = auditoriaDepositoJob;
-    }
+  public DonacionController(
+      MatchmakerService matchmakerService,
+      ServicioNotificaciones servicioNotificaciones,
+      IncentivoClient incentivoClient,
+      DonacionRepository donacionRepository,
+      BeneficiarioRepository beneficiarioRepository,
+      AsignacionBatchJob asignacionBatchJob,
+      RecepcionDonacionesUseCase recepcionDonacionesUseCase,
+      AuditoriaDepositoJob auditoriaDepositoJob) {
+    this.matchmakerService = matchmakerService;
+    this.servicioNotificaciones = servicioNotificaciones;
+    this.incentivoClient = incentivoClient;
+    this.donacionRepository = donacionRepository;
+    this.beneficiarioRepository = beneficiarioRepository;
+    this.asignacionBatchJob = asignacionBatchJob;
+    this.recepcionDonacionesUseCase = recepcionDonacionesUseCase;
+    this.auditoriaDepositoJob = auditoriaDepositoJob;
+  }
 
-    @Operation(summary = "Auditar donaciones vencidas", description = "Ejecuta la auditoría de donaciones que han superado su fecha de vencimiento en depósito")
-    @ApiResponse(responseCode = "200", description = "Auditoría ejecutada")
-    @PostMapping("/donaciones/auditoria/vencidos")
-    public ResponseEntity<Void> auditarVencidos() {
-        auditoriaDepositoJob.auditarVencidos();
-        return ResponseEntity.ok().build();
-    }
+  @Operation(
+      summary = "Auditar donaciones vencidas",
+      description =
+          "Ejecuta la auditoría de donaciones que han superado su fecha de vencimiento en depósito")
+  @ApiResponse(responseCode = "200", description = "Auditoría ejecutada")
+  @ApiResponse(
+      responseCode = "500",
+      description = "Error interno del servidor",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PostMapping("/donaciones/auditoria/vencidos")
+  public ResponseEntity<Void> auditarVencidos() {
+    auditoriaDepositoJob.auditarVencidos();
+    return ResponseEntity.ok().build();
+  }
 
-    @Operation(summary = "Recibir bienes brutos", description = "Registra una nueva recepción de bienes y los segmenta en donaciones individuales")
-    @ApiResponse(responseCode = "200", description = "Recepción creada con sus donaciones segmentadas")
-    @PostMapping("/recepciones")
-    public ResponseEntity<DonacionOriginal> recibirBienesBrutos(@RequestBody CargaBienesRequestDTO requestDTO) {
-        DonacionOriginal recepcion = recepcionDonacionesUseCase.recibir(requestDTO);
-        return ResponseEntity.ok(recepcion);
-    }
+  @Operation(
+      summary = "Recibir bienes brutos",
+      description =
+          "Registra una nueva recepción de bienes y los segmenta en donaciones individuales")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Recepción creada con sus donaciones segmentadas")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Donante o administrador no encontrado, o persona sin rol donante",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @ApiResponse(
+      responseCode = "500",
+      description = "Error interno del servidor",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PostMapping("/recepciones")
+  public ResponseEntity<DonacionOriginal> recibirBienesBrutos(
+      @RequestBody CargaBienesRequestDTO requestDTO) {
+    DonacionOriginal recepcion = recepcionDonacionesUseCase.recibir(requestDTO);
+    return ResponseEntity.ok(recepcion);
+  }
 
-    @Operation(summary = "Obtener donación por ID", description = "Devuelve el estado y la asignación de una donación específica")
-    @ApiResponse(responseCode = "200", description = "Donación encontrada")
-    @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
-    public ResponseEntity<DonacionResponseDTO> obtenerDonacion(@PathVariable UUID id) {
-        return donacionRepository.buscarPorId(id).map(donacion -> {
-            DonacionResponseDTO response = new DonacionResponseDTO(
-                    donacion.getId(),
-                    donacion.getEstado(),
-                    donacion.getEntidadAsignada() != null ? donacion.getEntidadAsignada().getId() : null
-            );
-            return ResponseEntity.ok(response);
-        }).orElseGet(() -> {
-            DonacionResponseDTO response = new DonacionResponseDTO(id, null, null);
-            return ResponseEntity.ok(response);
-        });
-    }
+  @Operation(
+      summary = "Obtener donación por ID",
+      description = "Devuelve el estado y la asignación de una donación específica")
+  @ApiResponse(responseCode = "200", description = "Donación encontrada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "ID con formato inválido (debe ser UUID)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
+  public ResponseEntity<DonacionResponseDTO> obtenerDonacion(@PathVariable UUID id) {
+    return donacionRepository
+        .buscarPorId(id)
+        .map(
+            donacion -> {
+              DonacionResponseDTO response =
+                  new DonacionResponseDTO(
+                      donacion.getId(),
+                      donacion.getEstado(),
+                      donacion.getEntidadAsignada() != null
+                          ? donacion.getEntidadAsignada().getId()
+                          : null);
+              return ResponseEntity.ok(response);
+            })
+        .orElseGet(
+            () -> {
+              DonacionResponseDTO response = new DonacionResponseDTO(id, null, null);
+              return ResponseEntity.ok(response);
+            });
+  }
 
-    @Operation(summary = "Registrar donación en depósito", description = "Notifica al servicio de incentivos que una donación fue recibida en depósito")
-    @ApiResponse(responseCode = "200", description = "Actividad registrada en incentivos")
-    @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/en_deposito")
-    public ResponseEntity<Void> donacionEnDeposito(@PathVariable UUID id) {
-        Donacion donacion = donacionRepository.buscarPorId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Donacion no encontrada"));
+  @Operation(
+      summary = "Registrar donación en depósito",
+      description = "Notifica al servicio de incentivos que una donación fue recibida en depósito")
+  @ApiResponse(responseCode = "200", description = "Actividad registrada en incentivos")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Donación no encontrada o formato de ID inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @ApiResponse(
+      responseCode = "500",
+      description = "Error al comunicarse con servicio de incentivos",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/en_deposito")
+  public ResponseEntity<Void> donacionEnDeposito(@PathVariable UUID id) {
+    Donacion donacion =
+        donacionRepository
+            .buscarPorId(id)
+            .orElseThrow(() -> new IllegalArgumentException("Donacion no encontrada"));
 
-        UUID idDonante = UUID.randomUUID(); // idDonante mockeado
+    UUID idDonante = UUID.randomUUID(); // idDonante mockeado
 
-        int cantidadBienes = donacion.getBienes().size();
-        List<String> categorias = donacion.getCategoriasString();
-        UUID idEntidadBeneficiaria = null;
-        LocalDate fecha = LocalDate.now();
+    int cantidadBienes = donacion.getBienes().size();
+    List<String> categorias = donacion.getCategoriasString();
+    UUID idEntidadBeneficiaria = null;
+    LocalDate fecha = LocalDate.now();
 
-        com.donatrack.common.dto.ActividadDonacionDTO dto = new com.donatrack.common.dto.ActividadDonacionDTO(
-                id, idDonante, cantidadBienes, categorias, idEntidadBeneficiaria, fecha);
+    ActividadDonacionDTO dto =
+        new ActividadDonacionDTO(
+            id, idDonante, cantidadBienes, categorias, idEntidadBeneficiaria, fecha);
 
-        incentivoClient.registrarActividadDonacionEnDeposito(id, dto);
-        return ResponseEntity.ok().build();
-    }
+    incentivoClient.registrarActividadDonacionEnDeposito(id, dto);
+    return ResponseEntity.ok().build();
+  }
 
-    @Operation(summary = "Asignar donación a beneficiario", description = "Asigna una donación a una entidad beneficiaria y notifica a las partes")
-    @ApiResponse(responseCode = "200", description = "Donación asignada y notificaciones enviadas")
-    @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/asignar")
-    public ResponseEntity<Void> asignarDonacion(@PathVariable UUID id,
-            @RequestBody BeneficiarioResponseDTO beneficiarioDTO) {
-        Contacto contactoBeneficiario = new Contacto("entidad@test.com", null, null, MedioContacto.CORREO);
-        servicioNotificaciones.enviar(new NotificacionOutDTO("Donación asignada", MedioContacto.CORREO),
-                contactoBeneficiario);
+  @Operation(
+      summary = "Asignar donación a beneficiario",
+      description = "Asigna una donación a una entidad beneficiaria y notifica a las partes")
+  @ApiResponse(responseCode = "200", description = "Donación asignada y notificaciones enviadas")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Datos de beneficiario inválidos",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/asignar")
+  public ResponseEntity<Void> asignarDonacion(
+      @PathVariable UUID id, @RequestBody BeneficiarioResponseDTO beneficiarioDTO) {
+    Contacto contactoBeneficiario =
+        new Contacto("entidad@test.com", null, null, MedioContacto.CORREO);
+    servicioNotificaciones.enviar(
+        new NotificacionOutDTO("Donación asignada", MedioContacto.CORREO), contactoBeneficiario);
 
-        Contacto contactoDonante = new Contacto("donante@test.com", null, null, MedioContacto.CORREO);
-        servicioNotificaciones.enviar(
-                new NotificacionOutDTO("Tu donación ha sido asignada a una entidad", MedioContacto.CORREO),
-                contactoDonante);
+    Contacto contactoDonante = new Contacto("donante@test.com", null, null, MedioContacto.CORREO);
+    servicioNotificaciones.enviar(
+        new NotificacionOutDTO("Tu donación ha sido asignada a una entidad", MedioContacto.CORREO),
+        contactoDonante);
 
-        return ResponseEntity.ok().build();
-    }
+    return ResponseEntity.ok().build();
+  }
 
-    @Operation(summary = "Registrar donación entregada", description = "Notifica al servicio de incentivos que una donación fue entregada exitosamente")
-    @ApiResponse(responseCode = "200", description = "Actividad de entrega registrada")
-    @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/entregada")
-    public ResponseEntity<Void> donacionEntregada(@PathVariable UUID id, @RequestParam UUID idDonante) {
-        int cantidadBienesMock = 5;
-        List<String> categoriasMock = List.of("Alimentos", "Vestimenta");
-        UUID idEntidadMock = UUID.randomUUID();
-        java.time.LocalDate fechaMock = java.time.LocalDate.now();
+  @Operation(
+      summary = "Registrar donación entregada",
+      description =
+          "Notifica al servicio de incentivos que una donación fue entregada exitosamente")
+  @ApiResponse(responseCode = "200", description = "Actividad de entrega registrada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Falta parámetro 'idDonante' o formato UUID inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/entregada")
+  public ResponseEntity<Void> donacionEntregada(
+      @PathVariable UUID id, @RequestParam UUID idDonante) {
+    int cantidadBienesMock = 5;
+    List<String> categoriasMock = List.of("Alimentos", "Vestimenta");
+    UUID idEntidadMock = UUID.randomUUID();
+    LocalDate fechaMock = LocalDate.now();
 
-        com.donatrack.common.dto.ActividadDonacionDTO dto = new com.donatrack.common.dto.ActividadDonacionDTO(
-                id, idDonante, cantidadBienesMock, categoriasMock, idEntidadMock, fechaMock);
+    ActividadDonacionDTO dto =
+        new ActividadDonacionDTO(
+            id, idDonante, cantidadBienesMock, categoriasMock, idEntidadMock, fechaMock);
 
-        incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
-        return ResponseEntity.ok().build();
-    }
+    incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
+    return ResponseEntity.ok().build();
+  }
 
-    @Operation(summary = "Sugerir beneficiarios (matchmaking)", description = "Ejecuta el algoritmo de matchmaking para sugerir beneficiarios compatibles con la donación")
-    @ApiResponse(responseCode = "200", description = "Lista de beneficiarios sugeridos")
-    @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/matchmaking")
-    public ResponseEntity<List<BeneficiarioResponseDTO>> sugerirBeneficiarios(@PathVariable UUID id) {
-        Donacion donacionMock = new Donacion(null);
-        donacionMock.setId(id);
+  @Operation(
+      summary = "Sugerir beneficiarios (matchmaking)",
+      description =
+          "Ejecuta el algoritmo de matchmaking para sugerir beneficiarios compatibles con la donación")
+  @ApiResponse(responseCode = "200", description = "Lista de beneficiarios sugeridos")
+  @ApiResponse(
+      responseCode = "400",
+      description = "ID con formato inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/matchmaking")
+  public ResponseEntity<List<BeneficiarioResponseDTO>> sugerirBeneficiarios(@PathVariable UUID id) {
+    Donacion donacionMock = new Donacion(null);
+    donacionMock.setId(id);
 
-        List<Beneficiario> disponibles = beneficiarioRepository.buscarTodos();
-        List<Beneficiario> sugerencias = matchmakerService.obtenerSugerencias(donacionMock, disponibles);
+    List<Beneficiario> disponibles = beneficiarioRepository.buscarTodos();
+    List<Beneficiario> sugerencias =
+        matchmakerService.obtenerSugerencias(donacionMock, disponibles);
 
-        List<BeneficiarioResponseDTO> sugerenciasDTO = sugerencias.stream()
-                .map(b -> new BeneficiarioResponseDTO(b.getId()))
-                .collect(Collectors.toList());
+    List<BeneficiarioResponseDTO> sugerenciasDTO =
+        sugerencias.stream()
+            .map(b -> new BeneficiarioResponseDTO(b.getId()))
+            .collect(Collectors.toList());
 
-        return ResponseEntity.ok(sugerenciasDTO);
-    }
+    return ResponseEntity.ok(sugerenciasDTO);
+  }
 
-    @Operation(summary = "Actualizar donación", description = "Actualiza los datos de una donación existente")
-    @ApiResponse(responseCode = "200", description = "Donación actualizada")
-    @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
-    public ResponseEntity<DonacionResponseDTO> actualizarDonacion(@PathVariable UUID id,
-            @RequestBody DonacionRequestDTO requestDTO) {
-        DonacionResponseDTO response = new DonacionResponseDTO(id, null, null);
-        return ResponseEntity.ok(response);
-    }
+  @Operation(
+      summary = "Actualizar donación",
+      description = "Actualiza los datos de una donación existente")
+  @ApiResponse(responseCode = "200", description = "Donación actualizada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Datos inválidos",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
+  public ResponseEntity<DonacionResponseDTO> actualizarDonacion(
+      @PathVariable UUID id, @RequestBody DonacionRequestDTO requestDTO) {
+    DonacionResponseDTO response = new DonacionResponseDTO(id, null, null);
+    return ResponseEntity.ok(response);
+  }
 
-    @Operation(summary = "Eliminar donación", description = "Elimina una donación del sistema")
-    @ApiResponse(responseCode = "204", description = "Donación eliminada")
-    @DeleteMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
-    public ResponseEntity<Void> eliminarDonacion(@PathVariable UUID id) {
-        return ResponseEntity.noContent().build();
-    }
+  @Operation(summary = "Eliminar donación", description = "Elimina una donación del sistema")
+  @ApiResponse(responseCode = "204", description = "Donación eliminada")
+  @ApiResponse(
+      responseCode = "400",
+      description = "ID con formato inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @DeleteMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
+  public ResponseEntity<Void> eliminarDonacion(@PathVariable UUID id) {
+    return ResponseEntity.noContent().build();
+  }
 
-    @Operation(summary = "Cambiar estado de donación", description = "Cambia el estado de una donación registrando la transición en el historial")
-    @ApiResponse(responseCode = "200", description = "Estado cambiado")
-    @ApiResponse(responseCode = "404", description = "Donación no encontrada")
-    @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado")
-    public ResponseEntity<Void> cambiarEstado(@PathVariable UUID id, @RequestBody CambioEstadoRequestDTO request) {
-        return donacionRepository.buscarPorId(id).map(donacion -> {
-            donacion.cambiarEstado(request.nuevoEstado(), request.observacion(), null);
-            donacionRepository.guardar(donacion);
-            return ResponseEntity.ok().<Void>build();
-        }).orElse(ResponseEntity.notFound().build());
-    }
+  @Operation(
+      summary = "Cambiar estado de donación",
+      description = "Cambia el estado de una donación registrando la transición en el historial")
+  @ApiResponse(responseCode = "200", description = "Estado cambiado")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Estado de donación inválido o formato de datos incorrecto",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @ApiResponse(
+      responseCode = "404",
+      description = "Donación no encontrada",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado")
+  public ResponseEntity<Void> cambiarEstado(
+      @PathVariable UUID id, @RequestBody CambioEstadoRequestDTO request) {
+    return donacionRepository
+        .buscarPorId(id)
+        .map(
+            donacion -> {
+              donacion.cambiarEstado(request.nuevoEstado(), request.observacion(), null);
+              donacionRepository.guardar(donacion);
+              return ResponseEntity.ok().<Void>build();
+            })
+        .orElse(ResponseEntity.notFound().build());
+  }
 
-    @Operation(summary = "Ejecutar asignación batch", description = "Ejecuta el proceso batch de asignación automática de donaciones en depósito a beneficiarios")
-    @ApiResponse(responseCode = "200", description = "Proceso de asignación ejecutado")
-    @PostMapping("/donaciones/asignacion-batch")
-    public ResponseEntity<Void> ejecutarAsignacionBatch() {
-        asignacionBatchJob.asignarDonacionesEnDeposito();
-        return ResponseEntity.ok().build();
-    }
+  @Operation(
+      summary = "Ejecutar asignación batch",
+      description =
+          "Ejecuta el proceso batch de asignación automática de donaciones en depósito a beneficiarios")
+  @ApiResponse(responseCode = "200", description = "Proceso de asignación ejecutado")
+  @ApiResponse(
+      responseCode = "500",
+      description = "Error interno durante el proceso batch",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PostMapping("/donaciones/asignacion-batch")
+  public ResponseEntity<Void> ejecutarAsignacionBatch() {
+    asignacionBatchJob.asignarDonacionesEnDeposito();
+    return ResponseEntity.ok().build();
+  }
 }

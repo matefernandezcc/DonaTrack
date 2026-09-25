@@ -6,7 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PerfilDonanteRepository {
-    Optional<PerfilDonante> findById(UUID donanteId);
-    void save(PerfilDonante perfil);
-    List<PerfilDonante> findAll();
+  Optional<PerfilDonante> findById(UUID donanteId);
+
+  void save(PerfilDonante perfil);
+
+  List<PerfilDonante> findAll();
 }

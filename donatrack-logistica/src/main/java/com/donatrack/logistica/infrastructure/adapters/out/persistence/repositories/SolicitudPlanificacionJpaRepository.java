@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SolicitudPlanificacionJpaRepository
-        extends JpaRepository<SolicitudPlanificacionEntity, UUID> {
-}
+    extends JpaRepository<SolicitudPlanificacionEntity, UUID> {}

@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChoferJpaRepository extends JpaRepository<ChoferEntity, UUID> {
   Optional<ChoferEntity> findByLegajo(String legajo);
+
   void deleteByLegajo(String legajo);
 }

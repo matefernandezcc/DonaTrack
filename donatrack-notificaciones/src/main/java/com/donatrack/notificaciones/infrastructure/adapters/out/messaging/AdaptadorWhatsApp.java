@@ -9,12 +9,13 @@ import org.springframework.stereotype.Component;
 @Component("WHATSAPP")
 public class AdaptadorWhatsApp implements NotificacionAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdaptadorWhatsApp.class);
+  private static final Logger logger = LoggerFactory.getLogger(AdaptadorWhatsApp.class);
 
-    @Override
-    public void enviar(Notificacion notificacion) {
-        // Simulación de envío por WhatsApp
-        logger.info("Enviando WhatsApp al {}: {}", notificacion.getDestinatario(), notificacion.getMensaje());
-        notificacion.setCompletada(true);
-    }
+  @Override
+  public void enviar(Notificacion notificacion) {
+    // Simulación de envío por WhatsApp
+    logger.info(
+        "Enviando WhatsApp al {}: {}", notificacion.getDestinatario(), notificacion.getMensaje());
+    notificacion.setCompletada(true);
+  }
 }

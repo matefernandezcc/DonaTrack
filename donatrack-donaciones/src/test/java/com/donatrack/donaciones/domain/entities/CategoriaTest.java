@@ -2,10 +2,9 @@ package com.donatrack.donaciones.domain.entities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Test;
-
 import com.donatrack.donaciones.domain.entities.donacion.Categoria;
 import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
+import org.junit.jupiter.api.Test;
 
 public class CategoriaTest {
   Categoria categoriaPadre = new Categoria("ropa", "ropaGeneral");

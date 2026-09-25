@@ -43,7 +43,8 @@ public class RolMapper {
     } else if (entity instanceof RepresentanteEntity re) {
       domain = new Representante(re.getCargo(), null);
     } else {
-      throw new IllegalArgumentException("RolEntity no soportado: " + entity.getClass().getSimpleName());
+      throw new IllegalArgumentException(
+          "RolEntity no soportado: " + entity.getClass().getSimpleName());
     }
 
     domain.setId(entity.getId());

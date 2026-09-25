@@ -3,6 +3,9 @@ package com.donatrack.donaciones.domain.entities.persona;
 import com.donatrack.donaciones.domain.entities.persona.ubicacion.Direccion;
 import com.donatrack.donaciones.domain.entities.persona.validador.PersonaValidator;
 import com.donatrack.donaciones.domain.entities.roles.Rol;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,19 +13,13 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import io.swagger.v3.oas.annotations.media.Schema;
-
-@Schema(description = "Persona registrada en el sistema. Campo 'tipo' obligatorio: 'HUMANA' o 'JURIDICA'")
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "tipo"
-)
+@Schema(
+    description =
+        "Persona registrada en el sistema. Campo 'tipo' obligatorio: 'HUMANA' o 'JURIDICA'")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tipo")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = PersonaHumana.class, name = "HUMANA"),
-    @JsonSubTypes.Type(value = PersonaJuridica.class, name = "JURIDICA")
+  @JsonSubTypes.Type(value = PersonaHumana.class, name = "HUMANA"),
+  @JsonSubTypes.Type(value = PersonaJuridica.class, name = "JURIDICA")
 })
 @Getter
 @Setter
@@ -65,8 +62,8 @@ public abstract class Persona {
 
   public boolean validarDocumentacion(DocumentoIdentidad d) {
     if (d == null) return false;
-    return this.documento != null 
-        && this.documento.getNumero().equals(d.getNumero()) 
+    return this.documento != null
+        && this.documento.getNumero().equals(d.getNumero())
         && this.documento.getTipo() == d.getTipo();
   }
 

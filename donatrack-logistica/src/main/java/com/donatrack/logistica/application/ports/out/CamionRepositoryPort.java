@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CamionRepositoryPort {
-    void guardar(Camion camion);
+  void guardar(Camion camion);
 
-    Optional<Camion> buscarPorPatente(String patente);
+  Optional<Camion> buscarPorPatente(String patente);
 
-    List<Camion> obtenerTodos();
+  List<Camion> obtenerTodos();
 
-    void eliminar(String patente);
+  void eliminar(String patente);
 }

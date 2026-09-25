@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DonacionJpaRepository extends JpaRepository<DonacionEntity, UUID> {
-    List<DonacionEntity> findByEstado(String estado);
+  List<DonacionEntity> findByEstado(String estado);
 }

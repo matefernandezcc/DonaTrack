@@ -9,12 +9,13 @@ import org.springframework.stereotype.Component;
 @Component("SMS")
 public class AdaptadorSMS implements NotificacionAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdaptadorSMS.class);
+  private static final Logger logger = LoggerFactory.getLogger(AdaptadorSMS.class);
 
-    @Override
-    public void enviar(Notificacion notificacion) {
-        // Simulación de envío por SMS
-        logger.info("Enviando SMS al {}: {}", notificacion.getDestinatario(), notificacion.getMensaje());
-        notificacion.setCompletada(true);
-    }
+  @Override
+  public void enviar(Notificacion notificacion) {
+    // Simulación de envío por SMS
+    logger.info(
+        "Enviando SMS al {}: {}", notificacion.getDestinatario(), notificacion.getMensaje());
+    notificacion.setCompletada(true);
+  }
 }

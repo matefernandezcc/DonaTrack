@@ -26,7 +26,7 @@ public class NecesidadRecurrente extends Necesidad {
     this.tipoPeriodo = tipoPeriodo;
     this.activa = true;
     this.historialPeriodos = new ArrayList<>();
-    
+
     // Inicializar el período actual
     LocalDate inicio = LocalDate.now();
     LocalDate fin = inicio.plusDays(tipoPeriodo.getDias() - 1);
@@ -38,7 +38,7 @@ public class NecesidadRecurrente extends Necesidad {
       return null;
     }
     this.historialPeriodos.add(this.periodoActual);
-    
+
     LocalDate nuevoInicio = this.periodoActual.getFechaFin().plusDays(1);
     LocalDate nuevoFin = nuevoInicio.plusDays(this.tipoPeriodo.getDias() - 1);
     this.periodoActual = new PeriodoNecesidad(nuevoInicio, nuevoFin);

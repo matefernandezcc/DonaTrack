@@ -17,6 +17,6 @@ public abstract class Rol {
   }
 
   public abstract boolean esValidoParaHumana();
-  
+
   public abstract boolean esValidoParaJuridica();
 }

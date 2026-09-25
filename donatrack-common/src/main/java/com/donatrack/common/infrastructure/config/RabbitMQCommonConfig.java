@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQCommonConfig {
 
-    @Bean
-    public Jackson2JsonMessageConverter jackson2JsonMessageConverter(ObjectMapper objectMapper) {
-        return new Jackson2JsonMessageConverter(objectMapper);
-    }
+  @Bean
+  public Jackson2JsonMessageConverter jackson2JsonMessageConverter(ObjectMapper objectMapper) {
+    return new Jackson2JsonMessageConverter(objectMapper);
+  }
 }

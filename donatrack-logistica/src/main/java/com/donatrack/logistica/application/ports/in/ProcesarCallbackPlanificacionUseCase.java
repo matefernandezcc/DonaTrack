@@ -5,5 +5,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProcesarCallbackPlanificacionUseCase {
-    void procesarCallback(UUID idSolicitud, List<RutaDeReparto> rutas);
+  void procesarCallback(UUID idSolicitud, List<RutaDeReparto> rutas);
 }

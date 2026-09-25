@@ -1,9 +1,7 @@
 package com.donatrack.logistica.domain.entities.reparto;
 
-import java.util.List;
-
 import com.donatrack.logistica.domain.entities.entregas.Entrega;
-
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

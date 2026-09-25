@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ItemPlanificacionJpaRepository
-        extends JpaRepository<ItemPlanificacionEntity, UUID> {
-}
+    extends JpaRepository<ItemPlanificacionEntity, UUID> {}
