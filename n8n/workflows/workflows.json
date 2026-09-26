@@ -5,7 +5,7 @@
         "id": "donatrack-insignias",
         "name": "DonaTrack - Insignias",
         "description": null,
-        "active": true,
+        "active": false,
         "isArchived": false,
         "nodes": [
             {
@@ -131,28 +131,31 @@
         },
         "staticData": null,
         "meta": null,
+        "nodeGroups": [],
         "pinData": {},
-        "versionId": "10ea8ef8-aab2-4e04-af4c-97c0791363e4",
-        "activeVersionId": "10ea8ef8-aab2-4e04-af4c-97c0791363e4",
-        "versionCounter": 5,
+        "versionId": "45c8970b-5007-45af-817b-e2e00a3f87ac",
+        "activeVersionId": null,
+        "versionCounter": 6,
         "triggerCount": 1,
+        "sourceWorkflowId": null,
         "tags": [],
         "shared": [
             {
-                "updatedAt": "2026-05-30T00:12:40.185Z",
-                "createdAt": "2026-05-30T00:12:40.185Z",
+                "updatedAt": "2026-09-25T13:44:25.104Z",
+                "createdAt": "2026-09-25T13:44:25.104Z",
                 "role": "workflow:owner",
                 "workflowId": "donatrack-insignias",
-                "projectId": "aUAwLVlEtsTFzDRX",
+                "projectId": "XdyxmmRJHDP8lpo0",
                 "project": {
-                    "updatedAt": "2026-05-28T01:42:24.179Z",
-                    "createdAt": "2026-05-28T01:39:13.389Z",
-                    "id": "aUAwLVlEtsTFzDRX",
+                    "updatedAt": "2026-09-25T13:45:31.247Z",
+                    "createdAt": "2026-09-25T13:43:52.692Z",
+                    "id": "XdyxmmRJHDP8lpo0",
                     "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
                     "type": "personal",
                     "icon": null,
                     "description": null,
-                    "creatorId": "c2b9a27b-1aee-479f-87b0-2027812789e1"
+                    "customTelemetryTags": [],
+                    "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
                 }
             }
         ],
@@ -167,7 +170,7 @@
         "id": "donatrack-ranking",
         "name": "DonaTrack - Ranking",
         "description": null,
-        "active": true,
+        "active": false,
         "isArchived": false,
         "nodes": [
             {
@@ -358,28 +361,31 @@
             }
         },
         "meta": null,
+        "nodeGroups": [],
         "pinData": {},
-        "versionId": "ed7a3926-fb8b-47de-8718-99cd349012f2",
-        "activeVersionId": "ed7a3926-fb8b-47de-8718-99cd349012f2",
-        "versionCounter": 14,
+        "versionId": "ca453ae3-7d5e-4405-9643-20bbf4903327",
+        "activeVersionId": null,
+        "versionCounter": 15,
         "triggerCount": 1,
+        "sourceWorkflowId": null,
         "tags": [],
         "shared": [
             {
-                "updatedAt": "2026-05-30T01:28:29.750Z",
-                "createdAt": "2026-05-30T01:28:29.750Z",
+                "updatedAt": "2026-09-25T13:44:25.111Z",
+                "createdAt": "2026-09-25T13:44:25.111Z",
                 "role": "workflow:owner",
                 "workflowId": "donatrack-ranking",
-                "projectId": "aUAwLVlEtsTFzDRX",
+                "projectId": "XdyxmmRJHDP8lpo0",
                 "project": {
-                    "updatedAt": "2026-05-28T01:42:24.179Z",
-                    "createdAt": "2026-05-28T01:39:13.389Z",
-                    "id": "aUAwLVlEtsTFzDRX",
+                    "updatedAt": "2026-09-25T13:45:31.247Z",
+                    "createdAt": "2026-09-25T13:43:52.692Z",
+                    "id": "XdyxmmRJHDP8lpo0",
                     "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
                     "type": "personal",
                     "icon": null,
                     "description": null,
-                    "creatorId": "c2b9a27b-1aee-479f-87b0-2027812789e1"
+                    "customTelemetryTags": [],
+                    "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
                 }
             }
         ],
@@ -978,28 +984,31 @@
             "aiBuilderA ssisted": true,
             "builderVariant": "mcp"
         },
+        "nodeGroups": [],
         "pinData": {},
-        "versionId": "55320d91-4a0f-4048-a091-b22b2ac981c3",
+        "versionId": "f4e4c24a-6ff1-42f5-9716-13e0b8cd4ae9",
         "activeVersionId": null,
         "versionCounter": 4,
         "triggerCount": 1,
+        "sourceWorkflowId": null,
         "tags": [],
         "shared": [
             {
-                "updatedAt": "2026-05-31T22:47:12.240Z",
-                "createdAt": "2026-05-31T22:47:12.240Z",
+                "updatedAt": "2026-09-25T13:44:25.117Z",
+                "createdAt": "2026-09-25T13:44:25.117Z",
                 "role": "workflow:owner",
                 "workflowId": "2zpu451nLHxitRhz",
-                "projectId": "aUAwLVlEtsTFzDRX",
+                "projectId": "XdyxmmRJHDP8lpo0",
                 "project": {
-                    "updatedAt": "2026-05-28T01:42:24.179Z",
-                    "createdAt": "2026-05-28T01:39:13.389Z",
-                    "id": "aUAwLVlEtsTFzDRX",
+                    "updatedAt": "2026-09-25T13:45:31.247Z",
+                    "createdAt": "2026-09-25T13:43:52.692Z",
+                    "id": "XdyxmmRJHDP8lpo0",
                     "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
                     "type": "personal",
                     "icon": null,
                     "description": null,
-                    "creatorId": "c2b9a27b-1aee-479f-87b0-2027812789e1"
+                    "customTelemetryTags": [],
+                    "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
                 }
             }
         ],
@@ -1014,7 +1023,7 @@
         "id": "donatrack-notificador",
         "name": "DonaTrack - Notificador",
         "description": "Workflow central de notificaciones multicanal con switch de canales (Discord, Email, WhatsApp, SMS)",
-        "active": true,
+        "active": false,
         "isArchived": false,
         "nodes": [
             {
@@ -1349,6 +1358,450 @@
         },
         "settings": {
             "executionOrder": "v1"
+        },
+        "staticData": null,
+        "meta": null,
+        "nodeGroups": [],
+        "pinData": null,
+        "versionId": "2387694f-e8ec-4a26-ab76-76d2919bf345",
+        "activeVersionId": null,
+        "versionCounter": 7,
+        "triggerCount": 1,
+        "sourceWorkflowId": null,
+        "tags": [],
+        "shared": [
+            {
+                "updatedAt": "2026-09-25T13:44:25.130Z",
+                "createdAt": "2026-09-25T13:44:25.130Z",
+                "role": "workflow:owner",
+                "workflowId": "donatrack-notificador",
+                "projectId": "XdyxmmRJHDP8lpo0",
+                "project": {
+                    "updatedAt": "2026-09-25T13:45:31.247Z",
+                    "createdAt": "2026-09-25T13:43:52.692Z",
+                    "id": "XdyxmmRJHDP8lpo0",
+                    "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+                    "type": "personal",
+                    "icon": null,
+                    "description": null,
+                    "customTelemetryTags": [],
+                    "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
+                }
+            }
+        ],
+        "versionMetadata": {
+            "name": null,
+            "description": null
+        }
+    },
+    {
+        "updatedAt": "2026-09-26T04:09:08.000Z",
+        "createdAt": "2026-09-25T14:39:19.091Z",
+        "id": "donatrack-notificador-real",
+        "name": "DonaTrack - Notificador Real",
+        "description": null,
+        "active": true,
+        "isArchived": false,
+        "nodes": [
+            {
+                "parameters": {
+                    "httpMethod": "POST",
+                    "path": "donatrack/notificaciones/real",
+                    "responseMode": "responseNode",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.webhook",
+                "typeVersion": 2.1,
+                "position": [
+                    0,
+                    200
+                ],
+                "id": "webhook-trigger",
+                "name": "Webhook Trigger"
+            },
+            {
+                "parameters": {
+                    "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || 'General';\n  const mensaje = body.mensaje || body.message || body.description || 'Notificación sin mensaje';\n  let medio = (body.medio || body.channel || 'DISCORD').toUpperCase();\n  if (medio === 'CORREO') medio = 'EMAIL';\n  if (medio === 'TELEFONO') medio = 'SMS';\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: body.discordPayload\n    }\n  };\n});"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    220,
+                    200
+                ],
+                "id": "code-normalizar",
+                "name": "Normalizar Mensaje"
+            },
+            {
+                "parameters": {
+                    "rules": {
+                        "values": [
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 3
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.medio }}",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "rightValue": "DISCORD"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "Discord"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 3
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.medio }}",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "rightValue": "EMAIL"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "Email"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 3
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.medio }}",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "rightValue": "WHATSAPP"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "WhatsApp"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 3
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.medio }}",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "rightValue": "SMS"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "SMS"
+                            }
+                        ]
+                    }
+                },
+                "type": "n8n-nodes-base.switch",
+                "typeVersion": 3.4,
+                "position": [
+                    460,
+                    200
+                ],
+                "id": "switch-medio",
+                "name": "Switch Medio"
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+                    "sendBody": true,
+                    "contentType": "json",
+                    "specifyBody": "json",
+                    "jsonBody": "{\n  \"username\": \"DonaTrack • Comunidad Oficial\",\n  \"embeds\": [\n    {\n      \"title\": \"🎮 Alerta Oficial en Discord\",\n      \"description\": \"> 📢 **Mensaje al Canal:**\\n> *{{ $json.mensaje }}*\",\n      \"color\": 5793266\n    }\n  ]\n}",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    760,
+                    40
+                ],
+                "id": "http-enviar-discord",
+                "name": "Enviar Discord"
+            },
+            {
+                "parameters": {
+                    "fromEmail": "donatracksoporte@gmail.com",
+                    "toEmail": "={{ $json.destinatario }}",
+                    "subject": "Notificación Oficial de DonaTrack",
+                    "text": "={{ $json.mensaje }}",
+                    "emailFormat": "text"
+                },
+                "type": "n8n-nodes-base.emailSend",
+                "typeVersion": 2.1,
+                "position": [
+                    760,
+                    150
+                ],
+                "id": "email-real",
+                "name": "Enviar Correo Real",
+                "credentials": {
+                    "smtp": {
+                        "id": "QrDHYpFztzj4hwz2",
+                        "name": "gmail-app"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "=https://api.twilio.com/2010-04-01/Accounts/{{ $env.TWILIO_ACCOUNT_SID }}/Messages.json",
+                    "authentication": "none",
+                    "sendBody": true,
+                    "contentType": "form-urlencoded",
+                    "specifyBody": "keypair",
+                    "bodyParameters": {
+                        "parameters": [
+                            {
+                                "name": "From",
+                                "value": "whatsapp:+17372508034"
+                            },
+                            {
+                                "name": "To",
+                                "value": "={{ $json.destinatario.startsWith(\"whatsapp:\") ? $json.destinatario : \"whatsapp:\" + ($json.destinatario.startsWith(\"+\") ? $json.destinatario : \"+\" + $json.destinatario).replace(\"+5411\", \"+54911\") }}"
+                            },
+                            {
+                                "name": "ContentSid",
+                                "value": "HXfe5ab5f00277942d4d4200328b4d403c"
+                            },
+                            {
+                                "name": "ContentVariables",
+                                "value": "={{ JSON.stringify({\"1\": \"DonaTrack\", \"2\": \"ahora\"}) }}"
+                            }
+                        ]
+                    },
+                    "sendHeaders": true,
+                    "headerParameters": {
+                        "parameters": [
+                            {
+                                "name": "Authorization",
+                                "value": "=Basic {{ $env.TWILIO_AUTH_TOKEN_BASE64 }}"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    760,
+                    260
+                ],
+                "id": "http-whatsapp-real",
+                "name": "Enviar WhatsApp Real"
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+                    "sendBody": true,
+                    "contentType": "json",
+                    "specifyBody": "json",
+                    "jsonBody": "{\n  \"username\": \"DonaTrack • Pasarela SMS Móvil\",\n  \"embeds\": [\n    {\n      \"title\": \"📱 SMS Transaccional Despachado\",\n      \"description\": \"```txt\\n[DONATRACK-SMS] {{ $json.mensaje }}\\n```\",\n      \"color\": 15965202\n    }\n  ]\n}",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    760,
+                    370
+                ],
+                "id": "http-sms-simulado",
+                "name": "Enviar SMS Simulado"
+            },
+            {
+                "parameters": {
+                    "respondWith": "json",
+                    "responseBody": "={{ { \"success\": true, \"canal\": $json.medio, \"destinatario\": $json.destinatario, \"mensaje\": $json.mensaje } }}",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.respondToWebhook",
+                "typeVersion": 1.5,
+                "position": [
+                    1020,
+                    200
+                ],
+                "id": "respond-webhook-node",
+                "name": "Respond to Webhook"
+            }
+        ],
+        "connections": {
+            "Webhook Trigger": {
+                "main": [
+                    [
+                        {
+                            "node": "Normalizar Mensaje",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Normalizar Mensaje": {
+                "main": [
+                    [
+                        {
+                            "node": "Switch Medio",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Switch Medio": {
+                "main": [
+                    [
+                        {
+                            "node": "Enviar Discord",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Enviar Correo Real",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Enviar WhatsApp Real",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Enviar SMS Simulado",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Enviar Discord": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Enviar Correo Real": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Enviar WhatsApp Real": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Enviar SMS Simulado": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1",
+            "availableInMCP": true
+        },
+        "staticData": null,
+        "meta": null,
+        "nodeGroups": [],
+        "pinData": {},
+        "versionId": "942464ff-2315-48b8-bd9a-b22fb7220893",
+        "activeVersionId": "942464ff-2315-48b8-bd9a-b22fb7220893",
+        "versionCounter": 13,
+        "triggerCount": 1,
+        "sourceWorkflowId": null,
+        "tags": [],
+        "shared": [
+            {
+                "updatedAt": "2026-09-25T14:39:19.095Z",
+                "createdAt": "2026-09-25T14:39:19.095Z",
+                "role": "workflow:owner",
+                "workflowId": "donatrack-notificador-real",
+                "projectId": "XdyxmmRJHDP8lpo0",
+                "project": {
+                    "updatedAt": "2026-09-25T13:45:31.247Z",
+                    "createdAt": "2026-09-25T13:43:52.692Z",
+                    "id": "XdyxmmRJHDP8lpo0",
+                    "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+                    "type": "personal",
+                    "icon": null,
+                    "description": null,
+                    "customTelemetryTags": [],
+                    "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
+                }
+            }
+        ],
+        "versionMetadata": {
+            "name": null,
+            "description": null
         }
     }
 ]
