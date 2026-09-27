@@ -5,7 +5,7 @@ info:
 
 http:
   method: PUT
-  url: "{{donacionesUrl}}/api/donaciones/:donacionId/estado"
+  url: "{{donacionesUrl}}/api/donaciones/:donacionId/estado/asignar"
   params:
     - name: donacionId
       value: 31008064-071a-4d7a-ac37-33318f7d9841
@@ -14,8 +14,7 @@ http:
     type: json
     data: |-
       {
-        "nuevoEstado": "ASIGNADA",
-        "observacion": "Asignación manual a entidad beneficiaria"
+        "id": "e4444444-4444-4444-8444-444444444444"
       }
   auth: inherit
 

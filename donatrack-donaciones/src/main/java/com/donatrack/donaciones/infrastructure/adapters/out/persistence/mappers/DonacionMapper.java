@@ -11,7 +11,7 @@ public class DonacionMapper {
     if (domain == null) return null;
 
     DonacionEntity entity = new DonacionEntity();
-    // No setear ID: @GeneratedValue lo genera al persistir
+    entity.setId(domain.getId());
     if (domain.getEstado() != null) {
       entity.setEstado(domain.getEstado().name());
     }
@@ -44,6 +44,13 @@ public class DonacionMapper {
     if (entity.getNecesidad() != null && entity.getNecesidad().getBeneficiario() != null) {
       domain.setEntidadAsignada(
           (Beneficiario) RolMapper.toDomain(entity.getNecesidad().getBeneficiario()));
+    }
+
+    if (entity.getSubcategoriaAsignada() != null) {
+      domain.setSubCategoria(new com.donatrack.donaciones.domain.entities.donacion.Subcategoria(
+          entity.getSubcategoriaAsignada().getNombre(),
+          entity.getSubcategoriaAsignada().getDescripcion()
+      ));
     }
 
     if (entity.getBienes() != null) {

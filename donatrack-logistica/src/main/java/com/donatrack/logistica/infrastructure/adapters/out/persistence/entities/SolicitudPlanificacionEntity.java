@@ -19,16 +19,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.springframework.data.domain.Persistable;
+import jakarta.persistence.Transient;
+
 @Entity
 @Table(name = "solicitudes_planificacion", schema = "logistica")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SolicitudPlanificacionEntity {
+public class SolicitudPlanificacionEntity implements Persistable<UUID> {
+
+  @Transient
+  private boolean isNew = true;
+
+  @Override
+  public boolean isNew() {
+      return isNew;
+  }
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "solicitud_planificacion_id")
   private UUID id;
 

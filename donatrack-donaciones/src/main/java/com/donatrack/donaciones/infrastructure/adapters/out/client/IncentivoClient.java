@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "incentivos", url = "http://localhost:8080/incentivos")
+@FeignClient(name = "incentivos", url = "${feign.client.config.incentivos.url:http://incentivos:8001/api}")
 public interface IncentivoClient {
 
-  @PostMapping("/donantes/{id}/actividad-entregada")
+  @PostMapping("/donantes/{id}/actividad")
   void registrarActividadDonacionExitosa(
       @PathVariable("id") UUID id, @RequestBody ActividadDonacionDTO actividad);
 
-  @PostMapping("/entidades/{id}/actividad-deposito")
+  @PostMapping("/donantes/{id}/actividad")
   void registrarActividadDonacionEnDeposito(
       @PathVariable("id") UUID id, @RequestBody ActividadDonacionDTO actividad);
 }

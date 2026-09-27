@@ -160,6 +160,7 @@ public class PlanificacionRutasUseCase implements ProcesarPlanificacionesPendien
     // En una implementación real, estas rutas se enviarían al proveedor.
     // Aquí solo simulamos la generación.
     for (RutaDeReparto ruta : rutasCreadas) {
+      rutaRepository.guardar(ruta);
       log.info(
           "Ruta planificada (simulada) exitosamente: ID {} con {} paradas.",
           ruta.getId(),

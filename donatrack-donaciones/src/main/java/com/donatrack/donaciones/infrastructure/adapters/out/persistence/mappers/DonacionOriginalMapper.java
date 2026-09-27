@@ -10,7 +10,7 @@ public class DonacionOriginalMapper {
     if (domain == null) return null;
 
     DonacionOriginalEntity entity = new DonacionOriginalEntity();
-    // No setear ID: @GeneratedValue lo genera al persistir
+    entity.setId(domain.getId());
     entity.setDescripcionGeneral(domain.getDescripcionGeneral());
     entity.setUsuarioId(domain.getUsuarioId());
     if (domain.getFechaRecepcion() != null) {

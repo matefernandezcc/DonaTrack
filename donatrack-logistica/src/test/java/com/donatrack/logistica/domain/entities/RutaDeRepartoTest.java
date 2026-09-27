@@ -77,8 +77,8 @@ public class RutaDeRepartoTest {
 
   @Test
   public void testRutaConCamionYChofer() {
-    Camion camion = new Camion("AB-123-CD", 15.0, 3.0, 5000.0);
-    Chofer chofer = new Chofer();
+    Camion camion = new Camion(UUID.randomUUID(), "AB-123-CD", 15.0, 3.0, 5000.0);
+    Chofer chofer = new Chofer(UUID.randomUUID(), "legajo", "Juan");
 
     RutaDeReparto ruta = crearRutaConEntregas(1, 1);
     ruta.setCamion(camion);

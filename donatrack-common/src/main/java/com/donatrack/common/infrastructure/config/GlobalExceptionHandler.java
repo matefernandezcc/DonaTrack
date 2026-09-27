@@ -195,6 +195,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGenericException(
       Exception ex, HttpServletRequest request) {
+    ex.printStackTrace();
     log.error("Error interno no manejado en {}: ", request.getRequestURI(), ex);
     return buildResponse(
         HttpStatus.INTERNAL_SERVER_ERROR,

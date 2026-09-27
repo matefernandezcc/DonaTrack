@@ -22,6 +22,7 @@ public class CamionEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
+
   @Column(name = "camion_id")
   private UUID id;
 

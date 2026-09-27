@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
     name = "Donaciones",
     description = "Gestión de donaciones, recepción de bienes, asignación y estados")
+@Transactional
 public class DonacionController {
 
   private final MatchmakerService matchmakerService;
@@ -148,7 +150,7 @@ public class DonacionController {
       description = "Error al comunicarse con servicio de incentivos",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/en_deposito")
-  public ResponseEntity<Void> donacionEnDeposito(@PathVariable UUID id) {
+  public ResponseEntity<java.util.Map<String, String>> donacionEnDeposito(@PathVariable UUID id) {
     Donacion donacion =
         donacionRepository
             .buscarPorId(id)
@@ -165,8 +167,11 @@ public class DonacionController {
         new ActividadDonacionDTO(
             id, idDonante, cantidadBienes, categorias, idEntidadBeneficiaria, fecha);
 
-    incentivoClient.registrarActividadDonacionEnDeposito(id, dto);
-    return ResponseEntity.ok().build();
+    incentivoClient.registrarActividadDonacionEnDeposito(idDonante, dto);
+    
+    java.util.Map<String, String> response = new java.util.HashMap<>();
+    response.put("mensaje", "Donación en depósito exitosa");
+    return ResponseEntity.ok(response);
   }
 
   @Operation(

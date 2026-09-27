@@ -70,8 +70,8 @@ class IniciarRutaServiceTest {
   private RutaDeReparto crearRuta(UUID idRuta, String legajoChofer) {
     RutaDeReparto ruta = new RutaDeReparto();
     ruta.setId(idRuta);
-    ruta.setChofer(new Chofer(legajoChofer, "Juan"));
-    ruta.setCamion(new Camion("ABC", 10.0, 2.0, 1000.0));
+    ruta.setChofer(new Chofer(UUID.randomUUID(), legajoChofer, "Juan"));
+    ruta.setCamion(new Camion(UUID.randomUUID(), "ABC", 10.0, 2.0, 1000.0));
     ruta.setIniciada(false);
 
     Entrega entrega = new Entrega(UUID.randomUUID(), EstadoEntrega.PENDIENTE, 1.0, 1.0, null);

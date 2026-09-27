@@ -20,16 +20,27 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.springframework.data.domain.Persistable;
+import jakarta.persistence.Transient;
+
 @Entity
 @Table(name = "rutas_reparto", schema = "logistica")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RutaDeRepartoEntity {
+public class RutaDeRepartoEntity implements Persistable<UUID> {
+
+  @Transient
+  private boolean isNew = true;
+
+  @Override
+  public boolean isNew() {
+      return isNew;
+  }
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+
   @Column(name = "ruta_reparto_id")
   private UUID id;
 
@@ -37,11 +48,11 @@ public class RutaDeRepartoEntity {
   @JoinColumn(name = "solicitud_planificacion_id")
   private SolicitudPlanificacionEntity solicitud;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.MERGE)
   @JoinColumn(name = "camion_id")
   private CamionEntity camion;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.MERGE)
   @JoinColumn(name = "chofer_id")
   private ChoferEntity chofer;
 

@@ -24,7 +24,6 @@ import lombok.Setter;
 public class DonacionOriginalEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "donacion_original_id")
   private UUID id;
 

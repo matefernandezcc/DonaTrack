@@ -66,7 +66,6 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
     recepcion.segmentarBienes(bienesBrutos, procesadorCargaInicial);
 
     // 5. Persistir
-    recepcion.getDonacionesSegmentadas().forEach(donacionRepository::guardar);
     recepcionDonacionRepository.guardar(recepcion);
 
     return recepcion;
