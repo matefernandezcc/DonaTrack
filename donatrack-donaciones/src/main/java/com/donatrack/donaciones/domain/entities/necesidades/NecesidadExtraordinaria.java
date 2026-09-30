@@ -17,6 +17,12 @@ public class NecesidadExtraordinaria extends Necesidad {
   private EstadoNecesidad estado;
   private List<Donacion> donacionesRecibidas;
 
+  public NecesidadExtraordinaria() {
+    super();
+    this.estado = EstadoNecesidad.ABIERTA;
+    this.donacionesRecibidas = new ArrayList<>();
+  }
+
   public NecesidadExtraordinaria(
       String descripcion, Subcategoria subcategoriaRequerida, double cantidadRequerida) {
     super(descripcion, subcategoriaRequerida);

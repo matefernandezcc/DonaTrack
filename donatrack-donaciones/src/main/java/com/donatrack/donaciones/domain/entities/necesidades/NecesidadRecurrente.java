@@ -16,6 +16,12 @@ public class NecesidadRecurrente extends Necesidad {
   private PeriodoNecesidad periodoActual;
   private TipoPeriodo tipoPeriodo;
 
+  public NecesidadRecurrente() {
+    super();
+    this.activa = true;
+    this.historialPeriodos = new ArrayList<>();
+  }
+
   public NecesidadRecurrente(
       String descripcion,
       Subcategoria subcategoriaRequerida,

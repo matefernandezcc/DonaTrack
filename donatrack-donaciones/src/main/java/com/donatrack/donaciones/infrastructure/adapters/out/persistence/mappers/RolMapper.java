@@ -17,8 +17,19 @@ public class RolMapper {
     RolEntity entity;
     if (domain instanceof Donante) {
       entity = new DonanteEntity();
-    } else if (domain instanceof Beneficiario) {
-      entity = new BeneficiarioEntity();
+    } else if (domain instanceof Beneficiario b) {
+      BeneficiarioEntity be = new BeneficiarioEntity();
+      be.setCorreoRepresentante(b.getCorreoRepresentante());
+      if (b.getNecesidadesDeclaradas() != null) {
+        for (com.donatrack.donaciones.domain.entities.necesidades.Necesidad n : b.getNecesidadesDeclaradas()) {
+          com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.NecesidadEntity ne = NecesidadMapper.toEntity(n);
+          if (ne != null) {
+            ne.setBeneficiario(be);
+            be.getNecesidadesDeclaradas().add(ne);
+          }
+        }
+      }
+      entity = be;
     } else if (domain instanceof Representante r) {
       RepresentanteEntity re = new RepresentanteEntity();
       re.setCargo(r.getCargo());
@@ -38,8 +49,18 @@ public class RolMapper {
     Rol domain;
     if (entity instanceof DonanteEntity) {
       domain = new Donante();
-    } else if (entity instanceof BeneficiarioEntity) {
-      domain = new Beneficiario();
+    } else if (entity instanceof BeneficiarioEntity be) {
+      Beneficiario b = new Beneficiario();
+      b.setCorreoRepresentante(be.getCorreoRepresentante());
+      if (be.getNecesidadesDeclaradas() != null) {
+        for (com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.NecesidadEntity ne : be.getNecesidadesDeclaradas()) {
+          com.donatrack.donaciones.domain.entities.necesidades.Necesidad n = NecesidadMapper.toDomain(ne);
+          if (n != null) {
+            b.getNecesidadesDeclaradas().add(n);
+          }
+        }
+      }
+      domain = b;
     } else if (entity instanceof RepresentanteEntity re) {
       domain = new Representante(re.getCargo(), null);
     } else {

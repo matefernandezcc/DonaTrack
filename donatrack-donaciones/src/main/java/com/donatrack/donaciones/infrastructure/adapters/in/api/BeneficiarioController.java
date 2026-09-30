@@ -3,6 +3,8 @@ package com.donatrack.donaciones.infrastructure.adapters.in.api;
 import com.donatrack.common.dto.ErrorResponse;
 import com.donatrack.donaciones.application.ports.out.BeneficiarioRepository;
 import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
+import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.NecesidadDTO;
+import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.NecesidadDtoMapper;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -132,11 +134,12 @@ public class BeneficiarioController {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @PostMapping("/{id}/necesidades")
   public ResponseEntity<Void> agregarNecesidad(
-      @PathVariable UUID id, @RequestBody Necesidad necesidad) {
+      @PathVariable UUID id, @RequestBody NecesidadDTO necesidadDto) {
     return beneficiarioRepository
         .buscarPorId(id)
         .map(
             b -> {
+              Necesidad necesidad = NecesidadDtoMapper.toDomain(necesidadDto);
               b.registrarNecesidad(necesidad);
               beneficiarioRepository.guardar(b);
               return ResponseEntity.ok().<Void>build();
@@ -157,10 +160,15 @@ public class BeneficiarioController {
       description = "Beneficiario no encontrado",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/{id}/necesidades")
-  public ResponseEntity<List<Necesidad>> obtenerNecesidades(@PathVariable UUID id) {
+  public ResponseEntity<List<NecesidadDTO>> obtenerNecesidades(@PathVariable UUID id) {
     return beneficiarioRepository
         .buscarPorId(id)
-        .map(b -> ResponseEntity.ok(b.getNecesidadesDeclaradas()))
+        .map(b -> {
+          List<NecesidadDTO> dtos = b.getNecesidadesDeclaradas().stream()
+              .map(NecesidadDtoMapper::toDto)
+              .toList();
+          return ResponseEntity.ok(dtos);
+        })
         .orElse(ResponseEntity.notFound().build());
   }
 }

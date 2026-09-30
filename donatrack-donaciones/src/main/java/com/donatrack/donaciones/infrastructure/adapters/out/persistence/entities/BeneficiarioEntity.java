@@ -13,4 +13,10 @@ import lombok.Setter;
 @DiscriminatorValue("Beneficiario")
 @Getter
 @Setter
-public class BeneficiarioEntity extends RolEntity {}
+public class BeneficiarioEntity extends RolEntity {
+  @jakarta.persistence.Column(name = "correo_representante")
+  private String correoRepresentante;
+
+  @jakarta.persistence.OneToMany(mappedBy = "beneficiario", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+  private java.util.List<NecesidadEntity> necesidadesDeclaradas = new java.util.ArrayList<>();
+}
