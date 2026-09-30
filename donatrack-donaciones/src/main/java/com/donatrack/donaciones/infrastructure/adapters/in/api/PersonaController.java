@@ -3,8 +3,14 @@ package com.donatrack.donaciones.infrastructure.adapters.in.api;
 import com.donatrack.common.dto.ErrorResponse;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Archivo;
+import com.donatrack.donaciones.domain.entities.persona.Contacto;
+import com.donatrack.donaciones.domain.entities.persona.DocumentoIdentidad;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
+import com.donatrack.donaciones.domain.entities.persona.ubicacion.Direccion;
 import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.importador.ImportadorCSV;
+import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.ContactoDTO;
+import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.PersonaDTO;
+import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.PersonaDtoMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,7 +18,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,12 +51,10 @@ public class PersonaController {
       description = "Documento o email duplicado",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @PostMapping
-  public ResponseEntity<Persona> crearPersona(@RequestBody Persona persona) {
-    if (persona.getId() == null) {
-      persona.setId(UUID.randomUUID());
-    }
+  public ResponseEntity<PersonaDTO> crearPersona(@RequestBody PersonaDTO personaDto) {
+    Persona persona = PersonaDtoMapper.toDomain(personaDto);
     personaRepository.guardar(persona);
-    return ResponseEntity.ok(persona);
+    return ResponseEntity.ok(PersonaDtoMapper.toDto(persona));
   }
 
   @Operation(
@@ -78,8 +84,11 @@ public class PersonaController {
   @Operation(summary = "Listar personas", description = "Obtiene todas las personas registradas")
   @ApiResponse(responseCode = "200", description = "Lista de personas")
   @GetMapping
-  public ResponseEntity<List<Persona>> obtenerTodas() {
-    return ResponseEntity.ok(personaRepository.obtenerTodas());
+  public ResponseEntity<List<PersonaDTO>> obtenerTodas() {
+    List<PersonaDTO> dtos = personaRepository.obtenerTodas().stream()
+        .map(PersonaDtoMapper::toDto)
+        .collect(Collectors.toList());
+    return ResponseEntity.ok(dtos);
   }
 
   @Operation(
@@ -95,16 +104,16 @@ public class PersonaController {
       description = "Persona no encontrada",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/{id}")
-  public ResponseEntity<Persona> obtenerPersona(@PathVariable UUID id) {
+  public ResponseEntity<PersonaDTO> obtenerPersona(@PathVariable UUID id) {
     return personaRepository
         .buscarPorId(id)
-        .map(ResponseEntity::ok)
+        .map(p -> ResponseEntity.ok(PersonaDtoMapper.toDto(p)))
         .orElse(ResponseEntity.notFound().build());
   }
 
   @Operation(
       summary = "Actualizar persona",
-      description = "Actualiza los datos de una persona existente")
+      description = "Actualiza los datos de una persona existente (actualización parcial)")
   @ApiResponse(responseCode = "200", description = "Persona actualizada")
   @ApiResponse(
       responseCode = "400",
@@ -115,15 +124,40 @@ public class PersonaController {
       description = "Persona no encontrada",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @PutMapping("/{id}")
-  public ResponseEntity<Persona> actualizarPersona(
-      @PathVariable UUID id, @RequestBody Persona persona) {
+  public ResponseEntity<PersonaDTO> actualizarPersona(
+      @PathVariable UUID id, @RequestBody Map<String, Object> datosNuevos) {
     return personaRepository
         .buscarPorId(id)
         .map(
             p -> {
-              persona.setId(id);
-              personaRepository.guardar(persona);
-              return ResponseEntity.ok(persona);
+              // Convertir objetos anidados del Map genérico a objetos de dominio
+              // sin usar frameworks en el dominio
+              Map<String, Object> datosConvertidos = new java.util.HashMap<>(datosNuevos);
+              if (datosNuevos.containsKey("contacto") && datosNuevos.get("contacto") instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> cm = (Map<String, Object>) datosNuevos.get("contacto");
+                com.donatrack.donaciones.domain.entities.enums.MedioContacto medio = null;
+                if (cm.get("medioPredeterminado") != null) {
+                  medio = com.donatrack.donaciones.domain.entities.enums.MedioContacto.valueOf((String) cm.get("medioPredeterminado"));
+                }
+                datosConvertidos.put("contacto", new Contacto(
+                    (String) cm.get("correoElectronico"),
+                    (String) cm.get("telefono"),
+                    (String) cm.get("whatsapp"),
+                    medio));
+              }
+              if (datosNuevos.containsKey("documento") && datosNuevos.get("documento") instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> dm = (Map<String, Object>) datosNuevos.get("documento");
+                com.donatrack.donaciones.domain.entities.enums.TipoDocumento tipo = null;
+                if (dm.get("tipo") != null) {
+                  tipo = com.donatrack.donaciones.domain.entities.enums.TipoDocumento.valueOf((String) dm.get("tipo"));
+                }
+                datosConvertidos.put("documento", new DocumentoIdentidad(tipo, (String) dm.get("numero")));
+              }
+              p.actualizarInformacion(datosConvertidos);
+              personaRepository.guardar(p);
+              return ResponseEntity.ok(PersonaDtoMapper.toDto(p));
             })
         .orElse(ResponseEntity.notFound().build());
   }

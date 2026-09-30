@@ -12,7 +12,7 @@ http:
       - name: file
         type: file
         value:
-          - ./donantes_sample.csv
+          - ./Donaciones/Personas/donantes_sample.csv
   auth: inherit
 
 settings:
@@ -20,3 +20,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+

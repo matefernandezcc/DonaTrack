@@ -3,9 +3,6 @@ package com.donatrack.donaciones.domain.entities.persona;
 import com.donatrack.donaciones.domain.entities.persona.ubicacion.Direccion;
 import com.donatrack.donaciones.domain.entities.persona.validador.PersonaValidator;
 import com.donatrack.donaciones.domain.entities.roles.Rol;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,14 +10,6 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
-@Schema(
-    description =
-        "Persona registrada en el sistema. Campo 'tipo' obligatorio: 'HUMANA' o 'JURIDICA'")
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tipo")
-@JsonSubTypes({
-  @JsonSubTypes.Type(value = PersonaHumana.class, name = "HUMANA"),
-  @JsonSubTypes.Type(value = PersonaJuridica.class, name = "JURIDICA")
-})
 @Getter
 @Setter
 public abstract class Persona {
