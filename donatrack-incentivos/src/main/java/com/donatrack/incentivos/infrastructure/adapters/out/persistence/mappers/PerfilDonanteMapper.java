@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PerfilDonanteMapper {
@@ -34,6 +35,7 @@ public class PerfilDonanteMapper {
     // Misión actual
     if (domain.getMisionActual() != null) {
       MisionEntity me = new MisionEntity();
+      me.setId(UUID.randomUUID());
       me.setNombre(domain.getMisionActual().getNombre());
       if (domain.getMisionActual().getTipoMetrica() != null) {
         me.setTipoMetrica(domain.getMisionActual().getTipoMetrica().name());
@@ -52,6 +54,7 @@ public class PerfilDonanteMapper {
         ie.setDescripcion(ins.getDescripcion());
 
         InsigniaObtenidaEntity ioe = new InsigniaObtenidaEntity();
+        ioe.setId(UUID.randomUUID());
         ioe.setPerfil(entity);
         ioe.setInsignia(ie);
         ioe.setFechaObtencion(ins.getFechaObtencion());
@@ -64,6 +67,7 @@ public class PerfilDonanteMapper {
     // Métricas del donante
     if (domain.getMetricas() != null) {
       MetricasDonanteEntity mde = new MetricasDonanteEntity();
+      mde.setId(UUID.randomUUID());
       mde.setPerfil(entity);
       mde.setTotalDonacionesHistoricas(
           domain.getMetricas().getRegistrosDonacion() != null
@@ -77,6 +81,7 @@ public class PerfilDonanteMapper {
                 .map(
                     reg -> {
                       RegistroDonacionEntity rde = new RegistroDonacionEntity();
+                      rde.setId(UUID.randomUUID());
                       rde.setMetricas(mde);
                       rde.setIdDonacionOrigen(reg.getIdDonacion());
                       rde.setCantidadBienes(reg.getCantidadBienes());
@@ -100,8 +105,10 @@ public class PerfilDonanteMapper {
         for (Map.Entry<Mision, YearMonth> entry :
             domain.getMetricas().getMisionesCompletadas().entrySet()) {
           ProgresoMisionEntity pme = new ProgresoMisionEntity();
+          pme.setId(UUID.randomUUID());
           pme.setPerfil(entity);
           MisionEntity me = new MisionEntity();
+          me.setId(UUID.randomUUID());
           me.setNombre(entry.getKey().getNombre());
           pme.setMision(me);
           pme.setEstado("COMPLETADA");

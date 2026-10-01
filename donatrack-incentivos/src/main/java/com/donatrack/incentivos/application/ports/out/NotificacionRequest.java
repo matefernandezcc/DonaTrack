@@ -1,3 +1,5 @@
 package com.donatrack.incentivos.application.ports.out;
 
-public record NotificacionRequest(String destinatario, String mensaje, String medio) {}
+import java.io.Serializable;
+
+public record NotificacionRequest(String destinatario, String mensaje, String medio) implements Serializable {}

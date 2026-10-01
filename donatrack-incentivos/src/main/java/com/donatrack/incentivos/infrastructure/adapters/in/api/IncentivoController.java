@@ -28,12 +28,20 @@ public class IncentivoController {
 
   private final RankingMensualService rankingMensualService;
   private final RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase;
+  private final com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient;
+  private final org.springframework.web.client.RestTemplate restTemplate;
+
+  @org.springframework.beans.factory.annotation.Value("${n8n.webhook.ranking.url:http://n8n:5678/webhook/donatrack/ranking}")
+  private String n8nWebhookRankingUrl;
 
   public IncentivoController(
       RankingMensualService rankingMensualService,
-      RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase) {
+      RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase,
+      com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient) {
     this.rankingMensualService = rankingMensualService;
     this.registrarActividadDonacionUseCase = registrarActividadDonacionUseCase;
+    this.personaClient = personaClient;
+    this.restTemplate = new org.springframework.web.client.RestTemplate();
   }
 
   @Operation(
@@ -134,14 +142,36 @@ public class IncentivoController {
         top3.stream()
             .map(
                 p -> {
+                  String nombreUsuario = p.getDonanteId().toString();
+                  try {
+                    com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient.PersonaDTO persona = 
+                        personaClient.obtenerPersona(p.getDonanteId());
+                    if (persona != null) {
+                      if ("JURIDICA".equals(persona.tipo())) {
+                        nombreUsuario = persona.razonSocial();
+                      } else {
+                        nombreUsuario = persona.nombre() + " " + persona.apellido();
+                      }
+                    }
+                  } catch (Exception e) {
+                    // Ignore
+                  }
+
                   java.util.Map<String, Object> map = new java.util.HashMap<>();
-                  map.put("user", p.getDonanteId().toString());
+                  map.put("user", nombreUsuario);
                   map.put(
-                      "totalDonations",
+                      "donations",
                       p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size());
+                  map.put("totalDonations", p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size());
                   return map;
                 })
             .collect(java.util.stream.Collectors.toList());
+
+    try {
+      restTemplate.postForObject(n8nWebhookRankingUrl, response, String.class);
+    } catch (Exception e) {
+      // Ignore webhook failure
+    }
 
     return ResponseEntity.ok(response);
   }

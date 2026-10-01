@@ -14,20 +14,36 @@ public class N8nDifusionAdapter implements DifusionPort {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(N8nDifusionAdapter.class);
   private final RestTemplate restTemplate;
+  private final PersonaClient personaClient;
 
   @org.springframework.beans.factory.annotation.Value(
       "${n8n.webhook.url:http://n8n:5678/webhook/donatrack/badge-earned}")
   private String webhookUrl;
 
-  public N8nDifusionAdapter() {
+  public N8nDifusionAdapter(PersonaClient personaClient) {
     this.restTemplate = new RestTemplate();
+    this.personaClient = personaClient;
   }
 
   @Override
   @EventListener
   public void difundirInsignia(InsigniaObtenidaEvent evento) {
     java.util.Map<String, Object> payload = new java.util.HashMap<>();
-    payload.put("user", evento.getDonanteId().toString());
+    String nombreUsuario = evento.getDonanteId().toString();
+    try {
+      PersonaClient.PersonaDTO persona = personaClient.obtenerPersona(evento.getDonanteId());
+      if (persona != null) {
+        if ("JURIDICA".equals(persona.tipo())) {
+          nombreUsuario = persona.razonSocial();
+        } else {
+          nombreUsuario = persona.nombre() + " " + persona.apellido();
+        }
+      }
+    } catch (Exception e) {
+      LOGGER.warn("No se pudo obtener el nombre de la persona para la insignia: {}", e.getMessage());
+    }
+
+    payload.put("user", nombreUsuario);
     payload.put("badge", evento.getInsignia().getNombre());
     payload.put("description", evento.getInsignia().getDescripcion());
 
