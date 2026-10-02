@@ -28,7 +28,7 @@ public class JpaRutaDeRepartoRepository implements RutaDeRepartoRepositoryPort {
   @Override
   public Optional<RutaDeReparto> buscarPorIdDonacion(UUID idDonacion) {
     return jpaRepository
-        .findByParadas_Entregas_IdDonacion(idDonacion)
+        .findFirstByEntregaIdDonacion(idDonacion)
         .map(RutaDeRepartoMapper::toDomain);
   }
 

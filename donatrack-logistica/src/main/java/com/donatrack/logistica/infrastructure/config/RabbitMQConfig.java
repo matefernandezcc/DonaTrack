@@ -20,10 +20,6 @@ public class RabbitMQConfig {
     return new TopicExchange(LOGISTICA_EXCHANGE);
   }
 
-  @Bean("logisticaJsonMessageConverter")
-  public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
-    return new Jackson2JsonMessageConverter(objectMapper);
-  }
 
   public static final String DONACIONES_EXCHANGE = "donaciones.exchange";
   public static final String REPLANIFICADA_QUEUE = "logistica.replanificada.queue";

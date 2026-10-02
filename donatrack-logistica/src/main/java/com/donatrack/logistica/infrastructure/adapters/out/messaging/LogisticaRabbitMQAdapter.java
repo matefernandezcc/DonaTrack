@@ -15,8 +15,10 @@ public class LogisticaRabbitMQAdapter {
 
   private final RabbitTemplate rabbitTemplate;
 
-  public LogisticaRabbitMQAdapter(RabbitTemplate rabbitTemplate) {
+  public LogisticaRabbitMQAdapter(
+      RabbitTemplate rabbitTemplate, org.springframework.amqp.support.converter.MessageConverter messageConverter) {
     this.rabbitTemplate = rabbitTemplate;
+    this.rabbitTemplate.setMessageConverter(messageConverter);
   }
 
   @EventListener
