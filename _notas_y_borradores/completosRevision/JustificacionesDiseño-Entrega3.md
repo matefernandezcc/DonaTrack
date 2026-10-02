@@ -1,4 +1,4 @@
-# Justificaciones de Diseño — Entrega 3
+# Justificaciones de Diseño — Entrega 3 (HAY QUE EXPORTARLO AL ARCHIVO EXCEL PARA TENERLO PERSISTIDO Y DESPUES A LOS ARCHIVOS DE JUSTIFICACION DE ARQUITECTURA)
 
 ## 1. Arquitectura de comunicación inter-servicios
 
