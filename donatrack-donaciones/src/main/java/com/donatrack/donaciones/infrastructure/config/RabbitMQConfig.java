@@ -64,8 +64,4 @@ public class RabbitMQConfig {
     return BindingBuilder.bind(entregaFallidaQueue).to(logisticaExchange).with("entrega.fallida");
   }
 
-  @Bean("donacionesJsonMessageConverter")
-  public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
-    return new Jackson2JsonMessageConverter(objectMapper);
-  }
 }

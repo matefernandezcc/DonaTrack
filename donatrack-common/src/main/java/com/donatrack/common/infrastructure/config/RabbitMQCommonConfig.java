@@ -5,11 +5,17 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
+
 @Configuration
 public class RabbitMQCommonConfig {
 
   @Bean
   public Jackson2JsonMessageConverter jackson2JsonMessageConverter(ObjectMapper objectMapper) {
-    return new Jackson2JsonMessageConverter(objectMapper);
+    Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter(objectMapper);
+    DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
+    typeMapper.setTrustedPackages("*");
+    converter.setJavaTypeMapper(typeMapper);
+    return converter;
   }
 }

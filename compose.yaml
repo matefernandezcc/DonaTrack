@@ -64,7 +64,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
 
   incentivos:
     build:
@@ -81,7 +80,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
 
   logistica:
     build:
@@ -99,7 +97,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
 
   notificaciones:
     build:
@@ -116,7 +113,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
 
   server:
     build:
