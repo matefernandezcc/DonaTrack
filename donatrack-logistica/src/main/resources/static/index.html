@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DonaTrack - Logística</title>
+    <!-- Incluir fuente Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* DonaTrack Brand Colors */
+            --blue: #0b4a8f;
+            --blue-600: #1e6bb8;
+            --blue-50: #e8f1fb;
+            
+            --green: #157a4f;
+            --green-50: #e6f6ef;
+            
+            --ink: #0e1726;
+            --muted: #475467;
+            
+            --line: #e6ebf2;
+            --bg: #ffffff;
+            --bg-soft: #f6f8fb;
+
+            --radius: 14px;
+            --radius-lg: 22px;
+            --shadow: 0 8px 24px -8px rgba(14, 23, 38, 0.12), 0 2px 6px rgba(14, 23, 38, 0.06);
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-soft);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--ink);
+        }
+
+        .container {
+            background: var(--bg);
+            padding: 3rem 4rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.8s var(--ease);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--line);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--blue), var(--blue-600));
+        }
+
+        .logo-icon {
+            width: 72px;
+            height: 72px;
+            background: var(--blue-50);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--blue);
+        }
+
+        .logo-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        h1 {
+            color: var(--ink);
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            background: var(--green-50);
+            color: var(--green);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(21, 122, 79, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--green);
+            border-radius: 50%;
+            margin-right: 8px;
+            position: relative;
+        }
+
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background-color: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            opacity: 0.4;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            text-align: left;
+            margin-top: 1rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--line);
+        }
+
+        .info-item {
+            background: var(--bg-soft);
+            padding: 1rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--line);
+        }
+
+        .info-label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 0.875rem;
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            70% { transform: scale(2.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-icon">
+            <svg xmlns="http://www.w3.org/2001/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+        </div>
+        
+        <h1>DonaTrack Logística</h1>
+        <p class="subtitle">Microservicio encargado de la gestión de envíos, asignación de transportistas y rastreo.</p>
+        
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            Servidor Operativo
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Entorno</span>
+                <span class="info-value">Producción (Render)</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Versión</span>
+                <span class="info-value">v1.0.0</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
