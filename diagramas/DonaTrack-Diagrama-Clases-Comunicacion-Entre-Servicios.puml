@@ -1,19 +1,7 @@
-@startuml DonaTrack-Diagrama-Clases.puml
+@startuml DonaTrack-Diagrama-Clases-Comunicacion-Entre-Servicios.puml
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 
-note as JPANote
-  **Nota de Entrega 4:**
-  Las clases de dominio reflejadas en este diagrama
-  han sido mapeadas físicamente a **Entities JPA**.
-  Las estrategias de herencia utilizadas son:
-  - Persona / Roles: ""JOINED""
-  - Necesidad: ""SINGLE_TABLE""
-  
-  Los Detalles físicos exactos de la BD (esquemas aislados, 
-  claves foráneas, tipos y timestamps) 
-  se encuentran detallados en los **DER físicos** por cada servicio.
-end note
 package "servicio de Donaciones"{
     package "Gestión de Personas" {
         enum TipoDocumento {
@@ -168,6 +156,17 @@ package "servicio de Donaciones"{
             + ejecutarMatchmaking(donaciones: List<Donacion>, necesidades: List<Necesidad>): List<ResultadoMatch>
         }
 
+
+        ' --- EVENTOS DTO (Publicados a RabbitMQ) ---
+        class DonacionAsignadaEvent <<Event DTO>> {
+            + idDonacion: UUID
+            + idNecesidad: UUID
+        }
+        class NotificacionEvent <<Event DTO>> {
+            + destinatario: String
+            + mensaje: String
+            + tipoEvento: String
+        }
 
         ' --- EVENTOS Y MENSAJERÍA (Entrega 4 - EDA) ---
         interface PublicadorEventosPort <<Outbound Port>> {
@@ -434,6 +433,20 @@ package "Servicio de Logística" {
         - camionPatente: String
     }
 
+    ' --- EVENTOS DTO (Publicados a RabbitMQ) ---
+    class RutaIniciadaEvent <<Event DTO>> {
+        + idRuta: UUID
+        + donacionesEnRuta: List<UUID>
+    }
+    class EntregaExitosaEvent <<Event DTO>> {
+        + idDonacion: UUID
+        + comprobante: String
+    }
+    class EntregaFallidaEvent <<Event DTO>> {
+        + idDonacion: UUID
+        + motivo: String
+    }
+
     ' Relaciones de Logistica
     SolicitudPlanificacion "1" --> "0..*" RutaDeReparto : genera >
     RutaDeReparto "1" --> "1" Camion : asignada a >
@@ -657,5 +670,72 @@ package "Servicio de Notificaciones" {
     Notificacion --> Evento : posee >
     Evento --> TipoEvento : posee >
 }
+
+package "Comunicacion Inter-Servicios" {
+    class APIGateway <<REST>>
+    class MessageBroker <<RabbitMQ>>
+}
+
+
+' ============================================================
+' COMUNICACIÓN INTER-SERVICIOS (Sincrónico y Asincrónico)
+' ============================================================
+
+' --- APIGateway: Exposición REST (Sincrónico) ---
+APIGateway --> Persona : "expone CRUD Donantes"
+APIGateway --> DonacionOriginal : "expone CRUD Donaciones"
+APIGateway --> Necesidad : "expone CRUD Necesidades"
+APIGateway --> PerfilDonante : "expone métricas, misiones, insignias"
+APIGateway --> SolicitudPlanificacion : "expone planificación y callback"
+APIGateway --> NotificadorService : "expone operaciones"
+
+' --- MessageBroker: Eventos (Asincrónico) ---
+
+' 1. Publicación de Eventos
+AsignadorDonaciones ..> DonacionAsignadaEvent : "crea >"
+RutaDeReparto ..> RutaIniciadaEvent : "crea >"
+Entrega ..> EntregaExitosaEvent : "crea >"
+Entrega ..> EntregaFallidaEvent : "crea >"
+
+' Los eventos van al Broker
+DonacionAsignadaEvent --> MessageBroker : "publica en"
+RutaIniciadaEvent --> MessageBroker : "publica en"
+EntregaExitosaEvent --> MessageBroker : "publica en"
+EntregaFallidaEvent --> MessageBroker : "publica en"
+InsigniaObtenidaEvent --> MessageBroker : "publica en"
+NotificacionEvent --> MessageBroker : "publica en"
+
+' El Gestor de Donaciones re-emite eventos de logistica a Notificaciones
+GestorEventosLogistica ..> NotificacionEvent : "crea >"
+
+' 2. Consumo de Eventos
+MessageBroker --> RutaIniciadaEvent : "entrega a >"
+MessageBroker --> EntregaExitosaEvent : "entrega a >"
+MessageBroker --> EntregaFallidaEvent : "entrega a >"
+MessageBroker --> DonacionAsignadaEvent : "entrega a >"
+MessageBroker --> InsigniaObtenidaEvent : "entrega a >"
+MessageBroker --> NotificacionEvent : "entrega a >"
+
+RutaIniciadaEvent ..> GestorEventosLogistica : "consumido por"
+EntregaExitosaEvent ..> GestorEventosLogistica : "consumido por"
+EntregaFallidaEvent ..> GestorEventosLogistica : "consumido por"
+
+EntregaExitosaEvent ..> PerfilDonante : "consumido por\n(para métricas)"
+DonacionAsignadaEvent ..> PerfilDonante : "consumido por"
+
+NotificacionEvent ..> NotificadorService : "consumido por"
+
+note bottom of MessageBroker
+    **Arquitectura Dirigida por Eventos (EDA) - Entrega 4:**
+    Los servicios están completamente desacoplados.
+    Se comunican publicando y consumiendo DTOs 
+    (Eventos de Dominio) a través de RabbitMQ.
+end note
+
+note bottom of APIGateway
+    Punto de entrada unificado
+    para todas las operaciones
+    REST de los servicios.
+end note
 
 @enduml
