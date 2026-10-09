@@ -19,8 +19,7 @@ public class JpaDonacionOriginalRepository implements DonacionOriginalRepository
 
   private final DonacionOriginalJpaRepository jpaRepository;
 
-  @PersistenceContext
-  private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   public JpaDonacionOriginalRepository(DonacionOriginalJpaRepository jpaRepository) {
     this.jpaRepository = jpaRepository;
@@ -46,13 +45,11 @@ public class JpaDonacionOriginalRepository implements DonacionOriginalRepository
 
     // Asignar donante con referencia manejada por Hibernate (evita entidad detached)
     if (donacionOriginal.getDonante() != null && donacionOriginal.getDonante().getId() != null) {
-      DonanteEntity donanteRef = entityManager.getReference(
-          DonanteEntity.class, donacionOriginal.getDonante().getId());
+      DonanteEntity donanteRef =
+          entityManager.getReference(DonanteEntity.class, donacionOriginal.getDonante().getId());
       entity.setDonante(donanteRef);
     }
 
     entityManager.persist(entity);
   }
 }
-
-

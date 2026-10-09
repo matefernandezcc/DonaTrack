@@ -1,13 +1,12 @@
 package com.donatrack.logistica.application.ports.out;
 
+import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
 import java.util.List;
 
-import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
-
 public interface ItemPlanificacionRepositoryPort {
-    void guardar(ItemPlanificacion item);
+  void guardar(ItemPlanificacion item);
 
-    List<ItemPlanificacion> obtenerTodos();
+  List<ItemPlanificacion> obtenerTodos();
 
-    void eliminarTodos(List<ItemPlanificacion> items);
+  void eliminarTodos(List<ItemPlanificacion> items);
 }

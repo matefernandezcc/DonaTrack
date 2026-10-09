@@ -3,7 +3,6 @@ package com.donatrack.donaciones.domain.entities.roles;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -20,13 +19,13 @@ public class Donante extends Rol {
   }
 
   @Override
-  public boolean esValidoParaHumana() { 
-    return true; 
+  public boolean esValidoParaHumana() {
+    return true;
   }
 
   @Override
-  public boolean esValidoParaJuridica() { 
-    return true; 
+  public boolean esValidoParaJuridica() {
+    return true;
   }
 
   // --- Métodos del Diagrama de Clases ---

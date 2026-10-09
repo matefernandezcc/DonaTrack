@@ -20,8 +20,7 @@ public class JpaBeneficiarioRepository implements BeneficiarioRepository {
 
   private final BeneficiarioJpaRepository jpaRepository;
 
-  @PersistenceContext
-  private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   public JpaBeneficiarioRepository(BeneficiarioJpaRepository jpaRepository) {
     this.jpaRepository = jpaRepository;

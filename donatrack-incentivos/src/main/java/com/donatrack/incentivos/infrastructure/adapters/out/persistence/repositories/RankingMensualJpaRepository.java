@@ -6,5 +6,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RankingMensualJpaRepository extends JpaRepository<RankingMensualEntity, UUID> {
-}
+public interface RankingMensualJpaRepository extends JpaRepository<RankingMensualEntity, UUID> {}

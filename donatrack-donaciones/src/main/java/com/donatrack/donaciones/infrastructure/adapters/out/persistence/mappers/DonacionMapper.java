@@ -11,19 +11,22 @@ public class DonacionMapper {
     if (domain == null) return null;
 
     DonacionEntity entity = new DonacionEntity();
-    // No setear ID: @GeneratedValue lo genera al persistir
+    entity.setId(domain.getId());
     if (domain.getEstado() != null) {
       entity.setEstado(domain.getEstado().name());
     }
 
     if (domain.getBienes() != null) {
-      domain.getBienes().forEach(bien -> {
-        var bienEntity = BienMapper.toEntity(bien);
-        if (bienEntity != null) {
-          bienEntity.setDonacion(entity);
-          entity.getBienes().add(bienEntity);
-        }
-      });
+      domain
+          .getBienes()
+          .forEach(
+              bien -> {
+                var bienEntity = BienMapper.toEntity(bien);
+                if (bienEntity != null) {
+                  bienEntity.setDonacion(entity);
+                  entity.getBienes().add(bienEntity);
+                }
+              });
     }
 
     return entity;
@@ -39,16 +42,27 @@ public class DonacionMapper {
     }
 
     if (entity.getNecesidad() != null && entity.getNecesidad().getBeneficiario() != null) {
-      domain.setEntidadAsignada((Beneficiario) RolMapper.toDomain(entity.getNecesidad().getBeneficiario()));
+      domain.setEntidadAsignada(
+          (Beneficiario) RolMapper.toDomain(entity.getNecesidad().getBeneficiario()));
+    }
+
+    if (entity.getSubcategoriaAsignada() != null) {
+      domain.setSubCategoria(new com.donatrack.donaciones.domain.entities.donacion.Subcategoria(
+          entity.getSubcategoriaAsignada().getNombre(),
+          entity.getSubcategoriaAsignada().getDescripcion()
+      ));
     }
 
     if (entity.getBienes() != null) {
-      entity.getBienes().forEach(bienEntity -> {
-        var bien = BienMapper.toDomain(bienEntity);
-        if (bien != null) {
-          domain.agregarBien(bien);
-        }
-      });
+      entity
+          .getBienes()
+          .forEach(
+              bienEntity -> {
+                var bien = BienMapper.toDomain(bienEntity);
+                if (bien != null) {
+                  domain.agregarBien(bien);
+                }
+              });
     }
 
     return domain;

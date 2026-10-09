@@ -1,8 +1,8 @@
 package com.donatrack.donaciones.infrastructure.adapters.out.persistence.repositories;
 
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.PersonaEntity;
-import java.util.UUID;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -40,17 +40,14 @@ public class NotificacionMapper {
       if (entity.getEventoNotificacion().getTipoEvento() != null) {
         try {
           tipo = TipoEvento.valueOf(entity.getEventoNotificacion().getTipoEvento());
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
       }
       evento = new Evento(tipo, entity.getEventoNotificacion().getDescripcion(), null);
     }
 
-    Notificacion domain = new Notificacion(
-        entity.getDestinatario(),
-        entity.getMensaje(),
-        evento,
-        entity.getMedio()
-    );
+    Notificacion domain =
+        new Notificacion(entity.getDestinatario(), entity.getMensaje(), evento, entity.getMedio());
     domain.setFechaEnvio(entity.getFechaEnvio());
     if (entity.getCompletada() != null && entity.getCompletada()) {
       domain.marcarComoCompletada();

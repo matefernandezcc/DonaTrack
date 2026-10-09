@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PerfilDonanteMapper {
@@ -34,6 +35,7 @@ public class PerfilDonanteMapper {
     // Misión actual
     if (domain.getMisionActual() != null) {
       MisionEntity me = new MisionEntity();
+      me.setId(UUID.randomUUID());
       me.setNombre(domain.getMisionActual().getNombre());
       if (domain.getMisionActual().getTipoMetrica() != null) {
         me.setTipoMetrica(domain.getMisionActual().getTipoMetrica().name());
@@ -52,6 +54,7 @@ public class PerfilDonanteMapper {
         ie.setDescripcion(ins.getDescripcion());
 
         InsigniaObtenidaEntity ioe = new InsigniaObtenidaEntity();
+        ioe.setId(UUID.randomUUID());
         ioe.setPerfil(entity);
         ioe.setInsignia(ie);
         ioe.setFechaObtencion(ins.getFechaObtencion());
@@ -64,6 +67,7 @@ public class PerfilDonanteMapper {
     // Métricas del donante
     if (domain.getMetricas() != null) {
       MetricasDonanteEntity mde = new MetricasDonanteEntity();
+      mde.setId(UUID.randomUUID());
       mde.setPerfil(entity);
       mde.setTotalDonacionesHistoricas(
           domain.getMetricas().getRegistrosDonacion() != null
@@ -72,16 +76,25 @@ public class PerfilDonanteMapper {
 
       // Registros de donación
       if (domain.getMetricas().getRegistrosDonacion() != null) {
-        List<RegistroDonacionEntity> regEntities = domain.getMetricas().getRegistrosDonacion().stream().map(reg -> {
-          RegistroDonacionEntity rde = new RegistroDonacionEntity();
-          rde.setMetricas(mde);
-          rde.setIdDonacionOrigen(reg.getIdDonacion());
-          rde.setCantidadBienes(reg.getCantidadBienes());
-          rde.setCategorias(reg.getCategorias() != null ? String.join(",", reg.getCategorias()) : null);
-          rde.setIdEntidadBeneficiariaOrigen(reg.getIdEntidadBeneficiaria());
-          rde.setMesDonacion(reg.getMesDonacion() != null ? reg.getMesDonacion().toString() : null);
-          return rde;
-        }).collect(Collectors.toList());
+        List<RegistroDonacionEntity> regEntities =
+            domain.getMetricas().getRegistrosDonacion().stream()
+                .map(
+                    reg -> {
+                      RegistroDonacionEntity rde = new RegistroDonacionEntity();
+                      rde.setId(UUID.randomUUID());
+                      rde.setMetricas(mde);
+                      rde.setIdDonacionOrigen(reg.getIdDonacion());
+                      rde.setCantidadBienes(reg.getCantidadBienes());
+                      rde.setCategorias(
+                          reg.getCategorias() != null
+                              ? String.join(",", reg.getCategorias())
+                              : null);
+                      rde.setIdEntidadBeneficiariaOrigen(reg.getIdEntidadBeneficiaria());
+                      rde.setMesDonacion(
+                          reg.getMesDonacion() != null ? reg.getMesDonacion().toString() : null);
+                      return rde;
+                    })
+                .collect(Collectors.toList());
         mde.setRegistrosDonacion(regEntities);
       }
       entity.setMetricas(mde);
@@ -89,10 +102,13 @@ public class PerfilDonanteMapper {
       // Misiones completadas -> ProgresoMisionEntity
       if (domain.getMetricas().getMisionesCompletadas() != null) {
         List<ProgresoMisionEntity> progresos = new ArrayList<>();
-        for (Map.Entry<Mision, YearMonth> entry : domain.getMetricas().getMisionesCompletadas().entrySet()) {
+        for (Map.Entry<Mision, YearMonth> entry :
+            domain.getMetricas().getMisionesCompletadas().entrySet()) {
           ProgresoMisionEntity pme = new ProgresoMisionEntity();
+          pme.setId(UUID.randomUUID());
           pme.setPerfil(entity);
           MisionEntity me = new MisionEntity();
+          me.setId(UUID.randomUUID());
           me.setNombre(entry.getKey().getNombre());
           pme.setMision(me);
           pme.setEstado("COMPLETADA");
@@ -122,42 +138,60 @@ public class PerfilDonanteMapper {
 
     // Insignias obtenidas
     if (entity.getInsigniasObtenidas() != null) {
-      domain.setInsigniasObtenidas(entity.getInsigniasObtenidas().stream().map(ioe -> {
-        Insignia ins = new Insignia(
-            ioe.getInsignia() != null ? ioe.getInsignia().getNombre() : "Insignia",
-            ioe.getInsignia() != null ? ioe.getInsignia().getDescripcion() : ""
-        );
-        if (ioe.getInsignia() != null) {
-          ins.setId(ioe.getInsignia().getId());
-        }
-        ins.setFechaObtencion(ioe.getFechaObtencion());
-        ins.setVisiblePublicamente(ioe.getVisiblePublicamente() != null ? ioe.getVisiblePublicamente() : true);
-        return ins;
-      }).collect(Collectors.toList()));
+      domain.setInsigniasObtenidas(
+          entity.getInsigniasObtenidas().stream()
+              .map(
+                  ioe -> {
+                    Insignia ins =
+                        new Insignia(
+                            ioe.getInsignia() != null ? ioe.getInsignia().getNombre() : "Insignia",
+                            ioe.getInsignia() != null ? ioe.getInsignia().getDescripcion() : "");
+                    if (ioe.getInsignia() != null) {
+                      ins.setId(ioe.getInsignia().getId());
+                    }
+                    ins.setFechaObtencion(ioe.getFechaObtencion());
+                    ins.setVisiblePublicamente(
+                        ioe.getVisiblePublicamente() != null ? ioe.getVisiblePublicamente() : true);
+                    return ins;
+                  })
+              .collect(Collectors.toList()));
     }
 
     // Registros donación
     if (entity.getMetricas() != null && entity.getMetricas().getRegistrosDonacion() != null) {
-      domain.getMetricas().setRegistrosDonacion(entity.getMetricas().getRegistrosDonacion().stream().map(rde -> {
-        RegistroDonacion reg = new RegistroDonacion();
-        reg.setIdDonacion(rde.getIdDonacionOrigen());
-        reg.setCantidadBienes(rde.getCantidadBienes() != null ? rde.getCantidadBienes() : 0);
-        if (rde.getCategorias() != null && !rde.getCategorias().isBlank()) {
-          reg.setCategorias(new HashSet<>(Arrays.asList(rde.getCategorias().split(","))));
-        } else {
-          reg.setCategorias(new HashSet<>());
-        }
-        reg.setIdEntidadBeneficiaria(rde.getIdEntidadBeneficiariaOrigen());
-        reg.setMesDonacion(rde.getMesDonacion() != null ? YearMonth.parse(rde.getMesDonacion()) : null);
-        return reg;
-      }).collect(Collectors.toList()));
+      domain
+          .getMetricas()
+          .setRegistrosDonacion(
+              entity.getMetricas().getRegistrosDonacion().stream()
+                  .map(
+                      rde -> {
+                        RegistroDonacion reg = new RegistroDonacion();
+                        reg.setIdDonacion(rde.getIdDonacionOrigen());
+                        reg.setCantidadBienes(
+                            rde.getCantidadBienes() != null ? rde.getCantidadBienes() : 0);
+                        if (rde.getCategorias() != null && !rde.getCategorias().isBlank()) {
+                          reg.setCategorias(
+                              new HashSet<>(Arrays.asList(rde.getCategorias().split(","))));
+                        } else {
+                          reg.setCategorias(new HashSet<>());
+                        }
+                        reg.setIdEntidadBeneficiaria(rde.getIdEntidadBeneficiariaOrigen());
+                        reg.setMesDonacion(
+                            rde.getMesDonacion() != null
+                                ? YearMonth.parse(rde.getMesDonacion())
+                                : null);
+                        return reg;
+                      })
+                  .collect(Collectors.toList()));
     }
 
     // Progreso misiones
     if (entity.getProgresosMisiones() != null) {
       Map<Mision, YearMonth> map = domain.getMetricas().getMisionesCompletadas();
       for (ProgresoMisionEntity pme : entity.getProgresosMisiones()) {
-        if ("COMPLETADA".equalsIgnoreCase(pme.getEstado()) && pme.getMesCompletada() != null && pme.getMision() != null) {
+        if ("COMPLETADA".equalsIgnoreCase(pme.getEstado())
+            && pme.getMesCompletada() != null
+            && pme.getMision() != null) {
           Mision dummy = new Mision(pme.getMision().getNombre(), null, null, 0);
           map.put(dummy, YearMonth.parse(pme.getMesCompletada()));
         }

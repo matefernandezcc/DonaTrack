@@ -1,16 +1,16 @@
 package com.donatrack.donaciones.domain.entities.necesidades;
 
 public enum TipoPeriodo {
-    SEMANAL(7),
-    MENSUAL(30);
+  SEMANAL(7),
+  MENSUAL(30);
 
-    private final int dias;
+  private final int dias;
 
-    TipoPeriodo(int dias) {
-        this.dias = dias;
-    }
+  TipoPeriodo(int dias) {
+    this.dias = dias;
+  }
 
-    public int getDias() {
-        return dias;
-    }
+  public int getDias() {
+    return dias;
+  }
 }

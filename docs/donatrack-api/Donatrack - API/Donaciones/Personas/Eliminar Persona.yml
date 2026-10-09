@@ -8,7 +8,7 @@ http:
   url: "{{donacionesUrl}}/api/personas/:personaId"
   params:
     - name: personaId
-      value: 5c8e8956-c21f-4d19-a3d7-30f4d69cc434
+      value: d8404b9a-0504-40c7-b8c5-0635faae4f2e
       type: path
   body: none
   auth: inherit
@@ -18,3 +18,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+

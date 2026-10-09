@@ -12,26 +12,26 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQIncentivosConfig {
 
-    public static final String INCENTIVOS_EXCHANGE = "incentivos.exchange";
-    public static final String NUEVA_INSIGNIA_QUEUE = "nueva_insignia_queue";
+  public static final String INCENTIVOS_EXCHANGE = "incentivos.exchange";
+  public static final String NUEVA_INSIGNIA_QUEUE = "nueva_insignia_queue";
 
-    @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
+  @Bean
+  public MessageConverter jsonMessageConverter() {
+    return new Jackson2JsonMessageConverter();
+  }
 
-    @Bean
-    public TopicExchange incentivosExchange() {
-        return new TopicExchange(INCENTIVOS_EXCHANGE);
-    }
+  @Bean
+  public TopicExchange incentivosExchange() {
+    return new TopicExchange(INCENTIVOS_EXCHANGE);
+  }
 
-    @Bean
-    public Queue nuevaInsigniaQueue() {
-        return new Queue(NUEVA_INSIGNIA_QUEUE, true); // Durable
-    }
+  @Bean
+  public Queue nuevaInsigniaQueue() {
+    return new Queue(NUEVA_INSIGNIA_QUEUE, true); // Durable
+  }
 
-    @Bean
-    public Binding bindingNuevaInsignia(Queue nuevaInsigniaQueue, TopicExchange incentivosExchange) {
-        return BindingBuilder.bind(nuevaInsigniaQueue).to(incentivosExchange).with("insignia.nueva");
-    }
+  @Bean
+  public Binding bindingNuevaInsignia(Queue nuevaInsigniaQueue, TopicExchange incentivosExchange) {
+    return BindingBuilder.bind(nuevaInsigniaQueue).to(incentivosExchange).with("insignia.nueva");
+  }
 }

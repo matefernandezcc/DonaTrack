@@ -57,7 +57,12 @@ public class Donacion {
   public List<String> getCategoriasString() {
     List<String> categorias = new ArrayList<>();
     for (Bien bien : bienes) {
-      categorias.add(bien.getSubcategoria().getNombre());
+      if (bien.getSubcategoria() != null) {
+        categorias.add(bien.getSubcategoria().getNombre());
+      }
+    }
+    if (categorias.isEmpty() && this.subCategoria != null) {
+      categorias.add(this.subCategoria.getNombre());
     }
     return categorias;
   }

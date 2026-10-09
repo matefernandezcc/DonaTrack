@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CamionJpaRepository extends JpaRepository<CamionEntity, UUID> {
   Optional<CamionEntity> findByPatente(String patente);
+
   void deleteByPatente(String patente);
 }

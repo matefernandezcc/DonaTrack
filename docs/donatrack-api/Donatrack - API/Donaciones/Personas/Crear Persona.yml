@@ -10,24 +10,33 @@ http:
     type: json
     data: |-
       {
-        "email": "donante@test.com",
-        "contacto": {
-          "correoElectronico": "donante@test.com",
-          "telefono": "+5411223344",
-          "whatsapp": "+5411223344",
-          "medioPredeterminado": "WHATSAPP"
-        },
-        "direccion": {
-          "calle": "Av. Siempreviva",
-          "numero": "742",
-          "localidad": "Springfield",
-          "codigoPostal": "1602"
-        },
-        "documento": {
-          "tipo": "DNI",
-          "numero": "40123456"
+          "tipo": "HUMANA",
+          "email": "mateo@donatrack.com",
+          "nombre": "Mateo",
+          "apellido": "Fernandez",
+          "edad": 23,
+          "contacto": {
+            "correoElectronico": "mateo@donatrack.com",
+            "telefono": "+54 11 1234-5678",
+            "whatsapp": "+54 11 1234-5678",
+            "medioPredeterminado": "CORREO"
+          },
+          "documento": {
+            "tipo": "DNI",
+            "numero": "99887766"
+          },
+          "direccion": {
+            "calle": "Av. Corrientes",
+            "altura": 4303,
+            "localidad": "CABA",
+            "provincia": {
+              "nombreProvincia": "Buenos Aires",
+              "pais": { "nombre": "Argentina" }
+            },
+            "codigoPostal": "C1181",
+            "coordenadas": null
+          }
         }
-      }
   auth: inherit
 
 settings:
@@ -35,3 +44,5 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
+

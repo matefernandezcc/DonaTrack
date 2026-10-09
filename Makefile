@@ -105,12 +105,25 @@ ci:
 # =========================
 
 N8N_CONTAINER=n8n_donatrack
+POSTGRES_CONTAINER=postgres_donatrack
 
 docker-up:
 	docker compose up -d
 
 docker-down:
 	docker compose down
+
+db-init:
+	@echo "Esperando que PostgreSQL esté listo..."
+	@until docker exec $(POSTGRES_CONTAINER) pg_isready -U postgres > /dev/null 2>&1; do \
+		echo "PostgreSQL está arrancando..."; \
+		sleep 2; \
+	done
+	@echo "Ejecutando init.sql (creación de schemas y tablas)..."
+	docker exec -i $(POSTGRES_CONTAINER) psql -U postgres -d donatrack < ./database/init.sql
+	@echo "Ejecutando local-seed-data.sql (carga de datos iniciales)..."
+	docker exec -i $(POSTGRES_CONTAINER) psql -U postgres -d donatrack < ./database/local-seed-data.sql
+	@echo "Base de datos inicializada con éxito."
 
 n8n-import:
 	docker cp ./n8n/workflows/workflows.json \
@@ -125,8 +138,9 @@ n8n-export:
 
 setup:
 	docker compose up -d
-	@echo "Waiting for n8n..."
-	sleep 15
+	make db-init
+	@echo "Esperando a n8n..."
+	sleep 10
 	make n8n-import
 
 # =========================
@@ -149,5 +163,6 @@ help:
 	@echo "  make notificaciones      -> start notificaciones service (port 8003)"
 	@echo "  make server              -> start general server service (port 8080)"
 	@echo "  make ci                  -> full pipeline"
-	@echo "  make setup               -> start docker and import n8n workflows"
+	@echo "  make db-init             -> init schemas and seed data in local postgres"
+	@echo "  make setup               -> start docker, init database, and import n8n workflows"
 	@echo "  make n8n-export          -> export workflows to repo"

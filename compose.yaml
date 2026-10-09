@@ -13,8 +13,8 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./local-seed-data.sql:/docker-entrypoint-initdb.d/z-local-seed-data.sql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/local-seed-data.sql:/docker-entrypoint-initdb.d/z-local-seed-data.sql
 
   n8n:
     image: docker.n8n.io/n8nio/n8n:2.39.7
@@ -26,7 +26,12 @@ services:
       - GENERIC_TIMEZONE=America/Argentina/Buenos_Aires
       - TZ=America/Argentina/Buenos_Aires
       - N8N_CORS_ALLOWED_ORIGINS=*
-      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1545253873785118740/fQ46oGTgcP5UZbcZmiVL7JIUblz71AUCVjzIDq7WnXYTCR-kT217cPlgGdNiGWnGm6jR
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN_BASE64=${TWILIO_AUTH_TOKEN_BASE64}
+      - TWILIO_CONTENT_SID=${TWILIO_CONTENT_SID}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/workflows
@@ -59,7 +64,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
 
   incentivos:
     build:
@@ -76,7 +80,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
 
   logistica:
     build:
@@ -94,7 +97,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
 
   notificaciones:
     build:
@@ -111,7 +113,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
 
   server:
     build:

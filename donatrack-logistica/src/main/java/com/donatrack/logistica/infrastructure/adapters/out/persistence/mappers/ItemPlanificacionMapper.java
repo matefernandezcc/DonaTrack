@@ -27,17 +27,15 @@ public final class ItemPlanificacionMapper {
   public static ItemPlanificacion toDomain(ItemPlanificacionEntity entity) {
     if (entity == null) return null;
     Direccion destino = null;
-    if (entity.getCalleDestino() != null || entity.getAlturaDestino() != null || entity.getLocalidadDestino() != null) {
-      destino = new Direccion(
-          entity.getCalleDestino(),
-          entity.getAlturaDestino(),
-          entity.getLocalidadDestino());
+    if (entity.getCalleDestino() != null
+        || entity.getAlturaDestino() != null
+        || entity.getLocalidadDestino() != null) {
+      destino =
+          new Direccion(
+              entity.getCalleDestino(), entity.getAlturaDestino(), entity.getLocalidadDestino());
     }
 
     return new ItemPlanificacion(
-        entity.getIdDonacion(),
-        entity.getPesoEstimado(),
-        entity.getVolumenEstimado(),
-        destino);
+        entity.getIdDonacion(), entity.getPesoEstimado(), entity.getVolumenEstimado(), destino);
   }
 }

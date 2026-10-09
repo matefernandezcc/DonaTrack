@@ -39,16 +39,20 @@ Se migró todo el modelo de objetos a **PostgreSQL** y **Spring Data JPA** mante
 
 ---
 
-## 🟢 Fase 4: Despliegue en la Nube (Completada)
+## 🟢 Fase 4: Despliegue en la Nube y Testing (Completada)
 
-El despliegue en la nube y la integración con el Broker han sido completados exitosamente:
+El despliegue en la nube y la integración avanzada con el Broker han sido completados exitosamente cumpliendo todos los requisitos:
 
 1. **Despliegue de Logística:** 
-   * [x] Publicar `donatrack-logistica` remotamente en Render: `https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`
+   * [x] Publicar `donatrack-logistica` remotamente en Render: `https://dona-logistica.onrender.com/swagger-ui/index.html`.
    * [x] Conectar con BD Supabase PostgreSQL (schema `logistica` con pooler AWS US-East-1).
-2. **Configuración del Broker:**
-   * [x] Configurar `logistica.url.remota` en `donatrack-donaciones` (`LogisticaRemotoClient` apuntando a Render).
-   * [x] Soporte de fallback automático a Logística local (`localhost:8002`) si el servicio remoto está suspendido o inalcanzable.
+2. **Configuración del Broker de Integración (Donaciones -> Logística):**
+   * [x] Implementar soporte multicapa en `LogisticaBrokerAdapter`.
+   * [x] Intento 1: Servidor propio en la nube (`LogisticaRemoto1Client` -> `logistica.url.remota1`).
+   * [x] Intento 2 (Compañero): Servidor alternativo en la nube (`LogisticaRemoto2Client` -> `logistica.url.remota2`).
+   * [x] Intento 3 (Fallback): Logística local (`LogisticaLocalClient` -> `localhost:8002`) por si la nube falla o está pausada.
 3. **Pruebas y Documentación:**
-   * [x] Colección de endpoints documentada en Swagger UI y disponible para pruebas en Bruno (`docs/donatrack-api`).
+   * [x] Configuración de Pre-Request Scripts inteligentes en Bruno para enrutar el test al servidor productivo que esté vivo, ignorando los caídos.
+   * [x] Comprobación de que las requests hacia Base de Datos (GET/POST CRUD) operan con código HTTP 200 en Render.
+   * [x] Nota técnica documentada: Las requests que usan mensajería asíncrona dan 500 en la nube por falta de clúster RabbitMQ, pero caen elegantemente en Fallback local al usarlas a través del Broker.
    * [x] Verificación de suite de tests unitarios y de persistencia JPA pasando al 100%.

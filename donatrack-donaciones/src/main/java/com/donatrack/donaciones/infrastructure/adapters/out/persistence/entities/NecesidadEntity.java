@@ -30,7 +30,6 @@ import lombok.Setter;
 public abstract class NecesidadEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "necesidad_id")
   private UUID id;
 

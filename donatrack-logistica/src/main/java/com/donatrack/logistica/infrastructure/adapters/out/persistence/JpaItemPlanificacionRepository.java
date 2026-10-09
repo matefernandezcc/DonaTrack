@@ -28,7 +28,10 @@ public class JpaItemPlanificacionRepository implements ItemPlanificacionReposito
 
   @Override
   public void eliminarTodos(List<ItemPlanificacion> items) {
-    List<com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ItemPlanificacionEntity> entities = items.stream().map(ItemPlanificacionMapper::toEntity).toList();
+    List<
+            com.donatrack.logistica.infrastructure.adapters.out.persistence.entities
+                .ItemPlanificacionEntity>
+        entities = items.stream().map(ItemPlanificacionMapper::toEntity).toList();
     jpaRepository.deleteAll(entities);
   }
 }

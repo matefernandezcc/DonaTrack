@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 public abstract class Necesidad {
@@ -14,10 +15,14 @@ public abstract class Necesidad {
   private LocalDate fechaSolicitud;
   private Subcategoria subcategoriaRequerida;
 
-  protected Necesidad(String descripcion, Subcategoria subcategoriaRequerida) {
+  protected Necesidad() {
     this.id = UUID.randomUUID();
+    this.fechaSolicitud = LocalDate.now();
+  }
+
+  protected Necesidad(String descripcion, Subcategoria subcategoriaRequerida) {
+    this();
     this.descripcion = descripcion;
     this.subcategoriaRequerida = subcategoriaRequerida;
-    this.fechaSolicitud = LocalDate.now();
   }
 }

@@ -28,6 +28,7 @@ public class ParadaEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
+
   @Column(name = "parada_id")
   private UUID id;
 

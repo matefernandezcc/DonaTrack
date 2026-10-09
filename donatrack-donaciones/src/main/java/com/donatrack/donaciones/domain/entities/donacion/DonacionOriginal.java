@@ -11,33 +11,32 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DonacionOriginal {
-    private UUID id;
-    private String descripcionGeneral;
-    private LocalDate fechaRecepcion;
-    private Donante donante;
-    private List<Donacion> donacionesSegmentadas;
-    private String usuarioId;
+  private UUID id;
+  private String descripcionGeneral;
+  private LocalDate fechaRecepcion;
+  private Donante donante;
+  private List<Donacion> donacionesSegmentadas;
+  private String usuarioId;
 
-    public DonacionOriginal() {
-        this.id = UUID.randomUUID();
-        this.fechaRecepcion = LocalDate.now();
-        this.donacionesSegmentadas = new ArrayList<>();
-    }
+  public DonacionOriginal() {
+    this.id = UUID.randomUUID();
+    this.fechaRecepcion = LocalDate.now();
+    this.donacionesSegmentadas = new ArrayList<>();
+  }
 
-    public DonacionOriginal(
-            String descripcionGeneral,
-            Donante donante,
-            String usuarioId) {
-        this.id = UUID.randomUUID();
-        this.descripcionGeneral = descripcionGeneral;
-        this.fechaRecepcion = LocalDate.now();
-        this.donante = donante;
-        this.usuarioId = usuarioId;
-        this.donacionesSegmentadas = new ArrayList<>();
-    }
+  public DonacionOriginal(String descripcionGeneral, Donante donante, String usuarioId) {
+    this.id = UUID.randomUUID();
+    this.descripcionGeneral = descripcionGeneral;
+    this.fechaRecepcion = LocalDate.now();
+    this.donante = donante;
+    this.usuarioId = usuarioId;
+    this.donacionesSegmentadas = new ArrayList<>();
+  }
 
-    public void segmentarBienes(List<Bien> bienesBrutos, com.donatrack.donaciones.application.usecases.ProcesadorCargaInicial procesador) {
-        // Ejecuta la segmentación y guarda las donaciones resultantes
-        this.donacionesSegmentadas = procesador.procesar(bienesBrutos);
-    }
+  public void segmentarBienes(
+      List<Bien> bienesBrutos,
+      com.donatrack.donaciones.application.usecases.ProcesadorCargaInicial procesador) {
+    // Ejecuta la segmentación y guarda las donaciones resultantes
+    this.donacionesSegmentadas = procesador.procesar(bienesBrutos);
+  }
 }

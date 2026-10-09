@@ -10,7 +10,7 @@ public final class CamionMapper {
   public static CamionEntity toEntity(Camion domain) {
     if (domain == null) return null;
     return new CamionEntity(
-        null,
+        domain.getId(),
         domain.getPatente(),
         domain.getCapacidadVolumen(),
         domain.getAltura(),
@@ -20,6 +20,7 @@ public final class CamionMapper {
   public static Camion toDomain(CamionEntity entity) {
     if (entity == null) return null;
     return new Camion(
+        entity.getId(),
         entity.getPatente(),
         entity.getCapacidadVolumen(),
         entity.getAltura(),

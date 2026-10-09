@@ -1,0 +1,26 @@
+info:
+  name: Recepcionar Donacion
+  type: http
+  seq: 15
+
+http:
+  method: POST
+  url: "{{logisticaUrl}}/api/planificacion/items"
+  body:
+    type: json
+    data: |-
+      {
+        "idDonacion": "139e0f9f-9431-4302-9f06-cad97978f7be",
+        "peso": 25.5,
+        "volumen": 0.5,
+        "calleDestino": "Av. Santa Fe",
+        "alturaDestino": "1234",
+        "localidadDestino": "CABA"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Archivo {
-    private String nombre;
-    private byte[] contenido;
+  private String nombre;
+  private byte[] contenido;
 }
