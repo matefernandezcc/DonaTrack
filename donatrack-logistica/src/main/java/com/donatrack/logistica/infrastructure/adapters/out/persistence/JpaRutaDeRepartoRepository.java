@@ -10,20 +10,25 @@ import java.util.UUID;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.RutaDeRepartoEntity;
+
 @Repository
 @Transactional(readOnly = true)
 public class JpaRutaDeRepartoRepository implements RutaDeRepartoRepositoryPort {
 
   private final RutaDeRepartoJpaRepository jpaRepository;
+  private final EntityManager em;
 
-  public JpaRutaDeRepartoRepository(RutaDeRepartoJpaRepository jpaRepository) {
+  public JpaRutaDeRepartoRepository(RutaDeRepartoJpaRepository jpaRepository, EntityManager em) {
     this.jpaRepository = jpaRepository;
+    this.em = em;
   }
 
   @Override
   public Optional<RutaDeReparto> buscarPorIdDonacion(UUID idDonacion) {
     return jpaRepository
-        .findByParadas_Entregas_IdDonacion(idDonacion)
+        .findFirstByEntregaIdDonacion(idDonacion)
         .map(RutaDeRepartoMapper::toDomain);
   }
 
@@ -40,6 +45,15 @@ public class JpaRutaDeRepartoRepository implements RutaDeRepartoRepositoryPort {
   @Override
   @Transactional
   public void guardar(RutaDeReparto ruta) {
-    jpaRepository.save(RutaDeRepartoMapper.toEntity(ruta));
+    RutaDeRepartoEntity entity = RutaDeRepartoMapper.toEntity(ruta);
+    if (entity.getCamion() != null && entity.getCamion().getId() != null) {
+      entity.setCamion(em.getReference(com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.CamionEntity.class, entity.getCamion().getId()));
+    }
+    if (entity.getChofer() != null && entity.getChofer().getId() != null) {
+      entity.setChofer(em.getReference(com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ChoferEntity.class, entity.getChofer().getId()));
+    }
+    jpaRepository.save(entity);
+    jpaRepository.flush();
+    System.out.println("GUARDAR RUTA COMPLETADO Y FLUSHEADO");
   }
 }

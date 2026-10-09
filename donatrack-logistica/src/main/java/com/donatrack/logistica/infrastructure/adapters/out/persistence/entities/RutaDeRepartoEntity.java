@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Entity
 @Table(name = "rutas_reparto", schema = "logistica")
 @Getter
@@ -29,7 +30,7 @@ import lombok.Setter;
 public class RutaDeRepartoEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+
   @Column(name = "ruta_reparto_id")
   private UUID id;
 
@@ -37,11 +38,11 @@ public class RutaDeRepartoEntity {
   @JoinColumn(name = "solicitud_planificacion_id")
   private SolicitudPlanificacionEntity solicitud;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.MERGE)
   @JoinColumn(name = "camion_id")
   private CamionEntity camion;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.MERGE)
   @JoinColumn(name = "chofer_id")
   private ChoferEntity chofer;
 

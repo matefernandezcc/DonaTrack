@@ -19,8 +19,7 @@ public class JpaPersonaRepository implements PersonaRepository {
 
   private final PersonaJpaRepository jpaRepository;
 
-  @PersistenceContext
-  private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   public JpaPersonaRepository(PersonaJpaRepository jpaRepository) {
     this.jpaRepository = jpaRepository;
@@ -58,7 +57,10 @@ public class JpaPersonaRepository implements PersonaRepository {
   @Override
   public Optional<Persona> buscarPorRolId(UUID rolId) {
     return jpaRepository.findAll().stream()
-        .filter(p -> p.getRoles() != null && p.getRoles().stream().anyMatch(r -> r.getId().equals(rolId)))
+        .filter(
+            p ->
+                p.getRoles() != null
+                    && p.getRoles().stream().anyMatch(r -> r.getId().equals(rolId)))
         .findFirst()
         .map(PersonaMapper::toDomain);
   }

@@ -10,34 +10,35 @@ import org.springframework.stereotype.Component;
 @Component
 public class IncentivosRabbitMQListener {
 
-    private final NotificadorService notificadorService;
+  private final NotificadorService notificadorService;
 
-    public IncentivosRabbitMQListener(NotificadorService notificadorService) {
-        this.notificadorService = notificadorService;
-    }
+  public IncentivosRabbitMQListener(NotificadorService notificadorService) {
+    this.notificadorService = notificadorService;
+  }
 
-    @RabbitListener(bindings = @org.springframework.amqp.rabbit.annotation.QueueBinding(
-            value = @Queue(value = "nueva_insignia_queue", durable = "true"),
-            exchange = @org.springframework.amqp.rabbit.annotation.Exchange(value = "incentivos.exchange", type = "topic"),
-            key = "insignia.nueva"
-    ))
-    public void onNuevaInsignia(NotificacionRequestDTO request) {
-        log.info("Recibido evento de nueva insignia para: {}", request.destinatario);
+  @RabbitListener(
+      bindings =
+          @org.springframework.amqp.rabbit.annotation.QueueBinding(
+              value = @Queue(value = "nueva_insignia_queue", durable = "true"),
+              exchange =
+                  @org.springframework.amqp.rabbit.annotation.Exchange(
+                      value = "incentivos.exchange",
+                      type = "topic"),
+              key = "insignia.nueva"))
+  public void onNuevaInsignia(NotificacionRequestDTO request) {
+    log.info("Recibido evento de nueva insignia para: {}", request.destinatario);
 
-        notificadorService.enviarNotificacion(
-                request.destinatario,
-                request.mensaje,
-                request.medio != null ? request.medio : "EMAIL"
-        );
-    }
+    notificadorService.enviarNotificacion(
+        request.destinatario, request.mensaje, request.medio != null ? request.medio : "EMAIL");
+  }
 
-    public static class NotificacionRequestDTO {
-        public String destinatario;
-        public String asunto;
-        public String mensaje;
-        public String medio;
-        
-        // Se pueden añadir constructores o dejar public fields para que Jackson deserialice.
-        public NotificacionRequestDTO() {}
-    }
+  public static class NotificacionRequestDTO {
+    public String destinatario;
+    public String asunto;
+    public String mensaje;
+    public String medio;
+
+    // Se pueden añadir constructores o dejar public fields para que Jackson deserialice.
+    public NotificacionRequestDTO() {}
+  }
 }

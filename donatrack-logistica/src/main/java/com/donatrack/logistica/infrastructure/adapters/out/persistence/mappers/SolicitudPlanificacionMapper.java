@@ -16,7 +16,8 @@ public final class SolicitudPlanificacionMapper {
     entity.setId(domain.getId());
     entity.setFechaSolicitud(domain.getFechaSolicitud());
     if (domain.getEstado() != null) {
-      entity.setEstado(SolicitudPlanificacionEntity.EstadoPlanificacionEnum.valueOf(domain.getEstado().name()));
+      entity.setEstado(
+          SolicitudPlanificacionEntity.EstadoPlanificacionEnum.valueOf(domain.getEstado().name()));
     }
     return entity;
   }
@@ -28,10 +29,18 @@ public final class SolicitudPlanificacionMapper {
     domain.setId(entity.getId());
     domain.setFechaSolicitud(entity.getFechaSolicitud());
     if (entity.getEstado() != null) {
-      domain.setEstado(com.donatrack.logistica.domain.entities.planificacion.EstadoPlanificacion.valueOf(entity.getEstado().name()));
+      domain.setEstado(
+          com.donatrack.logistica.domain.entities.planificacion.EstadoPlanificacion.valueOf(
+              entity.getEstado().name()));
     }
     if (entity.getItems() != null) {
-      domain.setIdsDonaciones(entity.getItems().stream().map(com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ItemPlanificacionEntity::getIdDonacion).collect(Collectors.toList()));
+      domain.setIdsDonaciones(
+          entity.getItems().stream()
+              .map(
+                  com.donatrack.logistica.infrastructure.adapters.out.persistence.entities
+                          .ItemPlanificacionEntity
+                      ::getIdDonacion)
+              .collect(Collectors.toList()));
     } else {
       domain.setIdsDonaciones(new ArrayList<>());
     }

@@ -22,13 +22,13 @@ public class BienMapper {
   public static Bien toDomain(BienEntity entity) {
     if (entity == null) return null;
 
-    Bien domain = new Bien(
-        entity.getDescripcion(),
-        entity.getCantidad() != null ? entity.getCantidad() : 0.0,
-        entity.getUnidadMedicion(),
-        entity.getEsUsado() != null ? entity.getEsUsado() : false,
-        entity.getFechaVencimiento()
-    );
+    Bien domain =
+        new Bien(
+            entity.getDescripcion(),
+            entity.getCantidad() != null ? entity.getCantidad() : 0.0,
+            entity.getUnidadMedicion(),
+            entity.getEsUsado() != null ? entity.getEsUsado() : false,
+            entity.getFechaVencimiento());
     domain.setSubcategoria(null); // Esto requeriría otro mapeo si es necesario
 
     return domain;

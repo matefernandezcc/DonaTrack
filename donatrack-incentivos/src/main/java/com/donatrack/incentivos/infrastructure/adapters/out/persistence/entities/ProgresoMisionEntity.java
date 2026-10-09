@@ -1,9 +1,10 @@
 package com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+
+
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,7 +24,7 @@ import lombok.Setter;
 public class ProgresoMisionEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+  
   @Column(name = "progreso_mision_id")
   private UUID id;
 
@@ -31,7 +32,7 @@ public class ProgresoMisionEntity {
   @JoinColumn(name = "perfil_donante_id", nullable = false)
   private PerfilDonanteEntity perfil;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "mision_id", nullable = false)
   private MisionEntity mision;
 

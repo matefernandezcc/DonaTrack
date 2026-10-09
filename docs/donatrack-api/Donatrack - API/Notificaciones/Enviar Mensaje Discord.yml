@@ -1,0 +1,23 @@
+info:
+  name: Enviar Mensaje Discord (n8n)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{notificacionesUrl}}/api/mensajes"
+  body:
+    type: json
+    data: |-
+      {
+        "destinatario": "Mateo Fernandez",
+        "mensaje": "¡Tu donación fue asignada exitosamente a la Fundación Sol!",
+        "medio": "DISCORD"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

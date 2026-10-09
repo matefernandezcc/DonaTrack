@@ -1,7 +1,6 @@
 package com.donatrack.donaciones.domain.entities.roles;
 
 import com.donatrack.donaciones.domain.entities.persona.PersonaJuridica;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,12 +16,12 @@ public class Representante extends Rol {
   }
 
   @Override
-  public boolean esValidoParaHumana() { 
+  public boolean esValidoParaHumana() {
     return true; // Un representante debe ser una persona humana
   }
 
   @Override
-  public boolean esValidoParaJuridica() { 
-    return false; 
+  public boolean esValidoParaJuridica() {
+    return false;
   }
 }

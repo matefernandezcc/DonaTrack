@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Entity
 @Table(name = "solicitudes_planificacion", schema = "logistica")
 @Getter
@@ -28,7 +29,6 @@ import lombok.Setter;
 public class SolicitudPlanificacionEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "solicitud_planificacion_id")
   private UUID id;
 

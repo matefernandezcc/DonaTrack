@@ -6,8 +6,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BeneficiarioRepository {
-    List<Beneficiario> buscarTodos();
-    Optional<Beneficiario> buscarPorId(UUID id);
-    Beneficiario guardar(Beneficiario beneficiario);
-    void eliminarPorId(UUID id);
+  List<Beneficiario> buscarTodos();
+
+  Optional<Beneficiario> buscarPorId(UUID id);
+
+  Beneficiario guardar(Beneficiario beneficiario);
+
+  void eliminarPorId(UUID id);
 }

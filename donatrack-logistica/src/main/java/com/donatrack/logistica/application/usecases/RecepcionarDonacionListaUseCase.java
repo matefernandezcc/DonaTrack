@@ -3,22 +3,21 @@ package com.donatrack.logistica.application.usecases;
 import com.donatrack.logistica.application.ports.in.RecepcionarDonacionListaPort;
 import com.donatrack.logistica.application.ports.out.ItemPlanificacionRepositoryPort;
 import com.donatrack.logistica.domain.entities.planificacion.ItemPlanificacion;
-
 import org.springframework.stereotype.Service;
 
 @Service
 public class RecepcionarDonacionListaUseCase implements RecepcionarDonacionListaPort {
 
-    private final ItemPlanificacionRepositoryPort repositoryPort;
+  private final ItemPlanificacionRepositoryPort repositoryPort;
 
-    public RecepcionarDonacionListaUseCase(ItemPlanificacionRepositoryPort repositoryPort) {
-        this.repositoryPort = repositoryPort;
-    }
+  public RecepcionarDonacionListaUseCase(ItemPlanificacionRepositoryPort repositoryPort) {
+    this.repositoryPort = repositoryPort;
+  }
 
-    @Override
-    public void recepcionar(ItemPlanificacion item) {
-        // Acá a futuro podrías validar reglas de negocio, como que el peso no sea
-        // negativo
-        repositoryPort.guardar(item);
-    }
+  @Override
+  public void recepcionar(ItemPlanificacion item) {
+    // Acá a futuro podrías validar reglas de negocio, como que el peso no sea
+    // negativo
+    repositoryPort.guardar(item);
+  }
 }

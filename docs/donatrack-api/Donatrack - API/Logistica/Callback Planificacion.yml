@@ -29,8 +29,10 @@ http:
                   "latitud": -34.6037,
                   "longitud": -58.3816
                 },
-                "idsDonaciones": [
-                  "31008064-071a-4d7a-ac37-33318f7d9841"
+                "entregas": [
+                  {
+                    "idEntrega": "31008064-071a-4d7a-ac37-33318f7d9841"
+                  }
                 ]
               }
             ]
@@ -44,3 +46,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+​

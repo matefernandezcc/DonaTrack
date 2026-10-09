@@ -9,11 +9,11 @@ public final class ChoferMapper {
 
   public static ChoferEntity toEntity(Chofer domain) {
     if (domain == null) return null;
-    return new ChoferEntity(null, domain.getLegajo(), domain.getNombre());
+    return new ChoferEntity(domain.getId(), domain.getLegajo(), domain.getNombre());
   }
 
   public static Chofer toDomain(ChoferEntity entity) {
     if (entity == null) return null;
-    return new Chofer(entity.getLegajo(), entity.getNombre());
+    return new Chofer(entity.getId(), entity.getLegajo(), entity.getNombre());
   }
 }

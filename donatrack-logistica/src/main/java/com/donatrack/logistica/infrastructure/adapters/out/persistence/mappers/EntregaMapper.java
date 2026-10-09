@@ -6,9 +6,7 @@ import com.donatrack.logistica.domain.entities.entregas.EstadoEntrega;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.ComprobanteRecepcionEmbeddable;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.entities.EntregaEntity;
 
-/**
- * Mapper bidireccional entre Entrega (dominio) y EntregaEntity (JPA).
- */
+/** Mapper bidireccional entre Entrega (dominio) y EntregaEntity (JPA). */
 public final class EntregaMapper {
 
   private EntregaMapper() {}

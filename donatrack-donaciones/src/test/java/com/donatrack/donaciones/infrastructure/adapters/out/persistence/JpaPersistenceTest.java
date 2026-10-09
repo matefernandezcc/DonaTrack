@@ -69,9 +69,11 @@ class JpaPersistenceTest {
     assertNotNull(savedPersona.getId());
     assertNotNull(savedPersona.getDireccion().getId());
 
-    Optional<PersonaHumanaEntity> encontrada = personaRepository.findById(savedPersona.getId())
-        .filter(p -> p instanceof PersonaHumanaEntity)
-        .map(p -> (PersonaHumanaEntity) p);
+    Optional<PersonaHumanaEntity> encontrada =
+        personaRepository
+            .findById(savedPersona.getId())
+            .filter(p -> p instanceof PersonaHumanaEntity)
+            .map(p -> (PersonaHumanaEntity) p);
 
     assertEquals(true, encontrada.isPresent());
     assertEquals("Juan", encontrada.get().getNombre());

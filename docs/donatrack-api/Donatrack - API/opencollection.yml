@@ -2,6 +2,65 @@ opencollection: 1.0.0
 
 info:
   name: Donatrack - API
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  scripts:
+    - type: before-request
+      code: |-
+        const axios = require("axios");
+
+        // 1. SOLO ejecutar este script si estamos en el entorno de Producción
+        if (bru.getEnvName() === "prod") {
+          
+          if (!bru.getVar("yaResolvioLogistica")) {
+            
+            // Solo testeamos los servidores reales en la nube
+            const urls = [
+              "https://donatrack-logistica-50xn.onrender.com", 
+              "https://dona-logistica.onrender.com"
+            ];
+
+            let urlActiva = null;
+            
+            for (const url of urls) {
+              try {
+                // Le pegamos a /api/camiones porque el actuator/health da 503 si falta RabbitMQ
+                await axios.get(`${url}/api/camiones`, { 
+                  timeout: 2000,
+                  validateStatus: function (status) {
+                    return status < 500; // Solo falla si hay timeout o explota el server
+                  }
+                });
+                urlActiva = url; 
+                break;
+              } catch (err) {
+                console.log(`Servidor no disponible: ${url}`);
+              }
+            }
+
+            // 2. Si ninguno de la nube respondió, fallamos el test intencionalmente
+            if (!urlActiva) {
+              throw new Error("❌ CRÍTICO: Ninguno de los servidores de Logística en Render está respondiendo.");
+            }
+
+            // Si alguno funcionó, lo seteamos y guardamos la variable
+            bru.setEnvVar("logisticaUrl", urlActiva);
+            bru.setVar("yaResolvioLogistica", true);
+            
+            console.log(`✅ Usando servidor productivo: ${urlActiva}`);
+          }
+        }
 bundled: false
 extensions:
   bruno:

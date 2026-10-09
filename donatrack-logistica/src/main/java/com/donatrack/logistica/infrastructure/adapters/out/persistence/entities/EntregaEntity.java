@@ -27,6 +27,7 @@ public class EntregaEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
+
   @Column(name = "entrega_id")
   private UUID id;
 

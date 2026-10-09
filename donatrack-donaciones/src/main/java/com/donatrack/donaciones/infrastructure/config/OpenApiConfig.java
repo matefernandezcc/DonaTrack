@@ -14,12 +14,15 @@ public class OpenApiConfig {
   @ConditionalOnMissingBean(OpenAPI.class)
   public OpenAPI donacionesOpenAPI() {
     return new OpenAPI()
-        .info(new Info()
-            .title("DonaTrack - API de Donaciones, Beneficiarios y Personas")
-            .description("Módulo responsable de la recepción de donaciones, gestión de personas (humanas y jurídicas), importación masiva por CSV, administración de beneficiarios con sus necesidades y matchmaking inteligente de asignación.")
-            .version("1.0.0")
-            .contact(new Contact()
-                .name("DonaTrack Team - Donaciones")
-                .email("donaciones@donatrack.org")));
+        .info(
+            new Info()
+                .title("DonaTrack - API de Donaciones, Beneficiarios y Personas")
+                .description(
+                    "Módulo responsable de la recepción de donaciones, gestión de personas (humanas y jurídicas), importación masiva por CSV, administración de beneficiarios con sus necesidades y matchmaking inteligente de asignación.")
+                .version("1.0.0")
+                .contact(
+                    new Contact()
+                        .name("DonaTrack Team - Donaciones")
+                        .email("donaciones@donatrack.org")));
   }
 }

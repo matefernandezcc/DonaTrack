@@ -14,12 +14,15 @@ public class OpenApiConfig {
   @ConditionalOnMissingBean(OpenAPI.class)
   public OpenAPI incentivosOpenAPI() {
     return new OpenAPI()
-        .info(new Info()
-            .title("DonaTrack - API de Incentivos, Gamificación y Ranking")
-            .description("Módulo responsable del registro de actividades de donantes, cálculo de métricas de impacto, asignación de insignias/medallas por logros y generación de rankings (Top 3 donantes).")
-            .version("1.0.0")
-            .contact(new Contact()
-                .name("DonaTrack Team - Incentivos")
-                .email("incentivos@donatrack.org")));
+        .info(
+            new Info()
+                .title("DonaTrack - API de Incentivos, Gamificación y Ranking")
+                .description(
+                    "Módulo responsable del registro de actividades de donantes, cálculo de métricas de impacto, asignación de insignias/medallas por logros y generación de rankings (Top 3 donantes).")
+                .version("1.0.0")
+                .contact(
+                    new Contact()
+                        .name("DonaTrack Team - Incentivos")
+                        .email("incentivos@donatrack.org")));
   }
 }

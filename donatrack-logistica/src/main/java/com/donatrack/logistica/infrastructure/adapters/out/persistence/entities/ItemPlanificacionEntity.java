@@ -24,6 +24,7 @@ public class ItemPlanificacionEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
+
   @Column(name = "item_planificacion_id")
   private UUID id;
 

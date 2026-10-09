@@ -11,9 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Schema(description = "Payload recibido desde el servicio optimizador externo de rutas")
 public class CallbackPlanificacionRequest {
-    @Schema(description = "Identificador de la solicitud de planificación", example = "31008064-071a-4d7a-ac37-33318f7d9842")
-    private UUID idSolicitud;
+  @Schema(
+      description = "Identificador de la solicitud de planificación",
+      example = "31008064-071a-4d7a-ac37-33318f7d9842")
+  private UUID idSolicitud;
 
-    @Schema(description = "Listado de rutas optimizadas calculadas")
-    private List<RutaDeReparto> rutas;
+  @Schema(description = "Listado de rutas optimizadas calculadas")
+  private List<RutaDeReparto> rutas;
 }

@@ -9,8 +9,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 class DonatrackTests {
 
   // Mock del ConnectionFactory para evitar que RabbitMQ intente conectarse a un broker real
-  @MockitoBean
-  private ConnectionFactory connectionFactory;
+  @MockitoBean private ConnectionFactory connectionFactory;
 
   @Test
   void contextLoads() {

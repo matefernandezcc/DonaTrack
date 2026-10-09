@@ -62,6 +62,10 @@ package "Servicio de Notificaciones" {
         + enviar(notificacion: Notificacion)
     }
 
+    class AdaptadorDiscord implements NotificacionAdapter {
+        + enviar(notificacion: Notificacion)
+    }
+
     ' Relaciones
     NotificadorService --> NotificacionAdapter : utiliza >
     NotificadorService ..> Notificacion : envía >

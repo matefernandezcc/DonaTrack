@@ -5,7 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DonacionOriginalRepository {
-    void guardar(DonacionOriginal donacionOriginal);
-    Optional<DonacionOriginal> buscarPorId(UUID id);
-    Optional<DonacionOriginal> buscarPorIdDonacion(UUID idDonacion);
+  void guardar(DonacionOriginal donacionOriginal);
+
+  Optional<DonacionOriginal> buscarPorId(UUID id);
+
+  Optional<DonacionOriginal> buscarPorIdDonacion(UUID idDonacion);
 }

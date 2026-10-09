@@ -10,18 +10,6 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "tipo"
-)
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = PersonaHumana.class, name = "HUMANA"),
-    @JsonSubTypes.Type(value = PersonaJuridica.class, name = "JURIDICA")
-})
 @Getter
 @Setter
 public abstract class Persona {
@@ -63,8 +51,8 @@ public abstract class Persona {
 
   public boolean validarDocumentacion(DocumentoIdentidad d) {
     if (d == null) return false;
-    return this.documento != null 
-        && this.documento.getNumero().equals(d.getNumero()) 
+    return this.documento != null
+        && this.documento.getNumero().equals(d.getNumero())
         && this.documento.getTipo() == d.getTipo();
   }
 
