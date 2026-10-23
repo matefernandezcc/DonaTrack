@@ -16,6 +16,19 @@ services:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./database/local-seed-data.sql:/docker-entrypoint-initdb.d/z-local-seed-data.sql
 
+  mongo-donatrack:
+    image: mongo:7-jammy
+    container_name: mongo_donatrack
+    restart: always
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-donatrack}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-donatrack}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-donatrack_logistica}
+    volumes:
+      - mongo_data:/data/db
+
   n8n:
     image: docker.n8n.io/n8nio/n8n:2.39.7
     container_name: n8n_donatrack
@@ -90,13 +103,13 @@ services:
     ports:
       - "8002:8002"
     depends_on:
-      - postgres-donatrack
+      - mongo-donatrack
       - rabbitmq
     env_file:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
-      - POSTGRES_HOST=postgres-donatrack
+      - MONGO_HOST=mongo-donatrack
 
   notificaciones:
     build:
@@ -131,5 +144,7 @@ services:
 
 volumes:
   postgres_data:
+  mongo_data:
   n8n_data:
   rabbitmq_data:
+
