@@ -1,23 +1,23 @@
 info:
   name: Confirmar Entrega
   type: http
-  seq: 6
+  seq: 16
 
 http:
   method: POST
-  url: "{{logisticaUrl}}/api/entregas/:donacionId/confirmar"
+  url: "{{logisticaUrl}}/api/entregas/:idDonacion/confirmar"
   params:
-    - name: donacionId
-      value: 31008064-071a-4d7a-ac37-33318f7d9841
+    - name: idDonacion
+      value: 139e0f9f-9431-4302-9f06-cad97978f7be
       type: path
   body:
     type: json
     data: |-
       {
         "fotos": [
-          "http://fotos.donatrack.com/comprobante1.jpg"
+          "https://fotos.donatrack.org/remito-1.jpg"
         ],
-        "patenteCamion": "AA123BB"
+        "patenteCamion": "EE555FF"
       }
   auth: inherit
 

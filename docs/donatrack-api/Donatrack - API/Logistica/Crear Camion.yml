@@ -11,9 +11,9 @@ http:
     data: |-
       {
         "patente": "EE555FF",
-        "capacidadCarga": 1500.0,
-        "capacidadVolumen": 3.5,
-        "autonomiaEstimada": 650.0
+        "capacidadVolumen": 25.0,
+        "altura": 3.5,
+        "capacidadCarga": 4500.0
       }
   auth: inherit
 

@@ -1,7 +1,7 @@
 info:
   name: Callback Planificacion
   type: http
-  seq: 9
+  seq: 12
 
 http:
   method: POST
@@ -14,9 +14,13 @@ http:
         "rutas": [
           {
             "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-            "fechaOperativa": "2026-09-03",
-            "camionPatente": "AA123BB",
-            "choferLegajo": "CH-001",
+            "fechaOperativa": "2026-10-28",
+            "camion": {
+              "patente": "EE555FF"
+            },
+            "chofer": {
+              "legajo": "CH-005"
+            },
             "paradas": [
               {
                 "orden": 1,
@@ -31,7 +35,9 @@ http:
                 },
                 "entregas": [
                   {
-                    "idEntrega": "31008064-071a-4d7a-ac37-33318f7d9841"
+                    "idEntrega": "139e0f9f-9431-4302-9f06-cad97978f7be",
+                    "pesoEstimado": 25.5,
+                    "volumenEstimado": 0.5
                   }
                 ]
               }
@@ -46,4 +52,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-​
