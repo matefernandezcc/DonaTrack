@@ -121,9 +121,15 @@ db-init:
 	done
 	@echo "Ejecutando init.sql (creación de schemas y tablas)..."
 	docker exec -i $(POSTGRES_CONTAINER) psql -U postgres -d donatrack < ./database/init.sql
-	@echo "Ejecutando local-seed-data.sql (carga de datos iniciales)..."
+	@echo "Ejecutando local-seed-data.sql (carga de datos iniciales en PostgreSQL)..."
 	docker exec -i $(POSTGRES_CONTAINER) psql -U postgres -d donatrack < ./database/local-seed-data.sql
-	@echo "Base de datos inicializada con éxito."
+	@make mongo-init
+	@echo "Bases de datos (PostgreSQL y MongoDB) inicializadas con éxito."
+
+mongo-init:
+	@echo "Ejecutando mongo-init.js (precarga de datos en MongoDB)..."
+	docker exec -i mongo_donatrack mongosh -u donatrack -p donatrack --authenticationDatabase admin < ./database/mongo-init.js
+	@echo "MongoDB precargado con éxito."
 
 n8n-import:
 	docker cp ./n8n/workflows/workflows.json \

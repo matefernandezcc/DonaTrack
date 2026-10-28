@@ -30,6 +30,7 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-donatrack_logistica}
     volumes:
       - mongo_data:/data/db
+      - ./database/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   n8n:
     image: docker.n8n.io/n8nio/n8n:2.39.7
