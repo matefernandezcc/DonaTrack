@@ -77,6 +77,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
+      - MONGO_HOST=mongo-donatrack
+      - LOGISTICA_URL_LOCAL=http://logistica:8002
 
   incentivos:
     build:
@@ -93,6 +95,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
+      - MONGO_HOST=mongo-donatrack
+      - LOGISTICA_URL_LOCAL=http://logistica:8002
 
   logistica:
     build:
@@ -103,13 +107,16 @@ services:
     ports:
       - "8002:8002"
     depends_on:
+      - postgres-donatrack
       - mongo-donatrack
       - rabbitmq
     env_file:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
+      - POSTGRES_HOST=postgres-donatrack
       - MONGO_HOST=mongo-donatrack
+      - LOGISTICA_URL_LOCAL=http://logistica:8002
 
   notificaciones:
     build:
@@ -126,6 +133,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
+      - MONGO_HOST=mongo-donatrack
+      - LOGISTICA_URL_LOCAL=http://logistica:8002
 
   server:
     build:
@@ -136,11 +145,14 @@ services:
       - "8080:8080"
     depends_on:
       - postgres-donatrack
+      - mongo-donatrack
     env_file:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
+      - MONGO_HOST=mongo-donatrack
+      - LOGISTICA_URL_LOCAL=http://logistica:8002
 
 volumes:
   postgres_data:

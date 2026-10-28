@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@DiscriminatorValue("Recurrente")
+@DiscriminatorValue("RECURRENTE")
 @Getter
 @Setter
 public class NecesidadRecurrenteEntity extends NecesidadEntity {}
