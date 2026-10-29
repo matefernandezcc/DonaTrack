@@ -1,65 +1,212 @@
 # Arquitectura del Sistema DonaTrack
 
-Este documento describe las decisiones arquitectónicas principales para la plataforma **DonaTrack**, que permiten cumplir con los requisitos de mantenibilidad, desacoplamiento y escalabilidad solicitados.
+Este documento describe las decisiones arquitectónicas principales para la plataforma **DonaTrack**, que permiten cumplir con los requisitos de mantenibilidad, desacoplamiento, escalabilidad y persistencia políglota definidos por la cátedra.
+
+---
 
 ## 1. Estilo Arquitectónico Principal
 
-DonaTrack utiliza una **Arquitectura Orientada a Servicios (SOA)** implementada como un conjunto de servicios (módulos o microservicios lógicos) débilmente acoplados.
+DonaTrack implementa una **Arquitectura Orientada a Servicios (SOA)** materializada como microservicios lógicos desacoplados, donde cada contexto opera con autonomía de despliegue y modelo de datos propio.
 
-Internamente, cada servicio sigue el patrón de **Arquitectura Hexagonal (Puertos y Adaptadores)**. 
-Esta decisión aisla la lógica de negocio (Dominio y Casos de Uso) de las dependencias externas (bases de datos, colas de mensajes, frameworks web y servicios de terceros).
+Internamente, cada servicio sigue el patrón de **Arquitectura Hexagonal (Puertos y Adaptadores)**. Esta decisión aísla rigurosamente el núcleo de negocio (Dominio y Casos de Uso) de las dependencias externas (bases de datos, brokers de mensajería, frameworks web y APIs de terceros).
 
 ### Estructura Hexagonal (por servicio):
-- **Dominio (`domain`)**: Entidades de negocio sin dependencias externas.
+- **Dominio (`domain`)**: Entidades de negocio, Value Objects, eventos de dominio y reglas invariantes sin dependencias de frameworks ni librerías de persistencia.
 - **Aplicación (`application`)**:
-  - `usecases`: Lógica de negocio orquestada.
-  - `ports.in`: Interfaces de entrada (casos de uso que exponen).
-  - `ports.out`: Interfaces de salida (contratos que deben cumplir las infraestructuras, como repositorios o clientes externos).
+  - `usecases`: Orquestación de la lógica de negocio y transacciones de aplicación.
+  - `ports.in`: Contratos de entrada que exponen los casos de uso hacia los adaptadores primarios.
+  - `ports.out`: Contratos de salida que definen las operaciones requeridas de infraestructura (repositorios, clientes REST, publicadores de eventos).
 - **Infraestructura (`infrastructure`)**:
   - `adapters.in`: Controladores REST, Listeners de RabbitMQ.
-  - `adapters.out`: Repositorios JPA, Clientes Feign, Adaptadores de envío de mensajes.
-  - `config`: Configuraciones de Spring, RabbitMQ, etc.
+  - `adapters.out`: Repositorios JPA / Spring Data Mongo, Clientes HTTP (OpenFeign), Adaptadores AMQP.
+  - `config`: Configuración de Spring Boot, seguridad, conversores BSON y beans de infraestructura.
 
-## 2. Persistencia y Bases de Datos
+---
 
-El sistema utiliza una **estrategia de persistencia relacional** (PostgreSQL) dependiendo del entorno de despliegue, manteniendo en ambos casos un **aislamiento lógico estricto mediante esquemas (schemas)**.
-- **Base de Datos Local (Docker)**: Clúster principal para los servicios locales (`donaciones`, `incentivos`, `notificaciones` y el nodo fallback de `logistica`).
-- **Base de Datos Cloud (Supabase)**: Instancia en la nube dedicada exclusivamente a los servidores de `logistica` desplegados en Render (dado que no pueden acceder a la red local).
-- **Esquemas separados**: `logistica`, `donaciones`, `incentivos`, `notificaciones`, `auth`.
-  * *Justificación:* Mantener bases de datos físicas separadas en la nube aumenta drásticamente los costos. Utilizar schemas lógicos garantiza el aislamiento exigido por los microservicios, evitando el antipatrón de Base de Datos Compartida, pero de forma económica.
-- **Identidad Agnóstica a Persistencia**: Se eliminó el uso de secuencias autogeneradas por la base de datos (`@GeneratedValue`) en favor de asignar UUIDs explícitamente desde el Dominio.
-  * *Justificación:* Permite que las entidades nazcan con identidad antes de interactuar con la base de datos, habilitando la publicación inmediata de eventos asincrónicos y reduciendo el acoplamiento con la tecnología de persistencia.
-- **Estrategia ORM (Mapeo Objeto-Relacional)**: Se utiliza JPA/Hibernate con una clara separación entre `Domain Entities` y `JPA Entities` mediante Mappers. 
-  * *Justificación de Herencias:* Se eligió `JOINED` para la jerarquía de Personas (para normalizar y evitar tablas nulas masivas) y `SINGLE_TABLE` para Necesidades (ideal porque las variaciones agregan pocos campos y evita JOINs costosos).
+## 2. Estrategia de Persistencia Políglota y Bases de Datos (Entrega 5)
 
-## 3. Patrones de Integración y Diseño Guiado por el Dominio (DDD) Domain Driven Desing 
+En cumplimiento con los requerimientos de la Entrega 5, DonaTrack adoptó una **Estrategia de Persistencia Políglota** (*Polyglot Persistence*). En lugar de forzar un único motor relacional para requerimientos heterogéneos, cada microservicio persiste su modelo en el motor que mejor se adapta a su dinámica operativa:
 
-Las fronteras de integración entre los microservicios fueron definidas utilizando **Domain-Driven Design (DDD)**. Cada servicio representa un **Bounded Context** (Contexto Delimitado) con su propio modelo de lenguaje (*Ubiquitous Language*). Para comunicarlos sin corromper sus modelos, se corrompe porque el tema de desplegar y chequear es complicado, se implementan patrones de *Context Mapping*.
+| Servicio | Paradigma | Motor de Base de Datos | Tecnología de Mapeo | Esquema / Base de Datos |
+|---|---|---|---|---|
+| **`donatrack-donaciones`** | Relacional (SQL) | PostgreSQL 16 | ORM (Hibernate / JPA) | Esquema `donaciones` |
+| **`donatrack-incentivos`** | Relacional (SQL) | PostgreSQL 16 | ORM (Hibernate / JPA) | Esquema `incentivos` |
+| **`donatrack-notificaciones`** | Relacional (SQL) | PostgreSQL 16 | ORM (Hibernate / JPA) | Esquema `notificaciones` |
+| **`donatrack-logistica`** | **Documental (NoSQL)** | **MongoDB 7.0** | **ODM (Spring Data MongoDB)** | Base `donatrack_logistica` |
 
-### 3.1. Arquitectura Dirigida por Eventos (EDA) y Eventos de Dominio
-Para evitar bloqueos y acoplamiento temporal, los Bounded Contexts se comunican publicando **Eventos de Dominio** (patrón táctico de DDD) mediante colas (RabbitMQ/CloudAMQP) para flujos reactivos.
-- **Justificación y Trade-off:** Se abandona la consistencia fuerte (ACID) en favor de una consistencia eventual. Si el servicio de Notificaciones o Logística cae temporalmente, el flujo de Donaciones no colapsa; los mensajes quedan encolados (tolerancia a fallos). Además, el núcleo del dominio emite *Spring Events* en memoria que son capturados por un adaptador secundario, evitando contaminar la lógica de negocio con librerías de infraestructura AMQP.
+### 2.1. Persistencia Documental en Logística (MongoDB)
 
-### 3.2. Capa Anticorrupción (ACL) y Broker de Logística
-El módulo de `donaciones` debe entregar datos a `logistica`. Para evitar que el modelo de Donaciones se contamine con la lógica externa y protegerse de la inestabilidad de la nube, se utiliza el patrón **Anticorruption Layer (ACL)** de DDD combinado con un broker inteligente.
-- **Implementación**: Se encapsula la lógica de traducción y enrutamiento en el `LogisticaBrokerAdapter`.
-- **Justificación**: Provee Alta Disponibilidad (HA). El broker intenta derivar la petición sincrónica primero al Servidor de Nube Primario (Render). Si falla (timeout o 503 por pausa), hace un desvío transparente al Servidor Nube Secundario, y como último recurso, a la instancia de `localhost`. Esto satisface la necesidad de elegir entre múltiples proveedores logísticos.
+#### A. Justificación Técnica del Cambio de Motor (Trade-Offs)
+El ciclo de vida del reparto (`RutaDeReparto`) es dinámico, jerárquico y de lectura intensiva. Durante la ejecución de una ruta:
+- Un chofer consulta en tiempo real su itinerario completo, requiriendo recuperar la ruta, sus paradas ordenadas, las donaciones asignadas y las direcciones de destino.
+- En un esquema relacional normalizado, esta operación exige un `JOIN` sobre 6 tablas (`rutas_reparto`, `paradas`, `entregas`, `comprobantes`, `direcciones`, `coordenadas`), con alto costo de CPU e índices múltiples.
+- En **MongoDB**, toda la ruta se persiste y recupera como un único **Documento Raíz Agregado (DDD)** en tiempo $O(1)$ sin joins:
 
-### 3.3. Comunicación Síncrona Específica (Feign Clients)
-El servicio de `incentivos` requiere consultar datos nominales a `donaciones` para generar el ranking y las notificaciones por Discord.
-- **Justificación**: Se utiliza **Spring Cloud OpenFeign** en lugar de leer directamente la base de datos de Donaciones (lo cual sería un severo anti-patrón de integración). Se implementa con tolerancia a fallos (`@JsonIgnoreProperties`) para ignorar cambios indeseados en el payload del servicio emisor, y si la red falla, el sistema maneja excepciones silenciosamente para no frenar la lógica de cálculo principal.
+```java
+// donatrack-logistica: Agregado Raíz Documental
+@Document(collection = "rutas_reparto")
+@CompoundIndex(name = "idx_rutas_entregas_donacion", def = "{'paradas.entregas.idEntrega': 1}")
+public class RutaRepartoDocument {
+    @Id
+    private UUID id;
+    private LocalDate fechaOperativa;
+    private Boolean iniciada;
 
-### 3.4. Integración con Servicios Externos (SaaS y Callbacks)
-- **Notificaciones Low-Code (n8n)**: En lugar de acoplar directamente el código Java a SDKs de Meta (WhatsApp) o Discord, DonaTrack dispara *Webhooks* hacia **n8n**. Esto simplifica el backend y permite modificar los canales de notificación gráficamente sin redesplegar.
-- **Planificación Externa (Callback)**: La asignación de camiones tarda minutos. La comunicación es asíncrona mediante un webhook inverso (`/api/planificacion/callback`), permitiendo que el hilo principal del servidor quede libre mientras el optimizador externo trabaja.
+    // Snapshot Histórico Inmutable O(1)
+    private UUID camionId;
+    private String camionPatente;
+    private Double camionCapacidadVolumen;
+    private Double camionAltura;
+    private Double camionCapacidadCarga;
 
-## 4. Despliegue (Deployment)
+    private UUID choferId;
+    private String choferLegajo;
+    private String choferNombre;
 
-Para los ambientes de producción (nube) y desarrollo (local), se tomaron las siguientes decisiones de infraestructura:
+    // Documentos Embebidos (Composición Fuerte)
+    private List<ParadaDocument> paradas = new ArrayList<>();
+}
+```
 
-- **Ecosistema Docker (Inmutabilidad)**: Todo el conjunto (PostgreSQL, RabbitMQ local, n8n) se orquesta vía `docker-compose`. 
-  * *Justificación:* Garantiza que todos los desarrolladores operen en un entorno inmutable. Se incluye un script de *Seeding* que puebla la base de datos automáticamente al inicio para facilitar el testing.
-- **Migración a Servicios Administrados (CloudAMQP y Supabase)**: 
-  * *Justificación:* Para poder desplegar la aplicación en Render y tener una integración distribuida real, fue necesario externalizar RabbitMQ (CloudAMQP) y la base de datos (Supabase), ya que los microservicios en la nube no pueden enrutar peticiones a contenedores dentro de un `localhost`.
-- **Estrategia Free-Tier (Manejo de "Cold-Starts")**: Los servicios desplegados en Render (como Logística) se apagan automáticamente ("spin-down") tras inactividad para reducir costos.
-  * *Justificación Técnica:* Para evitar que el conjunto de tests automáticos o manuales falle estrepitosamente debido a los tiempos de encendido en la nube (hasta 50 segundos), se introdujeron scripts dinámicos de Pre-Request en Bruno que evalúan la latencia y derivan la comunicación al Broker Local si la instancia principal no está operativa.
+#### B. Estrategia de Desnormalización y Snapshot Histórico Inmutable
+- **Snapshot de Camión y Chofer:** En vez de enlazar por referencia viva a las colecciones `camiones` y `choferes`, la ruta almacena una fotografía inmutable de los datos operativos del vehículo y conductor al momento de la planificación.
+  - *Justificación:* Garantiza inmutabilidad legal y operativa. Si un camión cambia su patente o un chofer renueva su legajo en el futuro, las rutas ejecutadas en el pasado preservan exactamente la información con la que salieron a la calle.
+- **Colecciones Satélite:** Se mantienen colecciones independientes para catálogos y solicitudes pendientes: `camiones`, `choferes`, `solicitudes_planificacion` y `items_planificacion`.
+
+#### C. Optimización de Lectura: Índice Compuesto Multikey
+Para atender la consulta de trazabilidad `GET /api/entregas/{idDonacion}/estado` (donde un donante consulta en qué ruta viaja su donación), un escaneo secuencial (*collection scan*) sobre los arrays anidados sería $O(N \cdot M)$. Se definió el índice multikey B-Tree:
+```java
+@CompoundIndex(name = "idx_rutas_entregas_donacion", def = "{'paradas.entregas.idEntrega': 1}")
+```
+Esto reduce la búsqueda de la ruta contenedora a tiempo logarítmico $O(\log N)$.
+
+#### D. Validación de la Cota BSON (Límite de 16 MB)
+MongoDB limita el tamaño de cada documento BSON a 16 MB.
+- En DonaTrack, una ruta operativa contiene en promedio entre 15 y 50 paradas, con un promedio de 1 a 2 entregas por parada.
+- Cada entrega almacena metadatos y URLs de comprobantes fotográficos (no los binarios en base64, que se sirven externamente).
+- Un documento de ruta con 100 entregas promedia un tamaño de **~150 KB**, lo que representa menos del **1% del límite de 16 MB**, garantizando seguridad frente a desbordamientos.
+
+#### E. Mapeo BSON Binary $\leftrightarrow$ Java UUID (`MongoConfig`)
+Spring Data MongoDB por defecto almacena los `java.util.UUID` como BSON Binary (Subtipo 4). Para garantizar la deserialización fluida y compatibilidad con scripts nativos de `mongosh` y Docker, se registraron conversores customizados en [`MongoConfig.java`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/config/MongoConfig.java):
+- `BinaryToUuidConverter` (`@ReadingConverter`): Reconstruye el `UUID` a partir de los 16 bytes del BSON.
+- `UuidToBinaryConverter` (`@WritingConverter`): Serializa el `UUID` al estándar binario.
+
+#### F. Idempotencia y Doble Mecanismo de Inicialización
+Para evitar duplicación de datos en reinicios:
+1. **Docker Compose (`database/mongo-init.js`):** Inicializa el contenedor local protegiendo cada inserción con `if (db.<coleccion>.countDocuments() === 0)`.
+2. **Spring Boot Runner (`MongoDataInitializer.java`):** Se ejecuta al arrancar el microservicio mediante `CommandLineRunner`. Si detecta que la base está vacía (aplica tanto a Docker local como al cluster en la nube **MongoDB Atlas**), precarga el lote inicial de 6 camiones, 6 choferes, 6 ítems pendientes y 3 rutas de prueba a través de los puertos de dominio.
+
+#### G. Aislamiento Hexagonal Puro
+La migración de Logística de PostgreSQL a MongoDB preservó el 100% de la capa de dominio (`RutaDeReparto`, `Parada`, `Entrega`, `Coordenada`, `Direccion`). Ninguna anotación de Spring Data MongoDB contaminó las clases del core; la adaptación se resolvió íntegramente en `infrastructure/adapters/out/persistence` con mappers bidireccionales (`RutaRepartoDocumentMapper`).
+
+---
+
+### 2.2. Persistencia Relacional en Donaciones, Incentivos y Notificaciones (PostgreSQL)
+
+Los microservicios de Donaciones, Incentivos y Notificaciones conservan su almacenamiento en **PostgreSQL 16**:
+- **Aislamiento por Esquemas Lógicos:** Se utilizan esquemas segregados (`donaciones`, `incentivos`, `notificaciones`) dentro de la misma instancia relacional. Esto garantiza independencia de tablas sin incurrir en los sobrecostos de aprovisionar múltiples bases físicas independientes en la nube.
+- **Identidad Agnóstica a Persistencia:** Las entidades generan sus propios UUIDs en el Dominio al instanciarse (`UUID.randomUUID()`), evitando el antipatrón de identificadores secuenciales autoincrementales (`@GeneratedValue`) dependientes del motor relacional.
+- **Estrategias de Herencia JPA:**
+  - `JOINED` para la jerarquía de Personas (`personas`, `personas_humanas`, `personas_juridicas`) y Roles (`roles`, `roles_donante`, `roles_beneficiario`, `roles_representante`): Garantiza normalización estricta e integridad referencial, evitando tablas masivas con columnas nulas.
+  - `SINGLE_TABLE` para `Necesidad` (`necesidades` con columna discriminadora `dtype`): Las variantes (`NecesidadRecurrente`, `NecesidadExtraordinaria`) comparten el 90% de sus atributos; unificar en una tabla evita joins costosos en lecturas frecuentes.
+- **Value Objects Aplanados (Flattening / Embedded):**
+  - Los Value Objects del dominio `Contacto`, `DocumentoIdentidad`, `Coordenada`, `Provincia` y `Pais` no poseen identidad propia ni tablas independientes; se aplanan como columnas embebidas en las tablas de sus entidades contenedoras (`personas` y `direcciones`).
+
+---
+
+## 3. Patrones de Integración y Diseño Guiado por el Dominio (DDD)
+
+Las fronteras entre los microservicios fueron modeladas respetando **Domain-Driven Design (DDD)**. Cada microservicio representa un **Bounded Context** con su propio Lenguaje Ubicuo. La integración inter-contextos se resuelve mediante patrones tácticos:
+
+### 3.1. Arquitectura Dirigida por Eventos (EDA) y Consistencia Eventual
+Para desacoplar temporalmente los procesos, la comunicación entre microservicios se efectúa publicando **Eventos de Dominio** a través de **RabbitMQ**:
+- `RutaIniciadaEvent`: Emitido por Logística; consumido por Donaciones para marcar los bienes en estado `EN_TRASLADO`.
+- `EntregaRealizadaEvent`: Emitido por Logística; consumido por Donaciones (transición a `ENTREGADA` y registro de fotos) e Incentivos (suma de puntos y evaluación de insignias).
+- `EntregaFallidaEvent`: Emitido por Logística; consumido por Donaciones (replanificación) y Notificaciones (alerta al beneficiario).
+- **Trade-off:** Se prioriza Alta Disponibilidad y Consistencia Eventual por sobre transacciones distribuidas ACID de dos fases (2PC), eliminando bloqueos de base de datos entre microservicios.
+
+### 3.2. Capa Anticorrupción (ACL) y Broker de Logística Resiliente
+Cuando `donatrack-donaciones` debe derivar una solicitud de retiro hacia Logística, utiliza el patrón **Anticorruption Layer (ACL)** implementado en `LogisticaBrokerAdapter`.
+- **Enrutamiento en 3 Niveles con Fallback:**
+  1. *Intento 1:* Servidor Nube Primario en Render (`LogisticaRemoto1Client`).
+  2. *Intento 2:* Servidor Nube Secundario en Render (`LogisticaRemoto2Client`).
+  3. *Intento 3 (Fallback):* Nodo local de respaldo en `localhost:8002` (`LogisticaLocalClient`).
+- **Justificación:** Otorga resiliencia frente a pausas por inactividad (*cold-starts*) del plan gratuito de Render o fallas de conectividad en la nube, garantizando que el usuario donante nunca perciba una indisponibilidad.
+
+### 3.3. Clientes Declarativos Síncronos (Spring Cloud OpenFeign)
+Para consultas de lectura sincrónica puntual (por ejemplo, cuando Incentivos consulta datos nominales a Donaciones para calcular rankings):
+- Se utiliza **Spring Cloud OpenFeign** en lugar de lecturas cruzadas directas de base de datos (lo que violaría el aislamiento de Bounded Contexts).
+- Se configuran DTOs desacoplados con `@JsonIgnoreProperties(ignoreUnknown = true)` para tolerar modificaciones en el contrato del emisor sin quebrar el cliente consumidor.
+
+### 3.4. Integración Low-Code y Callbacks Asíncronos
+- **Automatización de Notificaciones con n8n:** El backend no se acopla a SDKs propietarios de mensajería (Discord, WhatsApp, Email). En su lugar, emite webhooks HTTP hacia un flujo de **n8n**, permitiendo modificar plantillas, canales y destinatarios sin recompilar ni redesplegar el código fuente.
+- **Optimización de Rutas Asíncrona (Callback Pattern):** Dado que el algoritmo de asignación de flota puede demorar varios minutos, Logística delega el cálculo mediante una petición síncrona inicial y libera el hilo. El optimizador externo responde asíncronamente mediante un webhook inverso (`POST /api/planificacion/callback`).
+
+---
+
+## 4. Despliegue e Infraestructura (Deployment)
+
+El sistema soporta una operación híbrida y desacoplada mediante perfiles de Spring Boot:
+
+```
+[Cliente Web / Bruno API]
+          |
+          v
+   [API Gateway / Microservicios]
+    |           |               |
+    | (JPA)     | (AMQP)        | (Spring Data Mongo)
+    v           v               v
+[PostgreSQL] [RabbitMQ]     [MongoDB]
+ (Docker/     (Docker/       (Docker/
+  Supabase)    CloudAMQP)     Atlas Cluster)
+```
+
+### 4.1. Perfil Local (`PROFILE=local`)
+- **Orquestación con Docker Compose:** Se levantan en una red interna (`donatrack-network`):
+  - `postgres-donatrack` (PostgreSQL 16 en puerto `5432`).
+  - `rabbitmq-donatrack` (RabbitMQ con Management UI en puertos `5672` y `15672`).
+  - `mongo-donatrack` (MongoDB 7.0 en puerto `27017` con volumen persistente `mongo_data`).
+  - `n8n-donatrack` (Servidor de automatización en puerto `5678`).
+  - Microservicios de aplicación (`:8000`, `:8001`, `:8002`, `:8003`).
+
+### 4.2. Perfil Cloud / Producción (`PROFILE=prod`)
+- **Base Relacional Cloud:** **Supabase PostgreSQL** (AWS us-east-1) alojando los esquemas `donaciones`, `incentivos` y `notificaciones`.
+- **Base Documental Cloud:** **MongoDB Atlas Cluster** (`donatrack.ofn4ag4.mongodb.net`) alojando la base `donatrack_logistica`.
+- **Broker de Mensajería Cloud:** **CloudAMQP** (`jackal.rmq.cloudamqp.com`) con vhost y exchanges dedicados.
+- **Alojamiento de Microservicios:** Desplegados en **Render** con soporte de failover gestionado por el Broker de Logística ante desconexiones o *cold starts*.
+
+---
+
+# Referencias
+
+1. **Spring Data MongoDB Reference Documentation**  
+   Guía oficial de mapeo documental, anotaciones `@Document`, `@CompoundIndex` y repositorios ODM.  
+   [https://docs.spring.io/spring-data/mongodb/reference/](https://docs.spring.io/spring-data/mongodb/reference/)
+
+2. **MongoDB Manual: BSON Limits and Thresholds**  
+   Especificación formal de la cota de 16 MB para documentos BSON y niveles máximos de anidamiento.  
+   [https://www.mongodb.com/docs/manual/reference/limits/](https://www.mongodb.com/docs/manual/reference/limits/)
+
+3. **Martin Fowler: Polyglot Persistence**  
+   Definición arquitectónica del uso de múltiples tecnologías de almacenamiento de datos según la necesidad de cada componente.  
+   [https://martinfowler.com/bliki/PolyglotPersistence.html](https://martinfowler.com/bliki/PolyglotPersistence.html)
+
+4. **Implementación del Agregado Raíz Documental de Rutas**  
+   Código fuente en el repositorio DonaTrack:  
+   [`RutaRepartoDocument.java`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/adapters/out/persistence/documents/RutaRepartoDocument.java)
+
+5. **Configuración de Conversores BSON Binary $\leftrightarrow$ UUID**  
+   Código fuente en el repositorio DonaTrack:  
+   [`MongoConfig.java`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/config/MongoConfig.java)
+
+6. **Sembrador Automático Idempotente de Logística para MongoDB**  
+   Código fuente en el repositorio DonaTrack:  
+   [`MongoDataInitializer.java`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/config/MongoDataInitializer.java)
+
+7. **Diagrama de Clases JPA y Casos de Uso (Entrega 5)**  
+   Archivo PlantUML en el repositorio DonaTrack:  
+   [`DC-Donaciones-Entrega5.puml`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/diagramas/donaciones/DC-Donaciones-Entrega5.puml)
+
+8. **Diagrama de Componentes y Despliegue Políglota**  
+   Archivo PlantUML en el repositorio DonaTrack:  
+   [`DonaTrack-Diagrama-Componentes-y-Despliegue.puml`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/diagramas/DonaTrack-Diagrama-Componentes-y-Despliegue.puml)
