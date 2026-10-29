@@ -1,6 +1,6 @@
 # Arquitectura del Sistema DonaTrack
 
-Este documento describe las decisiones arquitectónicas principales para la plataforma **DonaTrack**, que permiten cumplir con los requisitos de mantenibilidad, desacoplamiento, escalabilidad y persistencia políglota definidos por la cátedra.
+Este documento describe las decisiones arquitectónicas principales para la plataforma **DonaTrack**, que permiten cumplir con los requisitos de mantenibilidad, desacoplamiento, escalabilidad y persistencia definidos por la cátedra.
 
 ---
 
@@ -8,7 +8,7 @@ Este documento describe las decisiones arquitectónicas principales para la plat
 
 DonaTrack implementa una **Arquitectura Orientada a Servicios (SOA)** materializada como microservicios lógicos desacoplados, donde cada contexto opera con autonomía de despliegue y modelo de datos propio.
 
-Internamente, cada servicio sigue el patrón de **Arquitectura Hexagonal (Puertos y Adaptadores)**. Esta decisión aísla rigurosamente el núcleo de negocio (Dominio y Casos de Uso) de las dependencias externas (bases de datos, brokers de mensajería, frameworks web y APIs de terceros).
+Internamente, cada servicio sigue el patrón de **Arquitectura Hexagonal (Puertos y Adaptadores)**. Esta decisión aísla el núcleo de negocio (Dominio y Casos de Uso) de las dependencias externas (bases de datos, brokers de mensajería, frameworks web y APIs de terceros).
 
 ### Estructura Hexagonal (por servicio):
 - **Dominio (`domain`)**: Entidades de negocio, Value Objects, eventos de dominio y reglas invariantes sin dependencias de frameworks ni librerías de persistencia.
@@ -25,7 +25,7 @@ Internamente, cada servicio sigue el patrón de **Arquitectura Hexagonal (Puerto
 
 ## 2. Estrategia de Persistencia Políglota y Bases de Datos (Entrega 5)
 
-En cumplimiento con los requerimientos de la Entrega 5, DonaTrack adoptó una **Estrategia de Persistencia Políglota** (*Polyglot Persistence*). En lugar de forzar un único motor relacional para requerimientos heterogéneos, cada microservicio persiste su modelo en el motor que mejor se adapta a su dinámica operativa:
+En cumplimiento con los requerimientos de la Entrega 5, DonaTrack adoptó una **Estrategia de Persistencia Políglota** cada microservicio persiste su modelo en el motor que mejor se adapta a su dinámica operativa:
 
 | Servicio | Paradigma | Motor de Base de Datos | Tecnología de Mapeo | Esquema / Base de Datos |
 |---|---|---|---|---|
@@ -40,38 +40,12 @@ En cumplimiento con los requerimientos de la Entrega 5, DonaTrack adoptó una **
 El ciclo de vida del reparto (`RutaDeReparto`) es dinámico, jerárquico y de lectura intensiva. Durante la ejecución de una ruta:
 - Un chofer consulta en tiempo real su itinerario completo, requiriendo recuperar la ruta, sus paradas ordenadas, las donaciones asignadas y las direcciones de destino.
 - En un esquema relacional normalizado, esta operación exige un `JOIN` sobre 6 tablas (`rutas_reparto`, `paradas`, `entregas`, `comprobantes`, `direcciones`, `coordenadas`), con alto costo de CPU e índices múltiples.
-- En **MongoDB**, toda la ruta se persiste y recupera como un único **Documento Raíz Agregado (DDD)** en tiempo $O(1)$ sin joins:
+- En **MongoDB**, toda la ruta se persiste y recupera como un único documento sin joins
 
-```java
-// donatrack-logistica: Agregado Raíz Documental
-@Document(collection = "rutas_reparto")
-@CompoundIndex(name = "idx_rutas_entregas_donacion", def = "{'paradas.entregas.idEntrega': 1}")
-public class RutaRepartoDocument {
-    @Id
-    private UUID id;
-    private LocalDate fechaOperativa;
-    private Boolean iniciada;
-
-    // Snapshot Histórico Inmutable O(1)
-    private UUID camionId;
-    private String camionPatente;
-    private Double camionCapacidadVolumen;
-    private Double camionAltura;
-    private Double camionCapacidadCarga;
-
-    private UUID choferId;
-    private String choferLegajo;
-    private String choferNombre;
-
-    // Documentos Embebidos (Composición Fuerte)
-    private List<ParadaDocument> paradas = new ArrayList<>();
-}
-```
 
 #### B. Estrategia de Desnormalización y Snapshot Histórico Inmutable
 - **Snapshot de Camión y Chofer:** En vez de enlazar por referencia viva a las colecciones `camiones` y `choferes`, la ruta almacena una fotografía inmutable de los datos operativos del vehículo y conductor al momento de la planificación.
   - *Justificación:* Garantiza inmutabilidad legal y operativa. Si un camión cambia su patente o un chofer renueva su legajo en el futuro, las rutas ejecutadas en el pasado preservan exactamente la información con la que salieron a la calle.
-- **Colecciones Satélite:** Se mantienen colecciones independientes para catálogos y solicitudes pendientes: `camiones`, `choferes`, `solicitudes_planificacion` y `items_planificacion`.
 
 #### C. Optimización de Lectura: Índice Compuesto Multikey
 Para atender la consulta de trazabilidad `GET /api/entregas/{idDonacion}/estado` (donde un donante consulta en qué ruta viaja su donación), un escaneo secuencial (*collection scan*) sobre los arrays anidados sería $O(N \cdot M)$. Se definió el índice multikey B-Tree:
@@ -133,15 +107,6 @@ Cuando `donatrack-donaciones` debe derivar una solicitud de retiro hacia Logíst
   3. *Intento 3 (Fallback):* Nodo local de respaldo en `localhost:8002` (`LogisticaLocalClient`).
 - **Justificación:** Otorga resiliencia frente a pausas por inactividad (*cold-starts*) del plan gratuito de Render o fallas de conectividad en la nube, garantizando que el usuario donante nunca perciba una indisponibilidad.
 
-### 3.3. Clientes Declarativos Síncronos (Spring Cloud OpenFeign)
-Para consultas de lectura sincrónica puntual (por ejemplo, cuando Incentivos consulta datos nominales a Donaciones para calcular rankings):
-- Se utiliza **Spring Cloud OpenFeign** en lugar de lecturas cruzadas directas de base de datos (lo que violaría el aislamiento de Bounded Contexts).
-- Se configuran DTOs desacoplados con `@JsonIgnoreProperties(ignoreUnknown = true)` para tolerar modificaciones en el contrato del emisor sin quebrar el cliente consumidor.
-
-### 3.4. Integración Low-Code y Callbacks Asíncronos
-- **Automatización de Notificaciones con n8n:** El backend no se acopla a SDKs propietarios de mensajería (Discord, WhatsApp, Email). En su lugar, emite webhooks HTTP hacia un flujo de **n8n**, permitiendo modificar plantillas, canales y destinatarios sin recompilar ni redesplegar el código fuente.
-- **Optimización de Rutas Asíncrona (Callback Pattern):** Dado que el algoritmo de asignación de flota puede demorar varios minutos, Logística delega el cálculo mediante una petición síncrona inicial y libera el hilo. El optimizador externo responde asíncronamente mediante un webhook inverso (`POST /api/planificacion/callback`).
-
 ---
 
 ## 4. Despliegue e Infraestructura (Deployment)
@@ -174,39 +139,3 @@ El sistema soporta una operación híbrida y desacoplada mediante perfiles de Sp
 - **Base Documental Cloud:** **MongoDB Atlas Cluster** (`donatrack.ofn4ag4.mongodb.net`) alojando la base `donatrack_logistica`.
 - **Broker de Mensajería Cloud:** **CloudAMQP** (`jackal.rmq.cloudamqp.com`) con vhost y exchanges dedicados.
 - **Alojamiento de Microservicios:** Desplegados en **Render** con soporte de failover gestionado por el Broker de Logística ante desconexiones o *cold starts*.
-
----
-
-# Referencias
-
-1. **Spring Data MongoDB Reference Documentation**  
-   Guía oficial de mapeo documental, anotaciones `@Document`, `@CompoundIndex` y repositorios ODM.  
-   [https://docs.spring.io/spring-data/mongodb/reference/](https://docs.spring.io/spring-data/mongodb/reference/)
-
-2. **MongoDB Manual: BSON Limits and Thresholds**  
-   Especificación formal de la cota de 16 MB para documentos BSON y niveles máximos de anidamiento.  
-   [https://www.mongodb.com/docs/manual/reference/limits/](https://www.mongodb.com/docs/manual/reference/limits/)
-
-3. **Martin Fowler: Polyglot Persistence**  
-   Definición arquitectónica del uso de múltiples tecnologías de almacenamiento de datos según la necesidad de cada componente.  
-   [https://martinfowler.com/bliki/PolyglotPersistence.html](https://martinfowler.com/bliki/PolyglotPersistence.html)
-
-4. **Implementación del Agregado Raíz Documental de Rutas**  
-   Código fuente en el repositorio DonaTrack:  
-   [`RutaRepartoDocument.java`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/adapters/out/persistence/documents/RutaRepartoDocument.java)
-
-5. **Configuración de Conversores BSON Binary $\leftrightarrow$ UUID**  
-   Código fuente en el repositorio DonaTrack:  
-   [`MongoConfig.java`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/config/MongoConfig.java)
-
-6. **Sembrador Automático Idempotente de Logística para MongoDB**  
-   Código fuente en el repositorio DonaTrack:  
-   [`MongoDataInitializer.java`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/config/MongoDataInitializer.java)
-
-7. **Diagrama de Clases JPA y Casos de Uso (Entrega 5)**  
-   Archivo PlantUML en el repositorio DonaTrack:  
-   [`DC-Donaciones-Entrega5.puml`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/diagramas/donaciones/DC-Donaciones-Entrega5.puml)
-
-8. **Diagrama de Componentes y Despliegue Políglota**  
-   Archivo PlantUML en el repositorio DonaTrack:  
-   [`DonaTrack-Diagrama-Componentes-y-Despliegue.puml`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/diagramas/DonaTrack-Diagrama-Componentes-y-Despliegue.puml)
