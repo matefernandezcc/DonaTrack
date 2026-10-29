@@ -10,7 +10,7 @@ Antes de todo, asegurate de tener levantados los servicios y la DB:
 
 ```bash
 # Levantar Postgres + RabbitMQ (si usás Docker)
-docker compose up -d postgres-donatrack rabbitmq
+docker compose up -d postgres-donatrack mongo-donatrack rabbitmq
 
 # Levantar los servicios Java (cada uno en una terminal)
 cd donatrack-donaciones && ../mvnw spring-boot:run -Dspring-boot.run.profiles=local
@@ -206,10 +206,26 @@ curl http://localhost:8002/api/camiones | python3 -m json.tool
 curl http://localhost:8002/api/choferes | python3 -m json.tool
 ```
 
-### Verificar en DBeaver:
-```sql
-SELECT * FROM logistica.camiones WHERE patente = 'TEST01';
-SELECT * FROM logistica.choferes WHERE legajo = 'CH-TEST-01';
+### Verificar en MongoDB (NoSQL) o DBeaver:
+> [!NOTE]
+> Desde la **Entrega 5 (Persistencia Políglota)**, el microservicio de Logística persiste en **MongoDB**.
+> Podés verificar en DBeaver (abriendo una conexión MongoDB a `localhost:27017`), en **MongoDB Compass** o mediante **mongosh**:
+
+```javascript
+// Base de datos: donatrack_logistica
+use donatrack_logistica;
+
+// Colección camiones
+db.camiones.find({ patente: "TEST01" });
+
+// Colección choferes
+db.choferes.find({ legajo: "CH-TEST-01" });
+```
+
+**O verificar directamente por endpoint REST:**
+```bash
+curl -s http://localhost:8002/api/camiones/TEST01 | python3 -m json.tool
+curl -s http://localhost:8002/api/choferes/CH-TEST-01 | python3 -m json.tool
 ```
 
 ---
@@ -301,10 +317,21 @@ curl -X POST http://localhost:8002/api/planificacion/items \
   }'
 ```
 
-### Verificar en DBeaver:
-```sql
-SELECT * FROM logistica.items_planificacion
-ORDER BY solicitud_planificacion_id DESC;
+### Verificar en MongoDB (NoSQL) o DBeaver:
+```javascript
+// Base de datos: donatrack_logistica
+use donatrack_logistica;
+
+// Buscar el item por ID de donación en la colección documental
+db.items_planificacion.find({ idDonacionOriginal: "76f9706f-8369-43cd-aaca-cc1603bf67f7" });
+
+// O listar los últimos items recibidos
+db.items_planificacion.find().sort({ _id: -1 }).limit(5);
+```
+
+**O verificar por endpoint REST:**
+```bash
+curl -s http://localhost:8002/api/planificacion/pendientes | python3 -m json.tool
 ```
 
 ---
@@ -362,7 +389,7 @@ Si rompiste la base de datos haciendo pruebas o querés arrancar desde cero como
 docker compose down -v
 
 # 3. Levantar Docker desde cero con Postgres + RabbitMQ  (esto vuelve a crear las tablas y corre el local-seed-data.sql)
-docker compose up -d postgres-donatrack rabbitmq
+docker compose up -d postgres-donatrack mongo-donatrack rabbitmq
 
 # 4. Limpiar compilaciones viejas por las dudas (opcional pero recomendado)
 ../mvnw clean
@@ -408,8 +435,8 @@ Si tocás un archivo `.java` mientras el servidor está levantado, a veces Sprin
 [x] TEST 2: Importar CSV → aparecen ~10 personas nuevas
 [x] TEST 2b: Re-importar CSV → no se duplican (mismo count)
 [x] TEST 3: GET /api/personas → devuelve la lista completa
-[x] TEST 4: Crear camión/chofer → aparecen en logistica.camiones/choferes
+[x] TEST 4: Crear camión/chofer → aparecen en MongoDB colecciones camiones y choferes (o GET /api/camiones)
 [x] TEST 5: Recibir bienes → donaciones_originales + donaciones + bienes creados
-[x] TEST 6: Item planificación → aparece en logistica.items_planificacion
+[x] TEST 6: Item planificación → aparece en MongoDB colección items_planificacion (o GET /api/planificacion/pendientes)
 [x] TEST 7: Actividad incentivos → registros en incentivos.perfiles_donante
 ```

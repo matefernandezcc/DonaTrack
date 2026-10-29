@@ -271,7 +271,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ $env.DISCORD_WEBHOOK_URL || \"https://httpbin.org/post\" }}",
+          "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ JSON.stringify($json.discordPayload) }}",
