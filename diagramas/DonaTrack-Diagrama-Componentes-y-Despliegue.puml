@@ -68,65 +68,59 @@ rectangle "Despliegue en la Nube (Render)" #line.dashed {
 ' PERFILES DE PERSISTENCIA Y MENSAJERÍA (Verticales)
 ' ========================================================
 rectangle "Profile: local" as ProfileLocal #line.dashed {
-    () "JPA :5432" as Port_JPA_Local
-    () "AMQP :5672" as Port_AMQP_Local
     () "Mongo :27017" as Port_Mongo_Local
+    () "AMQP :5672" as Port_AMQP_Local
+    () "JPA :5432" as Port_JPA_Local
 
-    node "Docker PostgreSQL\n:5432" as N_DB_Local {
-        component "PostgreSQL Local\n(schemas: donaciones, incentivos, notif)" as DB_Local
+    node "Docker MongoDB\n:27017" as N_Mongo_Local {
+        component "MongoDB Local\n(donatrack_logistica)" as Mongo_Local
     }
     node "Docker RabbitMQ\n:5672/:15672" as N_BrokerMQ_Local {
         component "RabbitMQ Local" as RabbitMQ_Local
     }
-    node "Docker MongoDB\n:27017" as N_Mongo_Local {
-        component "MongoDB Local\n(donatrack_logistica)" as Mongo_Local
+    node "Docker PostgreSQL\n:5432" as N_DB_Local {
+        component "PostgreSQL Local\n(schemas: donaciones, incentivos, notif)" as DB_Local
     }
     
-    Port_JPA_Local ----(0---- DB_Local
-    Port_AMQP_Local ----(0---- RabbitMQ_Local
     Port_Mongo_Local ----(0---- Mongo_Local
+    Port_AMQP_Local ----(0---- RabbitMQ_Local
+    Port_JPA_Local ----(0---- DB_Local
     
-    ' Alineación vertical de puertos
-    Port_JPA_Local -[hidden]left-> Port_AMQP_Local
-    Port_AMQP_Local -[hidden]left-> Port_Mongo_Local
+    ' Alineación vertical de puertos (Mongo arriba, AMQP medio, JPA abajo)
+    Port_Mongo_Local -[hidden]left-> Port_AMQP_Local
+    Port_AMQP_Local -[hidden]left-> Port_JPA_Local
 
-    ' Alineación vertical de servidores
-    N_DB_Local -[hidden]left-> N_BrokerMQ_Local
-    N_BrokerMQ_Local -[hidden]left-> N_Mongo_Local
-
-    ' Emparejamiento horizontal
-    
+    ' Alineación vertical de servidores (Mongo arriba, RabbitMQ medio, PostgreSQL abajo)
+    N_Mongo_Local -[hidden]left-> N_BrokerMQ_Local
+    N_BrokerMQ_Local -[hidden]left-> N_DB_Local
 }
 
 rectangle "Profile: prod" as ProfileProd #line.dashed {
-    () "JPA Supabase" as Port_JPA_Cloud
-    () "AMQP CloudAMQP" as Port_AMQP_Cloud
     () "Mongo Atlas" as Port_Mongo_Cloud
+    () "AMQP CloudAMQP" as Port_AMQP_Cloud
+    () "JPA Supabase" as Port_JPA_Cloud
 
-    node "Supabase PostgreSQL\n(AWS us-east-1)" as N_DB_Cloud {
-        component "PostgreSQL Supabase\n(schemas: donaciones, incentivos, notif)" as DB_Cloud
+    node "MongoDB Atlas\n(donatrack.ofn4ag4)" as N_Mongo_Cloud {
+        component "MongoDB Atlas Cluster\n(donatrack_logistica)" as Mongo_Cloud
     }
     node "CloudAMQP\n(jackal.rmq.cloudamqp.com)" as N_BrokerMQ_Cloud {
         component "CloudAMQP (RabbitMQ)" as RabbitMQ_Cloud
     }
-    node "MongoDB Atlas\n(donatrack.ofn4ag4)" as N_Mongo_Cloud {
-        component "MongoDB Atlas Cluster\n(donatrack_logistica)" as Mongo_Cloud
+    node "Supabase PostgreSQL\n(AWS us-east-1)" as N_DB_Cloud {
+        component "PostgreSQL Supabase\n(schemas: donaciones, incentivos, notif)" as DB_Cloud
     }
     
-    Port_JPA_Cloud ----(0---- DB_Cloud
-    Port_AMQP_Cloud ----(0---- RabbitMQ_Cloud
     Port_Mongo_Cloud ----(0---- Mongo_Cloud
+    Port_AMQP_Cloud ----(0---- RabbitMQ_Cloud
+    Port_JPA_Cloud ----(0---- DB_Cloud
     
-    ' Alineación vertical de puertos
-    Port_JPA_Cloud -[hidden]left-> Port_AMQP_Cloud
-    Port_AMQP_Cloud -[hidden]left-> Port_Mongo_Cloud
+    ' Alineación vertical de puertos (Mongo arriba, AMQP medio, JPA abajo)
+    Port_Mongo_Cloud -[hidden]left-> Port_AMQP_Cloud
+    Port_AMQP_Cloud -[hidden]left-> Port_JPA_Cloud
 
-    ' Alineación vertical de servidores
-    N_DB_Cloud -[hidden]left-> N_BrokerMQ_Cloud
-    N_BrokerMQ_Cloud -[hidden]left-> N_Mongo_Cloud
-
-    ' Emparejamiento horizontal
-    
+    ' Alineación vertical de servidores (Mongo arriba, CloudAMQP medio, Supabase abajo)
+    N_Mongo_Cloud -[hidden]left-> N_BrokerMQ_Cloud
+    N_BrokerMQ_Cloud -[hidden]left-> N_DB_Cloud
 }
 
 ProfileLocal -[hidden]left-> ProfileProd
