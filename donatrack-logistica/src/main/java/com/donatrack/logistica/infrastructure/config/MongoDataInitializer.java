@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
  * Asegura la disponibilidad inmediata de entidades de prueba para verificar flujos y colecciones de Bruno.
  */
 @Component
+@Profile("!test")
 public class MongoDataInitializer implements CommandLineRunner {
 
   private static final Logger log = LoggerFactory.getLogger(MongoDataInitializer.class);

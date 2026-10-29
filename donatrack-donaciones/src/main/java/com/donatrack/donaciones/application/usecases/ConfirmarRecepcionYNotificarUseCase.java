@@ -8,6 +8,7 @@ import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
+import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ConfirmarRecepcionYNotificarUseCase {
@@ -37,6 +39,7 @@ public class ConfirmarRecepcionYNotificarUseCase {
     this.eventPublisher = eventPublisher;
   }
 
+  @Transactional
   public void procesar(EntregaRealizadaEvent event) {
     Optional<Donacion> donacionOpt = donacionRepository.buscarPorId(event.getIdDonacion());
     if (donacionOpt.isEmpty()) return;
