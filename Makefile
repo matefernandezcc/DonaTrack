@@ -136,6 +136,12 @@ n8n-import:
 		$(N8N_CONTAINER):/tmp/workflows.json
 	docker exec $(N8N_CONTAINER) \
 		n8n import:workflow --input=/tmp/workflows.json
+	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=donatrack-notificador
+	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=donatrack-insignias
+	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=donatrack-ranking
+	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=2zpu451nLHxitRhz
+	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=donatrack-notificador-real
+	docker restart $(N8N_CONTAINER)
 
 n8n-export:
 	docker exec $(N8N_CONTAINER) \

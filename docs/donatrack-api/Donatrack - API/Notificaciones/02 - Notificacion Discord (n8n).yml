@@ -1,5 +1,5 @@
 info:
-  name: Enviar Mensaje Discord (n8n)
+  name: 02 - Notificacion Discord (n8n)
   type: http
   seq: 2
 
@@ -15,6 +15,11 @@ http:
         "medio": "DISCORD"
       }
   auth: inherit
+
+assert:
+  - expr: res.status
+    oper: eq
+    value: 200
 
 settings:
   encodeUrl: true

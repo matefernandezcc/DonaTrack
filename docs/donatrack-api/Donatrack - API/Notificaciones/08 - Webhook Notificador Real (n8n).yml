@@ -1,0 +1,28 @@
+info:
+  name: 08 - Webhook Notificador Real (n8n)
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{n8nUrl}}/webhook/donatrack/notificaciones/real"
+  body:
+    type: json
+    data: |-
+      {
+        "destinatario": "donatracksoporte@gmail.com",
+        "mensaje": "Notificación de prueba en canal Real de Producción",
+        "medio": "DISCORD"
+      }
+  auth: inherit
+
+assert:
+  - expr: res.status
+    oper: eq
+    value: 200
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

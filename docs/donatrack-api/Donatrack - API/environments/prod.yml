@@ -10,3 +10,5 @@ variables:
     value: https://dona-logistica.onrender.com
   - name: notificacionesUrl
     value: http://localhost:8003
+  - name: n8nUrl
+    value: http://localhost:5678

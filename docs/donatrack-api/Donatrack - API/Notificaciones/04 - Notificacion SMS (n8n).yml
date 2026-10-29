@@ -1,0 +1,28 @@
+info:
+  name: 04 - Notificacion SMS (n8n)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{notificacionesUrl}}/api/mensajes"
+  body:
+    type: json
+    data: |-
+      {
+        "destinatario": "+5491145678901",
+        "mensaje": "DonaTrack: Tu código de seguimiento de entrega es #DT-9482.",
+        "medio": "SMS"
+      }
+  auth: inherit
+
+assert:
+  - expr: res.status
+    oper: eq
+    value: 200
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,24 @@
+info:
+  name: 06 - Webhook Ranking Podio (n8n)
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{n8nUrl}}/webhook/donatrack/ranking"
+  body:
+    type: json
+    data: |-
+      {}
+  auth: inherit
+
+assert:
+  - expr: res.status
+    oper: eq
+    value: 200
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

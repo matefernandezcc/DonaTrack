@@ -1,0 +1,26 @@
+info:
+  name: 07 - Webhook Chatbot (n8n)
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{n8nUrl}}/webhook/chatbot"
+  body:
+    type: json
+    data: |-
+      {
+        "mensaje": "¿Cómo dono?"
+      }
+  auth: inherit
+
+assert:
+  - expr: res.status
+    oper: eq
+    value: 200
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
