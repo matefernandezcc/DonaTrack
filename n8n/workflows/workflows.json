@@ -26,7 +26,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const user = body.user || body.usuario || body.nombre || 'Donante DonaTrack';\n  const badge = body.badge || body.insignia || 'Insignia de Honor';\n  const description = body.description || body.descripcion || body.detalle || '\u00a1Gracias por apoyar a DonaTrack y marcar la diferencia!';\n  const timestamp = new Date().toISOString();\n\n  const discordPayload = {\n    username: \"DonaTrack Bot\",\n    embeds: [\n      {\n        title: \"\ud83c\udfc6 \u00a1Nueva Insignia Otorgada!\",\n        description: `\u00a1Felicitaciones a **${user}** por obtener un nuevo reconocimiento en **DonaTrack**! \ud83c\udf1f`,\n        color: 15844367,\n        fields: [\n          {\n            name: \"\ud83c\udf96\ufe0f Insignia\",\n            value: `**${badge}**`,\n            inline: true\n          },\n          {\n            name: \"\ud83d\udc64 Donante\",\n            value: `**${user}**`,\n            inline: true\n          },\n          {\n            name: \"\ud83d\udcdd Logro\",\n            value: description,\n            inline: false\n          }\n        ],\n        thumbnail: {\n          url: \"attachment://badge.png\"\n        },\n        footer: {\n          text: \"DonaTrack \u2022 Plataforma de Gesti\u00f3n y Trazabilidad\"\n        },\n        timestamp: timestamp\n      }\n    ]\n  };\n\n  return {\n    json: {\n      userName: user,\n      badgeName: badge,\n      description: description,\n      discordPayload: discordPayload\n    }\n  };\n});"
+          "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const user = body.user || body.usuario || body.nombre || 'Donante DonaTrack';\n  const badge = body.badge || body.insignia || 'Insignia de Honor';\n  const description = body.description || body.descripcion || body.detalle || '¡Gracias por apoyar a DonaTrack y marcar la diferencia!';\n  const timestamp = new Date().toISOString();\n\n  const discordPayload = {\n    username: \"DonaTrack Bot\",\n    embeds: [\n      {\n        title: \"🏆 ¡Nueva Insignia Otorgada!\",\n        description: `¡Felicitaciones a **${user}** por obtener un nuevo reconocimiento en **DonaTrack**! 🌟`,\n        color: 15844367,\n        fields: [\n          {\n            name: \"🎖️ Insignia\",\n            value: `**${badge}**`,\n            inline: true\n          },\n          {\n            name: \"👤 Donante\",\n            value: `**${user}**`,\n            inline: true\n          },\n          {\n            name: \"📝 Logro\",\n            value: description,\n            inline: false\n          }\n        ],\n        thumbnail: {\n          url: \"attachment://badge.png\"\n        },\n        footer: {\n          text: \"DonaTrack • Plataforma de Gestión y Trazabilidad\"\n        },\n        timestamp: timestamp\n      }\n    ]\n  };\n\n  return {\n    json: {\n      userName: user,\n      badgeName: badge,\n      description: description,\n      discordPayload: discordPayload\n    }\n  };\n});"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -238,7 +238,9 @@
           208
         ],
         "id": "persist-results-node",
-        "name": "Persist Results (Mock API)"
+        "name": "Persist Results (Mock API)",
+        "onError": "continueRegularOutput",
+        "executeOnce": true
       },
       {
         "parameters": {
@@ -255,7 +257,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const ranking = $(\"Calculate Ranking\").all().map(item => item.json);\nconst top3 = ranking.slice(0, 3);\nconst rest = ranking.slice(3);\n\nconst medals = ['\ud83e\udd47 1\u00ba Puesto \u2014 L\u00edder del Mes', '\ud83e\udd48 2\u00ba Puesto', '\ud83e\udd49 3\u00ba Puesto'];\nconst fields = [];\n\ntop3.forEach((item, index) => {\n  fields.push({\n    name: medals[index] || `${index + 1}\u00ba Puesto`,\n    value: `\ud83d\udc64 **${item.user}** \u2022 \\`${item.totalDonations} donaciones\\``,\n    inline: index > 0\n  });\n});\n\nif (rest.length > 0) {\n  const restNames = rest.map(r => `**${r.user}** (${r.totalDonations})`).join(', ');\n  fields.push({\n    name: \"\ud83d\udc4f Menciones de Honor\",\n    value: `Gracias a ${restNames} y a cada voluntario por su apoyo incondicional.`,\n    inline: false\n  });\n}\n\nconst discordPayload = {\n  username: \"DonaTrack Bot\",\n  embeds: [\n    {\n      title: \"\ud83d\udce2 \u00a1Podio & Ranking Mensual de DonaTrack! \ud83c\udfc6\",\n      description: \"Reconocimiento especial a los donantes con mayor impacto de este mes. \u00a1Gracias por hacer la diferencia! \ud83c\udf1f\",\n      color: 3447003,\n      fields: fields,\n      thumbnail: {\n        url: \"https://api.dicebear.com/9.x/bottts/png?seed=DonaTrackPodium&size=256\"\n      },\n      footer: {\n        text: \"DonaTrack \u2022 Plataforma de Gesti\u00f3n y Trazabilidad\"\n      },\n      timestamp: new Date().toISOString()\n    }\n  ]\n};\n\nreturn [{ json: { discordPayload: discordPayload } }];"
+          "jsCode": "const ranking = $(\"Calculate Ranking\").all().map(item => item.json);\nconst top3 = ranking.slice(0, 3);\nconst rest = ranking.slice(3);\n\nconst medals = ['🥇 1º Puesto — Líder del Mes', '🥈 2º Puesto', '🥉 3º Puesto'];\nconst fields = [];\n\ntop3.forEach((item, index) => {\n  fields.push({\n    name: medals[index] || `${index + 1}º Puesto`,\n    value: `👤 **${item.user}** • \\`${item.totalDonations} donaciones\\``,\n    inline: index > 0\n  });\n});\n\nif (rest.length > 0) {\n  const restNames = rest.map(r => `**${r.user}** (${r.totalDonations})`).join(', ');\n  fields.push({\n    name: \"👏 Menciones de Honor\",\n    value: `Gracias a ${restNames} y a cada voluntario por su apoyo incondicional.`,\n    inline: false\n  });\n}\n\nconst discordPayload = {\n  username: \"DonaTrack Bot\",\n  embeds: [\n    {\n      title: \"📢 ¡Podio & Ranking Mensual de DonaTrack! 🏆\",\n      description: \"Reconocimiento especial a los donantes con mayor impacto de este mes. ¡Gracias por hacer la diferencia! 🌟\",\n      color: 3447003,\n      fields: fields,\n      thumbnail: {\n        url: \"https://api.dicebear.com/9.x/bottts/png?seed=DonaTrackPodium&size=256\"\n      },\n      footer: {\n        text: \"DonaTrack • Plataforma de Gestión y Trazabilidad\"\n      },\n      timestamp: new Date().toISOString()\n    }\n  ]\n};\n\nreturn [{ json: { discordPayload: discordPayload } }];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -282,7 +284,8 @@
           208
         ],
         "id": "publish-discord-node",
-        "name": "Publish to Discord Webhook"
+        "name": "Publish to Discord Webhook",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -502,7 +505,7 @@
                         "operation": "equals",
                         "type": "string"
                       },
-                      "rightValue": "\u00bfC\u00f3mo dono?"
+                      "rightValue": "¿Cómo dono?"
                     }
                   ],
                   "options": {
@@ -525,7 +528,7 @@
                         "operation": "equals",
                         "type": "string"
                       },
-                      "rightValue": "Ver campa\u00f1as"
+                      "rightValue": "Ver campañas"
                     }
                   ],
                   "options": {
@@ -535,7 +538,7 @@
                     "version": 3
                   }
                 },
-                "outputKey": "Ver campa\u00f1as",
+                "outputKey": "Ver campañas",
                 "renameOutput": true
               },
               {
@@ -571,7 +574,7 @@
                         "operation": "equals",
                         "type": "string"
                       },
-                      "rightValue": "Seguimiento de mi donaci\u00f3n"
+                      "rightValue": "Seguimiento de mi donación"
                     }
                   ],
                   "options": {
@@ -617,7 +620,7 @@
                         "operation": "equals",
                         "type": "string"
                       },
-                      "rightValue": "\u00bfQu\u00e9 tipo de donaciones aceptan?"
+                      "rightValue": "¿Qué tipo de donaciones aceptan?"
                     }
                   ],
                   "options": {
@@ -710,7 +713,7 @@
               {
                 "name": "respuesta",
                 "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">\ud83c\udf1f \u00a1Donar es s\u00faper f\u00e1cil!</h4><p>Segu\u00ed estos 3 simples pasos:</p><ul style=\"padding-left: 20px; margin-bottom: 0;\"><li><b>1)</b> Registrate en la plataforma.</li><li><b>2)</b> Eleg\u00ed una campa\u00f1a activa o hac\u00e9 una donaci\u00f3n libre.</li><li><b>3)</b> Coordin\u00e1 el punto de entrega o retiro.</li></ul><p style=\"margin-bottom: 0; font-size: 0.9em; color: var(--muted); margin-top: 10px;\"><i>\u00a1Nosotros te vamos avisando c\u00f3mo avanza tu donaci\u00f3n!</i></p>"
+                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">🌟 ¡Donar es súper fácil!</h4><p>Seguí estos 3 simples pasos:</p><ul style=\"padding-left: 20px; margin-bottom: 0;\"><li><b>1)</b> Registrate en la plataforma.</li><li><b>2)</b> Elegí una campaña activa o hacé una donación libre.</li><li><b>3)</b> Coordiná el punto de entrega o retiro.</li></ul><p style=\"margin-bottom: 0; font-size: 0.9em; color: var(--muted); margin-top: 10px;\"><i>¡Nosotros te vamos avisando cómo avanza tu donación!</i></p>"
               }
             ]
           },
@@ -732,7 +735,7 @@
               {
                 "name": "respuesta",
                 "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">\ud83e\uddd1\u200d\ud83d\udcbb Asistencia Humana</h4><p>\u00a1Entendido! Ya le envi\u00e9 un aviso a nuestro equipo.</p><p style=\"margin-bottom: 0;\">Un agente se conectar\u00e1 a este chat en los pr\u00f3ximos minutos para ayudarte personalmente. Mientras tanto, \u00bfte puedo ayudar con algo m\u00e1s?</p>"
+                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">🧑‍💻 Asistencia Humana</h4><p>¡Entendido! Ya le envié un aviso a nuestro equipo.</p><p style=\"margin-bottom: 0;\">Un agente se conectará a este chat en los próximos minutos para ayudarte personalmente. Mientras tanto, ¿te puedo ayudar con algo más?</p>"
               }
             ]
           },
@@ -754,7 +757,7 @@
               {
                 "name": "respuesta",
                 "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">\u2764\ufe0f Campa\u00f1as Activas</h4><p>Tenemos varias campa\u00f1as donde pod\u00e9s ayudar ahora mismo. Cada una muestra su progreso y la ONG verificada a cargo.</p><a href=\"#campanas\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--blue); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">\ud83d\udc49 Ver campa\u00f1as destacadas</a>"
+                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">❤️ Campañas Activas</h4><p>Tenemos varias campañas donde podés ayudar ahora mismo. Cada una muestra su progreso y la ONG verificada a cargo.</p><a href=\"#campanas\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--blue); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">👉 Ver campañas destacadas</a>"
               }
             ]
           },
@@ -776,7 +779,7 @@
               {
                 "name": "respuesta",
                 "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">\ud83d\udcdd \u00a1Sumate a DonaTrack!</h4><p>El registro es <b>100% gratuito</b> y no toma ni un minuto.</p><p style=\"margin-bottom: 0;\">Encontr\u00e1 los botones de acceso para <b>Donantes</b> o <b>Sedes</b> en la secci\u00f3n superior de la p\u00e1gina (Sumate).</p>"
+                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">📝 ¡Sumate a DonaTrack!</h4><p>El registro es <b>100% gratuito</b> y no toma ni un minuto.</p><p style=\"margin-bottom: 0;\">Encontrá los botones de acceso para <b>Donantes</b> o <b>Sedes</b> en la sección superior de la página (Sumate).</p>"
               }
             ]
           },
@@ -798,7 +801,7 @@
               {
                 "name": "respuesta",
                 "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">\ud83d\udce6 Rastreo en tiempo real</h4><p>Cada donaci\u00f3n genera un c\u00f3digo de seguimiento \u00fanico. Con ese ID pod\u00e9s ver si est\u00e1 <b>Recibida</b>, <b>En viaje</b> o <b>Entregada</b>.</p><a href=\"#organizaciones\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--green); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">\ud83d\udd0d Ir a mi panel de tracking</a>"
+                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">📦 Rastreo en tiempo real</h4><p>Cada donación genera un código de seguimiento único. Con ese ID podés ver si está <b>Recibida</b>, <b>En viaje</b> o <b>Entregada</b>.</p><a href=\"#organizaciones\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--green); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">🔍 Ir a mi panel de tracking</a>"
               }
             ]
           },
@@ -828,7 +831,7 @@
               {
                 "name": "respuesta",
                 "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">\ud83c\udf81 \u00bfQu\u00e9 pod\u00e9s donar?</h4><p>Aceptamos principalmente:</p><ul style=\"padding-left: 20px; margin-bottom: 0;\"><li>\ud83d\udc55 <b>Ropa y calzado</b> (en buen estado)</li><li>\ud83e\udd6b <b>Alimentos no perecederos</b></li><li>\ud83e\uddf8 <b>Juguetes y \u00fatiles escolares</b></li></ul><p style=\"margin-bottom: 0; font-size: 0.9em; color: var(--muted); margin-top: 10px;\"><i>Recuerda que todo debe estar limpio y en condiciones de ser usado.</i></p>"
+                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">🎁 ¿Qué podés donar?</h4><p>Aceptamos principalmente:</p><ul style=\"padding-left: 20px; margin-bottom: 0;\"><li>👕 <b>Ropa y calzado</b> (en buen estado)</li><li>🥫 <b>Alimentos no perecederos</b></li><li>🧸 <b>Juguetes y útiles escolares</b></li></ul><p style=\"margin-bottom: 0; font-size: 0.9em; color: var(--muted); margin-top: 10px;\"><i>Recuerda que todo debe estar limpio y en condiciones de ser usado.</i></p>"
               }
             ]
           }
@@ -849,7 +852,7 @@
               {
                 "name": "respuesta",
                 "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">\ud83e\udd1d \u00a1Hac\u00e9 la diferencia!</h4><p>Los voluntarios son el coraz\u00f3n de DonaTrack. Pod\u00e9s sumarte como <b>sede de acopio</b> o ayudando en la <b>log\u00edstica</b>.</p><a href=\"#registro\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--green); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">\ud83d\udcaa Unirme como voluntario</a>"
+                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">🤝 ¡Hacé la diferencia!</h4><p>Los voluntarios son el corazón de DonaTrack. Podés sumarte como <b>sede de acopio</b> o ayudando en la <b>logística</b>.</p><a href=\"#registro\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--green); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">💪 Unirme como voluntario</a>"
               }
             ]
           }
@@ -870,7 +873,7 @@
               {
                 "name": "respuesta",
                 "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">\ud83d\udccd D\u00f3nde y Cu\u00e1ndo</h4><p>Los horarios de entrega se coordinan directamente con la sede que elijas al momento de hacer la donaci\u00f3n.</p><a href=\"#mapa\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--blue); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">\ud83d\uddfa\ufe0f Ver mapa de sedes</a>"
+                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">📍 Dónde y Cuándo</h4><p>Los horarios de entrega se coordinan directamente con la sede que elijas al momento de hacer la donación.</p><a href=\"#mapa\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--blue); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">🗺️ Ver mapa de sedes</a>"
               }
             ]
           }
@@ -1110,7 +1113,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || 'General';\n  const mensaje = body.mensaje || body.message || body.description || 'Notificaci\u00f3n sin mensaje';\n  let medio = (body.medio || body.channel || 'DISCORD').toUpperCase();\n  if (medio === 'CORREO') medio = 'EMAIL';\n  if (medio === 'TELEFONO') medio = 'SMS';\n\n  const timestamp = new Date().toISOString();\n  const avatarUrl = 'https://api.dicebear.com/9.x/bottts/png?seed=' + encodeURIComponent(destinatario) + '&size=128';\n  let discordPayload = {};\n\n  if (medio === 'EMAIL') {\n    discordPayload = {\n      username: 'DonaTrack \u2022 Servidor de Correo',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/732/732200.png',\n      embeds: [\n        {\n          author: {\n            name: 'DonaTrack Mailer Daemon',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/732/732200.png'\n          },\n          title: '\ud83d\udce7 Notificaci\u00f3n por Correo Electr\u00f3nico',\n          description: '> \ud83d\udcc4 **Asunto:** Notificaci\u00f3n Oficial \u2014 Plataforma DonaTrack\\n\\n**Estimado/a donante:**\\n*' + mensaje.replace(/\"/g, '\\\\\"') + '*',\n          color: 2851545,\n          fields: [\n            {\n              name: '\ud83d\udcec Para (Buz\u00f3n)',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '\ud83d\udce1 Canal',\n              value: '\ud83d\udce7 `EMAIL / SMTP`',\n              inline: true\n            },\n            {\n              name: '\u26a1 Estado',\n              value: '\ud83d\udcec `ENTREGADO EN INBOX`',\n              inline: true\n            },\n            {\n              name: '\ud83d\udd12 Seguridad',\n              value: '\ud83d\udee1\ufe0f `TLS 1.3 / DKIM Verificado`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack SMTP Gateway \u2022 Despachado v\u00eda n8n Mail Hub'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else if (medio === 'WHATSAPP') {\n    discordPayload = {\n      username: 'DonaTrack \u2022 WhatsApp Business',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',\n      embeds: [\n        {\n          author: {\n            name: 'WhatsApp Cloud API \u2022 DonaTrack Gateway',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/733/733585.png'\n          },\n          title: '\ud83d\udcac Mensaje de WhatsApp Entregado',\n          description: '> \ud83d\udcf1 *Mensaje recibido en chat m\u00f3vil:*\\n\\n> \" **' + mensaje.replace(/\"/g, '\\\\\"') + '** \"',\n          color: 2479078,\n          fields: [\n            {\n              name: '\ud83d\udcf1 Contacto / Tel\u00e9fono',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '\ud83d\udce1 Canal',\n              value: '\ud83d\udcac `WHATSAPP BUSINESS`',\n              inline: true\n            },\n            {\n              name: '\u26a1 Estado',\n              value: '\u2713\u2713 `ENTREGADO Y LE\u00cdDO`',\n              inline: true\n            },\n            {\n              name: '\ud83d\udd10 Privacidad',\n              value: '`Cifrado de extremo a extremo (E2EE)`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack WhatsApp Cloud \u2022 Meta API v\u00eda n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else if (medio === 'SMS') {\n    discordPayload = {\n      username: 'DonaTrack \u2022 Pasarela SMS M\u00f3vil',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/889/889140.png',\n      embeds: [\n        {\n          author: {\n            name: 'Telecom SMS Gateway \u2022 DonaTrack',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/889/889140.png'\n          },\n          title: '\ud83d\udcf1 SMS Transaccional Despachado',\n          description: '```txt\\n[DONATRACK-SMS] ' + mensaje.replace(/`/g, '') + '\\n```',\n          color: 15965202,\n          fields: [\n            {\n              name: '\ud83d\udcde L\u00ednea M\u00f3vil',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '\ud83d\udce1 Canal',\n              value: '\ud83d\udcf1 `SMS / GSM`',\n              inline: true\n            },\n            {\n              name: '\u26a1 Estado',\n              value: '\ud83d\udcf6 `TRANSMISI\u00d3N COMPLETADA`',\n              inline: true\n            },\n            {\n              name: '\ud83d\udcca Longitud',\n              value: '`' + mensaje.length + ' / 160 caracteres`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack Cellular Gateway \u2022 SMS Gateway v\u00eda n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else {\n    discordPayload = {\n      username: 'DonaTrack \u2022 Comunidad Oficial',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/3670/3670157.png',\n      embeds: [\n        {\n          author: {\n            name: 'DonaTrack Community Bot',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/3670/3670157.png'\n          },\n          title: '\ud83c\udfae Alerta Oficial en Discord',\n          description: '> \ud83d\udce2 **Mensaje al Canal:**\\n> *' + mensaje.replace(/\"/g, '\\\\\"') + '*',\n          color: 5793266,\n          fields: [\n            {\n              name: '\ud83d\udc64 Menci\u00f3n / Destinatario',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '\ud83d\udce1 Canal',\n              value: '\ud83c\udfae `DISCORD WEBHOOK`',\n              inline: true\n            },\n            {\n              name: '\u26a1 Estado',\n              value: '\ud83d\udfe2 `PUBLICADO EN SERVIDOR`',\n              inline: true\n            },\n            {\n              name: '\u26a1 Prioridad',\n              value: '`ALTA / TIEMPO REAL`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack Discord Integration \u2022 Webhook n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  }\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: discordPayload\n    }\n  };\n});"
+          "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || 'General';\n  const mensaje = body.mensaje || body.message || body.description || 'Notificación sin mensaje';\n  let medio = (body.medio || body.channel || 'DISCORD').toUpperCase();\n  if (medio === 'CORREO') medio = 'EMAIL';\n  if (medio === 'TELEFONO') medio = 'SMS';\n\n  const timestamp = new Date().toISOString();\n  const avatarUrl = 'https://api.dicebear.com/9.x/bottts/png?seed=' + encodeURIComponent(destinatario) + '&size=128';\n  let discordPayload = {};\n\n  if (medio === 'EMAIL') {\n    discordPayload = {\n      username: 'DonaTrack • Servidor de Correo',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/732/732200.png',\n      embeds: [\n        {\n          author: {\n            name: 'DonaTrack Mailer Daemon',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/732/732200.png'\n          },\n          title: '📧 Notificación por Correo Electrónico',\n          description: '> 📄 **Asunto:** Notificación Oficial — Plataforma DonaTrack\\n\\n**Estimado/a donante:**\\n*' + mensaje.replace(/\"/g, '\\\\\"') + '*',\n          color: 2851545,\n          fields: [\n            {\n              name: '📬 Para (Buzón)',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '📡 Canal',\n              value: '📧 `EMAIL / SMTP`',\n              inline: true\n            },\n            {\n              name: '⚡ Estado',\n              value: '📬 `ENTREGADO EN INBOX`',\n              inline: true\n            },\n            {\n              name: '🔒 Seguridad',\n              value: '🛡️ `TLS 1.3 / DKIM Verificado`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack SMTP Gateway • Despachado vía n8n Mail Hub'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else if (medio === 'WHATSAPP') {\n    discordPayload = {\n      username: 'DonaTrack • WhatsApp Business',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',\n      embeds: [\n        {\n          author: {\n            name: 'WhatsApp Cloud API • DonaTrack Gateway',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/733/733585.png'\n          },\n          title: '💬 Mensaje de WhatsApp Entregado',\n          description: '> 📱 *Mensaje recibido en chat móvil:*\\n\\n> \" **' + mensaje.replace(/\"/g, '\\\\\"') + '** \"',\n          color: 2479078,\n          fields: [\n            {\n              name: '📱 Contacto / Teléfono',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '📡 Canal',\n              value: '💬 `WHATSAPP BUSINESS`',\n              inline: true\n            },\n            {\n              name: '⚡ Estado',\n              value: '✓✓ `ENTREGADO Y LEÍDO`',\n              inline: true\n            },\n            {\n              name: '🔐 Privacidad',\n              value: '`Cifrado de extremo a extremo (E2EE)`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack WhatsApp Cloud • Meta API vía n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else if (medio === 'SMS') {\n    discordPayload = {\n      username: 'DonaTrack • Pasarela SMS Móvil',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/889/889140.png',\n      embeds: [\n        {\n          author: {\n            name: 'Telecom SMS Gateway • DonaTrack',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/889/889140.png'\n          },\n          title: '📱 SMS Transaccional Despachado',\n          description: '```txt\\n[DONATRACK-SMS] ' + mensaje.replace(/`/g, '') + '\\n```',\n          color: 15965202,\n          fields: [\n            {\n              name: '📞 Línea Móvil',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '📡 Canal',\n              value: '📱 `SMS / GSM`',\n              inline: true\n            },\n            {\n              name: '⚡ Estado',\n              value: '📶 `TRANSMISIÓN COMPLETADA`',\n              inline: true\n            },\n            {\n              name: '📊 Longitud',\n              value: '`' + mensaje.length + ' / 160 caracteres`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack Cellular Gateway • SMS Gateway vía n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  } else {\n    discordPayload = {\n      username: 'DonaTrack • Comunidad Oficial',\n      avatar_url: 'https://cdn-icons-png.flaticon.com/512/3670/3670157.png',\n      embeds: [\n        {\n          author: {\n            name: 'DonaTrack Community Bot',\n            icon_url: 'https://cdn-icons-png.flaticon.com/512/3670/3670157.png'\n          },\n          title: '🎮 Alerta Oficial en Discord',\n          description: '> 📢 **Mensaje al Canal:**\\n> *' + mensaje.replace(/\"/g, '\\\\\"') + '*',\n          color: 5793266,\n          fields: [\n            {\n              name: '👤 Mención / Destinatario',\n              value: '`' + destinatario + '`',\n              inline: true\n            },\n            {\n              name: '📡 Canal',\n              value: '🎮 `DISCORD WEBHOOK`',\n              inline: true\n            },\n            {\n              name: '⚡ Estado',\n              value: '🟢 `PUBLICADO EN SERVIDOR`',\n              inline: true\n            },\n            {\n              name: '⚡ Prioridad',\n              value: '`ALTA / TIEMPO REAL`',\n              inline: false\n            }\n          ],\n          thumbnail: {\n            url: avatarUrl\n          },\n          footer: {\n            text: 'DonaTrack Discord Integration • Webhook n8n'\n          },\n          timestamp: timestamp\n        }\n      ]\n    };\n  }\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: discordPayload\n    }\n  };\n});"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1457,7 +1460,7 @@
       }
     ],
     "versionMetadata": {
-      "name": "Updated Enviar Discord, Enviar Correo (Discord), Enviar WhatsApp (Discord), Env\u2026",
+      "name": "Updated Enviar Discord, Enviar Correo (Discord), Enviar WhatsApp (Discord), Env…",
       "description": "Updated nodes: Enviar Discord, Enviar Correo (Discord), Enviar WhatsApp (Discord), Enviar SMS (Discord)"
     }
   },
@@ -1489,7 +1492,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || 'General';\n  const mensaje = body.mensaje || body.message || body.description || 'Notificaci\u00f3n sin mensaje';\n  let medio = (body.medio || body.channel || 'DISCORD').toUpperCase();\n  if (medio === 'CORREO') medio = 'EMAIL';\n  if (medio === 'TELEFONO') medio = 'SMS';\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: body.discordPayload\n    }\n  };\n});"
+          "jsCode": "const input = $input.all();\nreturn input.map(item => {\n  const body = item.json.body || item.json;\n  const destinatario = body.destinatario || body.user || body.to || 'General';\n  const mensaje = body.mensaje || body.message || body.description || 'Notificación sin mensaje';\n  let medio = (body.medio || body.channel || 'DISCORD').toUpperCase();\n  if (medio === 'CORREO') medio = 'EMAIL';\n  if (medio === 'TELEFONO') medio = 'SMS';\n\n  return {\n    json: {\n      destinatario: destinatario,\n      mensaje: mensaje,\n      medio: medio,\n      discordPayload: body.discordPayload\n    }\n  };\n});"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1615,7 +1618,7 @@
           "url": "={{ $env.DISCORD_WEBHOOK_URL || \"https://httpbin.org/post\" }}",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={\n  \"username\": \"DonaTrack \u2022 Notificador PROD\",\n  \"embeds\": [\n    {\n      \"author\": { \"name\": \"Sistema Central \u2022 DonaTrack\" },\n      \"title\": \"\ud83c\udfae Notificaci\u00f3n de Comunidad (Real)\",\n      \"description\": \"```txt\\n[DONATRACK-DISCORD] {{ $json.mensaje }}\\n```\",\n      \"color\": 4437377,\n      \"fields\": [\n        { \"name\": \"\ud83d\udc65 Canal / Destino\", \"value\": \"`{{ $json.destinatario }}`\", \"inline\": true },\n        { \"name\": \"\ud83d\udce1 Medio\", \"value\": \"`\ud83d\udcd8 DISCORD`\", \"inline\": true },\n        { \"name\": \"\u26a1 Estado\", \"value\": \"`\u2705 TRANSMISI\u00d3N EXITOSA`\", \"inline\": true },\n        { \"name\": \"\ud83d\udd10 Entorno\", \"value\": \"`\ud83d\udfe2 PRODUCCI\u00d3N`\", \"inline\": false }\n      ],\n      \"footer\": { \"text\": \"DonaTrack Core Engine \u2022 Notificador Real v\u00eda n8n\" }\n    }\n  ]\n}",
+          "jsonBody": "={\n  \"username\": \"DonaTrack • Notificador PROD\",\n  \"embeds\": [\n    {\n      \"author\": { \"name\": \"Sistema Central • DonaTrack\" },\n      \"title\": \"🎮 Notificación de Comunidad (Real)\",\n      \"description\": \"```txt\\n[DONATRACK-DISCORD] {{ $json.mensaje }}\\n```\",\n      \"color\": 4437377,\n      \"fields\": [\n        { \"name\": \"👥 Canal / Destino\", \"value\": \"`{{ $json.destinatario }}`\", \"inline\": true },\n        { \"name\": \"📡 Medio\", \"value\": \"`📘 DISCORD`\", \"inline\": true },\n        { \"name\": \"⚡ Estado\", \"value\": \"`✅ TRANSMISIÓN EXITOSA`\", \"inline\": true },\n        { \"name\": \"🔐 Entorno\", \"value\": \"`🟢 PRODUCCIÓN`\", \"inline\": false }\n      ],\n      \"footer\": { \"text\": \"DonaTrack Core Engine • Notificador Real vía n8n\" }\n    }\n  ]\n}",
           "options": {},
           "contentType": "json"
         },
@@ -1632,9 +1635,9 @@
         "parameters": {
           "emailFormat": "html",
           "fromEmail": "donatracksoporte@gmail.com",
-          "html": "=<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 40px 0;\">\n  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-top: 5px solid #28a745;\">\n    <div style=\"text-align: center; margin-bottom: 30px;\">\n      <h1 style=\"color: #28a745; margin: 0; font-size: 28px;\">DonaTrack</h1>\n      <p style=\"color: #6c757d; font-size: 14px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;\">Sistema de Notificaciones</p>\n    </div>\n    \n    <div style=\"background-color: #f8f9fa; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-bottom: 30px;\">\n      <p style=\"font-size: 16px; line-height: 1.6; color: #333333; margin: 0;\">\n        {{ $json.mensaje }}\n      </p>\n    </div>\n\n    <div style=\"text-align: center; border-top: 1px solid #eeeeee; padding-top: 20px;\">\n      <p style=\"font-size: 12px; color: #999999; margin: 0; line-height: 1.5;\">\n        Este es un mensaje autom\u00e1tico generado por la plataforma <strong>DonaTrack</strong>.<br>\n        Por favor, no respondas a este correo.\n      </p>\n      <p style=\"font-size: 12px; color: #bbbbbb; margin-top: 10px;\">\n        &copy; 2026 DonaTrack. Todos los derechos reservados.\n      </p>\n    </div>\n  </div>\n</div>",
+          "html": "=<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 40px 0;\">\n  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-top: 5px solid #28a745;\">\n    <div style=\"text-align: center; margin-bottom: 30px;\">\n      <h1 style=\"color: #28a745; margin: 0; font-size: 28px;\">DonaTrack</h1>\n      <p style=\"color: #6c757d; font-size: 14px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;\">Sistema de Notificaciones</p>\n    </div>\n    \n    <div style=\"background-color: #f8f9fa; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-bottom: 30px;\">\n      <p style=\"font-size: 16px; line-height: 1.6; color: #333333; margin: 0;\">\n        {{ $json.mensaje }}\n      </p>\n    </div>\n\n    <div style=\"text-align: center; border-top: 1px solid #eeeeee; padding-top: 20px;\">\n      <p style=\"font-size: 12px; color: #999999; margin: 0; line-height: 1.5;\">\n        Este es un mensaje automático generado por la plataforma <strong>DonaTrack</strong>.<br>\n        Por favor, no respondas a este correo.\n      </p>\n      <p style=\"font-size: 12px; color: #bbbbbb; margin-top: 10px;\">\n        &copy; 2026 DonaTrack. Todos los derechos reservados.\n      </p>\n    </div>\n  </div>\n</div>",
           "options": {},
-          "subject": "Notificaci\u00f3n Oficial de DonaTrack",
+          "subject": "Notificación Oficial de DonaTrack",
           "toEmail": "={{ $json.destinatario }}"
         },
         "type": "n8n-nodes-base.emailSend",

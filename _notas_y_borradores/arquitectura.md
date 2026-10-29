@@ -22,7 +22,7 @@ Esta decisión aisla la lógica de negocio (Dominio y Casos de Uso) de las depen
 
 ## 2. Persistencia y Bases de Datos
 
-El sistema utiliza una **estrategia de persistencia híbrida** (PostgreSQL) dependiendo del entorno de despliegue, manteniendo en ambos casos un **aislamiento lógico estricto mediante esquemas (schemas)**.
+El sistema utiliza una **estrategia de persistencia relacional** (PostgreSQL) dependiendo del entorno de despliegue, manteniendo en ambos casos un **aislamiento lógico estricto mediante esquemas (schemas)**.
 - **Base de Datos Local (Docker)**: Clúster principal para los servicios locales (`donaciones`, `incentivos`, `notificaciones` y el nodo fallback de `logistica`).
 - **Base de Datos Cloud (Supabase)**: Instancia en la nube dedicada exclusivamente a los servidores de `logistica` desplegados en Render (dado que no pueden acceder a la red local).
 - **Esquemas separados**: `logistica`, `donaciones`, `incentivos`, `notificaciones`, `auth`.
@@ -32,9 +32,9 @@ El sistema utiliza una **estrategia de persistencia híbrida** (PostgreSQL) depe
 - **Estrategia ORM (Mapeo Objeto-Relacional)**: Se utiliza JPA/Hibernate con una clara separación entre `Domain Entities` y `JPA Entities` mediante Mappers. 
   * *Justificación de Herencias:* Se eligió `JOINED` para la jerarquía de Personas (para normalizar y evitar tablas nulas masivas) y `SINGLE_TABLE` para Necesidades (ideal porque las variaciones agregan pocos campos y evita JOINs costosos).
 
-## 3. Patrones de Integración y Diseño Guiado por el Dominio (DDD)
+## 3. Patrones de Integración y Diseño Guiado por el Dominio (DDD) Domain Driven Desing 
 
-Las fronteras de integración entre los microservicios fueron definidas utilizando **Domain-Driven Design (DDD)**. Cada servicio representa un **Bounded Context** (Contexto Delimitado) con su propio modelo de lenguaje (*Ubiquitous Language*). Para comunicarlos sin corromper sus modelos, se implementan patrones de *Context Mapping*.
+Las fronteras de integración entre los microservicios fueron definidas utilizando **Domain-Driven Design (DDD)**. Cada servicio representa un **Bounded Context** (Contexto Delimitado) con su propio modelo de lenguaje (*Ubiquitous Language*). Para comunicarlos sin corromper sus modelos, se corrompe porque el tema de desplegar y chequear es complicado, se implementan patrones de *Context Mapping*.
 
 ### 3.1. Arquitectura Dirigida por Eventos (EDA) y Eventos de Dominio
 Para evitar bloqueos y acoplamiento temporal, los Bounded Contexts se comunican publicando **Eventos de Dominio** (patrón táctico de DDD) mediante colas (RabbitMQ/CloudAMQP) para flujos reactivos.
