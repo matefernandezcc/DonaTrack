@@ -23,8 +23,7 @@ public class AdaptadorDiscord implements NotificacionAdapter {
   @Value("${n8n.webhook.url:http://n8n:5678/webhook/donatrack/notificaciones}")
   private String n8nWebhookUrl;
 
-  @Value(
-      "${discord.webhook.url:https://discord.com/api/webhooks/1553029764351262720/OajZ-dc1mGlmUY9736gqTY8L2DeoEdaJfMh8t3F7PdaprYjZPBLZlnWBdRNeD7ZLfotK}")
+  @Value("${discord.webhook.url:${DISCORD_WEBHOOK_URL:}}")
   private String discordWebhookUrl;
 
   public AdaptadorDiscord() {

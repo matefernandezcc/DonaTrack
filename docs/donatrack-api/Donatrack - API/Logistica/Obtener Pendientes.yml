@@ -1,7 +1,7 @@
 info:
   name: Obtener Pendientes
   type: http
-  seq: 1
+  seq: 10
 
 http:
   method: GET

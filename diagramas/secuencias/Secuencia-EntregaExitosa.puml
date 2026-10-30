@@ -1,4 +1,5 @@
 @startuml Secuencia-EntregaExitosa
+!pragma layout smetana
 title Confirmación de Entrega Exitosa
 
 actor "Entidad Beneficiaria" as ong
@@ -13,9 +14,9 @@ participant "IncentivosListener" as incListener
 participant "RegistrarActividadDonacionUseCase" as incUseCase
 participant "NotificacionesListener" as notiListener
 
-ong -> logCtrl: POST /api/rutas/{id}/entregas/{idEntrega}/confirmar
+ong -> logCtrl: POST /api/entregas/{idDonacion}/confirmar
 activate logCtrl
-logCtrl -> confRecepcion: confirmar(idEntrega, firma)
+logCtrl -> confRecepcion: confirmar(idDonacion, fotos, patenteCamion)
 activate confRecepcion
 confRecepcion -> confRecepcion: Marca entrega como ENTREGADA
 confRecepcion -> logPublisher: publishEvent(EntregaRealizadaEvent)

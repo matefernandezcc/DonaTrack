@@ -1,0 +1,27 @@
+info:
+  name: Actualizar Camion
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{logisticaUrl}}/api/camiones/:patente"
+  params:
+    - name: patente
+      value: EE555FF
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "capacidadVolumen": 30.0,
+        "altura": 3.8,
+        "capacidadCarga": 5500.0
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

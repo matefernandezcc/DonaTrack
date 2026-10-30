@@ -8,7 +8,7 @@ http:
   url: "{{donacionesUrl}}/api/beneficiarios/:beneficiarioId"
   params:
     - name: beneficiarioId
-      value: 1fa43186-fb18-43d3-8953-9990bf920b64
+      value: b3333333-3333-4333-8333-333333333333
       type: path
   body: none
   auth: inherit

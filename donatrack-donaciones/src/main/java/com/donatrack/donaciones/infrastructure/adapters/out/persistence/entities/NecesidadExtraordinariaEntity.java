@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@DiscriminatorValue("Extraordinaria")
+@DiscriminatorValue("EXTRAORDINARIA")
 @Getter
 @Setter
 public class NecesidadExtraordinariaEntity extends NecesidadEntity {}

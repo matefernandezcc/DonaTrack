@@ -17,6 +17,6 @@ public class BeneficiarioEntity extends RolEntity {
   @jakarta.persistence.Column(name = "correo_representante")
   private String correoRepresentante;
 
-  @jakarta.persistence.OneToMany(mappedBy = "beneficiario", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+  @jakarta.persistence.OneToMany(mappedBy = "beneficiario", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true, fetch = jakarta.persistence.FetchType.EAGER)
   private java.util.List<NecesidadEntity> necesidadesDeclaradas = new java.util.ArrayList<>();
 }

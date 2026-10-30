@@ -1,14 +1,14 @@
 info:
   name: Reportar Falla
   type: http
-  seq: 7
+  seq: 17
 
 http:
   method: POST
-  url: "{{logisticaUrl}}/api/entregas/:donacionId/falla"
+  url: "{{logisticaUrl}}/api/entregas/:idDonacion/falla"
   params:
-    - name: donacionId
-      value: 31008064-071a-4d7a-ac37-33318f7d9841
+    - name: idDonacion
+      value: 139e0f9f-9431-4302-9f06-cad97978f7be
       type: path
   body:
     type: json

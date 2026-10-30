@@ -1,0 +1,20 @@
+info:
+  name: Eliminar Chofer
+  type: http
+  seq: 8
+
+http:
+  method: DELETE
+  url: "{{logisticaUrl}}/api/choferes/:legajo"
+  params:
+    - name: legajo
+      value: CH-005
+      type: path
+  body: none
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
