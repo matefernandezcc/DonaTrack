@@ -7,7 +7,7 @@ variables:
   - name: incentivosUrl
     value: http://localhost:8001
   - name: logisticaUrl
-    value: https://dona-logistica.onrender.com
+    value: https://donatrack-logistica-50xn.onrender.com
   - name: notificacionesUrl
     value: http://localhost:8003
   - name: n8nUrl
