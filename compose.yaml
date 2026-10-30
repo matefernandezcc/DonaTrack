@@ -92,10 +92,10 @@ services:
       - RABBITMQ_VIRTUAL_HOST=/
       - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
       - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
-      - LOGISTICA_URL_LOCAL=http://logistica:8002
-      - LOGISTICA_URL_REMOTA=http://logistica:8002
-      - LOGISTICA_URL_REMOTA1=http://logistica:8002
-      - LOGISTICA_URL_REMOTA2=http://logistica:8002
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
+      - LOGISTICA_URL_REMOTA=${LOGISTICA_URL_REMOTA:-https://dona-logistica.onrender.com}
+      - LOGISTICA_URL_REMOTA1=${LOGISTICA_URL_REMOTA1:-https://dona-logistica.onrender.com}
+      - LOGISTICA_URL_REMOTA2=${LOGISTICA_URL_REMOTA2:-https://dona-logistica.onrender.com}
 
   incentivos:
     build:
@@ -122,7 +122,7 @@ services:
       - RABBITMQ_VIRTUAL_HOST=/
       - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
       - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
-      - LOGISTICA_URL_LOCAL=http://logistica:8002
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
   logistica:
     build:
@@ -150,7 +150,7 @@ services:
       - RABBITMQ_VIRTUAL_HOST=/
       - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
       - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
-      - LOGISTICA_URL_LOCAL=http://logistica:8002
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
   notificaciones:
     build:
@@ -177,7 +177,7 @@ services:
       - RABBITMQ_VIRTUAL_HOST=/
       - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
       - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
-      - LOGISTICA_URL_LOCAL=http://logistica:8002
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
   server:
     build:
@@ -208,7 +208,7 @@ services:
       - RABBITMQ_VIRTUAL_HOST=/
       - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
       - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
-      - LOGISTICA_URL_LOCAL=http://logistica:8002
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
 volumes:
   postgres_data:
