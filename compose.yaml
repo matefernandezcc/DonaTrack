@@ -62,8 +62,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-donatrack}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-donatrack}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_LOCAL_PASSWORD:-donatrack}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
@@ -87,6 +87,11 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
       - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=http://logistica:8002
       - LOGISTICA_URL_REMOTA=http://logistica:8002
       - LOGISTICA_URL_REMOTA1=http://logistica:8002
@@ -112,6 +117,11 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
       - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=http://logistica:8002
 
   logistica:
@@ -134,6 +144,11 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - MONGO_HOST=mongo-donatrack
       - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=http://logistica:8002
 
   notificaciones:
@@ -156,6 +171,11 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
       - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=http://logistica:8002
 
   server:
@@ -182,6 +202,11 @@ services:
       - POSTGRES_HOST=postgres-donatrack
       - MONGO_HOST=mongo-donatrack
       - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=http://logistica:8002
 
 volumes:
