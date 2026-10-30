@@ -33,7 +33,7 @@ public class InsigniaObtenidaEntity {
   @JoinColumn(name = "perfil_donante_id", nullable = false)
   private PerfilDonanteEntity perfil;
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   @JoinColumn(name = "insignia_id", nullable = false)
   private InsigniaEntity insignia;
 

@@ -35,8 +35,13 @@ public class IncentivoController {
   private final PerfilDonanteRepository perfilDonanteRepository;
   private final DifusionPort difusionPort;
   private final org.springframework.web.client.RestTemplate restTemplate;
+  private final com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.RankingMensualJpaRepository
+      rankingMensualJpaRepository;
+  private final com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.PerfilDonanteJpaRepository
+      perfilDonanteJpaRepository;
 
-  @org.springframework.beans.factory.annotation.Value("${n8n.webhook.ranking.url:http://n8n:5678/webhook/donatrack/ranking}")
+  @org.springframework.beans.factory.annotation.Value(
+      "${n8n.webhook.ranking.url:http://localhost:5678/webhook/donatrack/ranking}")
   private String n8nWebhookRankingUrl;
 
   public IncentivoController(
@@ -45,11 +50,34 @@ public class IncentivoController {
       com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient,
       PerfilDonanteRepository perfilDonanteRepository,
       DifusionPort difusionPort) {
+    this(
+        rankingMensualService,
+        registrarActividadDonacionUseCase,
+        personaClient,
+        perfilDonanteRepository,
+        difusionPort,
+        null,
+        null);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public IncentivoController(
+      RankingMensualService rankingMensualService,
+      RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase,
+      com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient,
+      PerfilDonanteRepository perfilDonanteRepository,
+      DifusionPort difusionPort,
+      com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.RankingMensualJpaRepository
+          rankingMensualJpaRepository,
+      com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.PerfilDonanteJpaRepository
+          perfilDonanteJpaRepository) {
     this.rankingMensualService = rankingMensualService;
     this.registrarActividadDonacionUseCase = registrarActividadDonacionUseCase;
     this.personaClient = personaClient;
     this.perfilDonanteRepository = perfilDonanteRepository;
     this.difusionPort = difusionPort;
+    this.rankingMensualJpaRepository = rankingMensualJpaRepository;
+    this.perfilDonanteJpaRepository = perfilDonanteJpaRepository;
     this.restTemplate = new org.springframework.web.client.RestTemplate();
   }
 
@@ -174,6 +202,8 @@ public class IncentivoController {
     java.time.YearMonth mesActual = java.time.YearMonth.now();
     List<PerfilDonante> top3 = rankingMensualService.obtenerTop3Mensual(mesActual);
 
+    persistirRankingMensual(mesActual, top3);
+
     List<java.util.Map<String, Object>> response =
         top3.stream()
             .map(
@@ -193,12 +223,12 @@ public class IncentivoController {
                     // Ignore
                   }
 
+                  int misionesMes = p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size();
+                  int donacionesTotales = p.getMetricas().obtenerTodasLasDonaciones().size();
                   java.util.Map<String, Object> map = new java.util.HashMap<>();
                   map.put("user", nombreUsuario);
-                  map.put(
-                      "donations",
-                      p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size());
-                  map.put("totalDonations", p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size());
+                  map.put("donations", misionesMes > 0 ? misionesMes : donacionesTotales);
+                  map.put("totalDonations", donacionesTotales);
                   return map;
                 })
             .collect(java.util.stream.Collectors.toList());
@@ -206,10 +236,69 @@ public class IncentivoController {
     try {
       restTemplate.postForObject(n8nWebhookRankingUrl, response, String.class);
     } catch (Exception e) {
-      // Ignore webhook failure
+      if (n8nWebhookRankingUrl != null && n8nWebhookRankingUrl.contains("http://n8n:5678")) {
+        try {
+          restTemplate.postForObject(
+              n8nWebhookRankingUrl.replace("http://n8n:5678", "http://localhost:5678"),
+              response,
+              String.class);
+        } catch (Exception ignored) {
+        }
+      }
     }
 
     return ResponseEntity.ok(response);
+  }
+
+  private void persistirRankingMensual(java.time.YearMonth mesActual, List<PerfilDonante> top3) {
+    if (rankingMensualJpaRepository == null || perfilDonanteJpaRepository == null) {
+      return;
+    }
+    try {
+      String mes = mesActual.getMonth().name();
+      Integer anio = mesActual.getYear();
+      com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities.RankingMensualEntity
+          ranking =
+              rankingMensualJpaRepository
+                  .findFirstByMesAndAnio(mes, anio)
+                  .orElseGet(
+                      () -> {
+                        com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
+                                .RankingMensualEntity
+                            r =
+                                new com.donatrack.incentivos.infrastructure.adapters.out.persistence
+                                    .entities.RankingMensualEntity();
+                        r.setId(UUID.randomUUID());
+                        r.setMes(mes);
+                        r.setAnio(anio);
+                        return r;
+                      });
+
+      ranking.getPosiciones().clear();
+      int pos = 1;
+      for (PerfilDonante p : top3) {
+        Optional<
+                com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
+                    .PerfilDonanteEntity>
+            perfilEntityOpt = perfilDonanteJpaRepository.findById(p.getDonanteId());
+        if (perfilEntityOpt.isPresent()) {
+          com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
+                  .PosicionRankingEntity
+              posicion =
+                  new com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
+                      .PosicionRankingEntity();
+          posicion.setId(UUID.randomUUID());
+          posicion.setRankingMensual(ranking);
+          posicion.setPerfil(perfilEntityOpt.get());
+          posicion.setPosicion(pos++);
+          posicion.setMisionesCompletadasMes(
+              p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size());
+          ranking.getPosiciones().add(posicion);
+        }
+      }
+      rankingMensualJpaRepository.save(ranking);
+    } catch (Exception ignored) {
+    }
   }
 
   @Operation(

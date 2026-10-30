@@ -13,6 +13,13 @@ http:
   body: none
   auth: inherit
 
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
 settings:
   encodeUrl: true
   timeout: 0

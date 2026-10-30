@@ -40,7 +40,7 @@ public class NotificacionController {
   @PostMapping("/mensajes")
   public ResponseEntity<Void> enviarNotificacion(@RequestBody NotificacionRequest request) {
     notificadorService.enviarNotificacion(
-        request.destinatario(), request.mensaje(), request.medio());
+        request.destinatario(), request.mensaje(), request.medio(), "NOTIFICACION_API");
     return ResponseEntity.ok().build();
   }
 }

@@ -17,7 +17,7 @@ public class N8nDifusionAdapter implements DifusionPort {
   private final PersonaClient personaClient;
 
   @org.springframework.beans.factory.annotation.Value(
-      "${n8n.webhook.url:http://n8n:5678/webhook/donatrack/badge-earned}")
+      "${n8n.webhook.url:http://localhost:5678/webhook/donatrack/badge-earned}")
   private String webhookUrl;
 
   public N8nDifusionAdapter(PersonaClient personaClient) {

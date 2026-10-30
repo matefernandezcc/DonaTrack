@@ -65,6 +65,21 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
     // 4. Procesar Carga Inicial delegando en la entidad DonacionOriginal
     recepcion.segmentarBienes(bienesBrutos, procesadorCargaInicial);
 
+    // Registrar historial de estado inicial (EN_DEPOSITO) en cada donación segmentada
+    String usuarioIdStr = requestDTO.idAdministrador().toString();
+    recepcion
+        .getDonacionesSegmentadas()
+        .forEach(
+            d -> {
+              if (d.getHistorial().isEmpty()) {
+                d.registrarCambioEstado(
+                    new com.donatrack.donaciones.domain.entities.donacion.HistorialEstado(
+                        com.donatrack.donaciones.domain.entities.enums.EstadoDonacion.EN_DEPOSITO,
+                        "Recepción inicial de donación en depósito",
+                        usuarioIdStr));
+              }
+            });
+
     // 5. Persistir
     recepcionDonacionRepository.guardar(recepcion);
 

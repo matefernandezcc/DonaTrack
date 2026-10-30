@@ -53,6 +53,12 @@ public class PersonaController {
   @PostMapping
   public ResponseEntity<PersonaDTO> crearPersona(@RequestBody PersonaDTO personaDto) {
     Persona persona = PersonaDtoMapper.toDomain(personaDto);
+    if (persona.getRoles().isEmpty()) {
+      com.donatrack.donaciones.domain.entities.roles.Donante rolDonante =
+          new com.donatrack.donaciones.domain.entities.roles.Donante();
+      rolDonante.setFechaAlta(java.time.LocalDate.now());
+      persona.agregarRol(rolDonante);
+    }
     personaRepository.guardar(persona);
     return ResponseEntity.ok(PersonaDtoMapper.toDto(persona));
   }
@@ -170,6 +176,7 @@ public class PersonaController {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> eliminarPersona(@PathVariable UUID id) {
+    personaRepository.eliminarPorId(id);
     return ResponseEntity.noContent().build();
   }
 }

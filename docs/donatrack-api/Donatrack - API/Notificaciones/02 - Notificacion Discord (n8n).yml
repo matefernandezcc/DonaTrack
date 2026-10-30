@@ -16,10 +16,12 @@ http:
       }
   auth: inherit
 
-assert:
-  - expr: res.status
-    oper: eq
-    value: 200
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
 
 settings:
   encodeUrl: true

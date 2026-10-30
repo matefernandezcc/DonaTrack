@@ -14,5 +14,7 @@ public interface PersonaRepository {
 
   void guardar(Persona persona);
 
+  default void eliminarPorId(UUID id) {}
+
   Optional<Persona> buscarPorRolId(UUID rolId);
 }

@@ -96,6 +96,7 @@ services:
       - LOGISTICA_URL_REMOTA=${LOGISTICA_URL_REMOTA:-https://dona-logistica.onrender.com}
       - LOGISTICA_URL_REMOTA1=${LOGISTICA_URL_REMOTA1:-https://dona-logistica.onrender.com}
       - LOGISTICA_URL_REMOTA2=${LOGISTICA_URL_REMOTA2:-https://dona-logistica.onrender.com}
+      - FEIGN_CLIENT_CONFIG_INCENTIVOS_URL=http://incentivos:8001/api
 
   incentivos:
     build:
@@ -123,6 +124,9 @@ services:
       - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
       - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
+      - PERSONAS_API_URL=http://donaciones:8000
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/donatrack/badge-earned
+      - N8N_WEBHOOK_RANKING_URL=http://n8n:5678/webhook/donatrack/ranking
 
   logistica:
     build:

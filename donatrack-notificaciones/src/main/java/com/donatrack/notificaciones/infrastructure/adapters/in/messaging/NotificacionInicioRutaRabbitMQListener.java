@@ -41,7 +41,7 @@ public class NotificacionInicioRutaRabbitMQListener {
     for (NotificacionInicioRutaEvent.ContactoInfo contacto : contactos) {
       try {
         notificadorService.enviarNotificacion(
-            contacto.getDestinatario(), mensaje, contacto.getMedio());
+            contacto.getDestinatario(), mensaje, contacto.getMedio(), "INICIO_RUTA");
         log.info(
             "Notificación enviada a {} vía {}", contacto.getDestinatario(), contacto.getMedio());
       } catch (Exception e) {

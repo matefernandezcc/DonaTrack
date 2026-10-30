@@ -47,7 +47,7 @@ public class NotificacionEntregaRabbitMQListener {
     for (NotificacionInicioRutaEvent.ContactoInfo contacto : contactos) {
       try {
         notificadorService.enviarNotificacion(
-            contacto.getDestinatario(), mensaje, contacto.getMedio());
+            contacto.getDestinatario(), mensaje, contacto.getMedio(), "ENTREGA_EXITOSA");
         log.info(
             "Notificación enviada a {} vía {}", contacto.getDestinatario(), contacto.getMedio());
       } catch (Exception e) {

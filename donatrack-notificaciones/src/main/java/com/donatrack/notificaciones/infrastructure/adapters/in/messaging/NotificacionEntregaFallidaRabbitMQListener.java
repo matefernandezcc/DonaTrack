@@ -46,7 +46,7 @@ public class NotificacionEntregaFallidaRabbitMQListener {
     for (NotificacionInicioRutaEvent.ContactoInfo contacto : contactos) {
       try {
         notificadorService.enviarNotificacion(
-            contacto.getDestinatario(), mensaje, contacto.getMedio());
+            contacto.getDestinatario(), mensaje, contacto.getMedio(), "ENTREGA_FALLIDA");
         log.info(
             "Notificación de fallo enviada a {} vía {} (Rol: {})",
             contacto.getDestinatario(),
