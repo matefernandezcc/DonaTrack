@@ -17,7 +17,9 @@ public final class SolicitudPlanificacionMongoMapper {
         id,
         domain.getFechaSolicitud(),
         domain.getEstado(),
-        domain.getIdsDonaciones() != null ? new ArrayList<>(domain.getIdsDonaciones()) : new ArrayList<>());
+        domain.getIdsDonaciones() != null
+            ? new ArrayList<>(domain.getIdsDonaciones())
+            : new ArrayList<>());
   }
 
   public static SolicitudPlanificacion toDomain(SolicitudPlanificacionDocument doc) {
@@ -27,7 +29,10 @@ public final class SolicitudPlanificacionMongoMapper {
     domain.setId(doc.getId());
     domain.setFechaSolicitud(doc.getFechaSolicitud());
     domain.setEstado(doc.getEstado());
-    domain.setIdsDonaciones(doc.getIdsDonaciones() != null ? new ArrayList<>(doc.getIdsDonaciones()) : new ArrayList<>());
+    domain.setIdsDonaciones(
+        doc.getIdsDonaciones() != null
+            ? new ArrayList<>(doc.getIdsDonaciones())
+            : new ArrayList<>());
     return domain;
   }
 }

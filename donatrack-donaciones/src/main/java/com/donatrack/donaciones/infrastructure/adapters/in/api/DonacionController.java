@@ -9,15 +9,20 @@ import com.donatrack.donaciones.application.ports.in.DonacionRequestDTO;
 import com.donatrack.donaciones.application.ports.in.DonacionResponseDTO;
 import com.donatrack.donaciones.application.ports.in.RecepcionDonacionesUseCase;
 import com.donatrack.donaciones.application.ports.out.BeneficiarioRepository;
+import com.donatrack.donaciones.application.ports.out.DonacionOriginalRepository;
 import com.donatrack.donaciones.application.ports.out.DonacionRepository;
+import com.donatrack.donaciones.application.ports.out.LogisticaPort;
 import com.donatrack.donaciones.application.ports.out.NotificacionOutDTO;
+import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 import com.donatrack.donaciones.application.ports.out.ServicioNotificaciones;
 import com.donatrack.donaciones.application.usecases.AsignacionBatchJob;
 import com.donatrack.donaciones.application.usecases.AuditoriaDepositoJob;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
+import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
+import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import com.donatrack.donaciones.domain.services.MatchmakerService;
 import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
@@ -28,8 +33,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +57,9 @@ public class DonacionController {
   private final AsignacionBatchJob asignacionBatchJob;
   private final RecepcionDonacionesUseCase recepcionDonacionesUseCase;
   private final AuditoriaDepositoJob auditoriaDepositoJob;
+  private final DonacionOriginalRepository donacionOriginalRepository;
+  private final PersonaRepository personaRepository;
+  private final LogisticaPort logisticaPort;
 
   public DonacionController(
       MatchmakerService matchmakerService,
@@ -60,6 +70,33 @@ public class DonacionController {
       AsignacionBatchJob asignacionBatchJob,
       RecepcionDonacionesUseCase recepcionDonacionesUseCase,
       AuditoriaDepositoJob auditoriaDepositoJob) {
+    this(
+        matchmakerService,
+        servicioNotificaciones,
+        incentivoClient,
+        donacionRepository,
+        beneficiarioRepository,
+        asignacionBatchJob,
+        recepcionDonacionesUseCase,
+        auditoriaDepositoJob,
+        null,
+        null,
+        null);
+  }
+
+  @Autowired
+  public DonacionController(
+      MatchmakerService matchmakerService,
+      ServicioNotificaciones servicioNotificaciones,
+      IncentivoClient incentivoClient,
+      DonacionRepository donacionRepository,
+      BeneficiarioRepository beneficiarioRepository,
+      AsignacionBatchJob asignacionBatchJob,
+      RecepcionDonacionesUseCase recepcionDonacionesUseCase,
+      AuditoriaDepositoJob auditoriaDepositoJob,
+      DonacionOriginalRepository donacionOriginalRepository,
+      PersonaRepository personaRepository,
+      LogisticaPort logisticaPort) {
     this.matchmakerService = matchmakerService;
     this.servicioNotificaciones = servicioNotificaciones;
     this.incentivoClient = incentivoClient;
@@ -68,6 +105,9 @@ public class DonacionController {
     this.asignacionBatchJob = asignacionBatchJob;
     this.recepcionDonacionesUseCase = recepcionDonacionesUseCase;
     this.auditoriaDepositoJob = auditoriaDepositoJob;
+    this.donacionOriginalRepository = donacionOriginalRepository;
+    this.personaRepository = personaRepository;
+    this.logisticaPort = logisticaPort;
   }
 
   @Operation(
@@ -156,11 +196,21 @@ public class DonacionController {
             .buscarPorId(id)
             .orElseThrow(() -> new IllegalArgumentException("Donacion no encontrada"));
 
-    UUID idDonante = UUID.randomUUID(); // idDonante mockeado
+    if (donacion.getEstado() != EstadoDonacion.EN_DEPOSITO) {
+      donacion.cambiarEstado(
+          EstadoDonacion.EN_DEPOSITO, "Donación ingresada/confirmada en depósito", null);
+      donacionRepository.guardar(donacion);
+    }
 
-    int cantidadBienes = donacion.getBienes().size();
+    UUID idDonante = resolverPersonaDonanteId(id);
+
+    int cantidadBienes = Math.max(1, donacion.getBienes().size());
     List<String> categorias = donacion.getCategoriasString();
-    UUID idEntidadBeneficiaria = null;
+    if (categorias.isEmpty()) {
+      categorias = List.of("Alimentos");
+    }
+    UUID idEntidadBeneficiaria =
+        donacion.getEntidadAsignada() != null ? donacion.getEntidadAsignada().getId() : null;
     LocalDate fecha = LocalDate.now();
 
     ActividadDonacionDTO dto =
@@ -168,7 +218,7 @@ public class DonacionController {
             id, idDonante, cantidadBienes, categorias, idEntidadBeneficiaria, fecha);
 
     incentivoClient.registrarActividadDonacionEnDeposito(idDonante, dto);
-    
+
     java.util.Map<String, String> response = new java.util.HashMap<>();
     response.put("mensaje", "Donación en depósito exitosa");
     return ResponseEntity.ok(response);
@@ -185,12 +235,59 @@ public class DonacionController {
   @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/asignar")
   public ResponseEntity<Void> asignarDonacion(
       @PathVariable UUID id, @RequestBody BeneficiarioResponseDTO beneficiarioDTO) {
+    String correoBeneficiario = "entidad@test.com";
+    String correoDonante = resolverCorreoDonante(id);
+
+    Optional<Donacion> donacionOpt = donacionRepository.buscarPorId(id);
+    Optional<Beneficiario> beneficiarioOpt =
+        (beneficiarioDTO != null && beneficiarioDTO.id() != null)
+            ? beneficiarioRepository.buscarPorId(beneficiarioDTO.id())
+            : Optional.empty();
+
+    if (beneficiarioOpt.isEmpty() && donacionOpt.isPresent()) {
+      List<Beneficiario> todos = beneficiarioRepository.buscarTodos();
+      if (!todos.isEmpty()) {
+        beneficiarioOpt = Optional.of(todos.get(0));
+      }
+    }
+
+    if (donacionOpt.isPresent() && beneficiarioOpt.isPresent()) {
+      Donacion donacion = donacionOpt.get();
+      Beneficiario beneficiario = beneficiarioOpt.get();
+      if (beneficiario.getCorreoRepresentante() != null
+          && !beneficiario.getCorreoRepresentante().isBlank()) {
+        correoBeneficiario = beneficiario.getCorreoRepresentante();
+      }
+      donacion.asignar(beneficiario);
+      donacionRepository.guardar(donacion);
+
+      if (personaRepository != null && logisticaPort != null) {
+        try {
+          var personaBenefOpt = personaRepository.buscarPorRolId(beneficiario.getId());
+          if (personaBenefOpt.isPresent() && personaBenefOpt.get().getDireccion() != null) {
+            var dir = personaBenefOpt.get().getDireccion();
+            double pesoTotal = Math.max(1, donacion.getBienes().size()) * 2.5;
+            double volumenTotal = Math.max(1, donacion.getBienes().size()) * 0.5;
+            logisticaPort.solicitarRetiro(
+                donacion.getId(),
+                pesoTotal,
+                volumenTotal,
+                dir.getCalle(),
+                String.valueOf(dir.getAltura()),
+                dir.getLocalidad());
+          }
+        } catch (Exception ignored) {
+          // Tolerancia si el servicio de logística no está alcanzable en asignación directa
+        }
+      }
+    }
+
     Contacto contactoBeneficiario =
-        new Contacto("entidad@test.com", null, null, MedioContacto.CORREO);
+        new Contacto(correoBeneficiario, null, null, MedioContacto.CORREO);
     servicioNotificaciones.enviar(
         new NotificacionOutDTO("Donación asignada", MedioContacto.CORREO), contactoBeneficiario);
 
-    Contacto contactoDonante = new Contacto("donante@test.com", null, null, MedioContacto.CORREO);
+    Contacto contactoDonante = new Contacto(correoDonante, null, null, MedioContacto.CORREO);
     servicioNotificaciones.enviar(
         new NotificacionOutDTO("Tu donación ha sido asignada a una entidad", MedioContacto.CORREO),
         contactoDonante);
@@ -210,14 +307,32 @@ public class DonacionController {
   @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/entregada")
   public ResponseEntity<Void> donacionEntregada(
       @PathVariable UUID id, @RequestParam UUID idDonante) {
-    int cantidadBienesMock = 5;
-    List<String> categoriasMock = List.of("Alimentos", "Vestimenta");
-    UUID idEntidadMock = UUID.randomUUID();
-    LocalDate fechaMock = LocalDate.now();
+    int cantidadBienes = 5;
+    List<String> categorias = List.of("Alimentos", "Vestimenta");
+    UUID idEntidad = UUID.fromString("b2222222-2222-4222-8222-222222222222");
+
+    Optional<Donacion> donacionOpt = donacionRepository.buscarPorId(id);
+    if (donacionOpt.isPresent()) {
+      Donacion donacion = donacionOpt.get();
+      if (donacion.getEstado() != EstadoDonacion.ENTREGADA) {
+        donacion.cambiarEstado(
+            EstadoDonacion.ENTREGADA, "Donación entregada exitosamente al beneficiario", null);
+        donacionRepository.guardar(donacion);
+      }
+      if (!donacion.getBienes().isEmpty()) {
+        cantidadBienes = donacion.getBienes().size();
+      }
+      if (!donacion.getCategoriasString().isEmpty()) {
+        categorias = donacion.getCategoriasString();
+      }
+      if (donacion.getEntidadAsignada() != null && donacion.getEntidadAsignada().getId() != null) {
+        idEntidad = donacion.getEntidadAsignada().getId();
+      }
+    }
 
     ActividadDonacionDTO dto =
         new ActividadDonacionDTO(
-            id, idDonante, cantidadBienesMock, categoriasMock, idEntidadMock, fechaMock);
+            id, idDonante, cantidadBienes, categorias, idEntidad, LocalDate.now());
 
     incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
     return ResponseEntity.ok().build();
@@ -234,12 +349,18 @@ public class DonacionController {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/matchmaking")
   public ResponseEntity<List<BeneficiarioResponseDTO>> sugerirBeneficiarios(@PathVariable UUID id) {
-    Donacion donacionMock = new Donacion(null);
-    donacionMock.setId(id);
+    Donacion donacion =
+        donacionRepository
+            .buscarPorId(id)
+            .orElseGet(
+                () -> {
+                  Donacion d = new Donacion(null);
+                  d.setId(id);
+                  return d;
+                });
 
     List<Beneficiario> disponibles = beneficiarioRepository.buscarTodos();
-    List<Beneficiario> sugerencias =
-        matchmakerService.obtenerSugerencias(donacionMock, disponibles);
+    List<Beneficiario> sugerencias = matchmakerService.obtenerSugerencias(donacion, disponibles);
 
     List<BeneficiarioResponseDTO> sugerenciasDTO =
         sugerencias.stream()
@@ -247,6 +368,40 @@ public class DonacionController {
             .collect(Collectors.toList());
 
     return ResponseEntity.ok(sugerenciasDTO);
+  }
+
+  private UUID resolverPersonaDonanteId(UUID donacionId) {
+    if (donacionOriginalRepository != null && personaRepository != null) {
+      Optional<DonacionOriginal> origOpt =
+          donacionOriginalRepository.buscarPorIdDonacion(donacionId);
+      if (origOpt.isPresent()
+          && origOpt.get().getDonante() != null
+          && origOpt.get().getDonante().getId() != null) {
+        Optional<Persona> pOpt =
+            personaRepository.buscarPorRolId(origOpt.get().getDonante().getId());
+        if (pOpt.isPresent() && pOpt.get().getId() != null) {
+          return pOpt.get().getId();
+        }
+      }
+    }
+    return UUID.fromString("a1111111-1111-4111-8111-111111111111");
+  }
+
+  private String resolverCorreoDonante(UUID donacionId) {
+    if (donacionOriginalRepository != null && personaRepository != null) {
+      Optional<DonacionOriginal> origOpt =
+          donacionOriginalRepository.buscarPorIdDonacion(donacionId);
+      if (origOpt.isPresent()
+          && origOpt.get().getDonante() != null
+          && origOpt.get().getDonante().getId() != null) {
+        Optional<Persona> pOpt =
+            personaRepository.buscarPorRolId(origOpt.get().getDonante().getId());
+        if (pOpt.isPresent() && pOpt.get().getEmail() != null) {
+          return pOpt.get().getEmail();
+        }
+      }
+    }
+    return "donante@test.com";
   }
 
   @Operation(

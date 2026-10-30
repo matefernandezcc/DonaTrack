@@ -28,7 +28,10 @@ public class DonacionesRabbitMQListener {
     log.info("Recibido evento de notificación general (Donaciones) para: {}", request.destinatario);
 
     notificadorService.enviarNotificacion(
-        request.destinatario, request.mensaje, request.medio != null ? request.medio : "EMAIL");
+        request.destinatario,
+        request.mensaje,
+        request.medio != null ? request.medio : "EMAIL",
+        "EVENTO_DONACION");
   }
 
   public static class NotificacionRequestDTO {

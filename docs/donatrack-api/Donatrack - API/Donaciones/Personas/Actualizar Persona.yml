@@ -8,7 +8,7 @@ http:
   url: "{{donacionesUrl}}/api/personas/:personaId"
   params:
     - name: personaId
-      value: d8404b9a-0504-40c7-b8c5-0635faae4f2e
+      value: "{{personaCreadaId}}"
       type: path
   body:
     type: json
@@ -23,9 +23,21 @@ http:
       }
   auth: inherit
 
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+  scripts:
+    - type: before-request
+      code: |-
+        if (!bru.getVar("personaCreadaId")) {
+          bru.setVar("personaCreadaId", "d8404b9a-0504-40c7-b8c5-0635faae4f2e");
+        }
+
+
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-

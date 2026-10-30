@@ -3,8 +3,6 @@ package com.donatrack.incentivos.infrastructure.adapters.out.persistence.entitie
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-
-
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -27,7 +25,6 @@ import lombok.Setter;
 public class MetricasDonanteEntity {
 
   @Id
-  
   @Column(name = "metricas_donante_id")
   private UUID id;
 

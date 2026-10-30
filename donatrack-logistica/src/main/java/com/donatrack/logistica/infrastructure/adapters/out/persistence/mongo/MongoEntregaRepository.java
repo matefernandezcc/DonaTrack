@@ -22,8 +22,7 @@ public class MongoEntregaRepository implements EntregaRepositoryPort {
   private final EntregaMongoRepository entregaMongoRepository;
 
   public MongoEntregaRepository(
-      RutaDeRepartoMongoRepository rutaRepository,
-      EntregaMongoRepository entregaMongoRepository) {
+      RutaDeRepartoMongoRepository rutaRepository, EntregaMongoRepository entregaMongoRepository) {
     this.rutaRepository = rutaRepository;
     this.entregaMongoRepository = entregaMongoRepository;
   }
@@ -49,7 +48,9 @@ public class MongoEntregaRepository implements EntregaRepositoryPort {
     }
 
     // 2. Fallback a colección individual de entregas
-    return entregaMongoRepository.findById(idEntrega).map(RutaDeRepartoMongoMapper::toEntregaDomain);
+    return entregaMongoRepository
+        .findById(idEntrega)
+        .map(RutaDeRepartoMongoMapper::toEntregaDomain);
   }
 
   @Override

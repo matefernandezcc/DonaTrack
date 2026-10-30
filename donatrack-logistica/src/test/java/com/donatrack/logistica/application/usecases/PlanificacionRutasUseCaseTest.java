@@ -81,7 +81,8 @@ class PlanificacionRutasUseCaseTest {
     when(itemPlanificacionRepository.obtenerTodos()).thenReturn(items);
     when(camionRepository.obtenerTodos())
         .thenReturn(List.of(new Camion(UUID.randomUUID(), "ABC1234", 10.0, 2.0, 1000.0)));
-    when(choferRepository.obtenerTodos()).thenReturn(List.of(new Chofer(UUID.randomUUID(), "CH1", "Juan")));
+    when(choferRepository.obtenerTodos())
+        .thenReturn(List.of(new Chofer(UUID.randomUUID(), "CH1", "Juan")));
 
     // Ejecutar
     useCase.procesarPlanificacionesPendientes();

@@ -17,8 +17,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Document(collection = "solicitudes_planificacion")
 public class SolicitudPlanificacionDocument {
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
   private LocalDateTime fechaSolicitud;
   private EstadoPlanificacion estado;

@@ -14,8 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Document(collection = "items_planificacion")
 public class ItemPlanificacionDocument {
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
   private UUID idDonacionOriginal;
   private Double pesoEstimado;

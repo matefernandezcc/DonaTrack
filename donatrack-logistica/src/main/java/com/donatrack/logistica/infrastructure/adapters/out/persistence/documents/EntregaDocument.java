@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,8 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Document(collection = "entregas")
 public class EntregaDocument {
-  @Id
-  private UUID idEntrega;
+  @Id private UUID idEntrega;
   private EstadoEntrega estado;
   private Double pesoEstimado;
   private Double volumenEstimado;

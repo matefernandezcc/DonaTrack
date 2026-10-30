@@ -32,7 +32,7 @@ public class PerfilDonanteEntity {
   @Column(name = "categoria", length = 50)
   private String categoria;
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   @JoinColumn(name = "mision_actual_id")
   private MisionEntity misionActual;
 

@@ -56,7 +56,8 @@
           208
         ],
         "id": "generate-badge-image-node",
-        "name": "Generate Badge Image"
+        "name": "Generate Badge Image",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -86,7 +87,8 @@
           208
         ],
         "id": "publish-discord-node",
-        "name": "Publish to Discord Webhook"
+        "name": "Publish to Discord Webhook",
+        "onError": "continueRegularOutput"
       }
     ],
     "connections": {
@@ -1249,7 +1251,8 @@
           48
         ],
         "id": "http-enviar-discord",
-        "name": "Enviar Discord"
+        "name": "Enviar Discord",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1267,7 +1270,8 @@
           208
         ],
         "id": "http-enviar-email",
-        "name": "Enviar Correo (Discord)"
+        "name": "Enviar Correo (Discord)",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1285,7 +1289,8 @@
           352
         ],
         "id": "http-enviar-whatsapp",
-        "name": "Enviar WhatsApp (Discord)"
+        "name": "Enviar WhatsApp (Discord)",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1303,12 +1308,13 @@
           512
         ],
         "id": "http-enviar-sms",
-        "name": "Enviar SMS (Discord)"
+        "name": "Enviar SMS (Discord)",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
           "respondWith": "json",
-          "responseBody": "={{ { \"success\": true, \"canal\": $json.medio, \"destinatario\": $json.destinatario, \"mensaje\": $json.mensaje } }}",
+          "responseBody": "={{ { \"success\": true, \"canal\": $(\"Normalizar Mensaje\").first().json.medio, \"destinatario\": $(\"Normalizar Mensaje\").first().json.destinatario, \"mensaje\": $(\"Normalizar Mensaje\").first().json.mensaje } }}",
           "options": {}
         },
         "type": "n8n-nodes-base.respondToWebhook",
@@ -1629,7 +1635,8 @@
           -48
         ],
         "id": "http-enviar-discord",
-        "name": "Enviar Discord"
+        "name": "Enviar Discord",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1654,7 +1661,8 @@
             "id": "QrDHYpFztzj4hwz2",
             "name": "gmail-app"
           }
-        }
+        },
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1700,7 +1708,8 @@
           304
         ],
         "id": "http-whatsapp-real",
-        "name": "Enviar WhatsApp Real"
+        "name": "Enviar WhatsApp Real",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1743,12 +1752,13 @@
           496
         ],
         "id": "http-sms-simulado",
-        "name": "Enviar SMS Real"
+        "name": "Enviar SMS Real",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
           "respondWith": "json",
-          "responseBody": "={{ { \"success\": true, \"canal\": $json.medio, \"destinatario\": $json.destinatario, \"mensaje\": $json.mensaje } }}",
+          "responseBody": "={{ { \"success\": true, \"canal\": $(\"Normalizar Mensaje\").first().json.medio, \"destinatario\": $(\"Normalizar Mensaje\").first().json.destinatario, \"mensaje\": $(\"Normalizar Mensaje\").first().json.mensaje } }}",
           "options": {}
         },
         "type": "n8n-nodes-base.respondToWebhook",

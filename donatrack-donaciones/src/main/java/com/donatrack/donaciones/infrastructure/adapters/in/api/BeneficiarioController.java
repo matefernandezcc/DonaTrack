@@ -3,9 +3,9 @@ package com.donatrack.donaciones.infrastructure.adapters.in.api;
 import com.donatrack.common.dto.ErrorResponse;
 import com.donatrack.donaciones.application.ports.out.BeneficiarioRepository;
 import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
+import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.NecesidadDTO;
 import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.NecesidadDtoMapper;
-import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -163,12 +163,12 @@ public class BeneficiarioController {
   public ResponseEntity<List<NecesidadDTO>> obtenerNecesidades(@PathVariable UUID id) {
     return beneficiarioRepository
         .buscarPorId(id)
-        .map(b -> {
-          List<NecesidadDTO> dtos = b.getNecesidadesDeclaradas().stream()
-              .map(NecesidadDtoMapper::toDto)
-              .toList();
-          return ResponseEntity.ok(dtos);
-        })
+        .map(
+            b -> {
+              List<NecesidadDTO> dtos =
+                  b.getNecesidadesDeclaradas().stream().map(NecesidadDtoMapper::toDto).toList();
+              return ResponseEntity.ok(dtos);
+            })
         .orElse(ResponseEntity.notFound().build());
   }
 }

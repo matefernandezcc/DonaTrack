@@ -55,6 +55,14 @@ public class JpaPersonaRepository implements PersonaRepository {
   }
 
   @Override
+  @Transactional
+  public void eliminarPorId(UUID id) {
+    if (id != null && jpaRepository.existsById(id)) {
+      jpaRepository.deleteById(id);
+    }
+  }
+
+  @Override
   public Optional<Persona> buscarPorRolId(UUID rolId) {
     return jpaRepository.findAll().stream()
         .filter(

@@ -9,8 +9,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RutaDeRepartoMongoRepository
-    extends MongoRepository<RutaDeRepartoDocument, UUID> {
+public interface RutaDeRepartoMongoRepository extends MongoRepository<RutaDeRepartoDocument, UUID> {
 
   @Query("{ 'paradas.entregas.idEntrega': ?0 }")
   List<RutaDeRepartoDocument> findByEntregaId(UUID idEntrega);

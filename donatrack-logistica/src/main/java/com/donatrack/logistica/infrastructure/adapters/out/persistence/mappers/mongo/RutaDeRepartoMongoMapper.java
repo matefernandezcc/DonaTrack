@@ -74,21 +74,19 @@ public final class RutaDeRepartoMongoMapper {
 
     // Reconstrucción de Camión a partir de datos desnormalizados
     if (doc.getCamionId() != null || doc.getCamionPatente() != null) {
-      Camion camion = new Camion(
-          doc.getCamionId(),
-          doc.getCamionPatente(),
-          doc.getCamionCapacidadVolumen(),
-          doc.getCamionAltura(),
-          doc.getCamionCapacidadCarga());
+      Camion camion =
+          new Camion(
+              doc.getCamionId(),
+              doc.getCamionPatente(),
+              doc.getCamionCapacidadVolumen(),
+              doc.getCamionAltura(),
+              doc.getCamionCapacidadCarga());
       domain.setCamion(camion);
     }
 
     // Reconstrucción de Chofer a partir de datos desnormalizados
     if (doc.getChoferId() != null || doc.getChoferLegajo() != null) {
-      Chofer chofer = new Chofer(
-          doc.getChoferId(),
-          doc.getChoferLegajo(),
-          doc.getChoferNombre());
+      Chofer chofer = new Chofer(doc.getChoferId(), doc.getChoferLegajo(), doc.getChoferNombre());
       domain.setChofer(chofer);
     }
 
@@ -115,16 +113,17 @@ public final class RutaDeRepartoMongoMapper {
     doc.setOrden(domain.getOrden());
 
     if (domain.getDireccion() != null) {
-      doc.setDireccion(new DireccionDocument(
-          domain.getDireccion().getCalle(),
-          domain.getDireccion().getAltura(),
-          domain.getDireccion().getLocalidad()));
+      doc.setDireccion(
+          new DireccionDocument(
+              domain.getDireccion().getCalle(),
+              domain.getDireccion().getAltura(),
+              domain.getDireccion().getLocalidad()));
     }
 
     if (domain.getCoordenada() != null) {
-      doc.setCoordenada(new CoordenadaDocument(
-          domain.getCoordenada().getLatitud(),
-          domain.getCoordenada().getLongitud()));
+      doc.setCoordenada(
+          new CoordenadaDocument(
+              domain.getCoordenada().getLatitud(), domain.getCoordenada().getLongitud()));
     }
 
     if (domain.getEntregas() != null) {
@@ -147,16 +146,16 @@ public final class RutaDeRepartoMongoMapper {
     domain.setOrden(doc.getOrden());
 
     if (doc.getDireccion() != null) {
-      domain.setDireccion(new Direccion(
-          doc.getDireccion().getCalle(),
-          doc.getDireccion().getAltura(),
-          doc.getDireccion().getLocalidad()));
+      domain.setDireccion(
+          new Direccion(
+              doc.getDireccion().getCalle(),
+              doc.getDireccion().getAltura(),
+              doc.getDireccion().getLocalidad()));
     }
 
     if (doc.getCoordenada() != null) {
-      domain.setCoordenada(new Coordenada(
-          doc.getCoordenada().getLatitud(),
-          doc.getCoordenada().getLongitud()));
+      domain.setCoordenada(
+          new Coordenada(doc.getCoordenada().getLatitud(), doc.getCoordenada().getLongitud()));
     }
 
     if (doc.getEntregas() != null) {
@@ -185,10 +184,11 @@ public final class RutaDeRepartoMongoMapper {
 
     if (domain.getComprobanteRecepcion() != null) {
       ComprobanteRecepcion cr = domain.getComprobanteRecepcion();
-      doc.setComprobanteRecepcion(new ComprobanteRecepcionDocument(
-          cr.getFechaHora(),
-          cr.getFotos() != null ? new ArrayList<>(cr.getFotos()) : new ArrayList<>(),
-          cr.getCamionPatente()));
+      doc.setComprobanteRecepcion(
+          new ComprobanteRecepcionDocument(
+              cr.getFechaHora(),
+              cr.getFotos() != null ? new ArrayList<>(cr.getFotos()) : new ArrayList<>(),
+              cr.getCamionPatente()));
     }
 
     return doc;
@@ -205,10 +205,11 @@ public final class RutaDeRepartoMongoMapper {
 
     if (doc.getComprobanteRecepcion() != null) {
       ComprobanteRecepcionDocument crd = doc.getComprobanteRecepcion();
-      domain.setComprobanteRecepcion(new ComprobanteRecepcion(
-          crd.getFechaHora(),
-          crd.getFotos() != null ? new ArrayList<>(crd.getFotos()) : new ArrayList<>(),
-          crd.getCamionPatente()));
+      domain.setComprobanteRecepcion(
+          new ComprobanteRecepcion(
+              crd.getFechaHora(),
+              crd.getFotos() != null ? new ArrayList<>(crd.getFotos()) : new ArrayList<>(),
+              crd.getCamionPatente()));
     }
 
     return domain;

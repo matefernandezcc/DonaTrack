@@ -39,10 +39,22 @@ http:
         }
   auth: inherit
 
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.body && res.body.id) {
+          bru.setVar("personaCreadaId", res.body.id);
+        }
+
+
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
   forwardAuthorizationHeader: true
-

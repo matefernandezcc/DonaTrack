@@ -29,7 +29,10 @@ public class IncentivosRabbitMQListener {
     log.info("Recibido evento de nueva insignia para: {}", request.destinatario);
 
     notificadorService.enviarNotificacion(
-        request.destinatario, request.mensaje, request.medio != null ? request.medio : "EMAIL");
+        request.destinatario,
+        request.mensaje,
+        request.medio != null ? request.medio : "EMAIL",
+        "NUEVA_INSIGNIA");
   }
 
   public static class NotificacionRequestDTO {
