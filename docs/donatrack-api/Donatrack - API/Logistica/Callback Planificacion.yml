@@ -10,16 +10,16 @@ http:
     type: json
     data: |-
       {
-        "idSolicitud": "31008064-071a-4d7a-ac37-33318f7d9843",
+        "idSolicitud": "b4444444-4444-4444-8444-444444444444",
         "rutas": [
           {
             "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "fechaOperativa": "2026-10-28",
             "camion": {
-              "patente": "EE555FF"
+              "patente": "AE304KL"
             },
             "chofer": {
-              "legajo": "CH-005"
+              "legajo": "CH-105"
             },
             "paradas": [
               {

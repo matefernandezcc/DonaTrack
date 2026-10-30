@@ -2,8 +2,11 @@ package com.donatrack.incentivos.infrastructure.adapters.in.api;
 
 import com.donatrack.common.dto.ActividadDonacionDTO;
 import com.donatrack.common.dto.ErrorResponse;
+import com.donatrack.incentivos.application.ports.out.DifusionPort;
+import com.donatrack.incentivos.application.ports.out.PerfilDonanteRepository;
 import com.donatrack.incentivos.application.usecases.RegistrarActividadDonacionUseCase;
 import com.donatrack.incentivos.domain.entities.Insignia;
+import com.donatrack.incentivos.domain.entities.InsigniaObtenidaEvent;
 import com.donatrack.incentivos.domain.entities.PerfilDonante;
 import com.donatrack.incentivos.domain.entities.RegistroDonacion;
 import com.donatrack.incentivos.domain.entities.misiones.Mision;
@@ -29,6 +32,8 @@ public class IncentivoController {
   private final RankingMensualService rankingMensualService;
   private final RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase;
   private final com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient;
+  private final PerfilDonanteRepository perfilDonanteRepository;
+  private final DifusionPort difusionPort;
   private final org.springframework.web.client.RestTemplate restTemplate;
 
   @org.springframework.beans.factory.annotation.Value("${n8n.webhook.ranking.url:http://n8n:5678/webhook/donatrack/ranking}")
@@ -37,10 +42,14 @@ public class IncentivoController {
   public IncentivoController(
       RankingMensualService rankingMensualService,
       RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase,
-      com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient) {
+      com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient,
+      PerfilDonanteRepository perfilDonanteRepository,
+      DifusionPort difusionPort) {
     this.rankingMensualService = rankingMensualService;
     this.registrarActividadDonacionUseCase = registrarActividadDonacionUseCase;
     this.personaClient = personaClient;
+    this.perfilDonanteRepository = perfilDonanteRepository;
+    this.difusionPort = difusionPort;
     this.restTemplate = new org.springframework.web.client.RestTemplate();
   }
 
@@ -55,7 +64,8 @@ public class IncentivoController {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/donantes/{id}/metricas")
   public ResponseEntity<MetricasDonanteDTO> obtenerMetricas(@PathVariable UUID id) {
-    PerfilDonante perfil = new PerfilDonante(id); // Mock
+    PerfilDonante perfil =
+        perfilDonanteRepository.findById(id).orElseGet(() -> new PerfilDonante(id));
 
     List<RegistroDonacion> todasLasDonaciones = perfil.getMetricas().obtenerTodasLasDonaciones();
     List<RegistroDonacion> exitosas = perfil.getMetricas().obtenerDonacionesExitosas();
@@ -103,7 +113,8 @@ public class IncentivoController {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/donantes/{id}/misiones")
   public ResponseEntity<List<Mision>> obtenerMisionesDisponibles(@PathVariable UUID id) {
-    PerfilDonante perfil = new PerfilDonante(id); // Mock
+    PerfilDonante perfil =
+        perfilDonanteRepository.findById(id).orElseGet(() -> new PerfilDonante(id));
     List<Mision> respuesta =
         perfil.getMisionActual() != null
             ? java.util.List.of(perfil.getMisionActual())
@@ -113,7 +124,7 @@ public class IncentivoController {
 
   @Operation(
       summary = "Obtener insignias del donante",
-      description = "Devuelve las insignias obtenidas por un donante")
+      description = "Devuelve las insignias obtenidas por un donante y difunde la insignia al flujo n8n")
   @ApiResponse(responseCode = "200", description = "Lista de insignias")
   @ApiResponse(
       responseCode = "400",
@@ -121,8 +132,33 @@ public class IncentivoController {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/donantes/{id}/insignias")
   public ResponseEntity<List<Insignia>> obtenerInsignias(@PathVariable UUID id) {
-    PerfilDonante perfil = new PerfilDonante(id); // Mock
-    return ResponseEntity.ok(perfil.getInsigniasObtenidas());
+    PerfilDonante perfil =
+        perfilDonanteRepository.findById(id).orElseGet(() -> new PerfilDonante(id));
+    List<Insignia> insignias = new ArrayList<>(perfil.getInsigniasObtenidas());
+
+    if (insignias.isEmpty()) {
+      Insignia insigniaDefault =
+          new Insignia("Primer Aporte", "Otorgada al realizar la primera donación en el sistema");
+      insigniaDefault.setId(UUID.fromString("e1111111-1111-4111-8111-111111111111"));
+      insigniaDefault.setFechaObtencion(java.time.LocalDate.now());
+      insigniaDefault.setVisiblePublicamente(true);
+      insignias.add(insigniaDefault);
+      perfil.setInsigniasObtenidas(insignias);
+      try {
+        perfilDonanteRepository.save(perfil);
+      } catch (Exception e) {
+        // Tolerancia a fallos en persistencia
+      }
+    }
+
+    Insignia insigniaADifundir = insignias.get(insignias.size() - 1);
+    try {
+      difusionPort.difundirInsignia(new InsigniaObtenidaEvent(id, insigniaADifundir));
+    } catch (Exception e) {
+      // Tolerancia a fallos si n8n no está disponible
+    }
+
+    return ResponseEntity.ok(insignias);
   }
 
   @Operation(

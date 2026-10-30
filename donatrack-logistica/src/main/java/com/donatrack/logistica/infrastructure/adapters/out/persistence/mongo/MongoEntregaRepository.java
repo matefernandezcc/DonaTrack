@@ -8,6 +8,7 @@ import com.donatrack.logistica.infrastructure.adapters.out.persistence.documents
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers.mongo.RutaDeRepartoMongoMapper;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.repositories.mongo.EntregaMongoRepository;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.repositories.mongo.RutaDeRepartoMongoRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.annotation.Primary;
@@ -32,13 +33,15 @@ public class MongoEntregaRepository implements EntregaRepositoryPort {
     if (idEntrega == null) return Optional.empty();
 
     // 1. Buscar en la ruta embebida (Aggregate Root)
-    Optional<RutaDeRepartoDocument> rutaOpt = rutaRepository.findByEntregaId(idEntrega);
-    if (rutaOpt.isPresent()) {
-      for (ParadaDocument parada : rutaOpt.get().getParadas()) {
-        if (parada.getEntregas() != null) {
-          for (EntregaDocument ed : parada.getEntregas()) {
-            if (idEntrega.equals(ed.getIdEntrega())) {
-              return Optional.of(RutaDeRepartoMongoMapper.toEntregaDomain(ed));
+    List<RutaDeRepartoDocument> rutas = rutaRepository.findByEntregaId(idEntrega);
+    for (RutaDeRepartoDocument rutaDoc : rutas) {
+      if (rutaDoc.getParadas() != null) {
+        for (ParadaDocument parada : rutaDoc.getParadas()) {
+          if (parada.getEntregas() != null) {
+            for (EntregaDocument ed : parada.getEntregas()) {
+              if (idEntrega.equals(ed.getIdEntrega())) {
+                return Optional.of(RutaDeRepartoMongoMapper.toEntregaDomain(ed));
+              }
             }
           }
         }
@@ -57,17 +60,18 @@ public class MongoEntregaRepository implements EntregaRepositoryPort {
     entregaMongoRepository.save(ed);
 
     // Si la entrega pertenece a una ruta, actualizar el subdocumento en la ruta
-    Optional<RutaDeRepartoDocument> rutaOpt = rutaRepository.findByEntregaId(entrega.getIdEntrega());
-    if (rutaOpt.isPresent()) {
-      RutaDeRepartoDocument rutaDoc = rutaOpt.get();
+    List<RutaDeRepartoDocument> rutas = rutaRepository.findByEntregaId(entrega.getIdEntrega());
+    for (RutaDeRepartoDocument rutaDoc : rutas) {
       boolean modificado = false;
-      for (ParadaDocument parada : rutaDoc.getParadas()) {
-        if (parada.getEntregas() != null) {
-          for (int i = 0; i < parada.getEntregas().size(); i++) {
-            if (entrega.getIdEntrega().equals(parada.getEntregas().get(i).getIdEntrega())) {
-              parada.getEntregas().set(i, ed);
-              modificado = true;
-              break;
+      if (rutaDoc.getParadas() != null) {
+        for (ParadaDocument parada : rutaDoc.getParadas()) {
+          if (parada.getEntregas() != null) {
+            for (int i = 0; i < parada.getEntregas().size(); i++) {
+              if (entrega.getIdEntrega().equals(parada.getEntregas().get(i).getIdEntrega())) {
+                parada.getEntregas().set(i, ed);
+                modificado = true;
+                break;
+              }
             }
           }
         }

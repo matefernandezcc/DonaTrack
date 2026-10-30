@@ -154,7 +154,7 @@ class LogisticaMongoPersistenceTest {
     rutaDoc.setId(rutaId);
     rutaDoc.setParadas(new ArrayList<>(List.of(pd)));
 
-    when(rutaMongoRepository.findByEntregaId(entregaId)).thenReturn(Optional.of(rutaDoc));
+    when(rutaMongoRepository.findByEntregaId(entregaId)).thenReturn(List.of(rutaDoc));
 
     // 1. Buscar entrega por ID
     Optional<Entrega> encontrada = mongoEntregaRepository.buscarPorId(entregaId);

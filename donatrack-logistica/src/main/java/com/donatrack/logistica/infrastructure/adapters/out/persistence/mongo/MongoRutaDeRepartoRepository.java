@@ -23,7 +23,9 @@ public class MongoRutaDeRepartoRepository implements RutaDeRepartoRepositoryPort
 
   @Override
   public Optional<RutaDeReparto> buscarPorIdDonacion(UUID idDonacion) {
-    return mongoRepository.findByEntregaId(idDonacion).map(RutaDeRepartoMongoMapper::toDomain);
+    return mongoRepository.findByEntregaId(idDonacion).stream()
+        .findFirst()
+        .map(RutaDeRepartoMongoMapper::toDomain);
   }
 
   @Override

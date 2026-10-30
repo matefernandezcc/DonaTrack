@@ -3,7 +3,6 @@ package com.donatrack.logistica.infrastructure.adapters.out.persistence.reposito
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.documents.RutaDeRepartoDocument;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -14,7 +13,7 @@ public interface RutaDeRepartoMongoRepository
     extends MongoRepository<RutaDeRepartoDocument, UUID> {
 
   @Query("{ 'paradas.entregas.idEntrega': ?0 }")
-  Optional<RutaDeRepartoDocument> findByEntregaId(UUID idEntrega);
+  List<RutaDeRepartoDocument> findByEntregaId(UUID idEntrega);
 
   List<RutaDeRepartoDocument> findByChoferId(UUID choferId);
 
