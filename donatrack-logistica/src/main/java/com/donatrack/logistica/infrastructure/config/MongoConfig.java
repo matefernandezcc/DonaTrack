@@ -14,8 +14,8 @@ import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
 /**
- * Configuración de conversión bidireccional entre Binary de MongoDB y java.util.UUID.
- * Garantiza compatibilidad universal entre mongosh (mongo-init.js) y Spring Data MongoDB.
+ * Configuración de conversión bidireccional entre Binary de MongoDB y java.util.UUID. Garantiza
+ * compatibilidad universal entre mongosh (mongo-init.js) y Spring Data MongoDB.
  */
 @Configuration
 public class MongoConfig {

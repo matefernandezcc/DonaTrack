@@ -15,10 +15,11 @@ public final class ItemPlanificacionMongoMapper {
 
     DireccionDocument destinoDoc = null;
     if (domain.getDestino() != null) {
-      destinoDoc = new DireccionDocument(
-          domain.getDestino().getCalle(),
-          domain.getDestino().getAltura(),
-          domain.getDestino().getLocalidad());
+      destinoDoc =
+          new DireccionDocument(
+              domain.getDestino().getCalle(),
+              domain.getDestino().getAltura(),
+              domain.getDestino().getLocalidad());
     }
 
     return new ItemPlanificacionDocument(
@@ -34,16 +35,14 @@ public final class ItemPlanificacionMongoMapper {
 
     Direccion destino = null;
     if (doc.getDestino() != null) {
-      destino = new Direccion(
-          doc.getDestino().getCalle(),
-          doc.getDestino().getAltura(),
-          doc.getDestino().getLocalidad());
+      destino =
+          new Direccion(
+              doc.getDestino().getCalle(),
+              doc.getDestino().getAltura(),
+              doc.getDestino().getLocalidad());
     }
 
     return new ItemPlanificacion(
-        doc.getIdDonacionOriginal(),
-        doc.getPesoEstimado(),
-        doc.getVolumenEstimado(),
-        destino);
+        doc.getIdDonacionOriginal(), doc.getPesoEstimado(), doc.getVolumenEstimado(), destino);
   }
 }

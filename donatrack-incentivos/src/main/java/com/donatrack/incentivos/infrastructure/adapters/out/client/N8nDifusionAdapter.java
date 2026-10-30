@@ -17,7 +17,7 @@ public class N8nDifusionAdapter implements DifusionPort {
   private final PersonaClient personaClient;
 
   @org.springframework.beans.factory.annotation.Value(
-      "${n8n.webhook.url:http://n8n:5678/webhook/donatrack/badge-earned}")
+      "${n8n.webhook.url:http://localhost:5678/webhook/donatrack/badge-earned}")
   private String webhookUrl;
 
   public N8nDifusionAdapter(PersonaClient personaClient) {
@@ -40,7 +40,8 @@ public class N8nDifusionAdapter implements DifusionPort {
         }
       }
     } catch (Exception e) {
-      LOGGER.warn("No se pudo obtener el nombre de la persona para la insignia: {}", e.getMessage());
+      LOGGER.warn(
+          "No se pudo obtener el nombre de la persona para la insignia: {}", e.getMessage());
     }
 
     payload.put("user", nombreUsuario);

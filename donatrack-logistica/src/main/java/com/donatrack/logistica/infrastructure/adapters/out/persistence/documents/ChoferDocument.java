@@ -15,8 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Document(collection = "choferes")
 public class ChoferDocument {
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
   @Indexed(unique = true)
   private String legajo;

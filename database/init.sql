@@ -1,4 +1,4 @@
-﻿-- ============================================================================
+-- ============================================================================
 -- DonaTrack - Script de InicializaciÃ³n de Base de Datos Local y ProducciÃ³n
 -- 3 Schemas Relacionales: donaciones, incentivos, notificaciones (Logística persiste en MongoDB NoSQL)
 -- ============================================================================
@@ -69,8 +69,10 @@ CREATE TABLE IF NOT EXISTS donaciones.roles_representante (
 );
 
 CREATE TABLE IF NOT EXISTS donaciones.roles_beneficiario (
-    rol_beneficiario_id UUID PRIMARY KEY REFERENCES donaciones.roles(rol_id) ON DELETE CASCADE
+    rol_beneficiario_id UUID PRIMARY KEY REFERENCES donaciones.roles(rol_id) ON DELETE CASCADE,
+    correo_representante VARCHAR(255)
 );
+ALTER TABLE donaciones.roles_beneficiario ADD COLUMN IF NOT EXISTS correo_representante VARCHAR(255);
 
 CREATE TABLE IF NOT EXISTS donaciones.categorias (
     categoria_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

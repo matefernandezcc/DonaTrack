@@ -68,6 +68,12 @@ public class ImportadorCSV implements ImportadorStrategy {
         } else {
           System.out.println("Creando nuevo donante para: " + email);
           Persona nuevaPersona = personaFactory.crearDesdeCSV(datos);
+          if (nuevaPersona.getRoles().isEmpty()) {
+            com.donatrack.donaciones.domain.entities.roles.Donante rolDonante =
+                new com.donatrack.donaciones.domain.entities.roles.Donante();
+            rolDonante.setFechaAlta(java.time.LocalDate.now());
+            nuevaPersona.agregarRol(rolDonante);
+          }
           personaRepository.guardar(nuevaPersona);
           System.out.println("Enviando credenciales de acceso a " + email);
         }

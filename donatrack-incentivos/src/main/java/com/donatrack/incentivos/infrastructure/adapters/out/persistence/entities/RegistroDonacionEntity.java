@@ -2,8 +2,6 @@ package com.donatrack.incentivos.infrastructure.adapters.out.persistence.entitie
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-
-
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,7 +21,6 @@ import lombok.Setter;
 public class RegistroDonacionEntity {
 
   @Id
-  
   @Column(name = "registro_donacion_id")
   private UUID id;
 

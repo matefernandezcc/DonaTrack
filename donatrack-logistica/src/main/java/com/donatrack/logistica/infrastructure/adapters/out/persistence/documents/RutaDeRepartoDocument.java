@@ -19,11 +19,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "rutas_reparto")
 @CompoundIndex(name = "idx_entregas_id", def = "{'paradas.entregas.idEntrega': 1}")
 public class RutaDeRepartoDocument {
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
-  @Indexed
-  private LocalDate fechaOperativa;
+  @Indexed private LocalDate fechaOperativa;
 
   private Boolean iniciada;
 
@@ -35,8 +33,7 @@ public class RutaDeRepartoDocument {
   private Double camionCapacidadCarga;
 
   // --- Desnormalización de Chofer (Lecturas directas O(1) y Snapshot histórico) ---
-  @Indexed
-  private UUID choferId;
+  @Indexed private UUID choferId;
   private String choferLegajo;
   private String choferNombre;
 

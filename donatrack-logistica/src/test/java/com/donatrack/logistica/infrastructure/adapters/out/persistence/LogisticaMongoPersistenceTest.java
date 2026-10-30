@@ -22,7 +22,6 @@ import com.donatrack.logistica.infrastructure.adapters.out.persistence.documents
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.documents.RutaDeRepartoDocument;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers.mongo.CamionMongoMapper;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers.mongo.ChoferMongoMapper;
-import com.donatrack.logistica.infrastructure.adapters.out.persistence.mappers.mongo.RutaDeRepartoMongoMapper;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.mongo.MongoCamionRepository;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.mongo.MongoChoferRepository;
 import com.donatrack.logistica.infrastructure.adapters.out.persistence.mongo.MongoEntregaRepository;
@@ -62,7 +61,8 @@ class LogisticaMongoPersistenceTest {
     mongoCamionRepository = new MongoCamionRepository(camionMongoRepository);
     mongoChoferRepository = new MongoChoferRepository(choferMongoRepository);
     mongoRutaRepository = new MongoRutaDeRepartoRepository(rutaMongoRepository);
-    mongoEntregaRepository = new MongoEntregaRepository(rutaMongoRepository, entregaMongoRepository);
+    mongoEntregaRepository =
+        new MongoEntregaRepository(rutaMongoRepository, entregaMongoRepository);
   }
 
   @Test
@@ -116,10 +116,17 @@ class LogisticaMongoPersistenceTest {
     entrega.setEstado(EstadoEntrega.PENDIENTE);
     entrega.setPesoEstimado(25.0);
 
-    Parada parada = new Parada(1, new Direccion("Av. Mayo", "100", "CABA"), new Coordenada(-34.6, -58.3), List.of(entrega));
-    RutaDeReparto ruta = new RutaDeReparto(rutaId, LocalDate.now(), false, camion, chofer, List.of(parada));
+    Parada parada =
+        new Parada(
+            1,
+            new Direccion("Av. Mayo", "100", "CABA"),
+            new Coordenada(-34.6, -58.3),
+            List.of(entrega));
+    RutaDeReparto ruta =
+        new RutaDeReparto(rutaId, LocalDate.now(), false, camion, chofer, List.of(parada));
 
-    ArgumentCaptor<RutaDeRepartoDocument> captor = ArgumentCaptor.forClass(RutaDeRepartoDocument.class);
+    ArgumentCaptor<RutaDeRepartoDocument> captor =
+        ArgumentCaptor.forClass(RutaDeRepartoDocument.class);
 
     mongoRutaRepository.guardar(ruta);
 
@@ -139,11 +146,13 @@ class LogisticaMongoPersistenceTest {
     // Verificación de parada y entrega embebidas
     assertEquals(1, guardado.getParadas().size());
     assertEquals(1, guardado.getParadas().get(0).getEntregas().size());
-    assertEquals(entrega.getIdEntrega(), guardado.getParadas().get(0).getEntregas().get(0).getIdEntrega());
+    assertEquals(
+        entrega.getIdEntrega(), guardado.getParadas().get(0).getEntregas().get(0).getIdEntrega());
   }
 
   @Test
-  @DisplayName("Debe buscar una Entrega dentro del Aggregate Root RutaDeReparto y actualizar su estado")
+  @DisplayName(
+      "Debe buscar una Entrega dentro del Aggregate Root RutaDeReparto y actualizar su estado")
   void debeBuscarYActualizarEntregaEmbebidaEnRuta() {
     UUID rutaId = UUID.randomUUID();
     UUID entregaId = UUID.randomUUID();

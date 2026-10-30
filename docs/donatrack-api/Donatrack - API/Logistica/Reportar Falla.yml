@@ -8,7 +8,7 @@ http:
   url: "{{logisticaUrl}}/api/entregas/:idDonacion/falla"
   params:
     - name: idDonacion
-      value: 139e0f9f-9431-4302-9f06-cad97978f7be
+      value: 35008064-071a-4d7a-ac37-33318f7d9845
       type: path
   body:
     type: json
@@ -18,6 +18,13 @@ http:
         "puedeReplanificarse": true
       }
   auth: inherit
+
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
 
 settings:
   encodeUrl: true
