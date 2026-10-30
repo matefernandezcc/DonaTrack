@@ -360,8 +360,7 @@ public class DonacionController {
                 });
 
     List<Beneficiario> disponibles = beneficiarioRepository.buscarTodos();
-    List<Beneficiario> sugerencias =
-        matchmakerService.obtenerSugerencias(donacion, disponibles);
+    List<Beneficiario> sugerencias = matchmakerService.obtenerSugerencias(donacion, disponibles);
 
     List<BeneficiarioResponseDTO> sugerenciasDTO =
         sugerencias.stream()
@@ -373,7 +372,8 @@ public class DonacionController {
 
   private UUID resolverPersonaDonanteId(UUID donacionId) {
     if (donacionOriginalRepository != null && personaRepository != null) {
-      Optional<DonacionOriginal> origOpt = donacionOriginalRepository.buscarPorIdDonacion(donacionId);
+      Optional<DonacionOriginal> origOpt =
+          donacionOriginalRepository.buscarPorIdDonacion(donacionId);
       if (origOpt.isPresent()
           && origOpt.get().getDonante() != null
           && origOpt.get().getDonante().getId() != null) {
@@ -389,7 +389,8 @@ public class DonacionController {
 
   private String resolverCorreoDonante(UUID donacionId) {
     if (donacionOriginalRepository != null && personaRepository != null) {
-      Optional<DonacionOriginal> origOpt = donacionOriginalRepository.buscarPorIdDonacion(donacionId);
+      Optional<DonacionOriginal> origOpt =
+          donacionOriginalRepository.buscarPorIdDonacion(donacionId);
       if (origOpt.isPresent()
           && origOpt.get().getDonante() != null
           && origOpt.get().getDonante().getId() != null) {

@@ -21,7 +21,8 @@ public class AdaptadorEmail implements NotificacionAdapter {
   public void enviar(Notificacion notificacion) {
     logger.info(
         "Enviando Email a {}: {}", notificacion.getDestinatario(), notificacion.getMensaje());
-    boolean enviado = n8nClient.enviar(notificacion.getDestinatario(), notificacion.getMensaje(), "EMAIL");
+    boolean enviado =
+        n8nClient.enviar(notificacion.getDestinatario(), notificacion.getMensaje(), "EMAIL");
     notificacion.setCompletada(enviado);
   }
 }

@@ -28,8 +28,7 @@ public class MongoRutaDeRepartoRepository implements RutaDeRepartoRepositoryPort
 
   @Autowired
   public MongoRutaDeRepartoRepository(
-      RutaDeRepartoMongoRepository mongoRepository,
-      EntregaMongoRepository entregaMongoRepository) {
+      RutaDeRepartoMongoRepository mongoRepository, EntregaMongoRepository entregaMongoRepository) {
     this.mongoRepository = mongoRepository;
     this.entregaMongoRepository = entregaMongoRepository;
   }

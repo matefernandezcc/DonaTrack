@@ -6,9 +6,7 @@ import com.donatrack.donaciones.domain.entities.donacion.Archivo;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.DocumentoIdentidad;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
-import com.donatrack.donaciones.domain.entities.persona.ubicacion.Direccion;
 import com.donatrack.donaciones.domain.entities.roles.strategyAdministrador.importador.ImportadorCSV;
-import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.ContactoDTO;
 import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.PersonaDTO;
 import com.donatrack.donaciones.infrastructure.adapters.in.api.dtos.PersonaDtoMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,9 +89,10 @@ public class PersonaController {
   @ApiResponse(responseCode = "200", description = "Lista de personas")
   @GetMapping
   public ResponseEntity<List<PersonaDTO>> obtenerTodas() {
-    List<PersonaDTO> dtos = personaRepository.obtenerTodas().stream()
-        .map(PersonaDtoMapper::toDto)
-        .collect(Collectors.toList());
+    List<PersonaDTO> dtos =
+        personaRepository.obtenerTodas().stream()
+            .map(PersonaDtoMapper::toDto)
+            .collect(Collectors.toList());
     return ResponseEntity.ok(dtos);
   }
 
@@ -139,27 +138,36 @@ public class PersonaController {
               // Convertir objetos anidados del Map genérico a objetos de dominio
               // sin usar frameworks en el dominio
               Map<String, Object> datosConvertidos = new java.util.HashMap<>(datosNuevos);
-              if (datosNuevos.containsKey("contacto") && datosNuevos.get("contacto") instanceof Map) {
+              if (datosNuevos.containsKey("contacto")
+                  && datosNuevos.get("contacto") instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> cm = (Map<String, Object>) datosNuevos.get("contacto");
                 com.donatrack.donaciones.domain.entities.enums.MedioContacto medio = null;
                 if (cm.get("medioPredeterminado") != null) {
-                  medio = com.donatrack.donaciones.domain.entities.enums.MedioContacto.valueOf((String) cm.get("medioPredeterminado"));
+                  medio =
+                      com.donatrack.donaciones.domain.entities.enums.MedioContacto.valueOf(
+                          (String) cm.get("medioPredeterminado"));
                 }
-                datosConvertidos.put("contacto", new Contacto(
-                    (String) cm.get("correoElectronico"),
-                    (String) cm.get("telefono"),
-                    (String) cm.get("whatsapp"),
-                    medio));
+                datosConvertidos.put(
+                    "contacto",
+                    new Contacto(
+                        (String) cm.get("correoElectronico"),
+                        (String) cm.get("telefono"),
+                        (String) cm.get("whatsapp"),
+                        medio));
               }
-              if (datosNuevos.containsKey("documento") && datosNuevos.get("documento") instanceof Map) {
+              if (datosNuevos.containsKey("documento")
+                  && datosNuevos.get("documento") instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> dm = (Map<String, Object>) datosNuevos.get("documento");
                 com.donatrack.donaciones.domain.entities.enums.TipoDocumento tipo = null;
                 if (dm.get("tipo") != null) {
-                  tipo = com.donatrack.donaciones.domain.entities.enums.TipoDocumento.valueOf((String) dm.get("tipo"));
+                  tipo =
+                      com.donatrack.donaciones.domain.entities.enums.TipoDocumento.valueOf(
+                          (String) dm.get("tipo"));
                 }
-                datosConvertidos.put("documento", new DocumentoIdentidad(tipo, (String) dm.get("numero")));
+                datosConvertidos.put(
+                    "documento", new DocumentoIdentidad(tipo, (String) dm.get("numero")));
               }
               p.actualizarInformacion(datosConvertidos);
               personaRepository.guardar(p);

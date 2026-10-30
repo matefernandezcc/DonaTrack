@@ -8,7 +8,6 @@ import com.donatrack.notificaciones.infrastructure.adapters.out.persistence.repo
 import com.donatrack.notificaciones.infrastructure.adapters.out.persistence.repositories.NotificacionJpaRepository;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,8 +67,7 @@ public class NotificadorService {
     try {
       EventoNotificacionEntity eventoEntity = new EventoNotificacionEntity();
       eventoEntity.setTipoEvento(tipoEvento != null ? tipoEvento : "NOTIFICACION_API");
-      String desc =
-          mensaje != null && mensaje.length() > 240 ? mensaje.substring(0, 240) : mensaje;
+      String desc = mensaje != null && mensaje.length() > 240 ? mensaje.substring(0, 240) : mensaje;
       eventoEntity.setDescripcion(desc);
       eventoEntity.setFechaRecepcion(LocalDateTime.now());
       EventoNotificacionEntity savedEvento = eventoRepository.save(eventoEntity);
@@ -83,7 +81,8 @@ public class NotificadorService {
       notifEntity.setCompletada(completada);
       notificacionRepository.save(notifEntity);
     } catch (Exception e) {
-      System.err.println("No se pudo persistir la notificación en base de datos: " + e.getMessage());
+      System.err.println(
+          "No se pudo persistir la notificación en base de datos: " + e.getMessage());
     }
   }
 }

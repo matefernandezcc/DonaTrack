@@ -26,15 +26,27 @@ public class PersonaDtoMapper {
 
     Persona persona;
     if (dto instanceof PersonaHumanaDTO h) {
-      persona = new PersonaHumana(
-          dto.getEmail(), contacto, direccion, documento,
-          h.getNombre(), h.getApellido(), h.getEdad());
+      persona =
+          new PersonaHumana(
+              dto.getEmail(),
+              contacto,
+              direccion,
+              documento,
+              h.getNombre(),
+              h.getApellido(),
+              h.getEdad());
     } else if (dto instanceof PersonaJuridicaDTO j) {
-      TipoPersonaJuridica tipoJur = j.getTipo() != null
-          ? TipoPersonaJuridica.valueOf(j.getTipo()) : null;
-      persona = new PersonaJuridica(
-          dto.getEmail(), contacto, direccion, documento,
-          j.getRazonSocial(), tipoJur, j.getRubro());
+      TipoPersonaJuridica tipoJur =
+          j.getTipo() != null ? TipoPersonaJuridica.valueOf(j.getTipo()) : null;
+      persona =
+          new PersonaJuridica(
+              dto.getEmail(),
+              contacto,
+              direccion,
+              documento,
+              j.getRazonSocial(),
+              tipoJur,
+              j.getRubro());
     } else {
       throw new IllegalArgumentException("PersonaDTO no soportado");
     }
@@ -77,8 +89,10 @@ public class PersonaDtoMapper {
 
   private static Contacto toContactoDomain(ContactoDTO dto) {
     if (dto == null) return null;
-    MedioContacto medio = dto.getMedioPredeterminado() != null
-        ? MedioContacto.valueOf(dto.getMedioPredeterminado()) : null;
+    MedioContacto medio =
+        dto.getMedioPredeterminado() != null
+            ? MedioContacto.valueOf(dto.getMedioPredeterminado())
+            : null;
     return new Contacto(dto.getCorreoElectronico(), dto.getTelefono(), dto.getWhatsapp(), medio);
   }
 
@@ -88,8 +102,8 @@ public class PersonaDtoMapper {
     dto.setCorreoElectronico(c.getCorreoElectronico());
     dto.setTelefono(c.getTelefono());
     dto.setWhatsapp(c.getWhatsapp());
-    dto.setMedioPredeterminado(c.getMedioPredeterminado() != null
-        ? c.getMedioPredeterminado().name() : null);
+    dto.setMedioPredeterminado(
+        c.getMedioPredeterminado() != null ? c.getMedioPredeterminado().name() : null);
     return dto;
   }
 
@@ -125,9 +139,13 @@ public class PersonaDtoMapper {
     if (dto.getCoordenadas() != null) {
       coord = new Coordenada(dto.getCoordenadas().getLatitud(), dto.getCoordenadas().getLongitud());
     }
-    return new Direccion(dto.getCalle(),
+    return new Direccion(
+        dto.getCalle(),
         dto.getAltura() != null ? dto.getAltura() : 0.0,
-        dto.getLocalidad(), prov, dto.getCodigoPostal(), coord);
+        dto.getLocalidad(),
+        prov,
+        dto.getCodigoPostal(),
+        coord);
   }
 
   private static DireccionDTO toDireccionDto(Direccion d) {

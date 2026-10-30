@@ -40,7 +40,8 @@ public class N8nDifusionAdapter implements DifusionPort {
         }
       }
     } catch (Exception e) {
-      LOGGER.warn("No se pudo obtener el nombre de la persona para la insignia: {}", e.getMessage());
+      LOGGER.warn(
+          "No se pudo obtener el nombre de la persona para la insignia: {}", e.getMessage());
     }
 
     payload.put("user", nombreUsuario);

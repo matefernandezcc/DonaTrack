@@ -14,7 +14,7 @@ public class LogisticaBrokerAdapter implements LogisticaPort {
   private final LogisticaRemoto2Client remoto2Client;
 
   public LogisticaBrokerAdapter(
-      LogisticaLocalClient localClient, 
+      LogisticaLocalClient localClient,
       LogisticaRemoto1Client remoto1Client,
       LogisticaRemoto2Client remoto2Client) {
     this.localClient = localClient;
@@ -35,23 +35,34 @@ public class LogisticaBrokerAdapter implements LogisticaPort {
             idDonacionOriginal, pesoTotal, volumenTotal, calle, altura, localidad);
 
     try {
-      log.info("BROKER: Intentando servicio de logística remoto (Servidor 1) para la donación: {}", idDonacionOriginal);
+      log.info(
+          "BROKER: Intentando servicio de logística remoto (Servidor 1) para la donación: {}",
+          idDonacionOriginal);
       remoto1Client.recepcionarDonacionLista(request);
       log.info("BROKER: Éxito con el servicio de logística remoto 1.");
     } catch (Exception e1) {
-      log.warn("BROKER: Falló el servicio remoto 1 ({}). Se aplicará Fallback al servicio remoto 2.", e1.getMessage());
+      log.warn(
+          "BROKER: Falló el servicio remoto 1 ({}). Se aplicará Fallback al servicio remoto 2.",
+          e1.getMessage());
       try {
-        log.info("BROKER: Intentando servicio de logística remoto (Servidor 2) para la donación: {}", idDonacionOriginal);
+        log.info(
+            "BROKER: Intentando servicio de logística remoto (Servidor 2) para la donación: {}",
+            idDonacionOriginal);
         remoto2Client.recepcionarDonacionLista(request);
         log.info("BROKER: Éxito con el servicio de logística remoto 2.");
       } catch (Exception e2) {
-        log.warn("BROKER: Falló el servicio remoto 2 ({}). Se aplicará Fallback al servicio local.", e2.getMessage());
+        log.warn(
+            "BROKER: Falló el servicio remoto 2 ({}). Se aplicará Fallback al servicio local.",
+            e2.getMessage());
         try {
-          log.info("BROKER: Intentando servicio de logística local para la donación: {}", idDonacionOriginal);
+          log.info(
+              "BROKER: Intentando servicio de logística local para la donación: {}",
+              idDonacionOriginal);
           localClient.recepcionarDonacionLista(request);
           log.info("BROKER: Éxito con el servicio de logística local.");
         } catch (Exception e3) {
-          log.error("BROKER: TODOS los servicios de logística han fallado. No se pudo solicitar el retiro.");
+          log.error(
+              "BROKER: TODOS los servicios de logística han fallado. No se pudo solicitar el retiro.");
           throw new RuntimeException("Servicios de logística no disponibles en ningún entorno", e3);
         }
       }

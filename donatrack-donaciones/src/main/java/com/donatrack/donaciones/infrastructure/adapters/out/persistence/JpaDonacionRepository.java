@@ -4,7 +4,6 @@ import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.donacion.HistorialEstado;
 import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
-import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.BeneficiarioEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.DonacionEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.HistorialEstadoEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.NecesidadEntity;

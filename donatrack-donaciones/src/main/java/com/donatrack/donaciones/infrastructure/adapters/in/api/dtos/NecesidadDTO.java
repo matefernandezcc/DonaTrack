@@ -11,8 +11,8 @@ import lombok.Setter;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tipo")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = NecesidadExtraordinariaDTO.class, name = "extraordinaria"),
-    @JsonSubTypes.Type(value = NecesidadRecurrenteDTO.class, name = "recurrente")
+  @JsonSubTypes.Type(value = NecesidadExtraordinariaDTO.class, name = "extraordinaria"),
+  @JsonSubTypes.Type(value = NecesidadRecurrenteDTO.class, name = "recurrente")
 })
 @Getter
 @Setter

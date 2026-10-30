@@ -65,11 +65,13 @@ public class JpaBeneficiarioRepository implements BeneficiarioRepository {
     }
     BeneficiarioEntity entity = (BeneficiarioEntity) RolMapper.toEntity(beneficiario);
 
-    if (beneficiario.getNecesidadesDeclaradas() != null && entity.getNecesidadesDeclaradas() != null) {
+    if (beneficiario.getNecesidadesDeclaradas() != null
+        && entity.getNecesidadesDeclaradas() != null) {
       for (int i = 0;
           i
               < Math.min(
-                  beneficiario.getNecesidadesDeclaradas().size(), entity.getNecesidadesDeclaradas().size());
+                  beneficiario.getNecesidadesDeclaradas().size(),
+                  entity.getNecesidadesDeclaradas().size());
           i++) {
         Necesidad domNec = beneficiario.getNecesidadesDeclaradas().get(i);
         NecesidadEntity entNec = entity.getNecesidadesDeclaradas().get(i);

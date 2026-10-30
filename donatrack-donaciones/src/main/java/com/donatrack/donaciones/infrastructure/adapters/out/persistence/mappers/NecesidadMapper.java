@@ -2,10 +2,10 @@ package com.donatrack.donaciones.infrastructure.adapters.out.persistence.mappers
 
 import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.entities.enums.EstadoNecesidad;
-import com.donatrack.donaciones.domain.entities.necesidades.TipoPeriodo;
 import com.donatrack.donaciones.domain.entities.necesidades.Necesidad;
 import com.donatrack.donaciones.domain.entities.necesidades.NecesidadExtraordinaria;
 import com.donatrack.donaciones.domain.entities.necesidades.NecesidadRecurrente;
+import com.donatrack.donaciones.domain.entities.necesidades.TipoPeriodo;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.NecesidadEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.NecesidadExtraordinariaEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.NecesidadRecurrenteEntity;
@@ -60,7 +60,8 @@ public class NecesidadMapper {
       domain = ex;
     } else if (entity instanceof NecesidadRecurrenteEntity rece) {
       NecesidadRecurrente rec = new NecesidadRecurrente();
-      rec.setCantidadObjetivo(rece.getCantidadObjetivo() != null ? rece.getCantidadObjetivo() : 0.0);
+      rec.setCantidadObjetivo(
+          rece.getCantidadObjetivo() != null ? rece.getCantidadObjetivo() : 0.0);
       rec.setActiva(rece.getActiva() != null ? rece.getActiva() : false);
       if (rece.getTipoPeriodo() != null) {
         try {

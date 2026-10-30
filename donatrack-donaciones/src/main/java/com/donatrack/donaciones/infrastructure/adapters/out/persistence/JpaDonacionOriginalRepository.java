@@ -71,7 +71,10 @@ public class JpaDonacionOriginalRepository implements DonacionOriginalRepository
 
     if (donacionOriginal.getDonacionesSegmentadas() != null && entity.getDonaciones() != null) {
       for (int i = 0;
-          i < Math.min(donacionOriginal.getDonacionesSegmentadas().size(), entity.getDonaciones().size());
+          i
+              < Math.min(
+                  donacionOriginal.getDonacionesSegmentadas().size(),
+                  entity.getDonaciones().size());
           i++) {
         Donacion domSeg = donacionOriginal.getDonacionesSegmentadas().get(i);
         DonacionEntity entSeg = entity.getDonaciones().get(i);

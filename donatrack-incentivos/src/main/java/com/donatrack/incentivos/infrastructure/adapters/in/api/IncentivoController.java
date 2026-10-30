@@ -31,13 +31,16 @@ public class IncentivoController {
 
   private final RankingMensualService rankingMensualService;
   private final RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase;
-  private final com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient;
+  private final com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient
+      personaClient;
   private final PerfilDonanteRepository perfilDonanteRepository;
   private final DifusionPort difusionPort;
   private final org.springframework.web.client.RestTemplate restTemplate;
-  private final com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.RankingMensualJpaRepository
+  private final com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories
+          .RankingMensualJpaRepository
       rankingMensualJpaRepository;
-  private final com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.PerfilDonanteJpaRepository
+  private final com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories
+          .PerfilDonanteJpaRepository
       perfilDonanteJpaRepository;
 
   @org.springframework.beans.factory.annotation.Value(
@@ -67,9 +70,11 @@ public class IncentivoController {
       com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient,
       PerfilDonanteRepository perfilDonanteRepository,
       DifusionPort difusionPort,
-      com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.RankingMensualJpaRepository
+      com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories
+              .RankingMensualJpaRepository
           rankingMensualJpaRepository,
-      com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.PerfilDonanteJpaRepository
+      com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories
+              .PerfilDonanteJpaRepository
           perfilDonanteJpaRepository) {
     this.rankingMensualService = rankingMensualService;
     this.registrarActividadDonacionUseCase = registrarActividadDonacionUseCase;
@@ -152,7 +157,8 @@ public class IncentivoController {
 
   @Operation(
       summary = "Obtener insignias del donante",
-      description = "Devuelve las insignias obtenidas por un donante y difunde la insignia al flujo n8n")
+      description =
+          "Devuelve las insignias obtenidas por un donante y difunde la insignia al flujo n8n")
   @ApiResponse(responseCode = "200", description = "Lista de insignias")
   @ApiResponse(
       responseCode = "400",
@@ -210,8 +216,9 @@ public class IncentivoController {
                 p -> {
                   String nombreUsuario = p.getDonanteId().toString();
                   try {
-                    com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient.PersonaDTO persona = 
-                        personaClient.obtenerPersona(p.getDonanteId());
+                    com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient
+                            .PersonaDTO
+                        persona = personaClient.obtenerPersona(p.getDonanteId());
                     if (persona != null) {
                       if ("JURIDICA".equals(persona.tipo())) {
                         nombreUsuario = persona.razonSocial();

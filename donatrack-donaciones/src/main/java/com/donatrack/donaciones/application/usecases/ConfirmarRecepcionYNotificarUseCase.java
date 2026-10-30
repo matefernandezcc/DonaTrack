@@ -8,7 +8,6 @@ import com.donatrack.donaciones.application.ports.out.DonacionRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
 import com.donatrack.donaciones.domain.entities.donacion.Donacion;
 import com.donatrack.donaciones.domain.entities.donacion.DonacionOriginal;
-import com.donatrack.donaciones.domain.entities.enums.EstadoDonacion;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;

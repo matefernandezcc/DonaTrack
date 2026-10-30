@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "personasClient", url = "${personas.api.url:http://localhost:8000}")
 public interface PersonaClient {
 
-    @GetMapping("/api/personas/{id}")
-    PersonaDTO obtenerPersona(@PathVariable("id") UUID id);
+  @GetMapping("/api/personas/{id}")
+  PersonaDTO obtenerPersona(@PathVariable("id") UUID id);
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    record PersonaDTO(String nombre, String apellido, String razonSocial, String tipo) {}
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  record PersonaDTO(String nombre, String apellido, String razonSocial, String tipo) {}
 }
