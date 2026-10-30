@@ -1,7 +1,7 @@
-# Multi-stage build for Render
+# Multi-stage build for Render & Docker
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
-# Copiamos todo el repositorio (asumiendo que el contexto de build es la raiz)
+# Copiamos todo el repositorio (contexto de build es la raiz)
 COPY . .
 # Compilamos especificamente el modulo de logistica y sus dependencias (common, etc)
 RUN mvn clean package -DskipTests -pl donatrack-logistica -am

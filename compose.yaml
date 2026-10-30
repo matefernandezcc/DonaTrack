@@ -2,6 +2,7 @@ services:
   postgres-donatrack:
     image: postgres:15-alpine
     container_name: postgres_donatrack
+    profiles: ["local"]
     restart: always
     env_file:
       - .env
@@ -16,9 +17,25 @@ services:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./database/local-seed-data.sql:/docker-entrypoint-initdb.d/z-local-seed-data.sql
 
+  mongo-donatrack:
+    image: mongo:7-jammy
+    container_name: mongo_donatrack
+    profiles: ["local"]
+    restart: always
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-donatrack}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-donatrack}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-donatrack_logistica}
+    volumes:
+      - mongo_data:/data/db
+      - ./database/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
   n8n:
     image: docker.n8n.io/n8nio/n8n:2.39.7
     container_name: n8n_donatrack
+    profiles: ["local"]
     restart: always
     ports:
       - "5678:5678"
@@ -39,13 +56,14 @@ services:
   rabbitmq:
     image: rabbitmq:4.3.2-management-alpine
     container_name: rabbitmq_donatrack
+    profiles: ["local"]
     restart: always
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-donatrack}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-donatrack}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_LOCAL_PASSWORD:-donatrack}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
@@ -57,13 +75,27 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - postgres-donatrack
-      - rabbitmq
+      postgres-donatrack:
+        condition: service_started
+        required: false
+      rabbitmq:
+        condition: service_started
+        required: false
     env_file:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
+      - LOGISTICA_URL_REMOTA=${LOGISTICA_URL_REMOTA:-https://dona-logistica.onrender.com}
+      - LOGISTICA_URL_REMOTA1=${LOGISTICA_URL_REMOTA1:-https://dona-logistica.onrender.com}
+      - LOGISTICA_URL_REMOTA2=${LOGISTICA_URL_REMOTA2:-https://dona-logistica.onrender.com}
 
   incentivos:
     build:
@@ -73,30 +105,52 @@ services:
     ports:
       - "8001:8001"
     depends_on:
-      - postgres-donatrack
-      - rabbitmq
+      postgres-donatrack:
+        condition: service_started
+        required: false
+      rabbitmq:
+        condition: service_started
+        required: false
     env_file:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
   logistica:
     build:
-      context: ./
-      dockerfile: donatrack-logistica/Dockerfile
+      context: .
+      dockerfile: ./donatrack-logistica/Dockerfile
     container_name: donatrack-logistica
     restart: always
     ports:
       - "8002:8002"
     depends_on:
-      - postgres-donatrack
-      - rabbitmq
+      mongo-donatrack:
+        condition: service_started
+        required: false
+      rabbitmq:
+        condition: service_started
+        required: false
     env_file:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
-      - POSTGRES_HOST=postgres-donatrack
+      - MONGO_HOST=mongo-donatrack
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
   notificaciones:
     build:
@@ -106,13 +160,24 @@ services:
     ports:
       - "8003:8003"
     depends_on:
-      - postgres-donatrack
-      - rabbitmq
+      postgres-donatrack:
+        condition: service_started
+        required: false
+      rabbitmq:
+        condition: service_started
+        required: false
     env_file:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
   server:
     build:
@@ -122,14 +187,31 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres-donatrack
+      postgres-donatrack:
+        condition: service_started
+        required: false
+      mongo-donatrack:
+        condition: service_started
+        required: false
+      rabbitmq:
+        condition: service_started
+        required: false
     env_file:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
+      - MONGO_HOST=mongo-donatrack
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_SSL_ENABLED=false
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
 volumes:
   postgres_data:
+  mongo_data:
   n8n_data:
   rabbitmq_data:

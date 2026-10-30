@@ -1,0 +1,28 @@
+info:
+  name: 05 - Webhook Insignia Otorgada (n8n)
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{n8nUrl}}/webhook/donatrack/badge-earned"
+  body:
+    type: json
+    data: |-
+      {
+        "user": "Juan Pérez",
+        "badge": "Donador Estrella",
+        "description": "Completó 5 donaciones exitosas y colaboró con comedores comunitarios"
+      }
+  auth: inherit
+
+assert:
+  - expr: res.status
+    oper: eq
+    value: 200
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

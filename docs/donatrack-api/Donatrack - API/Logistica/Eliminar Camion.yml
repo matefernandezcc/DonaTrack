@@ -1,0 +1,20 @@
+info:
+  name: Eliminar Camion
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: "{{logisticaUrl}}/api/camiones/:patente"
+  params:
+    - name: patente
+      value: EE555FF
+      type: path
+  body: none
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

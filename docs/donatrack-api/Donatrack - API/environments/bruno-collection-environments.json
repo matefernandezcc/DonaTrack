@@ -42,6 +42,13 @@
           "type": "text",
           "enabled": true,
           "secret": false
+        },
+        {
+          "name": "n8nUrl",
+          "value": "http://localhost:5678",
+          "type": "text",
+          "enabled": true,
+          "secret": false
         }
       ]
     },
@@ -79,6 +86,60 @@
         {
           "name": "notificacionesUrl",
           "value": "http://donatrack-notificaciones:8003",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "n8nUrl",
+          "value": "http://n8n:5678",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        }
+      ]
+    },
+    {
+      "name": "prod",
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "http://localhost:8080",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "donacionesUrl",
+          "value": "http://localhost:8000",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "incentivosUrl",
+          "value": "http://localhost:8001",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "logisticaUrl",
+          "value": "https://dona-logistica.onrender.com",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "notificacionesUrl",
+          "value": "http://localhost:8003",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "n8nUrl",
+          "value": "http://localhost:5678",
           "type": "text",
           "enabled": true,
           "secret": false

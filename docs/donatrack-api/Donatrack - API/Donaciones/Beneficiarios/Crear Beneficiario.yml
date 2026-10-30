@@ -10,6 +10,7 @@ http:
     type: json
     data: |-
       {
+        "id": "b3333333-3333-4333-8333-333333333333",
         "correoRepresentante": "representante@ong.org",
         "donacionesAsignadas": [],
         "necesidadesDeclaradas": []

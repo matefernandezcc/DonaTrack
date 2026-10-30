@@ -1,7 +1,7 @@
 info:
   name: Recepcionar Donacion
   type: http
-  seq: 15
+  seq: 9
 
 http:
   method: POST

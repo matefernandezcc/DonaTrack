@@ -1,0 +1,521 @@
+@startuml DonaTrack_ServicioDonaciones_DiagramaClases_Entrega5
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+
+' ========================================================
+' NOTA EXPLICATIVA: RESOLUCIÓN DE DISCREPANCIAS Y PERSISTENCIA (ENTREGA 5)
+' ========================================================
+note as E5_Note
+  **DonaTrack — Servicio de Donaciones (Entrega 5)**
+  **Arquitectura Hexagonal + Mapeo Objeto-Relacional JPA (PostgreSQL)**
+
+  **Estrategias de Persistencia JPA & Mapeo de Objetos:**
+  1. **Herencia Polimórfica:**
+     - ""Persona"" y sub-roles (""Donante"", ""Beneficiario"", ""Representante""): Estrategia ""JOINED""
+       (tablas ""personas"", ""personas_humanas"", ""personas_juridicas"", ""roles"", etc.).
+     - ""Necesidad"": Estrategia ""SINGLE_TABLE"" con discriminador ""dtype"" en la tabla ""necesidades"".
+  2. **Value Objects Aplanados (Flattening / Embedded):**
+     - ""Contacto"" y ""DocumentoIdentidad"" se modelan como Value Objects en el dominio,
+       pero se aplanan en columnas de la tabla ""personas"" (""contacto_correo"", ""doc_tipo"", etc.).
+     - ""Coordenada"", ""Provincia"" y ""Pais"" se aplanan en columnas de la tabla ""direcciones""
+       (""latitud"", ""longitud"", ""provincia"", ""pais"").
+  3. **Tipos Enumerados vs. Base de Datos:**
+     - Los Enums de dominio (""EstadoDonacion"", ""TipoDocumento"", etc.) mantienen tipado fuerte en Java,
+       pero son persistidos como ""VARCHAR(50)"" desacoplando el esquema relacional.
+  4. **Broker de Integración:**
+     - Integración con Logística desacoplada mediante ""LogisticaBrokerAdapter"" con fallback en 3 niveles
+       (Render Propio -> Render Compañero -> Localhost:8002).
+end note
+
+package "Servicio de Donaciones" {
+
+    ' ========================================================
+    ' PAQUETE: GESTIÓN DE PERSONAS Y UBICACIÓN
+    ' ========================================================
+    package "Gestión de Personas y Ubicación" {
+        enum TipoDocumento {
+            DNI
+            CUIT
+            PASAPORTE
+        }
+
+        class DocumentoIdentidad <<Value Object (Aplanado en DB)>> {
+            - tipo: TipoDocumento
+            - numero: String
+            + getTipo(): TipoDocumento
+            + getNumero(): String
+        }
+
+        enum TipoPersonaJuridica {
+            GUBERNAMENTAL
+            ONG
+            EMPRESA
+            INSTITUCION
+        }
+
+        enum MedioContacto {
+            CORREO
+            TELEFONO
+            WHATSAPP
+            DISCORD
+        }
+
+        class Contacto <<Value Object (Aplanado en DB)>> {
+            - correoElectronico: String
+            - telefono: String
+            - whatsapp: String
+            - medioPredeterminado: MedioContacto
+            + getCorreoElectronico(): String
+            + getTelefono(): String
+            + getWhatsapp(): String
+            + getMedioPredeterminado(): MedioContacto
+        }
+
+        class Coordenada <<Value Object (Aplanado en DB)>> {
+            - latitud: Double
+            - longitud: Double
+            + getLatitud(): Double
+            + getLongitud(): Double
+        }
+
+        class Pais <<Value Object (Aplanado en DB)>> {
+            - nombrePais: String
+            - nacionalidad: String
+        }
+
+        class Provincia <<Value Object (Aplanado en DB)>> {
+            - nombreProvincia: String
+            - pais: Pais
+        }
+
+        class Direccion <<Entity JPA: direcciones>> {
+            - id: UUID
+            - calle: String
+            - altura: Double
+            - localidad: String
+            - provincia: Provincia
+            - codigoPostal: String
+            - coordenadas: Coordenada
+            + getCalle(): String
+            + getAltura(): Double
+            + getLocalidad(): String
+        }
+
+        abstract class Persona <<Entity JPA: personas (JOINED)>> {
+            - id: UUID
+            - email: String
+            - contacto: Contacto
+            - direccion: Direccion
+            - documento: DocumentoIdentidad
+            - roles: List<Rol>
+            + agregarRol(Rol r): boolean
+            + {abstract} validarRol(Rol r): boolean
+            + setDocumento(DocumentoIdentidad documento): boolean
+            + validarDocumentacion(DocumentoIdentidad d): boolean
+            + validar(PersonaValidator validador): boolean
+            + actualizarInformacion(Map<String, Object> datosNuevos): void
+        }
+
+        class PersonaHumana <<Entity JPA: personas_humanas (JOINED)>> extends Persona {
+            - nombre: String
+            - apellido: String
+            - edad: int
+            + validarRol(Rol r): boolean
+            + validarDocumentacion(DocumentoIdentidad d): boolean
+            + actualizarInformacion(Map<String, Object> datosNuevos): void
+        }
+
+        class PersonaJuridica <<Entity JPA: personas_juridicas (JOINED)>> extends Persona {
+            - razonSocial: String
+            - tipo: TipoPersonaJuridica
+            - representantes: List<Representante>
+            - rubro: String
+            + agregarRepresentante(Representante r): void
+            + validarRol(Rol r): boolean
+            + validarDocumentacion(DocumentoIdentidad d): boolean
+            + actualizarInformacion(Map<String, Object> datosNuevos): void
+        }
+
+        DocumentoIdentidad --> TipoDocumento
+        Contacto --> MedioContacto
+        Persona "1" *-- "1" Contacto : "contiene (aplanado en BD)"
+        Persona "1" *-- "1" DocumentoIdentidad : "contiene (aplanado en BD)"
+        Persona --> Direccion : "reside en"
+        Direccion *-- Coordenada : "coordenadas (aplanadas)"
+        Direccion *-- Provincia : "pertenece a (aplanada)"
+        Provincia *-- Pais : "contiene (aplanado)"
+        PersonaJuridica --> TipoPersonaJuridica
+    }
+
+    ' ========================================================
+    ' PAQUETE: GESTIÓN DE ROLES
+    ' ========================================================
+    package "Gestión de Roles" {
+        abstract class Rol <<Entity JPA: roles (JOINED)>> {
+            - id: UUID
+            - fechaAlta: LocalDate
+            - persona: Persona
+            + {abstract} esValidoParaHumana(): boolean
+            + {abstract} esValidoParaJuridica(): boolean
+        }
+
+        class Donante <<Entity JPA: roles_donante (JOINED)>> extends Rol {
+            - donacionesRealizadas: List<DonacionOriginal>
+            + esValidoParaHumana(): boolean
+            + esValidoParaJuridica(): boolean
+            + agregarDonacion(DonacionOriginal d): void
+            + consultarEstadoDonacion(Donacion d): EstadoDonacion
+            + filtrarDonaciones(EstadoDonacion estado, String categoria): void
+            + UbicacionCamion(): void
+        }
+
+        class Representante <<Entity JPA: roles_representante (JOINED)>> extends Rol {
+            - cargo: String
+            - organizacion: PersonaJuridica
+            + esValidoParaHumana(): boolean
+            + esValidoParaJuridica(): boolean
+        }
+
+        class Beneficiario <<Entity JPA: roles_beneficiario (JOINED)>> extends Rol {
+            - donacionesAsignadas: List<Donacion>
+            - necesidadesDeclaradas: List<Necesidad>
+            - correoRepresentante: String
+            + esValidoParaHumana(): boolean
+            + esValidoParaJuridica(): boolean
+            + registrarNecesidad(Necesidad n): void
+            + confirmarRecepcion(Donacion d, List<String> fotos): boolean
+            + EstadoDonaciones(): List<EstadoDonacion>
+            + UbicacionCamion(): void
+        }
+
+        Persona "1" *-- "1..*" Rol : "asume"
+        Representante --> PersonaJuridica : "representa a"
+    }
+
+    ' ========================================================
+    ' PAQUETE: GESTIÓN DE INGRESO Y SEGMENTACIÓN
+    ' ========================================================
+    package "Gestión de Ingreso y Segmentación" {
+        enum EstadoDonacion {
+            EN_DEPOSITO
+            ASIGNADA
+            LISTA_PARA_ENTREGAR
+            EN_TRASLADO
+            ENTREGADA
+            ENTREGA_FALLIDA
+            VENCIDA
+        }
+
+        class Foto <<Entity JPA: fotos>> {
+            - descripcion: String
+            - url: String
+            + getUrl(): String
+        }
+
+        class Categoria <<Entity JPA: categorias>> {
+            - id: UUID
+            - nombre: String
+            - descripcion: String
+            + agregarSubcategoria(Subcategoria s): void
+        }
+
+        class Subcategoria <<Entity JPA: subcategorias>> {
+            - id: UUID
+            - nombre: String
+            - descripcion: String
+            - categoriaPadre: Categoria
+            + esSubcategoriaDe(Categoria c): boolean
+        }
+
+        class Bien <<Entity JPA: bienes>> {
+            - descripcion: String
+            - cantidad: double
+            - unidadMedicion: String
+            - esUsado: Boolean
+            - fechaVencimiento: LocalDate
+            - fotos: List<Foto>
+            - subcategoria: Subcategoria
+            + agregarFoto(Foto foto): void
+        }
+
+        class HistorialEstado <<Entity JPA: historial_estados>> {
+            - estado: EstadoDonacion
+            - fecha: LocalDate
+            - observacion: String
+            - usuarioId: String
+        }
+
+        class Donacion <<Entity JPA: donaciones>> {
+            - id: UUID
+            - fechaCreacion: LocalDate
+            - estado: EstadoDonacion
+            - bienes: List<Bien>
+            - subCategoria: Subcategoria
+            - historial: List<HistorialEstado>
+            - fechaVencimiento: LocalDate
+            - entidadAsignada: Beneficiario
+            - fotos: List<Foto>
+            + agregarBien(Bien b): void
+            + registrarCambioEstado(HistorialEstado nuevoRegistro): void
+            + cambiarEstado(EstadoDonacion nuevoEstado, String obs, String usuarioId): void
+            + asignar(Beneficiario beneficiario): void
+            + addFoto(Foto foto): void
+            + getCategoriasString(): List<String>
+        }
+
+        class DonacionOriginal <<Entity JPA: donaciones_originales>> {
+            - id: UUID
+            - descripcionGeneral: String
+            - fechaRecepcion: LocalDate
+            - donante: Donante
+            - donacionesSegmentadas: List<Donacion>
+            - usuarioId: String
+            + segmentarBienes(List<Bien> bienes, ProcesadorCargaInicial procesador): void
+        }
+
+        ' Patrón Strategy para Segmentación
+        interface EstrategiaSegmentacion <<Strategy>> {
+            + segmentar(bienes: List<Bien>): List<Donacion>
+        }
+
+        class SegmentarPorSubcategoria implements EstrategiaSegmentacion
+        class SegmentarPorVencimiento implements EstrategiaSegmentacion
+        class SegmentarPorEstado implements EstrategiaSegmentacion
+
+        class ProcesadorCargaInicial <<Domain Service>> {
+            - estrategias: List<EstrategiaSegmentacion>
+            + procesar(bienesBrutos: List<Bien>): List<Donacion>
+        }
+
+        DonacionOriginal "1" *-- "0..*" Donacion : "segmenta en"
+        DonacionOriginal --> Donante : "realizada por"
+        Donacion "1" *-- "1..*" Bien : "agrupa"
+        Donacion "1" *-- "0..*" HistorialEstado : "registra historial"
+        Donacion --> Subcategoria : "categorizada como"
+        Donacion --> EstadoDonacion : "persiste como VARCHAR en DB"
+        Donacion --> Beneficiario : "asignada a"
+        Donacion "1" *-- "0..*" Foto : "comprobantes"
+        Bien --> Subcategoria
+        Bien "1" *-- "0..*" Foto
+        Categoria "1" *-- "0..*" Subcategoria : "contiene"
+        ProcesadorCargaInicial o-- EstrategiaSegmentacion
+        DonacionOriginal ..> ProcesadorCargaInicial : "delega segmentación"
+    }
+
+    ' ========================================================
+    ' PAQUETE: GESTIÓN DE NECESIDADES
+    ' ========================================================
+    package "Gestión de Necesidades" {
+        enum EstadoNecesidad {
+            ABIERTA
+            SATISFECHA
+        }
+
+        enum TipoPeriodo {
+            SEMANAL
+            MENSUAL
+            + getDias(): int
+        }
+
+        abstract class Necesidad <<Entity JPA: necesidades (SINGLE_TABLE)>> {
+            - id: UUID
+            - descripcion: String
+            - fechaSolicitud: LocalDate
+            - subcategoriaRequerida: Subcategoria
+            - beneficiario: Beneficiario
+        }
+
+        class PeriodoNecesidad <<Entity JPA: periodos_necesidad>> {
+            - id: UUID
+            - fechaInicio: LocalDate
+            - fechaFin: LocalDate
+            - estado: EstadoNecesidad
+            - donacionesAsignadas: List<Donacion>
+            + cantidadAcumulada(): double
+            + estaCubierta(cantidadObjetivo: double): Boolean
+            + asignarDonacion(Donacion d, double objetivo): void
+        }
+
+        class NecesidadExtraordinaria <<Entity JPA: necesidades (SINGLE_TABLE)>> extends Necesidad {
+            - cantidadRequerida: double
+            - estado: EstadoNecesidad
+            - donacionesRecibidas: List<Donacion>
+            + acumularDonacionesParciales(Donacion nuevaDonacion): void
+            + estaCubierta(): Boolean
+            + cantidadAcumulada(): double
+            + cantidadPendiente(): double
+        }
+
+        class NecesidadRecurrente <<Entity JPA: necesidades (SINGLE_TABLE)>> extends Necesidad {
+            - cantidadObjetivo: double
+            - activa: Boolean
+            - historialPeriodos: List<PeriodoNecesidad>
+            - periodoActual: PeriodoNecesidad
+            - tipoPeriodo: TipoPeriodo
+            + cerrarPeriodoYCrearSiguiente(): PeriodoNecesidad
+            + darDeBaja(): void
+        }
+
+        Beneficiario "1" *-- "0..*" Necesidad : "declara"
+        Necesidad --> Subcategoria : "demanda"
+        NecesidadRecurrente --> TipoPeriodo
+        NecesidadRecurrente "1" *-- "0..*" PeriodoNecesidad : "gestiona períodos"
+        PeriodoNecesidad --> EstadoNecesidad
+        PeriodoNecesidad o-- Donacion : "recibe donaciones asignadas"
+        NecesidadExtraordinaria --> EstadoNecesidad
+        NecesidadExtraordinaria o-- Donacion : "recibe donaciones parciales"
+    }
+
+    ' ========================================================
+    ' PAQUETE: CASOS DE USO Y SERVICIOS DE APLICACIÓN
+    ' ========================================================
+    package "Capa de Aplicación y Casos de Uso (Hexagonal)" {
+        class ProcesarInicioRutaUseCase <<Use Case>> {
+            - donacionRepository: DonacionRepository
+            - recepcionRepository: DonacionOriginalRepository
+            - personaRepository: PersonaRepository
+            - eventPublisher: ApplicationEventPublisher
+            + procesar(rutaId: UUID, patente: String, chofer: String, ids: List<UUID>): void
+        }
+
+        class ConfirmarRecepcionYNotificarUseCase <<Use Case>> {
+            - donacionRepository: DonacionRepository
+            - recepcionRepository: DonacionOriginalRepository
+            - personaRepository: PersonaRepository
+            - eventPublisher: ApplicationEventPublisher
+            + procesar(event: EntregaRealizadaEvent): void
+        }
+
+        class ProcesarFallaEntregaYNotificarUseCase <<Use Case>> {
+            - donacionRepository: DonacionRepository
+            - recepcionRepository: DonacionOriginalRepository
+            - personaRepository: PersonaRepository
+            - eventPublisher: ApplicationEventPublisher
+            + procesar(event: EntregaFallidaEvent): void
+        }
+
+        class ReplanificarEntregaUseCase <<Use Case>> {
+            - donacionRepository: DonacionRepository
+            + replanificar(idDonacion: UUID): void
+        }
+
+        class AsignadorDonaciones <<Domain Service>> {
+            + ejecutarMatchmaking(donaciones: List<Donacion>, necesidades: List<Necesidad>): List<ResultadoMatch>
+        }
+
+        interface AlgoritmoAsignacion <<Strategy>> {
+            + recomendarNecesidades(donaciones: List<Donacion>, necesidades: List<Necesidad>): List<ResultadoMatch>
+        }
+
+        class CompatibilidadSemantica implements AlgoritmoAsignacion
+        class PrioridadASubAtendidos implements AlgoritmoAsignacion
+        AsignadorDonaciones --> AlgoritmoAsignacion : "utiliza"
+
+        class MatchmakerService <<Use Case>> {
+            - asignador: AsignadorDonaciones
+            + ejecutar(): void
+        }
+        MatchmakerService --> AsignadorDonaciones
+
+        interface ImportadorStrategy <<Strategy>> {
+            + importar(archivo: Archivo): List<Persona>
+        }
+
+        class ImportadorCSV implements ImportadorStrategy
+    }
+
+    ' ========================================================
+    ' PAQUETE: PUERTOS Y ADAPTADORES DE INFRAESTRUCTURA
+    ' ========================================================
+    package "Puertos y Adaptadores de Infraestructura" {
+        
+        ' --- PUERTOS DE SALIDA (Ports Out) ---
+        interface LogisticaPort <<Port Out>> {
+            + solicitarRetiro(idDonacion: UUID, peso: double, vol: double, calle: String, alt: String, loc: String): void
+        }
+
+        interface ServicioNotificaciones <<Port Out>> {
+            + enviar(request: NotificacionRequest): void
+        }
+
+        interface DonacionRepository <<Port Out>> {
+            + guardar(donacion: Donacion): void
+            + buscarPorId(id: UUID): Optional<Donacion>
+        }
+
+        interface DonacionOriginalRepository <<Port Out>> {
+            + guardar(donacionOriginal: DonacionOriginal): void
+            + buscarPorId(id: UUID): Optional<DonacionOriginal>
+        }
+
+        interface PersonaRepository <<Port Out>> {
+            + guardar(persona: Persona): void
+            + buscarPorId(id: UUID): Optional<Persona>
+            + buscarPorEmail(email: String): Optional<Persona>
+        }
+
+        ' --- ADAPTADORES DE SALIDA (Adapters Out) ---
+        class LogisticaBrokerAdapter <<Adapter Out - Broker Pattern>> implements LogisticaPort {
+            - localClient: LogisticaLocalClient
+            - remoto1Client: LogisticaRemoto1Client
+            - remoto2Client: LogisticaRemoto2Client
+            + solicitarRetiro(idDonacion: UUID, peso: double, vol: double, calle: String, alt: String, loc: String): void
+        }
+        note bottom of LogisticaBrokerAdapter
+          **Broker Multi-Capa con Fallback:**
+          1. Intento 1: Render Nube Propia (Remoto 1)
+          2. Intento 2: Render Nube Compañero (Remoto 2)
+          3. Intento 3 (Fallback): Localhost:8002
+        end note
+
+        class NotificacionesMessagingAdapter <<Adapter Out>> implements ServicioNotificaciones {
+            - rabbitTemplate: RabbitTemplate
+            + enviar(request: NotificacionRequest): void
+        }
+
+        class DonacionesRabbitMQAdapter <<Adapter Out>> {
+            - rabbitTemplate: RabbitTemplate
+            + publicarNotificacionInicioRuta(event: NotificacionInicioRutaEvent): void
+            + publicarNotificacionEntrega(event: NotificacionEntregaExitosaEvent): void
+        }
+
+        class JpaDonacionRepository <<Adapter Out>> implements DonacionRepository
+        class JpaDonacionOriginalRepository <<Adapter Out>> implements DonacionOriginalRepository
+        class JpaPersonaRepository <<Adapter Out>> implements PersonaRepository
+
+        ' --- ADAPTADORES DE ENTRADA (Listeners Asíncronos RabbitMQ) ---
+        class RutaIniciadaRabbitMQListener <<Adapter In (AMQP)>> {
+            - useCase: ProcesarInicioRutaUseCase
+            + recibirEvento(event: RutaIniciadaEvent): void
+        }
+
+        class EntregaRealizadaRabbitMQListener <<Adapter In (AMQP)>> {
+            - useCase: ConfirmarRecepcionYNotificarUseCase
+            + recibirEvento(event: EntregaRealizadaEvent): void
+        }
+
+        class EntregaFallidaRabbitMQListener <<Adapter In (AMQP)>> {
+            - useCase: ProcesarFallaEntregaYNotificarUseCase
+            + recibirEvento(event: EntregaFallidaEvent): void
+        }
+
+        RutaIniciadaRabbitMQListener --> ProcesarInicioRutaUseCase : "dispara"
+        EntregaRealizadaRabbitMQListener --> ConfirmarRecepcionYNotificarUseCase : "dispara"
+        EntregaFallidaRabbitMQListener --> ProcesarFallaEntregaYNotificarUseCase : "dispara"
+        
+        ProcesarInicioRutaUseCase ..> DonacionesRabbitMQAdapter : "emite evento enriquecido"
+        ConfirmarRecepcionYNotificarUseCase ..> DonacionesRabbitMQAdapter : "emite evento enriquecido"
+    }
+
+}
+
+' Relaciones Cruzadas Use Cases -> Puertos / Dominio
+ProcesarInicioRutaUseCase --> DonacionRepository : "actualiza estado EN_TRASLADO"
+ConfirmarRecepcionYNotificarUseCase --> DonacionRepository : "guarda fotos y estado ENTREGADA"
+ProcesarFallaEntregaYNotificarUseCase --> DonacionRepository : "actualiza estado ENTREGA_FALLIDA"
+ReplanificarEntregaUseCase --> DonacionRepository : "vuelve a ASIGNADA"
+
+@enduml
+

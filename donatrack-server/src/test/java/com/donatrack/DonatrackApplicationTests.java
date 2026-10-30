@@ -3,9 +3,11 @@ package com.donatrack;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class DonatrackTests {
 
   // Mock del ConnectionFactory para evitar que RabbitMQ intente conectarse a un broker real

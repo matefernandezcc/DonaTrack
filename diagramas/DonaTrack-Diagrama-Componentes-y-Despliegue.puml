@@ -1,8 +1,8 @@
-@startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue_Entrega4
+@startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue_Entrega5
 left to right direction
 skinparam componentStyle uml2
-skinparam nodesep 40
-skinparam ranksep 80
+skinparam nodesep 25
+skinparam ranksep 60
 
 ' Colores
 skinparam node {
@@ -16,6 +16,11 @@ skinparam component {
 skinparam interface {
     BackgroundColor #FFFFFF
     BorderColor #5D6D7E
+    FontSize 11
+}
+skinparam rectangle {
+    BorderColor #5D6D7E
+    FontStyle bold
 }
 
 node "Servidor Frontend" as N_Frontend {
@@ -28,25 +33,23 @@ rectangle "API Gateway" #line.dashed {
     }
 }
 
-
-
 ' ----- BACKEND MultiServicio (MicroServidores) -----
 rectangle "Dominio (DonaTrack Backend)" #line.dashed {
-    node "Servidor de Donaciones" as N_Donaciones {
+    node "Servidor de Donaciones\n:8000" as N_Donaciones {
         component "Servicio de Donaciones" as ModDonaciones
         component "Broker de Logística\n(LogisticaBrokerAdapter)" as BrokerLogistica
         
         ModDonaciones ..> BrokerLogistica : usa
     }
-    node "Servidor de Incentivos" as N_Incentivos {
+    node "Servidor de Incentivos\n:8001" as N_Incentivos {
         component "Servicio de Incentivos" as ModIncentivos
     }
     
-    node "Servidor de Logística (Local - Fallback)" as N_Logistica_Local {
+    node "Servidor de Logística (Local - Fallback)\n:8002" as N_Logistica_Local {
         component "Servicio de Logística" as ModLogisticaLocal
     }
     
-    node "Servidor de Notificaciones" as N_Notificaciones {
+    node "Servidor de Notificaciones\n:8003" as N_Notificaciones {
         component "Servicio de Notificaciones" as ModNotificaciones
     }
 }
@@ -61,22 +64,66 @@ rectangle "Despliegue en la Nube (Render)" #line.dashed {
     }
 }
 
+' ========================================================
+' PERFILES DE PERSISTENCIA Y MENSAJERÍA (Verticales)
+' ========================================================
+rectangle "Profile: local" as ProfileLocal #line.dashed {
+    () "Mongo :27017" as Port_Mongo_Local
+    () "AMQP :5672" as Port_AMQP_Local
+    () "JPA :5432" as Port_JPA_Local
 
+    node "Docker MongoDB\n:27017" as N_Mongo_Local {
+        component "MongoDB Local\n(donatrack_logistica)" as Mongo_Local
+    }
+    node "Docker RabbitMQ\n:5672/:15672" as N_BrokerMQ_Local {
+        component "RabbitMQ Local" as RabbitMQ_Local
+    }
+    node "Docker PostgreSQL\n:5432" as N_DB_Local {
+        component "PostgreSQL Local\n(schemas: donaciones, incentivos, notif)" as DB_Local
+    }
+    
+    Port_Mongo_Local ----(0---- Mongo_Local
+    Port_AMQP_Local ----(0---- RabbitMQ_Local
+    Port_JPA_Local ----(0---- DB_Local
+    
+    ' Alineación vertical de puertos (Mongo arriba, AMQP medio, JPA abajo)
+    Port_Mongo_Local -[hidden]left-> Port_AMQP_Local
+    Port_AMQP_Local -[hidden]left-> Port_JPA_Local
 
-' Resto de los servidores externos y persistencia
-rectangle "Persistencia" #line.dashed {
-    node "Servidor de la BD Local" as N_DB {
-        component "Base de Datos PostgreSQL" as DB
-    }
-    node "Servidor Supabase (Nube)" as N_DB_Nube {
-        component "Base de Datos Supabase" as DB_Nube
-    }
-}  
-rectangle "Mensajería" #line.dashed { 
-    node "Servidor CloudAMQP (Nube)" as N_BrokerMQ {
-        component "Message Broker" as RabbitMQ
-    }
+    ' Alineación vertical de servidores (Mongo arriba, RabbitMQ medio, PostgreSQL abajo)
+    N_Mongo_Local -[hidden]left-> N_BrokerMQ_Local
+    N_BrokerMQ_Local -[hidden]left-> N_DB_Local
 }
+
+rectangle "Profile: prod" as ProfileProd #line.dashed {
+    () "Mongo Atlas" as Port_Mongo_Cloud
+    () "AMQP CloudAMQP" as Port_AMQP_Cloud
+    () "JPA Supabase" as Port_JPA_Cloud
+
+    node "MongoDB Atlas\n(donatrack.ofn4ag4)" as N_Mongo_Cloud {
+        component "MongoDB Atlas Cluster\n(donatrack_logistica)" as Mongo_Cloud
+    }
+    node "CloudAMQP\n(jackal.rmq.cloudamqp.com)" as N_BrokerMQ_Cloud {
+        component "CloudAMQP (RabbitMQ)" as RabbitMQ_Cloud
+    }
+    node "Supabase PostgreSQL\n(AWS us-east-1)" as N_DB_Cloud {
+        component "PostgreSQL Supabase\n(schemas: donaciones, incentivos, notif)" as DB_Cloud
+    }
+    
+    Port_Mongo_Cloud ----(0---- Mongo_Cloud
+    Port_AMQP_Cloud ----(0---- RabbitMQ_Cloud
+    Port_JPA_Cloud ----(0---- DB_Cloud
+    
+    ' Alineación vertical de puertos (Mongo arriba, AMQP medio, JPA abajo)
+    Port_Mongo_Cloud -[hidden]left-> Port_AMQP_Cloud
+    Port_AMQP_Cloud -[hidden]left-> Port_JPA_Cloud
+
+    ' Alineación vertical de servidores (Mongo arriba, CloudAMQP medio, Supabase abajo)
+    N_Mongo_Cloud -[hidden]left-> N_BrokerMQ_Cloud
+    N_BrokerMQ_Cloud -[hidden]left-> N_DB_Cloud
+}
+
+ProfileLocal -[hidden]left-> ProfileProd
 
 node "Servidor de n8n" as N_n8n {
     component "Servidor n8n\n(Automatización)" as n8n
@@ -91,7 +138,7 @@ node "Servidor de Planificación Externo" as N_Planificador {
 }
 
 ' ==========================================
-' CONEXIONES 
+' CONEXIONES (Ball-and-Socket: ----(0----)
 ' ==========================================
 
 ' 0. Conexiones Frontend y API Gateway
@@ -103,21 +150,33 @@ ModuloAPI ----(0---- ModLogisticaNube1 : "HTTP / API REST"
 ModuloAPI ----(0---- ModLogisticaNube2 : "HTTP / API REST"
 ModuloAPI ----(0---- ModNotificaciones : "HTTP / API REST"
 
-' 1. Conexiones a BD
-ModDonaciones ----(0---- DB : "JPA (schema: donaciones)"
-ModIncentivos ----(0---- DB : "JPA (schema: incentivos)"
-ModLogisticaLocal ----(0---- DB : "JPA (schema: logistica)"
-ModLogisticaNube1 ----(0---- DB_Nube : "JPA (schema: logistica)"
-ModLogisticaNube2 ----(0---- DB_Nube : "JPA (schema: logistica)"
-ModNotificaciones ----(0---- DB : "JPA (schema: notificaciones)"
+' 1. Conexiones Profile: local unificadas en puertos
+ModDonaciones ----(0---- Port_JPA_Local
+ModIncentivos ----(0---- Port_JPA_Local
+ModNotificaciones ----(0---- Port_JPA_Local
 
-' 2. Conexiones RabbitMQ
-ModDonaciones ----(0---- RabbitMQ : "Publica: donaciones.exchange\nConsume: logistica.exchange"
-ModIncentivos ----(0---- RabbitMQ : "Publica: incentivos.exchange"
-ModLogisticaLocal ----(0---- RabbitMQ : "Publica: logistica.exchange\nConsume: donaciones.exchange"
-ModLogisticaNube1 ----(0---- RabbitMQ : "Publica: logistica.exchange\nConsume: donaciones.exchange"
-ModLogisticaNube2 ----(0---- RabbitMQ : "Publica: logistica.exchange\nConsume: donaciones.exchange"
-ModNotificaciones ----(0---- RabbitMQ : "Consume: donaciones.exchange\ny incentivos.exchange"
+ModDonaciones ----(0---- Port_AMQP_Local
+ModIncentivos ----(0---- Port_AMQP_Local
+ModNotificaciones ----(0---- Port_AMQP_Local
+ModLogisticaLocal ----(0---- Port_AMQP_Local
+
+ModLogisticaLocal ----(0---- Port_Mongo_Local
+
+' 2. Conexiones Profile: prod unificadas en puertos
+ModDonaciones ----(0---- Port_JPA_Cloud
+ModIncentivos ----(0---- Port_JPA_Cloud
+ModNotificaciones ----(0---- Port_JPA_Cloud
+
+ModDonaciones ----(0---- Port_AMQP_Cloud
+ModIncentivos ----(0---- Port_AMQP_Cloud
+ModNotificaciones ----(0---- Port_AMQP_Cloud
+ModLogisticaLocal ----(0---- Port_AMQP_Cloud
+ModLogisticaNube1 ----(0---- Port_AMQP_Cloud
+ModLogisticaNube2 ----(0---- Port_AMQP_Cloud
+
+ModLogisticaLocal ----(0---- Port_Mongo_Cloud
+ModLogisticaNube1 ----(0---- Port_Mongo_Cloud
+ModLogisticaNube2 ----(0---- Port_Mongo_Cloud
 
 ' 3. Broker de Logística (Feign Clients)
 BrokerLogistica ----(0---- ModLogisticaNube1 : "HTTP POST (Prioridad 1)"

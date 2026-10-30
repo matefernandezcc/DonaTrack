@@ -1,4 +1,5 @@
 @startuml Secuencia-EntregaFallida
+!pragma layout smetana
 title Reporte de Entrega Fallida y Replanificación
 
 actor "Chofer" as chofer
@@ -13,9 +14,9 @@ participant "NotificacionesListener" as notiListener
 participant "LogísticaListener" as logListener
 participant "ReplanificarEntregaUseCase" as replanUseCase
 
-chofer -> logCtrl: POST /api/rutas/{id}/entregas/{idEntrega}/falla
+chofer -> logCtrl: POST /api/entregas/{idDonacion}/falla
 activate logCtrl
-logCtrl -> fallaEntrega: reportarFalla(idEntrega, motivo)
+logCtrl -> fallaEntrega: reportarFalla(idDonacion, motivo)
 activate fallaEntrega
 fallaEntrega -> fallaEntrega: Marca entrega como FALLIDA
 fallaEntrega -> logPub: publishEvent(EntregaFallidaEvent)
