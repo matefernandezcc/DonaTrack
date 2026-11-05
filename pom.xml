@@ -47,7 +47,7 @@
         <module>donatrack-incentivos</module>
         <module>donatrack-notificaciones</module>
         <module>donatrack-auth</module>
-        <module>donatrack-server</module>
+        <module>donatrack-web</module>
     </modules>
 
     <dependencies>
