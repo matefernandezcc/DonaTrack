@@ -43,22 +43,22 @@
           <div class="mock mock--card" style="box-shadow: 0 12px 32px -8px rgba(0,0,0,0.18);">
             <div class="mock__head" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line-2); padding-bottom: 8px;">
               <span style="font-weight: 700; font-size: 0.85rem; color: #0b4a8f;" id="hero-tracker-title">Rastreo de Remito Digital</span>
-              <span class="pill pill--green" id="hero-tracker-status" style="font-size: 0.72rem; padding: 2px 8px;">En entrega</span>
+              <span class="pill pill--green" id="hero-tracker-status" style="font-size: 0.72rem; padding: 2px 8px;">ENTREGADA</span>
             </div>
 
             <!-- Buscador Interactivo de Remitos -->
             <form id="hero-tracker-form" onsubmit="buscarRemitoHero(event)" style="margin: 12px 0 10px; display: flex; gap: 6px;">
-              <input type="text" id="hero-tracker-input" placeholder="Ej: #DT-2418, 3300, 3200..." value="#DT-2418"
+              <input type="text" id="hero-tracker-input" placeholder="Ej: #DT-3300, #DT-3200..." value="#DT-3300"
                      style="flex: 1; padding: 7px 10px; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.82rem; background: var(--bg); color: var(--fg);" />
               <button type="submit" style="padding: 7px 12px; background: #0176d3; color: #fff; border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer;">Rastrear</button>
             </form>
 
             <div id="hero-tracker-details" style="font-size: 0.78rem; line-height: 1.5; color: var(--muted); margin-bottom: 10px;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                <span>Destino:</span> <strong id="hero-tracker-dest" style="color: var(--fg);">Hogar Caminos, San Isidro</strong>
+                <span>Destino:</span> <strong id="hero-tracker-dest" style="color: var(--fg);">Av. Santa Fe 3200, Palermo, CABA</strong>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                <span>Carga:</span> <strong id="hero-tracker-peso" style="color: var(--fg);">85 kg (Abrigo clasificado)</strong>
+                <span>Carga:</span> <strong id="hero-tracker-peso" style="color: var(--fg);">85.0 kg (0.5 m³)</strong>
               </div>
               <div style="display: flex; justify-content: space-between;">
                 <span>Transporte:</span> <strong id="hero-tracker-camion" style="color: var(--fg);">AF456CD · Laura Fernández</strong>
@@ -67,19 +67,19 @@
 
             <button id="hero-tracker-proof-btn" onclick="verComprobanteHero()" type="button"
                     style="width: 100%; padding: 7px 10px; background: #f0f7ff; color: #0176d3; border: 1px solid #b8daf8; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
-              📄 Ver comprobante fotográfico y acta
+              📄 Ver comprobante auditado (#DT-3300)
             </button>
           </div>
 
-          <div class="mock mock--badge">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
+          <div class="mock mock--badge" style="width: 100%; max-width: 420px; box-sizing: border-box;">
+            <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 26px; height: 26px; flex-shrink: 0;">
               <path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z" fill="#0B4A8F" />
               <path d="m9 12 2 2 4-4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"
                 stroke-linejoin="round" />
             </svg>
             <div>
-              <strong>ONG verificada</strong>
-              <span>Comedor "El Faro"</span>
+              <strong style="font-size: 0.82rem; color: var(--fg);">ONG verificada</strong>
+              <span style="font-size: 0.75rem; color: var(--muted);">Comedor "El Faro" · Entregas auditadas con remito digital</span>
             </div>
           </div>
         </div>
@@ -665,16 +665,16 @@
     <script th:src="@{/js/map.js}" defer></script>
     <script>
       let lastRemitoData = {
-        codigo: "#DT-2418",
+        codigo: "#DT-3300",
         estado: "ENTREGADA",
-        direccion: "Hogar Caminos, San Isidro",
-        peso: "85 kg",
+        direccion: "Av. Santa Fe 3200, Palermo, CABA",
+        peso: "85.0 kg",
         volumen: "0.5 m³",
         patente: "AF456CD",
         chofer: "Laura Fernández",
         fecha: "28 Oct 2026",
         comprobante: {
-          fotos: ["https://storage.donatrack.org/remitos/remito-3300.jpg"]
+          fotos: ["https://storage.donatrack.org/remitos/remito-3300.jpg", "https://storage.donatrack.org/fotos/caja-alimentos-1.jpg"]
         }
       };
 
