@@ -248,3 +248,21 @@ CREATE TABLE IF NOT EXISTS notificaciones.notificaciones (
     fecha_envio TIMESTAMP,
     completada BOOLEAN DEFAULT FALSE
 );
+
+-- ============================================================================
+-- SCHEMA: auth
+-- ============================================================================
+CREATE SCHEMA IF NOT EXISTS auth;
+
+CREATE TABLE IF NOT EXISTS auth.usuarios (
+    usuario_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    rol VARCHAR(50) NOT NULL,
+    persona_id UUID,
+    proveedor_oauth VARCHAR(50) DEFAULT 'LOCAL',
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
