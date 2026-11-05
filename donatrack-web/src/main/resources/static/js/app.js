@@ -5,12 +5,15 @@
   // --- Theme Toggle ---
   const themeBtn = document.getElementById("theme-toggle");
   if (themeBtn) {
+    const isDarkInit = document.documentElement.getAttribute("data-theme") === "dark";
+    themeBtn.setAttribute("aria-pressed", String(isDarkInit));
     themeBtn.addEventListener("click", () => {
       const docEl = document.documentElement;
       const isDark = docEl.getAttribute("data-theme") === "dark";
       const newTheme = isDark ? "light" : "dark";
       docEl.setAttribute("data-theme", newTheme);
       localStorage.setItem("dt-theme", newTheme);
+      themeBtn.setAttribute("aria-pressed", String(!isDark));
     });
   }
 

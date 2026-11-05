@@ -42,7 +42,7 @@
 .btn--primary {
     background: var(--orange);
     color: #fff;
-    box-shadow: 0 10px 24px -10px rgba(242, 92, 31, 0.55),
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16),
         inset 0 -1px 0 rgba(0, 0, 0, 0.08);
 }
 
@@ -50,7 +50,7 @@
     background: var(--orange-600);
     color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 14px 30px -10px rgba(242, 92, 31, 0.65);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
 }
 
 .btn--secondary {
@@ -110,10 +110,8 @@
 }
 
 .grad-text {
-    background: linear-gradient(135deg, var(--green), var(--blue-600));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--green);
+    font-weight: 800;
 }
 
 .pill {
@@ -277,7 +275,7 @@
 }
 
 .quote figcaption span {
-    color: #fff;
+    color: var(--muted);
     font-size: 0.85rem;
 }
 

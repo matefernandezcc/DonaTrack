@@ -3,19 +3,20 @@
 <header class="nav" id="nav" th:fragment="header">
   <div class="nav__inner container">
     <a th:href="@{/}" class="nav__brand" aria-label="DonaTrack, inicio">
-      <img th:src="@{/img/package.svg}" class="logo" alt="" aria-hidden="true" />
+      <img th:src="@{/img/package.svg}" src="/img/package.svg" class="logo" alt="DonaTrack" width="32" height="32" />
       <span class="nav__brand-text">DonaTrack</span>
     </a>
 
     <nav class="nav__links" aria-label="Navegación principal">
-      <a th:href="@{/#como-funciona}">Cómo funciona</a>
+      <a th:href="@{/#que-donar}">Qué donar</a>
+      <a th:href="@{/#recorrido}">Recorrido</a>
       <a th:href="@{/#campanas}">Campañas</a>
-      <a th:href="@{/#organizaciones}">Organizaciones</a>
+      <a th:href="@{/#mapa}">Mapa solidario</a>
       <a th:href="@{/#impacto}">Impacto</a>
     </nav>
 
     <div class="nav__cta">
-      <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema">
+      <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema claro u oscuro" aria-pressed="false">
         <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="5"></circle>
@@ -43,9 +44,10 @@
   </div>
 
   <div class="nav__drawer" id="nav-drawer" hidden>
-    <a th:href="@{/#como-funciona}">Cómo funciona</a>
+    <a th:href="@{/#que-donar}">Qué donar</a>
+    <a th:href="@{/#recorrido}">Recorrido</a>
     <a th:href="@{/#campanas}">Campañas</a>
-    <a th:href="@{/#organizaciones}">Organizaciones</a>
+    <a th:href="@{/#mapa}">Mapa solidario</a>
     <a th:href="@{/#impacto}">Impacto</a>
     <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
   </div>

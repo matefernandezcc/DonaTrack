@@ -61,12 +61,12 @@
 
       // Switch to the end truck image
       if (truckImg && !truckImg.src.includes("delivery-truck-end")) {
-        truckImg.src = "img/delivery-truck-end.svg";
+        truckImg.src = "/img/delivery-truck-end.svg";
       }
     } else {
       // Ensure it stays as the start truck image
       if (truckImg && !truckImg.src.includes("delivery-truck-start")) {
-        truckImg.src = "img/delivery-truck-start.svg";
+        truckImg.src = "/img/delivery-truck-start.svg";
       }
     }
 
