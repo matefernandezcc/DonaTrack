@@ -3,7 +3,7 @@
 # =========================
 
 .DEFAULT_GOAL := help
-SERVER_MODULE=donatrack-server
+SERVER_MODULE=donatrack-web
 
 # =========================
 # BUILD
@@ -14,7 +14,7 @@ build:
 
 package:
 	mvn clean package -DskipTests
-	docker compose up --build -d
+	docker compose --profile local up --build -d
 
 # =========================
 # TEST
@@ -35,8 +35,11 @@ test-logistica:
 test-notificaciones:
 	mvn test -pl donatrack-notificaciones
 
-test-server:
-	mvn test -pl donatrack-server
+test-auth:
+	mvn test -pl donatrack-auth
+
+test-web:
+	mvn test -pl donatrack-web
 
 # =========================
 # QUALITY / FORMAT
@@ -74,8 +77,11 @@ logistica:
 notificaciones:
 	mvn install -pl donatrack-notificaciones -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-notificaciones
 
-server:
-	mvn install -pl donatrack-server -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-server
+auth:
+	mvn install -pl donatrack-auth -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-auth
+
+web:
+	mvn install -pl donatrack-web -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-web
 
 ngrok:
 	ngrok http --url=exclude-stoplight-registrar.ngrok-free.dev 8080
@@ -108,12 +114,13 @@ N8N_CONTAINER=n8n_donatrack
 POSTGRES_CONTAINER=postgres_donatrack
 
 docker-up:
-	docker compose up -d
+	docker compose --profile local up -d
 
 docker-down:
-	docker compose down
+	docker compose --profile local down
 
 db-init:
+	@docker compose --profile local up -d postgres-donatrack mongo-donatrack
 	@echo "Esperando que PostgreSQL esté listo..."
 	@until docker exec $(POSTGRES_CONTAINER) pg_isready -U postgres > /dev/null 2>&1; do \
 		echo "PostgreSQL está arrancando..."; \
@@ -149,7 +156,7 @@ n8n-export:
 	docker cp $(N8N_CONTAINER):/tmp/workflows.json ./n8n/workflows/workflows.json
 
 setup:
-	docker compose up -d
+	docker compose --profile local up -d
 	make db-init
 	@echo "Esperando a n8n..."
 	sleep 10
@@ -167,13 +174,16 @@ help:
 	@echo "  make test-incentivos     -> run incentivos tests"
 	@echo "  make test-logistica      -> run logistica tests"
 	@echo "  make test-notificaciones -> run notificaciones tests"
+	@echo "  make test-auth           -> run auth tests"
+	@echo "  make test-web            -> run web tests"
 	@echo "  make format              -> format code"
-	@echo "  make run                 -> start server"
+	@echo "  make run                 -> start web SSR client (port 8080)"
 	@echo "  make donaciones          -> start donaciones service (port 8000)"
 	@echo "  make incentivos          -> start incentivos service (port 8001)"
 	@echo "  make logistica           -> start logistica service (port 8002)"
 	@echo "  make notificaciones      -> start notificaciones service (port 8003)"
-	@echo "  make server              -> start general server service (port 8080)"
+	@echo "  make auth                -> start auth service (port 8004)"
+	@echo "  make web                 -> start web SSR client (port 8080)"
 	@echo "  make ci                  -> full pipeline"
 	@echo "  make db-init             -> init schemas and seed data in local postgres"
 	@echo "  make setup               -> start docker, init database, and import n8n workflows"
