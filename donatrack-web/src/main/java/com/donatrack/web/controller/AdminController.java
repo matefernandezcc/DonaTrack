@@ -32,14 +32,28 @@ public class AdminController {
   private final LogisticaGateway logisticaGateway;
   private final IncentivosGateway incentivosGateway;
   private final DonacionesGateway donacionesGateway;
+  private final com.donatrack.web.gateway.AuthGateway authGateway;
+  private final com.donatrack.web.service.SolicitudOngService solicitudOngService;
 
   public AdminController(
       LogisticaGateway logisticaGateway,
       IncentivosGateway incentivosGateway,
       DonacionesGateway donacionesGateway) {
+    this(logisticaGateway, incentivosGateway, donacionesGateway, null, new com.donatrack.web.service.SolicitudOngService());
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public AdminController(
+      LogisticaGateway logisticaGateway,
+      IncentivosGateway incentivosGateway,
+      DonacionesGateway donacionesGateway,
+      com.donatrack.web.gateway.AuthGateway authGateway,
+      com.donatrack.web.service.SolicitudOngService solicitudOngService) {
     this.logisticaGateway = logisticaGateway;
     this.incentivosGateway = incentivosGateway;
     this.donacionesGateway = donacionesGateway;
+    this.authGateway = authGateway;
+    this.solicitudOngService = solicitudOngService;
   }
 
   @ModelAttribute
@@ -206,6 +220,70 @@ public class AdminController {
       redirectAttributes.addFlashAttribute("flashError", "Error al importar CSV: " + e.getMessage());
     }
     return "redirect:/app/admin/csv";
+  }
+
+  // ==================== SECCIÓN MASTER: USUARIOS Y ROLES ====================
+
+  @GetMapping("/admin/usuarios")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String adminUsuarios(Model model) {
+    List<Map<String, Object>> usuarios =
+        authGateway != null ? authGateway.listarUsuarios() : Collections.emptyList();
+    List<com.donatrack.web.service.SolicitudOngService.SolicitudOng> solicitudes =
+        solicitudOngService.listarTodas();
+
+    model.addAttribute("usuarios", usuarios);
+    model.addAttribute("solicitudes", solicitudes);
+    return "admin/admin/usuarios";
+  }
+
+  @PostMapping("/admin/usuarios/{id}/rol")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String cambiarRolUsuario(
+      @PathVariable("id") UUID usuarioId,
+      @RequestParam("rol") String rol,
+      RedirectAttributes redirectAttributes) {
+    try {
+      if (authGateway != null) {
+        authGateway.cambiarRol(usuarioId, rol);
+        redirectAttributes.addFlashAttribute(
+            "flashOk", "Rol actualizado exitosamente a " + rol.toUpperCase());
+      }
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al actualizar rol: " + e.getMessage());
+    }
+    return "redirect:/app/admin/usuarios";
+  }
+
+  @PostMapping("/admin/solicitudes-ong/{id}/aprobar")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String aprobarSolicitudOng(
+      @PathVariable("id") String solicitudId,
+      RedirectAttributes redirectAttributes) {
+    try {
+      solicitudOngService.actualizarEstado(solicitudId, "APROBADA");
+      var solicitudOpt = solicitudOngService.obtenerPorId(solicitudId);
+      if (solicitudOpt.isPresent()) {
+        var s = solicitudOpt.get();
+        if (authGateway != null) {
+          var usuarios = authGateway.listarUsuarios();
+          var userMatch = usuarios.stream()
+              .filter(u -> s.email().equalsIgnoreCase(String.valueOf(u.get("email"))))
+              .findFirst();
+          if (userMatch.isPresent()) {
+            UUID uId = UUID.fromString(String.valueOf(userMatch.get().get("id")));
+            authGateway.cambiarRol(uId, "BENEFICIARIA");
+          }
+        }
+      }
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Solicitud de ONG #" + solicitudId + " verificada y aprobada con éxito.");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al aprobar solicitud: " + e.getMessage());
+    }
+    return "redirect:/app/admin/usuarios";
   }
 
   // ==================== SECCIÓN DONANTE ====================

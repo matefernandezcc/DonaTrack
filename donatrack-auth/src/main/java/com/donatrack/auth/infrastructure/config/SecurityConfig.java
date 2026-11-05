@@ -87,7 +87,9 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(
                         "/auth/login",
+                        "/auth/register",
                         "/auth/token/exchange",
+                        "/admin/usuarios/**",
                         "/healthcheck",
                         "/actuator/**",
                         "/oauth2/**",

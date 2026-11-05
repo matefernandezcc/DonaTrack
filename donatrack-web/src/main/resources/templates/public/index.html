@@ -641,7 +641,7 @@
               gestionar entregas con transparencia.
             </p>
             <div class="access__ctas">
-              <a th:href="@{/login(rol='BENEFICIARIA')}" class="btn btn--secondary">Solicitar verificación ONG</a>
+              <button type="button" onclick="abrirModalSolicitudOng(event)" class="btn btn--secondary" style="cursor: pointer;">Solicitar verificación ONG</button>
               <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
@@ -658,6 +658,80 @@
         </p>
       </div>
     </section>
+
+    <!-- Modal Solicitud Verificación ONG -->
+    <dialog class="modal" id="modal-solicitud-ong" aria-modal="true" aria-labelledby="modal-ong-title" hidden>
+      <div class="modal__backdrop" onclick="cerrarModalSolicitudOng()"></div>
+      <div class="modal__panel" style="max-width: 580px; width: 92%; max-height: 90vh; overflow-y: auto;">
+        <button class="modal__close" aria-label="Cerrar" onclick="cerrarModalSolicitudOng()">&times;</button>
+        <div class="modal__body" style="padding: 2rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(1, 118, 211, 0.12); color: #0176d3; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">🏢</div>
+            <div>
+              <h3 id="modal-ong-title" style="margin: 0; font-size: 1.3rem; font-weight: 700; color: #032d60;">Solicitud de Verificación ONG</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: #5c768d;">Registrá tu entidad para recibir donaciones trazadas en DonaTrack</p>
+            </div>
+          </div>
+
+          <form id="form-solicitud-ong" onsubmit="enviarSolicitudOng(event)">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #333; margin-bottom: 0.25rem;">Nombre de la Organización *</label>
+                <input type="text" id="ong-nombre" required placeholder="Ej: Comedor Esperanza" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #c9c9c9; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #333; margin-bottom: 0.25rem;">CUIT / Identificador Fiscal *</label>
+                <input type="text" id="ong-cuit" required placeholder="30-71234567-9" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #c9c9c9; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #333; margin-bottom: 0.25rem;">Nombre del Responsable *</label>
+                <input type="text" id="ong-responsable" required placeholder="Ej: Marta Gómez" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #c9c9c9; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #333; margin-bottom: 0.25rem;">Tipo de Entidad</label>
+                <select id="ong-tipo" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #c9c9c9; border-radius: 6px; font-size: 0.88rem; background: white; box-sizing: border-box;">
+                  <option value="COMEDOR">Comedor Comunitario / Merendero</option>
+                  <option value="FUNDACION">Fundación / Asociación Civil</option>
+                  <option value="REFUGIO">Refugio / Hogar de Tránsito</option>
+                  <option value="OTRO">Otra Organización Social</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #333; margin-bottom: 0.25rem;">Correo Electrónico *</label>
+                <input type="email" id="ong-email" required placeholder="contacto@organizacion.org" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #c9c9c9; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #333; margin-bottom: 0.25rem;">Teléfono de Contacto *</label>
+                <input type="tel" id="ong-telefono" required placeholder="+54 11 5555-4321" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #c9c9c9; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
+              </div>
+            </div>
+
+            <div style="margin-bottom: 0.85rem;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #333; margin-bottom: 0.25rem;">Dirección de Sede / Comedor *</label>
+              <input type="text" id="ong-direccion" required placeholder="Calle, Número, Localidad, Provincia" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #c9c9c9; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 1.1rem;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #333; margin-bottom: 0.25rem;">Principales Necesidades / Capacidad de Recepción</label>
+              <textarea id="ong-necesidades" rows="2" placeholder="Ej: Recibimos alimentos no perecederos y ropa para 120 familias." style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #c9c9c9; border-radius: 6px; font-size: 0.88rem; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+            </div>
+
+            <div id="modal-ong-alert" style="display: none; padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem;"></div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+              <button type="button" onclick="cerrarModalSolicitudOng()" class="btn btn--ghost" style="padding: 0.55rem 1.1rem;">Cancelar</button>
+              <button type="submit" id="btn-submit-ong" class="btn btn--primary" style="padding: 0.55rem 1.4rem; background: #0176d3; color: white;">Enviar Solicitud</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </dialog>
   </main>
 
   <th:block th:fragment="scripts">
@@ -770,6 +844,80 @@
           }
         } catch (err) {
           console.error("Error calculando impacto:", err);
+        }
+      }
+
+      function abrirModalSolicitudOng(e) {
+        if (e) e.preventDefault();
+        const m = document.getElementById("modal-solicitud-ong");
+        if (m) {
+          m.removeAttribute("hidden");
+          m.showModal();
+          document.body.style.overflow = "hidden";
+        }
+      }
+
+      function cerrarModalSolicitudOng() {
+        const m = document.getElementById("modal-solicitud-ong");
+        if (m) {
+          m.close();
+          m.setAttribute("hidden", "true");
+          document.body.style.overflow = "";
+        }
+      }
+
+      async function enviarSolicitudOng(e) {
+        e.preventDefault();
+        const btn = document.getElementById("btn-submit-ong");
+        const alertBox = document.getElementById("modal-ong-alert");
+        btn.disabled = true;
+        btn.textContent = "Enviando solicitud...";
+
+        const payload = {
+          nombreOng: document.getElementById("ong-nombre").value,
+          nombreOrganizacion: document.getElementById("ong-nombre").value,
+          cuit: document.getElementById("ong-cuit").value,
+          responsable: document.getElementById("ong-responsable").value,
+          tipo: document.getElementById("ong-tipo").value,
+          tipoEntidad: document.getElementById("ong-tipo").options[document.getElementById("ong-tipo").selectedIndex].text,
+          email: document.getElementById("ong-email").value,
+          telefono: document.getElementById("ong-telefono").value,
+          direccion: document.getElementById("ong-direccion").value,
+          necesidades: document.getElementById("ong-necesidades").value
+        };
+
+        try {
+          const res = await fetch("/api/public/solicitudes-ong", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          alertBox.style.display = "block";
+          if (res.ok) {
+            alertBox.style.background = "#e6f4ea";
+            alertBox.style.color = "#137333";
+            alertBox.style.border = "1px solid #ceead6";
+            alertBox.textContent = "✅ " + (data.mensaje || "¡Solicitud enviada con éxito! El equipo de DonaTrack la revisará.");
+            document.getElementById("form-solicitud-ong").reset();
+            setTimeout(() => {
+              cerrarModalSolicitudOng();
+              alertBox.style.display = "none";
+            }, 2500);
+          } else {
+            alertBox.style.background = "#fce8e6";
+            alertBox.style.color = "#c5221f";
+            alertBox.style.border = "1px solid #fad2cf";
+            alertBox.textContent = "❌ " + (data.error || "No se pudo registrar la solicitud.");
+          }
+        } catch (err) {
+          alertBox.style.display = "block";
+          alertBox.style.background = "#fce8e6";
+          alertBox.style.color = "#c5221f";
+          alertBox.textContent = "❌ Error de conexión al enviar la solicitud.";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Enviar Solicitud";
         }
       }
     </script>

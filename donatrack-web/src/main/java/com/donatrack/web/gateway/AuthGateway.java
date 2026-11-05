@@ -35,5 +35,37 @@ public class AuthGateway {
         .retrieve()
         .body(TokenResponse.class);
   }
+
+  public TokenResponse registrar(Map<String, Object> payload) {
+    return authClient
+        .post()
+        .uri("/auth/register")
+        .body(payload)
+        .retrieve()
+        .body(TokenResponse.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  public java.util.List<Map<String, Object>> listarUsuarios() {
+    try {
+      return authClient
+          .get()
+          .uri("/admin/usuarios")
+          .retrieve()
+          .body(java.util.List.class);
+    } catch (Exception e) {
+      log.error("Error al listar usuarios desde auth service: {}", e.getMessage());
+      return java.util.Collections.emptyList();
+    }
+  }
+
+  public void cambiarRol(java.util.UUID usuarioId, String nuevoRol) {
+    authClient
+        .put()
+        .uri("/admin/usuarios/{id}/rol", usuarioId)
+        .body(Map.of("rol", nuevoRol))
+        .retrieve()
+        .toBodilessEntity();
+  }
 }
 

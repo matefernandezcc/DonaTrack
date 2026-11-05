@@ -48,6 +48,65 @@ public class AuthService {
     return construirTokenResponse(usuario);
   }
 
+  public TokenResponse registrarUsuario(com.donatrack.auth.infrastructure.adapters.in.api.dto.RegisterRequest request) {
+    String username = request.username().trim().toLowerCase();
+    String email = request.email().trim().toLowerCase();
+
+    if (usuarioRepository.existsByUsername(username)) {
+      throw new IllegalArgumentException("El nombre de usuario '" + username + "' ya está registrado");
+    }
+    if (usuarioRepository.existsByEmail(email)) {
+      throw new IllegalArgumentException("El correo '" + email + "' ya está registrado");
+    }
+
+    com.donatrack.auth.domain.entities.Rol rol = com.donatrack.auth.domain.entities.Rol.DONANTE;
+    if (request.rol() != null && !request.rol().isBlank()) {
+      try {
+        rol = com.donatrack.auth.domain.entities.Rol.valueOf(request.rol().trim().toUpperCase());
+      } catch (IllegalArgumentException ignored) {}
+    }
+
+    Usuario nuevo =
+        Usuario.builder()
+            .username(username)
+            .password(passwordEncoder.encode(request.password()))
+            .nombre(request.nombre().trim())
+            .email(email)
+            .rol(rol)
+            .personaId(UUID.randomUUID())
+            .proveedorOAuth("LOCAL")
+            .build();
+
+    Usuario guardado = usuarioRepository.save(nuevo);
+    return construirTokenResponse(guardado);
+  }
+
+  public java.util.List<Map<String, Object>> listarUsuarios() {
+    return usuarioRepository.findAll().stream()
+        .map(u -> {
+          Map<String, Object> map = new java.util.LinkedHashMap<>();
+          map.put("id", u.getId() != null ? u.getId().toString() : "");
+          map.put("username", u.getUsername());
+          map.put("nombre", u.getNombre());
+          map.put("email", u.getEmail());
+          map.put("rol", u.getRol().name());
+          map.put("personaId", u.getPersonaId() != null ? u.getPersonaId().toString() : "");
+          map.put("proveedorOAuth", u.getProveedorOAuth());
+          map.put("fechaCreacion", u.getFechaCreacion() != null ? u.getFechaCreacion().toString() : "");
+          return map;
+        })
+        .collect(java.util.stream.Collectors.toList());
+  }
+
+  public void cambiarRolUsuario(UUID usuarioId, String nuevoRolStr) {
+    Usuario usuario = usuarioRepository.findById(usuarioId)
+        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
+    com.donatrack.auth.domain.entities.Rol nuevoRol =
+        com.donatrack.auth.domain.entities.Rol.valueOf(nuevoRolStr.trim().toUpperCase());
+    usuario.setRol(nuevoRol);
+    usuarioRepository.save(usuario);
+  }
+
   public String generarCodigoIntercambio(Usuario usuario) {
     String code = UUID.randomUUID().toString();
     exchangeCodes.put(code, new CodeEntry(usuario, Instant.now().plusSeconds(60)));

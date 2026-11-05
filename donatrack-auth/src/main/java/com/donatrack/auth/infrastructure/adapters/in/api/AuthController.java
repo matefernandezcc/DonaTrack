@@ -8,7 +8,9 @@ import com.donatrack.auth.infrastructure.adapters.in.api.dto.TokenResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +45,29 @@ public class AuthController {
   public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
     TokenResponse response = authService.login(request);
     return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/auth/register")
+  public ResponseEntity<TokenResponse> register(
+      @Valid @RequestBody com.donatrack.auth.infrastructure.adapters.in.api.dto.RegisterRequest request) {
+    TokenResponse response = authService.registrarUsuario(request);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/admin/usuarios")
+  public ResponseEntity<java.util.List<Map<String, Object>>> listarUsuarios() {
+    return ResponseEntity.ok(authService.listarUsuarios());
+  }
+
+  @PutMapping("/admin/usuarios/{id}/rol")
+  public ResponseEntity<Map<String, String>> cambiarRol(
+      @PathVariable UUID id, @RequestBody Map<String, String> body) {
+    String nuevoRol = body.get("rol");
+    if (nuevoRol == null || nuevoRol.isBlank()) {
+      return ResponseEntity.badRequest().body(Map.of("error", "El campo 'rol' es requerido"));
+    }
+    authService.cambiarRolUsuario(id, nuevoRol);
+    return ResponseEntity.ok(Map.of("mensaje", "Rol actualizado exitosamente a " + nuevoRol));
   }
 
   @PostMapping("/auth/token/exchange")

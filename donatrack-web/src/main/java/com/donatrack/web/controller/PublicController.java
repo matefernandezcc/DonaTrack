@@ -24,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -38,6 +39,7 @@ public class PublicController {
   private final LogisticaGateway logisticaGateway;
   private final JwtDecoder jwtDecoder;
   private final SecurityContextRepository securityContextRepository;
+  private final com.donatrack.web.service.SolicitudOngService solicitudOngService;
 
   public PublicController(
       AuthGateway authGateway,
@@ -45,11 +47,23 @@ public class PublicController {
       LogisticaGateway logisticaGateway,
       JwtDecoder jwtDecoder,
       SecurityContextRepository securityContextRepository) {
+    this(authGateway, incentivosGateway, logisticaGateway, jwtDecoder, securityContextRepository, new com.donatrack.web.service.SolicitudOngService());
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public PublicController(
+      AuthGateway authGateway,
+      IncentivosGateway incentivosGateway,
+      LogisticaGateway logisticaGateway,
+      JwtDecoder jwtDecoder,
+      SecurityContextRepository securityContextRepository,
+      com.donatrack.web.service.SolicitudOngService solicitudOngService) {
     this.authGateway = authGateway;
     this.incentivosGateway = incentivosGateway;
     this.logisticaGateway = logisticaGateway;
     this.jwtDecoder = jwtDecoder;
     this.securityContextRepository = securityContextRepository;
+    this.solicitudOngService = solicitudOngService;
   }
 
   @GetMapping("/healthcheck")
@@ -208,6 +222,55 @@ public class PublicController {
       log.warn("Fallo de autenticación para usuario {}: {}", username, e.getMessage());
       redirectAttributes.addFlashAttribute("loginError", "Credenciales inválidas. Reintentá.");
       return "redirect:/login";
+    }
+  }
+
+  @GetMapping("/registro")
+  public String mostrarRegistro(Model model) {
+    return "public/registro";
+  }
+
+  @PostMapping("/registro")
+  public String procesarRegistro(
+      @RequestParam("nombre") String nombre,
+      @RequestParam("username") String username,
+      @RequestParam("email") String email,
+      @RequestParam("password") String password,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      RedirectAttributes redirectAttributes) {
+    try {
+      TokenResponse tokenResponse =
+          authGateway.registrar(
+              Map.of(
+                  "nombre", nombre,
+                  "username", username,
+                  "email", email,
+                  "password", password,
+                  "rol", "DONANTE"));
+      establecerSesionSegura(tokenResponse.accessToken(), request, response);
+      String rol = tokenResponse.user().rol();
+      return "redirect:/app/" + rol.toLowerCase();
+    } catch (Exception e) {
+      log.warn("Fallo al registrar usuario {}: {}", username, e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "registerError", "No se pudo crear la cuenta: " + e.getMessage());
+      return "redirect:/registro";
+    }
+  }
+
+  @PostMapping("/api/public/solicitudes-ong")
+  @ResponseBody
+  public ResponseEntity<?> registrarSolicitudOng(@RequestBody Map<String, String> body) {
+    try {
+      var solicitud = solicitudOngService.registrarSolicitud(body);
+      return ResponseEntity.ok(
+          Map.of(
+              "ok", true,
+              "mensaje", "Solicitud registrada con éxito. Un administrador auditará los datos para habilitar el portal.",
+              "id", solicitud.id()));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
   }
 
