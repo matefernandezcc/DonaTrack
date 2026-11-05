@@ -65,10 +65,21 @@ public class AdminController {
   }
 
   private UUID resolverDonanteId(Authentication auth) {
-    if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-      return DEFAULT_DONANTE_ID;
+    if (auth instanceof JwtAuthenticationToken jwt) {
+      String pId = jwt.getToken().getClaimAsString("personaId");
+      if (pId != null && !pId.isBlank()) {
+        try {
+          return UUID.fromString(pId);
+        } catch (IllegalArgumentException ignored) {}
+      }
+      String sub = jwt.getToken().getSubject();
+      if (sub != null && !sub.isBlank()) {
+        try {
+          return UUID.fromString(sub);
+        } catch (IllegalArgumentException ignored) {}
+      }
     }
-    return resolverPersonaId(auth, DEFAULT_DONANTE_ID);
+    return DEFAULT_DONANTE_ID;
   }
 
   private UUID resolverBeneficiarioId(Authentication auth) {
@@ -205,6 +216,9 @@ public class AdminController {
     UUID donanteId = resolverDonanteId(auth);
     Map<String, Object> metricas = incentivosGateway.obtenerMetricas(donanteId);
     List<Map<String, Object>> insignias = incentivosGateway.obtenerInsignias(donanteId);
+    if (insignias == null) {
+      insignias = Collections.emptyList();
+    }
 
     // Métricas dinámicas calculadas 100% de la base de datos real
     long donaciones = 0;
@@ -216,22 +230,43 @@ public class AdminController {
       bienes = n.longValue();
     }
     long puntosReales = (donaciones * 500) + (bienes * 75);
-    if (puntosReales == 0 && donaciones > 0) {
-      puntosReales = donaciones * 250;
+
+    // Rango dinámico según puntos reales acumulados
+    String rangoNombre;
+    int rangoNivel;
+    long proximoObjetivo;
+    if (puntosReales >= 5000) {
+      rangoNombre = "Trailblazer Ranger";
+      rangoNivel = 4;
+      proximoObjetivo = 10000;
+    } else if (puntosReales >= 1500) {
+      rangoNombre = "Guardián Solidario";
+      rangoNivel = 3;
+      proximoObjetivo = 5000;
+    } else if (puntosReales >= 500) {
+      rangoNombre = "Colaborador Activo";
+      rangoNivel = 2;
+      proximoObjetivo = 1500;
+    } else {
+      rangoNombre = "Donante Inicial";
+      rangoNivel = 1;
+      proximoObjetivo = 500;
     }
 
-    long proximoObjetivo = 3000;
-    if (puntosReales >= 3000) proximoObjetivo = 5000;
-    if (puntosReales >= 5000) proximoObjetivo = 10000;
     long puntosFaltantes = Math.max(0, proximoObjetivo - puntosReales);
-    int progresoPct = (int) Math.min(100, Math.max(8, (puntosReales * 100) / proximoObjetivo));
+    int progresoPct = proximoObjetivo > 0 ? (int) Math.min(100, (puntosReales * 100) / proximoObjetivo) : 0;
+    boolean isNuevoUsuario = (donaciones == 0);
 
-    model.addAttribute("metricas", metricas);
+    model.addAttribute("metricas", metricas != null ? metricas : Collections.emptyMap());
     model.addAttribute("insignias", insignias);
+    model.addAttribute("totalInsignias", insignias.size());
     model.addAttribute("puntosReales", puntosReales);
+    model.addAttribute("rangoNombre", rangoNombre);
+    model.addAttribute("rangoNivel", rangoNivel);
     model.addAttribute("puntosFaltantes", puntosFaltantes);
     model.addAttribute("proximoObjetivo", proximoObjetivo);
     model.addAttribute("progresoPct", progresoPct);
+    model.addAttribute("isNuevoUsuario", isNuevoUsuario);
     return "admin/donante/panel";
   }
 

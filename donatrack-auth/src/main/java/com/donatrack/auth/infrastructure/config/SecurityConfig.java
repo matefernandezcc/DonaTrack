@@ -117,6 +117,10 @@ public class SecurityConfig {
                     Usuario usuario;
                     if (userOpt.isPresent()) {
                       usuario = userOpt.get();
+                      if (usuario.getPersonaId() == null) {
+                        usuario.setPersonaId(UUID.randomUUID());
+                        usuario = usuarioRepository.save(usuario);
+                      }
                     } else {
                       usuario =
                           Usuario.builder()
@@ -126,6 +130,7 @@ public class SecurityConfig {
                               .email(email)
                               .rol(Rol.DONANTE)
                               .proveedorOAuth("SOCIAL")
+                              .personaId(UUID.randomUUID())
                               .build();
                       usuario = usuarioRepository.save(usuario);
                     }

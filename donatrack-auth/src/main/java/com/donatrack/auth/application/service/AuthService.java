@@ -81,7 +81,7 @@ public class AuthService {
                       .email(email)
                       .rol(com.donatrack.auth.domain.entities.Rol.DONANTE)
                       .proveedorOAuth(proveedor)
-                      .personaId(UUID.fromString("a1111111-1111-4111-8111-111111111111"))
+                      .personaId(UUID.randomUUID())
                       .build();
               return usuarioRepository.save(nuevo);
             });
@@ -98,6 +98,10 @@ public class AuthService {
   }
 
   public TokenResponse construirTokenResponse(Usuario usuario) {
+    if (usuario.getPersonaId() == null) {
+      usuario.setPersonaId(UUID.randomUUID());
+      usuario = usuarioRepository.save(usuario);
+    }
     String token = jwtService.generarToken(usuario);
     return new TokenResponse(
         token,

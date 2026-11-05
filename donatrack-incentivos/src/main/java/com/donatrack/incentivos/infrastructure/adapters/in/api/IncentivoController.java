@@ -130,7 +130,7 @@ public class IncentivoController {
             .donacionesExitosas(totalExitosas)
             .totalOrganizacionesAyudadas((int) organizacionesAyudadas)
             .historialDonacionesPorMes(historialMap)
-            .posicionRanking(5) // Mock
+            .posicionRanking(totalHistorico > 0 ? 5 : 0)
             .build();
 
     return ResponseEntity.ok(dto);
@@ -170,26 +170,13 @@ public class IncentivoController {
         perfilDonanteRepository.findById(id).orElseGet(() -> new PerfilDonante(id));
     List<Insignia> insignias = new ArrayList<>(perfil.getInsigniasObtenidas());
 
-    if (insignias.isEmpty()) {
-      Insignia insigniaDefault =
-          new Insignia("Primer Aporte", "Otorgada al realizar la primera donación en el sistema");
-      insigniaDefault.setId(UUID.fromString("e1111111-1111-4111-8111-111111111111"));
-      insigniaDefault.setFechaObtencion(java.time.LocalDate.now());
-      insigniaDefault.setVisiblePublicamente(true);
-      insignias.add(insigniaDefault);
-      perfil.setInsigniasObtenidas(insignias);
+    if (!insignias.isEmpty()) {
+      Insignia insigniaADifundir = insignias.get(insignias.size() - 1);
       try {
-        perfilDonanteRepository.save(perfil);
+        difusionPort.difundirInsignia(new InsigniaObtenidaEvent(id, insigniaADifundir));
       } catch (Exception e) {
-        // Tolerancia a fallos en persistencia
+        // Tolerancia a fallos si n8n no está disponible
       }
-    }
-
-    Insignia insigniaADifundir = insignias.get(insignias.size() - 1);
-    try {
-      difusionPort.difundirInsignia(new InsigniaObtenidaEvent(id, insigniaADifundir));
-    } catch (Exception e) {
-      // Tolerancia a fallos si n8n no está disponible
     }
 
     return ResponseEntity.ok(insignias);
