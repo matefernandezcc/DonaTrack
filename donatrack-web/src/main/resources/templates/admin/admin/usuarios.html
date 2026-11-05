@@ -10,6 +10,31 @@
 
   <div id="main-content-slot">
 
+    <style>
+      .table-scroll-container {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0 0 8px 8px;
+        box-sizing: border-box;
+      }
+      .table-scroll-container::-webkit-scrollbar {
+        height: 7px;
+      }
+      .table-scroll-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+      .table-scroll-container::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 4px;
+      }
+      .table-scroll-container::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+      }
+    </style>
+
     <!-- Mensajes Flash -->
     <div th:if="${flashOk != null}" class="slds-notify slds-notify_alert slds-alert_success slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
       <span class="slds-assistive-text">Éxito</span>
@@ -22,7 +47,7 @@
     </div>
 
     <!-- ==================== TARJETA 1: TABLA DE USUARIOS Y ROLES (MASTER) ==================== -->
-    <article class="slds-card slds-m-bottom_x-large" style="border-radius: 8px; border: 1px solid #dddbda; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <article class="slds-card slds-m-bottom_x-large" style="border-radius: 8px; border: 1px solid #dddbda; box-shadow: 0 2px 8px rgba(0,0,0,0.06); width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box;">
       
       <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium" style="border-bottom: 1px solid #e5e5e5; background: #f8fafc;">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -47,58 +72,56 @@
         </div>
       </div>
 
-      <div class="slds-card__body slds-card__body_inner slds-p-around_none">
-        <div class="slds-table_responsive">
-          <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
-            <thead>
-              <tr class="slds-line-height_reset" style="background: #f1f5f9;">
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Usuario</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Nombre Completo</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Correo Electrónico</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Proveedor</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Rol Actual</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Acción de Asignación</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="u : ${usuarios}" class="slds-hint-parent">
-                <td style="font-weight: 600; color: #0f172a; padding: 12px 16px;">
-                  <span th:text="${u['username']}">donante</span>
-                </td>
-                <td style="color: #334155; padding: 12px 16px;" th:text="${u['nombre']}">María González</td>
-                <td style="color: #475569; font-family: monospace; font-size: 0.85rem; padding: 12px 16px;" th:text="${u['email']}">maria@donatrack.org</td>
-                <td style="padding: 12px 16px;">
-                  <span th:if="${u['proveedorOAuth'] == 'GOOGLE'}" class="slds-badge" style="background: #e8f0fe; color: #1a73e8; font-weight: 600;">Google SSO</span>
-                  <span th:if="${u['proveedorOAuth'] == 'GITHUB'}" class="slds-badge" style="background: #f3f4f6; color: #1f2937; font-weight: 600;">GitHub SSO</span>
-                  <span th:if="${u['proveedorOAuth'] == 'LOCAL' or u['proveedorOAuth'] == null or u['proveedorOAuth'] == 'SOCIAL'}" class="slds-badge slds-badge_lightest" style="font-weight: 600;">Local / Formulario</span>
-                </td>
-                <td style="padding: 12px 16px;">
-                  <span th:if="${u['rol'] == 'ADMIN'}" class="slds-badge slds-theme_error" style="font-weight: 700;">ADMIN</span>
-                  <span th:if="${u['rol'] == 'BENEFICIARIA'}" class="slds-badge slds-theme_success" style="font-weight: 700;">BENEFICIARIA</span>
-                  <span th:if="${u['rol'] == 'DONANTE'}" class="slds-badge slds-badge_lightest" style="font-weight: 700; color: #014486; border: 1px solid #b8daf8;">DONANTE</span>
-                </td>
-                <td style="padding: 12px 16px;">
-                  <!-- Formulario para cambiar rol del usuario en vivo -->
-                  <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/rol'}" method="post" style="display: flex; gap: 6px; align-items: center;">
-                    <select name="rol" class="slds-select" style="font-size: 0.8rem; padding: 4px 8px; height: 32px; border-radius: 4px; width: 140px;">
-                      <option value="DONANTE" th:selected="${u['rol'] == 'DONANTE'}">DONANTE</option>
-                      <option value="BENEFICIARIA" th:selected="${u['rol'] == 'BENEFICIARIA'}">BENEFICIARIA</option>
-                      <option value="ADMIN" th:selected="${u['rol'] == 'ADMIN'}">ADMIN</option>
-                    </select>
-                    <button type="submit" class="slds-button slds-button_brand slds-button_sm" style="height: 32px; border-radius: 4px; font-size: 0.78rem;">
-                      Cambiar
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="slds-card__body slds-p-around_none table-scroll-container">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" style="width: 100%; min-width: 780px;">
+          <thead>
+            <tr class="slds-line-height_reset" style="background: #f1f5f9;">
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Usuario</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Nombre Completo</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Correo Electrónico</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Proveedor</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Rol Actual</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Acción de Asignación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="u : ${usuarios}" class="slds-hint-parent">
+              <td style="font-weight: 600; color: #0f172a; padding: 10px 14px; white-space: nowrap;">
+                <span th:text="${u['username']}">donante</span>
+              </td>
+              <td style="color: #334155; padding: 10px 14px; white-space: nowrap;" th:text="${u['nombre']}">María González</td>
+              <td style="color: #475569; font-family: monospace; font-size: 0.82rem; padding: 10px 14px; white-space: nowrap;" th:text="${u['email']}">maria@donatrack.org</td>
+              <td style="padding: 10px 14px; white-space: nowrap;">
+                <span th:if="${u['proveedorOAuth'] == 'GOOGLE'}" class="slds-badge" style="background: #e8f0fe; color: #1a73e8; font-weight: 600; font-size: 0.75rem;">Google SSO</span>
+                <span th:if="${u['proveedorOAuth'] == 'GITHUB'}" class="slds-badge" style="background: #f3f4f6; color: #1f2937; font-weight: 600; font-size: 0.75rem;">GitHub SSO</span>
+                <span th:if="${u['proveedorOAuth'] == 'LOCAL' or u['proveedorOAuth'] == null or u['proveedorOAuth'] == 'SOCIAL'}" class="slds-badge slds-badge_lightest" style="font-weight: 600; font-size: 0.75rem;">Local / Formulario</span>
+              </td>
+              <td style="padding: 10px 14px; white-space: nowrap;">
+                <span th:if="${u['rol'] == 'ADMIN'}" class="slds-badge slds-theme_error" style="font-weight: 700; font-size: 0.75rem;">ADMIN</span>
+                <span th:if="${u['rol'] == 'BENEFICIARIA'}" class="slds-badge slds-theme_success" style="font-weight: 700; font-size: 0.75rem;">BENEFICIARIA</span>
+                <span th:if="${u['rol'] == 'DONANTE'}" class="slds-badge slds-badge_lightest" style="font-weight: 700; color: #014486; border: 1px solid #b8daf8; font-size: 0.75rem;">DONANTE</span>
+              </td>
+              <td style="padding: 10px 14px; white-space: nowrap;">
+                <!-- Formulario para cambiar rol del usuario en vivo -->
+                <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/rol'}" method="post" style="display: flex; gap: 6px; align-items: center; margin: 0;">
+                  <select name="rol" class="slds-select" style="font-size: 0.78rem; padding: 3px 6px; height: 30px; border-radius: 4px; width: 125px;">
+                    <option value="DONANTE" th:selected="${u['rol'] == 'DONANTE'}">DONANTE</option>
+                    <option value="BENEFICIARIA" th:selected="${u['rol'] == 'BENEFICIARIA'}">BENEFICIARIA</option>
+                    <option value="ADMIN" th:selected="${u['rol'] == 'ADMIN'}">ADMIN</option>
+                  </select>
+                  <button type="submit" class="slds-button slds-button_brand slds-button_sm" style="height: 30px; border-radius: 4px; font-size: 0.75rem; padding: 0 10px;">
+                    Cambiar
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </article>
 
     <!-- ==================== TARJETA 2: SOLICITUDES DE VERIFICACIÓN DE ONGS ==================== -->
-    <article class="slds-card" style="border-radius: 8px; border: 1px solid #dddbda; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <article class="slds-card" style="border-radius: 8px; border: 1px solid #dddbda; box-shadow: 0 2px 8px rgba(0,0,0,0.06); width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box;">
       
       <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium" style="border-bottom: 1px solid #e5e5e5; background: #fdfaf6;">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -123,55 +146,53 @@
         </div>
       </div>
 
-      <div class="slds-card__body slds-card__body_inner slds-p-around_none">
-        <div class="slds-table_responsive">
-          <table class="slds-table slds-table_cell-buffer slds-table_bordered">
-            <thead>
-              <tr class="slds-line-height_reset" style="background: #f8fafc;">
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Organización & CUIT</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Contacto & Responsable</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Sede Física</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Tipo & Necesidades</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Estado</th>
-                <th scope="col" style="font-weight: 700; color: #475569; padding: 12px 16px;">Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="s : ${solicitudes}" class="slds-hint-parent">
-                <td style="padding: 12px 16px;">
-                  <strong style="color: #014486; display: block;" th:text="${s.nombreOng()}">Comedor Los Bajitos</strong>
-                  <span style="font-family: monospace; font-size: 0.78rem; color: #64748b;" th:text="'CUIT: ' + ${s.cuit()}">CUIT: 30-71458921-4</span>
-                </td>
-                <td style="padding: 12px 16px;">
-                  <span style="display: block; font-weight: 600; color: #334155;" th:text="${s.responsable()}">Marta Gómez</span>
-                  <span style="display: block; font-size: 0.8rem; color: #475569;" th:text="${s.email()}">comedor@gmail.com</span>
-                  <span style="font-size: 0.78rem; color: #64748b;" th:text="${s.telefono()}">+54 11 4253-9988</span>
-                </td>
-                <td style="padding: 12px 16px; color: #334155; font-size: 0.85rem;" th:text="${s.direccion()}">
-                  Av. Calchaquí 1820, Quilmes
-                </td>
-                <td style="padding: 12px 16px;">
-                  <span class="slds-badge slds-badge_lightest" style="font-weight: 600; margin-bottom: 4px;" th:text="${s.tipoEntidad()}">Comedor</span>
-                  <p style="font-size: 0.78rem; color: #64748b; line-height: 1.3;" th:text="${s.necesidades()}">Alimentos secos</p>
-                </td>
-                <td style="padding: 12px 16px;">
-                  <span th:if="${s.estado() == 'PENDIENTE'}" class="slds-badge slds-theme_warning" style="font-weight: 700;">PENDIENTE DE AUDITORÍA</span>
-                  <span th:if="${s.estado() == 'APROBADA'}" class="slds-badge slds-theme_success" style="font-weight: 700;">✓ APROBADA Y VERIFICADA</span>
-                </td>
-                <td style="padding: 12px 16px;">
-                  <form th:if="${s.estado() == 'PENDIENTE'}" th:action="@{'/app/admin/solicitudes-ong/' + ${s.id()} + '/aprobar'}" method="post">
-                    <button type="submit" class="slds-button slds-button_success slds-button_sm" style="font-weight: 700; border-radius: 4px;">
-                      ✓ Aprobar Verificación
-                    </button>
-                  </form>
-                  <span th:if="${s.estado() == 'APROBADA'}" style="color: #166534; font-size: 0.8rem; font-weight: 600;">
-                    Portal habilitado
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="slds-card__body slds-p-around_none table-scroll-container">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered" style="width: 100%; min-width: 820px;">
+          <thead>
+            <tr class="slds-line-height_reset" style="background: #f8fafc;">
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Organización & CUIT</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Contacto & Responsable</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Sede Física</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Tipo & Necesidades</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Estado</th>
+              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s : ${solicitudes}" class="slds-hint-parent">
+              <td style="padding: 10px 14px; white-space: nowrap;">
+                <strong style="color: #014486; display: block;" th:text="${s.nombreOng()}">Comedor Los Bajitos</strong>
+                <span style="font-family: monospace; font-size: 0.78rem; color: #64748b;" th:text="'CUIT: ' + ${s.cuit()}">CUIT: 30-71458921-4</span>
+              </td>
+              <td style="padding: 10px 14px; white-space: nowrap;">
+                <span style="display: block; font-weight: 600; color: #334155;" th:text="${s.responsable()}">Marta Gómez</span>
+                <span style="display: block; font-size: 0.8rem; color: #475569;" th:text="${s.email()}">comedor@gmail.com</span>
+                <span style="font-size: 0.78rem; color: #64748b;" th:text="${s.telefono()}">+54 11 4253-9988</span>
+              </td>
+              <td style="padding: 10px 14px; color: #334155; font-size: 0.82rem; white-space: nowrap;" th:text="${s.direccion()}">
+                Av. Calchaquí 1820, Quilmes
+              </td>
+              <td style="padding: 10px 14px; max-width: 250px;">
+                <span class="slds-badge slds-badge_lightest" style="font-weight: 600; margin-bottom: 4px; font-size: 0.75rem;" th:text="${s.tipoEntidad()}">Comedor</span>
+                <p style="font-size: 0.78rem; color: #64748b; line-height: 1.3; margin: 0; word-break: break-word;" th:text="${s.necesidades()}">Alimentos secos</p>
+              </td>
+              <td style="padding: 10px 14px; white-space: nowrap;">
+                <span th:if="${s.estado() == 'PENDIENTE'}" class="slds-badge slds-theme_warning" style="font-weight: 700; font-size: 0.75rem;">PENDIENTE DE AUDITORÍA</span>
+                <span th:if="${s.estado() == 'APROBADA'}" class="slds-badge slds-theme_success" style="font-weight: 700; font-size: 0.75rem;">✓ APROBADA Y VERIFICADA</span>
+              </td>
+              <td style="padding: 10px 14px; white-space: nowrap;">
+                <form th:if="${s.estado() == 'PENDIENTE'}" th:action="@{'/app/admin/solicitudes-ong/' + ${s.id()} + '/aprobar'}" method="post" style="margin: 0;">
+                  <button type="submit" class="slds-button slds-button_success slds-button_sm" style="font-weight: 700; border-radius: 4px; font-size: 0.75rem; padding: 0 10px; height: 30px;">
+                    ✓ Aprobar Verificación
+                  </button>
+                </form>
+                <span th:if="${s.estado() == 'APROBADA'}" style="color: #166534; font-size: 0.8rem; font-weight: 600;">
+                  Portal habilitado
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </article>
 
@@ -183,3 +204,4 @@
 
 </body>
 </html>
+

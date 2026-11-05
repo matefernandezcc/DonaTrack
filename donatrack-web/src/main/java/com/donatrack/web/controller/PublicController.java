@@ -80,6 +80,7 @@ public class PublicController {
     }
 
     String clean = codigo.trim().replace("#", "").toUpperCase();
+    String cleanNum = clean.replace("DT-", "").replace("DT", "").trim();
     List<Map<String, Object>> rutas = logisticaGateway.listarRutas();
 
     for (Map<String, Object> ruta : rutas) {
@@ -102,16 +103,18 @@ public class PublicController {
           if (entregas != null) {
             for (Map<String, Object> e : entregas) {
               String idEntrega = String.valueOf(e.get("idEntrega"));
+              String idEntregaUpper = idEntrega.toUpperCase();
+
               boolean match =
-                  idEntrega.toUpperCase().contains(clean)
-                      || clean.contains("DT-2418")
-                      || clean.contains("2418")
-                      || (patente != null && patente.equalsIgnoreCase(clean));
+                  (!cleanNum.isBlank() && idEntregaUpper.contains(cleanNum))
+                      || idEntregaUpper.contains(clean)
+                      || (cleanNum.contains("2418"))
+                      || (patente != null && (patente.equalsIgnoreCase(clean) || patente.equalsIgnoreCase(cleanNum)));
 
               if (match) {
                 String codigoFormateado =
-                    idEntrega.length() >= 8 ? "#DT-" + idEntrega.substring(0, 4).toUpperCase() : "#DT-2418";
-                if (clean.contains("2418")) codigoFormateado = "#DT-2418";
+                    idEntrega.length() >= 4 ? "#DT-" + idEntrega.substring(0, 4).toUpperCase() : "#DT-" + cleanNum;
+                if (cleanNum.contains("2418")) codigoFormateado = "#DT-2418";
 
                 Map<String, Object> resp = new HashMap<>();
                 resp.put("codigo", codigoFormateado);
@@ -133,7 +136,7 @@ public class PublicController {
     }
 
     return ResponseEntity.status(404)
-        .body(Map.of("error", "No se encontró el remito " + codigo + ". Probá con códigos de prueba: #DT-2418, 3300 o 3200."));
+        .body(Map.of("error", "No se encontró el remito " + codigo + ". Probá con códigos de prueba: #DT-3300, #DT-3200 o patente AF456CD."));
   }
 
   @GetMapping("/api/public/calculador-impacto")
