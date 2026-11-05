@@ -8,26 +8,16 @@
   <main id="contenido">
     <!-- ============ HERO ============ -->
     <section class="hero">
-      <div class="hero__bg" aria-hidden="true">
-        <span class="blob blob--blue"></span>
-        <span class="blob blob--green"></span>
-        <span class="blob blob--orange"></span>
-      </div>
-
       <div class="container hero__grid">
         <div class="hero__copy">
-          <span class="eyebrow">
-            <span class="eyebrow__dot"></span>
-            UTN Solidaria · Trazabilidad transparente
-          </span>
           <h1 class="hero__title">
             Convertí el excedente en
-            <span class="grad-text">esperanza</span>
+            <strong style="color: var(--green);">esperanza</strong>
           </h1>
           <p class="hero__lead">
             Cada donación merece ser trazable. DonaTrack conecta a personas y
             empresas con organizaciones verificadas, y te muestra el recorrido
-            completo: desde tu mano hasta quien lo necesita.
+            completo: desde tu mano hasta quien lo necesita con remito auditado.
           </p>
           <div class="hero__ctas">
             <a th:href="@{/login}" class="btn btn--primary btn--lg">
@@ -49,35 +39,36 @@
           </ul>
         </div>
 
-        <div class="hero__mock" aria-hidden="true">
-          <div class="mock mock--card">
-            <div class="mock__head">
-              <span class="mock__dot"></span>
-              <span class="mock__dot"></span>
-              <span class="mock__dot"></span>
-              <span class="mock__title">Donación #DT-2418</span>
+        <div class="hero__mock">
+          <div class="mock mock--card" style="box-shadow: 0 12px 32px -8px rgba(0,0,0,0.18);">
+            <div class="mock__head" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line-2); padding-bottom: 8px;">
+              <span style="font-weight: 700; font-size: 0.85rem; color: #0b4a8f;" id="hero-tracker-title">Rastreo de Remito Digital</span>
+              <span class="pill pill--green" id="hero-tracker-status" style="font-size: 0.72rem; padding: 2px 8px;">En entrega</span>
             </div>
-            <div class="mock__row">
-              <span>Estado</span>
-              <strong class="pill pill--green">En entrega</strong>
+
+            <!-- Buscador Interactivo de Remitos -->
+            <form id="hero-tracker-form" onsubmit="buscarRemitoHero(event)" style="margin: 12px 0 10px; display: flex; gap: 6px;">
+              <input type="text" id="hero-tracker-input" placeholder="Ej: #DT-2418, 3300, 3200..." value="#DT-2418"
+                     style="flex: 1; padding: 7px 10px; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.82rem; background: var(--bg); color: var(--fg);" />
+              <button type="submit" style="padding: 7px 12px; background: #0176d3; color: #fff; border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer;">Rastrear</button>
+            </form>
+
+            <div id="hero-tracker-details" style="font-size: 0.78rem; line-height: 1.5; color: var(--muted); margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                <span>Destino:</span> <strong id="hero-tracker-dest" style="color: var(--fg);">Hogar Caminos, San Isidro</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                <span>Carga:</span> <strong id="hero-tracker-peso" style="color: var(--fg);">85 kg (Abrigo clasificado)</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Transporte:</span> <strong id="hero-tracker-camion" style="color: var(--fg);">AF456CD · Laura Fernández</strong>
+              </div>
             </div>
-            <div class="mock__bar">
-              <span style="width: 78%"></span>
-            </div>
-            <ul class="mock__steps">
-              <li class="is-done">Recibida</li>
-              <li class="is-done">Acopio</li>
-              <li class="is-active">En camino</li>
-              <li>Entregada</li>
-            </ul>
-            <div class="mock__map">
-              <svg viewBox="0 0 240 90" role="img" aria-label="Mapa de ruta">
-                <path d="M10 70 C 60 10, 120 90, 230 25" stroke="#0B4A8F" stroke-width="2" fill="none"
-                  stroke-dasharray="4 4" />
-                <circle cx="10" cy="70" r="4" fill="#1F9D6E" />
-                <circle cx="230" cy="25" r="4" fill="#F25C1F" />
-              </svg>
-            </div>
+
+            <button id="hero-tracker-proof-btn" onclick="verComprobanteHero()" type="button"
+                    style="width: 100%; padding: 7px 10px; background: #f0f7ff; color: #0176d3; border: 1px solid #b8daf8; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+              📄 Ver comprobante fotográfico y acta
+            </button>
           </div>
 
           <div class="mock mock--badge">
@@ -170,54 +161,83 @@
       </div>
     </section>
 
-    <!-- ============ HOW IT WORKS ============ -->
-    <section class="how" id="como-funciona" aria-labelledby="how-title">
+    <!-- ============ QUE PODES DONAR ============ -->
+    <section class="how" id="que-donar" aria-labelledby="how-title">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow">Cómo funciona</span>
-          <h2 id="how-title">Tres pasos, un impacto medible</h2>
+          <h2 id="how-title">Bienes tangibles para cada necesidad urgente</h2>
+          <p style="color: var(--muted); max-width: 620px;">Canalizamos insumos auditados por peso, volumen y fecha de vencimiento hacia comedores y escuelas con remito digital.</p>
         </div>
         <div class="how__grid">
           <article class="card card--hover">
-            <div class="card__icon card__icon--blue">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M21 21l-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="currentColor" stroke-width="2"
-                  fill="none" stroke-linecap="round" />
-              </svg>
-            </div>
-            <h3>Descubrí causas</h3>
+            <div style="font-size: 2rem; margin-bottom: 12px;">🥫</div>
+            <h3>Alimentos no perecederos</h3>
             <p>
-              Explorá campañas reales de organizaciones verificadas. Filtrá
-              por causa, zona o tipo de donación.
+              Leche en polvo, fideos, arroz, legumbres y conservas. Control bromatológico y pesaje directo en centros de acopio.
             </p>
           </article>
           <article class="card card--hover">
-            <div class="card__icon card__icon--orange">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
-            <h3>Doná fácilmente</h3>
+            <div style="font-size: 2rem; margin-bottom: 12px;">🧥</div>
+            <h3>Indumentaria y abrigo</h3>
             <p>
-              Coordiná el retiro o entregá en un punto de acopio. Sin trámites,
-              sin fricciones.
+              Frazadas, camperas y calzado infantil clasificados por talle y temporada para comedores y hogares de niñez.
             </p>
           </article>
           <article class="card card--hover">
-            <div class="card__icon card__icon--green">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3 12h4l3-8 4 16 3-8h4" stroke="currentColor" stroke-width="2" fill="none"
-                  stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
-            <h3>Seguí el impacto real</h3>
+            <div style="font-size: 2rem; margin-bottom: 12px;">📚</div>
+            <h3>Mobiliario y útiles escolares</h3>
             <p>
-              Recibís notificaciones en cada etapa. Fotos, confirmaciones y
-              métricas de impacto en tu panel.
+              Pupitres, pizarrones, mochilas y kits didácticos acondicionados para escuelas rurales y centros de apoyo comunitario.
             </p>
           </article>
+        </div>
+
+        <!-- Calculador de Impacto Tangible -->
+        <div class="calculator-card" style="margin-top: 36px; padding: 28px; background: var(--bg-soft); border: 1px solid var(--line-2); border-radius: var(--radius-lg); box-shadow: var(--shadow);">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px;">
+            <div>
+              <h3 style="margin-bottom: 4px; font-size: 1.35rem; color: var(--fg);">Calculá el impacto de tu donación</h3>
+              <p style="margin: 0; font-size: 0.9rem; color: var(--muted);">Conocé con precisión cuántas familias, raciones o escuelas transformás antes de donar.</p>
+            </div>
+            <!-- Tabs de Categoría -->
+            <div style="display: flex; gap: 8px;" id="calc-tabs">
+              <button type="button" onclick="seleccionarCategoriaCalc('alimentos')" class="btn-calc-tab is-active" data-cat="alimentos" style="padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line-2); background: #0176d3; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer;">🥫 Alimentos</button>
+              <button type="button" onclick="seleccionarCategoriaCalc('abrigo')" class="btn-calc-tab" data-cat="abrigo" style="padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line-2); background: var(--bg); color: var(--muted); font-size: 0.85rem; font-weight: 600; cursor: pointer;">🧥 Abrigo</button>
+              <button type="button" onclick="seleccionarCategoriaCalc('utiles')" class="btn-calc-tab" data-cat="utiles" style="padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line-2); background: var(--bg); color: var(--muted); font-size: 0.85rem; font-weight: 600; cursor: pointer;">📚 Mobiliario / Útiles</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
+            <div>
+              <label for="calc-range" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 8px;">
+                Cantidad estimada a aportar: <strong id="calc-qty-label" style="font-size: 1.15rem; color: #0176d3;">15 kg</strong>
+              </label>
+              <input type="range" id="calc-range" min="1" max="100" value="15" oninput="actualizarCalculoLive(this.value)" style="width: 100%; accent-color: #0176d3; cursor: pointer;" />
+              <span style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 4px;">
+                <span>1 unidad/kg</span>
+                <span>50 unidades/kg</span>
+                <span>100 unidades/kg</span>
+              </span>
+            </div>
+
+            <div style="background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div>
+                <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Impacto Comunitario:</span>
+                <strong id="calc-impact-main" style="font-size: 1.05rem; color: #15803d; font-weight: 800;">60 raciones nutritivas</strong>
+              </div>
+              <div>
+                <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Familias asistidas:</span>
+                <strong id="calc-impact-sec" style="font-size: 1.05rem; color: var(--fg); font-weight: 700;">6 familias en Comedor El Faro</strong>
+              </div>
+              <div>
+                <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Puntos cívicos (Trailblazer):</span>
+                <strong id="calc-puntos" style="font-size: 1rem; color: #c2410c; font-weight: 700;">+150 puntos</strong>
+              </div>
+              <div style="display: flex; align-items: flex-end;">
+                <a id="calc-cta-btn" th:href="@{/login(campana='alimentos',cantidad='15')}" class="btn btn--primary btn--sm" style="width: 100%; text-align: center; font-size: 0.8rem;">Donar esta cantidad →</a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -251,7 +271,7 @@
     </section>
 
     <!-- ============ MAP ============ -->
-    <section class="map-sec" id="organizaciones" aria-labelledby="map-title">
+    <section class="map-sec" id="mapa" aria-labelledby="map-title">
       <div class="container">
         <div class="section-head">
           <span class="eyebrow">Mapa de impacto</span>
@@ -376,7 +396,7 @@
             <span class="eyebrow">Campañas destacadas</span>
             <h2 id="camp-title">Donde podés ayudar hoy</h2>
           </div>
-          <a href="#" class="link-arrow">Ver todas las campañas →</a>
+          <a th:href="@{/login(section='campanas')}" class="link-arrow">Ver todas las campañas en plataforma →</a>
         </div>
 
         <div class="camp__grid">
@@ -397,13 +417,13 @@
                 perecederos durante el invierno.
               </p>
               <div class="campaign__progress">
-                <div class="bar"><span style="width: 72%"></span></div>
+                <div class="bar"><span style="width: 72.5%"></span></div>
                 <div class="campaign__stats">
-                  <strong>72%</strong>
-                  <span>· 1.284 donantes</span>
+                  <strong>1.450 / 2.000 kg</strong>
+                  <span>· Alimentos no perecederos</span>
                 </div>
               </div>
-              <a href="#" class="btn btn--primary btn--sm">Donar a esta campaña</a>
+              <a th:href="@{/login(campana='alimentos')}" class="btn btn--primary btn--sm">Donar a esta campaña</a>
             </div>
           </article>
 
@@ -426,11 +446,11 @@
               <div class="campaign__progress">
                 <div class="bar"><span style="width: 48%"></span></div>
                 <div class="campaign__stats">
-                  <strong>48%</strong>
-                  <span>· 612 donantes</span>
+                  <strong>180 / 375 prendas</strong>
+                  <span>· Abrigo clasificado</span>
                 </div>
               </div>
-              <a href="#" class="btn btn--primary btn--sm">Donar a esta campaña</a>
+              <a th:href="@{/login(campana='abrigo')}" class="btn btn--primary btn--sm">Donar a esta campaña</a>
             </div>
           </article>
 
@@ -451,13 +471,13 @@
                 Cierra el 30 de junio.
               </p>
               <div class="campaign__progress">
-                <div class="bar"><span style="width: 91%"></span></div>
+                <div class="bar"><span style="width: 90%"></span></div>
                 <div class="campaign__stats">
-                  <strong>91%</strong>
-                  <span>· 2.044 donantes</span>
+                  <strong>36 / 40 unidades</strong>
+                  <span>· Pupitres y bancos</span>
                 </div>
               </div>
-              <a href="#" class="btn btn--primary btn--sm">Donar a esta campaña</a>
+              <a th:href="@{/login(campana='escolar')}" class="btn btn--primary btn--sm">Donar a esta campaña</a>
             </div>
           </article>
         </div>
@@ -604,7 +624,7 @@
               impacto medible.
             </p>
             <div class="access__ctas">
-              <a href="#" class="btn btn--primary">Crear cuenta</a>
+              <a th:href="@{/login(rol='DONANTE')}" class="btn btn--primary">Crear cuenta donante</a>
               <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
@@ -621,7 +641,7 @@
               gestionar entregas con transparencia.
             </p>
             <div class="access__ctas">
-              <a href="#" class="btn btn--secondary">Solicitar verificación</a>
+              <a th:href="@{/login(rol='BENEFICIARIA')}" class="btn btn--secondary">Solicitar verificación ONG</a>
               <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
@@ -643,6 +663,116 @@
   <th:block th:fragment="scripts">
     <script th:src="@{/js/scroll-story.js}" defer></script>
     <script th:src="@{/js/map.js}" defer></script>
+    <script>
+      let lastRemitoData = {
+        codigo: "#DT-2418",
+        estado: "ENTREGADA",
+        direccion: "Hogar Caminos, San Isidro",
+        peso: "85 kg",
+        volumen: "0.5 m³",
+        patente: "AF456CD",
+        chofer: "Laura Fernández",
+        fecha: "28 Oct 2026",
+        comprobante: {
+          fotos: ["https://storage.donatrack.org/remitos/remito-3300.jpg"]
+        }
+      };
+
+      async function buscarRemitoHero(e) {
+        if (e) e.preventDefault();
+        const input = document.getElementById("hero-tracker-input");
+        const codigo = input ? input.value.trim() : "";
+        if (!codigo) return;
+
+        try {
+          const res = await fetch("/api/public/rastreo?codigo=" + encodeURIComponent(codigo));
+          const data = await res.json();
+          if (res.ok) {
+            lastRemitoData = data;
+            document.getElementById("hero-tracker-title").textContent = "Donación " + data.codigo;
+            document.getElementById("hero-tracker-status").textContent = data.estado;
+            document.getElementById("hero-tracker-dest").textContent = data.direccion;
+            document.getElementById("hero-tracker-peso").textContent = data.peso + " (" + data.volumen + ")";
+            document.getElementById("hero-tracker-camion").textContent = data.patente + " · " + data.chofer;
+            document.getElementById("hero-tracker-proof-btn").textContent = "📄 Ver comprobante auditado (" + data.codigo + ")";
+          } else {
+            alert(data.error || "No se encontró el remito.");
+          }
+        } catch (err) {
+          console.error("Error al rastrear remito:", err);
+        }
+      }
+
+      function verComprobanteHero() {
+        const modal = document.getElementById("map-modal");
+        if (!modal) return;
+        const mTitle = document.getElementById("modal-title");
+        const mDesc = document.getElementById("modal-desc");
+        const mOrg = document.getElementById("modal-org");
+        const mType = document.getElementById("modal-type");
+        const mDate = document.getElementById("modal-date");
+        const mStatus = document.getElementById("modal-status");
+        const mMedia = document.getElementById("modal-media");
+
+        mTitle.textContent = "Remito " + lastRemitoData.codigo;
+        mDesc.textContent = "Entrega auditada en " + lastRemitoData.direccion;
+        mOrg.textContent = lastRemitoData.chofer + " (Móvil " + lastRemitoData.patente + ")";
+        mType.textContent = lastRemitoData.peso + " (" + lastRemitoData.volumen + ")";
+        mDate.textContent = lastRemitoData.fecha;
+        mStatus.textContent = lastRemitoData.estado;
+        mStatus.className = "pill pill--green";
+
+        if (lastRemitoData.comprobante && lastRemitoData.comprobante.fotos && lastRemitoData.comprobante.fotos.length > 0) {
+          mMedia.style.backgroundImage = "url('" + lastRemitoData.comprobante.fotos[0] + "')";
+          mMedia.style.backgroundSize = "cover";
+          mMedia.textContent = "";
+        } else {
+          mMedia.style.background = "#0b4a8f";
+          mMedia.textContent = "📦";
+        }
+
+        modal.removeAttribute("hidden");
+        modal.showModal();
+        document.body.style.overflow = "hidden";
+      }
+
+      let currentCalcCat = "alimentos";
+      function seleccionarCategoriaCalc(cat) {
+        currentCalcCat = cat;
+        document.querySelectorAll("#calc-tabs button").forEach(b => {
+          if (b.getAttribute("data-cat") === cat) {
+            b.style.background = "#0176d3";
+            b.style.color = "#ffffff";
+          } else {
+            b.style.background = "var(--bg)";
+            b.style.color = "var(--muted)";
+          }
+        });
+        const range = document.getElementById("calc-range");
+        actualizarCalculoLive(range ? range.value : 15);
+      }
+
+      async function actualizarCalculoLive(val) {
+        const qtyLabel = document.getElementById("calc-qty-label");
+        const unitSuffix = currentCalcCat === "alimentos" ? " kg" : currentCalcCat === "abrigo" ? " prendas" : " unidades";
+        if (qtyLabel) qtyLabel.textContent = val + unitSuffix;
+
+        try {
+          const res = await fetch("/api/public/calculador-impacto?categoria=" + currentCalcCat + "&cantidad=" + val);
+          const data = await res.json();
+          document.getElementById("calc-impact-main").textContent = data.impactoPrincipal;
+          document.getElementById("calc-impact-sec").textContent = data.impactoSecundario;
+          document.getElementById("calc-puntos").textContent = data.puntos;
+          const ctaBtn = document.getElementById("calc-cta-btn");
+          if (ctaBtn) {
+            ctaBtn.href = "/login?campana=" + currentCalcCat + "&cantidad=" + val;
+            ctaBtn.textContent = "Donar " + val + unitSuffix + " →";
+          }
+        } catch (err) {
+          console.error("Error calculando impacto:", err);
+        }
+      }
+    </script>
   </th:block>
 </body>
 </html>

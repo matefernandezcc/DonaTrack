@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.donatrack.web.controller.PublicController;
 import com.donatrack.web.gateway.AuthGateway;
 import com.donatrack.web.gateway.IncentivosGateway;
+import com.donatrack.web.gateway.LogisticaGateway;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,10 +35,13 @@ class PublicControllerTest {
     };
     jwtDecoder = token -> null;
 
+    LogisticaGateway logisticaGateway = new LogisticaGateway(null);
+
     PublicController controller =
         new PublicController(
             authGateway,
             incentivosGateway,
+            logisticaGateway,
             jwtDecoder,
             new HttpSessionSecurityContextRepository());
 
