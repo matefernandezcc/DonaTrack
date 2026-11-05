@@ -2,6 +2,10 @@ name: dev
 variables:
   - name: baseUrl
     value: http://localhost:8080
+  - name: authUrl
+    value: http://localhost:8004
+  - name: webUrl
+    value: http://localhost:8080
   - name: donacionesUrl
     value: http://localhost:8000
   - name: incentivosUrl
@@ -12,3 +16,5 @@ variables:
     value: http://localhost:8003
   - name: n8nUrl
     value: http://localhost:5678
+  - name: token
+    value: ""
