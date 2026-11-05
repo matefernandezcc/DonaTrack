@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+<head>
+  <title>DonaTrack · Necesidades Materiales</title>
+</head>
+<body>
+
+  <span id="page-header-title">Declaración de Necesidades Materiales</span>
+
+  <div id="main-content-slot">
+    <!-- Formulario para declarar nueva necesidad -->
+    <article class="slds-card slds-m-bottom_large">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Registrar Necesidad Prioritaria</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body slds-card__body_inner">
+        <p class="slds-m-bottom_medium">
+          Las necesidades declaradas alimentan el algoritmo de matchmaking para asignar donaciones de forma equitativa.
+        </p>
+
+        <form th:action="@{/app/beneficiaria/necesidades}" method="post">
+          <div class="slds-form slds-form_stacked">
+            
+            <div class="slds-form-element slds-m-bottom_small">
+              <label class="slds-form-element__label" for="descripcion">
+                <abbr class="slds-required" title="obligatorio">* </abbr>Descripción de la Necesidad
+              </label>
+              <div class="slds-form-element__control">
+                <input class="slds-input" type="text" id="descripcion" name="descripcion"
+                       placeholder="Ej: Leche en polvo para merendero infantil" required />
+              </div>
+            </div>
+
+            <div class="slds-grid slds-gutters_small slds-m-bottom_small">
+              <div class="slds-col slds-size_1-of-2">
+                <div class="slds-form-element">
+                  <label class="slds-form-element__label" for="cantidadRequerida">
+                    <abbr class="slds-required" title="obligatorio">* </abbr>Cantidad Requerida
+                  </label>
+                  <div class="slds-form-element__control">
+                    <input class="slds-input" type="number" step="1" id="cantidadRequerida" name="cantidadRequerida" value="50" required />
+                  </div>
+                </div>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <div class="slds-form-element">
+                  <label class="slds-form-element__label" for="tipo">Prioridad / Tipo</label>
+                  <div class="slds-form-element__control">
+                    <select class="slds-select" id="tipo" name="tipo">
+                      <option value="extraordinaria" selected>Extraordinaria (Urgente)</option>
+                      <option value="ordinaria">Ordinaria (Recurrente)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="slds-form-element slds-m-bottom_medium">
+              <label class="slds-form-element__label" for="subcategoria">Rubro / Subcategoría</label>
+              <div class="slds-form-element__control">
+                <select class="slds-select" id="subcategoria" name="nombreSubcategoria">
+                  <option value="Alimentos" selected>Alimentos y Bebidas</option>
+                  <option value="No Perecederos">No Perecederos</option>
+                  <option value="Abrigo">Ropa y Abrigo</option>
+                  <option value="Higiene">Higiene Personal</option>
+                  <option value="Medicamentos">Medicamentos</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="slds-button slds-button_brand" type="submit">
+              Publicar Necesidad
+            </button>
+          </div>
+        </form>
+      </div>
+    </article>
+
+    <!-- Tabla de necesidades registradas -->
+    <article class="slds-card">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Necesidades Declaradas por tu Organización</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Necesidades registradas">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th scope="col"><div class="slds-truncate" title="Descripción">Descripción</div></th>
+              <th scope="col"><div class="slds-truncate" title="Cantidad">Cantidad Requerida</div></th>
+              <th scope="col"><div class="slds-truncate" title="Subcategoría">Subcategoría</div></th>
+              <th scope="col"><div class="slds-truncate" title="Tipo">Tipo</div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent" th:each="n : ${necesidades}">
+              <th scope="row"><div class="slds-truncate" th:text="${n.descripcion}">Leche para merendero</div></th>
+              <td><div class="slds-truncate" th:text="${n.cantidadRequerida != null ? n.cantidadRequerida : (n.cantidadObjetivo != null ? n.cantidadObjetivo : '-')}">100.0</div></td>
+              <td><div class="slds-truncate" th:text="${n.subcategoriaRequerida != null ? n.subcategoriaRequerida.nombre : 'Alimentos'}">Alimentos</div></td>
+              <td>
+                <span class="slds-badge slds-badge_lightest" th:text="${n.tipo != null ? n.tipo : (n.tipoPeriodo != null ? n.tipoPeriodo : 'Ordinaria')}">Extraordinaria</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(necesidades)}">
+              <td colspan="4" class="slds-text-color_weak slds-p-around_medium">No tenés necesidades registradas actualmente.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </div>
+
+</body>
+</html>
+

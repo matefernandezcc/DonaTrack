@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+<head>
+  <title>DonaTrack · Panel de la Organización</title>
+</head>
+<body>
+
+  <span id="page-header-title">Espacio para Entidades Beneficiarias</span>
+
+  <div id="main-content-slot">
+    <article class="slds-card slds-p-around_large slds-m-bottom_large">
+      <div class="slds-media slds-media_center slds-m-bottom_medium">
+        <div class="slds-media__figure">
+          <span class="slds-avatar slds-avatar_large slds-avatar_circle" style="width: 72px; height: 72px; display: inline-flex; align-items: center; justify-content: center; background-color: #2e844a; color: white; font-size: 24px; font-weight: 700;">
+            <span th:text="${#strings.substring(nombreUsuario, 0, 1).toUpperCase()}">B</span>
+          </span>
+        </div>
+        <div class="slds-media__body">
+          <h2 class="slds-text-heading_medium" th:text="'Organización Beneficiaria: ' + ${nombreUsuario}">Fundación Esperanza</h2>
+          <p class="slds-text-body_regular slds-text-color_weak">
+            Gestión de solicitudes prioritarias y trazabilidad de recepción con remitos digitales.
+          </p>
+        </div>
+      </div>
+
+      <!-- Indicadores resumen -->
+      <div class="slds-grid slds-gutters slds-wrap slds-m-top_medium">
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_small">
+          <div class="slds-box slds-box_small slds-theme_shade slds-text-align_center">
+            <div class="slds-text-heading_large" style="color: #2e844a; font-weight: 700;"
+                 th:text="${totalNecesidades != null ? totalNecesidades : 0}">0</div>
+            <div class="slds-text-title_caps slds-m-top_xx-small">Necesidades Declaradas</div>
+            <div class="slds-m-top_small">
+              <a th:href="@{/app/beneficiaria/necesidades}" class="slds-button slds-button_neutral">Gestionar Necesidades</a>
+            </div>
+          </div>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_small">
+          <div class="slds-box slds-box_small slds-theme_shade slds-text-align_center">
+            <div class="slds-text-heading_large" style="color: #0176d3; font-weight: 700;"
+                 th:text="${totalRutas != null ? totalRutas : 0}">0</div>
+            <div class="slds-text-title_caps slds-m-top_xx-small">Rutas Logísticas Activas</div>
+            <div class="slds-m-top_small">
+              <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand">Confirmar Entregas</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+</body>
+</html>

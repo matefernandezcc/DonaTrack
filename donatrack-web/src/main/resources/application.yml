@@ -1,0 +1,28 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: donatrack-web
+  thymeleaf:
+    cache: false
+    mode: HTML
+    encoding: UTF-8
+
+donatrack:
+  jwt-secret: ${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+  api:
+    auth-url: ${AUTH_URL:http://localhost:8004}
+    donaciones-url: ${DONACIONES_URL:http://localhost:8000}
+    incentivos-url: ${INCENTIVOS_URL:http://localhost:8001}
+    logistica-url: ${LOGISTICA_URL:http://localhost:8002}
+    notificaciones-url: ${NOTIFICACIONES_URL:http://localhost:8003}
+    timeout-seconds: ${API_TIMEOUT_SECONDS:60}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+

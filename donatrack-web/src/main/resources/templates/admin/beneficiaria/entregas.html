@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+<head>
+  <title>DonaTrack · Confirmar Entregas</title>
+</head>
+<body>
+
+  <span id="page-header-title">Seguimiento y Confirmación de Entregas Logísticas</span>
+
+  <div id="main-content-slot">
+    <!-- Card informativa -->
+    <article class="slds-card slds-m-bottom_large">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Certificación de Recepción de Bienes</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body slds-card__body_inner">
+        <p>
+          Al arribar el camión de logística a tu sede, ingresá el UUID de la donación junto con la patente y la URL del comprobante o foto de entrega para actualizar el estado logístico a <code>ENTREGADA</code>.
+        </p>
+      </div>
+    </article>
+
+    <!-- Formulario de Confirmación -->
+    <article class="slds-card slds-m-bottom_large">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Confirmar Recepción de Entrega</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body slds-card__body_inner">
+        <form th:action="@{/app/beneficiaria/entregas/confirmar}" method="post">
+          <div class="slds-form slds-form_stacked">
+            
+            <div class="slds-grid slds-gutters_small slds-m-bottom_small">
+              <div class="slds-col slds-size_1-of-2">
+                <div class="slds-form-element">
+                  <label class="slds-form-element__label" for="idDonacion">
+                    <abbr class="slds-required" title="obligatorio">* </abbr>UUID Donación / Entrega
+                  </label>
+                  <div class="slds-form-element__control">
+                    <input class="slds-input" type="text" id="idDonacion" name="idDonacion"
+                           placeholder="Ej: 31008064-071a-4d7a-ac37-33318f7d9841" required />
+                  </div>
+                </div>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <div class="slds-form-element">
+                  <label class="slds-form-element__label" for="patenteCamion">Patente del Camión</label>
+                  <div class="slds-form-element__control">
+                    <input class="slds-input" type="text" id="patenteCamion" name="patenteCamion"
+                           placeholder="Ej: AA123BB" required />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="slds-form-element slds-m-bottom_medium">
+              <label class="slds-form-element__label" for="fotoUrl">URL de Foto / Remito de Recepción</label>
+              <div class="slds-form-element__control">
+                <input class="slds-input" type="url" id="fotoUrl" name="fotoUrl"
+                       placeholder="https://storage.donatrack.org/remitos/remito-firmado.jpg" />
+              </div>
+            </div>
+
+            <button class="slds-button slds-button_brand" type="submit">
+              Confirmar y Firmar Entrega
+            </button>
+          </div>
+        </form>
+      </div>
+    </article>
+
+    <!-- Blueprint Oficial Salesforce: Coordinates & Map Container -->
+    <article class="slds-card slds-m-bottom_large">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-address" title="Mapa">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#address}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Mapa Operativo de Entregas y Puntos Logísticos</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body slds-card__body_inner">
+        <div class="slds-grid slds-has-coordinates" style="height: 440px; border: 1px solid #dddbda; border-radius: 4px; overflow: hidden;">
+          <div class="slds-map_container" style="flex: 1; height: 100%;">
+            <div class="slds-map" style="height: 100%;">
+              <iframe id="GoogleMapID" title="Google Maps iframe" src="https://sfdc-map.surge.sh/" style="width: 100%; height: 100%; border: 0;"></iframe>
+            </div>
+          </div>
+          <div class="slds-coordinates" style="width: 320px; overflow-y: auto; background: #fff; border-left: 1px solid #dddbda;">
+            <div class="slds-coordinates__header slds-p-around_small slds-border_bottom">
+              <h2 class="slds-coordinates__title slds-text-title_bold">
+                Puntos de Entrega DonaTrack (5)
+              </h2>
+            </div>
+            <ul class="slds-coordinates__list">
+              <li class="slds-coordinates__item slds-p-around_x-small slds-border_bottom">
+                <button class="slds-coordinates__item-action slds-button_reset slds-media slds-media_center" aria-pressed="true" type="button">
+                  <span class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-standard-account">
+                      <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#account}"></use>
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="slds-media__body slds-m-left_x-small">
+                    <span class="slds-text-link slds-text-title_bold">DonaTrack Hub Central</span>
+                    <span class="slds-text-body_small slds-text-color_weak slds-show">Av. Corrientes 1230, CABA</span>
+                  </span>
+                </button>
+              </li>
+              <li class="slds-coordinates__item slds-p-around_x-small slds-border_bottom">
+                <button class="slds-coordinates__item-action slds-button_reset slds-media slds-media_center" aria-pressed="false" type="button">
+                  <span class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-standard-account">
+                      <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#account}"></use>
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="slds-media__body slds-m-left_x-small">
+                    <span class="slds-text-link slds-text-title_bold">Comedor El Faro</span>
+                    <span class="slds-text-body_small slds-text-color_weak slds-show">Av. Rivadavia 8500, Flores</span>
+                  </span>
+                </button>
+              </li>
+              <li class="slds-coordinates__item slds-p-around_x-small slds-border_bottom">
+                <button class="slds-coordinates__item-action slds-button_reset slds-media slds-media_center" aria-pressed="false" type="button">
+                  <span class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-standard-account">
+                      <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#account}"></use>
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="slds-media__body slds-m-left_x-small">
+                    <span class="slds-text-link slds-text-title_bold">Hogar Caminos</span>
+                    <span class="slds-text-body_small slds-text-color_weak slds-show">Av. Cabildo 2200, Belgrano</span>
+                  </span>
+                </button>
+              </li>
+              <li class="slds-coordinates__item slds-p-around_x-small slds-border_bottom">
+                <button class="slds-coordinates__item-action slds-button_reset slds-media slds-media_center" aria-pressed="false" type="button">
+                  <span class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-standard-account">
+                      <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#account}"></use>
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="slds-media__body slds-m-left_x-small">
+                    <span class="slds-text-link slds-text-title_bold">Fundación Raíces</span>
+                    <span class="slds-text-body_small slds-text-color_weak slds-show">Av. Gaona 3100, Flores</span>
+                  </span>
+                </button>
+              </li>
+              <li class="slds-coordinates__item slds-p-around_x-small slds-border_bottom">
+                <button class="slds-coordinates__item-action slds-button_reset slds-media slds-media_center" aria-pressed="false" type="button">
+                  <span class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-standard-account">
+                      <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#account}"></use>
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="slds-media__body slds-m-left_x-small">
+                    <span class="slds-text-link slds-text-title_bold">DonaTrack Hub Oeste</span>
+                    <span class="slds-text-body_small slds-text-color_weak slds-show">Av. San Martín 4500, Morón</span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Rutas y Despachos Activos -->
+    <article class="slds-card">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Rutas y Despachos en Operación</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Rutas logísticas">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th scope="col"><div class="slds-truncate" title="ID Ruta">ID Ruta</div></th>
+              <th scope="col"><div class="slds-truncate" title="Fecha">Fecha Operativa</div></th>
+              <th scope="col"><div class="slds-truncate" title="Camión">Camión / Chofer</div></th>
+              <th scope="col"><div class="slds-truncate" title="Estado">Estado</div></th>
+              <th scope="col"><div class="slds-truncate" title="Paradas">Paradas</div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent" th:each="r : ${rutas}">
+              <th scope="row"><div class="slds-truncate" th:text="${r.id}">d3b07384...</div></th>
+              <td><div class="slds-truncate" th:text="${r.fechaOperativa}">2026-10-28</div></td>
+              <td>
+                <div class="slds-truncate" th:text="(${r.camion != null ? r.camion.patente : 'N/A'}) + ' (' + (${r.chofer != null ? r.chofer.nombre : 'Sin chofer'}) + ')'">AA123BB (Roberto Gómez)</div>
+              </td>
+              <td>
+                <span class="slds-badge" th:classappend="${r.iniciada} ? 'slds-theme_success' : 'slds-badge_lightest'"
+                      th:text="${r.iniciada} ? 'En Tránsito' : 'Planificada'">Planificada</span>
+              </td>
+              <td>
+                <span class="slds-badge" th:text="${#lists.size(r.paradas)} + ' paradas'">2 paradas</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(rutas)}">
+              <td colspan="5" class="slds-text-color_weak slds-p-around_medium">No hay rutas activas registradas en logística.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </div>
+
+</body>
+</html>
+

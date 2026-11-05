@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(title, content, scripts)">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+  <title th:replace="${title}">DonaTrack · Donaciones con Trazabilidad</title>
+  <meta name="description"
+    content="DonaTrack conecta donaciones con organizaciones beneficiarias y permite seguir cada entrega de forma transparente." />
+  <meta name="theme-color" content="#0B4A8F" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- SOLO CSS público. Aislamiento estricto: Prohibido cargar SLDS acá. -->
+  <link rel="stylesheet" th:href="@{/css/variables.css}" />
+  <link rel="stylesheet" th:href="@{/css/base.css}" />
+  <link rel="stylesheet" th:href="@{/css/components.css}" />
+  <link rel="stylesheet" th:href="@{/css/sections.css}" />
+
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}" />
+
+  <script>
+    const dtTheme = localStorage.getItem("dt-theme");
+    if (dtTheme === "dark" || (!dtTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.setAttribute("data-theme", "dark");
+    }
+  </script>
+</head>
+<body class="dt-public">
+  <header th:replace="~{fragments/public-header :: header}"></header>
+
+  <!-- SLOT: Contenido de cada página pública -->
+  <main id="contenido" th:replace="${content}">
+    <p>Contenido principal</p>
+  </main>
+
+  <footer th:replace="~{fragments/public-footer :: footer}"></footer>
+
+  <!-- Leaflet y JS común -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script th:src="@{/js/app.js}" defer></script>
+
+  <!-- SLOT: Scripts específicos de la vista -->
+  <th:block th:replace="${scripts}"></th:block>
+</body>
+</html>
+

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(title, pageTitle, content, scripts)">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title th:replace="${title}">DonaTrack · Backoffice</title>
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}" />
+
+  <!-- SOLO SLDS OFICIAL. Aislamiento estricto: Cero CSS personalizado inventado. -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/styles/salesforce-lightning-design-system.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+<body class="slds-scope" style="background-color: #f3f3f3; min-height: 100vh;">
+
+  <!-- ==================== SLDS BLUEPRINT: GLOBAL HEADER ==================== -->
+  <header class="slds-global-header_container">
+    <a href="#main-content" class="slds-assistive-text slds-assistive-text_focus">Saltar al contenido principal</a>
+    <div class="slds-global-header slds-grid slds-grid_align-spread slds-p-horizontal_medium">
+      
+      <!-- Brand Logo DonaTrack Package (Cajita Oficial) -->
+      <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
+        <a th:href="@{/}" class="slds-grid slds-grid_vertical-align-center" style="text-decoration: none;" title="Volver al Inicio Público">
+          <img th:src="@{/img/package.svg}" src="/img/package.svg" alt="DonaTrack" style="width: 32px; height: 32px; display: block;" />
+          <span class="slds-text-heading_small slds-m-left_x-small" style="font-weight: 700; color: #014486; letter-spacing: -0.3px;">DonaTrack</span>
+        </a>
+        <span class="slds-badge slds-badge_lightest slds-m-left_small">Backoffice</span>
+      </div>
+
+      <!-- User Profile & Actions con Blobatar Avatar -->
+      <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
+        <div class="slds-grid slds-grid_vertical-align-center slds-m-right_medium">
+          <img th:src="@{'https://blobatar.dev/avatar/' + ${nombreUsuario != null ? nombreUsuario : #authentication.name} + '?size=32&background=circle'}"
+               alt="Avatar" style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #c9c7c5; margin-right: 8px; display: block;" />
+          <span class="slds-text-body_regular" style="color: #444;">
+            Conectado como: <strong th:text="${nombreCompleto != null ? nombreCompleto : #authentication.name}">Usuario</strong>
+          </span>
+        </div>
+        <a th:href="@{/}" class="slds-button slds-button_neutral slds-m-right_small">Ir a Web Pública</a>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+          <button class="slds-button slds-button_destructive" type="submit">Cerrar sesión</button>
+        </form>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <div class="slds-grid slds-m-top_xx-large" style="padding-top: 12px;">
+
+    <!-- ==================== SLDS BLUEPRINT: VERTICAL NAVIGATION ==================== -->
+    <nav class="slds-nav-vertical slds-size_1-of-6 slds-p-around_small" aria-label="Menú de Navegación"
+         style="background-color: #ffffff; border-right: 1px solid #dddbda; min-height: calc(100vh - 60px);">
+
+      <!-- Sección Administrador -->
+      <div class="slds-nav-vertical__section" sec:authorize="hasRole('ADMIN')">
+        <h2 class="slds-nav-vertical__title slds-text-title_caps">Administración</h2>
+        <ul>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/admin}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chart}"></use>
+              </svg>
+              <span class="slds-truncate">Resumen Operativo</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/admin/camiones}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#truck}"></use>
+              </svg>
+              <span class="slds-truncate">Flota de Camiones</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/admin/ranking}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
+              </svg>
+              <span class="slds-truncate">Ranking & Podio</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/admin/matchmaking}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#change_record_type}"></use>
+              </svg>
+              <span class="slds-truncate">Matchmaking</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/admin/csv}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#upload}"></use>
+              </svg>
+              <span class="slds-truncate">Importar CSV</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sección Donante -->
+      <div class="slds-nav-vertical__section" sec:authorize="hasRole('DONANTE') or hasRole('ADMIN')">
+        <h2 class="slds-nav-vertical__title slds-text-title_caps">Portal Donante</h2>
+        <ul>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/donante}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
+              </svg>
+              <span class="slds-truncate">Mi Perfil & Rango</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/donante/donaciones}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#package}"></use>
+              </svg>
+              <span class="slds-truncate">Registrar Donación</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sección Beneficiaria -->
+      <div class="slds-nav-vertical__section" sec:authorize="hasRole('BENEFICIARIA') or hasRole('ADMIN')">
+        <h2 class="slds-nav-vertical__title slds-text-title_caps">Organizaciones</h2>
+        <ul>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/beneficiaria}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
+              </svg>
+              <span class="slds-truncate">Mi Organización</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/beneficiaria/necesidades}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#task}"></use>
+              </svg>
+              <span class="slds-truncate">Necesidades Materiales</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/beneficiaria/entregas}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
+              </svg>
+              <span class="slds-truncate">Confirmar Entregas</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+    </nav>
+
+    <!-- ==================== CONTENT BODY ==================== -->
+    <main id="main-content" class="slds-size_5-of-6 slds-p-around_large" tabindex="-1">
+
+      <!-- SLDS BLUEPRINT: PAGE HEADER -->
+      <div class="slds-page-header slds-m-bottom_medium" style="border-radius: 4px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);">
+        <div class="slds-page-header__row">
+          <div class="slds-page-header__col-title">
+            <div class="slds-media">
+              <div class="slds-media__body">
+                <div class="slds-page-header__name">
+                  <div class="slds-page-header__name-title">
+                    <h1 class="slds-page-header__title slds-truncate" th:replace="${pageTitle}">Panel de Control</h1>
+                  </div>
+                </div>
+                <p class="slds-page-header__name-meta">Gestión en tiempo real vinculada a microservicios DonaTrack</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLDS BLUEPRINT: TOAST NOTIFICATIONS -->
+      <div class="slds-notify_container slds-is-relative slds-m-bottom_medium" th:if="${flashOk != null}">
+        <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
+          <span class="slds-assistive-text">éxito</span>
+          <div class="slds-notify__content">
+            <h2 class="slds-text-heading_small" th:text="${flashOk}">Operación completada con éxito.</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="slds-notify_container slds-is-relative slds-m-bottom_medium" th:if="${flashError != null}">
+        <div class="slds-notify slds-notify_toast slds-theme_error" role="status">
+          <span class="slds-assistive-text">error</span>
+          <div class="slds-notify__content">
+            <h2 class="slds-text-heading_small" th:text="${flashError}">Ocurrió un error.</h2>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLOT: Contenido de la sección específica -->
+      <div th:replace="${content}">
+        <p>Contenido del backoffice</p>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Scripts específicos de la vista -->
+  <th:block th:replace="${scripts}"></th:block>
+
+</body>
+</html>

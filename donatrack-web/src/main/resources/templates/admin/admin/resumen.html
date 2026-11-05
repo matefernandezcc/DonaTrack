@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+<head>
+  <title>DonaTrack · Resumen Operativo</title>
+</head>
+<body>
+
+  <span id="page-header-title">Resumen Operativo de la Plataforma</span>
+
+  <div id="main-content-slot">
+    
+    <!-- GRID DE METRICAS SLDS -->
+    <div class="slds-grid slds-gutters slds-m-bottom_large">
+      
+      <div class="slds-col slds-size_1-of-3">
+        <article class="slds-card slds-p-around_medium" style="border-left: 4px solid #0176d3;">
+          <div class="slds-text-title_caps" style="color: #706e6b;">Flota Registrada</div>
+          <div class="slds-text-heading_large slds-m-vertical_x-small" style="font-weight: 700; color: #0176d3;" th:text="${totalCamiones}">0</div>
+          <p class="slds-text-body_small">Unidades disponibles en el servicio de Logística</p>
+          <a th:href="@{/app/admin/camiones}" class="slds-button slds-button_outline-brand slds-m-top_small">Ver Camiones</a>
+        </article>
+      </div>
+
+      <div class="slds-col slds-size_1-of-3">
+        <article class="slds-card slds-p-around_medium" style="border-left: 4px solid #2e844a;">
+          <div class="slds-text-title_caps" style="color: #706e6b;">Choferes Asignados</div>
+          <div class="slds-text-heading_large slds-m-vertical_x-small" style="font-weight: 700; color: #2e844a;" th:text="${totalChoferes}">0</div>
+          <p class="slds-text-body_small">Conductores habilitados para rutas de entrega</p>
+        </article>
+      </div>
+
+      <div class="slds-col slds-size_1-of-3">
+        <article class="slds-card slds-p-around_medium" style="border-left: 4px solid #dd7a01;">
+          <div class="slds-text-title_caps" style="color: #706e6b;">Gamificación & Misiones</div>
+          <div class="slds-text-heading_large slds-m-vertical_x-small" style="font-weight: 700; color: #dd7a01;">Podio Activo</div>
+          <p class="slds-text-body_small">Top donantes mensuales según entregas verificadas</p>
+          <a th:href="@{/app/admin/ranking}" class="slds-button slds-button_outline-brand slds-m-top_small">Ver Ranking</a>
+        </article>
+      </div>
+
+    </div>
+
+    <!-- TARJETA INFORMATIVA ARQUITECTURA -->
+    <article class="slds-card">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-service-contract" title="Estado del Sistema">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#service_contract}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Estado de los Microservicios DonaTrack</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body slds-card__body_inner">
+        <div class="slds-grid slds-gutters">
+          <div class="slds-col slds-size_1-of-2">
+            <ul class="slds-has-dividers_bottom-space">
+              <li class="slds-item">
+                <strong>Servicio de Autenticación (Auth):</strong>
+                <span class="slds-badge slds-theme_success slds-float_right">Online (Puerto 8004)</span>
+              </li>
+              <li class="slds-item">
+                <strong>Servicio de Logística:</strong>
+                <span class="slds-badge slds-theme_success slds-float_right">Conectado (MongoDB)</span>
+              </li>
+            </ul>
+          </div>
+          <div class="slds-col slds-size_1-of-2">
+            <ul class="slds-has-dividers_bottom-space">
+              <li class="slds-item">
+                <strong>Servicio de Donaciones:</strong>
+                <span class="slds-badge slds-theme_success slds-float_right">PostgreSQL Supabase</span>
+              </li>
+              <li class="slds-item">
+                <strong>Servicio de Incentivos:</strong>
+                <span class="slds-badge slds-theme_success slds-float_right">PostgreSQL Supabase</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+</body>
+</html>
+

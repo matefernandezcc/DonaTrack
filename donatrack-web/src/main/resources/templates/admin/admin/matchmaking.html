@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+<head>
+  <title>DonaTrack · Matchmaking Inteligente</title>
+</head>
+<body>
+
+  <span id="page-header-title">Matchmaking Inteligente de Donaciones</span>
+
+  <div id="main-content-slot">
+    <!-- Card de ejecución del algoritmo -->
+    <article class="slds-card slds-m-bottom_large">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Algoritmo de Compatibilidad y Asignación</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body slds-card__body_inner">
+        <p class="slds-m-bottom_medium">
+          El motor de matchmaking analiza los bienes brutos recibidos contra las necesidades declaradas por las organizaciones beneficiarias registradas.
+        </p>
+
+        <form th:action="@{/app/admin/matchmaking}" method="get" class="slds-grid slds-gutters_small slds-grid_vertical-align-end">
+          <div class="slds-col slds-size_1-of-2">
+            <div class="slds-form-element">
+              <label class="slds-form-element__label" for="donacionId">UUID de Donación a emparejar</label>
+              <div class="slds-form-element__control">
+                <input class="slds-input" type="text" id="donacionId" name="donacionId"
+                       th:value="${donacionId}" placeholder="Ej: 5cd80011-2a54-4ca7-a39c-28b2b53d8c55" required />
+              </div>
+            </div>
+          </div>
+          <div class="slds-col">
+            <button class="slds-button slds-button_brand" type="submit">Ejecutar Matchmaking</button>
+          </div>
+        </form>
+      </div>
+    </article>
+
+    <!-- Resultados del Matchmaking si hubo búsqueda -->
+    <article class="slds-card slds-m-bottom_large" th:if="${sugerencias != null}">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small" th:text="'Resultados de compatibilidad para donación: ' + ${donacionId}">Resultados</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Sugerencias de matchmaking">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th scope="col"><div class="slds-truncate" title="ID Beneficiario">ID Beneficiario</div></th>
+              <th scope="col"><div class="slds-truncate" title="Estado de Sugerencia">Estado de Compatibilidad</div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent" th:each="s : ${sugerencias}">
+              <th scope="row"><div class="slds-truncate" th:text="${s.id}">b2222222-2222-4222-8222-222222222222</div></th>
+              <td><span class="slds-badge slds-badge_lightest" style="background-color: #eef4ff; color: #0176d3; font-weight: 600;">Compatible</span></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(sugerencias)}">
+              <td colspan="2" class="slds-text-color_weak slds-p-around_medium">No se encontraron beneficiarios compatibles para esta donación.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <!-- Lista general de Beneficiarias Registradas -->
+    <article class="slds-card">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Entidades Beneficiarias Registradas en el Sistema</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Entidades beneficiarias">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th scope="col"><div class="slds-truncate" title="ID">ID Beneficiario</div></th>
+              <th scope="col"><div class="slds-truncate" title="Representante">Correo Representante</div></th>
+              <th scope="col"><div class="slds-truncate" title="Fecha Alta">Fecha Alta</div></th>
+              <th scope="col"><div class="slds-truncate" title="Necesidades">Necesidades Declaradas</div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent" th:each="b : ${beneficiarios}">
+              <th scope="row"><div class="slds-truncate" th:text="${b.id}">b2222222-2222-4222-8222-222222222222</div></th>
+              <td><div class="slds-truncate" th:text="${b.correoRepresentante}">representante@ong.org</div></td>
+              <td><div class="slds-truncate" th:text="${b.fechaAlta}">2026-10-30</div></td>
+              <td>
+                <span class="slds-badge" th:text="${#lists.size(b.necesidadesDeclaradas)} + ' necesidades'">1 necesidad</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(beneficiarios)}">
+              <td colspan="4" class="slds-text-color_weak slds-p-around_medium">No hay beneficiarios registrados en el sistema de donaciones.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </div>
+
+</body>
+</html>
+
