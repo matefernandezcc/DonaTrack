@@ -28,7 +28,8 @@
 }
 
 .btn--sm {
-    --h: 40px;
+    --h: 44px;
+    min-height: 44px;
     padding: 0 16px;
     font-size: 0.9rem;
 }
