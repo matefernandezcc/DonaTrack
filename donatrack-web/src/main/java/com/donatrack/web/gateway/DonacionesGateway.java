@@ -87,11 +87,16 @@ public class DonacionesGateway {
   }
 
   public List<Map<String, Object>> sugerirBeneficiarios(UUID donacionId) {
+    return sugerirBeneficiarios(donacionId, "HIBRIDO");
+  }
+
+  public List<Map<String, Object>> sugerirBeneficiarios(UUID donacionId, String algoritmo) {
     try {
+      String alg = (algoritmo != null && !algoritmo.isBlank()) ? algoritmo : "HIBRIDO";
       List<Map<String, Object>> result =
           donacionesClient
               .get()
-              .uri("/api/donaciones/{id}/matchmaking", donacionId)
+              .uri("/api/donaciones/{id}/matchmaking?algoritmo={alg}", donacionId, alg)
               .retrieve()
               .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
       return result != null ? result : Collections.emptyList();
@@ -99,6 +104,41 @@ public class DonacionesGateway {
       log.error("Error al consultar matchmaking para donacion {}: {}", donacionId, e.getMessage());
       return Collections.emptyList();
     }
+  }
+
+  public List<Map<String, Object>> listarDonaciones(String estado, UUID idDonante) {
+    try {
+      StringBuilder uri = new StringBuilder("/api/donaciones?");
+      if (estado != null && !estado.isBlank()) {
+        uri.append("estado=").append(estado).append("&");
+      }
+      if (idDonante != null) {
+        uri.append("idDonante=").append(idDonante).append("&");
+      }
+      List<Map<String, Object>> result =
+          donacionesClient
+              .get()
+              .uri(uri.toString())
+              .retrieve()
+              .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+      return result != null ? result : Collections.emptyList();
+    } catch (Exception e) {
+      log.warn("Error al consultar listado de donaciones: {}", e.getMessage());
+      return Collections.emptyList();
+    }
+  }
+
+  public void asignarDonacion(UUID donacionId, UUID beneficiarioId) {
+    donacionesClient
+        .put()
+        .uri("/api/donaciones/{id}/estado/asignar", donacionId)
+        .body(Map.of("id", beneficiarioId.toString()))
+        .retrieve()
+        .toBodilessEntity();
+  }
+
+  public void ejecutarMatchmakingBatch() {
+    donacionesClient.post().uri("/api/donaciones/matchmaking/batch").retrieve().toBodilessEntity();
   }
 
   public List<Map<String, Object>> obtenerPersonas() {

@@ -236,6 +236,7 @@ public class IncentivoController {
                   int misionesMes = p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size();
                   int donacionesTotales = p.getMetricas().obtenerTodasLasDonaciones().size();
                   java.util.Map<String, Object> map = new java.util.HashMap<>();
+                  map.put("donanteId", p.getDonanteId().toString());
                   map.put("user", nombreUsuario);
                   map.put("donations", misionesMes > 0 ? misionesMes : donacionesTotales);
                   map.put("totalDonations", donacionesTotales);

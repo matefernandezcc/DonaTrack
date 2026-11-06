@@ -14,6 +14,7 @@
 
     --ink: #0e1726;
     --ink-2: #1f2a3d;
+    --fg: var(--ink);
     --text: var(--ink);
     --muted: #475467;
     --muted-2: #525c6e;
@@ -51,6 +52,7 @@
     --bg-nav-elevated: rgba(17, 24, 39, 0.95);
     --ink: #f9fafb;
     --ink-2: #e5e7eb;
+    --fg: var(--ink);
     --text: var(--ink);
     --muted: #9ca3af;
     --muted-2: #6b7280;

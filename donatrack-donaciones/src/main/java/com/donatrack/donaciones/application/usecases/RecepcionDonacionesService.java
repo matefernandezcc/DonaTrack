@@ -42,14 +42,16 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
   @Override
   public DonacionOriginal recibir(CargaBienesRequestDTO requestDTO) {
     // 1. Obtener entidades (con fallback seguro a IDs por defecto para nuevos usuarios)
-    java.util.UUID idDonante = requestDTO.idDonante() != null ? requestDTO.idDonante() : DEFAULT_DONANTE_UUID;
+    java.util.UUID idDonante =
+        requestDTO.idDonante() != null ? requestDTO.idDonante() : DEFAULT_DONANTE_UUID;
     Persona donantePersona =
         personaRepository
             .buscarPorId(idDonante)
             .or(() -> personaRepository.buscarPorId(DEFAULT_DONANTE_UUID))
             .orElseThrow(() -> new IllegalArgumentException("Donante no encontrado"));
 
-    java.util.UUID idAdmin = requestDTO.idAdministrador() != null ? requestDTO.idAdministrador() : DEFAULT_ADMIN_UUID;
+    java.util.UUID idAdmin =
+        requestDTO.idAdministrador() != null ? requestDTO.idAdministrador() : DEFAULT_ADMIN_UUID;
     Persona adminPersona =
         personaRepository
             .buscarPorId(idAdmin)

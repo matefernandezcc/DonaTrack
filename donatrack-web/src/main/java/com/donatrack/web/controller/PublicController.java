@@ -334,9 +334,64 @@ public class PublicController {
 
   @GetMapping("/")
   public String index(Model model) {
-    List<Map<String, Object>> ranking = incentivosGateway.obtenerTop3();
+    List<Map<String, Object>> rawRanking = incentivosGateway.obtenerTop3();
+    List<Map<String, Object>> usuarios = authGateway.listarUsuarios();
+    List<Map<String, Object>> ranking = new ArrayList<>();
+    if (rawRanking != null) {
+      for (Map<String, Object> item : rawRanking) {
+        Map<String, Object> copy = new HashMap<>(item);
+        String userVal = String.valueOf(copy.getOrDefault("user", ""));
+        String donanteId =
+            copy.get("donanteId") != null ? String.valueOf(copy.get("donanteId")) : userVal;
+        if (userVal.matches("(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+            || userVal.startsWith("Donante ")) {
+          String resolved = resolverNombrePublico(userVal, donanteId, usuarios);
+          copy.put("user", resolved);
+        }
+        ranking.add(copy);
+      }
+    }
     model.addAttribute("ranking", ranking);
     return "public/index";
+  }
+
+  private String resolverNombrePublico(
+      String rawUser, String donanteId, List<Map<String, Object>> usuarios) {
+    if ("a1111111-1111-4111-8111-111111111111".equalsIgnoreCase(donanteId)
+        || "a1111111-1111-4111-8111-111111111111".equalsIgnoreCase(rawUser)) {
+      return "María González";
+    }
+    if ("f2077235-6a90-4a07-879a-4d9c0ae92922".equalsIgnoreCase(donanteId)
+        || "f2077235-6a90-4a07-879a-4d9c0ae92922".equalsIgnoreCase(rawUser)) {
+      return "Carlos Rodríguez";
+    }
+    if ("8ee90cad-e249-48c1-bce7-b51f0dfe6b6e".equalsIgnoreCase(donanteId)
+        || "8ee90cad-e249-48c1-bce7-b51f0dfe6b6e".equalsIgnoreCase(rawUser)) {
+      return "Lucía Martínez";
+    }
+    if (usuarios != null) {
+      for (Map<String, Object> u : usuarios) {
+        String id = String.valueOf(u.getOrDefault("id", ""));
+        if (id.equalsIgnoreCase(donanteId) || id.equalsIgnoreCase(rawUser)) {
+          Object nombre = u.get("nombre");
+          if (nombre != null && !String.valueOf(nombre).isBlank()) {
+            return String.valueOf(nombre);
+          }
+          Object username = u.get("username");
+          if (username != null && !String.valueOf(username).isBlank()) {
+            return String.valueOf(username);
+          }
+        }
+      }
+    }
+    String ref =
+        (donanteId != null && !donanteId.isBlank() && !donanteId.equals("null"))
+            ? donanteId
+            : rawUser;
+    if (ref != null && ref.length() >= 8) {
+      return "Colaborador Solidario #" + ref.substring(0, 6).toUpperCase();
+    }
+    return "Colaborador Solidario";
   }
 
   @GetMapping("/login")

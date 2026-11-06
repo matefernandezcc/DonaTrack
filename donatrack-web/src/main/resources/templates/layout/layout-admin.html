@@ -67,7 +67,8 @@
       <!-- User Profile & Actions con Blobatar Avatar -->
       <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
         <div class="slds-grid slds-grid_vertical-align-center slds-m-right_medium">
-          <img th:src="@{'https://blobatar.dev/avatar/' + ${nombreUsuario != null ? nombreUsuario : #authentication.name} + '?size=32&background=circle'}"
+          <img src="/img/package.svg"
+               th:src="@{'https://blobatar.dev/avatar/' + ${nombreUsuario != null ? nombreUsuario : #authentication.name} + '?size=32&background=circle'}"
                alt="Avatar" style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #c9c7c5; margin-right: 8px; display: block;" />
           <span class="slds-text-body_regular" style="color: #444;">
             Conectado como: <strong th:text="${nombreCompleto != null ? nombreCompleto : #authentication.name}">Usuario</strong>
@@ -180,6 +181,22 @@
               <span class="slds-truncate">Registrar Donación</span>
             </a>
           </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/donante(tab='seguimiento')}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
+              </svg>
+              <span class="slds-truncate">Mis Donaciones (Seguimiento)</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/donante(tab='causas')}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
+              </svg>
+              <span class="slds-truncate">Buscador Causas ONG</span>
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -227,7 +244,7 @@
               <div class="slds-media__body">
                 <div class="slds-page-header__name">
                   <div class="slds-page-header__name-title">
-                    <h1 class="slds-page-header__title slds-truncate" th:replace="${pageTitle}">Panel de Control</h1>
+                    <h1 class="slds-page-header__title slds-truncate" th:insert="${pageTitle}">Panel de Control</h1>
                   </div>
                 </div>
                 <p class="slds-page-header__name-meta">Gestión en tiempo real vinculada a microservicios DonaTrack</p>

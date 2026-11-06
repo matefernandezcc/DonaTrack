@@ -35,6 +35,16 @@
               Ingresá el detalle de los alimentos o bienes materiales a donar. Tu aporte ingresará a la red comunitaria DonaTrack, asignándose automáticamente a una ruta logística trazable con remito y foto de recepción al pie del camión.
             </p>
 
+            <!-- Aviso si viene pre-cargado desde el Buscador de Causas / Necesidades ONG -->
+            <div th:if="${prefillOng != null && !prefillOng.isBlank()}"
+                 style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div>
+                <strong style="color: #166534; font-size: 0.85rem; display: block;">Causa seleccionada desde el Buscador de Necesidades</strong>
+                <span style="color: #15803d; font-size: 0.8rem;" th:text="'Insumo requerido por: ' + ${prefillOng}">Insumo requerido por ONG</span>
+              </div>
+              <span class="slds-badge" style="background: #166534; color: #fff; font-weight: 700; font-size: 0.7rem;">PRIORIDAD ACTIVA</span>
+            </div>
+
             <form th:action="@{/app/donante/donaciones}" method="post">
               <div class="slds-form slds-form_stacked">
                 
@@ -44,6 +54,7 @@
                   </label>
                   <div class="slds-form-element__control">
                     <input class="slds-input" type="text" id="descripcion" name="descripcion"
+                           th:value="${prefillDescripcion}"
                            placeholder="Ej: Fideos secos x500g, Arroz largo fino, Campera de abrigo polar..." required />
                   </div>
                 </div>
@@ -79,10 +90,10 @@
                       <label class="slds-form-element__label" for="subcategoria" style="font-weight: 700; color: #1e293b;">Categoría Solidaria</label>
                       <div class="slds-form-element__control">
                         <select class="slds-select" id="subcategoria" name="nombreSubcategoria">
-                          <option value="No Perecederos" selected>Alimentos No Perecederos</option>
-                          <option value="Abrigo">Abrigo / Ropa de Temporada</option>
-                          <option value="Higiene">Artículos de Higiene Personal</option>
-                          <option value="Medicamentos">Medicamentos y Primeros Auxilios</option>
+                          <option value="No Perecederos" th:selected="${prefillCategoria == null || prefillCategoria == '' || prefillCategoria == 'No Perecederos'}">Alimentos No Perecederos</option>
+                          <option value="Abrigo" th:selected="${prefillCategoria == 'Abrigo'}">Abrigo / Ropa de Temporada</option>
+                          <option value="Higiene" th:selected="${prefillCategoria == 'Higiene'}">Artículos de Higiene Personal</option>
+                          <option value="Medicamentos" th:selected="${prefillCategoria == 'Medicamentos'}">Medicamentos y Primeros Auxilios</option>
                         </select>
                       </div>
                     </div>
@@ -164,9 +175,6 @@
 
     </div>
   </div>
-
-</body>
-</html>
 
 </body>
 </html>
