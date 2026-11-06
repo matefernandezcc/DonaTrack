@@ -43,7 +43,12 @@ public class AdminController {
       LogisticaGateway logisticaGateway,
       IncentivosGateway incentivosGateway,
       DonacionesGateway donacionesGateway) {
-    this(logisticaGateway, incentivosGateway, donacionesGateway, null, new com.donatrack.web.service.SolicitudOngService());
+    this(
+        logisticaGateway,
+        incentivosGateway,
+        donacionesGateway,
+        null,
+        new com.donatrack.web.service.SolicitudOngService());
   }
 
   @org.springframework.beans.factory.annotation.Autowired
@@ -77,10 +82,12 @@ public class AdminController {
         if (token.getClaimAsString("username") != null) {
           username = token.getClaimAsString("username");
         }
-        if (token.getClaimAsString("descripcion") != null && !token.getClaimAsString("descripcion").isBlank()) {
+        if (token.getClaimAsString("descripcion") != null
+            && !token.getClaimAsString("descripcion").isBlank()) {
           descripcion = token.getClaimAsString("descripcion");
         }
-        if (token.getClaimAsString("ubicacion") != null && !token.getClaimAsString("ubicacion").isBlank()) {
+        if (token.getClaimAsString("ubicacion") != null
+            && !token.getClaimAsString("ubicacion").isBlank()) {
           ubicacion = token.getClaimAsString("ubicacion");
         }
         usuarioId = token.getSubject();
@@ -97,7 +104,8 @@ public class AdminController {
                 ubicacion = ubi;
               }
             }
-          } catch (Exception ignored) {}
+          } catch (Exception ignored) {
+          }
         }
       }
       model.addAttribute("nombreCompleto", nombreCompleto);
@@ -122,7 +130,8 @@ public class AdminController {
         redirectAttributes.addFlashAttribute("flashOk", "Perfil actualizado con éxito.");
       }
     } catch (Exception e) {
-      redirectAttributes.addFlashAttribute("flashError", "Error al actualizar perfil: " + e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al actualizar perfil: " + e.getMessage());
     }
     String referer = request.getHeader("Referer");
     return "redirect:" + (referer != null ? referer : "/app/donante");
@@ -134,13 +143,15 @@ public class AdminController {
       if (pId != null && !pId.isBlank()) {
         try {
           return UUID.fromString(pId);
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
       }
       String sub = jwt.getToken().getSubject();
       if (sub != null && !sub.isBlank()) {
         try {
           return UUID.fromString(sub);
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
       }
     }
     return DEFAULT_DONANTE_ID;
@@ -159,7 +170,8 @@ public class AdminController {
       if (pId != null && !pId.isBlank()) {
         try {
           return UUID.fromString(pId);
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
       }
     }
     return fallback;
@@ -169,7 +181,8 @@ public class AdminController {
   public String dashboardRoot(Authentication auth) {
     if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
       return "redirect:/app/admin";
-    } else if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_DONANTE"))) {
+    } else if (auth.getAuthorities().stream()
+        .anyMatch(a -> a.getAuthority().equals("ROLE_DONANTE"))) {
       return "redirect:/app/donante";
     } else {
       return "redirect:/app/beneficiaria";
@@ -199,8 +212,7 @@ public class AdminController {
   @PostMapping("/admin/camiones")
   @PreAuthorize("hasRole('ADMIN')")
   public String crearCamion(
-      @ModelAttribute("nuevoCamion") CamionDto nuevoCamion,
-      RedirectAttributes redirectAttributes) {
+      @ModelAttribute("nuevoCamion") CamionDto nuevoCamion, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.crearCamion(nuevoCamion);
       redirectAttributes.addFlashAttribute(
@@ -215,8 +227,7 @@ public class AdminController {
   @PostMapping("/admin/camiones/{patente}/eliminar")
   @PreAuthorize("hasRole('ADMIN')")
   public String eliminarCamion(
-      @PathVariable("patente") String patente,
-      RedirectAttributes redirectAttributes) {
+      @PathVariable("patente") String patente, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarCamion(patente);
       redirectAttributes.addFlashAttribute("flashOk", "Camión " + patente + " eliminado.");
@@ -225,6 +236,57 @@ public class AdminController {
           "flashError", "No se pudo eliminar el camión: " + e.getMessage());
     }
     return "redirect:/app/admin/camiones";
+  }
+
+  @GetMapping("/admin/choferes")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String adminChoferes(Model model) {
+    List<com.donatrack.web.dto.ChoferDto> choferes = logisticaGateway.listarChoferes();
+    model.addAttribute("choferes", choferes);
+    model.addAttribute("nuevoChofer", new com.donatrack.web.dto.ChoferDto("", "", "", ""));
+    return "admin/admin/choferes";
+  }
+
+  @PostMapping("/admin/choferes")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String crearChofer(
+      @ModelAttribute("nuevoChofer") com.donatrack.web.dto.ChoferDto nuevoChofer,
+      RedirectAttributes redirectAttributes) {
+    try {
+      logisticaGateway.crearChofer(nuevoChofer);
+      String nomCompleto =
+          nuevoChofer.nombre()
+              + (nuevoChofer.apellido() != null ? " " + nuevoChofer.apellido() : "");
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Chofer " + nomCompleto.trim() + " registrado con éxito.");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al registrar chofer: " + e.getMessage());
+    }
+    return "redirect:/app/admin/choferes";
+  }
+
+  @PostMapping("/admin/choferes/{legajo}/eliminar")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String eliminarChofer(
+      @PathVariable("legajo") String legajo, RedirectAttributes redirectAttributes) {
+    try {
+      logisticaGateway.eliminarChofer(legajo);
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Chofer con legajo " + legajo + " eliminado.");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "No se pudo eliminar el chofer: " + e.getMessage());
+    }
+    return "redirect:/app/admin/choferes";
+  }
+
+  @GetMapping("/admin/rutas")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String adminRutas(Model model) {
+    List<Map<String, Object>> rutas = logisticaGateway.listarRutas();
+    model.addAttribute("rutas", rutas);
+    return "admin/admin/rutas";
   }
 
   @GetMapping("/admin/ranking")
@@ -259,8 +321,7 @@ public class AdminController {
   @GetMapping("/admin/matchmaking")
   @PreAuthorize("hasRole('ADMIN')")
   public String adminMatchmaking(
-      @RequestParam(name = "donacionId", required = false) UUID donacionId,
-      Model model) {
+      @RequestParam(name = "donacionId", required = false) UUID donacionId, Model model) {
     List<Map<String, Object>> beneficiarios = donacionesGateway.obtenerBeneficiarios();
     model.addAttribute("beneficiarios", beneficiarios);
 
@@ -282,13 +343,13 @@ public class AdminController {
   @PostMapping("/admin/csv")
   @PreAuthorize("hasRole('ADMIN')")
   public String importarCsv(
-      @RequestParam("file") MultipartFile file,
-      RedirectAttributes redirectAttributes) {
+      @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
     try {
       String resultado = donacionesGateway.importarCsv(file);
       redirectAttributes.addFlashAttribute("flashOk", "Importación completada: " + resultado);
     } catch (Exception e) {
-      redirectAttributes.addFlashAttribute("flashError", "Error al importar CSV: " + e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al importar CSV: " + e.getMessage());
     }
     return "redirect:/app/admin/csv";
   }
@@ -338,7 +399,8 @@ public class AdminController {
         authGateway.resetearPassword(usuarioId);
         String label = (email != null && !email.isBlank()) ? email : usuarioId.toString();
         redirectAttributes.addFlashAttribute(
-            "flashOk", "Contraseña del usuario " + label + " restablecida con éxito a 'password123'.");
+            "flashOk",
+            "Contraseña del usuario " + label + " restablecida con éxito a 'password123'.");
       }
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
@@ -350,8 +412,7 @@ public class AdminController {
   @PostMapping("/admin/solicitudes-ong/{id}/aprobar")
   @PreAuthorize("hasRole('ADMIN')")
   public String aprobarSolicitudOng(
-      @PathVariable("id") String solicitudId,
-      RedirectAttributes redirectAttributes) {
+      @PathVariable("id") String solicitudId, RedirectAttributes redirectAttributes) {
     try {
       solicitudOngService.actualizarEstado(solicitudId, "APROBADA");
       var solicitudOpt = solicitudOngService.obtenerPorId(solicitudId);
@@ -359,9 +420,10 @@ public class AdminController {
         var s = solicitudOpt.get();
         if (authGateway != null) {
           var usuarios = authGateway.listarUsuarios();
-          var userMatch = usuarios.stream()
-              .filter(u -> s.email().equalsIgnoreCase(String.valueOf(u.get("email"))))
-              .findFirst();
+          var userMatch =
+              usuarios.stream()
+                  .filter(u -> s.email().equalsIgnoreCase(String.valueOf(u.get("email"))))
+                  .findFirst();
           if (userMatch.isPresent()) {
             UUID uId = UUID.fromString(String.valueOf(userMatch.get().get("id")));
             authGateway.cambiarRol(uId, "BENEFICIARIA");
@@ -410,7 +472,8 @@ public class AdminController {
       puntosReales = (donacionesEnDeposito * 10) + (donacionesExitosas * 35) + (bienes * 2);
     }
 
-    // Rango dinámico según puntos reales acumulados (Esquema por etapas: +10 pts depósito, +25 pts entrega)
+    // Rango dinámico según puntos reales acumulados (Esquema por etapas: +10 pts depósito, +25 pts
+    // entrega)
     String rangoNombre;
     int rangoNivel;
     long proximoObjetivo;
@@ -433,7 +496,8 @@ public class AdminController {
     }
 
     long puntosFaltantes = Math.max(0, proximoObjetivo - puntosReales);
-    int progresoPct = proximoObjetivo > 0 ? (int) Math.min(100, (puntosReales * 100) / proximoObjetivo) : 0;
+    int progresoPct =
+        proximoObjetivo > 0 ? (int) Math.min(100, (puntosReales * 100) / proximoObjetivo) : 0;
     boolean isNuevoUsuario = (donaciones == 0);
 
     // Métricas de Impacto Social Tangible
@@ -478,22 +542,25 @@ public class AdminController {
       RedirectAttributes redirectAttributes) {
     try {
       UUID donanteId = resolverDonanteId(auth);
-      Map<String, Object> payload = Map.of(
-          "idDonante", donanteId.toString(),
-          "idAdministrador", DEFAULT_ADMIN_ID.toString(),
-          "bienesBrutos", List.of(Map.of(
-              "descripcion", descripcion,
-              "cantidad", cantidad,
-              "unidadMedicion", unidadMedicion,
-              "esUsado", esUsado,
-              "nombreSubcategoria", nombreSubcategoria
-          ))
-      );
+      Map<String, Object> payload =
+          Map.of(
+              "idDonante", donanteId.toString(),
+              "idAdministrador", DEFAULT_ADMIN_ID.toString(),
+              "bienesBrutos",
+                  List.of(
+                      Map.of(
+                          "descripcion", descripcion,
+                          "cantidad", cantidad,
+                          "unidadMedicion", unidadMedicion,
+                          "esUsado", esUsado,
+                          "nombreSubcategoria", nombreSubcategoria)));
       Map<String, Object> resp = donacionesGateway.crearRecepcion(payload);
       String donacionId = resp.containsKey("id") ? resp.get("id").toString() : "generada";
-      redirectAttributes.addFlashAttribute("flashOk", "Donación registrada con éxito (ID: " + donacionId + ").");
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Donación registrada con éxito (ID: " + donacionId + ").");
     } catch (Exception e) {
-      redirectAttributes.addFlashAttribute("flashError", "Error al registrar donación: " + e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al registrar donación: " + e.getMessage());
     }
     return "redirect:/app/donante";
   }
@@ -548,12 +615,21 @@ public class AdminController {
 
         @SuppressWarnings("unchecked")
         Map<String, Object> camion = (Map<String, Object>) r.get("camion");
-        String patente = camion != null && camion.get("patente") != null ? String.valueOf(camion.get("patente")) : "AA123BB";
+        String patente =
+            camion != null && camion.get("patente") != null
+                ? String.valueOf(camion.get("patente"))
+                : "AA123BB";
 
         @SuppressWarnings("unchecked")
         Map<String, Object> chofer = (Map<String, Object>) r.get("chofer");
-        String choferNombre = chofer != null && chofer.get("nombre") != null ? String.valueOf(chofer.get("nombre")) : "Chofer DonaTrack";
-        String choferLegajo = chofer != null && chofer.get("legajo") != null ? String.valueOf(chofer.get("legajo")) : "CH-101";
+        String choferNombre =
+            chofer != null && chofer.get("nombre") != null
+                ? String.valueOf(chofer.get("nombre"))
+                : "Chofer DonaTrack";
+        String choferLegajo =
+            chofer != null && chofer.get("legajo") != null
+                ? String.valueOf(chofer.get("legajo"))
+                : "CH-101";
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> paradas = (List<Map<String, Object>>) r.get("paradas");
@@ -571,8 +647,14 @@ public class AdminController {
 
             @SuppressWarnings("unchecked")
             Map<String, Object> coord = (Map<String, Object>) p.get("coordenada");
-            double lat = (coord != null && coord.get("latitud") instanceof Number n) ? n.doubleValue() : -34.6037;
-            double lng = (coord != null && coord.get("longitud") instanceof Number n) ? n.doubleValue() : -58.3816;
+            double lat =
+                (coord != null && coord.get("latitud") instanceof Number n)
+                    ? n.doubleValue()
+                    : -34.6037;
+            double lng =
+                (coord != null && coord.get("longitud") instanceof Number n)
+                    ? n.doubleValue()
+                    : -58.3816;
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> entregas = (List<Map<String, Object>>) p.get("entregas");
@@ -582,7 +664,8 @@ public class AdminController {
                 String estado = String.valueOf(e.get("estado"));
                 double peso = (e.get("pesoEstimado") instanceof Number n) ? n.doubleValue() : 25.0;
                 double vol = (e.get("volumenEstimado") instanceof Number n) ? n.doubleValue() : 0.4;
-                String codigoCorto = "#DT-" + (idEntrega.length() >= 4 ? idEntrega.substring(0, 4) : "2418");
+                String codigoCorto =
+                    "#DT-" + (idEntrega.length() >= 4 ? idEntrega.substring(0, 4) : "2418");
 
                 Map<String, Object> item = new LinkedHashMap<>();
                 item.put("idEntrega", idEntrega);
@@ -610,7 +693,9 @@ public class AdminController {
                         String fStr = f.toString();
                         if (fStr.contains("storage.donatrack.org")) {
                           String filename = fStr.substring(fStr.lastIndexOf("/") + 1);
-                          sanitizedFotos.add("https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/" + filename);
+                          sanitizedFotos.add(
+                              "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/"
+                                  + filename);
                         } else {
                           sanitizedFotos.add(fStr);
                         }
@@ -655,22 +740,59 @@ public class AdminController {
     }
 
     String orgNombre = "Fundación Esperanza";
-    if (auth.getName().equalsIgnoreCase("admin")) {
+    String cuitOrg = "30-71482910-4";
+    String emailOrg = "contacto@fundacionesperanza.org";
+    String direccionOrg = "Calle 50 742, La Plata, Buenos Aires";
+
+    Map<String, Object> benInfo = donacionesGateway.obtenerBeneficiario(beneficiarioId);
+    if (benInfo != null && !benInfo.isEmpty()) {
+      if (benInfo.get("correoRepresentante") != null
+          && !benInfo.get("correoRepresentante").toString().isBlank()) {
+        emailOrg = benInfo.get("correoRepresentante").toString();
+      }
+      Object pObj = benInfo.get("persona");
+      if (pObj instanceof Map<?, ?> pMap) {
+        if (pMap.get("razonSocial") != null && !pMap.get("razonSocial").toString().isBlank()) {
+          orgNombre = pMap.get("razonSocial").toString();
+        } else if (pMap.get("nombre") != null && !pMap.get("nombre").toString().isBlank()) {
+          orgNombre = pMap.get("nombre").toString();
+        }
+        if (pMap.get("docNumero") != null && !pMap.get("docNumero").toString().isBlank()) {
+          cuitOrg = pMap.get("docNumero").toString();
+        }
+        if (pMap.get("email") != null && !pMap.get("email").toString().isBlank()) {
+          emailOrg = pMap.get("email").toString();
+        }
+        Object dObj = pMap.get("direccion");
+        if (dObj instanceof Map<?, ?> dMap) {
+          String c = dMap.get("calle") != null ? dMap.get("calle").toString() : "";
+          String a = dMap.get("altura") != null ? dMap.get("altura").toString() : "";
+          String l = dMap.get("localidad") != null ? dMap.get("localidad").toString() : "";
+          String resDir = (c + " " + a + (l.isBlank() ? "" : ", " + l)).trim();
+          if (!resDir.isBlank()) {
+            direccionOrg = resDir;
+          }
+        }
+      }
+    } else if (auth.getName() != null && auth.getName().equalsIgnoreCase("admin")) {
       orgNombre = "Fundación Esperanza (Vista Admin)";
+    } else if (auth.getName() != null && !auth.getName().isBlank()) {
+      orgNombre = "Organización " + auth.getName();
     }
 
     model.addAttribute("nombreUsuario", auth.getName());
     model.addAttribute("nombreOrganizacion", orgNombre);
-    model.addAttribute("cuitOrganizacion", "30-71482910-4");
-    model.addAttribute("emailOrganizacion", "contacto@fundacionesperanza.org");
-    model.addAttribute("direccionOrganizacion", "Calle 50 742, La Plata, Buenos Aires");
+    model.addAttribute("cuitOrganizacion", cuitOrg);
+    model.addAttribute("emailOrganizacion", emailOrg);
+    model.addAttribute("direccionOrganizacion", direccionOrg);
     model.addAttribute("totalNecesidades", necesidades.size());
     model.addAttribute("necesidades", necesidades);
     model.addAttribute("totalRutas", rutas != null ? rutas.size() : 0);
     model.addAttribute("totalEnCamino", enCamino != null ? enCamino.size() : 0);
     model.addAttribute("totalRecibidas", recibidas != null ? recibidas.size() : 0);
     model.addAttribute("kilosRecibidos", Math.round(kilosRecibidos));
-    model.addAttribute("proximasEntregas", enCamino != null ? enCamino.stream().limit(4).toList() : List.of());
+    model.addAttribute(
+        "proximasEntregas", enCamino != null ? enCamino.stream().limit(4).toList() : List.of());
 
     return "admin/beneficiaria/panel";
   }
@@ -695,19 +817,22 @@ public class AdminController {
       RedirectAttributes redirectAttributes) {
     try {
       UUID beneficiarioId = resolverBeneficiarioId(auth);
-      Map<String, Object> req = Map.of(
-          "tipo", tipo,
-          "descripcion", descripcion,
-          "cantidadRequerida", cantidadRequerida,
-          "subcategoriaRequerida", Map.of(
-              "nombre", nombreSubcategoria,
-              "descripcion", "Categoría " + nombreSubcategoria
-          )
-      );
+      Map<String, Object> req =
+          Map.of(
+              "tipo", tipo,
+              "descripcion", descripcion,
+              "cantidadRequerida", cantidadRequerida,
+              "subcategoriaRequerida",
+                  Map.of(
+                      "nombre",
+                      nombreSubcategoria,
+                      "descripcion",
+                      "Categoría " + nombreSubcategoria));
       donacionesGateway.agregarNecesidad(beneficiarioId, req);
       redirectAttributes.addFlashAttribute("flashOk", "Necesidad declarada con éxito.");
     } catch (Exception e) {
-      redirectAttributes.addFlashAttribute("flashError", "Error al registrar necesidad: " + e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al registrar necesidad: " + e.getMessage());
     }
     return "redirect:/app/beneficiaria/necesidades";
   }
@@ -748,9 +873,14 @@ public class AdminController {
         fotos.add(fotoUrl);
       }
       logisticaGateway.confirmarEntrega(idDonacion, fotos, patenteCamion);
-      redirectAttributes.addFlashAttribute("flashOk", "Recepción de entrega " + idDonacion + " confirmada con éxito. Comprobante alojado en Supabase S3.");
+      redirectAttributes.addFlashAttribute(
+          "flashOk",
+          "Recepción de entrega "
+              + idDonacion
+              + " confirmada con éxito. Comprobante alojado en Supabase S3.");
     } catch (Exception e) {
-      redirectAttributes.addFlashAttribute("flashError", "Error al confirmar entrega: " + e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al confirmar entrega: " + e.getMessage());
     }
     return "redirect:/app/beneficiaria/entregas";
   }

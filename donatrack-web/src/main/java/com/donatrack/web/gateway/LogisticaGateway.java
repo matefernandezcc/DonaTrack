@@ -43,20 +43,11 @@ public class LogisticaGateway {
   }
 
   public void crearCamion(CamionDto camion) {
-    logisticaClient
-        .post()
-        .uri("/api/camiones")
-        .body(camion)
-        .retrieve()
-        .toBodilessEntity();
+    logisticaClient.post().uri("/api/camiones").body(camion).retrieve().toBodilessEntity();
   }
 
   public void eliminarCamion(String patente) {
-    logisticaClient
-        .delete()
-        .uri("/api/camiones/{patente}", patente)
-        .retrieve()
-        .toBodilessEntity();
+    logisticaClient.delete().uri("/api/camiones/{patente}", patente).retrieve().toBodilessEntity();
   }
 
   public List<ChoferDto> listarChoferes() {
@@ -72,6 +63,14 @@ public class LogisticaGateway {
       log.error("Error al consultar choferes de logistica: {}", e.getMessage());
       return Collections.emptyList();
     }
+  }
+
+  public void crearChofer(ChoferDto chofer) {
+    logisticaClient.post().uri("/api/choferes").body(chofer).retrieve().toBodilessEntity();
+  }
+
+  public void eliminarChofer(String legajo) {
+    logisticaClient.delete().uri("/api/choferes/{legajo}", legajo).retrieve().toBodilessEntity();
   }
 
   public List<Map<String, Object>> listarRutas() {
@@ -90,10 +89,10 @@ public class LogisticaGateway {
   }
 
   public void confirmarEntrega(UUID idDonacion, List<String> fotos, String patenteCamion) {
-    Map<String, Object> body = Map.of(
-        "fotos", fotos != null ? fotos : List.of(),
-        "patenteCamion", patenteCamion != null ? patenteCamion : ""
-    );
+    Map<String, Object> body =
+        Map.of(
+            "fotos", fotos != null ? fotos : List.of(),
+            "patenteCamion", patenteCamion != null ? patenteCamion : "");
     logisticaClient
         .post()
         .uri("/api/entregas/{idDonacion}/confirmar", idDonacion)
@@ -107,13 +106,14 @@ public class LogisticaGateway {
       MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
       body.add("file", file.getResource());
 
-      Map<String, String> resp = logisticaClient
-          .post()
-          .uri("/api/entregas/{idDonacion}/fotos/subir", idDonacion)
-          .contentType(MediaType.MULTIPART_FORM_DATA)
-          .body(body)
-          .retrieve()
-          .body(new ParameterizedTypeReference<Map<String, String>>() {});
+      Map<String, String> resp =
+          logisticaClient
+              .post()
+              .uri("/api/entregas/{idDonacion}/fotos/subir", idDonacion)
+              .contentType(MediaType.MULTIPART_FORM_DATA)
+              .body(body)
+              .retrieve()
+              .body(new ParameterizedTypeReference<Map<String, String>>() {});
 
       return resp != null ? resp.get("url") : null;
     } catch (Exception e) {

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#extra-scripts})}">
+<head>
+  <title>DonaTrack · Gestión de Choferes</title>
+</head>
+<body>
+
+  <!-- Título del encabezado -->
+  <span id="page-header-title">Gestión de Choferes de Reparto</span>
+
+  <!-- Contenido principal -->
+  <div id="main-content-slot">
+
+    <!-- SLDS BLUEPRINT: CARD CONTAINER -->
+    <article class="slds-card">
+      
+      <!-- Card Header con botón Nuevo Chofer -->
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-user" title="Choferes">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#user}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Plantel de Choferes Habilitados</span>
+            </h2>
+          </div>
+          <div class="slds-no-flex">
+            <button class="slds-button slds-button_brand" onclick="document.getElementById('modal-chofer').removeAttribute('hidden'); document.getElementById('backdrop-chofer').removeAttribute('hidden');">
+              <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
+              </svg>Registrar Nuevo Chofer
+            </button>
+          </div>
+        </header>
+      </div>
+
+      <!-- Card Body: SLDS DATA TABLE BLUEPRINT -->
+      <div class="slds-card__body slds-card__body_inner">
+        <div class="slds-scrollable_x slds-border_bottom">
+          <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" aria-label="Tabla de Choferes">
+            <thead>
+              <tr class="slds-line-height_reset">
+                <th scope="col" style="width: 25%;">
+                  <div class="slds-truncate" title="Legajo">Legajo</div>
+                </th>
+                <th scope="col" style="width: 35%;">
+                  <div class="slds-truncate" title="Nombre y Apellido">Nombre y Apellido</div>
+                </th>
+                <th scope="col" style="width: 25%;">
+                  <div class="slds-truncate" title="Teléfono">Teléfono de Contacto</div>
+                </th>
+                <th scope="col" style="width: 15%; text-align: right;">
+                  <span class="slds-assistive-text">Acciones</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="slds-hint-parent" th:each="chofer : ${choferes}">
+                <th scope="row" data-label="Legajo">
+                  <div class="slds-truncate">
+                    <strong style="color: #0176d3;" th:text="${chofer.legajo}">CH-001</strong>
+                  </div>
+                </th>
+                <td data-label="Nombre y Apellido">
+                  <div class="slds-truncate" th:text="${chofer.nombre} + (${chofer.apellido != null ? ' ' + chofer.apellido : ''})">Juan Pérez</div>
+                </td>
+                <td data-label="Teléfono">
+                  <div class="slds-truncate" th:text="${chofer.telefono}">+54 11 4455-6677</div>
+                </td>
+                <td style="text-align: right;">
+                  <form th:action="@{/app/admin/choferes/{leg}/eliminar(leg=${chofer.legajo})}" method="post" style="display: inline;"
+                        onsubmit="return confirm('¿Seguro que deseas eliminar este chofer?');">
+                    <button type="submit" class="slds-button slds-button_text-destructive" style="font-size: 0.85rem;">
+                      Eliminar
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(choferes)}">
+                <td colspan="4" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">
+                  No hay choferes registrados en el sistema logístico. Hacé clic en "Registrar Nuevo Chofer".
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <footer class="slds-card__footer slds-grid slds-grid_align-spread">
+        <span class="slds-text-body_small slds-text-color_weak" th:text="'Total de conductores: ' + ${#lists.size(choferes)}">Total de conductores: 0</span>
+      </footer>
+    </article>
+
+    <!-- ==================== SLDS BLUEPRINT: MODAL REGISTRO CHOFER ==================== -->
+    <section id="modal-chofer" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-chofer" class="slds-modal slds-fade-in-open" hidden>
+      <div class="slds-modal__container" style="max-width: 520px;">
+        
+        <header class="slds-modal__header">
+          <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar"
+                  onclick="document.getElementById('modal-chofer').setAttribute('hidden', ''); document.getElementById('backdrop-chofer').setAttribute('hidden', '');">
+            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+              <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
+            </svg>
+            <span class="slds-assistive-text">Cerrar</span>
+          </button>
+          <h2 id="modal-heading-chofer" class="slds-modal__title slds-hyphenate">Habilitar Nuevo Chofer</h2>
+        </header>
+
+        <form th:action="@{/app/admin/choferes}" th:object="${nuevoChofer}" method="post">
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-chofer">
+            
+            <div class="slds-form-element slds-m-bottom_small">
+              <label class="slds-form-element__label" for="legajo">
+                <abbr class="slds-required" title="requerido">* </abbr>Número de Legajo
+              </label>
+              <div class="slds-form-element__control">
+                <input type="text" id="legajo" th:field="*{legajo}" required
+                       placeholder="Ej: CH-101" class="slds-input" />
+              </div>
+            </div>
+
+            <div class="slds-form-element slds-m-bottom_small">
+              <label class="slds-form-element__label" for="nombre">
+                <abbr class="slds-required" title="requerido">* </abbr>Nombre
+              </label>
+              <div class="slds-form-element__control">
+                <input type="text" id="nombre" th:field="*{nombre}" required
+                       placeholder="Ej: Martín" class="slds-input" />
+              </div>
+            </div>
+
+            <div class="slds-form-element slds-m-bottom_small">
+              <label class="slds-form-element__label" for="apellido">
+                <abbr class="slds-required" title="requerido">* </abbr>Apellido
+              </label>
+              <div class="slds-form-element__control">
+                <input type="text" id="apellido" th:field="*{apellido}" required
+                       placeholder="Ej: Rossi" class="slds-input" />
+              </div>
+            </div>
+
+            <div class="slds-form-element slds-m-bottom_small">
+              <label class="slds-form-element__label" for="telefono">
+                <abbr class="slds-required" title="requerido">* </abbr>Teléfono / Celular
+              </label>
+              <div class="slds-form-element__control">
+                <input type="tel" id="telefono" th:field="*{telefono}" required
+                       placeholder="Ej: +54 11 5566-7788" class="slds-input" />
+              </div>
+            </div>
+
+          </div>
+
+          <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" type="button"
+                    onclick="document.getElementById('modal-chofer').setAttribute('hidden', ''); document.getElementById('backdrop-chofer').setAttribute('hidden', '');">
+              Cancelar
+            </button>
+            <button class="slds-button slds-button_brand" type="submit">Guardar Chofer</button>
+          </footer>
+        </form>
+
+      </div>
+    </section>
+
+    <!-- Backdrop del Modal -->
+    <div id="backdrop-chofer" class="slds-backdrop slds-backdrop_open" hidden></div>
+
+  </div>
+
+  <div id="extra-scripts"></div>
+</body>
+</html>
+
