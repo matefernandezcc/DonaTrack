@@ -327,6 +327,26 @@ public class AdminController {
     return "redirect:/app/admin/usuarios";
   }
 
+  @PostMapping("/admin/usuarios/{id}/reset-password")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String resetearPasswordUsuario(
+      @PathVariable("id") UUID usuarioId,
+      @RequestParam(name = "email", required = false) String email,
+      RedirectAttributes redirectAttributes) {
+    try {
+      if (authGateway != null) {
+        authGateway.resetearPassword(usuarioId);
+        String label = (email != null && !email.isBlank()) ? email : usuarioId.toString();
+        redirectAttributes.addFlashAttribute(
+            "flashOk", "Contraseña del usuario " + label + " restablecida con éxito a 'password123'.");
+      }
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al restablecer contraseña: " + e.getMessage());
+    }
+    return "redirect:/app/admin/usuarios";
+  }
+
   @PostMapping("/admin/solicitudes-ong/{id}/aprobar")
   @PreAuthorize("hasRole('ADMIN')")
   public String aprobarSolicitudOng(
@@ -378,28 +398,38 @@ public class AdminController {
     if (metricas != null && metricas.get("cantidadBienesDonados") instanceof Number n) {
       bienes = n.longValue();
     }
-    long puntosReales = (donaciones * 500) + (bienes * 75);
+    long donacionesExitosas = 0;
+    if (metricas != null && metricas.get("donacionesExitosas") instanceof Number n) {
+      donacionesExitosas = n.longValue();
+    }
+    long puntosReales = 0;
+    if (metricas != null && metricas.get("puntosTotales") instanceof Number n) {
+      puntosReales = n.longValue();
+    } else {
+      long donacionesEnDeposito = Math.max(0, donaciones - donacionesExitosas);
+      puntosReales = (donacionesEnDeposito * 10) + (donacionesExitosas * 35) + (bienes * 2);
+    }
 
-    // Rango dinámico según puntos reales acumulados
+    // Rango dinámico según puntos reales acumulados (Esquema por etapas: +10 pts depósito, +25 pts entrega)
     String rangoNombre;
     int rangoNivel;
     long proximoObjetivo;
-    if (puntosReales >= 5000) {
-      rangoNombre = "Trailblazer Ranger";
+    if (puntosReales >= 350) {
+      rangoNombre = "Líder Comunitario";
       rangoNivel = 4;
-      proximoObjetivo = 10000;
-    } else if (puntosReales >= 1500) {
+      proximoObjetivo = 700;
+    } else if (puntosReales >= 150) {
       rangoNombre = "Guardián Solidario";
       rangoNivel = 3;
-      proximoObjetivo = 5000;
-    } else if (puntosReales >= 500) {
+      proximoObjetivo = 350;
+    } else if (puntosReales >= 50) {
       rangoNombre = "Colaborador Activo";
       rangoNivel = 2;
-      proximoObjetivo = 1500;
+      proximoObjetivo = 150;
     } else {
       rangoNombre = "Donante Inicial";
       rangoNivel = 1;
-      proximoObjetivo = 500;
+      proximoObjetivo = 50;
     }
 
     long puntosFaltantes = Math.max(0, proximoObjetivo - puntosReales);

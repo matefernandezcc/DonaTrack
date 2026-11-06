@@ -68,6 +68,14 @@ public class AuthGateway {
         .toBodilessEntity();
   }
 
+  public void resetearPassword(java.util.UUID usuarioId) {
+    authClient
+        .post()
+        .uri("/admin/usuarios/{id}/reset-password", usuarioId)
+        .retrieve()
+        .toBodilessEntity();
+  }
+
   @SuppressWarnings("unchecked")
   public Map<String, Object> obtenerPerfil(java.util.UUID usuarioId) {
     try {

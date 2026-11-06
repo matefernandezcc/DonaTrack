@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@lombok.extern.slf4j.Slf4j
 public class AuthService {
 
   private final UsuarioRepository usuarioRepository;
@@ -107,6 +108,14 @@ public class AuthService {
         com.donatrack.auth.domain.entities.Rol.valueOf(nuevoRolStr.trim().toUpperCase());
     usuario.setRol(nuevoRol);
     usuarioRepository.save(usuario);
+  }
+
+  public void resetearPasswordTemporal(UUID usuarioId) {
+    Usuario usuario = usuarioRepository.findById(usuarioId)
+        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
+    usuario.setPassword(passwordEncoder.encode("password123"));
+    usuarioRepository.save(usuario);
+    log.info("Contraseña del usuario {} ({}) restablecida a 'password123' por el Administrador", usuario.getUsername(), usuario.getEmail());
   }
 
   public String generarCodigoIntercambio(Usuario usuario) {

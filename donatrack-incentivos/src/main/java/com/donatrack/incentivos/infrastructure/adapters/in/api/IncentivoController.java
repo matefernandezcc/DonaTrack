@@ -121,6 +121,10 @@ public class IncentivoController {
       historialMap.merge(d.getMesDonacion(), 1, Integer::sum);
     }
 
+    int donacionesEnDeposito = Math.max(0, totalHistorico - totalExitosas);
+    // Esquema justo por etapas: +10 puntos inmediatos en depósito, +25 puntos extra al confirmarse la entrega a la entidad
+    int puntos = (donacionesEnDeposito * 10) + (totalExitosas * 35) + (bienesDonados * 2);
+
     MetricasDonanteDTO dto =
         MetricasDonanteDTO.builder()
             .donanteId(perfil.getDonanteId())
@@ -131,6 +135,7 @@ public class IncentivoController {
             .totalOrganizacionesAyudadas((int) organizacionesAyudadas)
             .historialDonacionesPorMes(historialMap)
             .posicionRanking(totalHistorico > 0 ? 5 : 0)
+            .puntosTotales(puntos)
             .build();
 
     return ResponseEntity.ok(dto);

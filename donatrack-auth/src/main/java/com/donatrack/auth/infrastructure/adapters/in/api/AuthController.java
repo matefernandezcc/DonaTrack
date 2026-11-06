@@ -70,6 +70,12 @@ public class AuthController {
     return ResponseEntity.ok(Map.of("mensaje", "Rol actualizado exitosamente a " + nuevoRol));
   }
 
+  @PostMapping("/admin/usuarios/{id}/reset-password")
+  public ResponseEntity<Map<String, String>> resetearPassword(@PathVariable UUID id) {
+    authService.resetearPasswordTemporal(id);
+    return ResponseEntity.ok(Map.of("mensaje", "Contraseña restablecida exitosamente a 'password123'"));
+  }
+
   @GetMapping("/api/auth/perfil/{id}")
   public ResponseEntity<Map<String, Object>> obtenerPerfil(@PathVariable UUID id) {
     return ResponseEntity.ok(authService.obtenerPerfil(id));

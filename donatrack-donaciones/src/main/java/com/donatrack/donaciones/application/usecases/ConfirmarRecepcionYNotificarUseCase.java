@@ -70,27 +70,26 @@ public class ConfirmarRecepcionYNotificarUseCase {
       }
     }
 
-    if (incentivoClient != null && donacion.getDonante() != null) {
+    if (incentivoClient != null) {
       try {
-        UUID idDonante = donacion.getDonante().getId();
-        int cantidadBienes = donacion.getBienes() != null ? donacion.getBienes().size() : 1;
-        List<String> categorias = new ArrayList<>();
-        if (donacion.getBienes() != null) {
-          for (var bien : donacion.getBienes()) {
-            if (bien.getCategoria() != null) {
-              categorias.add(bien.getCategoria().name());
-            }
+        java.util.UUID idDonante = null;
+        var recepcionOpt = recepcionRepository.buscarPorIdDonacion(donacion.getId());
+        if (recepcionOpt.isPresent() && recepcionOpt.get().getDonante() != null) {
+          idDonante = recepcionOpt.get().getDonante().getId();
+        }
+        if (idDonante != null) {
+          int cantidadBienes = donacion.getBienes() != null ? donacion.getBienes().size() : 1;
+          List<String> categorias = donacion.getCategoriasString();
+          if (categorias == null || categorias.isEmpty()) {
+            categorias = List.of("Alimentos");
           }
+          java.util.UUID idEntidad = beneficiario != null ? beneficiario.getId() : null;
+          com.donatrack.common.dto.ActividadDonacionDTO dto =
+              new com.donatrack.common.dto.ActividadDonacionDTO(
+                  donacion.getId(), idDonante, cantidadBienes, categorias, idEntidad, java.time.LocalDate.now());
+          incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
+          log.info("Incentivos actualizados para donante {} tras entrega exitosa de donación {}", idDonante, donacion.getId());
         }
-        if (categorias.isEmpty()) {
-          categorias.add("Alimentos");
-        }
-        UUID idEntidad = beneficiario != null ? beneficiario.getId() : null;
-        com.donatrack.common.dto.ActividadDonacionDTO dto =
-            new com.donatrack.common.dto.ActividadDonacionDTO(
-                donacion.getId(), idDonante, cantidadBienes, categorias, idEntidad, java.time.LocalDate.now());
-        incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
-        log.info("Incentivos actualizados para donante {} tras entrega exitosa de donación {}", idDonante, donacion.getId());
       } catch (Exception ex) {
         log.warn("No se pudo notificar a incentivos al confirmar entrega: {}", ex.getMessage());
       }
