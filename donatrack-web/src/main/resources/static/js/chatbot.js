@@ -38,8 +38,8 @@
   };
 
   const respond = (q) => {
-    // Le pegamos al Webhook de producción de n8n
-    fetch("http://localhost:5678/webhook/chatbot", {
+    // Le pegamos al endpoint proxy de DonaTrack Web (evita llamadas directas y fallas CORS/host)
+    fetch("/api/public/chatbot", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mensaje: q })
@@ -49,7 +49,7 @@
         addMsg(data.respuesta || "Mensaje procesado por n8n (sin respuesta)", "bot");
       })
       .catch((e) => {
-        console.warn("Error al conectar con n8n:", e);
+        console.warn("Error al conectar con chatbot proxy:", e);
         addMsg("Ups, el bot está fuera de servicio en este momento.", "bot");
       });
   };

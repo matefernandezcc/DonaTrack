@@ -43,13 +43,23 @@ public class PublicController {
   private final SecurityContextRepository securityContextRepository;
   private final com.donatrack.web.service.SolicitudOngService solicitudOngService;
 
+  @org.springframework.beans.factory.annotation.Value(
+      "${donatrack.n8n-url:${N8N_URL:http://localhost:5678}}")
+  private String n8nUrl = "http://localhost:5678";
+
   public PublicController(
       AuthGateway authGateway,
       IncentivosGateway incentivosGateway,
       LogisticaGateway logisticaGateway,
       JwtDecoder jwtDecoder,
       SecurityContextRepository securityContextRepository) {
-    this(authGateway, incentivosGateway, logisticaGateway, jwtDecoder, securityContextRepository, new com.donatrack.web.service.SolicitudOngService());
+    this(
+        authGateway,
+        incentivosGateway,
+        logisticaGateway,
+        jwtDecoder,
+        securityContextRepository,
+        new com.donatrack.web.service.SolicitudOngService());
   }
 
   @org.springframework.beans.factory.annotation.Autowired
@@ -76,9 +86,11 @@ public class PublicController {
 
   @GetMapping("/api/public/rastreo")
   @ResponseBody
-  public ResponseEntity<?> rastrearRemito(@RequestParam(value = "codigo", required = false) String codigo) {
+  public ResponseEntity<?> rastrearRemito(
+      @RequestParam(value = "codigo", required = false) String codigo) {
     if (codigo == null || codigo.trim().isBlank()) {
-      return ResponseEntity.badRequest().body(Map.of("error", "Ingresá un código de remito o entrega."));
+      return ResponseEntity.badRequest()
+          .body(Map.of("error", "Ingresá un código de remito o entrega."));
     }
 
     String clean = codigo.trim().replace("#", "").toUpperCase();
@@ -98,7 +110,8 @@ public class PublicController {
           Map<String, Object> dir = (Map<String, Object>) parada.get("direccion");
           String direccionStr =
               dir != null
-                  ? String.format("%s %s, %s", dir.get("calle"), dir.get("altura"), dir.get("localidad"))
+                  ? String.format(
+                      "%s %s, %s", dir.get("calle"), dir.get("altura"), dir.get("localidad"))
                   : "Destino Asignado";
 
           List<Map<String, Object>> entregas = (List<Map<String, Object>>) parada.get("entregas");
@@ -106,7 +119,8 @@ public class PublicController {
             for (Map<String, Object> e : entregas) {
               String idEntrega = String.valueOf(e.get("idEntrega"));
               String idEntregaUpper = idEntrega.toUpperCase();
-              String shortCode = idEntregaUpper.length() >= 4 ? idEntregaUpper.substring(0, 4) : idEntregaUpper;
+              String shortCode =
+                  idEntregaUpper.length() >= 4 ? idEntregaUpper.substring(0, 4) : idEntregaUpper;
               String codigoCorto = "DT-" + shortCode;
 
               boolean match = false;
@@ -116,11 +130,15 @@ public class PublicController {
                 }
               }
               if (!match && !clean.isBlank()) {
-                if (clean.equalsIgnoreCase(codigoCorto) || clean.equalsIgnoreCase("#" + codigoCorto) || clean.equalsIgnoreCase(idEntregaUpper)) {
+                if (clean.equalsIgnoreCase(codigoCorto)
+                    || clean.equalsIgnoreCase("#" + codigoCorto)
+                    || clean.equalsIgnoreCase(idEntregaUpper)) {
                   match = true;
                 }
               }
-              if (!match && (cleanNum.equals("2418") || clean.contains("2418")) && shortCode.equals("3300")) {
+              if (!match
+                  && (cleanNum.equals("2418") || clean.contains("2418"))
+                  && shortCode.equals("3300")) {
                 match = true;
               }
               if (!match && patente != null && !patente.isBlank()) {
@@ -137,8 +155,12 @@ public class PublicController {
                 resp.put("codigo", codigoFormateado);
                 resp.put("idEntrega", idEntrega);
                 resp.put("estado", e.get("estado"));
-                resp.put("peso", e.get("pesoEstimado") != null ? e.get("pesoEstimado") + " kg" : "85 kg");
-                resp.put("volumen", e.get("volumenEstimado") != null ? e.get("volumenEstimado") + " m³" : "0.5 m³");
+                resp.put(
+                    "peso",
+                    e.get("pesoEstimado") != null ? e.get("pesoEstimado") + " kg" : "85 kg");
+                resp.put(
+                    "volumen",
+                    e.get("volumenEstimado") != null ? e.get("volumenEstimado") + " m³" : "0.5 m³");
                 resp.put("direccion", direccionStr);
                 resp.put("chofer", choferNombre);
                 resp.put("patente", patente);
@@ -156,7 +178,9 @@ public class PublicController {
                         String fStr = f.toString();
                         if (fStr.contains("storage.donatrack.org")) {
                           String filename = fStr.substring(fStr.lastIndexOf("/") + 1);
-                          fotosSanitizadas.add("https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/" + filename);
+                          fotosSanitizadas.add(
+                              "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/"
+                                  + filename);
                         } else {
                           fotosSanitizadas.add(fStr);
                         }
@@ -178,10 +202,17 @@ public class PublicController {
     }
 
     return ResponseEntity.status(404)
-        .body(Map.of("error", "No se encontró el remito " + codigo + ". Probá con códigos de prueba: #DT-3300, #DT-3200 o patente AF456CD."));
+        .body(
+            Map.of(
+                "error",
+                "No se encontró el remito "
+                    + codigo
+                    + ". Probá con códigos de prueba: #DT-3300, #DT-3200 o patente AF456CD."));
   }
 
-  @GetMapping(value = {"/remitos/{filename:.+}", "/fotos/{filename:.+}"}, produces = "image/svg+xml")
+  @GetMapping(
+      value = {"/remitos/{filename:.+}", "/fotos/{filename:.+}"},
+      produces = "image/svg+xml")
   @ResponseBody
   public ResponseEntity<String> obtenerRemitoSvg(@PathVariable String filename) {
     String cleanCode = filename.replaceAll("(?i)\\.(jpg|jpeg|png|svg|pdf)$", "").toUpperCase();
@@ -192,7 +223,8 @@ public class PublicController {
       cleanCode = "DT-" + cleanCode;
     }
 
-    String svg = """
+    String svg =
+        """
         <svg xmlns="http://www.w3.org/2000/svg" width="600" height="380" viewBox="0 0 600 380">
           <defs>
             <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="1">
@@ -206,31 +238,31 @@ public class PublicController {
           <rect x="15" y="15" width="570" height="350" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
           <rect x="15" y="15" width="570" height="64" rx="14" fill="url(#headerGrad)"/>
           <rect x="15" y="60" width="570" height="19" fill="url(#headerGrad)"/>
-          
+
           <text x="36" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="19" font-weight="800" fill="#ffffff">DonaTrack • Comprobante Digital de Entrega</text>
           <text x="560" y="52" font-family="monospace" font-size="14" font-weight="bold" fill="#bbf7d0" text-anchor="end">CERTIFICADO #%s</text>
-          
+
           <rect x="36" y="98" width="168" height="26" rx="13" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
           <circle cx="50" cy="111" r="5" fill="#16a34a"/>
           <text x="64" y="115" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="#15803d">ENTREGA VERIFICADA</text>
-          
+
           <text x="36" y="152" font-family="-apple-system, sans-serif" font-size="11" fill="#64748b" font-weight="700">DESTINO ASIGNADO</text>
           <text x="36" y="174" font-family="-apple-system, sans-serif" font-size="15" fill="#0f172a" font-weight="700">Comedor Solidario / Organización Verificada</text>
           <text x="36" y="194" font-family="-apple-system, sans-serif" font-size="13" fill="#475569">Recepción en sede con acta digital conforme</text>
-          
+
           <text x="320" y="152" font-family="-apple-system, sans-serif" font-size="11" fill="#64748b" font-weight="700">UNIDAD LOGÍSTICA</text>
           <text x="320" y="174" font-family="-apple-system, sans-serif" font-size="15" fill="#0f172a" font-weight="700">Flota DonaTrack Auditada</text>
           <text x="320" y="194" font-family="-apple-system, sans-serif" font-size="13" fill="#475569">Móvil de traslado certificado</text>
-          
+
           <line x1="36" y1="216" x2="560" y2="216" stroke="#f1f5f9" stroke-width="2"/>
-          
+
           <text x="36" y="244" font-family="-apple-system, sans-serif" font-size="11" fill="#64748b" font-weight="700">CARGA &amp; ALIMENTOS</text>
           <text x="36" y="266" font-family="-apple-system, sans-serif" font-size="14" fill="#0f172a">Bienes de primera necesidad y asistencia alimentaria directa</text>
-          
+
           <text x="36" y="308" font-family="monospace" font-size="10" fill="#94a3b8">HASH DE AUDITORÍA: d7a8f102e89c34b6701a52fe901c3d4e8b21a76c</text>
           <text x="36" y="326" font-family="-apple-system, sans-serif" font-size="11" fill="#166534" font-weight="600">&#x2713; Firma digital registrada al pie del camión por receptor institucional</text>
           <text x="36" y="346" font-family="-apple-system, sans-serif" font-size="10" fill="#94a3b8">DonaTrack Civic Logistics Network • Trazabilidad 100%% sin intermediarios</text>
-          
+
           <rect x="470" y="234" width="90" height="90" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
           <rect x="480" y="244" width="22" height="22" fill="#0f172a"/>
           <rect x="528" y="244" width="22" height="22" fill="#0f172a"/>
@@ -238,7 +270,8 @@ public class PublicController {
           <rect x="508" y="272" width="14" height="14" fill="#166534"/>
           <text x="515" y="338" font-family="monospace" font-size="8" fill="#64748b" text-anchor="middle">QR FIRMADO</text>
         </svg>
-        """.formatted(cleanCode);
+        """
+            .formatted(cleanCode);
     return ResponseEntity.ok().header("Content-Type", "image/svg+xml;charset=UTF-8").body(svg);
   }
 
@@ -372,11 +405,36 @@ public class PublicController {
       var solicitud = solicitudOngService.registrarSolicitud(body);
       return ResponseEntity.ok(
           Map.of(
-              "ok", true,
-              "mensaje", "Solicitud registrada con éxito. Un administrador auditará los datos para habilitar el portal.",
-              "id", solicitud.id()));
+              "ok",
+              true,
+              "mensaje",
+              "Solicitud registrada con éxito. Un administrador auditará los datos para habilitar el portal.",
+              "id",
+              solicitud.id()));
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    }
+  }
+
+  @GetMapping("/oauth2/authorization/{provider}")
+  public String iniciarSocialLogin(
+      @PathVariable("provider") String provider,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      RedirectAttributes redirectAttributes) {
+    try {
+      String code = authGateway.obtenerCodigoSocial(provider);
+      if (code != null && !code.isBlank()) {
+        return callbackSSO(code, request, response, redirectAttributes);
+      }
+      redirectAttributes.addFlashAttribute(
+          "loginError", "No se pudo iniciar sesión con " + provider + ".");
+      return "redirect:/login";
+    } catch (Exception e) {
+      log.error("Fallo al iniciar sesión social con {}: {}", provider, e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "loginError", "Error de comunicación con el servicio de autenticación.");
+      return "redirect:/login";
     }
   }
 
@@ -394,8 +452,47 @@ public class PublicController {
       return "redirect:/app/" + rol.toLowerCase();
     } catch (Exception e) {
       log.error("Error en intercambio de código SSO: {}", e.getMessage());
-      redirectAttributes.addFlashAttribute("loginError", "No se pudo completar el inicio de sesión social.");
+      redirectAttributes.addFlashAttribute(
+          "loginError", "No se pudo completar el inicio de sesión social.");
       return "redirect:/login";
+    }
+  }
+
+  @PostMapping("/api/public/chatbot")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> proxyChatbot(
+      @RequestBody Map<String, Object> payload) {
+    try {
+      java.net.http.HttpClient httpClient =
+          java.net.http.HttpClient.newBuilder()
+              .connectTimeout(java.time.Duration.ofSeconds(2))
+              .build();
+      org.springframework.http.client.JdkClientHttpRequestFactory requestFactory =
+          new org.springframework.http.client.JdkClientHttpRequestFactory(httpClient);
+      requestFactory.setReadTimeout(java.time.Duration.ofSeconds(3));
+
+      org.springframework.web.client.RestClient restClient =
+          org.springframework.web.client.RestClient.builder()
+              .baseUrl(n8nUrl)
+              .requestFactory(requestFactory)
+              .build();
+      Map<String, Object> resp =
+          restClient
+              .post()
+              .uri("/webhook/chatbot")
+              .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+              .body(payload)
+              .retrieve()
+              .body(
+                  new org.springframework.core.ParameterizedTypeReference<
+                      Map<String, Object>>() {});
+      return ResponseEntity.ok(resp != null ? resp : Map.of("respuesta", "Mensaje procesado."));
+    } catch (Exception e) {
+      log.warn("No se pudo conectar con el servicio de chatbot n8n: {}", e.getMessage());
+      return ResponseEntity.ok(
+          Map.of(
+              "respuesta",
+              "Hola! En este momento nuestro asistente virtual está descansando. Podés consultar nuestras secciones de ayuda o escribirnos directamente."));
     }
   }
 
@@ -429,9 +526,9 @@ public class PublicController {
     SecurityContextHolder.setContext(context);
 
     session.setAttribute(
-        org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+        org.springframework.security.web.context.HttpSessionSecurityContextRepository
+            .SPRING_SECURITY_CONTEXT_KEY,
         context);
     securityContextRepository.saveContext(context, request, response);
   }
 }
-
