@@ -36,6 +36,23 @@ public class AuthGateway {
         .body(TokenResponse.class);
   }
 
+  public String obtenerCodigoSocial(String provider) {
+    try {
+      Map<String, String> resp =
+          authClient
+              .get()
+              .uri("/api/auth/sso/codigo?provider={p}", provider)
+              .retrieve()
+              .body(
+                  new org.springframework.core.ParameterizedTypeReference<
+                      Map<String, String>>() {});
+      return resp != null ? resp.get("code") : null;
+    } catch (Exception e) {
+      log.error("Error al obtener código social para {}: {}", provider, e.getMessage());
+      return null;
+    }
+  }
+
   public TokenResponse registrar(Map<String, Object> payload) {
     return authClient
         .post()
@@ -48,11 +65,7 @@ public class AuthGateway {
   @SuppressWarnings("unchecked")
   public java.util.List<Map<String, Object>> listarUsuarios() {
     try {
-      return authClient
-          .get()
-          .uri("/admin/usuarios")
-          .retrieve()
-          .body(java.util.List.class);
+      return authClient.get().uri("/admin/usuarios").retrieve().body(java.util.List.class);
     } catch (Exception e) {
       log.error("Error al listar usuarios desde auth service: {}", e.getMessage());
       return java.util.Collections.emptyList();
@@ -79,11 +92,7 @@ public class AuthGateway {
   @SuppressWarnings("unchecked")
   public Map<String, Object> obtenerPerfil(java.util.UUID usuarioId) {
     try {
-      return authClient
-          .get()
-          .uri("/api/auth/perfil/{id}", usuarioId)
-          .retrieve()
-          .body(Map.class);
+      return authClient.get().uri("/api/auth/perfil/{id}", usuarioId).retrieve().body(Map.class);
     } catch (Exception e) {
       log.error("Error al consultar perfil de usuario: {}", e.getMessage());
       return Map.of();
@@ -94,12 +103,11 @@ public class AuthGateway {
     authClient
         .put()
         .uri("/api/auth/perfil/{id}", usuarioId)
-        .body(Map.of(
-            "descripcion", descripcion != null ? descripcion : "",
-            "ubicacion", ubicacion != null ? ubicacion : ""
-        ))
+        .body(
+            Map.of(
+                "descripcion", descripcion != null ? descripcion : "",
+                "ubicacion", ubicacion != null ? ubicacion : ""))
         .retrieve()
         .toBodilessEntity();
   }
 }
-

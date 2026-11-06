@@ -8,7 +8,6 @@ import com.donatrack.auth.infrastructure.adapters.in.api.dto.TokenResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,8 +29,7 @@ public class AuthController {
 
   @GetMapping("/oauth2/authorization/{provider}")
   public void mockOAuth2Redirect(
-      @PathVariable("provider") String provider,
-      HttpServletResponse response) throws IOException {
+      @PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
     String prov = provider.toLowerCase();
     String email = prov.equals("google") ? "donante.google@gmail.com" : "donante.github@gmail.com";
     String nombre = prov.equals("google") ? "Donante Google (SSO)" : "Donante GitHub (SSO)";
@@ -39,6 +37,26 @@ public class AuthController {
     Usuario usuario = authService.obtenerOCrearUsuarioSocial(email, nombre, provider.toUpperCase());
     String code = authService.generarCodigoIntercambio(usuario);
     response.sendRedirect(webUrl + "/auth/callback?code=" + code);
+  }
+
+  @GetMapping("/api/auth/sso/codigo")
+  public ResponseEntity<Map<String, String>> obtenerCodigoSocial(
+      @RequestParam("provider") String provider,
+      @RequestParam(value = "email", required = false) String emailParam,
+      @RequestParam(value = "nombre", required = false) String nombreParam) {
+    String prov = provider.toLowerCase();
+    String email =
+        (emailParam != null && !emailParam.isBlank())
+            ? emailParam
+            : (prov.equals("google") ? "donante.google@gmail.com" : "donante.github@gmail.com");
+    String nombre =
+        (nombreParam != null && !nombreParam.isBlank())
+            ? nombreParam
+            : (prov.equals("google") ? "Donante Google (SSO)" : "Donante GitHub (SSO)");
+
+    Usuario usuario = authService.obtenerOCrearUsuarioSocial(email, nombre, provider.toUpperCase());
+    String code = authService.generarCodigoIntercambio(usuario);
+    return ResponseEntity.ok(Map.of("code", code));
   }
 
   @PostMapping("/auth/login")
@@ -49,7 +67,8 @@ public class AuthController {
 
   @PostMapping("/auth/register")
   public ResponseEntity<TokenResponse> register(
-      @Valid @RequestBody com.donatrack.auth.infrastructure.adapters.in.api.dto.RegisterRequest request) {
+      @Valid @RequestBody
+          com.donatrack.auth.infrastructure.adapters.in.api.dto.RegisterRequest request) {
     TokenResponse response = authService.registrarUsuario(request);
     return ResponseEntity.ok(response);
   }
@@ -73,7 +92,8 @@ public class AuthController {
   @PostMapping("/admin/usuarios/{id}/reset-password")
   public ResponseEntity<Map<String, String>> resetearPassword(@PathVariable UUID id) {
     authService.resetearPasswordTemporal(id);
-    return ResponseEntity.ok(Map.of("mensaje", "Contraseña restablecida exitosamente a 'password123'"));
+    return ResponseEntity.ok(
+        Map.of("mensaje", "Contraseña restablecida exitosamente a 'password123'"));
   }
 
   @GetMapping("/api/auth/perfil/{id}")
@@ -99,4 +119,3 @@ public class AuthController {
     return ResponseEntity.ok(Map.of("status", "Servicio de Autenticación DonaTrack online 🚀"));
   }
 }
-

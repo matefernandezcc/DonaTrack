@@ -34,7 +34,10 @@ public class WebSecurityConfig {
                 auth.requestMatchers(
                         "/",
                         "/login",
+                        "/registro",
                         "/auth/**",
+                        "/oauth2/**",
+                        "/api/public/**",
                         "/css/**",
                         "/js/**",
                         "/img/**",
@@ -42,6 +45,7 @@ public class WebSecurityConfig {
                         "/fotos/**",
                         "/assets/**",
                         "/favicon.svg",
+                        "/healthcheck",
                         "/actuator/**",
                         "/error")
                     .permitAll()
@@ -72,4 +76,3 @@ public class WebSecurityConfig {
     return new HttpSessionSecurityContextRepository();
   }
 }
-
