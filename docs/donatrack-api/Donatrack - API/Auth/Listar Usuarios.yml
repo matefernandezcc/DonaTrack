@@ -1,0 +1,22 @@
+info:
+  name: Listar Usuarios
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{authUrl}}/admin/usuarios"
+  auth: none
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

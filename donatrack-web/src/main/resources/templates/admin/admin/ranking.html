@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+<head>
+  <title>DonaTrack · Ranking Mensual de Donantes</title>
+</head>
+<body>
+
+  <span id="page-header-title">Ranking Mensual & Gamificación</span>
+
+  <div id="main-content-slot">
+    <article class="slds-card">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-reward" title="Ranking">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Podio Mensual de Donantes Destacados</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+
+      <div class="slds-card__body slds-card__body_inner">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" aria-label="Tabla de Ranking">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th scope="col" style="width: 15%;">
+                <div class="slds-truncate" title="Posición">Posición</div>
+              </th>
+              <th scope="col" style="width: 45%;">
+                <div class="slds-truncate" title="Donante">Donante</div>
+              </th>
+              <th scope="col" style="width: 40%;">
+                <div class="slds-truncate" title="Donaciones">Donaciones Completadas</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent" th:each="pos, iter : ${ranking}">
+              <th scope="row">
+                <span class="slds-badge"
+                      th:classappend="${iter.count == 1} ? 'slds-theme_warning' : (${iter.count == 2} ? 'slds-badge_lightest' : 'slds-theme_shade')"
+                      th:text="'#' + ${iter.count}">#1</span>
+              </th>
+              <td>
+                <strong th:text="${pos['nombre']}">María González</strong>
+              </td>
+              <td>
+                <span class="slds-text-color_success" style="font-weight: 700;"
+                      th:text="${pos['donaciones']} + ' donaciones'">
+                  2 donaciones
+                </span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(ranking)}">
+              <td colspan="3" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">
+                Aún no se ha consolidado el ranking del mes.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="slds-card__footer slds-grid slds-grid_align-spread">
+        <span class="slds-text-body_small">DonaTrack · Ranking Mensual</span>
+        <a th:href="@{/app/admin}" class="slds-text-link">← Volver al Resumen</a>
+      </footer>
+    </article>
+  </div>
+
+</body>
+</html>
+

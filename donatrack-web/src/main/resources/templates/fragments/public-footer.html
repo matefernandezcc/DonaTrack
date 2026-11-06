@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<footer class="footer" th:fragment="footer">
+  <div class="container footer__grid">
+    <div class="footer__brand">
+      <a th:href="@{/}" class="nav__brand">
+        <img th:src="@{/img/package.svg}" src="/img/package.svg" class="logo" alt="DonaTrack" width="32" height="32" />
+        <span class="nav__brand-text">DonaTrack</span>
+      </a>
+      <p>
+        Plataforma de gestión y trazabilidad de donaciones. Proyecto de UTN Solidaria.
+      </p>
+      <div class="footer__badges" aria-label="Sellos de confianza">
+        <span class="trust">UTN</span>
+        <span class="trust">ONG Verif.</span>
+        <span class="trust">Ley 25.326</span>
+      </div>
+    </div>
+
+    <div>
+      <h4>Plataforma</h4>
+      <ul>
+        <li><a th:href="@{/#que-donar}">Qué donar</a></li>
+        <li><a th:href="@{/#recorrido}">Recorrido</a></li>
+        <li><a th:href="@{/#campanas}">Campañas</a></li>
+        <li><a th:href="@{/#mapa}">Mapa solidario</a></li>
+        <li><a th:href="@{/#impacto}">Impacto</a></li>
+        <li><a th:href="@{/login}">Acceso a la plataforma</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Términos y condiciones</a></li>
+        <li><a href="#">Política de privacidad</a></li>
+        <li><a href="#">Declaración de accesibilidad</a></li>
+        <li><a href="https://www.argentina.gob.ar/normativa/nacional/ley-25326-64790" target="_blank" rel="noopener">Ley 25.326</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contacto</h4>
+      <ul>
+        <li><a href="mailto:hola@donatrack.org">hola@donatrack.org</a></li>
+        <li><a href="https://frba.utn.edu.ar" target="_blank" rel="noopener">UTN FRBA</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer__bottom container">
+    <span>© 2026 DonaTrack · UTN Solidaria</span>
+    <span>Hecho con propósito en Argentina.</span>
+  </div>
+</footer>
+</html>
+

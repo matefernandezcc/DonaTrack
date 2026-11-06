@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+  <title>DonaTrack · Iniciar Sesión</title>
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      background-color: #f4f6f9;
+      color: #181818;
+      display: flex;
+    }
+
+    .login-wrapper {
+      display: flex;
+      width: 100vw;
+      min-height: 100vh;
+    }
+
+    /* ==================== COLUMNA IZQUIERDA: FORMULARIO ==================== */
+    .login-col-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 24px;
+      background: #f7f9fb;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 410px;
+      background: #ffffff;
+      border: 1px solid #e5e9f2;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      padding: 36px 32px 32px;
+      text-align: center;
+    }
+
+    .login-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .login-title {
+      font-size: 1.45rem;
+      font-weight: 600;
+      color: #0b2147;
+      margin-bottom: 24px;
+      letter-spacing: -0.3px;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #444444;
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #c9c7c5;
+      border-radius: 4px;
+      font-size: 0.9375rem;
+      color: #181818;
+      background: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #0176d3;
+      box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.18);
+    }
+
+    .form-checkbox-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      font-size: 0.8125rem;
+      color: #444444;
+    }
+
+    .form-checkbox-row label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .btn-salesforce {
+      width: 100%;
+      padding: 11px 16px;
+      background-color: #0176d3;
+      border: 1px solid #0176d3;
+      border-radius: 4px;
+      color: #ffffff;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-salesforce:hover {
+      background-color: #014486;
+      border-color: #014486;
+    }
+
+    .divider {
+      position: relative;
+      text-align: center;
+      margin: 22px 0 18px;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e0e5ed;
+    }
+
+    .divider span {
+      position: relative;
+      background: #ffffff;
+      padding: 0 12px;
+      font-size: 0.75rem;
+      color: #706e6b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sso-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-sso {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 14px;
+      background: #ffffff;
+      border: 1px solid #c9c7c5;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #181818;
+      text-decoration: none;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn-sso:hover {
+      background-color: #f4f6f9;
+      border-color: #b0adab;
+    }
+
+    .demo-badges {
+      margin-top: 24px;
+      padding: 12px;
+      background: #eaf5fe;
+      border: 1px solid #cbe5fb;
+      border-radius: 6px;
+      text-align: left;
+      font-size: 0.775rem;
+      color: #032d60;
+      line-height: 1.5;
+    }
+
+    .demo-badges strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #014486;
+    }
+
+    .demo-chip {
+      display: inline-block;
+      background: #ffffff;
+      border: 1px solid #b8daf8;
+      border-radius: 4px;
+      padding: 2px 7px;
+      margin: 2px 2px 2px 0;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 0.75rem;
+      transition: background-color 0.1s ease;
+    }
+
+    .demo-chip:hover {
+      background: #0176d3;
+      color: #ffffff;
+      border-color: #0176d3;
+    }
+
+    .login-footer {
+      margin-top: 24px;
+      font-size: 0.75rem;
+      color: #706e6b;
+      text-align: center;
+    }
+
+    /* ==================== COLUMNA DERECHA: INSIGHTS & BLUE BANNER ==================== */
+    .login-col-right {
+      flex: 1.15;
+      background: linear-gradient(145deg, #00103a 0%, #03234d 50%, #04386e 100%);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 60px 56px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Efectos decorativos de fondo */
+    .login-col-right::before {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-banner-content {
+      max-width: 540px;
+      z-index: 2;
+    }
+
+    .hero-description {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #f1f5f9;
+      margin-bottom: 28px;
+    }
+
+    .btn-hero-pill {
+      display: inline-block;
+      background: #ffffff;
+      color: #014486;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      padding: 12px 28px;
+      border-radius: 30px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .btn-hero-pill:hover {
+      transform: translateY(-2px);
+      background-color: #f0f6ff;
+    }
+
+    /* Cards de Insights Dinámicos */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 36px;
+      z-index: 2;
+    }
+
+    .insight-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      padding: 18px;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .insight-card:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .insight-number {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .insight-label {
+      font-size: 0.8125rem;
+      color: #f1f5f9;
+      line-height: 1.4;
+    }
+
+    .banner-footer {
+      font-size: 0.8125rem;
+      color: #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+      border-top: 1px solid rgba(255, 255, 255, 0.25);
+      padding-top: 20px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 900px) {
+      .login-wrapper {
+        flex-direction: column;
+      }
+      .login-col-right {
+        display: none;
+      }
+      .login-col-left {
+        min-height: 100vh;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+
+    <!-- ==================== COLUMNA IZQUIERDA: LOGIN SALESFORCE STYLE ==================== -->
+    <div class="login-col-left">
+      <div class="login-card">
+
+        <!-- Logo DonaTrack Package -->
+        <div class="login-logo" style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 20px;">
+          <img th:src="@{/img/package.svg}" src="/img/package.svg" alt="DonaTrack" style="width: 72px; height: 72px; object-fit: contain;" />
+          <span style="font-weight: 800; font-size: 1.25rem; color: #014486; letter-spacing: -0.5px;">DonaTrack</span>
+        </div>
+
+        <h1 class="login-title">Iniciar Sesión</h1>
+
+        <!-- Alertas de estado -->
+        <div th:if="${loginError != null}" style="background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
+          <span th:text="${loginError}">Credenciales inválidas.</span>
+        </div>
+
+        <div th:if="${logoutMessage != null}" style="background-color: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
+          <span th:text="${logoutMessage}">Sesión cerrada exitosamente.</span>
+        </div>
+
+        <!-- Formulario de Acceso -->
+        <form th:action="@{/login}" method="post" id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="username">Usuario o Correo Electrónico</label>
+            <input class="form-input" type="text" id="username" name="username" required autocomplete="username"
+                   placeholder="Ej: admin, donante, beneficiaria" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Contraseña</label>
+            <input class="form-input" type="password" id="password" name="password" required autocomplete="current-password"
+                   placeholder="••••••••" />
+          </div>
+
+          <div class="form-checkbox-row">
+            <label>
+              <input type="checkbox" name="remember" checked />
+              Recordar usuario
+            </label>
+            <a href="#" style="color: #0176d3; text-decoration: none;" onclick="alert('Contactá al administrador de DonaTrack para recuperar tu clave.'); return false;">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <button type="submit" class="btn-salesforce">
+            Iniciar Sesión
+          </button>
+        </form>
+
+        <div class="divider">
+          <span>O ingresar con</span>
+        </div>
+
+        <!-- Social SSO -->
+        <div class="sso-group">
+          <a th:href="@{/oauth2/authorization/google}" class="btn-sso">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3h3.86c2.26-2.09 3.68-5.17 3.68-9.09z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09C3.25 21.3 7.31 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.27C.46 8.24 0 10.06 0 12s.46 3.76 1.27 5.38l4-3.09z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.62l4 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+            </svg>
+            Google Workspace
+          </a>
+
+          <a th:href="@{/oauth2/authorization/github}" class="btn-sso">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#24292e">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            GitHub Enterprise
+          </a>
+        </div>
+
+        <!-- Credenciales Demo Interactivas -->
+        <div class="demo-badges">
+          <strong>Acceso Rápido para Evaluación:</strong>
+          <span class="demo-chip" onclick="fillCreds('admin', 'admin')">🔑 Admin</span>
+          <span class="demo-chip" onclick="fillCreds('donante', 'donante')">🎁 Donante</span>
+          <span class="demo-chip" onclick="fillCreds('beneficiaria', 'beneficiaria')">🏢 Beneficiaria</span>
+        </div>
+
+        <!-- Acceso a Registro -->
+        <div style="margin-top: 18px; font-size: 0.85rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+          ¿No tenés una cuenta?
+          <a th:href="@{/registro}" style="color: #0176d3; font-weight: 700; text-decoration: none;">Registrate gratis</a>
+        </div>
+
+      </div>
+
+      <div class="login-footer">
+        © 2026 DonaTrack, Inc. Todos los derechos reservados. <a href="/" style="color: #014486; font-weight: 600; text-decoration: none;">Volver al Portal</a>
+      </div>
+    </div>
+
+    <!-- ==================== COLUMNA DERECHA: INSIGHTS & HERO BANNER ==================== -->
+    <div class="login-col-right">
+      <div class="hero-banner-content">
+        <h2 class="hero-title" style="font-size: 2.25rem; line-height: 1.25; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 18px;">Trazabilidad, impacto y transparencia en cada entrega.</h2>
+        <p class="hero-description">
+          Conectamos donantes comprometidos con organizaciones comunitarias, garantizando auditoría logística en tiempo real, certificación de remitos y optimización inteligente de rutas.
+        </p>
+
+        <a th:href="@{/}" class="btn-hero-pill">
+          Explorar Portal Público
+        </a>
+
+        <!-- Insights Dinámicos de Donaciones -->
+        <div class="insights-grid">
+          <div class="insight-card">
+            <div class="insight-number">+12,450 kg</div>
+            <div class="insight-label">Alimentos e insumos canalizados este mes</div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-number">100%</div>
+            <div class="insight-label">Trazabilidad auditada con remito digital</div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-number">13 Camiones</div>
+            <div class="insight-label">Flota activa con cálculo de cubicaje</div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-number">4 ONGs</div>
+            <div class="insight-label">Comedores y fundaciones asistidas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="banner-footer">
+        <span>DonaTrack v2.0 · Entrega 6</span>
+        <span>Salesforce Lightning Design System Inspired</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function fillCreds(u, p) {
+      document.getElementById('username').value = u;
+      document.getElementById('password').value = p;
+    }
+  </script>
+</body>
+</html>

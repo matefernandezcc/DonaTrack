@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#extra-scripts})}">
+<head>
+  <title>DonaTrack · Rutas de Reparto</title>
+</head>
+<body>
+
+  <!-- Título del encabezado -->
+  <span id="page-header-title">Supervisión de Rutas y Logística de Distribución</span>
+
+  <!-- Contenido principal -->
+  <div id="main-content-slot">
+
+    <!-- SLDS BLUEPRINT: CARD CONTAINER -->
+    <article class="slds-card">
+      
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-routing-offline" title="Rutas">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#routing_offline}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Rutas Planificadas y en Tránsito</span>
+            </h2>
+          </div>
+          <div class="slds-no-flex">
+            <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral">
+              <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#refresh}"></use>
+              </svg>Ver Asignaciones
+            </a>
+          </div>
+        </header>
+      </div>
+
+      <!-- Card Body: SLDS DATA TABLE BLUEPRINT -->
+      <div class="slds-card__body slds-card__body_inner">
+        <div class="slds-scrollable_x slds-border_bottom">
+          <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" aria-label="Tabla de Rutas">
+            <thead>
+              <tr class="slds-line-height_reset">
+                <th scope="col" style="width: 15%;">
+                  <div class="slds-truncate" title="Código de Ruta">Código / ID</div>
+                </th>
+                <th scope="col" style="width: 15%;">
+                  <div class="slds-truncate" title="Fecha Operativa">Fecha Operativa</div>
+                </th>
+                <th scope="col" style="width: 20%;">
+                  <div class="slds-truncate" title="Móvil y Chofer">Móvil & Conductor</div>
+                </th>
+                <th scope="col" style="width: 25%;">
+                  <div class="slds-truncate" title="Paradas y Destinos">Paradas & Destinos</div>
+                </th>
+                <th scope="col" style="width: 15%;">
+                  <div class="slds-truncate" title="Estado">Estado</div>
+                </th>
+                <th scope="col" style="width: 10%; text-align: right;">
+                  <span class="slds-assistive-text">Acciones</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="slds-hint-parent" th:each="ruta : ${rutas}">
+                <th scope="row" data-label="Código">
+                  <div class="slds-truncate">
+                    <strong style="color: #0176d3;" th:text="${ruta.id != null ? #strings.substring(ruta.id.toString(), 0, 8) : 'Ruta'}">R-001</strong>
+                  </div>
+                </th>
+                <td data-label="Fecha Operativa">
+                  <div class="slds-truncate" th:text="${ruta.fechaOperativa != null ? ruta.fechaOperativa : 'Hoy'}">2026-11-06</div>
+                </td>
+                <td data-label="Móvil & Conductor">
+                  <div>
+                    <span class="slds-badge slds-badge_lightest" th:text="${ruta.camion != null ? ruta.camion.patente : 'Sin móvil'}">AB123CD</span>
+                    <div class="slds-text-body_small slds-m-top_xx-small" th:text="${ruta.chofer != null ? (ruta.chofer.nombre + ' ' + ruta.chofer.apellido) : 'Chofer no asignado'}">
+                      Juan Pérez
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Paradas">
+                  <div th:if="${ruta.paradas != null and not #lists.isEmpty(ruta.paradas)}">
+                    <span class="slds-text-body_small" th:text="${#lists.size(ruta.paradas)} + ' paradas programadas'">2 paradas</span>
+                    <ul class="slds-list_dotted slds-text-body_small slds-m-top_xx-small" style="max-height: 80px; overflow-y: auto;">
+                      <li th:each="parada : ${ruta.paradas}">
+                        <span th:if="${parada.direccion != null}"
+                              th:text="${parada.direccion.calle + ' ' + parada.direccion.altura + ', ' + parada.direccion.localidad}">
+                          Av. Corrientes 1234, CABA
+                        </span>
+                        <span th:if="${parada.direccion == null}">Parada operativa</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div th:if="${ruta.paradas == null or #lists.isEmpty(ruta.paradas)}" class="slds-text-color_weak slds-text-body_small">
+                    Sin paradas asignadas
+                  </div>
+                </td>
+                <td data-label="Estado">
+                  <span th:if="${ruta.estado == 'FINALIZADA' or ruta.estado == 'COMPLETADA'}" class="slds-badge slds-badge_success" th:text="${ruta.estado}">FINALIZADA</span>
+                  <span th:if="${ruta.estado == 'INICIADA' or ruta.estado == 'EN_TRANSITO'}" class="slds-badge slds-badge_inverse" th:text="${ruta.estado}">EN TRÁNSITO</span>
+                  <span th:if="${ruta.estado == 'PLANIFICADA' or ruta.estado == null or (ruta.estado != 'FINALIZADA' and ruta.estado != 'COMPLETADA' and ruta.estado != 'INICIADA' and ruta.estado != 'EN_TRANSITO')}"
+                        class="slds-badge slds-badge_lightest" th:text="${ruta.estado != null ? ruta.estado : 'PLANIFICADA'}">PLANIFICADA</span>
+                </td>
+                <td style="text-align: right;">
+                  <span class="slds-text-body_small slds-text-color_weak" th:text="${ruta.distanciaTotalKm != null ? (ruta.distanciaTotalKm + ' km') : ''}"></span>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(rutas)}">
+                <td colspan="6" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">
+                  No hay rutas planificadas registradas en el sistema logístico en este momento.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <footer class="slds-card__footer slds-grid slds-grid_align-spread">
+        <span class="slds-text-body_small slds-text-color_weak" th:text="'Total de rutas: ' + ${#lists.size(rutas)}">Total de rutas: 0</span>
+      </footer>
+    </article>
+
+  </div>
+
+  <div id="extra-scripts"></div>
+</body>
+</html>
+

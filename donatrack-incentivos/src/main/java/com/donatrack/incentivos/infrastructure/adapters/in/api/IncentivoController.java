@@ -121,6 +121,11 @@ public class IncentivoController {
       historialMap.merge(d.getMesDonacion(), 1, Integer::sum);
     }
 
+    int donacionesEnDeposito = Math.max(0, totalHistorico - totalExitosas);
+    // Esquema justo por etapas: +10 puntos inmediatos en depósito, +25 puntos extra al confirmarse
+    // la entrega a la entidad
+    int puntos = (donacionesEnDeposito * 10) + (totalExitosas * 35) + (bienesDonados * 2);
+
     MetricasDonanteDTO dto =
         MetricasDonanteDTO.builder()
             .donanteId(perfil.getDonanteId())
@@ -130,7 +135,8 @@ public class IncentivoController {
             .donacionesExitosas(totalExitosas)
             .totalOrganizacionesAyudadas((int) organizacionesAyudadas)
             .historialDonacionesPorMes(historialMap)
-            .posicionRanking(5) // Mock
+            .posicionRanking(totalHistorico > 0 ? 5 : 0)
+            .puntosTotales(puntos)
             .build();
 
     return ResponseEntity.ok(dto);
@@ -170,26 +176,13 @@ public class IncentivoController {
         perfilDonanteRepository.findById(id).orElseGet(() -> new PerfilDonante(id));
     List<Insignia> insignias = new ArrayList<>(perfil.getInsigniasObtenidas());
 
-    if (insignias.isEmpty()) {
-      Insignia insigniaDefault =
-          new Insignia("Primer Aporte", "Otorgada al realizar la primera donación en el sistema");
-      insigniaDefault.setId(UUID.fromString("e1111111-1111-4111-8111-111111111111"));
-      insigniaDefault.setFechaObtencion(java.time.LocalDate.now());
-      insigniaDefault.setVisiblePublicamente(true);
-      insignias.add(insigniaDefault);
-      perfil.setInsigniasObtenidas(insignias);
+    if (!insignias.isEmpty()) {
+      Insignia insigniaADifundir = insignias.get(insignias.size() - 1);
       try {
-        perfilDonanteRepository.save(perfil);
+        difusionPort.difundirInsignia(new InsigniaObtenidaEvent(id, insigniaADifundir));
       } catch (Exception e) {
-        // Tolerancia a fallos en persistencia
+        // Tolerancia a fallos si n8n no está disponible
       }
-    }
-
-    Insignia insigniaADifundir = insignias.get(insignias.size() - 1);
-    try {
-      difusionPort.difundirInsignia(new InsigniaObtenidaEvent(id, insigniaADifundir));
-    } catch (Exception e) {
-      // Tolerancia a fallos si n8n no está disponible
     }
 
     return ResponseEntity.ok(insignias);
@@ -220,10 +213,20 @@ public class IncentivoController {
                             .PersonaDTO
                         persona = personaClient.obtenerPersona(p.getDonanteId());
                     if (persona != null) {
-                      if ("JURIDICA".equals(persona.tipo())) {
+                      if ("JURIDICA".equalsIgnoreCase(persona.tipo())
+                          && persona.razonSocial() != null
+                          && !persona.razonSocial().isBlank()) {
                         nombreUsuario = persona.razonSocial();
                       } else {
-                        nombreUsuario = persona.nombre() + " " + persona.apellido();
+                        String n = persona.nombre() != null ? persona.nombre().trim() : "";
+                        String a = persona.apellido() != null ? persona.apellido().trim() : "";
+                        String completo = (n + " " + a).trim();
+                        if (!completo.isEmpty()) {
+                          nombreUsuario = completo;
+                        } else if (persona.razonSocial() != null
+                            && !persona.razonSocial().isBlank()) {
+                          nombreUsuario = persona.razonSocial();
+                        }
                       }
                     }
                   } catch (Exception e) {

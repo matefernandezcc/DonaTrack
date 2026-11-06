@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+<head>
+  <title>DonaTrack · Panel de la Organización</title>
+</head>
+<body>
+
+  <span id="page-header-title">Portal Institucional de la Organización</span>
+
+  <div id="main-content-slot">
+
+    <!-- ==================== TARJETA DE IDENTIDAD INSTITUCIONAL ==================== -->
+    <article class="slds-card slds-p-around_large slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <div class="slds-grid slds-grid_vertical-align-center slds-wrap" style="gap: 20px;">
+        
+        <div class="slds-col slds-no-flex">
+          <span class="slds-avatar slds-avatar_large slds-avatar_circle"
+                style="width: 76px; height: 76px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #166534 0%, #15803d 100%); color: white; font-size: 32px; font-weight: 800; box-shadow: 0 4px 10px rgba(22,101,52,0.25);">
+            <span th:text="${#strings.substring(nombreOrganizacion != null ? nombreOrganizacion : 'B', 0, 1).toUpperCase()}">F</span>
+          </span>
+        </div>
+
+        <div class="slds-col slds-has-flexi-truncate">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <h2 class="slds-text-heading_medium" style="font-weight: 800; color: #0f172a; font-size: 1.4rem;" th:text="${nombreOrganizacion}">
+              Fundación Esperanza
+            </h2>
+            <span class="slds-badge slds-theme_success" style="font-size: 0.76rem; font-weight: 700; padding: 3px 10px; border-radius: 12px;">
+              ONG Verificada y Auditada
+            </span>
+          </div>
+
+          <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small" style="font-size: 0.88rem;">
+            Entidad comunitaria registrada en la red solidaria DonaTrack.
+          </p>
+
+          <div class="slds-grid slds-wrap slds-m-top_x-small" style="gap: 16px; font-size: 0.82rem; color: #475569;">
+            <span class="slds-grid slds-grid_vertical-align-center">
+              Dirección: <strong class="slds-m-left_xx-small" th:text="${direccionOrganizacion}">Calle 50 742, La Plata, Buenos Aires</strong>
+            </span>
+            <span class="slds-grid slds-grid_vertical-align-center">
+              CUIT: <strong class="slds-m-left_xx-small" th:text="${cuitOrganizacion}">30-71482910-4</strong>
+            </span>
+            <span class="slds-grid slds-grid_vertical-align-center">
+              Contacto: <strong class="slds-m-left_xx-small" th:text="${emailOrganizacion}">contacto@fundacionesperanza.org</strong>
+            </span>
+          </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="slds-col slds-no-flex" style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <a th:href="@{/app/beneficiaria/necesidades}" class="slds-button slds-button_neutral" style="font-weight: 600;">
+            Nueva Necesidad
+          </a>
+          <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; font-weight: 700;">
+            Recepcionar
+          </a>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ==================== 4 INDICADORES OPERATIVOS ==================== -->
+    <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_large">
+      
+      <!-- Kilos Recibidos -->
+      <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+        <div class="slds-card slds-p-around_medium" style="border-radius: 8px; border: 1px solid #e2e8f0; height: 100%;">
+          <div class="slds-text-heading_medium" style="font-weight: 800; color: #166534; font-size: 1.5rem;"
+               th:text="${#numbers.formatInteger(kilosRecibidos, 0, 'POINT')} + ' kg'">
+            0 kg
+          </div>
+          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+            Mercadería Recepcionada
+          </div>
+        </div>
+      </div>
+
+      <!-- Camiones en Camino -->
+      <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+        <div class="slds-card slds-p-around_medium" style="border-radius: 8px; border: 1px solid #e2e8f0; height: 100%;">
+          <div class="slds-text-heading_medium" style="font-weight: 800; color: #014486; font-size: 1.5rem;"
+               th:text="${totalEnCamino} + ' pendientes'">
+            0 pendientes
+          </div>
+          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+            Entregas en Camino
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificadas en Sede -->
+      <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+        <div class="slds-card slds-p-around_medium" style="border-radius: 8px; border: 1px solid #e2e8f0; height: 100%;">
+          <div class="slds-text-heading_medium" style="font-weight: 800; color: #4338ca; font-size: 1.5rem;"
+               th:text="${totalRecibidas} + ' recibidas'">
+            0 recibidas
+          </div>
+          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+            Remitos Digitales Conformes
+          </div>
+        </div>
+      </div>
+
+      <!-- Necesidades Declaradas -->
+      <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+        <div class="slds-card slds-p-around_medium" style="border-radius: 8px; border: 1px solid #e2e8f0; height: 100%;">
+          <div class="slds-text-heading_medium" style="font-weight: 800; color: #c2410c; font-size: 1.5rem;"
+               th:text="${totalNecesidades} + ' pedidos'">
+            0 pedidos
+          </div>
+          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+            Necesidades Declaradas
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== DOS COLUMNAS: ENTREGAS EN CAMINO & NECESIDADES ==================== -->
+    <div class="slds-grid slds-gutters slds-wrap">
+
+      <!-- Columna Izquierda: Entregas próximas a arribar -->
+      <div class="slds-col slds-size_1-of-1 slds-large-size_7-of-12 slds-m-bottom_large">
+        <article class="slds-card" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 100%;">
+          <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium" style="border-bottom: 1px solid #f1f5f9;">
+            <header class="slds-media slds-media_center">
+              <div class="slds-media__body">
+                <h3 class="slds-card__header-title" style="font-weight: 800; color: #0f172a; font-size: 1.15rem;">
+                  Próximos Camiones Arribando a Sede
+                </h3>
+                <p class="slds-text-body_small slds-text-color_weak">
+                  Mercadería en tránsito hacia tu comedor u hogar. Confirmá la recepción al pie del vehículo.
+                </p>
+              </div>
+            </header>
+            <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_neutral slds-button_small" style="font-weight: 600;">
+              Ver Rutas
+            </a>
+          </div>
+
+          <div class="slds-card__body slds-p-around_medium">
+            <div th:if="${#lists.isEmpty(proximasEntregas)}" class="slds-text-align_center slds-p-around_large slds-text-color_weak">
+              No hay entregas pendientes de recepción en este momento.
+            </div>
+
+            <div th:unless="${#lists.isEmpty(proximasEntregas)}" style="display: flex; flex-direction: column; gap: 12px;">
+              <div th:each="e : ${proximasEntregas}"
+                   style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <strong style="color: #014486; font-size: 1rem;" th:text="${e.codigoCorto}">#DT-3300</strong>
+                    <span class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700;" th:text="${e.estado}">
+                      EN_CAMINO
+                    </span>
+                  </div>
+                  <div style="font-size: 0.84rem; color: #334155; margin-top: 4px;">
+                    Destino: <span th:text="${e.direccion}">Av. Santa Fe 3200, Palermo</span>
+                  </div>
+                  <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">
+                    Móvil: <strong th:text="${e.patente}">AF456CD</strong> · Chofer: <span th:text="${e.choferNombre}">Laura Fernández</span> · Carga: <strong style="color: #166534;" th:text="${e.peso} + ' kg'">85 kg</strong>
+                  </div>
+                </div>
+
+                <div>
+                  <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand"
+                     style="background: #166534; border-color: #166534; font-weight: 700; font-size: 0.82rem; padding: 0 14px;">
+                    Recepcionar
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Columna Derecha: Necesidades Declaradas Activas -->
+      <div class="slds-col slds-size_1-of-1 slds-large-size_5-of-12 slds-m-bottom_large">
+        <article class="slds-card" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 100%;">
+          <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium" style="border-bottom: 1px solid #f1f5f9;">
+            <header class="slds-media slds-media_center">
+              <div class="slds-media__body">
+                <h3 class="slds-card__header-title" style="font-weight: 800; color: #0f172a; font-size: 1.15rem;">
+                  Necesidades Activas
+                </h3>
+                <p class="slds-text-body_small slds-text-color_weak">
+                  Artículos requeridos para recibir donaciones.
+                </p>
+              </div>
+            </header>
+            <a th:href="@{/app/beneficiaria/necesidades}" class="slds-button slds-button_neutral slds-button_small" style="font-weight: 600;">
+              Nueva
+            </a>
+          </div>
+
+          <div class="slds-card__body slds-p-around_none">
+            <div th:if="${#lists.isEmpty(necesidades)}" class="slds-text-align_center slds-p-around_large slds-text-color_weak">
+              No tenés necesidades registradas actualmente.
+            </div>
+
+            <!-- Contenedor con slide vertical y contención horizontal para evitar desbordes -->
+            <div th:unless="${#lists.isEmpty(necesidades)}" class="table-scroll-container"
+                 style="max-height: 360px; overflow-y: auto; overflow-x: auto; width: 100%; border-top: 1px solid #f1f5f9;">
+              <table class="slds-table slds-table_cell-buffer slds-table_bordered" style="width: 100%; table-layout: fixed;">
+                <thead>
+                  <tr class="slds-line-height_reset" style="background: #f8fafc; position: sticky; top: 0; z-index: 1;">
+                    <th scope="col" style="font-size: 0.76rem; font-weight: 700; color: #64748b; padding: 8px 12px; width: 48%;">Descripción</th>
+                    <th scope="col" style="font-size: 0.76rem; font-weight: 700; color: #64748b; padding: 8px 12px; width: 24%;">Cantidad</th>
+                    <th scope="col" style="font-size: 0.76rem; font-weight: 700; color: #64748b; padding: 8px 12px; width: 28%;">Prioridad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="n : ${necesidades}" class="slds-hint-parent">
+                    <td style="padding: 10px 12px; white-space: normal; word-break: break-word;">
+                      <strong style="color: #1e293b; font-size: 0.86rem;" th:text="${n.descripcion}">Leche en polvo</strong>
+                      <div style="font-size: 0.74rem; color: #64748b;" th:text="${n.subcategoria}">Alimentos</div>
+                    </td>
+                    <td style="padding: 10px 12px; font-weight: 700; color: #166534; white-space: nowrap;" th:text="${n.cantidad}">100</td>
+                    <td style="padding: 10px 12px;">
+                      <span class="slds-badge slds-badge_lightest" style="font-size: 0.7rem; font-weight: 600; text-transform: capitalize;" th:text="${n.tipo}">Urgente</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

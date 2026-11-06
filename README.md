@@ -59,7 +59,7 @@ El sistema está diseñado como una **arquitectura distribuida de microservicios
 ```
 
 > Para más detalles sobre puertos, URLs de Swagger y comandos de ejecución, consultá [`SERVICIOS.md`](SERVICIOS.md).
-> Para el detalle del diseño SOA y arquitectura hexagonal, consultá [`docs/arquitectura.md`](docs/arquitectura.md).
+> Para el detalle del diseño SOA y arquitectura hexagonal, consultá [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md).
 
 ---
 
@@ -188,11 +188,11 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 - **Notificaciones**: Despacho multicanal con patrón Strategy (`EmailStrategy`, `SmsStrategy`, `WhatsAppStrategy`).
 
 #### Entregables
-1. **Modelo del Dominio**: Diagrama de clases por servicio en [`diagramas/`](diagramas/).
-2. **Justificaciones de Diseño**: Revisión detallada en [`_notas_y_borradores/pendientes/entrega_3/revision_entrega_requerimiento.md`](_notas_y_borradores/pendientes/entrega_3/revision_entrega_requerimiento.md).
+1. **Modelo del Dominio**: Diagrama de clases por servicio en [`docs/diagramas/`](docs/diagramas/).
+2. **Justificaciones de Diseño**: Revisión detallada en [`docs/notas_y_borradores/decisiones-arquitectura.md`](docs/notas_y_borradores/decisiones-arquitectura.md).
 3. **APIs REST documentadas**: Swagger UI interactivo para cada microservicio y colección en [`docs/donatrack-api`](docs/donatrack-api).
 4. **Contenerización Docker**: Dockerfiles multi-stage por módulo y orquestación con [`compose.yaml`](compose.yaml).
-5. **Diagrama de Componentes y Despliegue**: Diagrama general de la solución en [`diagramas/`](diagramas/).
+5. **Diagrama de Componentes y Despliegue**: Diagrama general de la solución en [`docs/diagramas/`](docs/diagramas/).
 
 </details>
 
@@ -219,10 +219,10 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 - Despliegue independiente del microservicio `donatrack-logistica` en Render conectado a Supabase.
 
 #### Entregables
-1. **Modelo de Clases actualizado**: [`DonaTrack-Diagrama-Clases-Entrega4.puml`](diagramas/DonaTrack-Diagrama-Clases-Entrega4.puml).
-2. **Modelo de Datos (DER Físicos)**: Diagramas entidad-relación físicos por servicio en [`diagramas/`](diagramas/) (`DER-Donaciones`, `DER-Logistica`, `DER-Incentivos`, `DER-Notificaciones`).
-3. **Justificaciones de Diseño y Documento de Arquitectura**: [`docs/arquitectura.md`](docs/arquitectura.md) (justificación de arquitectura SOA, hexagonal, capas y patrones).
-4. **Diagrama de Componentes y Despliegue**: [`DonaTrack-Diagrama-Componentes-y-Despliegue-Entrega4.puml`](diagramas/DonaTrack-Diagrama-Componentes-y-Despliegue-Entrega4.puml).
+1. **Modelo de Clases actualizado**: [`DonaTrack-Diagrama-Clases.puml`](docs/diagramas/DonaTrack-Diagrama-Clases.puml).
+2. **Modelo de Datos (DER Físicos)**: Diagramas entidad-relación físicos por servicio en [`docs/diagramas/`](docs/diagramas/) (`DER-Donaciones`, `DER-Logistica`, `DER-Incentivos`, `DER-Notificaciones`).
+3. **Justificaciones de Diseño y Documento de Arquitectura**: [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md) (justificación de arquitectura SOA, hexagonal, capas y patrones).
+4. **Diagrama de Componentes y Despliegue**: [`DonaTrack-Diagrama-Componentes-y-Despliegue.puml`](docs/diagramas/DonaTrack-Diagrama-Componentes-y-Despliegue.puml).
 5. **Implementación de requerimientos de integración**: Mensajería con RabbitMQ y Broker de logística con fallback.
 6. **Despliegue del Servicio de Logística**: Operativo y accesible vía Swagger en [`https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html).
 
@@ -266,5 +266,5 @@ docker compose up --build -d
 ```
 
 > 📄 Ver [`SERVICIOS.md`](SERVICIOS.md) para la guía completa de puertos, Swagger y comandos.
-> 📄 Ver [`docs/arquitectura.md`](docs/arquitectura.md) para la documentación técnica de arquitectura y diseño.
+> 📄 Ver [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md) para la documentación técnica de arquitectura y diseño.
 
