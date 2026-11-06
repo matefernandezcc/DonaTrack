@@ -35,7 +35,6 @@ public class SecurityConfig {
   @Value("${donatrack.web-url:http://localhost:8080}")
   private String webUrl;
 
-
   @Bean
   public ClientRegistrationRepository clientRegistrationRepository(
       @Value("${GOOGLE_CLIENT_ID:#{null}}") String googleId,
@@ -45,27 +44,49 @@ public class SecurityConfig {
 
     List<ClientRegistration> registrations = new ArrayList<>();
 
-    if (googleId != null && !googleId.isBlank() && googleSecret != null && !googleSecret.isBlank()
+    if (googleId != null
+        && !googleId.isBlank()
+        && googleSecret != null
+        && !googleSecret.isBlank()
         && !googleId.contains("placeholder")) {
       registrations.add(
-          CommonOAuth2Provider.GOOGLE.getBuilder("google")
+          CommonOAuth2Provider.GOOGLE
+              .getBuilder("google")
               .clientId(googleId.trim())
               .clientSecret(googleSecret.trim())
               .scope("openid", "profile", "email")
               .build());
     }
 
-    if (githubId != null && !githubId.isBlank() && githubSecret != null && !githubSecret.isBlank()
+    if (githubId != null
+        && !githubId.isBlank()
+        && githubSecret != null
+        && !githubSecret.isBlank()
         && !githubId.contains("placeholder")) {
       registrations.add(
-          CommonOAuth2Provider.GITHUB.getBuilder("github")
+          CommonOAuth2Provider.GITHUB
+              .getBuilder("github")
               .clientId(githubId.trim())
               .clientSecret(githubSecret.trim())
               .scope("user:email", "read:user")
               .build());
     }
 
-    return registrations.isEmpty() ? null : new InMemoryClientRegistrationRepository(registrations);
+    if (registrations.isEmpty()) {
+      registrations.add(
+          ClientRegistration.withRegistrationId("disabled")
+              .clientId("disabled")
+              .clientSecret("disabled")
+              .authorizationGrantType(
+                  org.springframework.security.oauth2.core.AuthorizationGrantType
+                      .AUTHORIZATION_CODE)
+              .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+              .authorizationUri("https://disabled.local/auth")
+              .tokenUri("https://disabled.local/token")
+              .build());
+    }
+
+    return new InMemoryClientRegistrationRepository(registrations);
   }
 
   @Bean
@@ -78,11 +99,12 @@ public class SecurityConfig {
       HttpSecurity http,
       UsuarioRepository usuarioRepository,
       AuthService authService,
-      @Autowired(required = false) ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+      @Autowired(required = false) ClientRegistrationRepository clientRegistrationRepository)
+      throws Exception {
 
     http.csrf(AbstractHttpConfigurer::disable)
         .cors(c -> c.configurationSource(corsConfigurationSource()))
-        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
@@ -100,7 +122,12 @@ public class SecurityConfig {
                     .anyRequest()
                     .authenticated());
 
-    if (clientRegistrationRepository != null) {
+    boolean hasSocialProviders =
+        clientRegistrationRepository != null
+            && (clientRegistrationRepository.findByRegistrationId("google") != null
+                || clientRegistrationRepository.findByRegistrationId("github") != null);
+
+    if (hasSocialProviders) {
       http.oauth2Login(
           oauth2 ->
               oauth2.successHandler(
@@ -128,7 +155,8 @@ public class SecurityConfig {
                       usuario =
                           Usuario.builder()
                               .username(email.split("@")[0].toLowerCase())
-                              .password(new BCryptPasswordEncoder().encode(UUID.randomUUID().toString()))
+                              .password(
+                                  new BCryptPasswordEncoder().encode(UUID.randomUUID().toString()))
                               .nombre(name)
                               .email(email)
                               .rol(Rol.DONANTE)

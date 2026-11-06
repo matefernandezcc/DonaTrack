@@ -69,7 +69,8 @@ services:
 
   donaciones:
     build:
-      context: ./donatrack-donaciones
+      context: .
+      dockerfile: ./donatrack-donaciones/Dockerfile
     container_name: donatrack-donaciones
     restart: always
     ports:
@@ -100,7 +101,8 @@ services:
 
   incentivos:
     build:
-      context: ./donatrack-incentivos
+      context: .
+      dockerfile: ./donatrack-incentivos/Dockerfile
     container_name: donatrack-incentivos
     restart: always
     ports:
@@ -158,7 +160,8 @@ services:
 
   notificaciones:
     build:
-      context: ./donatrack-notificaciones
+      context: .
+      dockerfile: ./donatrack-notificaciones/Dockerfile
     container_name: donatrack-notificaciones
     restart: always
     ports:
