@@ -18,12 +18,18 @@ import org.springframework.web.client.RestClient;
 public class ApiClientsConfig {
 
   @Bean
-  public ClientHttpRequestInterceptor bearerTokenInterceptor() {
+  public ClientHttpRequestInterceptor bearerTokenInterceptor(
+      @org.springframework.beans.factory.annotation.Value(
+              "${INTERNAL_API_KEY:${donatrack.internal-api-key:donatrack-internal-key-change-in-prod}}")
+          String internalApiKey) {
     return (request, body, execution) -> {
+      request.getHeaders().set("X-Service-Key", internalApiKey);
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth instanceof JwtAuthenticationToken jwtAuth) {
         request.getHeaders().setBearerAuth(jwtAuth.getToken().getTokenValue());
-      } else if (auth != null && auth.getCredentials() instanceof String token && !token.isBlank()) {
+      } else if (auth != null
+          && auth.getCredentials() instanceof String token
+          && !token.isBlank()) {
         request.getHeaders().setBearerAuth(token);
       }
       return execution.execute(request, body);
@@ -32,8 +38,11 @@ public class ApiClientsConfig {
 
   private RestClient createClient(
       String baseUrl, ApiProperties props, ClientHttpRequestInterceptor interceptor) {
-    JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
-    requestFactory.setReadTimeout(Duration.ofSeconds(props.timeoutSeconds() > 0 ? props.timeoutSeconds() : 60));
+    java.net.http.HttpClient httpClient =
+        java.net.http.HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+    JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+    requestFactory.setReadTimeout(
+        Duration.ofSeconds(props.timeoutSeconds() > 0 ? props.timeoutSeconds() : 60));
 
     return RestClient.builder()
         .baseUrl(baseUrl != null ? baseUrl : "http://localhost:8080")
@@ -54,13 +63,14 @@ public class ApiClientsConfig {
   }
 
   @Bean
-  public RestClient incentivosClient(ApiProperties props, ClientHttpRequestInterceptor interceptor) {
+  public RestClient incentivosClient(
+      ApiProperties props, ClientHttpRequestInterceptor interceptor) {
     return createClient(props.incentivosUrl(), props, interceptor);
   }
 
   @Bean
-  public RestClient donacionesClient(ApiProperties props, ClientHttpRequestInterceptor interceptor) {
+  public RestClient donacionesClient(
+      ApiProperties props, ClientHttpRequestInterceptor interceptor) {
     return createClient(props.donacionesUrl(), props, interceptor);
   }
 }
-
