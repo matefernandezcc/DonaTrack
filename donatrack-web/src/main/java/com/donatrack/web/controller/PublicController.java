@@ -47,6 +47,10 @@ public class PublicController {
       "${donatrack.n8n-url:${N8N_URL:http://localhost:5678}}")
   private String n8nUrl = "http://localhost:5678";
 
+  @org.springframework.beans.factory.annotation.Value(
+      "${donatrack.api.auth-url:${AUTH_URL:http://localhost:8004}}")
+  private String authUrl = "http://localhost:8004";
+
   public PublicController(
       AuthGateway authGateway,
       IncentivosGateway incentivosGateway,
@@ -424,10 +428,14 @@ public class PublicController {
   @GetMapping("/oauth2/authorization/{provider}")
   public String iniciarSocialLogin(
       @PathVariable("provider") String provider,
+      @RequestParam(value = "mock", required = false, defaultValue = "false") boolean mock,
       HttpServletRequest request,
       HttpServletResponse response,
       RedirectAttributes redirectAttributes) {
     try {
+      if (!mock && authUrl != null && !authUrl.isBlank()) {
+        return "redirect:" + authUrl + "/oauth2/authorization/" + provider.toLowerCase();
+      }
       String code = authGateway.obtenerCodigoSocial(provider);
       if (code != null && !code.isBlank()) {
         return callbackSSO(code, request, response, redirectAttributes);

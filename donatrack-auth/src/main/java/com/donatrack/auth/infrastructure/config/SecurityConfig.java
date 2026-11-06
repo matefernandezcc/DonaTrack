@@ -112,6 +112,7 @@ public class SecurityConfig {
                         "/auth/register",
                         "/auth/token/exchange",
                         "/api/auth/perfil/**",
+                        "/api/auth/sso/**",
                         "/admin/usuarios/**",
                         "/healthcheck",
                         "/actuator/**",
