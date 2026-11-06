@@ -113,12 +113,12 @@ WHERE p.email = 'test.manual@donatrack.com';
 
 ### Paso 1: Crear el CSV de prueba
 
-Ya tenés uno en el repo: `enunciado/CSV/donantes_sample.csv`. Tiene 10 donantes (9 humanos + 1 jurídica).
+Ya tenés uno en el repo: `docs/enunciado/CSV/donantes_sample.csv`. Tiene 10 donantes (9 humanos + 1 jurídica).
 
 ### Paso 2: Ejecutar (curl con multipart):
 ```bash
 curl -X POST http://localhost:8000/api/personas/importar-csv \
-  -F "file=@enunciado/CSV/donantes_sample.csv"
+  -F "file=@docs/enunciado/CSV/donantes_sample.csv"
 ```
 
 > [!WARNING]
@@ -151,7 +151,7 @@ JOIN donaciones.personas_juridicas pj ON p.persona_id = pj.persona_juridica_id;
 ### Paso 3: Re-importar el mismo CSV (test idempotencia):
 ```bash
 curl -X POST http://localhost:8000/api/personas/importar-csv \
-  -F "file=@enunciado/CSV/donantes_sample.csv"
+  -F "file=@docs/enunciado/CSV/donantes_sample.csv"
 ```
 
 **¿Qué tiene que pasar?** No debería duplicar personas. El importador busca por email y actualiza los existentes. Verificá que el `COUNT(*)` siga siendo el mismo.

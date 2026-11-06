@@ -28,7 +28,7 @@ database/
 n8n/
 
 # Documentación, diagramas y notas de diseño (no requeridos para compilar)
-_notas_y_borradores/
+notas_y_borradores/
 diagramas/
 docs/
 enunciado/

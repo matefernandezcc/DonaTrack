@@ -108,4 +108,4 @@ public class NotificacionesListener {
 | Cuando necesitamos garantía de entrega (si el receptor cae, el mensaje queda guardado). | Consultas simples de lectura (GET) de una API a otra. Para eso usar REST (o gRPC). |
 
 > [!NOTE]
-> Para más detalles arquitectónicos, puedes revisar el archivo [`docs/arquitectura.md`](../../docs/arquitectura.md) y las [`Justificaciones de Diseño`](../pendientes/JustificacionesDiseño-Entrega3.md).
+> Para más detalles arquitectónicos, puedes revisar el archivo [`arquitectura.md`](../../arquitectura.md) y las [`Justificaciones de Diseño`](../pendientes/JustificacionesDiseño-Entrega3.md).
