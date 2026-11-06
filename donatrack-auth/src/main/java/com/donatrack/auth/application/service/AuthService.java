@@ -28,9 +28,7 @@ public class AuthService {
   private record CodeEntry(Usuario usuario, Instant expiresAt) {}
 
   public AuthService(
-      UsuarioRepository usuarioRepository,
-      JwtService jwtService,
-      PasswordEncoder passwordEncoder) {
+      UsuarioRepository usuarioRepository, JwtService jwtService, PasswordEncoder passwordEncoder) {
     this.usuarioRepository = usuarioRepository;
     this.jwtService = jwtService;
     this.passwordEncoder = passwordEncoder;
@@ -49,12 +47,14 @@ public class AuthService {
     return construirTokenResponse(usuario);
   }
 
-  public TokenResponse registrarUsuario(com.donatrack.auth.infrastructure.adapters.in.api.dto.RegisterRequest request) {
+  public TokenResponse registrarUsuario(
+      com.donatrack.auth.infrastructure.adapters.in.api.dto.RegisterRequest request) {
     String username = request.username().trim().toLowerCase();
     String email = request.email().trim().toLowerCase();
 
     if (usuarioRepository.existsByUsername(username)) {
-      throw new IllegalArgumentException("El nombre de usuario '" + username + "' ya está registrado");
+      throw new IllegalArgumentException(
+          "El nombre de usuario '" + username + "' ya está registrado");
     }
     if (usuarioRepository.existsByEmail(email)) {
       throw new IllegalArgumentException("El correo '" + email + "' ya está registrado");
@@ -64,7 +64,8 @@ public class AuthService {
     if (request.rol() != null && !request.rol().isBlank()) {
       try {
         rol = com.donatrack.auth.domain.entities.Rol.valueOf(request.rol().trim().toUpperCase());
-      } catch (IllegalArgumentException ignored) {}
+      } catch (IllegalArgumentException ignored) {
+      }
     }
 
     Usuario nuevo =
@@ -84,26 +85,38 @@ public class AuthService {
 
   public java.util.List<Map<String, Object>> listarUsuarios() {
     return usuarioRepository.findAll().stream()
-        .map(u -> {
-          Map<String, Object> map = new java.util.LinkedHashMap<>();
-          map.put("id", u.getId() != null ? u.getId().toString() : "");
-          map.put("username", u.getUsername());
-          map.put("nombre", u.getNombre());
-          map.put("email", u.getEmail());
-          map.put("rol", u.getRol().name());
-          map.put("personaId", u.getPersonaId() != null ? u.getPersonaId().toString() : "");
-          map.put("proveedorOAuth", u.getProveedorOAuth());
-          map.put("descripcion", u.getDescripcion() != null ? u.getDescripcion() : "Comprometidos con una logística solidaria eficiente y transparente.");
-          map.put("ubicacion", u.getUbicacion() != null ? u.getUbicacion() : "Buenos Aires, Argentina");
-          map.put("fechaCreacion", u.getFechaCreacion() != null ? u.getFechaCreacion().toString() : "");
-          return map;
-        })
+        .map(
+            u -> {
+              Map<String, Object> map = new java.util.LinkedHashMap<>();
+              map.put("id", u.getId() != null ? u.getId().toString() : "");
+              map.put("username", u.getUsername());
+              map.put("nombre", u.getNombre());
+              map.put("email", u.getEmail());
+              map.put("rol", u.getRol().name());
+              map.put("personaId", u.getPersonaId() != null ? u.getPersonaId().toString() : "");
+              map.put("proveedorOAuth", u.getProveedorOAuth());
+              map.put(
+                  "descripcion",
+                  u.getDescripcion() != null
+                      ? u.getDescripcion()
+                      : "Comprometidos con una logística solidaria eficiente y transparente.");
+              map.put(
+                  "ubicacion",
+                  u.getUbicacion() != null ? u.getUbicacion() : "Buenos Aires, Argentina");
+              map.put(
+                  "fechaCreacion",
+                  u.getFechaCreacion() != null ? u.getFechaCreacion().toString() : "");
+              return map;
+            })
         .collect(java.util.stream.Collectors.toList());
   }
 
   public void cambiarRolUsuario(UUID usuarioId, String nuevoRolStr) {
-    Usuario usuario = usuarioRepository.findById(usuarioId)
-        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
+    Usuario usuario =
+        usuarioRepository
+            .findById(usuarioId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
     com.donatrack.auth.domain.entities.Rol nuevoRol =
         com.donatrack.auth.domain.entities.Rol.valueOf(nuevoRolStr.trim().toUpperCase());
     usuario.setRol(nuevoRol);
@@ -111,11 +124,17 @@ public class AuthService {
   }
 
   public void resetearPasswordTemporal(UUID usuarioId) {
-    Usuario usuario = usuarioRepository.findById(usuarioId)
-        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
+    Usuario usuario =
+        usuarioRepository
+            .findById(usuarioId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
     usuario.setPassword(passwordEncoder.encode("password123"));
     usuarioRepository.save(usuario);
-    log.info("Contraseña del usuario {} ({}) restablecida a 'password123' por el Administrador", usuario.getUsername(), usuario.getEmail());
+    log.info(
+        "Contraseña del usuario {} ({}) restablecida a 'password123' por el Administrador",
+        usuario.getUsername(),
+        usuario.getEmail());
   }
 
   public String generarCodigoIntercambio(Usuario usuario) {
@@ -158,8 +177,11 @@ public class AuthService {
   }
 
   public void actualizarPerfil(UUID usuarioId, String descripcion, String ubicacion) {
-    Usuario usuario = usuarioRepository.findById(usuarioId)
-        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
+    Usuario usuario =
+        usuarioRepository
+            .findById(usuarioId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
     if (descripcion != null && !descripcion.isBlank()) {
       usuario.setDescripcion(descripcion.trim());
     }
@@ -170,16 +192,25 @@ public class AuthService {
   }
 
   public Map<String, Object> obtenerPerfil(UUID usuarioId) {
-    Usuario usuario = usuarioRepository.findById(usuarioId)
-        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
+    Usuario usuario =
+        usuarioRepository
+            .findById(usuarioId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
     Map<String, Object> map = new java.util.LinkedHashMap<>();
     map.put("id", usuario.getId().toString());
     map.put("username", usuario.getUsername());
     map.put("nombre", usuario.getNombre());
     map.put("email", usuario.getEmail());
     map.put("rol", usuario.getRol().name());
-    map.put("descripcion", usuario.getDescripcion() != null ? usuario.getDescripcion() : "Comprometidos con una logística solidaria eficiente y transparente.");
-    map.put("ubicacion", usuario.getUbicacion() != null ? usuario.getUbicacion() : "Buenos Aires, Argentina");
+    map.put(
+        "descripcion",
+        usuario.getDescripcion() != null
+            ? usuario.getDescripcion()
+            : "Comprometidos con una logística solidaria eficiente y transparente.");
+    map.put(
+        "ubicacion",
+        usuario.getUbicacion() != null ? usuario.getUbicacion() : "Buenos Aires, Argentina");
     return map;
   }
 
@@ -191,7 +222,9 @@ public class AuthService {
         usuario.getEmail(),
         usuario.getRol().name(),
         usuario.getPersonaId(),
-        usuario.getDescripcion() != null ? usuario.getDescripcion() : "Comprometidos con una logística solidaria eficiente y transparente.",
+        usuario.getDescripcion() != null
+            ? usuario.getDescripcion()
+            : "Comprometidos con una logística solidaria eficiente y transparente.",
         usuario.getUbicacion() != null ? usuario.getUbicacion() : "Buenos Aires, Argentina");
   }
 
@@ -202,9 +235,6 @@ public class AuthService {
     }
     String token = jwtService.generarToken(usuario);
     return new TokenResponse(
-        token,
-        jwtService.getExpiresInSeconds(),
-        construirUserInfoDto(usuario));
+        token, jwtService.getExpiresInSeconds(), construirUserInfoDto(usuario));
   }
 }
-

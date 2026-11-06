@@ -51,12 +51,7 @@ public class AuthDataSeeder implements CommandLineRunner {
   }
 
   private void seedUsuario(
-      String username,
-      String rawPassword,
-      String nombre,
-      String email,
-      Rol rol,
-      UUID personaId) {
+      String username, String rawPassword, String nombre, String email, Rol rol, UUID personaId) {
     if (!usuarioRepository.existsByUsername(username)) {
       Usuario usuario =
           Usuario.builder()
@@ -73,4 +68,3 @@ public class AuthDataSeeder implements CommandLineRunner {
     }
   }
 }
-

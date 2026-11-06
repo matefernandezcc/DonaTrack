@@ -22,13 +22,15 @@ public class SupabaseS3StorageAdapter implements StoragePort {
   @Value("${supabase.s3.bucket:remitos}")
   private String bucketName;
 
-  @Value("${supabase.s3.public-url-base:https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos}")
+  @Value(
+      "${supabase.s3.public-url-base:https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos}")
   private String publicUrlBase;
 
   @Override
   public String subirArchivo(String originalFilename, String contentType, byte[] bytes) {
     if (s3Client == null) {
-      log.info("Entorno local detectado (S3 deshabilitado). Utilizando remito modelo para desarrollo offline.");
+      log.info(
+          "Entorno local detectado (S3 deshabilitado). Utilizando remito modelo para desarrollo offline.");
       return "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.jpg";
     }
     if (bytes == null || bytes.length == 0) {
@@ -42,23 +44,22 @@ public class SupabaseS3StorageAdapter implements StoragePort {
         extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
       }
 
-      String filename = "entrega-" + UUID.randomUUID() + "-" + System.currentTimeMillis() + extension;
+      String filename =
+          "entrega-" + UUID.randomUUID() + "-" + System.currentTimeMillis() + extension;
       String mime = (contentType != null && !contentType.isBlank()) ? contentType : "image/jpeg";
 
-      PutObjectRequest req = PutObjectRequest.builder()
-          .bucket(bucketName)
-          .key(filename)
-          .contentType(mime)
-          .build();
+      PutObjectRequest req =
+          PutObjectRequest.builder().bucket(bucketName).key(filename).contentType(mime).build();
 
       s3Client.putObject(req, RequestBody.fromBytes(bytes));
       String publicUrl = publicUrlBase + "/" + filename;
-      log.info("Archivo {} subido exitosamente a Supabase S3. URL Pública: {}", filename, publicUrl);
+      log.info(
+          "Archivo {} subido exitosamente a Supabase S3. URL Pública: {}", filename, publicUrl);
       return publicUrl;
     } catch (Exception e) {
-      log.error("Fallo al subir objeto a Supabase S3 (bucket: {}): {}", bucketName, e.getMessage(), e);
+      log.error(
+          "Fallo al subir objeto a Supabase S3 (bucket: {}): {}", bucketName, e.getMessage(), e);
       return null;
     }
   }
 }
-

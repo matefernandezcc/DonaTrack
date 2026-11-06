@@ -32,7 +32,8 @@ class AuthServiceTest {
   @BeforeEach
   void setUp() {
     usuarioRepository = new FakeUsuarioRepository();
-    jwtService = new JwtService("SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!", 60);
+    jwtService =
+        new JwtService("SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!", 60);
     passwordEncoder = new BCryptPasswordEncoder();
     authService = new AuthService(usuarioRepository, jwtService, passwordEncoder);
   }
@@ -111,7 +112,9 @@ class AuthServiceTest {
 
     @Override
     public Optional<Usuario> findByUsername(String username) {
-      return db.values().stream().filter(u -> u.getUsername().equalsIgnoreCase(username)).findFirst();
+      return db.values().stream()
+          .filter(u -> u.getUsername().equalsIgnoreCase(username))
+          .findFirst();
     }
 
     @Override
@@ -138,34 +141,138 @@ class AuthServiceTest {
       return entity;
     }
 
-    @Override public Optional<Usuario> findById(UUID id) { return Optional.ofNullable(db.get(id)); }
-    @Override public boolean existsById(UUID id) { return db.containsKey(id); }
-    @Override public List<Usuario> findAll() { return new ArrayList<>(db.values()); }
-    @Override public List<Usuario> findAllById(Iterable<UUID> ids) { return Collections.emptyList(); }
-    @Override public long count() { return db.size(); }
-    @Override public void deleteById(UUID id) { db.remove(id); }
-    @Override public void delete(Usuario entity) { db.remove(entity.getId()); }
-    @Override public void deleteAllById(Iterable<? extends UUID> ids) {}
-    @Override public void deleteAll(Iterable<? extends Usuario> entities) {}
-    @Override public void deleteAll() { db.clear(); }
-    @Override public void flush() {}
-    @Override public <S extends Usuario> S saveAndFlush(S entity) { return save(entity); }
-    @Override public <S extends Usuario> List<S> saveAllAndFlush(Iterable<S> entities) { return Collections.emptyList(); }
-    @Override public void deleteAllInBatch(Iterable<Usuario> entities) {}
-    @Override public void deleteAllByIdInBatch(Iterable<UUID> ids) {}
-    @Override public void deleteAllInBatch() {}
-    @Override public Usuario getOne(UUID id) { return db.get(id); }
-    @Override public Usuario getById(UUID id) { return db.get(id); }
-    @Override public Usuario getReferenceById(UUID id) { return db.get(id); }
-    @Override public <S extends Usuario> List<S> findAll(Example<S> example) { return Collections.emptyList(); }
-    @Override public <S extends Usuario> List<S> findAll(Example<S> example, Sort sort) { return Collections.emptyList(); }
-    @Override public <S extends Usuario> List<S> saveAll(Iterable<S> entities) { return Collections.emptyList(); }
-    @Override public List<Usuario> findAll(Sort sort) { return Collections.emptyList(); }
-    @Override public Page<Usuario> findAll(Pageable pageable) { return Page.empty(); }
-    @Override public <S extends Usuario> Optional<S> findOne(Example<S> example) { return Optional.empty(); }
-    @Override public <S extends Usuario> Page<S> findAll(Example<S> example, Pageable pageable) { return Page.empty(); }
-    @Override public <S extends Usuario> long count(Example<S> example) { return 0; }
-    @Override public <S extends Usuario> boolean exists(Example<S> example) { return false; }
-    @Override public <S extends Usuario, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) { return null; }
+    @Override
+    public Optional<Usuario> findById(UUID id) {
+      return Optional.ofNullable(db.get(id));
+    }
+
+    @Override
+    public boolean existsById(UUID id) {
+      return db.containsKey(id);
+    }
+
+    @Override
+    public List<Usuario> findAll() {
+      return new ArrayList<>(db.values());
+    }
+
+    @Override
+    public List<Usuario> findAllById(Iterable<UUID> ids) {
+      return Collections.emptyList();
+    }
+
+    @Override
+    public long count() {
+      return db.size();
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+      db.remove(id);
+    }
+
+    @Override
+    public void delete(Usuario entity) {
+      db.remove(entity.getId());
+    }
+
+    @Override
+    public void deleteAllById(Iterable<? extends UUID> ids) {}
+
+    @Override
+    public void deleteAll(Iterable<? extends Usuario> entities) {}
+
+    @Override
+    public void deleteAll() {
+      db.clear();
+    }
+
+    @Override
+    public void flush() {}
+
+    @Override
+    public <S extends Usuario> S saveAndFlush(S entity) {
+      return save(entity);
+    }
+
+    @Override
+    public <S extends Usuario> List<S> saveAllAndFlush(Iterable<S> entities) {
+      return Collections.emptyList();
+    }
+
+    @Override
+    public void deleteAllInBatch(Iterable<Usuario> entities) {}
+
+    @Override
+    public void deleteAllByIdInBatch(Iterable<UUID> ids) {}
+
+    @Override
+    public void deleteAllInBatch() {}
+
+    @Override
+    public Usuario getOne(UUID id) {
+      return db.get(id);
+    }
+
+    @Override
+    public Usuario getById(UUID id) {
+      return db.get(id);
+    }
+
+    @Override
+    public Usuario getReferenceById(UUID id) {
+      return db.get(id);
+    }
+
+    @Override
+    public <S extends Usuario> List<S> findAll(Example<S> example) {
+      return Collections.emptyList();
+    }
+
+    @Override
+    public <S extends Usuario> List<S> findAll(Example<S> example, Sort sort) {
+      return Collections.emptyList();
+    }
+
+    @Override
+    public <S extends Usuario> List<S> saveAll(Iterable<S> entities) {
+      return Collections.emptyList();
+    }
+
+    @Override
+    public List<Usuario> findAll(Sort sort) {
+      return Collections.emptyList();
+    }
+
+    @Override
+    public Page<Usuario> findAll(Pageable pageable) {
+      return Page.empty();
+    }
+
+    @Override
+    public <S extends Usuario> Optional<S> findOne(Example<S> example) {
+      return Optional.empty();
+    }
+
+    @Override
+    public <S extends Usuario> Page<S> findAll(Example<S> example, Pageable pageable) {
+      return Page.empty();
+    }
+
+    @Override
+    public <S extends Usuario> long count(Example<S> example) {
+      return 0;
+    }
+
+    @Override
+    public <S extends Usuario> boolean exists(Example<S> example) {
+      return false;
+    }
+
+    @Override
+    public <S extends Usuario, R> R findBy(
+        Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+      return null;
+    }
   }
 }

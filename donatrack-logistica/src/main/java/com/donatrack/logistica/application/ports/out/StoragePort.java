@@ -12,4 +12,3 @@ public interface StoragePort {
    */
   String subirArchivo(String originalFilename, String contentType, byte[] bytes);
 }
-

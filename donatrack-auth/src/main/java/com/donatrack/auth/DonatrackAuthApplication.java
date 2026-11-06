@@ -9,4 +9,3 @@ public class DonatrackAuthApplication {
     SpringApplication.run(DonatrackAuthApplication.class, args);
   }
 }
-

@@ -5,4 +5,3 @@ public enum Rol {
   DONANTE,
   BENEFICIARIA
 }
-

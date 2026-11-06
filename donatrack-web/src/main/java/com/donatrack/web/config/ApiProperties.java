@@ -9,6 +9,4 @@ public record ApiProperties(
     String incentivosUrl,
     String logisticaUrl,
     String notificacionesUrl,
-    long timeoutSeconds
-) {}
-
+    long timeoutSeconds) {}

@@ -9,4 +9,3 @@ public class DonatrackWebApplication {
     SpringApplication.run(DonatrackWebApplication.class, args);
   }
 }
-

@@ -94,4 +94,3 @@ public class JwtService {
     return ttlMinutes * 60;
   }
 }
-

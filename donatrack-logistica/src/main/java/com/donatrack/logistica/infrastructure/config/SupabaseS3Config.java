@@ -35,14 +35,19 @@ public class SupabaseS3Config {
   @Bean
   public S3Client s3Client() {
     if (!enabled) {
-      log.info("Supabase S3 deshabilitado en este entorno (dev/local). Se utilizará almacenamiento local sin llamadas a S3.");
+      log.info(
+          "Supabase S3 deshabilitado en este entorno (dev/local). Se utilizará almacenamiento local sin llamadas a S3.");
       return null;
     }
     if (accessKey == null || accessKey.isBlank() || secretKey == null || secretKey.isBlank()) {
-      log.warn("Supabase S3: Claves de acceso no configuradas. El cliente S3 no estará disponible.");
+      log.warn(
+          "Supabase S3: Claves de acceso no configuradas. El cliente S3 no estará disponible.");
       return null;
     }
-    log.info("Inicializando cliente S3 de Supabase Storage en endpoint: {} (región: {})", endpoint, region);
+    log.info(
+        "Inicializando cliente S3 de Supabase Storage en endpoint: {} (región: {})",
+        endpoint,
+        region);
     return S3Client.builder()
         .endpointOverride(URI.create(endpoint))
         .region(Region.of(region))
@@ -52,4 +57,3 @@ public class SupabaseS3Config {
         .build();
   }
 }
-

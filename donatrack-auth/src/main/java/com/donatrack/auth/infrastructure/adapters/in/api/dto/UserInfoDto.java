@@ -10,6 +10,4 @@ public record UserInfoDto(
     String rol,
     UUID personaId,
     String descripcion,
-    String ubicacion
-) {}
-
+    String ubicacion) {}

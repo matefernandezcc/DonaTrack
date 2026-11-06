@@ -9,6 +9,7 @@ import com.donatrack.logistica.application.ports.in.RecepcionarDonacionListaPort
 import com.donatrack.logistica.application.ports.out.CamionRepositoryPort;
 import com.donatrack.logistica.application.ports.out.ChoferRepositoryPort;
 import com.donatrack.logistica.application.ports.out.RutaDeRepartoRepositoryPort;
+import com.donatrack.logistica.application.ports.out.StoragePort;
 import com.donatrack.logistica.application.usecases.ConfirmarRecepcionUseCase;
 import com.donatrack.logistica.application.usecases.ReportarFallaEntregaUseCase;
 import com.donatrack.logistica.domain.entities.entregas.*;
@@ -27,7 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.donatrack.logistica.application.ports.out.StoragePort;
 
 @RestController
 @RequestMapping("/api")
@@ -285,17 +285,21 @@ public class LogisticaController {
 
   @Operation(
       summary = "Subir foto o comprobante a Supabase S3",
-      description = "Almacena la imagen de descarga o remito en el bucket S3 de Supabase y devuelve la URL pública.")
-  @PostMapping(value = "/entregas/{idDonacion}/fotos/subir", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+      description =
+          "Almacena la imagen de descarga o remito en el bucket S3 de Supabase y devuelve la URL pública.")
+  @PostMapping(
+      value = "/entregas/{idDonacion}/fotos/subir",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Map<String, String>> subirFotoComprobante(
-      @PathVariable UUID idDonacion,
-      @RequestParam("file") MultipartFile file) {
+      @PathVariable UUID idDonacion, @RequestParam("file") MultipartFile file) {
     if (storagePort == null) {
       return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
           .body(Map.of("error", "Servicio de almacenamiento Supabase S3 no disponible"));
     }
     try {
-      String url = storagePort.subirArchivo(file.getOriginalFilename(), file.getContentType(), file.getBytes());
+      String url =
+          storagePort.subirArchivo(
+              file.getOriginalFilename(), file.getContentType(), file.getBytes());
       if (url == null) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(Map.of("error", "No se pudo subir la foto al bucket Supabase S3"));

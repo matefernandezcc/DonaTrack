@@ -44,7 +44,8 @@ public class Usuario {
 
   @Column(name = "descripcion", length = 500)
   @Builder.Default
-  private String descripcion = "Comprometidos con una logística solidaria eficiente y transparente.";
+  private String descripcion =
+      "Comprometidos con una logística solidaria eficiente y transparente.";
 
   @Column(name = "ubicacion", length = 150)
   @Builder.Default
@@ -54,4 +55,3 @@ public class Usuario {
   @Builder.Default
   private LocalDateTime fechaCreacion = LocalDateTime.now();
 }
-

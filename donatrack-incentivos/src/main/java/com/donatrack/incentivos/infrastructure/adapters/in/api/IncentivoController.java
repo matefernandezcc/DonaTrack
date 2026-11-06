@@ -122,7 +122,8 @@ public class IncentivoController {
     }
 
     int donacionesEnDeposito = Math.max(0, totalHistorico - totalExitosas);
-    // Esquema justo por etapas: +10 puntos inmediatos en depósito, +25 puntos extra al confirmarse la entrega a la entidad
+    // Esquema justo por etapas: +10 puntos inmediatos en depósito, +25 puntos extra al confirmarse
+    // la entrega a la entidad
     int puntos = (donacionesEnDeposito * 10) + (totalExitosas * 35) + (bienesDonados * 2);
 
     MetricasDonanteDTO dto =
@@ -212,7 +213,9 @@ public class IncentivoController {
                             .PersonaDTO
                         persona = personaClient.obtenerPersona(p.getDonanteId());
                     if (persona != null) {
-                      if ("JURIDICA".equalsIgnoreCase(persona.tipo()) && persona.razonSocial() != null && !persona.razonSocial().isBlank()) {
+                      if ("JURIDICA".equalsIgnoreCase(persona.tipo())
+                          && persona.razonSocial() != null
+                          && !persona.razonSocial().isBlank()) {
                         nombreUsuario = persona.razonSocial();
                       } else {
                         String n = persona.nombre() != null ? persona.nombre().trim() : "";
@@ -220,7 +223,8 @@ public class IncentivoController {
                         String completo = (n + " " + a).trim();
                         if (!completo.isEmpty()) {
                           nombreUsuario = completo;
-                        } else if (persona.razonSocial() != null && !persona.razonSocial().isBlank()) {
+                        } else if (persona.razonSocial() != null
+                            && !persona.razonSocial().isBlank()) {
                           nombreUsuario = persona.razonSocial();
                         }
                       }
