@@ -43,6 +43,101 @@
 
   <footer th:replace="~{fragments/public-footer :: footer}"></footer>
 
+  <!-- ============ CHATBOT ROUTER: SALESFORCE EMBEDDED SERVICE & N8N FALLBACK ============ -->
+  <template id="n8n-chatbot-template">
+    <button class="chatbot__fab" id="chat-fab" aria-label="Abrir asistente" aria-expanded="false" aria-controls="chat-panel">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V5Z" fill="currentColor" />
+      </svg>
+    </button>
+    <dialog class="chatbot" id="chat-panel" aria-modal="false" aria-labelledby="chat-title" hidden>
+      <header class="chatbot__head">
+        <div class="chatbot__who">
+          <span class="chatbot__avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="#1F9D6E" />
+              <path d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" />
+              <circle cx="9" cy="10" r="1" fill="#fff" />
+              <circle cx="15" cy="10" r="1" fill="#fff" />
+            </svg>
+          </span>
+          <div>
+            <strong id="chat-title">Asistente DonaTrack</strong>
+            <span class="chatbot__status"><i></i> En línea</span>
+          </div>
+        </div>
+        <button class="chatbot__close" id="chat-close" aria-label="Cerrar chat">&times;</button>
+      </header>
+      <div class="chatbot__log" id="chat-log">
+        <div class="msg msg--bot">¡Hola! Soy el asistente virtual de DonaTrack. ¿En qué te puedo ayudar hoy?</div>
+      </div>
+      <div class="chatbot__chips">
+        <button class="chip" type="button" onclick="document.getElementById('chat-input').value = '¿Cómo donar?'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">¿Cómo donar?</button>
+        <button class="chip" type="button" onclick="document.getElementById('chat-input').value = 'Rastrear remito'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">Rastreo</button>
+        <button class="chip" type="button" onclick="document.getElementById('chat-input').value = 'Verificar ONG'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">Verificar ONG</button>
+      </div>
+      <form class="chatbot__form" id="chat-form">
+        <label for="chat-input" class="sr-only">Escribí tu mensaje</label>
+        <input id="chat-input" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
+        <button type="submit" class="btn btn--primary btn--sm" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 11 21 3l-8 18-2-8-8-2Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </form>
+    </dialog>
+  </template>
+
+  <script>
+    (function() {
+      const hostname = window.location.hostname;
+      // Salesforce activo en dominios autorizados de producción o túneles de demo
+      const isSalesforceDomain = hostname.endsWith('onrender.com') ||
+                                 hostname === 'exclude-stoplight-registrar.ngrok-free.dev' ||
+                                 hostname.includes('donatrack.org');
+
+      function loadLocalChatbot() {
+        if (document.getElementById("chat-fab")) return;
+        const tpl = document.getElementById("n8n-chatbot-template");
+        if (tpl) {
+          tpl.parentNode.insertBefore(tpl.content.cloneNode(true), tpl);
+          const s = document.createElement("script");
+          s.src = "/js/chatbot.js";
+          document.body.appendChild(s);
+        }
+      }
+
+      if (isSalesforceDomain) {
+        window.initEmbeddedMessaging = function() {
+          try {
+            embeddedservice_bootstrap.settings.language = 'es_AR';
+            embeddedservice_bootstrap.init(
+              '00DKh000001LcL5',
+              'Chatbot_DonaTrack',
+              'https://be1776887191673.my.site.com/ESWChatbotDonaTrack1780800682238',
+              { scrt2URL: 'https://be1776887191673.my.salesforce-scrt.com' }
+            );
+          } catch (e) {
+            console.warn("Excepción al inicializar Salesforce Embedded Messaging, activando asistente n8n:", e);
+            loadLocalChatbot();
+          }
+        };
+
+        const sf = document.createElement("script");
+        sf.type = "text/javascript";
+        sf.src = "https://be1776887191673.my.site.com/ESWChatbotDonaTrack1780800682238/assets/js/bootstrap.min.js";
+        sf.onload = window.initEmbeddedMessaging;
+        sf.onerror = function() {
+          console.warn("No se pudo conectar a Salesforce, activando asistente n8n de respaldo.");
+          loadLocalChatbot();
+        };
+        document.body.appendChild(sf);
+      } else {
+        loadLocalChatbot();
+      }
+    })();
+  </script>
+
   <!-- Leaflet y JS común -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

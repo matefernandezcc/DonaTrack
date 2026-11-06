@@ -94,30 +94,32 @@
           </div>
         </header>
       </div>
-      <div class="slds-card__body">
-        <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Necesidades registradas">
-          <thead>
-            <tr class="slds-line-height_reset">
-              <th scope="col"><div class="slds-truncate" title="Descripción">Descripción</div></th>
-              <th scope="col"><div class="slds-truncate" title="Cantidad">Cantidad Requerida</div></th>
-              <th scope="col"><div class="slds-truncate" title="Subcategoría">Subcategoría</div></th>
-              <th scope="col"><div class="slds-truncate" title="Tipo">Tipo</div></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="slds-hint-parent" th:each="n : ${necesidades}">
-              <th scope="row"><div class="slds-truncate" th:text="${n.descripcion}">Leche para merendero</div></th>
-              <td><div class="slds-truncate" th:text="${n.cantidad}">100.0</div></td>
-              <td><div class="slds-truncate" th:text="${n.subcategoria}">Alimentos</div></td>
-              <td>
-                <span class="slds-badge slds-badge_lightest" th:text="${n.tipo}">Extraordinaria</span>
-              </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(necesidades)}">
-              <td colspan="4" class="slds-text-color_weak slds-p-around_medium">No tenés necesidades registradas actualmente.</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="slds-card__body slds-p-around_none">
+        <div class="table-scroll-container" style="max-height: 480px; overflow-y: auto; overflow-x: auto; width: 100%;">
+          <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Necesidades registradas" style="width: 100%; table-layout: fixed;">
+            <thead>
+              <tr class="slds-line-height_reset" style="background: #f8fafc; position: sticky; top: 0; z-index: 1;">
+                <th scope="col" style="width: 45%; font-weight: 700; color: #64748b;"><div class="slds-truncate" title="Descripción">Descripción</div></th>
+                <th scope="col" style="width: 20%; font-weight: 700; color: #64748b;"><div class="slds-truncate" title="Cantidad">Cantidad Requerida</div></th>
+                <th scope="col" style="width: 20%; font-weight: 700; color: #64748b;"><div class="slds-truncate" title="Subcategoría">Subcategoría</div></th>
+                <th scope="col" style="width: 15%; font-weight: 700; color: #64748b;"><div class="slds-truncate" title="Tipo">Tipo</div></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="slds-hint-parent" th:each="n : ${necesidades}">
+                <th scope="row" style="white-space: normal; word-break: break-word;"><strong th:text="${n.descripcion}">Leche para merendero</strong></th>
+                <td style="font-weight: 700; color: #166534;"><div class="slds-truncate" th:text="${n.cantidad}">100.0</div></td>
+                <td><div class="slds-truncate" th:text="${n.subcategoria}">Alimentos</div></td>
+                <td>
+                  <span class="slds-badge slds-badge_lightest" style="text-transform: capitalize;" th:text="${n.tipo}">Extraordinaria</span>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(necesidades)}">
+                <td colspan="4" class="slds-text-color_weak slds-p-around_medium slds-text-align_center">No tenés necesidades registradas actualmente.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </article>
   </div>

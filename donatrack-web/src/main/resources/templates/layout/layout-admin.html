@@ -13,6 +13,29 @@
         href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/styles/salesforce-lightning-design-system.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <style>
+    /* Respaldo y garantía de visualización para navegación vertical SLDS */
+    @media (min-width: 768px) {
+      #admin-nav {
+        display: block !important;
+      }
+    }
+    @media (max-width: 767px) {
+      #admin-nav:not(.is-open) {
+        display: none !important;
+      }
+      #admin-nav.is-open {
+        display: block !important;
+        width: 100% !important;
+      }
+    }
+    /* Contenedor con scroll para tablas extensas */
+    .table-scroll-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  </style>
 </head>
 <body class="slds-scope" style="background-color: #f3f3f3; min-height: 100vh;">
 
@@ -60,7 +83,7 @@
   <div class="slds-grid slds-wrap slds-m-top_xx-large" style="padding-top: 12px;">
 
     <!-- ==================== SLDS BLUEPRINT: VERTICAL NAVIGATION ==================== -->
-    <nav id="admin-nav" class="slds-nav-vertical slds-size_1-of-1 slds-medium-size_1-of-6 slds-p-around_small slds-hide slds-show_medium" aria-label="Menú de Navegación"
+    <nav id="admin-nav" class="slds-nav-vertical slds-size_1-of-1 slds-medium-size_1-of-6 slds-p-around_small" aria-label="Menú de Navegación"
          style="background-color: #ffffff; border-right: 1px solid #dddbda; min-height: calc(100vh - 60px);">
 
       <!-- Sección Administrador -->
@@ -265,19 +288,40 @@
 
   </div>
 
-  <!-- Script responsive drawer para navegación móvil -->
+  <!-- Script responsive drawer y resaltado activo para navegación vertical -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       var toggleBtn = document.getElementById('admin-menu-toggle');
       var nav = document.getElementById('admin-nav');
       if (toggleBtn && nav) {
         toggleBtn.addEventListener('click', function() {
-          var isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-          toggleBtn.setAttribute('aria-expanded', !isExpanded);
-          if (isExpanded) {
-            nav.classList.add('slds-hide');
-          } else {
-            nav.classList.remove('slds-hide');
+          var isOpen = nav.classList.toggle('is-open');
+          toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+      }
+
+      // Resaltar automáticamente el tab vertical activo según la URL
+      var currentPath = window.location.pathname;
+      var links = document.querySelectorAll('.slds-nav-vertical__action');
+      links.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (href && (currentPath === href || (href !== '/app/admin' && href !== '/app/donante' && href !== '/app/beneficiaria' && currentPath.startsWith(href)))) {
+          var item = link.closest('.slds-nav-vertical__item');
+          if (item) {
+            item.classList.add('slds-is-active');
+            link.setAttribute('aria-current', 'page');
+          }
+        }
+      });
+      if (!document.querySelector('.slds-nav-vertical__item.slds-is-active')) {
+        links.forEach(function(link) {
+          var href = link.getAttribute('href');
+          if (href && currentPath === href) {
+            var item = link.closest('.slds-nav-vertical__item');
+            if (item) {
+              item.classList.add('slds-is-active');
+              link.setAttribute('aria-current', 'page');
+            }
           }
         });
       }
