@@ -49,6 +49,19 @@ public class DonacionesGateway {
     }
   }
 
+  public Map<String, Object> obtenerBeneficiario(UUID beneficiarioId) {
+    try {
+      return donacionesClient
+          .get()
+          .uri("/api/beneficiarios/{id}", beneficiarioId)
+          .retrieve()
+          .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+    } catch (Exception e) {
+      log.warn("No se pudo obtener datos del beneficiario {}: {}", beneficiarioId, e.getMessage());
+      return Collections.emptyMap();
+    }
+  }
+
   public List<Map<String, Object>> obtenerNecesidades(UUID beneficiarioId) {
     try {
       List<Map<String, Object>> result =
@@ -119,5 +132,51 @@ public class DonacionesGateway {
       log.error("Error al importar CSV: {}", e.getMessage());
       throw new RuntimeException("Error en importación de CSV: " + e.getMessage());
     }
+  }
+
+  public List<Map<String, Object>> listarSolicitudesOng() {
+    try {
+      List<Map<String, Object>> result =
+          donacionesClient
+              .get()
+              .uri("/api/solicitudes-ong")
+              .retrieve()
+              .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+      return result != null ? result : Collections.emptyList();
+    } catch (Exception e) {
+      log.error("Error al consultar solicitudes de ONG: {}", e.getMessage());
+      return Collections.emptyList();
+    }
+  }
+
+  public Map<String, Object> registrarSolicitudOng(Map<String, ?> data) {
+    return donacionesClient
+        .post()
+        .uri("/api/solicitudes-ong")
+        .body(data)
+        .retrieve()
+        .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+  }
+
+  public Map<String, Object> obtenerSolicitudOng(String id) {
+    try {
+      return donacionesClient
+          .get()
+          .uri("/api/solicitudes-ong/{id}", id)
+          .retrieve()
+          .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+    } catch (Exception e) {
+      log.error("Error al consultar solicitud ONG {}: {}", id, e.getMessage());
+      return null;
+    }
+  }
+
+  public Map<String, Object> actualizarEstadoSolicitudOng(String id, String estado) {
+    return donacionesClient
+        .put()
+        .uri("/api/solicitudes-ong/{id}/estado", id)
+        .body(Map.of("estado", estado))
+        .retrieve()
+        .body(new ParameterizedTypeReference<Map<String, Object>>() {});
   }
 }

@@ -27,8 +27,8 @@ public class ConfirmarRecepcionYNotificarUseCase {
   private final PersonaRepository personaRepository;
   private final ApplicationEventPublisher eventPublisher;
 
-  @org.springframework.beans.factory.annotation.Autowired(required = false)
-  private com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient incentivoClient;
+  private com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient
+      incentivoClient;
 
   private static final org.slf4j.Logger log =
       org.slf4j.LoggerFactory.getLogger(ConfirmarRecepcionYNotificarUseCase.class);
@@ -38,19 +38,22 @@ public class ConfirmarRecepcionYNotificarUseCase {
       DonacionOriginalRepository recepcionRepository,
       PersonaRepository personaRepository,
       ApplicationEventPublisher eventPublisher) {
-    this.donacionRepository = donacionRepository;
-    this.recepcionRepository = recepcionRepository;
-    this.personaRepository = personaRepository;
-    this.eventPublisher = eventPublisher;
+    this(donacionRepository, recepcionRepository, personaRepository, eventPublisher, null);
   }
 
+  @org.springframework.beans.factory.annotation.Autowired
   public ConfirmarRecepcionYNotificarUseCase(
       DonacionRepository donacionRepository,
       DonacionOriginalRepository recepcionRepository,
       PersonaRepository personaRepository,
       ApplicationEventPublisher eventPublisher,
-      com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient incentivoClient) {
-    this(donacionRepository, recepcionRepository, personaRepository, eventPublisher);
+      @org.springframework.beans.factory.annotation.Autowired(required = false)
+          com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient
+              incentivoClient) {
+    this.donacionRepository = donacionRepository;
+    this.recepcionRepository = recepcionRepository;
+    this.personaRepository = personaRepository;
+    this.eventPublisher = eventPublisher;
     this.incentivoClient = incentivoClient;
   }
 
@@ -86,9 +89,17 @@ public class ConfirmarRecepcionYNotificarUseCase {
           java.util.UUID idEntidad = beneficiario != null ? beneficiario.getId() : null;
           com.donatrack.common.dto.ActividadDonacionDTO dto =
               new com.donatrack.common.dto.ActividadDonacionDTO(
-                  donacion.getId(), idDonante, cantidadBienes, categorias, idEntidad, java.time.LocalDate.now());
+                  donacion.getId(),
+                  idDonante,
+                  cantidadBienes,
+                  categorias,
+                  idEntidad,
+                  java.time.LocalDate.now());
           incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
-          log.info("Incentivos actualizados para donante {} tras entrega exitosa de donación {}", idDonante, donacion.getId());
+          log.info(
+              "Incentivos actualizados para donante {} tras entrega exitosa de donación {}",
+              idDonante,
+              donacion.getId());
         }
       } catch (Exception ex) {
         log.warn("No se pudo notificar a incentivos al confirmar entrega: {}", ex.getMessage());

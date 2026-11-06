@@ -1,13 +1,17 @@
 package com.donatrack.web.service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import com.donatrack.web.gateway.DonacionesGateway;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SolicitudOngService {
+
+  private static final Logger log = LoggerFactory.getLogger(SolicitudOngService.class);
 
   public record SolicitudOng(
       String id,
@@ -20,77 +24,144 @@ public class SolicitudOngService {
       String tipoEntidad,
       String necesidades,
       String estado,
-      String fecha
-  ) {}
+      String fecha) {}
 
-  private final Map<String, SolicitudOng> solicitudes = new ConcurrentHashMap<>();
+  private final DonacionesGateway donacionesGateway;
+  // Fallback in-memory map for unit tests where DonacionesGateway is not mocked
+  private final Map<String, SolicitudOng> fallbackSolicitudes = new ConcurrentHashMap<>();
+
+  @Autowired
+  public SolicitudOngService(DonacionesGateway donacionesGateway) {
+    this.donacionesGateway = donacionesGateway;
+  }
 
   public SolicitudOngService() {
-    // Sembrar 2 solicitudes para que el Administrador tenga casos reales de prueba en el panel
-    registrarSolicitud(Map.of(
-        "nombreOng", "Comedor Los Bajitos de Quilmes",
-        "cuit", "30-71458921-4",
-        "direccion", "Av. Calchaquí 1820, Quilmes, Bs. As.",
-        "email", "comedor.losbajitos@gmail.com",
-        "telefono", "+54 11 4253-9988",
-        "responsable", "Marta Gómez",
-        "tipoEntidad", "Comedor Comunitario",
-        "necesidades", "Alimentos no perecederos (arroz, fideos, leche en polvo)"
-    ));
-    registrarSolicitud(Map.of(
-        "nombreOng", "Hogar Niños del Sol",
-        "cuit", "30-68954123-8",
-        "direccion", "Calle 14 N° 520, La Plata",
-        "email", "contacto@ninosdelsol.org.ar",
-        "telefono", "+54 221 482-1144",
-        "responsable", "Esteban Rivas",
-        "tipoEntidad", "Hogar de Tránsito",
-        "necesidades", "Camperas, frazadas y calzado escolar"
-    ));
+    this(null);
   }
 
   public SolicitudOng registrarSolicitud(Map<String, String> data) {
-    String id = UUID.randomUUID().toString().substring(0, 8);
-    String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-    String nombre = data.containsKey("nombreOng") ? data.get("nombreOng") : data.getOrDefault("nombreOrganizacion", "ONG sin nombre");
-    String tipo = data.containsKey("tipoEntidad") ? data.get("tipoEntidad") : data.getOrDefault("tipo", "Comedor");
+    if (donacionesGateway != null) {
+      try {
+        Map<String, Object> resp = donacionesGateway.registrarSolicitudOng(data);
+        if (resp != null) {
+          return mapToRecord(resp);
+        }
+      } catch (Exception e) {
+        log.error(
+            "Error delegando registro de Solicitud ONG a donatrack-donaciones: {}", e.getMessage());
+      }
+    }
 
-    SolicitudOng s = new SolicitudOng(
-        id,
-        nombre,
-        data.getOrDefault("cuit", "-"),
-        data.getOrDefault("direccion", "-"),
-        data.getOrDefault("email", "-"),
-        data.getOrDefault("telefono", "-"),
-        data.getOrDefault("responsable", "-"),
-        tipo,
-        data.getOrDefault("necesidades", "-"),
-        "PENDIENTE",
-        fecha
-    );
-    solicitudes.put(id, s);
+    // Fallback local
+    String id = UUID.randomUUID().toString().substring(0, 8);
+    String fecha =
+        java.time.LocalDateTime.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    String nombre =
+        data.containsKey("nombreOng")
+            ? data.get("nombreOng")
+            : data.getOrDefault("nombreOrganizacion", "ONG sin nombre");
+    String tipo =
+        data.containsKey("tipoEntidad")
+            ? data.get("tipoEntidad")
+            : data.getOrDefault("tipo", "Comedor");
+
+    SolicitudOng s =
+        new SolicitudOng(
+            id,
+            nombre,
+            data.getOrDefault("cuit", "-"),
+            data.getOrDefault("direccion", "-"),
+            data.getOrDefault("email", "-"),
+            data.getOrDefault("telefono", "-"),
+            data.getOrDefault("responsable", "-"),
+            tipo,
+            data.getOrDefault("necesidades", "-"),
+            "PENDIENTE",
+            fecha);
+    fallbackSolicitudes.put(id, s);
     return s;
   }
 
   public List<SolicitudOng> listarTodas() {
-    List<SolicitudOng> list = new ArrayList<>(solicitudes.values());
+    if (donacionesGateway != null) {
+      try {
+        List<Map<String, Object>> list = donacionesGateway.listarSolicitudesOng();
+        if (list != null && !list.isEmpty()) {
+          return list.stream().map(this::mapToRecord).toList();
+        }
+      } catch (Exception e) {
+        log.error("Error consultando solicitudes en donatrack-donaciones: {}", e.getMessage());
+      }
+    }
+
+    List<SolicitudOng> list = new ArrayList<>(fallbackSolicitudes.values());
     list.sort((a, b) -> b.fecha().compareTo(a.fecha()));
     return list;
   }
 
   public Optional<SolicitudOng> obtenerPorId(String id) {
-    return Optional.ofNullable(solicitudes.get(id));
+    if (donacionesGateway != null) {
+      try {
+        Map<String, Object> resp = donacionesGateway.obtenerSolicitudOng(id);
+        if (resp != null) {
+          return Optional.of(mapToRecord(resp));
+        }
+      } catch (Exception e) {
+        log.error("Error obteniendo solicitud {} de donatrack-donaciones: {}", id, e.getMessage());
+      }
+    }
+    return Optional.ofNullable(fallbackSolicitudes.get(id));
   }
 
   public boolean actualizarEstado(String id, String nuevoEstado) {
-    SolicitudOng s = solicitudes.get(id);
+    if (donacionesGateway != null) {
+      try {
+        Map<String, Object> resp = donacionesGateway.actualizarEstadoSolicitudOng(id, nuevoEstado);
+        if (resp != null) {
+          return true;
+        }
+      } catch (Exception e) {
+        log.error(
+            "Error actualizando estado de solicitud {} en donatrack-donaciones: {}",
+            id,
+            e.getMessage());
+      }
+    }
+
+    SolicitudOng s = fallbackSolicitudes.get(id);
     if (s != null) {
-      solicitudes.put(id, new SolicitudOng(
-          s.id(), s.nombreOng(), s.cuit(), s.direccion(), s.email(), s.telefono(),
-          s.responsable(), s.tipoEntidad(), s.necesidades(), nuevoEstado, s.fecha()
-      ));
+      fallbackSolicitudes.put(
+          id,
+          new SolicitudOng(
+              s.id(),
+              s.nombreOng(),
+              s.cuit(),
+              s.direccion(),
+              s.email(),
+              s.telefono(),
+              s.responsable(),
+              s.tipoEntidad(),
+              s.necesidades(),
+              nuevoEstado,
+              s.fecha()));
       return true;
     }
     return false;
+  }
+
+  private SolicitudOng mapToRecord(Map<String, Object> m) {
+    return new SolicitudOng(
+        String.valueOf(m.getOrDefault("id", "")),
+        String.valueOf(m.getOrDefault("nombreOng", "")),
+        String.valueOf(m.getOrDefault("cuit", "-")),
+        String.valueOf(m.getOrDefault("direccion", "-")),
+        String.valueOf(m.getOrDefault("email", "-")),
+        String.valueOf(m.getOrDefault("telefono", "-")),
+        String.valueOf(m.getOrDefault("responsable", "-")),
+        String.valueOf(m.getOrDefault("tipoEntidad", "-")),
+        String.valueOf(m.getOrDefault("necesidades", "-")),
+        String.valueOf(m.getOrDefault("estado", "PENDIENTE")),
+        String.valueOf(m.getOrDefault("fecha", "")));
   }
 }
