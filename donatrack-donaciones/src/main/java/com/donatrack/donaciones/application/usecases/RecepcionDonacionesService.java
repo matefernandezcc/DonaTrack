@@ -23,6 +23,11 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
   private final DonacionRepository donacionRepository;
   private final DonacionOriginalRepository recepcionDonacionRepository;
 
+  private static final java.util.UUID DEFAULT_DONANTE_UUID =
+      java.util.UUID.fromString("a1111111-1111-4111-8111-111111111111");
+  private static final java.util.UUID DEFAULT_ADMIN_UUID =
+      java.util.UUID.fromString("a2222222-2222-4222-8222-222222222222");
+
   public RecepcionDonacionesService(
       PersonaRepository personaRepository,
       ProcesadorCargaInicial procesadorCargaInicial,
@@ -36,14 +41,19 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
 
   @Override
   public DonacionOriginal recibir(CargaBienesRequestDTO requestDTO) {
-    // 1. Obtener entidades
+    // 1. Obtener entidades (con fallback seguro a IDs por defecto para nuevos usuarios)
+    java.util.UUID idDonante = requestDTO.idDonante() != null ? requestDTO.idDonante() : DEFAULT_DONANTE_UUID;
     Persona donantePersona =
         personaRepository
-            .buscarPorId(requestDTO.idDonante())
+            .buscarPorId(idDonante)
+            .or(() -> personaRepository.buscarPorId(DEFAULT_DONANTE_UUID))
             .orElseThrow(() -> new IllegalArgumentException("Donante no encontrado"));
+
+    java.util.UUID idAdmin = requestDTO.idAdministrador() != null ? requestDTO.idAdministrador() : DEFAULT_ADMIN_UUID;
     Persona adminPersona =
         personaRepository
-            .buscarPorId(requestDTO.idAdministrador())
+            .buscarPorId(idAdmin)
+            .or(() -> personaRepository.buscarPorId(DEFAULT_ADMIN_UUID))
             .orElseThrow(() -> new IllegalArgumentException("Administrador no encontrado"));
 
     Donante donante =

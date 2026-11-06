@@ -588,8 +588,14 @@ public class AdminController {
               + donacionId
               + "). ¡Sumaste +10 puntos inmediatos en depósito y tu racha se extendió!");
     } catch (Exception e) {
+      String msg = e.getMessage() != null ? e.getMessage() : "Error en el servicio";
+      if (msg.contains("502") || msg.contains("Bad Gateway") || msg.contains("<!DOCTYPE html>")) {
+        msg = "El microservicio de donaciones está iniciando en la nube. Por favor, reintentá tu donación en unos segundos.";
+      } else if (msg.contains("503") || msg.contains("504") || msg.contains("Timeout") || msg.contains("timed out")) {
+        msg = "El microservicio de donaciones tardó en responder. Por favor, reintentá en un instante.";
+      }
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al registrar donación: " + e.getMessage());
+          "flashError", "Error al registrar donación: " + msg);
     }
     return "redirect:/app/donante";
   }
