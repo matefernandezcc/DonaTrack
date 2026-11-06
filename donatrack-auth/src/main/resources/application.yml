@@ -53,6 +53,6 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        default_schema: auth
+        default_schema: public
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
