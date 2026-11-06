@@ -31,7 +31,7 @@
             </h2>
           </div>
           <div class="slds-no-flex">
-            <button class="slds-button slds-button_brand" onclick="document.getElementById('modal-camion').removeAttribute('hidden'); document.getElementById('backdrop-camion').removeAttribute('hidden');">
+            <button class="slds-button slds-button_brand" onclick="abrirModalCamion()">
               <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
               </svg>Registrar Nuevo Camión
@@ -106,15 +106,15 @@
     </article>
 
     <!-- ==================== SLDS BLUEPRINT: MODAL REGISTRO CAMIÓN ==================== -->
-    <div id="modal-camion" hidden>
-      <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-camion" class="slds-modal slds-fade-in-open">
+    <div id="modal-camion" style="display: none;">
+      <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-camion" class="slds-modal slds-fade-in-open" style="z-index: 10001;">
         <div class="slds-modal__container">
           
           <form th:action="@{/app/admin/camiones}" method="post" th:object="${nuevoCamion}">
             
             <header class="slds-modal__header">
               <button type="button" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar"
-                      onclick="document.getElementById('modal-camion').setAttribute('hidden', ''); document.getElementById('backdrop-camion').setAttribute('hidden', '');">
+                      onclick="cerrarModalCamion()" style="font-size: 1.1rem; color: #fff; cursor: pointer;">
                 ✕
                 <span class="slds-assistive-text">Cerrar</span>
               </button>
@@ -162,8 +162,7 @@
             </div>
 
             <footer class="slds-modal__footer">
-              <button type="button" class="slds-button slds-button_neutral"
-                      onclick="document.getElementById('modal-camion').setAttribute('hidden', ''); document.getElementById('backdrop-camion').setAttribute('hidden', '');">
+              <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalCamion()">
                 Cancelar
               </button>
               <button type="submit" class="slds-button slds-button_brand">Guardar Camión</button>
@@ -173,14 +172,25 @@
 
         </div>
       </section>
+      <div id="backdrop-camion" class="slds-backdrop slds-backdrop_open" role="presentation" style="z-index: 10000;" onclick="cerrarModalCamion()"></div>
     </div>
-
-    <div id="backdrop-camion" class="slds-backdrop slds-backdrop_open" role="presentation" hidden></div>
 
   </div>
 
   <th:block id="extra-scripts">
-    <!-- Scripts adicionales si se necesitan -->
+    <script>
+      function abrirModalCamion() {
+        var el = document.getElementById('modal-camion');
+        if (el) el.style.display = 'block';
+      }
+      function cerrarModalCamion() {
+        var el = document.getElementById('modal-camion');
+        if (el) el.style.display = 'none';
+      }
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') cerrarModalCamion();
+      });
+    </script>
   </th:block>
 
 </body>

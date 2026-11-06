@@ -86,78 +86,154 @@
       </div>
     </section>
 
-    <!-- ============ SCROLL STORY ============ -->
-    <section class="story" id="recorrido" aria-labelledby="story-title">
-      <div class="container story__intro">
-        <span class="eyebrow eyebrow--green">El recorrido de una donación</span>
-        <h2 id="story-title">De tu mano a quien lo necesita</h2>
-        <p>
-          Seguí cada etapa del trayecto. Transparencia real, sin intermediarios
-          opacos.
-        </p>
-      </div>
+    <!-- ============ CIRCULAR STORYTELLING: EL CÍRCULO SE CIERRA ============ -->
+    <section class="story-circle" id="recorrido" aria-labelledby="story-title">
+      <div class="container story-circle__container">
+        <!-- Columna Izquierda: Copy y Detalles Dinámicos de Etapa -->
+        <div class="story-circle__copy">
+          <span class="eyebrow eyebrow--green">Ciclo Integral de Trazabilidad 360°</span>
+          <h2 id="story-title" class="story-circle__title">
+            De tu mano a quien lo necesita.<br />
+            <span class="text-gradient">El círculo se cierra.</span>
+          </h2>
+          <p class="story-circle__lead">
+            Seguí cada etapa física y digital en tiempo real. Cuando la mercadería llega al comedor comunitario y se certifica con foto al pie del camión, el ciclo solidario se completa.
+          </p>
 
-      <div class="story__stage" id="story-stage">
-        <svg class="story__svg" viewBox="0 0 1000 1800" preserveAspectRatio="none" aria-hidden="true">
-          <path id="road" d="M 150 100
-                 C 150 366, 850 366, 850 633
-                 C 850 900, 150 900, 150 1166
-                 C 150 1433, 850 1433, 850 1700" fill="none" stroke="#E5ECF5" stroke-width="22"
-            stroke-linecap="round" />
-          <path d="M 150 100
-                 C 150 366, 850 366, 850 633
-                 C 850 900, 150 900, 150 1166
-                 C 150 1433, 850 1433, 850 1700" fill="none" stroke="#0B4A8F" stroke-width="3" stroke-linecap="round"
-            stroke-dasharray="2 14" opacity="0.55" />
-        </svg>
+          <!-- Tarjeta dinámica de la etapa activa -->
+          <div class="story-card" id="story-active-card">
+            <div class="story-card__header">
+              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 05</span>
+              <span class="story-card__status" id="story-stage-status">Trazabilidad Iniciada</span>
+            </div>
+            <h3 class="story-card__title" id="story-stage-title">Donación Realizada</h3>
+            <p class="story-card__desc" id="story-stage-desc">
+              Registrás tu donación en segundos indicando tipo de bien, peso aproximado y punto de retiro o entrega. Se genera el remito digital con hash criptográfico único.
+            </p>
+            <div class="story-card__meta" id="story-stage-meta">
+              <span class="story-meta-badge" id="story-meta-origin">Recepción en depósito</span>
+              <span class="story-meta-points" id="story-meta-points">+10 Puntos de Impacto</span>
+            </div>
+          </div>
 
-        <div class="story__truck" id="story-truck" aria-hidden="true">
-          <img id="truck-image" src="/img/delivery-truck-start.svg" loading="lazy" decoding="async" alt=""
-            style="width: 100%; height: 100%; object-fit: contain;">
+          <!-- Selector Interactivo de Etapas (Pills) -->
+          <div class="story-controls">
+            <div class="story-pills" role="tablist" aria-label="Etapas del recorrido">
+              <button type="button" class="story-pill is-active" data-step="1" role="tab" aria-selected="true" onclick="selectCircleStep(1)">
+                <span>01</span> Registro
+              </button>
+              <button type="button" class="story-pill" data-step="2" role="tab" aria-selected="false" onclick="selectCircleStep(2)">
+                <span>02</span> Acopio
+              </button>
+              <button type="button" class="story-pill" data-step="3" role="tab" aria-selected="false" onclick="selectCircleStep(3)">
+                <span>03</span> En Ruta
+              </button>
+              <button type="button" class="story-pill" data-step="4" role="tab" aria-selected="false" onclick="selectCircleStep(4)">
+                <span>04</span> En Sede
+              </button>
+              <button type="button" class="story-pill" data-step="5" role="tab" aria-selected="false" onclick="selectCircleStep(5)">
+                <span>05</span> Círculo Cerrado
+              </button>
+            </div>
+            <div class="story-actions">
+              <button type="button" id="story-autoplay-toggle" class="btn btn--sm btn--ghost" onclick="toggleCircleAutoplay()" aria-label="Pausar ciclo automático">
+                <span id="story-autoplay-icon">⏸</span> <span id="story-autoplay-text">Pausar ciclo automático</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <ol class="story__steps">
-          <li class="step" data-step="1">
-            <span class="step__num">01</span>
-            <h3>Donación realizada</h3>
-            <p>
-              Registrás tu donación en segundos. Indicás tipo, cantidad y punto
-              de retiro.
-            </p>
-          </li>
-          <li class="step" data-step="2">
-            <span class="step__num">02</span>
-            <h3>Centro de acopio</h3>
-            <p>
-              Tu donación es clasificada y certificada por personal capacitado
-              en el centro más cercano.
-            </p>
-          </li>
-          <li class="step" data-step="3">
-            <span class="step__num">03</span>
-            <h3>Transporte en camino</h3>
-            <p>
-              Logística verificada en ruta. Recibís actualizaciones en tiempo
-              real con cada movimiento.
-            </p>
-          </li>
-          <li class="step" data-step="4">
-            <span class="step__num">04</span>
-            <h3>ONG receptora</h3>
-            <p>
-              La organización beneficiaria confirma la recepción con foto y
-              firma digital.
-            </p>
-          </li>
-          <li class="step" data-step="5">
-            <span class="step__num">05</span>
-            <h3>Entrega completada</h3>
-            <p>
-              Recibís la prueba de entrega y el impacto generado. El círculo se
-              cierra.
-            </p>
-          </li>
-        </ol>
+        <!-- Columna Derecha: Dial Circular con Camión y 5 Hitos -->
+        <div class="story-circle__visual">
+          <div class="dial-container" id="dial-container">
+            <!-- SVG del Dial con Ticks y Track -->
+            <svg class="dial-svg" viewBox="0 0 540 540" id="dial-svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="circleTrackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0b4a8f" />
+                  <stop offset="50%" stop-color="#0284c7" />
+                  <stop offset="100%" stop-color="#16a34a" />
+                </linearGradient>
+              </defs>
+
+              <!-- Órbita Base -->
+              <circle cx="270" cy="270" r="190" fill="none" stroke="currentColor" stroke-width="3" opacity="0.12" />
+              <!-- Círculo Guía Interno -->
+              <circle cx="270" cy="270" r="130" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 8" opacity="0.15" />
+
+              <!-- Ticks Radiales generados dinámicamente -->
+              <g id="dial-ticks" class="dial-ticks" opacity="0.45"></g>
+
+              <!-- Track de Progreso Activo -->
+              <circle id="dial-progress-circle" cx="270" cy="270" r="190" fill="none"
+                      stroke="url(#circleTrackGrad)" stroke-width="6" stroke-linecap="round"
+                      stroke-dasharray="1194" stroke-dashoffset="1194"
+                      transform="rotate(-90 270 270)" style="transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);" />
+            </svg>
+
+            <!-- Hub Central del Dial -->
+            <div class="dial-hub" id="dial-hub">
+              <div class="dial-hub__badge">DONATRACK</div>
+              <div class="dial-hub__title" id="dial-hub-stage">Registro</div>
+              <div class="dial-hub__sub">Trazabilidad 360°</div>
+              <div class="dial-hub__pulse"></div>
+            </div>
+
+            <!-- Camión Navegante sobre la Circunferencia -->
+            <div class="dial-truck" id="dial-truck" aria-hidden="true">
+              <div class="dial-truck__inner">
+                <img src="/img/delivery-truck-start.svg" id="dial-truck-img" alt="Camión DonaTrack" />
+              </div>
+            </div>
+
+            <!-- 5 Nodos / Hitos Alrededor de la Circunferencia -->
+            <!-- 01: Top 0° (12hs) -->
+            <div class="dial-node is-active" data-node="1" style="--angle: 0deg;" onclick="selectCircleStep(1)" role="button" tabindex="0" aria-label="Etapa 1: Donación">
+              <div class="dial-node__dot">01</div>
+              <div class="dial-node__label dial-node__label--top">
+                <strong>Donación</strong>
+                <span>Carga inicial</span>
+              </div>
+            </div>
+
+            <!-- 02: Top-Right 72° -->
+            <div class="dial-node" data-node="2" style="--angle: 72deg;" onclick="selectCircleStep(2)" role="button" tabindex="0" aria-label="Etapa 2: Acopio">
+              <div class="dial-node__dot">02</div>
+              <div class="dial-node__label dial-node__label--right-top">
+                <strong>Acopio</strong>
+                <span>Pesaje y control</span>
+              </div>
+            </div>
+
+            <!-- 03: Bottom-Right 144° -->
+            <div class="dial-node" data-node="3" style="--angle: 144deg;" onclick="selectCircleStep(3)" role="button" tabindex="0" aria-label="Etapa 3: Transporte">
+              <div class="dial-node__dot">03</div>
+              <div class="dial-node__label dial-node__label--right-bottom">
+                <strong>Transporte</strong>
+                <span>Logística en ruta</span>
+              </div>
+            </div>
+
+            <!-- 04: Bottom-Left 216° -->
+            <div class="dial-node" data-node="4" style="--angle: 216deg;" onclick="selectCircleStep(4)" role="button" tabindex="0" aria-label="Etapa 4: ONG Receptora">
+              <div class="dial-node__dot">04</div>
+              <div class="dial-node__label dial-node__label--left-bottom">
+                <strong>ONG Receptora</strong>
+                <span>Arribo a sede</span>
+              </div>
+            </div>
+
+            <!-- 05: Top-Left 288° -->
+            <div class="dial-node" data-node="5" style="--angle: 288deg;" onclick="selectCircleStep(5)" role="button" tabindex="0" aria-label="Etapa 5: Círculo Cerrado">
+              <div class="dial-node__dot">05</div>
+              <div class="dial-node__label dial-node__label--left-top">
+                <strong>Círculo Cerrado</strong>
+                <span>Remito y fotos S3</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
     </section>
 
@@ -749,8 +825,8 @@
         fecha: "28 Oct 2026",
         comprobante: {
           fotos: [
-            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.jpg",
-            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/caja-alimentos-1.jpg"
+            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp",
+            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/caja-alimentos-1.jpeg"
           ]
         }
       };

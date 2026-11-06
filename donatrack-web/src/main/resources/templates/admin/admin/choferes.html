@@ -31,7 +31,7 @@
             </h2>
           </div>
           <div class="slds-no-flex">
-            <button class="slds-button slds-button_brand" onclick="document.getElementById('modal-chofer').removeAttribute('hidden'); document.getElementById('backdrop-chofer').removeAttribute('hidden');">
+            <button class="slds-button slds-button_brand" onclick="abrirModalChofer()">
               <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
               </svg>Registrar Nuevo Chofer
@@ -99,83 +99,96 @@
     </article>
 
     <!-- ==================== SLDS BLUEPRINT: MODAL REGISTRO CHOFER ==================== -->
-    <section id="modal-chofer" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-chofer" class="slds-modal slds-fade-in-open" hidden>
-      <div class="slds-modal__container" style="max-width: 520px;">
-        
-        <header class="slds-modal__header">
-          <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar"
-                  onclick="document.getElementById('modal-chofer').setAttribute('hidden', ''); document.getElementById('backdrop-chofer').setAttribute('hidden', '');">
-            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-              <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
-            </svg>
-            <span class="slds-assistive-text">Cerrar</span>
-          </button>
-          <h2 id="modal-heading-chofer" class="slds-modal__title slds-hyphenate">Habilitar Nuevo Chofer</h2>
-        </header>
-
-        <form th:action="@{/app/admin/choferes}" th:object="${nuevoChofer}" method="post">
-          <div class="slds-modal__content slds-p-around_medium" id="modal-content-chofer">
-            
-            <div class="slds-form-element slds-m-bottom_small">
-              <label class="slds-form-element__label" for="legajo">
-                <abbr class="slds-required" title="requerido">* </abbr>Número de Legajo
-              </label>
-              <div class="slds-form-element__control">
-                <input type="text" id="legajo" th:field="*{legajo}" required
-                       placeholder="Ej: CH-101" class="slds-input" />
-              </div>
-            </div>
-
-            <div class="slds-form-element slds-m-bottom_small">
-              <label class="slds-form-element__label" for="nombre">
-                <abbr class="slds-required" title="requerido">* </abbr>Nombre
-              </label>
-              <div class="slds-form-element__control">
-                <input type="text" id="nombre" th:field="*{nombre}" required
-                       placeholder="Ej: Martín" class="slds-input" />
-              </div>
-            </div>
-
-            <div class="slds-form-element slds-m-bottom_small">
-              <label class="slds-form-element__label" for="apellido">
-                <abbr class="slds-required" title="requerido">* </abbr>Apellido
-              </label>
-              <div class="slds-form-element__control">
-                <input type="text" id="apellido" th:field="*{apellido}" required
-                       placeholder="Ej: Rossi" class="slds-input" />
-              </div>
-            </div>
-
-            <div class="slds-form-element slds-m-bottom_small">
-              <label class="slds-form-element__label" for="telefono">
-                <abbr class="slds-required" title="requerido">* </abbr>Teléfono / Celular
-              </label>
-              <div class="slds-form-element__control">
-                <input type="tel" id="telefono" th:field="*{telefono}" required
-                       placeholder="Ej: +54 11 5566-7788" class="slds-input" />
-              </div>
-            </div>
-
-          </div>
-
-          <footer class="slds-modal__footer">
-            <button class="slds-button slds-button_neutral" type="button"
-                    onclick="document.getElementById('modal-chofer').setAttribute('hidden', ''); document.getElementById('backdrop-chofer').setAttribute('hidden', '');">
-              Cancelar
+    <div id="modal-chofer-container" style="display: none;">
+      <section id="modal-chofer" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-chofer" class="slds-modal slds-fade-in-open" style="z-index: 10001;">
+        <div class="slds-modal__container" style="max-width: 520px;">
+          
+          <header class="slds-modal__header">
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar"
+                    type="button" onclick="cerrarModalChofer()" style="font-size: 1.1rem; color: #fff; cursor: pointer;">
+              ✕
+              <span class="slds-assistive-text">Cerrar</span>
             </button>
-            <button class="slds-button slds-button_brand" type="submit">Guardar Chofer</button>
-          </footer>
-        </form>
+            <h2 id="modal-heading-chofer" class="slds-modal__title slds-hyphenate">Habilitar Nuevo Chofer</h2>
+          </header>
 
-      </div>
-    </section>
+          <form th:action="@{/app/admin/choferes}" th:object="${nuevoChofer}" method="post">
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-chofer">
+              
+              <div class="slds-form-element slds-m-bottom_small">
+                <label class="slds-form-element__label" for="legajo">
+                  <abbr class="slds-required" title="requerido">* </abbr>Número de Legajo
+                </label>
+                <div class="slds-form-element__control">
+                  <input type="text" id="legajo" th:field="*{legajo}" required
+                         placeholder="Ej: CH-101" class="slds-input" />
+                </div>
+              </div>
 
-    <!-- Backdrop del Modal -->
-    <div id="backdrop-chofer" class="slds-backdrop slds-backdrop_open" hidden></div>
+              <div class="slds-form-element slds-m-bottom_small">
+                <label class="slds-form-element__label" for="nombre">
+                  <abbr class="slds-required" title="requerido">* </abbr>Nombre
+                </label>
+                <div class="slds-form-element__control">
+                  <input type="text" id="nombre" th:field="*{nombre}" required
+                         placeholder="Ej: Martín" class="slds-input" />
+                </div>
+              </div>
+
+              <div class="slds-form-element slds-m-bottom_small">
+                <label class="slds-form-element__label" for="apellido">
+                  <abbr class="slds-required" title="requerido">* </abbr>Apellido
+                </label>
+                <div class="slds-form-element__control">
+                  <input type="text" id="apellido" th:field="*{apellido}" required
+                         placeholder="Ej: Rossi" class="slds-input" />
+                </div>
+              </div>
+
+              <div class="slds-form-element slds-m-bottom_small">
+                <label class="slds-form-element__label" for="telefono">
+                  <abbr class="slds-required" title="requerido">* </abbr>Teléfono / Celular
+                </label>
+                <div class="slds-form-element__control">
+                  <input type="tel" id="telefono" th:field="*{telefono}" required
+                         placeholder="Ej: +54 11 5566-7788" class="slds-input" />
+                </div>
+              </div>
+
+            </div>
+
+            <footer class="slds-modal__footer">
+              <button class="slds-button slds-button_neutral" type="button" onclick="cerrarModalChofer()">
+                Cancelar
+              </button>
+              <button class="slds-button slds-button_brand" type="submit">Guardar Chofer</button>
+            </footer>
+          </form>
+
+        </div>
+      </section>
+
+      <!-- Backdrop del Modal -->
+      <div id="backdrop-chofer" class="slds-backdrop slds-backdrop_open" style="z-index: 10000;" onclick="cerrarModalChofer()"></div>
+    </div>
 
   </div>
 
-  <div id="extra-scripts"></div>
+  <div id="extra-scripts">
+    <script>
+      function abrirModalChofer() {
+        var el = document.getElementById('modal-chofer-container');
+        if (el) el.style.display = 'block';
+      }
+      function cerrarModalChofer() {
+        var el = document.getElementById('modal-chofer-container');
+        if (el) el.style.display = 'none';
+      }
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') cerrarModalChofer();
+      });
+    </script>
+  </div>
 </body>
 </html>
 

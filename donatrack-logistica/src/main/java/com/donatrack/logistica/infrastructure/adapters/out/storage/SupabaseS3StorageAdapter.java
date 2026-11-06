@@ -31,7 +31,7 @@ public class SupabaseS3StorageAdapter implements StoragePort {
     if (s3Client == null) {
       log.info(
           "Entorno local detectado (S3 deshabilitado). Utilizando remito modelo para desarrollo offline.");
-      return "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.jpg";
+      return "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp";
     }
     if (bytes == null || bytes.length == 0) {
       log.warn("No se puede subir un archivo vacío a S3.");
@@ -39,14 +39,15 @@ public class SupabaseS3StorageAdapter implements StoragePort {
     }
 
     try {
-      String extension = ".jpg";
+      String extension = ".webp";
       if (originalFilename != null && originalFilename.contains(".")) {
         extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
       }
 
-      String filename =
-          "entrega-" + UUID.randomUUID() + "-" + System.currentTimeMillis() + extension;
-      String mime = (contentType != null && !contentType.isBlank()) ? contentType : "image/jpeg";
+      // Nombre estructurado auditado: remito-{timestamp}-{shortUuid}.{ext}
+      String shortUuid = UUID.randomUUID().toString().substring(0, 8);
+      String filename = "remito-" + System.currentTimeMillis() + "-" + shortUuid + extension;
+      String mime = (contentType != null && !contentType.isBlank()) ? contentType : "image/webp";
 
       PutObjectRequest req =
           PutObjectRequest.builder().bucket(bucketName).key(filename).contentType(mime).build();

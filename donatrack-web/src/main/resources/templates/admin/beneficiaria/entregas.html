@@ -102,8 +102,8 @@
             
             <select id="filtro-estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 175px; border-radius: 6px;">
               <option value="TODOS">Todos los estados</option>
-              <option value="TRANSITO">En Tránsito 🚚</option>
-              <option value="PLANIFICADA">Planificada ⏱️</option>
+              <option value="TRANSITO">En Tránsito</option>
+              <option value="PLANIFICADA">Planificada</option>
             </select>
           </div>
 
@@ -124,27 +124,27 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                   <strong style="font-size: 1.15rem; color: #014486; font-weight: 800;" th:text="${e.codigoCorto}">#DT-3300</strong>
                   <span th:if="${e.rutaIniciada or e.estado == 'EN_TRASLADO'}" class="slds-badge slds-theme_success" style="font-size: 0.72rem; font-weight: 700;">
-                    EN TRÁNSITO 🚚
+                    EN TRÁNSITO
                   </span>
                   <span th:unless="${e.rutaIniciada or e.estado == 'EN_TRASLADO'}" class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700; color: #475569;">
-                    PLANIFICADA ⏱️
+                    PLANIFICADA
                   </span>
                 </div>
 
                 <!-- Datos Logísticos Clave -->
                 <div style="margin-bottom: 12px; font-size: 0.84rem; color: #334155;">
                   <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                    <span style="font-size: 1rem;">🚛</span>
-                    <span>Camión: <strong th:text="${e.patente}">AA123BB</strong></span>
+                    <span style="color: #64748b; font-size: 0.76rem; font-weight: 700; text-transform: uppercase;">Móvil:</span>
+                    <span><strong th:text="${e.patente}">AA123BB</strong></span>
                     <span class="slds-text-body_small slds-text-color_weak" th:text="'(' + ${e.choferNombre} + ')'"></span>
                   </div>
                   <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                    <span style="font-size: 1rem;">📍</span>
+                    <span style="color: #64748b; font-size: 0.76rem; font-weight: 700; text-transform: uppercase;">Destino:</span>
                     <span class="slds-truncate" th:text="${e.direccion}" title="Dirección de parada">Av. Santa Fe 3200</span>
                   </div>
                   <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size: 1rem;">⚖️</span>
-                    <span>Carga: <strong th:text="${e.peso} + ' kg'">85 kg</strong> <span class="slds-text-color_weak" th:text="'(' + ${e.volumen} + ' m³)'"></span></span>
+                    <span style="color: #64748b; font-size: 0.76rem; font-weight: 700; text-transform: uppercase;">Carga:</span>
+                    <span><strong th:text="${e.peso} + ' kg'">85 kg</strong> <span class="slds-text-color_weak" th:text="'(' + ${e.volumen} + ' m³)'"></span></span>
                   </div>
                 </div>
 
@@ -317,9 +317,9 @@
                 <strong id="modal-codigo" style="font-size: 1.2rem; color: #014486;">#DT-XXXX</strong>
               </div>
               <div style="font-size: 0.88rem; color: #1e293b; display: flex; flex-direction: column; gap: 4px;">
-                <div>🚛 Camión Patente: <strong id="modal-patente">AA123BB</strong> <span id="modal-chofer" class="slds-text-color_weak"></span></div>
-                <div>📍 Destino: <span id="modal-dir">Sede Comedor</span></div>
-                <div>⚖️ Carga Estimada: <strong id="modal-peso">85 kg</strong></div>
+                <div>Camión Patente: <strong id="modal-patente">AA123BB</strong> <span id="modal-chofer" class="slds-text-color_weak"></span></div>
+                <div>Destino: <span id="modal-dir">Sede Comedor</span></div>
+                <div>Carga Estimada: <strong id="modal-peso">85 kg</strong></div>
               </div>
             </div>
 
@@ -348,19 +348,13 @@
                 </div>
               </div>
 
-              <!-- URL o Enlace del Comprobante (Pre-cargado automáticamente o manual) -->
-              <div class="slds-form-element slds-m-bottom_large">
-                <label class="slds-form-element__label" for="fotoUrl" style="font-weight: 700; color: #0f172a;">
-                  URL del Comprobante Digital Firmado
-                </label>
-                <div class="slds-form-element__control">
-                  <input class="slds-input" type="text" id="fotoUrl" name="fotoUrl"
-                         value="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-verificado-app.jpg"
-                         required />
-                </div>
-                <div class="slds-form-element__help" style="font-size: 0.76rem; color: #64748b;">
-                  Se completa con la URL pública verificada en Supabase Storage (S3).
-                </div>
+              <!-- Comprobante Digital (Gestionado Automáticamente en Supabase S3) -->
+              <input type="hidden" id="fotoUrl" name="fotoUrl"
+                     value="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-verificado-app.jpeg" />
+              <div class="slds-box slds-box_x-small slds-m-bottom_medium" style="background: #f8fafc; border-color: #e2e8f0; border-radius: 8px;">
+                <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
+                  <strong>Almacenamiento Seguro S3:</strong> El comprobante se procesa y vincula automáticamente con nombre auditado (<code>remito-{timestamp}</code>). No necesitás ingresar URLs manualmente.
+                </p>
               </div>
 
               <!-- Botones Modal -->
@@ -599,7 +593,7 @@
         var link = document.getElementById('visor-link-externo');
         if (!modal || !img) return;
 
-        img.src = url || 'https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.jpg';
+        img.src = url || 'https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp';
         if (tit) tit.textContent = codigo ? ('Comprobante ' + codigo) : 'Comprobante de Entrega';
         if (sub) sub.textContent = subtitulo || 'Remito de descarga certificado en sede';
         if (link) link.href = url || '#';

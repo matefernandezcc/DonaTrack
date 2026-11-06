@@ -78,4 +78,21 @@ public class IncentivosGateway {
       return Collections.emptyList();
     }
   }
+
+  public void registrarActividad(UUID donanteId, Map<String, Object> actividad) {
+    try {
+      incentivosClient
+          .post()
+          .uri("/api/donantes/{id}/actividad", donanteId)
+          .body(actividad)
+          .retrieve()
+          .toBodilessEntity();
+      log.info("Actividad de donación registrada en incentivos para donante {}", donanteId);
+    } catch (Exception e) {
+      log.warn(
+          "No se pudo registrar actividad en incentivos para donante {}: {}",
+          donanteId,
+          e.getMessage());
+    }
+  }
 }

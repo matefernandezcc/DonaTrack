@@ -178,6 +178,11 @@ public class PublicController {
                         String fStr = f.toString();
                         if (fStr.contains("storage.donatrack.org")) {
                           String filename = fStr.substring(fStr.lastIndexOf("/") + 1);
+                          if ("remito-3300.jpg".equalsIgnoreCase(filename)) {
+                            filename = "remito-3300.webp";
+                          } else if ("remito-3200.jpg".equalsIgnoreCase(filename)) {
+                            filename = "remito-3200.webp";
+                          }
                           fotosSanitizadas.add(
                               "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/"
                                   + filename);
