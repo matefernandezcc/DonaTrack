@@ -2,101 +2,171 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
 <head>
-  <title>DonaTrack · Registrar Donación</title>
+  <title>DonaTrack · Registrar Donación Solidaria</title>
 </head>
 <body>
 
-  <span id="page-header-title">Registrar Nueva Donación de Bienes</span>
+  <span id="page-header-title">Registrar Nueva Donación Solidaria</span>
 
   <div id="main-content-slot">
-    <article class="slds-card slds-m-bottom_large">
-      <div class="slds-card__header slds-grid">
-        <header class="slds-media slds-media_center slds-has-flexi-truncate">
-          <div class="slds-media__body">
-            <h2 class="slds-card__header-title">
-              <span class="slds-text-heading_small">Carga de Recepción en Depósito DonaTrack</span>
-            </h2>
-          </div>
-        </header>
-      </div>
-      <div class="slds-card__body slds-card__body_inner">
-        <p class="slds-m-bottom_medium">
-          Al registrar la donación, se ingresa al módulo central con estado <code>RECEPCIONADA</code> y se activa inmediatamente para el proceso de matchmaking y planificación logística.
-        </p>
-
-        <form th:action="@{/app/donante/donaciones}" method="post">
-          <div class="slds-form slds-form_stacked">
-            
-            <div class="slds-form-element slds-m-bottom_small">
-              <label class="slds-form-element__label" for="descripcion">
-                <abbr class="slds-required" title="obligatorio">* </abbr>Descripción del Bien
-              </label>
-              <div class="slds-form-element__control">
-                <input class="slds-input" type="text" id="descripcion" name="descripcion"
-                       placeholder="Ej: Paquete de arroz 1kg, Campera de abrigo, etc." required />
+    <div class="slds-grid slds-gutters slds-wrap">
+      
+      <!-- Columna Principal: Formulario de Donación -->
+      <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+          <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-reward" style="background: #166534; border-radius: 6px; padding: 6px;">
+                  <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                    <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
+                  </svg>
+                </span>
               </div>
-            </div>
+              <div class="slds-media__body">
+                <h2 class="slds-card__header-title">
+                  <span class="slds-text-heading_small" style="font-weight: 800; color: #166534;">Registro de Donación Solidaria</span>
+                </h2>
+              </div>
+            </header>
+          </div>
+          <div class="slds-card__body slds-card__body_inner">
+            <p class="slds-m-bottom_medium" style="color: #475569; font-size: 0.92rem; line-height: 1.5;">
+              Ingresá el detalle de los alimentos o bienes materiales a donar. Tu aporte ingresará a la red comunitaria DonaTrack, asignándose automáticamente a una ruta logística trazable con remito y foto de recepción al pie del camión.
+            </p>
 
-            <div class="slds-grid slds-gutters_small slds-m-bottom_small">
-              <div class="slds-col slds-size_1-of-2">
-                <div class="slds-form-element">
-                  <label class="slds-form-element__label" for="cantidad">
-                    <abbr class="slds-required" title="obligatorio">* </abbr>Cantidad
+            <form th:action="@{/app/donante/donaciones}" method="post">
+              <div class="slds-form slds-form_stacked">
+                
+                <div class="slds-form-element slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="descripcion" style="font-weight: 700; color: #1e293b;">
+                    <abbr class="slds-required" title="obligatorio">* </abbr>Descripción del Bien o Alimento
                   </label>
                   <div class="slds-form-element__control">
-                    <input class="slds-input" type="number" step="0.5" id="cantidad" name="cantidad" value="10" required />
+                    <input class="slds-input" type="text" id="descripcion" name="descripcion"
+                           placeholder="Ej: Fideos secos x500g, Arroz largo fino, Campera de abrigo polar..." required />
                   </div>
                 </div>
-              </div>
-              <div class="slds-col slds-size_1-of-2">
-                <div class="slds-form-element">
-                  <label class="slds-form-element__label" for="unidadMedicion">Unidad de Medida</label>
-                  <div class="slds-form-element__control">
-                    <select class="slds-select" id="unidadMedicion" name="unidadMedicion">
-                      <option value="KILOS" selected>Kilos (kg)</option>
-                      <option value="UNIDADES">Unidades (u)</option>
-                      <option value="LITROS">Litros (l)</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <div class="slds-grid slds-gutters_small slds-m-bottom_medium">
-              <div class="slds-col slds-size_1-of-2">
-                <div class="slds-form-element">
-                  <label class="slds-form-element__label" for="subcategoria">Subcategoría</label>
-                  <div class="slds-form-element__control">
-                    <select class="slds-select" id="subcategoria" name="nombreSubcategoria">
-                      <option value="No Perecederos" selected>No Perecederos</option>
-                      <option value="Abrigo">Abrigo / Ropa</option>
-                      <option value="Higiene">Artículos de Higiene</option>
-                      <option value="Medicamentos">Medicamentos</option>
-                    </select>
+                <div class="slds-grid slds-gutters_small slds-m-bottom_small">
+                  <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="cantidad" style="font-weight: 700; color: #1e293b;">
+                        <abbr class="slds-required" title="obligatorio">* </abbr>Cantidad
+                      </label>
+                      <div class="slds-form-element__control">
+                        <input class="slds-input" type="number" step="0.5" id="cantidad" name="cantidad" value="10" min="0.5" required />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="unidadMedicion" style="font-weight: 700; color: #1e293b;">Unidad de Medida</label>
+                      <div class="slds-form-element__control">
+                        <select class="slds-select" id="unidadMedicion" name="unidadMedicion">
+                          <option value="KILOS" selected>Kilos (kg)</option>
+                          <option value="UNIDADES">Unidades (u)</option>
+                          <option value="LITROS">Litros (l)</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="slds-col slds-size_1-of-2">
-                <div class="slds-form-element">
-                  <label class="slds-form-element__label" for="esUsado">Condición del Bien</label>
-                  <div class="slds-form-element__control">
-                    <select class="slds-select" id="esUsado" name="esUsado">
-                      <option value="false" selected>Nuevo</option>
-                      <option value="true">Usado en buen estado</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <button class="slds-button slds-button_brand" type="submit">
-              Confirmar Recepción de Donación
-            </button>
+                <div class="slds-grid slds-gutters_small slds-m-bottom_medium">
+                  <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="subcategoria" style="font-weight: 700; color: #1e293b;">Categoría Solidaria</label>
+                      <div class="slds-form-element__control">
+                        <select class="slds-select" id="subcategoria" name="nombreSubcategoria">
+                          <option value="No Perecederos" selected>Alimentos No Perecederos</option>
+                          <option value="Abrigo">Abrigo / Ropa de Temporada</option>
+                          <option value="Higiene">Artículos de Higiene Personal</option>
+                          <option value="Medicamentos">Medicamentos y Primeros Auxilios</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="esUsado" style="font-weight: 700; color: #1e293b;">Condición del Bien</label>
+                      <div class="slds-form-element__control">
+                        <select class="slds-select" id="esUsado" name="esUsado">
+                          <option value="false" selected>Nuevo (Cerrado de fábrica)</option>
+                          <option value="true">Usado en perfecto estado</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
+                  <button class="slds-button slds-button_brand" type="submit" style="font-weight: 700; padding: 0 20px;">
+                    Confirmar Donación
+                  </button>
+                  <a th:href="@{/app/donante}" class="slds-button slds-button_neutral">
+                    Volver
+                  </a>
+                </div>
+              </div>
+            </form>
           </div>
-        </form>
+        </article>
       </div>
-    </article>
+
+      <!-- Columna Lateral: Información de Impacto y Trazabilidad -->
+      <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc;">
+          <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+              <div class="slds-media__body">
+                <h3 class="slds-card__header-title">
+                  <span class="slds-text-heading_small" style="font-weight: 700; color: #014486;">Transparencia & Trazabilidad</span>
+                </h3>
+              </div>
+            </header>
+          </div>
+          <div class="slds-card__body slds-card__body_inner">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; gap: 10px; align-items: flex-start;">
+                <span style="font-size: 1.3rem;">📋</span>
+                <div>
+                  <strong style="display: block; font-size: 0.88rem; color: #0f172a;">Remito Digital Automático</strong>
+                  <span style="font-size: 0.78rem; color: #64748b; line-height: 1.4; display: block;">
+                    Se genera un código de remito único (#DT-XXXX) para seguir el trayecto del camión asignado.
+                  </span>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: flex-start;">
+                <span style="font-size: 1.3rem;">📸</span>
+                <div>
+                  <strong style="display: block; font-size: 0.88rem; color: #0f172a;">Foto de Recepción en Comedor</strong>
+                  <span style="font-size: 0.78rem; color: #64748b; line-height: 1.4; display: block;">
+                    El comedor destinatario confirma la llegada subiendo una foto de la descarga firmada por sus coordinadores.
+                  </span>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: flex-start;">
+                <span style="font-size: 1.3rem;">🍲</span>
+                <div>
+                  <strong style="display: block; font-size: 0.88rem; color: #0f172a;">Conversión en Platos de Comida</strong>
+                  <span style="font-size: 0.78rem; color: #64748b; line-height: 1.4; display: block;">
+                    Cada 1 kg de alimentos no perecederos rinde aproximadamente 4 raciones de comida caliente.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+    </div>
   </div>
+
+</body>
+</html>
 
 </body>
 </html>

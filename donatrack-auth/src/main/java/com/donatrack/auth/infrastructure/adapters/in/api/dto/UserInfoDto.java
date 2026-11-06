@@ -8,6 +8,8 @@ public record UserInfoDto(
     String nombre,
     String email,
     String rol,
-    UUID personaId
+    UUID personaId,
+    String descripcion,
+    String ubicacion
 ) {}
 

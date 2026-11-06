@@ -67,5 +67,31 @@ public class AuthGateway {
         .retrieve()
         .toBodilessEntity();
   }
+
+  @SuppressWarnings("unchecked")
+  public Map<String, Object> obtenerPerfil(java.util.UUID usuarioId) {
+    try {
+      return authClient
+          .get()
+          .uri("/api/auth/perfil/{id}", usuarioId)
+          .retrieve()
+          .body(Map.class);
+    } catch (Exception e) {
+      log.error("Error al consultar perfil de usuario: {}", e.getMessage());
+      return Map.of();
+    }
+  }
+
+  public void actualizarPerfil(java.util.UUID usuarioId, String descripcion, String ubicacion) {
+    authClient
+        .put()
+        .uri("/api/auth/perfil/{id}", usuarioId)
+        .body(Map.of(
+            "descripcion", descripcion != null ? descripcion : "",
+            "ubicacion", ubicacion != null ? ubicacion : ""
+        ))
+        .retrieve()
+        .toBodilessEntity();
+  }
 }
 

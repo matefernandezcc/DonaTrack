@@ -46,6 +46,12 @@ public class JwtService {
       if (usuario.getPersonaId() != null) {
         claimsBuilder.claim("personaId", usuario.getPersonaId().toString());
       }
+      if (usuario.getDescripcion() != null) {
+        claimsBuilder.claim("descripcion", usuario.getDescripcion());
+      }
+      if (usuario.getUbicacion() != null) {
+        claimsBuilder.claim("ubicacion", usuario.getUbicacion());
+      }
 
       SignedJWT signedJWT =
           new SignedJWT(

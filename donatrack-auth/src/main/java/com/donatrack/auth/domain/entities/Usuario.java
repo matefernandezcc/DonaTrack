@@ -42,6 +42,14 @@ public class Usuario {
   @Builder.Default
   private String proveedorOAuth = "LOCAL";
 
+  @Column(name = "descripcion", length = 500)
+  @Builder.Default
+  private String descripcion = "Comprometidos con una logística solidaria eficiente y transparente.";
+
+  @Column(name = "ubicacion", length = 150)
+  @Builder.Default
+  private String ubicacion = "Buenos Aires, Argentina";
+
   @Column(name = "fecha_creacion")
   @Builder.Default
   private LocalDateTime fechaCreacion = LocalDateTime.now();

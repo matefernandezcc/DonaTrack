@@ -207,10 +207,17 @@ public class IncentivoController {
                             .PersonaDTO
                         persona = personaClient.obtenerPersona(p.getDonanteId());
                     if (persona != null) {
-                      if ("JURIDICA".equals(persona.tipo())) {
+                      if ("JURIDICA".equalsIgnoreCase(persona.tipo()) && persona.razonSocial() != null && !persona.razonSocial().isBlank()) {
                         nombreUsuario = persona.razonSocial();
                       } else {
-                        nombreUsuario = persona.nombre() + " " + persona.apellido();
+                        String n = persona.nombre() != null ? persona.nombre().trim() : "";
+                        String a = persona.apellido() != null ? persona.apellido().trim() : "";
+                        String completo = (n + " " + a).trim();
+                        if (!completo.isEmpty()) {
+                          nombreUsuario = completo;
+                        } else if (persona.razonSocial() != null && !persona.razonSocial().isBlank()) {
+                          nombreUsuario = persona.razonSocial();
+                        }
                       }
                     }
                   } catch (Exception e) {

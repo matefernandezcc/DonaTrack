@@ -70,6 +70,18 @@ public class AuthController {
     return ResponseEntity.ok(Map.of("mensaje", "Rol actualizado exitosamente a " + nuevoRol));
   }
 
+  @GetMapping("/api/auth/perfil/{id}")
+  public ResponseEntity<Map<String, Object>> obtenerPerfil(@PathVariable UUID id) {
+    return ResponseEntity.ok(authService.obtenerPerfil(id));
+  }
+
+  @PutMapping("/api/auth/perfil/{id}")
+  public ResponseEntity<Map<String, String>> actualizarPerfil(
+      @PathVariable UUID id, @RequestBody Map<String, String> body) {
+    authService.actualizarPerfil(id, body.get("descripcion"), body.get("ubicacion"));
+    return ResponseEntity.ok(Map.of("mensaje", "Perfil actualizado con éxito"));
+  }
+
   @PostMapping("/auth/token/exchange")
   public ResponseEntity<TokenResponse> exchangeCode(@Valid @RequestBody ExchangeRequest request) {
     TokenResponse response = authService.exchangeCode(request.code());

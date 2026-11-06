@@ -92,6 +92,8 @@ public class AuthService {
           map.put("rol", u.getRol().name());
           map.put("personaId", u.getPersonaId() != null ? u.getPersonaId().toString() : "");
           map.put("proveedorOAuth", u.getProveedorOAuth());
+          map.put("descripcion", u.getDescripcion() != null ? u.getDescripcion() : "Comprometidos con una logística solidaria eficiente y transparente.");
+          map.put("ubicacion", u.getUbicacion() != null ? u.getUbicacion() : "Buenos Aires, Argentina");
           map.put("fechaCreacion", u.getFechaCreacion() != null ? u.getFechaCreacion().toString() : "");
           return map;
         })
@@ -146,6 +148,32 @@ public class AuthService {
             });
   }
 
+  public void actualizarPerfil(UUID usuarioId, String descripcion, String ubicacion) {
+    Usuario usuario = usuarioRepository.findById(usuarioId)
+        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
+    if (descripcion != null && !descripcion.isBlank()) {
+      usuario.setDescripcion(descripcion.trim());
+    }
+    if (ubicacion != null && !ubicacion.isBlank()) {
+      usuario.setUbicacion(ubicacion.trim());
+    }
+    usuarioRepository.save(usuario);
+  }
+
+  public Map<String, Object> obtenerPerfil(UUID usuarioId) {
+    Usuario usuario = usuarioRepository.findById(usuarioId)
+        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
+    Map<String, Object> map = new java.util.LinkedHashMap<>();
+    map.put("id", usuario.getId().toString());
+    map.put("username", usuario.getUsername());
+    map.put("nombre", usuario.getNombre());
+    map.put("email", usuario.getEmail());
+    map.put("rol", usuario.getRol().name());
+    map.put("descripcion", usuario.getDescripcion() != null ? usuario.getDescripcion() : "Comprometidos con una logística solidaria eficiente y transparente.");
+    map.put("ubicacion", usuario.getUbicacion() != null ? usuario.getUbicacion() : "Buenos Aires, Argentina");
+    return map;
+  }
+
   public UserInfoDto construirUserInfoDto(Usuario usuario) {
     return new UserInfoDto(
         usuario.getId(),
@@ -153,7 +181,9 @@ public class AuthService {
         usuario.getNombre(),
         usuario.getEmail(),
         usuario.getRol().name(),
-        usuario.getPersonaId());
+        usuario.getPersonaId(),
+        usuario.getDescripcion() != null ? usuario.getDescripcion() : "Comprometidos con una logística solidaria eficiente y transparente.",
+        usuario.getUbicacion() != null ? usuario.getUbicacion() : "Buenos Aires, Argentina");
   }
 
   public TokenResponse construirTokenResponse(Usuario usuario) {

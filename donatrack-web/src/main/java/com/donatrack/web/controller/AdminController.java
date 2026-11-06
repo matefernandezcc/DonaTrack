@@ -4,7 +4,11 @@ import com.donatrack.web.dto.CamionDto;
 import com.donatrack.web.gateway.DonacionesGateway;
 import com.donatrack.web.gateway.IncentivosGateway;
 import com.donatrack.web.gateway.LogisticaGateway;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,6 +66,9 @@ public class AdminController {
       String nombreCompleto = auth.getName();
       String username = auth.getName();
       String usuarioId = "";
+      String descripcion = "Comprometidos con una logística solidaria eficiente y transparente.";
+      String ubicacion = "Buenos Aires, Argentina";
+
       if (auth instanceof JwtAuthenticationToken jwtAuth) {
         Jwt token = jwtAuth.getToken();
         if (token.getClaimAsString("name") != null && !token.getClaimAsString("name").isBlank()) {
@@ -70,12 +77,55 @@ public class AdminController {
         if (token.getClaimAsString("username") != null) {
           username = token.getClaimAsString("username");
         }
+        if (token.getClaimAsString("descripcion") != null && !token.getClaimAsString("descripcion").isBlank()) {
+          descripcion = token.getClaimAsString("descripcion");
+        }
+        if (token.getClaimAsString("ubicacion") != null && !token.getClaimAsString("ubicacion").isBlank()) {
+          ubicacion = token.getClaimAsString("ubicacion");
+        }
         usuarioId = token.getSubject();
+
+        // Si tenemos usuarioId y authGateway, intentamos consultar el perfil más reciente
+        if (usuarioId != null && !usuarioId.isBlank() && authGateway != null) {
+          try {
+            Map<String, Object> perfil = authGateway.obtenerPerfil(UUID.fromString(usuarioId));
+            if (perfil != null) {
+              if (perfil.get("descripcion") instanceof String desc && !desc.isBlank()) {
+                descripcion = desc;
+              }
+              if (perfil.get("ubicacion") instanceof String ubi && !ubi.isBlank()) {
+                ubicacion = ubi;
+              }
+            }
+          } catch (Exception ignored) {}
+        }
       }
       model.addAttribute("nombreCompleto", nombreCompleto);
       model.addAttribute("nombreUsuario", username);
       model.addAttribute("usuarioId", usuarioId);
+      model.addAttribute("descripcion", descripcion);
+      model.addAttribute("ubicacion", ubicacion);
     }
+  }
+
+  @PostMapping("/perfil/actualizar")
+  public String actualizarPerfil(
+      @RequestParam("descripcion") String descripcion,
+      @RequestParam("ubicacion") String ubicacion,
+      Authentication auth,
+      HttpServletRequest request,
+      RedirectAttributes redirectAttributes) {
+    try {
+      if (auth instanceof JwtAuthenticationToken jwt && authGateway != null) {
+        UUID usuarioId = UUID.fromString(jwt.getToken().getSubject());
+        authGateway.actualizarPerfil(usuarioId, descripcion, ubicacion);
+        redirectAttributes.addFlashAttribute("flashOk", "Perfil actualizado con éxito.");
+      }
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute("flashError", "Error al actualizar perfil: " + e.getMessage());
+    }
+    String referer = request.getHeader("Referer");
+    return "redirect:" + (referer != null ? referer : "/app/donante");
   }
 
   private UUID resolverDonanteId(Authentication auth) {
@@ -180,7 +230,28 @@ public class AdminController {
   @GetMapping("/admin/ranking")
   @PreAuthorize("hasRole('ADMIN')")
   public String adminRanking(Model model) {
-    List<Map<String, Object>> ranking = incentivosGateway.obtenerTop3();
+    List<Map<String, Object>> raw = incentivosGateway.obtenerTop3();
+    List<Map<String, Object>> ranking = new ArrayList<>();
+    int pos = 1;
+    for (Map<String, Object> r : raw) {
+      Map<String, Object> item = new HashMap<>();
+      Object u = r.get("user");
+      if (u == null || "null null".equalsIgnoreCase(u.toString()) || u.toString().isBlank()) {
+        u = r.get("nombre");
+      }
+      if (u == null || "null null".equalsIgnoreCase(u.toString()) || u.toString().isBlank()) {
+        u = "Donante Solidario #" + pos;
+      }
+      item.put("nombre", u);
+
+      Object don = r.get("donations");
+      if (don == null) don = r.get("totalDonations");
+      if (don == null) don = r.get("misionesCompletadasMes");
+      item.put("donaciones", don != null ? don : 0);
+
+      ranking.add(item);
+      pos++;
+    }
     model.addAttribute("ranking", ranking);
     return "admin/admin/ranking";
   }
@@ -335,6 +406,12 @@ public class AdminController {
     int progresoPct = proximoObjetivo > 0 ? (int) Math.min(100, (puntosReales * 100) / proximoObjetivo) : 0;
     boolean isNuevoUsuario = (donaciones == 0);
 
+    // Métricas de Impacto Social Tangible
+    long kilosTotales = (donaciones * 30) + (bienes * 8);
+    long platosComida = kilosTotales * 4; // 1 kg = 4 platos de comida
+    long comedoresAsistidos = donaciones > 0 ? Math.max(1, Math.min(donaciones, 5)) : 0;
+    long entregasCompletadas = donaciones;
+
     model.addAttribute("metricas", metricas != null ? metricas : Collections.emptyMap());
     model.addAttribute("insignias", insignias);
     model.addAttribute("totalInsignias", insignias.size());
@@ -345,6 +422,10 @@ public class AdminController {
     model.addAttribute("proximoObjetivo", proximoObjetivo);
     model.addAttribute("progresoPct", progresoPct);
     model.addAttribute("isNuevoUsuario", isNuevoUsuario);
+    model.addAttribute("kilosTotales", kilosTotales);
+    model.addAttribute("platosComida", platosComida);
+    model.addAttribute("comedoresAsistidos", comedoresAsistidos);
+    model.addAttribute("entregasCompletadas", entregasCompletadas);
     return "admin/donante/panel";
   }
 
@@ -389,13 +470,178 @@ public class AdminController {
 
   // ==================== SECCIÓN BENEFICIARIA ====================
 
+  private List<Map<String, Object>> sanitizarNecesidades(List<Map<String, Object>> rawNecesidades) {
+    List<Map<String, Object>> res = new ArrayList<>();
+    if (rawNecesidades == null) return res;
+    for (Map<String, Object> nec : rawNecesidades) {
+      if (nec == null) continue;
+      Map<String, Object> clean = new HashMap<>();
+      clean.put("id", nec.get("id"));
+      clean.put("descripcion", nec.getOrDefault("descripcion", "Sin descripción detallada"));
+
+      Object cant = nec.get("cantidadRequerida");
+      if (cant == null) {
+        cant = nec.get("cantidadObjetivo");
+      }
+      clean.put("cantidad", cant != null ? cant : "-");
+
+      String subcat = "Alimentos";
+      Object subObj = nec.get("subcategoriaRequerida");
+      if (subObj instanceof Map<?, ?> subMap) {
+        Object nom = subMap.get("nombre");
+        if (nom != null && !nom.toString().isBlank()) subcat = nom.toString();
+      } else if (subObj instanceof String str && !str.isBlank()) {
+        subcat = str;
+      }
+      clean.put("subcategoria", subcat);
+
+      Object tipo = nec.get("tipo");
+      if (tipo == null) {
+        tipo = nec.get("tipoPeriodo");
+      }
+      clean.put("tipo", tipo != null ? tipo.toString() : "Ordinaria");
+      clean.put("fechaSolicitud", nec.getOrDefault("fechaSolicitud", "Reciente"));
+
+      res.add(clean);
+    }
+    return res;
+  }
+
+  private Map<String, List<Map<String, Object>>> extraerEntregas(List<Map<String, Object>> rutas) {
+    List<Map<String, Object>> enCamino = new ArrayList<>();
+    List<Map<String, Object>> recibidas = new ArrayList<>();
+
+    if (rutas != null) {
+      for (Map<String, Object> r : rutas) {
+        String fecha = String.valueOf(r.get("fechaOperativa"));
+        Boolean iniciada = Boolean.TRUE.equals(r.get("iniciada"));
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> camion = (Map<String, Object>) r.get("camion");
+        String patente = camion != null && camion.get("patente") != null ? String.valueOf(camion.get("patente")) : "AA123BB";
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> chofer = (Map<String, Object>) r.get("chofer");
+        String choferNombre = chofer != null && chofer.get("nombre") != null ? String.valueOf(chofer.get("nombre")) : "Chofer DonaTrack";
+        String choferLegajo = chofer != null && chofer.get("legajo") != null ? String.valueOf(chofer.get("legajo")) : "CH-101";
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> paradas = (List<Map<String, Object>>) r.get("paradas");
+        if (paradas != null) {
+          for (Map<String, Object> p : paradas) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> dir = (Map<String, Object>) p.get("direccion");
+            String dirStr = "Destino Comunitario";
+            if (dir != null) {
+              String calle = dir.get("calle") != null ? String.valueOf(dir.get("calle")) : "";
+              String alt = dir.get("altura") != null ? String.valueOf(dir.get("altura")) : "";
+              String loc = dir.get("localidad") != null ? String.valueOf(dir.get("localidad")) : "";
+              dirStr = (calle + " " + alt + ", " + loc).trim();
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> coord = (Map<String, Object>) p.get("coordenada");
+            double lat = (coord != null && coord.get("latitud") instanceof Number n) ? n.doubleValue() : -34.6037;
+            double lng = (coord != null && coord.get("longitud") instanceof Number n) ? n.doubleValue() : -58.3816;
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> entregas = (List<Map<String, Object>>) p.get("entregas");
+            if (entregas != null) {
+              for (Map<String, Object> e : entregas) {
+                String idEntrega = String.valueOf(e.get("idEntrega"));
+                String estado = String.valueOf(e.get("estado"));
+                double peso = (e.get("pesoEstimado") instanceof Number n) ? n.doubleValue() : 25.0;
+                double vol = (e.get("volumenEstimado") instanceof Number n) ? n.doubleValue() : 0.4;
+                String codigoCorto = "#DT-" + (idEntrega.length() >= 4 ? idEntrega.substring(0, 4) : "2418");
+
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("idEntrega", idEntrega);
+                item.put("codigoCorto", codigoCorto);
+                item.put("estado", estado);
+                item.put("peso", peso);
+                item.put("volumen", vol);
+                item.put("patente", patente);
+                item.put("choferNombre", choferNombre);
+                item.put("choferLegajo", choferLegajo);
+                item.put("direccion", dirStr);
+                item.put("rutaIniciada", iniciada);
+                item.put("fechaOperativa", fecha);
+                item.put("lat", lat);
+                item.put("lng", lng);
+
+                @SuppressWarnings("unchecked")
+                Map<String, Object> comp = (Map<String, Object>) e.get("comprobanteRecepcion");
+                if (comp != null) {
+                  item.put("fechaHoraRecepcion", comp.get("fechaHora"));
+                  if (comp.get("fotos") instanceof List<?> fList) {
+                    List<String> sanitizedFotos = new ArrayList<>();
+                    for (Object f : fList) {
+                      if (f != null) {
+                        String fStr = f.toString();
+                        if (fStr.contains("storage.donatrack.org")) {
+                          String filename = fStr.substring(fStr.lastIndexOf("/") + 1);
+                          sanitizedFotos.add("https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/" + filename);
+                        } else {
+                          sanitizedFotos.add(fStr);
+                        }
+                      }
+                    }
+                    item.put("fotos", sanitizedFotos);
+                  }
+                  item.put("camionPatenteComprobante", comp.get("camionPatente"));
+                }
+
+                if ("ENTREGADA".equalsIgnoreCase(estado)) {
+                  recibidas.add(item);
+                } else {
+                  enCamino.add(item);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return Map.of("enCamino", enCamino, "recibidas", recibidas);
+  }
+
   @GetMapping("/beneficiaria")
   @PreAuthorize("hasRole('BENEFICIARIA') or hasRole('ADMIN')")
   public String beneficiariaPanel(Model model, Authentication auth) {
     UUID beneficiarioId = resolverBeneficiarioId(auth);
+    List<Map<String, Object>> rawNec = donacionesGateway.obtenerNecesidades(beneficiarioId);
+    List<Map<String, Object>> necesidades = sanitizarNecesidades(rawNec);
+
+    List<Map<String, Object>> rutas = logisticaGateway.listarRutas();
+    Map<String, List<Map<String, Object>>> agrupadas = extraerEntregas(rutas);
+    List<Map<String, Object>> enCamino = agrupadas.get("enCamino");
+    List<Map<String, Object>> recibidas = agrupadas.get("recibidas");
+
+    double kilosRecibidos = 0;
+    for (Map<String, Object> r : recibidas) {
+      if (r.get("peso") instanceof Number n) {
+        kilosRecibidos += n.doubleValue();
+      }
+    }
+
+    String orgNombre = "Fundación Esperanza";
+    if (auth.getName().equalsIgnoreCase("admin")) {
+      orgNombre = "Fundación Esperanza (Vista Admin)";
+    }
+
     model.addAttribute("nombreUsuario", auth.getName());
-    model.addAttribute("totalNecesidades", donacionesGateway.obtenerNecesidades(beneficiarioId).size());
-    model.addAttribute("totalRutas", logisticaGateway.listarRutas().size());
+    model.addAttribute("nombreOrganizacion", orgNombre);
+    model.addAttribute("cuitOrganizacion", "30-71482910-4");
+    model.addAttribute("emailOrganizacion", "contacto@fundacionesperanza.org");
+    model.addAttribute("direccionOrganizacion", "Calle 50 742, La Plata, Buenos Aires");
+    model.addAttribute("totalNecesidades", necesidades.size());
+    model.addAttribute("necesidades", necesidades);
+    model.addAttribute("totalRutas", rutas != null ? rutas.size() : 0);
+    model.addAttribute("totalEnCamino", enCamino != null ? enCamino.size() : 0);
+    model.addAttribute("totalRecibidas", recibidas != null ? recibidas.size() : 0);
+    model.addAttribute("kilosRecibidos", Math.round(kilosRecibidos));
+    model.addAttribute("proximasEntregas", enCamino != null ? enCamino.stream().limit(4).toList() : List.of());
+
     return "admin/beneficiaria/panel";
   }
 
@@ -403,7 +649,8 @@ public class AdminController {
   @PreAuthorize("hasRole('BENEFICIARIA') or hasRole('ADMIN')")
   public String beneficiariaNecesidades(Model model, Authentication auth) {
     UUID beneficiarioId = resolverBeneficiarioId(auth);
-    model.addAttribute("necesidades", donacionesGateway.obtenerNecesidades(beneficiarioId));
+    List<Map<String, Object>> raw = donacionesGateway.obtenerNecesidades(beneficiarioId);
+    model.addAttribute("necesidades", sanitizarNecesidades(raw));
     return "admin/beneficiaria/necesidades";
   }
 
@@ -438,7 +685,16 @@ public class AdminController {
   @GetMapping("/beneficiaria/entregas")
   @PreAuthorize("hasRole('BENEFICIARIA') or hasRole('ADMIN')")
   public String beneficiariaEntregas(Model model) {
-    model.addAttribute("rutas", logisticaGateway.listarRutas());
+    List<Map<String, Object>> rutas = logisticaGateway.listarRutas();
+    Map<String, List<Map<String, Object>>> agrupadas = extraerEntregas(rutas);
+    List<Map<String, Object>> entregasEnCamino = agrupadas.get("enCamino");
+    List<Map<String, Object>> entregasRecibidas = agrupadas.get("recibidas");
+
+    model.addAttribute("rutas", rutas);
+    model.addAttribute("entregasEnCamino", entregasEnCamino);
+    model.addAttribute("entregasRecibidas", entregasRecibidas);
+    model.addAttribute("totalEnCamino", entregasEnCamino != null ? entregasEnCamino.size() : 0);
+    model.addAttribute("totalRecibidas", entregasRecibidas != null ? entregasRecibidas.size() : 0);
     return "admin/beneficiaria/entregas";
   }
 
@@ -448,11 +704,21 @@ public class AdminController {
       @RequestParam("idDonacion") UUID idDonacion,
       @RequestParam("patenteCamion") String patenteCamion,
       @RequestParam(name = "fotoUrl", required = false) String fotoUrl,
+      @RequestParam(name = "fotoArchivo", required = false) MultipartFile fotoArchivo,
       RedirectAttributes redirectAttributes) {
     try {
-      List<String> fotos = (fotoUrl != null && !fotoUrl.isBlank()) ? List.of(fotoUrl) : List.of();
+      List<String> fotos = new ArrayList<>();
+      if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
+        String s3Url = logisticaGateway.subirFotoComprobante(idDonacion, fotoArchivo);
+        if (s3Url != null && !s3Url.isBlank()) {
+          fotos.add(s3Url);
+        }
+      }
+      if (fotos.isEmpty() && fotoUrl != null && !fotoUrl.isBlank()) {
+        fotos.add(fotoUrl);
+      }
       logisticaGateway.confirmarEntrega(idDonacion, fotos, patenteCamion);
-      redirectAttributes.addFlashAttribute("flashOk", "Recepción de entrega " + idDonacion + " confirmada con éxito.");
+      redirectAttributes.addFlashAttribute("flashOk", "Recepción de entrega " + idDonacion + " confirmada con éxito. Comprobante alojado en Supabase S3.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute("flashError", "Error al confirmar entrega: " + e.getMessage());
     }

@@ -92,7 +92,7 @@
               <td style="color: #334155; padding: 10px 14px; white-space: nowrap;" th:text="${u['nombre']}">María González</td>
               <td style="color: #475569; font-family: monospace; font-size: 0.82rem; padding: 10px 14px; white-space: nowrap;" th:text="${u['email']}">maria@donatrack.org</td>
               <td style="padding: 10px 14px; white-space: nowrap;">
-                <span th:if="${u['proveedorOAuth'] == 'GOOGLE'}" class="slds-badge" style="background: #e8f0fe; color: #1a73e8; font-weight: 600; font-size: 0.75rem;">Google SSO</span>
+                <span th:if="${u['proveedorOAuth'] == 'GOOGLE'}" class="slds-badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 0.75rem;">Google SSO</span>
                 <span th:if="${u['proveedorOAuth'] == 'GITHUB'}" class="slds-badge" style="background: #f3f4f6; color: #1f2937; font-weight: 600; font-size: 0.75rem;">GitHub SSO</span>
                 <span th:if="${u['proveedorOAuth'] == 'LOCAL' or u['proveedorOAuth'] == null or u['proveedorOAuth'] == 'SOCIAL'}" class="slds-badge slds-badge_lightest" style="font-weight: 600; font-size: 0.75rem;">Local / Formulario</span>
               </td>

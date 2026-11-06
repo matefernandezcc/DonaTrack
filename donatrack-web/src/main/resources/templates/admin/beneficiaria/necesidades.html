@@ -107,10 +107,10 @@
           <tbody>
             <tr class="slds-hint-parent" th:each="n : ${necesidades}">
               <th scope="row"><div class="slds-truncate" th:text="${n.descripcion}">Leche para merendero</div></th>
-              <td><div class="slds-truncate" th:text="${n.cantidadRequerida != null ? n.cantidadRequerida : (n.cantidadObjetivo != null ? n.cantidadObjetivo : '-')}">100.0</div></td>
-              <td><div class="slds-truncate" th:text="${n.subcategoriaRequerida != null ? n.subcategoriaRequerida.nombre : 'Alimentos'}">Alimentos</div></td>
+              <td><div class="slds-truncate" th:text="${n.cantidad}">100.0</div></td>
+              <td><div class="slds-truncate" th:text="${n.subcategoria}">Alimentos</div></td>
               <td>
-                <span class="slds-badge slds-badge_lightest" th:text="${n.tipo != null ? n.tipo : (n.tipoPeriodo != null ? n.tipoPeriodo : 'Ordinaria')}">Extraordinaria</span>
+                <span class="slds-badge slds-badge_lightest" th:text="${n.tipo}">Extraordinaria</span>
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(necesidades)}">

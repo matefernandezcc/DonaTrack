@@ -20,9 +20,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.donatrack.logistica.application.ports.out.StoragePort;
 
 @RestController
 @RequestMapping("/api")
@@ -41,6 +46,9 @@ public class LogisticaController {
   private final ProcesarPlanificacionesPendientesUseCase planificacionUseCase;
   private final ProcesarCallbackPlanificacionUseCase procesarCallbackPlanificacionUseCase;
   private final RecepcionarDonacionListaPort recepcionarDonacionListaPort;
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private StoragePort storagePort;
 
   public LogisticaController(
       ListarItemsPendientesPort listarItemsPendientesPort,
@@ -273,6 +281,30 @@ public class LogisticaController {
       @RequestBody ConfirmarRecepcionRequest request) {
     confirmarRecepcionUseCase.procesar(idDonacion, request.getFotos(), request.getPatenteCamion());
     return ResponseEntity.ok().build();
+  }
+
+  @Operation(
+      summary = "Subir foto o comprobante a Supabase S3",
+      description = "Almacena la imagen de descarga o remito en el bucket S3 de Supabase y devuelve la URL pública.")
+  @PostMapping(value = "/entregas/{idDonacion}/fotos/subir", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<Map<String, String>> subirFotoComprobante(
+      @PathVariable UUID idDonacion,
+      @RequestParam("file") MultipartFile file) {
+    if (storagePort == null) {
+      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+          .body(Map.of("error", "Servicio de almacenamiento Supabase S3 no disponible"));
+    }
+    try {
+      String url = storagePort.subirArchivo(file.getOriginalFilename(), file.getContentType(), file.getBytes());
+      if (url == null) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of("error", "No se pudo subir la foto al bucket Supabase S3"));
+      }
+      return ResponseEntity.ok(Map.of("url", url, "idDonacion", idDonacion.toString()));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", "Error procesando archivo: " + e.getMessage()));
+    }
   }
 
   @Operation(

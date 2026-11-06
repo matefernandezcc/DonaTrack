@@ -38,6 +38,8 @@ public class WebSecurityConfig {
                         "/css/**",
                         "/js/**",
                         "/img/**",
+                        "/remitos/**",
+                        "/fotos/**",
                         "/assets/**",
                         "/favicon.svg",
                         "/actuator/**",

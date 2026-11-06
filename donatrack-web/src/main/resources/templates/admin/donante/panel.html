@@ -71,24 +71,28 @@
               <svg class="slds-icon slds-icon_xx-small slds-icon-text-default slds-m-right_xx-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#location}"></use>
               </svg>
-              Buenos Aires, Argentina · Entregas Auditadas
+              <span th:text="${ubicacion != null ? ubicacion : 'Buenos Aires, Argentina'}">Buenos Aires, Argentina</span> · Entregas Auditadas
             </p>
 
-            <p class="slds-m-top_x-small" style="font-style: italic; color: #4b5563; font-size: 0.85rem;">
-              "Comprometidos con una logística solidaria eficiente y transparente. Sic Parvis Magna 🧭"
+            <p class="slds-m-top_x-small slds-grid slds-grid_vertical-align-center" style="font-style: italic; color: #4b5563; font-size: 0.88rem; flex-wrap: wrap; gap: 6px;">
+              <span>&ldquo;<span th:text="${descripcion != null ? descripcion : 'Comprometidos con una logística solidaria eficiente y transparente.'}">Comprometidos con una logística solidaria eficiente y transparente.</span>&rdquo;</span>
+              <button type="button" onclick="abrirPerfilModal()" class="slds-button slds-button_icon slds-button_icon-border" title="Editar lema y ubicación"
+                      style="width: 24px; height: 24px; min-width: 24px; border-radius: 4px; font-size: 0.78rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; line-height: 1;">
+                ✏️
+              </button>
             </p>
           </div>
 
           <!-- Botones de Acción Principal -->
           <div class="slds-col slds-no-flex slds-m-top_xx-small" style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button type="button" onclick="abrirWelcomeModal()" class="slds-button slds-button_neutral" style="border-radius: 4px; font-weight: 600;">
-              🗺️ Guía de Inicio
+              Guía de Inicio
             </button>
             <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" style="border-radius: 4px; font-weight: 700;">
               <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
               </svg>
-              Registrar Nueva Donación
+              Nueva Donación
             </a>
           </div>
 
@@ -97,32 +101,93 @@
       </div>
     </article>
 
-    <!-- ==================== GRID PRINCIPAL: CONTENIDO GAMIFICADO ==================== -->
+    <!-- ==================== GRID PRINCIPAL ==================== -->
     <div class="slds-grid slds-gutters slds-wrap">
 
       <!-- ==================== COLUMNA IZQUIERDA (8 DE 12) ==================== -->
       <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
         
-        <!-- Tarjeta de Bienvenida & Puntos Reales (Trailhead Greeting) -->
-        <article class="slds-card slds-m-bottom_large" style="background: linear-gradient(135deg, #0176d3 0%, #032d60 100%); color: #fff; border-radius: 8px; border: none; overflow: hidden; position: relative;">
-          <div class="slds-card__body slds-p-around_large" style="position: relative; z-index: 2;">
-            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.25);">
-              <svg class="slds-icon slds-icon_xx-small" aria-hidden="true" style="fill: #fbbf24;">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
-              </svg>
-              <span th:text="${#numbers.formatInteger(puntosReales, 0, 'POINT')} + ' Puntos Solidarios Acumulados'">0 Puntos Solidarios Acumulados</span>
+        <!-- ==================== HERO DE IMPACTO SOCIAL TANGIBLE ==================== -->
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04); overflow: hidden;">
+          <div class="slds-card__body slds-p-around_large">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+              <div>
+                <span class="slds-badge" style="background: #e8f5e9; color: #166534; font-weight: 700; font-size: 0.78rem; margin-bottom: 6px; padding: 4px 10px; border-radius: 4px;">
+                  🌱 IMPACTO SOCIAL TANGIBLE
+                </span>
+                <h2 class="slds-text-heading_medium" style="font-weight: 800; color: #0f172a; font-size: 1.45rem;"
+                    th:text="'El Impacto de tus Donaciones, ' + (${nombreCompleto != null ? nombreCompleto : nombreUsuario})">
+                  El Impacto de tus Donaciones
+                </h2>
+                <p class="slds-text-body_regular slds-text-color_weak" style="max-width: 620px; font-size: 0.92rem; margin-top: 4px;">
+                  Cada donación entregada se transforma en platos calientes, abrigo y sustento real para familias que asisten a comedores comunitarios.
+                </p>
+              </div>
+              <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" style="border-radius: 4px; font-weight: 700;">
+                <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
+                </svg>
+                Donar Alimentos o Bienes
+              </a>
             </div>
 
-            <h2 class="slds-text-heading_medium" style="color: #ffffff; font-weight: 800; font-size: 1.6rem; margin-bottom: 6px;"
-                th:text="'¡Hola, ' + (${nombreCompleto != null ? nombreCompleto : nombreUsuario}) + '!'">
-              ¡Hola!
-            </h2>
-            <p th:if="${isNuevoUsuario}" style="color: #e0f2fe; font-size: 0.95rem; line-height: 1.5; max-width: 580px;">
-              ¡Bienvenido a la red comunitaria DonaTrack! Tu perfil solidario está listo. Realizá tu primera donación para sumar tus primeros 500 puntos y desbloquear tu primera insignia comunitaria.
-            </p>
-            <p th:unless="${isNuevoUsuario}" style="color: #e0f2fe; font-size: 0.95rem; line-height: 1.5; max-width: 580px;">
-              Cada entrega verificada en destino suma puntos y desbloquea insignias para tu perfil comunitario. ¡Agreguemos una nueva donación a tu registro hoy!
-            </p>
+            <!-- Grilla de 4 Métricas de Impacto Concreto -->
+            <div class="slds-grid slds-gutters_small slds-wrap" style="margin-top: 10px;">
+              
+              <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <span style="font-size: 1.4rem; display: block; margin-bottom: 4px;">🍲</span>
+                  <div style="font-weight: 800; color: #014486; font-size: clamp(1.05rem, 2.5vw, 1.25rem); line-height: 1.2; word-break: break-word;"
+                       th:text="${#numbers.formatInteger(platosComida, 0, 'POINT')} + ' raciones'">
+                    0 raciones
+                  </div>
+                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 4px; line-height: 1.2;">
+                    PLATOS DE COMIDA
+                  </span>
+                </div>
+              </div>
+
+              <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <span style="font-size: 1.4rem; display: block; margin-bottom: 4px;">⚖️</span>
+                  <div style="font-weight: 800; color: #166534; font-size: clamp(1.05rem, 2.5vw, 1.25rem); line-height: 1.2; word-break: break-word;"
+                       th:text="${#numbers.formatInteger(kilosTotales, 0, 'POINT')} + ' kg'">
+                    0 kg
+                  </div>
+                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 4px; line-height: 1.2;">
+                    ALIMENTOS DONADOS
+                  </span>
+                </div>
+              </div>
+
+              <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <span style="font-size: 1.4rem; display: block; margin-bottom: 4px;">🏠</span>
+                  <div style="font-weight: 800; color: #c2410c; font-size: clamp(1.05rem, 2.5vw, 1.25rem); line-height: 1.2; word-break: break-word;"
+                       th:text="${comedoresAsistidos} + ' comedores'">
+                    0 comedores
+                  </div>
+                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 4px; line-height: 1.2;">
+                    CENTROS ASISTIDOS
+                  </span>
+                </div>
+              </div>
+
+              <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <span style="font-size: 1.4rem; display: block; margin-bottom: 4px;">🚚</span>
+                  <div style="font-weight: 800; color: #4338ca; font-size: clamp(1.05rem, 2.5vw, 1.25rem); line-height: 1.2; word-break: break-word;"
+                       th:text="${entregasCompletadas} + ' entregas'">
+                    0 entregas
+                  </div>
+                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 4px; line-height: 1.2;">
+                    LOGÍSTICA AUDITADA
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </article>
 
@@ -166,8 +231,8 @@
               </div>
               <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-text-align_right slds-m-top_small">
                 <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" style="border-radius: 4px;"
-                   th:text="${isNuevoUsuario ? 'Comenzar Mi Primera Donación' : 'Registrar Nuevo Aporte'}">
-                  Comenzar Mi Primera Donación
+                   th:text="${isNuevoUsuario ? 'Primera Donación' : 'Nueva Donación'}">
+                  Primera Donación
                 </a>
               </div>
             </div>
@@ -200,7 +265,7 @@
             <!-- Estado Vacío cuando no tiene insignias -->
             <div th:if="${#lists.isEmpty(insignias)}" class="slds-box slds-box_small slds-theme_shade slds-text-align_center slds-p-around_large" style="border-radius: 8px; border: 1px dashed #cbd5e1;">
               <div style="font-size: 2.2rem; margin-bottom: 8px;">🏅</div>
-              <h4 style="font-weight: 700; color: #334155; margin-bottom: 4px;">Aún no tenés insignias desbloqueadas</h4>
+              <h3 style="font-weight: 700; color: #334155; font-size: 1.05rem; margin-bottom: 4px;">Aún no tenés insignias desbloqueadas</h3>
               <p class="slds-text-body_small slds-text-color_weak" style="max-width: 480px; margin: 0 auto 14px;">
                 Tus insignias se otorgan automáticamente cuando registrás donaciones y se verifican las entregas con remito digital y fotos de recepción en destino.
               </p>
@@ -221,10 +286,10 @@
                     </div>
                   </div>
                   <div>
-                    <span class="slds-badge slds-badge_lightest" style="font-size: 0.68rem; margin-bottom: 2px;">LOGRO OFICIAL</span>
-                    <h4 style="font-weight: 700; font-size: 0.88rem; color: #014486;" th:text="${insignia.nombre}">Insignia</h4>
+                    <span class="slds-badge slds-badge_lightest" style="font-size: 0.78rem; font-weight: 700; margin-bottom: 2px;">LOGRO OFICIAL</span>
+                    <h3 style="font-weight: 700; font-size: 0.95rem; color: #014486;" th:text="${insignia.nombre}">Insignia</h3>
                     <p class="slds-text-body_small slds-text-color_weak" th:text="${insignia.descripcion}">Descripción de la insignia.</p>
-                    <span class="slds-text-body_small" style="font-size: 0.72rem; color: #2e844a; font-weight: 600;" th:text="'✓ Obtenida ' + (${insignia.fechaObtencion != null ? insignia.fechaObtencion : 'Recientemente'})">2026-11-05</span>
+                    <span class="slds-text-body_small" style="font-size: 0.78rem; color: #166534; font-weight: 600;" th:text="'✓ Obtenida ' + (${insignia.fechaObtencion != null ? insignia.fechaObtencion : 'Recientemente'})">2026-11-05</span>
                   </div>
                 </div>
               </div>
@@ -317,30 +382,92 @@
           </div>
         </article>
 
-        <!-- Community Tags (Comunidad Solidaria) -->
+        <!-- Compromiso Solidario y Trazabilidad -->
         <article class="slds-card" style="border-radius: 8px; border: 1px solid #dddbda;">
           <div class="slds-card__header slds-grid">
             <header class="slds-media slds-media_center slds-has-flexi-truncate">
               <div class="slds-media__body">
                 <h2 class="slds-card__header-title">
-                  <span class="slds-text-heading_small">Etiquetas de Comunidad</span>
+                  <span class="slds-text-heading_small" style="font-weight: 700; color: #014486;">Compromiso Comunitario</span>
                 </h2>
               </div>
             </header>
           </div>
           <div class="slds-card__body slds-card__body_inner">
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <span class="slds-badge slds-theme_shade" style="padding: 6px 12px; font-weight: 700; color: #014486;">#SolidaridadActiva</span>
-              <span class="slds-badge slds-theme_shade" style="padding: 6px 12px; font-weight: 700; color: #166534;">#LogisticaTransparente</span>
-              <span class="slds-badge slds-theme_shade" style="padding: 6px 12px; font-weight: 700; color: #c2410c;">#DonanteEstrella</span>
-              <span class="slds-badge slds-theme_shade" style="padding: 6px 12px; font-weight: 700; color: #4338ca;">#ImpactoReal</span>
-              <span class="slds-badge slds-theme_shade" style="padding: 6px 12px; font-weight: 700; color: #0369a1;">#Data360</span>
+            <p class="slds-text-body_small" style="color: #475569; line-height: 1.5; margin-bottom: 12px;">
+              Como donante activo de DonaTrack, contás con trazabilidad completa de extremo a extremo: remito digital, control de pesaje y fotografía de recepción al pie del camión.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 600;">
+                <span style="color: #166534; font-weight: 800;">✓</span> Donante Verificado en Red
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 600;">
+                <span style="color: #166534; font-weight: 800;">✓</span> Auditoría Cero Faltantes
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 600;">
+                <span style="color: #166534; font-weight: 800;">✓</span> Certificados de Recepción en Destino
+              </div>
             </div>
           </div>
         </article>
 
       </div>
 
+    </div>
+
+    <!-- ==================== MODAL PARA EDITAR PERFIL ==================== -->
+    <div id="modal-editar-perfil" style="display: none;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true" style="z-index: 10001;">
+        <div class="slds-modal__container" style="max-width: 540px;">
+          <header class="slds-modal__header" style="background: #014486; color: #fff; border-top-left-radius: 8px; border-top-right-radius: 8px; position: relative;">
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="cerrarPerfilModal()" style="position: absolute; top: 12px; right: 12px; color: #fff;">
+              ✕
+              <span class="slds-assistive-text">Cerrar</span>
+            </button>
+            <h2 class="slds-modal__title slds-hyphenate" style="color: #ffffff; font-weight: 800; font-size: 1.25rem;">
+              ✏️ Modificar Lema & Ubicación
+            </h2>
+            <p style="color: #e0f2fe; font-size: 0.85rem; margin-top: 2px;">
+              Personalizá los datos públicos que identifican a tu usuario o empresa en la red solidaria.
+            </p>
+          </header>
+          <div class="slds-modal__content slds-p-around_large" style="background: #ffffff;">
+            <form th:action="@{/app/perfil/actualizar}" method="post">
+              <div class="slds-form-element slds-m-bottom_medium">
+                <label class="slds-form-element__label" for="inputUbicacion" style="font-weight: 700; color: #1e293b;">
+                  📍 Ubicación / Sede
+                </label>
+                <div class="slds-form-element__control">
+                  <input class="slds-input" type="text" id="inputUbicacion" name="ubicacion"
+                         th:value="${ubicacion != null ? ubicacion : 'Buenos Aires, Argentina'}"
+                         placeholder="Ej: Palermo, CABA o Córdoba, Argentina" required />
+                </div>
+                <div class="slds-form-element__help" style="font-size: 0.76rem; color: #64748b;">
+                  Indica tu ciudad o barrio de referencia para asignación logística.
+                </div>
+              </div>
+
+              <div class="slds-form-element slds-m-bottom_medium">
+                <label class="slds-form-element__label" for="inputDescripcion" style="font-weight: 700; color: #1e293b;">
+                  💬 Lema / Descripción Solidaria
+                </label>
+                <div class="slds-form-element__control">
+                  <textarea class="slds-textarea" id="inputDescripcion" name="descripcion" rows="3"
+                            placeholder="Contá brevemente el compromiso solidario de tu empresa o familia..."
+                            th:text="${descripcion != null ? descripcion : 'Comprometidos con una logística solidaria eficiente y transparente.'}"
+                            maxlength="450" required></textarea>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+                <button type="button" class="slds-button slds-button_neutral" onclick="cerrarPerfilModal()">Cancelar</button>
+                <button type="submit" class="slds-button slds-button_brand" style="font-weight: 700;">Guardar Cambios</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
     </div>
 
     <!-- ==================== MODAL DE BIENVENIDA / ROADMAP SOLIDARIO ==================== -->
@@ -535,6 +662,16 @@
           const modal = document.getElementById('welcome-roadmap-modal');
           if (modal) modal.style.display = 'none';
           localStorage.setItem('donatrack_welcome_seen', 'true');
+        };
+
+        window.abrirPerfilModal = function () {
+          const modal = document.getElementById('modal-editar-perfil');
+          if (modal) modal.style.display = 'block';
+        };
+
+        window.cerrarPerfilModal = function () {
+          const modal = document.getElementById('modal-editar-perfil');
+          if (modal) modal.style.display = 'none';
         };
       });
     </script>

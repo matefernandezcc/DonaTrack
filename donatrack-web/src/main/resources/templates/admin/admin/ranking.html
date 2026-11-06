@@ -38,7 +38,7 @@
                 <div class="slds-truncate" title="Donante">Donante</div>
               </th>
               <th scope="col" style="width: 40%;">
-                <div class="slds-truncate" title="Misiones Completadas">Misiones Completadas</div>
+                <div class="slds-truncate" title="Donaciones">Donaciones Completadas</div>
               </th>
             </tr>
           </thead>
@@ -50,18 +50,18 @@
                       th:text="'#' + ${iter.count}">#1</span>
               </th>
               <td>
-                <strong th:text="${pos['nombre'] != null ? pos['nombre'] : (pos['perfilDonanteId'] != null ? pos['perfilDonanteId'] : 'Donante Solidario')}">María González</strong>
+                <strong th:text="${pos['nombre']}">María González</strong>
               </td>
               <td>
-                <span class="slds-text-color_success" style="font-weight: 600;"
-                      th:text="${pos['misionesCompletadasMes'] != null ? pos['misionesCompletadasMes'] : (pos['puntaje'] != null ? pos['puntaje'] : 0)} + ' misiones'">
-                  12 misiones
+                <span class="slds-text-color_success" style="font-weight: 700;"
+                      th:text="${pos['donaciones']} + ' donaciones'">
+                  2 donaciones
                 </span>
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(ranking)}">
               <td colspan="3" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">
-                Aún no se ha consolidado el ranking del mes corriente. Los datos se actualizan automáticamente tras cada entrega completada.
+                Aún no se ha consolidado el ranking del mes.
               </td>
             </tr>
           </tbody>
@@ -69,7 +69,7 @@
       </div>
 
       <footer class="slds-card__footer slds-grid slds-grid_align-spread">
-        <span class="slds-text-body_small">Servicio de Incentivos · PostgreSQL Supabase</span>
+        <span class="slds-text-body_small">DonaTrack · Ranking Mensual</span>
         <a th:href="@{/app/admin}" class="slds-text-link">← Volver al Resumen</a>
       </footer>
     </article>

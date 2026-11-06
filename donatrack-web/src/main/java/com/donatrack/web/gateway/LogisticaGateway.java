@@ -10,8 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class LogisticaGateway {
@@ -96,5 +100,25 @@ public class LogisticaGateway {
         .body(body)
         .retrieve()
         .toBodilessEntity();
+  }
+
+  public String subirFotoComprobante(UUID idDonacion, MultipartFile file) {
+    try {
+      MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+      body.add("file", file.getResource());
+
+      Map<String, String> resp = logisticaClient
+          .post()
+          .uri("/api/entregas/{idDonacion}/fotos/subir", idDonacion)
+          .contentType(MediaType.MULTIPART_FORM_DATA)
+          .body(body)
+          .retrieve()
+          .body(new ParameterizedTypeReference<Map<String, String>>() {});
+
+      return resp != null ? resp.get("url") : null;
+    } catch (Exception e) {
+      log.error("Error al subir foto de comprobante a logistica/Supabase S3: {}", e.getMessage());
+      return null;
+    }
   }
 }

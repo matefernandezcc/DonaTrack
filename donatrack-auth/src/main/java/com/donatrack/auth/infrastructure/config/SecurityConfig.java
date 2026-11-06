@@ -89,6 +89,7 @@ public class SecurityConfig {
                         "/auth/login",
                         "/auth/register",
                         "/auth/token/exchange",
+                        "/api/auth/perfil/**",
                         "/admin/usuarios/**",
                         "/healthcheck",
                         "/actuator/**",
