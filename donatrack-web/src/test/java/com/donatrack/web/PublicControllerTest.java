@@ -27,12 +27,13 @@ class PublicControllerTest {
   @BeforeEach
   void setUp() {
     authGateway = new AuthGateway(null);
-    incentivosGateway = new IncentivosGateway(null) {
-      @Override
-      public java.util.List<java.util.Map<String, Object>> obtenerTop3() {
-        return Collections.emptyList();
-      }
-    };
+    incentivosGateway =
+        new IncentivosGateway(null) {
+          @Override
+          public java.util.List<java.util.Map<String, Object>> obtenerTop3() {
+            return Collections.emptyList();
+          }
+        };
     jwtDecoder = token -> null;
 
     LogisticaGateway logisticaGateway = new LogisticaGateway(null);
@@ -55,7 +56,8 @@ class PublicControllerTest {
   @Test
   @DisplayName("GET / debe responder 200 OK y retornar la vista pública index")
   void testIndexPublico() throws Exception {
-    mockMvc.perform(get("/"))
+    mockMvc
+        .perform(get("/"))
         .andExpect(status().isOk())
         .andExpect(view().name("public/index"))
         .andExpect(model().attributeExists("ranking"));
@@ -64,9 +66,23 @@ class PublicControllerTest {
   @Test
   @DisplayName("GET /login debe responder 200 OK y retornar la vista pública login")
   void testLoginPage() throws Exception {
-    mockMvc.perform(get("/login"))
+    mockMvc
+        .perform(get("/login"))
         .andExpect(status().isOk())
         .andExpect(view().name("public/login"));
   }
-}
 
+  @Test
+  @DisplayName(
+      "POST /api/public/chatbot debe responder 200 con respuesta de fallback cuando n8n no está conectado")
+  void testChatbotProxyFallback() throws Exception {
+    mockMvc
+        .perform(
+            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                    "/api/public/chatbot")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"mensaje\":\"hola\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.respuesta").exists());
+  }
+}

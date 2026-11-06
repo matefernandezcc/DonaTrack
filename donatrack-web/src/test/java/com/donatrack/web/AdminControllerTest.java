@@ -28,6 +28,10 @@ class AdminControllerTest {
     camionesFake = new ArrayList<>();
     camionesFake.add(new CamionDto("AA111BB", 20.0, 3.0, 4000.0));
 
+    List<com.donatrack.web.dto.ChoferDto> choferesFake = new ArrayList<>();
+    choferesFake.add(
+        new com.donatrack.web.dto.ChoferDto("CH-001", "Mario", "Bros", "+54 11 1122-3344"));
+
     LogisticaGateway logisticaGateway =
         new LogisticaGateway(null) {
           @Override
@@ -44,12 +48,29 @@ class AdminControllerTest {
           public void eliminarCamion(String patente) {
             camionesFake.removeIf(c -> c.patente().equals(patente));
           }
+
+          @Override
+          public List<com.donatrack.web.dto.ChoferDto> listarChoferes() {
+            return choferesFake;
+          }
+
+          @Override
+          public void crearChofer(com.donatrack.web.dto.ChoferDto chofer) {
+            choferesFake.add(chofer);
+          }
+
+          @Override
+          public List<java.util.Map<String, Object>> listarRutas() {
+            return List.of(
+                java.util.Map.of("id", java.util.UUID.randomUUID(), "estado", "PLANIFICADA"));
+          }
         };
 
     IncentivosGateway incentivosGateway = new IncentivosGateway(null);
     DonacionesGateway donacionesGateway = new DonacionesGateway(null);
 
-    AdminController controller = new AdminController(logisticaGateway, incentivosGateway, donacionesGateway);
+    AdminController controller =
+        new AdminController(logisticaGateway, incentivosGateway, donacionesGateway);
 
     InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
     viewResolver.setPrefix("/templates/");
@@ -59,9 +80,11 @@ class AdminControllerTest {
   }
 
   @Test
-  @DisplayName("GET /app/admin/camiones debe retornar 200 OK y la lista de camiones para SLDS Data Table")
+  @DisplayName(
+      "GET /app/admin/camiones debe retornar 200 OK y la lista de camiones para SLDS Data Table")
   void testListarCamiones() throws Exception {
-    mockMvc.perform(get("/app/admin/camiones"))
+    mockMvc
+        .perform(get("/app/admin/camiones"))
         .andExpect(status().isOk())
         .andExpect(view().name("admin/admin/camiones"))
         .andExpect(model().attributeExists("camiones"))
@@ -71,7 +94,8 @@ class AdminControllerTest {
   @Test
   @DisplayName("POST /app/admin/camiones debe registrar camión y redirigir con flash message")
   void testCrearCamion() throws Exception {
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/app/admin/camiones")
                 .param("patente", "CC999DD")
                 .param("capacidadVolumen", "30.0")
@@ -85,9 +109,47 @@ class AdminControllerTest {
   @Test
   @DisplayName("GET /app/admin/matchmaking debe retornar vista con lista de beneficiarios")
   void testMatchmaking() throws Exception {
-    mockMvc.perform(get("/app/admin/matchmaking"))
+    mockMvc
+        .perform(get("/app/admin/matchmaking"))
         .andExpect(status().isOk())
         .andExpect(view().name("admin/admin/matchmaking"))
         .andExpect(model().attributeExists("beneficiarios"));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /app/admin/choferes debe retornar 200 OK y la lista de choferes para SLDS Data Table")
+  void testListarChoferes() throws Exception {
+    mockMvc
+        .perform(get("/app/admin/choferes"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("admin/admin/choferes"))
+        .andExpect(model().attributeExists("choferes"))
+        .andExpect(model().attributeExists("nuevoChofer"));
+  }
+
+  @Test
+  @DisplayName("POST /app/admin/choferes debe registrar chofer y redirigir con flash message")
+  void testCrearChofer() throws Exception {
+    mockMvc
+        .perform(
+            post("/app/admin/choferes")
+                .param("legajo", "CH-202")
+                .param("nombre", "Laura")
+                .param("apellido", "Fernández")
+                .param("telefono", "+54 11 9988-7766"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/app/admin/choferes"))
+        .andExpect(flash().attributeExists("flashOk"));
+  }
+
+  @Test
+  @DisplayName("GET /app/admin/rutas debe retornar 200 OK y la lista de rutas operativas")
+  void testListarRutas() throws Exception {
+    mockMvc
+        .perform(get("/app/admin/rutas"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("admin/admin/rutas"))
+        .andExpect(model().attributeExists("rutas"));
   }
 }
