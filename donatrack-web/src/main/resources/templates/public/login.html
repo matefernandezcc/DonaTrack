@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
@@ -8,12 +9,12 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -340,9 +341,11 @@
       .login-wrapper {
         flex-direction: column;
       }
+
       .login-col-right {
         display: none;
       }
+
       .login-col-left {
         min-height: 100vh;
       }
@@ -350,8 +353,10 @@
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
-  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/5c26c6a8-139c-4583-925c-4c4d035857f2/scripts/c360a.min.js" async defer></script>
+  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/9ab3777e-2275-4b8b-9015-8082f174b440/scripts/c360a.min.js"
+    async defer></script>
 </head>
+
 <body>
 
   <div class="login-wrapper">
@@ -361,19 +366,23 @@
       <div class="login-card">
 
         <!-- Logo DonaTrack Package -->
-        <div class="login-logo" style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 20px;">
-          <img th:src="@{/img/package.svg}" src="/img/package.svg" alt="DonaTrack" style="width: 72px; height: 72px; object-fit: contain;" />
+        <div class="login-logo"
+          style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 20px;">
+          <img th:src="@{/img/package.svg}" src="/img/package.svg" alt="DonaTrack"
+            style="width: 72px; height: 72px; object-fit: contain;" />
           <span style="font-weight: 800; font-size: 1.25rem; color: #014486; letter-spacing: -0.5px;">DonaTrack</span>
         </div>
 
         <h1 class="login-title">Iniciar Sesión</h1>
 
         <!-- Alertas de estado -->
-        <div th:if="${loginError != null}" style="background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
+        <div th:if="${loginError != null}"
+          style="background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
           <span th:text="${loginError}">Credenciales inválidas.</span>
         </div>
 
-        <div th:if="${logoutMessage != null}" style="background-color: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
+        <div th:if="${logoutMessage != null}"
+          style="background-color: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
           <span th:text="${logoutMessage}">Sesión cerrada exitosamente.</span>
         </div>
 
@@ -382,13 +391,13 @@
           <div class="form-group">
             <label class="form-label" for="username">Usuario o Correo Electrónico</label>
             <input class="form-input" type="text" id="username" name="username" required autocomplete="username"
-                   placeholder="Ej: admin, donante, beneficiaria" />
+              placeholder="Ej: admin, donante, beneficiaria" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="password">Contraseña</label>
-            <input class="form-input" type="password" id="password" name="password" required autocomplete="current-password"
-                   placeholder="••••••••" />
+            <input class="form-input" type="password" id="password" name="password" required
+              autocomplete="current-password" placeholder="••••••••" />
           </div>
 
           <div class="form-checkbox-row">
@@ -396,7 +405,9 @@
               <input type="checkbox" name="remember" checked />
               Recordar usuario
             </label>
-            <a href="#" style="color: #0176d3; text-decoration: none;" onclick="alert('Contactá al administrador de DonaTrack para recuperar tu clave.'); return false;">¿Olvidaste tu contraseña?</a>
+            <a href="#" style="color: #0176d3; text-decoration: none;"
+              onclick="alert('Contactá al administrador de DonaTrack para recuperar tu clave.'); return false;">¿Olvidaste
+              tu contraseña?</a>
           </div>
 
           <button type="submit" class="btn-salesforce">
@@ -412,17 +423,22 @@
         <div class="sso-group">
           <a th:href="@{/oauth2/authorization/google}" class="btn-sso">
             <svg width="18" height="18" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3h3.86c2.26-2.09 3.68-5.17 3.68-9.09z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09C3.25 21.3 7.31 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.27C.46 8.24 0 10.06 0 12s.46 3.76 1.27 5.38l4-3.09z"/>
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.62l4 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+              <path fill="#4285F4"
+                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3h3.86c2.26-2.09 3.68-5.17 3.68-9.09z" />
+              <path fill="#34A853"
+                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09C3.25 21.3 7.31 24 12 24z" />
+              <path fill="#FBBC05"
+                d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.27C.46 8.24 0 10.06 0 12s.46 3.76 1.27 5.38l4-3.09z" />
+              <path fill="#EA4335"
+                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.62l4 3.09c.95-2.85 3.6-4.96 6.73-4.96z" />
             </svg>
             Google Workspace
           </a>
 
           <a th:href="@{/oauth2/authorization/github}" class="btn-sso">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#24292e">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              <path
+                d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
             GitHub Enterprise
           </a>
@@ -437,24 +453,30 @@
         </div>
 
         <!-- Acceso a Registro -->
-        <div style="margin-top: 18px; font-size: 0.85rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+        <div
+          style="margin-top: 18px; font-size: 0.85rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 14px;">
           ¿No tenés una cuenta?
-          <a th:href="@{/registro}" style="color: #0176d3; font-weight: 700; text-decoration: none;">Registrate gratis</a>
+          <a th:href="@{/registro}" style="color: #0176d3; font-weight: 700; text-decoration: none;">Registrate
+            gratis</a>
         </div>
 
       </div>
 
       <div class="login-footer">
-        © 2026 DonaTrack, Inc. Todos los derechos reservados. <a href="/" style="color: #014486; font-weight: 600; text-decoration: none;">Volver al Portal</a>
+        © 2026 DonaTrack, Inc. Todos los derechos reservados. <a href="/"
+          style="color: #014486; font-weight: 600; text-decoration: none;">Volver al Portal</a>
       </div>
     </div>
 
     <!-- ==================== COLUMNA DERECHA: INSIGHTS & HERO BANNER ==================== -->
     <div class="login-col-right">
       <div class="hero-banner-content">
-        <h2 class="hero-title" style="font-size: 2.25rem; line-height: 1.25; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 18px;">Trazabilidad, impacto y transparencia en cada entrega.</h2>
+        <h2 class="hero-title"
+          style="font-size: 2.25rem; line-height: 1.25; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 18px;">
+          Trazabilidad, impacto y transparencia en cada entrega.</h2>
         <p class="hero-description">
-          Conectamos donantes comprometidos con organizaciones comunitarias, garantizando auditoría logística en tiempo real, certificación de remitos y optimización inteligente de rutas.
+          Conectamos donantes comprometidos con organizaciones comunitarias, garantizando auditoría logística en tiempo
+          real, certificación de remitos y optimización inteligente de rutas.
         </p>
 
         <a th:href="@{/}" class="btn-hero-pill">
@@ -497,4 +519,5 @@
     }
   </script>
 </body>
+
 </html>

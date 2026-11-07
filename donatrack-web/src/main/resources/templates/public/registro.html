@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
@@ -8,12 +9,12 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -138,8 +139,10 @@
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
-  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/5c26c6a8-139c-4583-925c-4c4d035857f2/scripts/c360a.min.js" async defer></script>
+  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/9ab3777e-2275-4b8b-9015-8082f174b440/scripts/c360a.min.js"
+    async defer></script>
 </head>
+
 <body>
 
   <div class="login-wrapper">
@@ -159,7 +162,8 @@
         </p>
 
         <!-- Alerta de error -->
-        <div th:if="${registerError != null}" style="background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
+        <div th:if="${registerError != null}"
+          style="background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
           <span th:text="${registerError}">Error al registrar.</span>
         </div>
 
@@ -182,7 +186,8 @@
 
           <div class="form-group">
             <label class="form-label" for="password">Contraseña</label>
-            <input class="form-input" type="password" id="password" name="password" required minlength="4" placeholder="Al menos 4 caracteres" />
+            <input class="form-input" type="password" id="password" name="password" required minlength="4"
+              placeholder="Al menos 4 caracteres" />
           </div>
 
           <button type="submit" class="btn-salesforce">
@@ -190,7 +195,8 @@
           </button>
         </form>
 
-        <div style="margin-top: 22px; font-size: 0.82rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <div
+          style="margin-top: 22px; font-size: 0.82rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 16px;">
           ¿Ya tenés una cuenta?
           <a th:href="@{/login}" style="color: #0176d3; font-weight: 700; text-decoration: none;">Iniciar Sesión</a>
         </div>
@@ -198,7 +204,8 @@
       </div>
 
       <div style="margin-top: 20px; font-size: 0.75rem; color: #706e6b;">
-        © 2026 DonaTrack, Inc. · <a href="/" style="color: #014486; text-decoration: none; font-weight: 600;">Volver al Inicio</a>
+        © 2026 DonaTrack, Inc. · <a href="/" style="color: #014486; text-decoration: none; font-weight: 600;">Volver al
+          Inicio</a>
       </div>
     </div>
 
@@ -209,11 +216,13 @@
           Cada kilo cuenta. Cada entrega se audita.
         </h2>
         <p style="font-size: 1rem; line-height: 1.6; color: #e2e8f0; margin-bottom: 24px; max-width: 500px;">
-          Al registrarte como donante, tus aportes se miden en tiempo real con pesaje de camiones, remitos digitales y fotos en destino en comedores comunitarios.
+          Al registrarte como donante, tus aportes se miden en tiempo real con pesaje de camiones, remitos digitales y
+          fotos en destino en comedores comunitarios.
         </p>
       </div>
 
-      <div style="border-top: 1px solid rgba(255, 255, 255, 0.25); padding-top: 20px; font-size: 0.8rem; color: #cbd5e1;">
+      <div
+        style="border-top: 1px solid rgba(255, 255, 255, 0.25); padding-top: 20px; font-size: 0.8rem; color: #cbd5e1;">
         DonaTrack v2.0 · Plataforma de Logística Solidaria Auditada
       </div>
     </div>
@@ -221,5 +230,5 @@
   </div>
 
 </body>
-</html>
 
+</html>

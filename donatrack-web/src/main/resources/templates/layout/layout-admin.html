@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:fragment="layout(title, pageTitle, content, scripts)">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  th:fragment="layout(title, pageTitle, content, scripts)">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,9 +10,9 @@
 
   <!-- SOLO SLDS OFICIAL. Aislamiento estricto: Cero CSS personalizado inventado. -->
   <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/styles/salesforce-lightning-design-system.min.css" />
+    href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/styles/salesforce-lightning-design-system.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
   <style>
     /* Respaldo y garantía de visualización para navegación vertical SLDS */
@@ -21,15 +21,18 @@
         display: block !important;
       }
     }
+
     @media (max-width: 767px) {
       #admin-nav:not(.is-open) {
         display: none !important;
       }
+
       #admin-nav.is-open {
         display: block !important;
         width: 100% !important;
       }
     }
+
     /* Contenedor con scroll para tablas extensas */
     .table-scroll-container {
       overflow-x: auto;
@@ -38,28 +41,35 @@
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
-  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/5c26c6a8-139c-4583-925c-4c4d035857f2/scripts/c360a.min.js" async defer></script>
+  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/9ab3777e-2275-4b8b-9015-8082f174b440/scripts/c360a.min.js"
+    async defer></script>
 </head>
+
 <body class="slds-scope" style="background-color: #f3f3f3; min-height: 100vh;">
 
   <!-- ==================== SLDS BLUEPRINT: GLOBAL HEADER ==================== -->
   <header class="slds-global-header_container">
     <a href="#main-content" class="slds-assistive-text slds-assistive-text_focus">Saltar al contenido principal</a>
     <div class="slds-global-header slds-grid slds-grid_align-spread slds-p-horizontal_medium">
-      
+
       <!-- Brand Logo DonaTrack Package (Cajita Oficial) -->
       <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
         <!-- Botón Hamburguesa Móvil (Visible en viewport < 768px) -->
-        <button type="button" class="slds-button slds-button_icon slds-button_icon-border-filled slds-hide_medium slds-m-right_small"
-                id="admin-menu-toggle" aria-expanded="false" aria-controls="admin-nav" aria-label="Alternar menú de navegación">
+        <button type="button"
+          class="slds-button slds-button_icon slds-button_icon-border-filled slds-hide_medium slds-m-right_small"
+          id="admin-menu-toggle" aria-expanded="false" aria-controls="admin-nav"
+          aria-label="Alternar menú de navegación">
           <svg class="slds-button__icon" aria-hidden="true">
             <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rows}"></use>
           </svg>
           <span class="slds-assistive-text">Menú</span>
         </button>
-        <a th:href="@{/}" class="slds-grid slds-grid_vertical-align-center" style="text-decoration: none;" title="Volver al Inicio Público">
-          <img th:src="@{/img/package.svg}" src="/img/package.svg" alt="DonaTrack" style="width: 32px; height: 32px; display: block;" />
-          <span class="slds-text-heading_small slds-m-left_x-small" style="font-weight: 700; color: #014486; letter-spacing: -0.3px;">DonaTrack</span>
+        <a th:href="@{/}" class="slds-grid slds-grid_vertical-align-center" style="text-decoration: none;"
+          title="Volver al Inicio Público">
+          <img th:src="@{/img/package.svg}" src="/img/package.svg" alt="DonaTrack"
+            style="width: 32px; height: 32px; display: block;" />
+          <span class="slds-text-heading_small slds-m-left_x-small"
+            style="font-weight: 700; color: #014486; letter-spacing: -0.3px;">DonaTrack</span>
         </a>
         <span class="slds-badge slds-badge_lightest slds-m-left_small">Backoffice</span>
       </div>
@@ -68,10 +78,12 @@
       <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
         <div class="slds-grid slds-grid_vertical-align-center slds-m-right_medium">
           <img src="/img/package.svg"
-               th:src="@{'https://blobatar.dev/avatar/' + ${nombreUsuario != null ? nombreUsuario : #authentication.name} + '?size=32&background=circle'}"
-               alt="Avatar" style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #c9c7c5; margin-right: 8px; display: block;" />
+            th:src="@{'https://blobatar.dev/avatar/' + ${nombreUsuario != null ? nombreUsuario : #authentication.name} + '?size=32&background=circle'}"
+            alt="Avatar"
+            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #c9c7c5; margin-right: 8px; display: block;" />
           <span class="slds-text-body_regular" style="color: #444;">
-            Conectado como: <strong th:text="${nombreCompleto != null ? nombreCompleto : #authentication.name}">Usuario</strong>
+            Conectado como: <strong
+              th:text="${nombreCompleto != null ? nombreCompleto : #authentication.name}">Usuario</strong>
           </span>
         </div>
         <a th:href="@{/}" class="slds-button slds-button_neutral slds-m-right_small">Ir a Web Pública</a>
@@ -87,8 +99,9 @@
   <div class="slds-grid slds-wrap slds-m-top_xx-large" style="padding-top: 12px;">
 
     <!-- ==================== SLDS BLUEPRINT: VERTICAL NAVIGATION ==================== -->
-    <nav id="admin-nav" class="slds-nav-vertical slds-size_1-of-1 slds-medium-size_1-of-6 slds-p-around_small" aria-label="Menú de Navegación"
-         style="background-color: #ffffff; border-right: 1px solid #dddbda; min-height: calc(100vh - 60px);">
+    <nav id="admin-nav" class="slds-nav-vertical slds-size_1-of-1 slds-medium-size_1-of-6 slds-p-around_small"
+      aria-label="Menú de Navegación"
+      style="background-color: #ffffff; border-right: 1px solid #dddbda; min-height: calc(100vh - 60px);">
 
       <!-- Sección Administrador -->
       <div class="slds-nav-vertical__section" sec:authorize="hasRole('ADMIN')">
@@ -103,7 +116,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/camiones}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/admin/camiones}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#truck}"></use>
               </svg>
@@ -111,7 +125,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/choferes}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/admin/choferes}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
               </svg>
@@ -119,7 +134,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/rutas}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/admin/rutas}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
               </svg>
@@ -127,7 +143,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/ranking}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/admin/ranking}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
               </svg>
@@ -135,7 +152,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/matchmaking}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/admin/matchmaking}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#change_record_type}"></use>
               </svg>
@@ -151,7 +169,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/usuarios}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/admin/usuarios}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
               </svg>
@@ -174,7 +193,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/donante/donaciones}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/donante/donaciones}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#package}"></use>
               </svg>
@@ -182,7 +202,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/donante(tab='seguimiento')}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/donante(tab='seguimiento')}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
               </svg>
@@ -190,7 +211,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/donante(tab='causas')}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/donante(tab='causas')}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
               </svg>
@@ -205,7 +227,8 @@
         <h2 class="slds-nav-vertical__title slds-text-title_caps">Organizaciones</h2>
         <ul>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/beneficiaria}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/beneficiaria}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
               </svg>
@@ -213,7 +236,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/beneficiaria/necesidades}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/beneficiaria/necesidades}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#task}"></use>
               </svg>
@@ -221,7 +245,8 @@
             </a>
           </li>
           <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/beneficiaria/entregas}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+            <a th:href="@{/app/beneficiaria/entregas}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
               </svg>
@@ -234,10 +259,12 @@
     </nav>
 
     <!-- ==================== CONTENT BODY ==================== -->
-    <main id="main-content" class="slds-size_1-of-1 slds-medium-size_5-of-6 slds-p-around_large" tabindex="-1" style="min-width: 0; max-width: 100%; box-sizing: border-box;">
+    <main id="main-content" class="slds-size_1-of-1 slds-medium-size_5-of-6 slds-p-around_large" tabindex="-1"
+      style="min-width: 0; max-width: 100%; box-sizing: border-box;">
 
       <!-- SLDS BLUEPRINT: PAGE HEADER -->
-      <div class="slds-page-header slds-m-bottom_medium" style="border-radius: 4px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);">
+      <div class="slds-page-header slds-m-bottom_medium"
+        style="border-radius: 4px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);">
         <div class="slds-page-header__row">
           <div class="slds-page-header__col-title">
             <div class="slds-media">
@@ -258,7 +285,8 @@
       <div class="slds-notify_container slds-is-relative slds-m-bottom_medium" th:if="${flashOk != null}">
         <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
           <span class="slds-assistive-text">Éxito</span>
-          <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Éxito">
+          <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top"
+            title="Éxito">
             <svg class="slds-icon slds-icon_small" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#success}"></use>
             </svg>
@@ -267,7 +295,8 @@
             <h2 class="slds-text-heading_small" th:text="${flashOk}">Operación completada con éxito.</h2>
           </div>
           <div class="slds-notify__close">
-            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar" onclick="this.closest('.slds-notify_container').remove()">
+            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar"
+              onclick="this.closest('.slds-notify_container').remove()">
               <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
               </svg>
@@ -280,7 +309,8 @@
       <div class="slds-notify_container slds-is-relative slds-m-bottom_medium" th:if="${flashError != null}">
         <div class="slds-notify slds-notify_toast slds-theme_error" role="alert">
           <span class="slds-assistive-text">Error</span>
-          <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top" title="Error">
+          <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top"
+            title="Error">
             <svg class="slds-icon slds-icon_small" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#error}"></use>
             </svg>
@@ -289,7 +319,8 @@
             <h2 class="slds-text-heading_small" th:text="${flashError}">Ocurrió un error.</h2>
           </div>
           <div class="slds-notify__close">
-            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar" onclick="this.closest('.slds-notify_container').remove()">
+            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar"
+              onclick="this.closest('.slds-notify_container').remove()">
               <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
               </svg>
@@ -310,11 +341,11 @@
 
   <!-- Script responsive drawer y resaltado activo para navegación vertical -->
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       var toggleBtn = document.getElementById('admin-menu-toggle');
       var nav = document.getElementById('admin-nav');
       if (toggleBtn && nav) {
-        toggleBtn.addEventListener('click', function() {
+        toggleBtn.addEventListener('click', function () {
           var isOpen = nav.classList.toggle('is-open');
           toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         });
@@ -323,7 +354,7 @@
       // Resaltar automáticamente el tab vertical activo según la URL
       var currentPath = window.location.pathname;
       var links = document.querySelectorAll('.slds-nav-vertical__action');
-      links.forEach(function(link) {
+      links.forEach(function (link) {
         var href = link.getAttribute('href');
         if (href && (currentPath === href || (href !== '/app/admin' && href !== '/app/donante' && href !== '/app/beneficiaria' && currentPath.startsWith(href)))) {
           var item = link.closest('.slds-nav-vertical__item');
@@ -334,7 +365,7 @@
         }
       });
       if (!document.querySelector('.slds-nav-vertical__item.slds-is-active')) {
-        links.forEach(function(link) {
+        links.forEach(function (link) {
           var href = link.getAttribute('href');
           if (href && currentPath === href) {
             var item = link.closest('.slds-nav-vertical__item');
@@ -352,4 +383,5 @@
   <th:block th:replace="${scripts}"></th:block>
 
 </body>
+
 </html>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:fragment="layout(title, content, scripts)">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content, scripts)">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
@@ -34,8 +34,10 @@
   </script>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
-  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/5c26c6a8-139c-4583-925c-4c4d035857f2/scripts/c360a.min.js" async defer></script>
+  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/9ab3777e-2275-4b8b-9015-8082f174b440/scripts/c360a.min.js"
+    async defer></script>
 </head>
+
 <body class="dt-public">
   <header th:replace="~{fragments/public-header :: header}"></header>
 
@@ -48,7 +50,8 @@
 
   <!-- ============ CHATBOT ROUTER: SALESFORCE EMBEDDED SERVICE & N8N FALLBACK ============ -->
   <template id="n8n-chatbot-template">
-    <button class="chatbot__fab" id="chat-fab" aria-label="Abrir asistente" aria-expanded="false" aria-controls="chat-panel">
+    <button class="chatbot__fab" id="chat-fab" aria-label="Abrir asistente" aria-expanded="false"
+      aria-controls="chat-panel">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V5Z" fill="currentColor" />
       </svg>
@@ -59,7 +62,8 @@
           <span class="chatbot__avatar" aria-hidden="true">
             <svg viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10" fill="#1F9D6E" />
-              <path d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" />
+              <path d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                fill="none" />
               <circle cx="9" cy="10" r="1" fill="#fff" />
               <circle cx="15" cy="10" r="1" fill="#fff" />
             </svg>
@@ -75,16 +79,22 @@
         <div class="msg msg--bot">¡Hola! Soy el asistente virtual de DonaTrack. ¿En qué te puedo ayudar hoy?</div>
       </div>
       <div class="chatbot__chips">
-        <button class="chip" type="button" onclick="document.getElementById('chat-input').value = '¿Cómo donar?'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">¿Cómo donar?</button>
-        <button class="chip" type="button" onclick="document.getElementById('chat-input').value = 'Rastrear remito'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">Rastreo</button>
-        <button class="chip" type="button" onclick="document.getElementById('chat-input').value = 'Verificar ONG'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">Verificar ONG</button>
+        <button class="chip" type="button"
+          onclick="document.getElementById('chat-input').value = '¿Cómo donar?'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">¿Cómo
+          donar?</button>
+        <button class="chip" type="button"
+          onclick="document.getElementById('chat-input').value = 'Rastrear remito'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">Rastreo</button>
+        <button class="chip" type="button"
+          onclick="document.getElementById('chat-input').value = 'Verificar ONG'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">Verificar
+          ONG</button>
       </div>
       <form class="chatbot__form" id="chat-form">
         <label for="chat-input" class="sr-only">Escribí tu mensaje</label>
         <input id="chat-input" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
         <button type="submit" class="btn btn--primary btn--sm" aria-label="Enviar">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 11 21 3l-8 18-2-8-8-2Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round" />
+            <path d="M3 11 21 3l-8 18-2-8-8-2Z" stroke="currentColor" stroke-width="2" fill="none"
+              stroke-linejoin="round" />
           </svg>
         </button>
       </form>
@@ -92,12 +102,12 @@
   </template>
 
   <script>
-    (function() {
+    (function () {
       const hostname = window.location.hostname;
       // Salesforce activo en dominios autorizados de producción o túneles de demo
       const isSalesforceDomain = hostname.endsWith('onrender.com') ||
-                                 hostname === 'exclude-stoplight-registrar.ngrok-free.dev' ||
-                                 hostname.includes('donatrack.org');
+        hostname === 'exclude-stoplight-registrar.ngrok-free.dev' ||
+        hostname.includes('donatrack.org');
 
       function loadLocalChatbot() {
         if (document.getElementById("chat-fab")) return;
@@ -111,7 +121,7 @@
       }
 
       if (isSalesforceDomain) {
-        window.initEmbeddedMessaging = function() {
+        window.initEmbeddedMessaging = function () {
           try {
             embeddedservice_bootstrap.settings.language = 'es_AR';
             embeddedservice_bootstrap.init(
@@ -130,7 +140,7 @@
         sf.type = "text/javascript";
         sf.src = "https://be1776887191673.my.site.com/ESWChatbotDonaTrack1780800682238/assets/js/bootstrap.min.js";
         sf.onload = window.initEmbeddedMessaging;
-        sf.onerror = function() {
+        sf.onerror = function () {
           console.warn("No se pudo conectar a Salesforce, activando asistente n8n de respaldo.");
           loadLocalChatbot();
         };
@@ -149,5 +159,5 @@
   <!-- SLOT: Scripts específicos de la vista -->
   <th:block th:replace="${scripts}"></th:block>
 </body>
-</html>
 
+</html>
