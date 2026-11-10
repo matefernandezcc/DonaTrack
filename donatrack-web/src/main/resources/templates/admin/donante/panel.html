@@ -122,8 +122,9 @@
     <div class="slds-tabs_default slds-m-bottom_large" style="background: #ffffff; border-radius: 8px; border: 1px solid #dddbda; padding: 0 16px;">
       <ul class="slds-tabs_default__nav" role="tablist" style="border-bottom: none;">
         <li class="slds-tabs_default__item" th:classappend="${tabActiva == null || tabActiva == 'resumen'} ? 'slds-is-active' : ''" role="presentation">
-          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0"
-             id="tab-btn-resumen" aria-controls="tab-panel-resumen" onclick="cambiarTabDonante('resumen')"
+          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
+             th:attr="tabindex=${tabActiva == null || tabActiva == 'resumen' ? 0 : -1},aria-selected=${tabActiva == null || tabActiva == 'resumen' ? 'true' : 'false'}"
+             id="tab-btn-resumen" aria-controls="tab-panel-resumen" onclick="cambiarTabDonante('resumen', true)"
              style="font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
             <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#metrics}"></use>
@@ -132,8 +133,9 @@
           </a>
         </li>
         <li class="slds-tabs_default__item" th:classappend="${tabActiva == 'seguimiento'} ? 'slds-is-active' : ''" role="presentation">
-          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1"
-             id="tab-btn-seguimiento" aria-controls="tab-panel-seguimiento" onclick="cambiarTabDonante('seguimiento')"
+          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
+             th:attr="tabindex=${tabActiva == 'seguimiento' ? 0 : -1},aria-selected=${tabActiva == 'seguimiento' ? 'true' : 'false'}"
+             id="tab-btn-seguimiento" aria-controls="tab-panel-seguimiento" onclick="cambiarTabDonante('seguimiento', true)"
              style="font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
             <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
@@ -144,8 +146,9 @@
           </a>
         </li>
         <li class="slds-tabs_default__item" th:classappend="${tabActiva == 'causas'} ? 'slds-is-active' : ''" role="presentation">
-          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1"
-             id="tab-btn-causas" aria-controls="tab-panel-causas" onclick="cambiarTabDonante('causas')"
+          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
+             th:attr="tabindex=${tabActiva == 'causas' ? 0 : -1},aria-selected=${tabActiva == 'causas' ? 'true' : 'false'}"
+             id="tab-btn-causas" aria-controls="tab-panel-causas" onclick="cambiarTabDonante('causas', true)"
              style="font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
             <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
@@ -156,8 +159,9 @@
           </a>
         </li>
         <li class="slds-tabs_default__item" th:classappend="${tabActiva == 'directorio'} ? 'slds-is-active' : ''" role="presentation">
-          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1"
-             id="tab-btn-directorio" aria-controls="tab-panel-directorio" onclick="cambiarTabDonante('directorio')"
+          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
+             th:attr="tabindex=${tabActiva == 'directorio' ? 0 : -1},aria-selected=${tabActiva == 'directorio' ? 'true' : 'false'}"
+             id="tab-btn-directorio" aria-controls="tab-panel-directorio" onclick="cambiarTabDonante('directorio', true)"
              style="font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
             <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
@@ -477,12 +481,18 @@
 
             <!-- Contenedor del Mapa con los 3 Estados UI -->
             <div class="slds-card__body slds-p-around_none" style="position: relative; min-height: 350px;">
-              <!-- Estado de Carga: Spinner SLDS -->
-              <div id="mapa-donante-loading" class="slds-spinner_container" style="position: absolute; inset: 0; z-index: 500; background: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center;">
-                <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
-                  <span class="slds-assistive-text">Cargando ubicación de móviles...</span>
-                  <div class="slds-spinner__dot-a"></div>
-                  <div class="slds-spinner__dot-b"></div>
+              <!-- Estado de Carga: Blueprint SLDS Box Theme Shade + Spinner -->
+              <div id="mapa-donante-loading" class="slds-box slds-theme_shade slds-align_absolute-center"
+                   style="position: absolute; inset: 0; z-index: 500; min-height: 350px; background: rgba(248, 250, 252, 0.85); border: none; border-radius: 0 0 8px 8px;">
+                <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center">
+                  <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand slds-is-relative slds-m-bottom_medium">
+                    <span class="slds-assistive-text">Cargando ubicación de móviles...</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                  </div>
+                  <p class="slds-text-body_small slds-text-color_weak" style="font-weight: 600; color: #475569;">
+                    Conectando con logística en ruta...
+                  </p>
                 </div>
               </div>
 
@@ -1000,7 +1010,7 @@
             </p>
           </header>
           <div class="slds-modal__content slds-p-around_large" style="background: #ffffff;">
-            <form th:action="@{/app/perfil/actualizar}" method="post">
+            <form id="form-editar-perfil" th:action="@{/app/perfil/actualizar}" method="post">
               <div class="slds-form-element slds-m-bottom_medium">
                 <label class="slds-form-element__label" for="inputUbicacion" style="font-weight: 700; color: #1e293b;">
                   Ubicación / Sede
@@ -1029,7 +1039,7 @@
 
               <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
                 <button type="button" class="slds-button slds-button_neutral" onclick="cerrarPerfilModal()">Cancelar</button>
-                <button type="submit" class="slds-button slds-button_brand" style="font-weight: 700;">Guardar Cambios</button>
+                <button type="submit" id="btn-guardar-perfil" class="slds-button slds-button_brand" style="font-weight: 700;">Guardar Cambios</button>
               </div>
             </form>
           </div>
@@ -1289,34 +1299,60 @@
           }
         });
 
-        // ==================== CONTROL DE PESTAÑAS DEL DONANTE ====================
-        window.cambiarTabDonante = function (tabId) {
+        // ==================== CONTROL DE PESTAÑAS DEL DONANTE (FASE 2) ====================
+        window.cambiarTabDonante = function (tabId, shouldPushState) {
+          const targetTab = tabId || 'resumen';
           const tabs = ['resumen', 'seguimiento', 'causas', 'directorio'];
           tabs.forEach(function (t) {
             const panel = document.getElementById('tab-panel-' + t);
             const btn = document.getElementById('tab-btn-' + t);
+            const isActive = (t === targetTab);
             if (panel) {
-              panel.style.display = (t === tabId) ? 'block' : 'none';
+              panel.style.display = isActive ? 'block' : 'none';
             }
-            if (btn && btn.parentElement) {
-              if (t === tabId) {
-                btn.parentElement.classList.add('slds-is-active');
-                btn.setAttribute('tabindex', '0');
-              } else {
-                btn.parentElement.classList.remove('slds-is-active');
-                btn.setAttribute('tabindex', '-1');
+            if (btn) {
+              btn.setAttribute('tabindex', isActive ? '0' : '-1');
+              btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+              if (btn.parentElement) {
+                if (isActive) {
+                  btn.parentElement.classList.add('slds-is-active');
+                } else {
+                  btn.parentElement.classList.remove('slds-is-active');
+                }
               }
             }
           });
-          if (tabId === 'seguimiento' && window.refrescarMapaDonante) {
-            window.refrescarMapaDonante();
+
+          if (targetTab === 'seguimiento') {
+            if (typeof window.inicializarOMostrarMapaDonante === 'function') {
+              window.inicializarOMostrarMapaDonante();
+            } else if (typeof window.refrescarMapaDonante === 'function') {
+              window.refrescarMapaDonante();
+            }
           }
-          if (window.history && window.history.replaceState) {
+
+          if (shouldPushState) {
             const url = new URL(window.location.href);
-            url.searchParams.set('tab', tabId);
-            window.history.replaceState({}, '', url.toString());
+            if (targetTab === 'resumen') {
+              url.searchParams.delete('tab');
+            } else {
+              url.searchParams.set('tab', targetTab);
+            }
+            window.history.pushState({ tab: targetTab }, '', url.toString());
+          }
+
+          if (typeof window.sincronizarSidebarDonante === 'function') {
+            window.sincronizarSidebarDonante(targetTab);
           }
         };
+
+        // Protección de Formulario Perfil con Modal Spinner SLDS (FASE 3)
+        if (window.DonaTrackForms) {
+          DonaTrackForms.registrarProteccion(
+            document.getElementById('form-editar-perfil'),
+            document.getElementById('btn-guardar-perfil')
+          );
+        }
 
         // ==================== FILTRADO REACTIVO DE MIS DONACIONES (UX-05) ====================
         window.filtrarMisDonaciones = function () {

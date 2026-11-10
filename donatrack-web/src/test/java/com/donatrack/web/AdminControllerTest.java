@@ -27,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -190,6 +192,71 @@ class AdminControllerTest {
                   .attribute(
                       "flashError",
                       containsString("Error al actualizar perfil: Servicio no disponible")));
+    }
+
+    @Test
+    @DisplayName(
+        "populateUserAttributes desacoplado: obtiene atributos de usuario desde claims de JWT sin invocar AuthGateway")
+    void populateUserAttributes_fromJwtClaims_withoutAuthGatewayCall() throws Exception {
+      // Arrange
+      Jwt jwtCustom =
+          Jwt.withTokenValue("mock-jwt-custom")
+              .header("alg", "none")
+              .subject(UUID.randomUUID().toString())
+              .claim("name", "Lorena Gomez")
+              .claim("username", "lgomez")
+              .claim("roles", List.of("ADMIN"))
+              .claim("descripcion", "Coordinadora de Distribución Central")
+              .claim("ubicacion", "Rosario, Santa Fe")
+              .issuedAt(Instant.now())
+              .expiresAt(Instant.now().plusSeconds(3600))
+              .build();
+      JwtAuthenticationToken customAuth =
+          new JwtAuthenticationToken(
+              jwtCustom, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+
+      when(logisticaGateway.listarCamiones()).thenReturn(Collections.emptyList());
+      when(logisticaGateway.listarChoferes()).thenReturn(Collections.emptyList());
+      when(logisticaGateway.listarRutas()).thenReturn(Collections.emptyList());
+
+      // Act & Assert
+      mockMvc
+          .perform(get("/app/admin").principal(customAuth))
+          .andExpect(status().isOk())
+          .andExpect(model().attribute("nombreUsuario", "lgomez"))
+          .andExpect(model().attribute("descripcion", "Coordinadora de Distribución Central"))
+          .andExpect(model().attribute("ubicacion", "Rosario, Santa Fe"));
+
+      verifyNoInteractions(authGateway);
+    }
+
+    @Test
+    @DisplayName(
+        "POST /app/perfil/actualizar persiste en HttpSession los atributos actualizados de perfil")
+    void actualizarPerfil_persisteEnHttpSession() throws Exception {
+      // Arrange
+      MockHttpSession session = new MockHttpSession();
+      String nuevaDescripcion = "Logística humanitaria y coordinación de voluntarios";
+      String nuevaUbicacion = "Córdoba Capital, Argentina";
+
+      // Act & Assert
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .session(session)
+                  .header("Referer", "/app/admin")
+                  .param("descripcion", nuevaDescripcion)
+                  .param("ubicacion", nuevaUbicacion))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+
+      assertEquals(nuevaDescripcion, session.getAttribute("perfil_descripcion"));
+      assertEquals(nuevaUbicacion, session.getAttribute("perfil_ubicacion"));
+
+      verify(authGateway, times(1))
+          .actualizarPerfil(any(UUID.class), eq(nuevaDescripcion), eq(nuevaUbicacion));
     }
   }
 
