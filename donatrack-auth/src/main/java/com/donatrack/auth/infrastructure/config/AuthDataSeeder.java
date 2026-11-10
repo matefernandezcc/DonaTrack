@@ -52,7 +52,8 @@ public class AuthDataSeeder implements CommandLineRunner {
 
   private void seedUsuario(
       String username, String rawPassword, String nombre, String email, Rol rol, UUID personaId) {
-    if (!usuarioRepository.existsByUsername(username)) {
+    java.util.Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(username);
+    if (usuarioOpt.isEmpty()) {
       Usuario usuario =
           Usuario.builder()
               .username(username)
@@ -65,6 +66,13 @@ public class AuthDataSeeder implements CommandLineRunner {
               .build();
       usuarioRepository.save(usuario);
       log.info("Usuario seed creado: {} (Rol: {})", username, rol);
+    } else {
+      Usuario usuario = usuarioOpt.get();
+      if (usuario.getRol() != rol) {
+        usuario.setRol(rol);
+        usuarioRepository.save(usuario);
+        log.info("Usuario seed restaurado a rol canónico: {} (Rol: {})", username, rol);
+      }
     }
   }
 }

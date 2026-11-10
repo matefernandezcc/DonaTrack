@@ -328,14 +328,14 @@
             <tbody>
               <tr class="slds-hint-parent" th:each="b : ${beneficiarios}">
                 <th scope="row">
-                  <div style="font-weight: 700; color: #0f172a;" th:text="${b.nombreLegible != null ? b.nombreLegible : b.correoRepresentante}">Comedor</div>
-                  <div style="font-size: 0.7rem; color: #64748b; font-family: monospace;" th:text="${b.id}">uuid</div>
+                  <div style="font-weight: 700; color: #0f172a;" th:text="${b['nombreLegible'] != null ? b['nombreLegible'] : b['correoRepresentante']}">Comedor</div>
+                  <div style="font-size: 0.7rem; color: #64748b; font-family: monospace;" th:text="${b['id']}">uuid</div>
                 </th>
-                <td><div class="slds-truncate" th:text="${b.correoRepresentante}">representante@ong.org</div></td>
-                <td><div class="slds-truncate" th:text="${b.fechaAlta}">2026-10-30</div></td>
+                <td><div class="slds-truncate" th:text="${b['correoRepresentante']}">representante@ong.org</div></td>
+                <td><div class="slds-truncate" th:text="${b['fechaAlta']}">2026-10-30</div></td>
                 <td>
                   <div class="slds-truncate" style="max-width: 340px; font-size: 0.82rem; color: #334155;"
-                       th:text="${b.necesidadesTexto != null ? b.necesidadesTexto : (#lists.size(b.necesidadesDeclaradas) + ' necesidades')}">1 necesidad</div>
+                       th:text="${b['necesidadesTexto'] != null ? b['necesidadesTexto'] : (b['necesidadesDeclaradas'] != null ? (#lists.size(b['necesidadesDeclaradas']) + ' necesidades') : '0 necesidades')}">1 necesidad</div>
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(beneficiarios)}">

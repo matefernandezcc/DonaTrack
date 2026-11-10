@@ -776,8 +776,8 @@
               <!-- Listado de Organizaciones en Tarjetas SLDS -->
               <div id="lista-directorio-container" style="display: flex; flex-direction: column; gap: 12px;">
                 <div th:each="b : ${beneficiarios}" class="directorio-ong-card"
-                     th:with="orgNombre=${(b.nombreLegible != null ? b.nombreLegible : (b.correoRepresentante != null && #strings.contains(b.correoRepresentante, 'esperanza') ? 'Comedor Comunitario La Esperanza' : 'Organización Comunitaria Verificada'))}, correo=${b.correoRepresentante != null ? b.correoRepresentante : 'contacto@ong.org'}"
-                     th:attr="data-search=${#strings.toLowerCase(orgNombre + ' ' + correo + ' ' + (b.id != null ? b.id : ''))}"
+                     th:with="orgNombre=${(b['nombreLegible'] != null ? b['nombreLegible'] : (b['correoRepresentante'] != null && #strings.contains(b['correoRepresentante'], 'esperanza') ? 'Comedor Comunitario La Esperanza' : 'Organización Comunitaria Verificada'))}, correo=${b['correoRepresentante'] != null ? b['correoRepresentante'] : 'contacto@ong.org'}"
+                     th:attr="data-search=${#strings.toLowerCase(orgNombre + ' ' + correo + ' ' + (b['id'] != null ? b['id'] : ''))}"
                      style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                   <div style="flex: 1; min-width: 250px;">
                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
@@ -786,10 +786,10 @@
                     </div>
                     <p class="slds-text-body_small slds-text-color_weak" style="margin-top: 4px;">
                       Contacto institucional: <strong th:text="${correo}">contacto@comedor.org</strong> ·
-                      Fecha de alta: <span th:text="${b.fechaAlta != null ? b.fechaAlta : '2026-10-30'}">2026-10-30</span>
+                      Fecha de alta: <span th:text="${b['fechaAlta'] != null ? b['fechaAlta'] : '2026-10-30'}">2026-10-30</span>
                     </p>
                     <p style="font-size: 0.85rem; color: #334155; margin-top: 4px;"
-                       th:text="${b.necesidadesTexto != null ? ('Necesidades: ' + b.necesidadesTexto) : 'Recepción activa de alimentos secos y abrigo'}">
+                       th:text="${b['necesidadesTexto'] != null ? ('Necesidades: ' + b['necesidadesTexto']) : 'Recepción activa de alimentos secos y abrigo'}">
                       Necesidades: Alimentos No Perecederos
                     </p>
                   </div>
