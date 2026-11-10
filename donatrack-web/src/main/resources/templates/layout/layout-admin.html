@@ -38,6 +38,68 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
+
+    /* ========================================================
+       BOTONES DE CIERRE (X) EN MODALES - ALTO CONTRASTE Y ACCESIBILIDAD
+       ======================================================== */
+    .slds-modal__close,
+    button.slds-modal__close,
+    .dt-modal-close-btn {
+      position: absolute !important;
+      top: 12px !important;
+      right: 12px !important;
+      width: 32px !important;
+      height: 32px !important;
+      padding: 0 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      border: 1px solid rgba(0, 0, 0, 0.15) !important;
+      background: #ffffff !important;
+      color: #0f172a !important;
+      font-size: 1.15rem !important;
+      font-weight: 800 !important;
+      line-height: 1 !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+      transition: all 0.15s ease-in-out !important;
+      z-index: 10002 !important;
+      text-decoration: none !important;
+    }
+
+    .slds-modal__close span[aria-hidden="true"],
+    button.slds-modal__close span[aria-hidden="true"],
+    .dt-modal-close-btn span[aria-hidden="true"] {
+      color: inherit !important;
+      font-size: 1.15rem !important;
+      font-weight: 800 !important;
+      line-height: 1 !important;
+      display: inline-block !important;
+    }
+
+    .slds-modal__close:hover,
+    button.slds-modal__close:hover,
+    .dt-modal-close-btn:hover {
+      background: #f1f5f9 !important;
+      color: #000000 !important;
+      border-color: rgba(0, 0, 0, 0.3) !important;
+      transform: scale(1.08) !important;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .slds-modal__close:active,
+    button.slds-modal__close:active,
+    .dt-modal-close-btn:active {
+      transform: scale(0.96) !important;
+    }
+
+    .slds-modal__close:focus,
+    button.slds-modal__close:focus,
+    .dt-modal-close-btn:focus {
+      outline: 2px solid #0176d3 !important;
+      outline-offset: 2px !important;
+    }
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
