@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
+<head>
+  <title>DonaTrack · Recepción de Donación en Depósito</title>
+</head>
+<body>
+
+  <span id="page-header-title">Operatoria de Depósito · Ingreso Físico de Donaciones</span>
+
+  <div id="main-content-slot">
+
+    <!-- Mensajes Flash de Notificación -->
+    <div th:if="${flashOk != null}" class="slds-notify slds-notify_alert slds-theme_success slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+      <span class="slds-assistive-text">Éxito</span>
+      <h2 th:text="${flashOk}">Operación completada con éxito.</h2>
+    </div>
+
+    <div th:if="${flashError != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+      <span class="slds-assistive-text">Error</span>
+      <h2 th:text="${flashError}">Ocurrió un error al procesar el ingreso.</h2>
+    </div>
+
+    <div th:if="${errorForm != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+      <span class="slds-assistive-text">Error en formulario</span>
+      <h2 th:text="${errorForm}">Revise los datos ingresados en el formulario.</h2>
+    </div>
+
+    <!-- Blueprint SLDS: Tarjeta de Formulario de Recepción Física -->
+    <article class="slds-card" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-width: 860px; margin: 0 auto;">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-around_medium" style="background: #f8fafc;">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-inbox" style="background: #014486; border-radius: 6px; padding: 6px;">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#inbox}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Registro de Recepción Física en Depósito</span>
+            </h2>
+            <p class="slds-text-body_small slds-text-color_weak">
+              Ingresá la mercadería o bultos entregados presencialmente por una persona donante para su auditoría y matchmaking.
+            </p>
+          </div>
+        </header>
+        <div>
+          <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral" style="font-weight: 600;">
+            ← Ir a Matchmaking
+          </a>
+        </div>
+      </div>
+
+      <div class="slds-card__body slds-card__body_inner slds-p-around_large">
+        <form id="form-recepcion-deposito" th:action="@{/app/admin/donaciones/recepcion}" method="post">
+
+          <!-- Persona Donante Registrada -->
+          <div class="slds-form-element slds-m-bottom_medium">
+            <label class="slds-form-element__label" for="idDonante" style="font-weight: 700; color: #1e293b;">
+              <abbr class="slds-required" title="obligatorio">*</abbr> Persona Donante Registrada
+            </label>
+            <div class="slds-form-element__control">
+              <div class="slds-select_container">
+                <select class="slds-select" id="idDonante" name="idDonante" required>
+                  <option value="" disabled selected>-- Seleccioná a nombre de quién ingresa la donación --</option>
+                  <option th:each="p : ${personas}"
+                          th:value="${p.id}"
+                          th:text="${(p.nombre != null ? p.nombre : '') + ' ' + (p.apellido != null ? p.apellido : '') + ' · ' + (p.documento != null ? ('DNI/Doc: ' + p.documento) : (p.email != null ? p.email : 'Donante'))}">
+                    Juan Pérez (DNI: 12345678)
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="slds-form-element__help" style="font-size: 0.78rem; color: #64748b;">
+              La donación ingresará automáticamente a stock <code>EN_DEPOSITO</code> a nombre del donante seleccionado.
+            </div>
+          </div>
+
+          <!-- Descripción de Bienes -->
+          <div class="slds-form-element slds-m-bottom_medium">
+            <label class="slds-form-element__label" for="descripcion" style="font-weight: 700; color: #1e293b;">
+              <abbr class="slds-required" title="obligatorio">*</abbr> Descripción de los Bienes Donados
+            </label>
+            <div class="slds-form-element__control">
+              <input type="text" id="descripcion" name="descripcion" class="slds-input"
+                     placeholder="Ej: 15 Cajas de fideos secos guiseros y 10 paquetes de lentejas" required />
+            </div>
+          </div>
+
+          <!-- Grilla de 3 Columnas: Cantidad, Unidad, Subcategoría -->
+          <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_medium">
+            <!-- Cantidad -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_x-small">
+              <div class="slds-form-element">
+                <label class="slds-form-element__label" for="cantidad" style="font-weight: 700; color: #1e293b;">
+                  <abbr class="slds-required" title="obligatorio">*</abbr> Cantidad
+                </label>
+                <div class="slds-form-element__control">
+                  <input type="number" id="cantidad" name="cantidad" class="slds-input"
+                         min="0.1" step="0.1" placeholder="Ej: 25" required />
+                </div>
+              </div>
+            </div>
+
+            <!-- Unidad de Medición -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_x-small">
+              <div class="slds-form-element">
+                <label class="slds-form-element__label" for="unidadMedicion" style="font-weight: 700; color: #1e293b;">
+                  <abbr class="slds-required" title="obligatorio">*</abbr> Unidad de Medición
+                </label>
+                <div class="slds-form-element__control">
+                  <div class="slds-select_container">
+                    <select class="slds-select" id="unidadMedicion" name="unidadMedicion" required>
+                      <option value="kg" selected>Kilogramos (kg)</option>
+                      <option value="unidades">Unidades (u)</option>
+                      <option value="bultos">Bultos / Cajas</option>
+                      <option value="litros">Litros (L)</option>
+                      <option value="pares">Pares (calzado)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subcategoría -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_x-small">
+              <div class="slds-form-element">
+                <label class="slds-form-element__label" for="nombreSubcategoria" style="font-weight: 700; color: #1e293b;">
+                  <abbr class="slds-required" title="obligatorio">*</abbr> Subcategoría
+                </label>
+                <div class="slds-form-element__control">
+                  <div class="slds-select_container">
+                    <select class="slds-select" id="nombreSubcategoria" name="nombreSubcategoria" required>
+                      <option value="Alimentos No Perecederos" selected>Alimentos No Perecederos</option>
+                      <option value="Ropa y Abrigo">Ropa y Abrigo</option>
+                      <option value="Calzado">Calzado</option>
+                      <option value="Medicamentos">Medicamentos</option>
+                      <option value="Higiene y Limpieza">Higiene y Limpieza</option>
+                      <option value="Mobiliario y Equipamiento">Mobiliario y Equipamiento</option>
+                      <option value="Juguetes y Recreación">Juguetes y Recreación</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fila de Fecha de Vencimiento y Toggle de Artículo Usado -->
+          <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_large" style="align-items: center;">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_x-small">
+              <div class="slds-form-element">
+                <label class="slds-form-element__label" for="fechaVencimiento" style="font-weight: 700; color: #1e293b;">
+                  Fecha de Vencimiento <span class="slds-text-color_weak">(Requerido para perecederos / medicamentos)</span>
+                </label>
+                <div class="slds-form-element__control">
+                  <input type="date" id="fechaVencimiento" name="fechaVencimiento" class="slds-input" />
+                </div>
+              </div>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_x-small">
+              <div class="slds-form-element" style="padding-top: 18px;">
+                <label class="slds-checkbox_toggle slds-grid">
+                  <span class="slds-form-element__label slds-m-bottom_none" style="font-weight: 700; color: #1e293b; margin-right: 12px;">¿Es artículo usado o de segunda mano?</span>
+                  <input type="checkbox" name="esUsado" id="esUsado" value="true" aria-describedby="esUsado-desc" />
+                  <span id="esUsado-desc" class="slds-checkbox_faux_container" aria-live="assertive">
+                    <span class="slds-checkbox_faux"></span>
+                    <span class="slds-checkbox_on">Sí (Usado)</span>
+                    <span class="slds-checkbox_off">No (Nuevo)</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de Acción con Prevención de Doble Clic -->
+          <div class="slds-border_top slds-p-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+            <span class="slds-text-body_small slds-text-color_weak">
+              Se generará un código corto único <code>#DT-XXXX</code> al confirmar la recepción.
+            </span>
+            <div style="display: flex; gap: 10px;">
+              <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral" style="min-height: 48px; min-width: 48px;">
+                Cancelar
+              </a>
+              <button type="submit" id="btn-submit-recepcion" class="slds-button slds-button_brand" style="font-weight: 800; min-height: 48px; min-width: 160px;">
+                <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
+                </svg>
+                Confirmar Recepción
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </article>
+
+  </div>
+
+  <th:block id="page-scripts">
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('form-recepcion-deposito');
+        var submitBtn = document.getElementById('btn-submit-recepcion');
+
+        if (form && submitBtn) {
+          form.addEventListener('submit', function (e) {
+            if (submitBtn.disabled) {
+              e.preventDefault();
+              return false;
+            }
+            // Bloqueo de doble clic para prevenir submits duplicados
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Registrando en depósito...';
+            submitBtn.style.opacity = '0.75';
+            submitBtn.style.cursor = 'wait';
+          });
+        }
+      });
+    </script>
+  </th:block>
+
+</body>
+</html>

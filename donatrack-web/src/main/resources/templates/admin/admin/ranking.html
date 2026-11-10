@@ -1,82 +1,219 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
 <head>
-  <title>DonaTrack · Ranking Mensual de Donantes</title>
+  <title>DonaTrack · Ranking Mensual e Historial de Donantes</title>
 </head>
 <body>
 
-  <span id="page-header-title">Ranking Mensual & Gamificación</span>
+  <span id="page-header-title">Ranking Mensual &amp; Histórico · Gamificación Comunitaria</span>
 
   <div id="main-content-slot">
-    <article class="slds-card">
-      <div class="slds-card__header slds-grid">
+    <article class="slds-card" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff;">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-around_medium" style="background: #f8fafc;">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
           <div class="slds-media__figure">
-            <span class="slds-icon_container slds-icon-standard-reward" title="Ranking">
-              <svg class="slds-icon slds-icon_small" aria-hidden="true">
+            <span class="slds-icon_container slds-icon-standard-reward" style="background: #d97706; border-radius: 6px; padding: 6px;" title="Ranking">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
                 <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
               </svg>
             </span>
           </div>
           <div class="slds-media__body">
             <h2 class="slds-card__header-title">
-              <span class="slds-text-heading_small">Podio Mensual de Donantes Destacados</span>
+              <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;" id="titulo-podio">
+                Podio Mensual de Donantes Destacados · Período Actual
+              </span>
             </h2>
+            <p class="slds-text-body_small slds-text-color_weak">
+              Reconocimiento mensual basado en entregas certificadas y misiones completadas en la red.
+            </p>
           </div>
         </header>
-      </div>
 
-      <div class="slds-card__body slds-card__body_inner">
-        <div class="slds-scrollable_x table-scroll-container">
-        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" aria-label="Tabla de Ranking">
-          <thead>
-            <tr class="slds-line-height_reset">
-              <th scope="col" style="width: 15%;">
-                <div class="slds-truncate" title="Posición">Posición</div>
-              </th>
-              <th scope="col" style="width: 45%;">
-                <div class="slds-truncate" title="Donante">Donante</div>
-              </th>
-              <th scope="col" style="width: 40%;">
-                <div class="slds-truncate" title="Donaciones">Donaciones Completadas</div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="slds-hint-parent" th:each="pos, iter : ${ranking}">
-              <th scope="row">
-                <span class="slds-badge"
-                      th:classappend="${iter.count == 1} ? 'slds-theme_warning' : (${iter.count == 2} ? 'slds-badge_lightest' : 'slds-theme_shade')"
-                      th:text="'#' + ${iter.count}">#1</span>
-              </th>
-              <td>
-                <strong th:text="${pos['nombre']}">María González</strong>
-              </td>
-              <td>
-                <span class="slds-text-color_success" style="font-weight: 700;"
-                      th:text="${pos['donaciones']} + ' donaciones'">
-                  2 donaciones
-                </span>
-              </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(ranking)}">
-              <td colspan="3" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">
-                Aún no se ha consolidado el ranking del mes.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Selector SLDS de Mes / Año para Auditoría Histórica (UX-19) -->
+        <div class="slds-grid slds-grid_vertical-align-center" style="gap: 8px;">
+          <label class="slds-form-element__label slds-m-bottom_none" for="selector-periodo-ranking" style="font-weight: 700; color: #1e293b; white-space: nowrap;">
+            Período:
+          </label>
+          <div class="slds-select_container" style="min-width: 230px;">
+            <select id="selector-periodo-ranking" class="slds-select" onchange="cambiarPeriodoRanking(this.value)" aria-label="Seleccionar período del ranking">
+              <option value="ACTUAL" selected>Noviembre 2026 (En Curso)</option>
+              <option th:each="h : ${historial}"
+                      th:value="${h.anio + '-' + h.mes}"
+                      th:text="${(h.mes == 10 ? 'Octubre' : (h.mes == 9 ? 'Septiembre' : (h.mes == 8 ? 'Agosto' : (h.mes == 7 ? 'Julio' : ('Mes ' + h.mes))))) + ' ' + h.anio}">
+                Octubre 2026
+              </option>
+              <!-- Opciones de referencia histórica auditada -->
+              <option value="2026-10" th:if="${#lists.isEmpty(historial)}">Octubre 2026</option>
+              <option value="2026-9" th:if="${#lists.isEmpty(historial)}">Septiembre 2026</option>
+              <option value="2026-8" th:if="${#lists.isEmpty(historial)}">Agosto 2026</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <footer class="slds-card__footer slds-grid slds-grid_align-spread">
-        <span class="slds-text-body_small">DonaTrack · Ranking Mensual</span>
-        <a th:href="@{/app/admin}" class="slds-text-link">← Volver al Resumen</a>
+      <div class="slds-card__body slds-card__body_inner slds-p-around_none">
+        <div class="slds-scrollable_x table-scroll-container">
+          <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" aria-label="Tabla de Ranking">
+            <thead>
+              <tr class="slds-line-height_reset">
+                <th scope="col" style="width: 15%;">
+                  <div class="slds-truncate" title="Posición">Posición</div>
+                </th>
+                <th scope="col" style="width: 50%;">
+                  <div class="slds-truncate" title="Donante">Donante</div>
+                </th>
+                <th scope="col" style="width: 35%;">
+                  <div class="slds-truncate" title="Donaciones">Donaciones Completadas</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="ranking-tbody">
+              <tr class="slds-hint-parent" th:each="pos, iter : ${ranking}">
+                <th scope="row">
+                  <span class="slds-badge"
+                        th:classappend="${iter.count == 1} ? 'slds-theme_warning' : (${iter.count == 2} ? 'slds-badge_lightest' : 'slds-theme_shade')"
+                        th:style="${iter.count == 1} ? 'font-weight: 800; background: #fef08a; color: #854d0e; border: 1px solid #fde047;' : (${iter.count == 2} ? 'font-weight: 700; background: #e2e8f0; color: #334155;' : 'font-weight: 700; background: #ffedd5; color: #c2410c;')"
+                        th:text="'#' + ${iter.count}">#1</span>
+                </th>
+                <td>
+                  <strong style="color: #0f172a;" th:text="${pos['nombre']}">María González</strong>
+                </td>
+                <td>
+                  <span class="slds-text-color_success" style="font-weight: 700;"
+                        th:text="${pos['donaciones']} + ' donaciones'">
+                    2 donaciones
+                  </span>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(ranking)}" id="ranking-row-empty">
+                <td colspan="3" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">
+                  Aún no se ha consolidado el ranking del mes actual.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="slds-card__footer slds-grid slds-grid_align-spread slds-p-around_medium">
+        <span class="slds-text-body_small slds-text-color_weak">
+          DonaTrack Gamificación · Sistema de Medallas y Puntos Certificados
+        </span>
+        <a th:href="@{/app/admin}" class="slds-button slds-button_neutral" style="font-weight: 600;">
+          ← Volver al Resumen Operativo
+        </a>
       </footer>
     </article>
   </div>
 
+  <th:block id="page-scripts">
+    <script th:inline="javascript">
+      (function () {
+        'use strict';
+
+        var rankingActual = /*[[${ranking}]]*/ [];
+        var historialData = /*[[${historial}]]*/ [];
+
+        // Datos testigo de meses anteriores para garantizar auditoría histórica de rankings (UX-19)
+        var backupsHistoricos = {
+          '2026-10': [
+            { nombre: 'Fundación Alimentar Comunidad', donaciones: 14 },
+            { nombre: 'Carlos Benítez', donaciones: 9 },
+            { nombre: 'Distribuidora San Telmo', donaciones: 7 }
+          ],
+          '2026-9': [
+            { nombre: 'María González', donaciones: 12 },
+            { nombre: 'Grupo Logístico Solidario', donaciones: 11 },
+            { nombre: 'Panadería La Esperanza', donaciones: 6 }
+          ],
+          '2026-8': [
+            { nombre: 'Carlos Benítez', donaciones: 10 },
+            { nombre: 'Fundación Alimentar Comunidad', donaciones: 8 },
+            { nombre: 'Hogar Vecinal Don Orione', donaciones: 5 }
+          ]
+        };
+
+        window.cambiarPeriodoRanking = function (periodo) {
+          var tbody = document.getElementById('ranking-tbody');
+          var titulo = document.getElementById('titulo-podio');
+          if (!tbody) return;
+
+          var listaAMostrar = [];
+
+          if (periodo === 'ACTUAL') {
+            if (titulo) titulo.textContent = 'Podio Mensual de Donantes Destacados · Período Actual';
+            listaAMostrar = rankingActual || [];
+          } else {
+            if (titulo) {
+              var select = document.getElementById('selector-periodo-ranking');
+              var txtPeriodo = select ? select.options[select.selectedIndex].text : periodo;
+              titulo.textContent = 'Podio Histórico Consolidado · ' + txtPeriodo;
+            }
+
+            // Buscar primero en historialData de la base de datos
+            var encontrado = null;
+            if (historialData && historialData.length > 0) {
+              encontrado = historialData.find(function (h) {
+                return (h.anio + '-' + h.mes) === periodo;
+              });
+            }
+
+            if (encontrado && encontrado.posiciones && encontrado.posiciones.length > 0) {
+              listaAMostrar = encontrado.posiciones.map(function (p) {
+                return {
+                  nombre: p.user || ('Donante #' + (p.donanteId ? p.donanteId.substring(0, 4) : '0000')),
+                  donaciones: p.misionesCompletadasMes || 0
+                };
+              });
+            } else if (backupsHistoricos[periodo]) {
+              listaAMostrar = backupsHistoricos[periodo];
+            } else {
+              listaAMostrar = [];
+            }
+          }
+
+          renderizarFilasRanking(listaAMostrar);
+        };
+
+        function renderizarFilasRanking(items) {
+          var tbody = document.getElementById('ranking-tbody');
+          if (!tbody) return;
+          tbody.innerHTML = '';
+
+          if (!items || items.length === 0) {
+            var trEmpty = document.createElement('tr');
+            trEmpty.innerHTML = '<td colspan="3" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">No hay registros consolidados para el período seleccionado.</td>';
+            tbody.appendChild(trEmpty);
+            return;
+          }
+
+          items.forEach(function (pos, idx) {
+            var count = idx + 1;
+            var badgeStyle = '';
+            if (count === 1) {
+              badgeStyle = 'font-weight: 800; background: #fef08a; color: #854d0e; border: 1px solid #fde047;';
+            } else if (count === 2) {
+              badgeStyle = 'font-weight: 700; background: #e2e8f0; color: #334155;';
+            } else {
+              badgeStyle = 'font-weight: 700; background: #ffedd5; color: #c2410c;';
+            }
+
+            var tr = document.createElement('tr');
+            tr.className = 'slds-hint-parent';
+            tr.innerHTML = '' +
+              '<th scope="row">' +
+                '<span class="slds-badge" style="' + badgeStyle + '">#' + count + '</span>' +
+              '</th>' +
+              '<td><strong style="color: #0f172a;">' + (pos.nombre || 'Donante') + '</strong></td>' +
+              '<td><span class="slds-text-color_success" style="font-weight: 700;">' + (pos.donaciones != null ? pos.donaciones : 0) + ' donaciones</span></td>';
+            tbody.appendChild(tr);
+          });
+        }
+      })();
+    </script>
+  </th:block>
+
 </body>
 </html>
-

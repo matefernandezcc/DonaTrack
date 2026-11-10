@@ -1,4 +1,4 @@
-/* DonaTrack — Leaflet interactive map */
+/* DonaTrack — Leaflet interactive map con hidratación asíncrona resiliente (UX-02) */
 (function () {
   "use strict";
 
@@ -21,7 +21,8 @@
     }
   ).addTo(map);
 
-  const points = [
+  // Fallback offline predeterminado si el microservicio demora o está en reposo (Render cold-start)
+  const staticPoints = [
     {
       type: "blue",
       coords: [-34.603, -58.381],
@@ -92,6 +93,9 @@
     },
   ];
 
+  let currentPoints = staticPoints;
+  let markers = [];
+
   const modal = document.getElementById("map-modal");
   const mTitle = document.getElementById("modal-title");
   const mDesc = document.getElementById("modal-desc");
@@ -102,75 +106,95 @@
   const mMedia = document.getElementById("modal-media");
 
   const openModal = (p) => {
-    mTitle.textContent = p.title;
-    mDesc.textContent = p.desc;
-    mOrg.textContent = p.org;
-    mType.textContent = p.kind;
-    mDate.textContent = p.date;
-    mStatus.textContent = p.status;
-    mStatus.className =
-      "pill " +
-      (p.type === "orange"
-        ? "pill--orange"
-        : p.type === "blue"
-          ? "pill--blue"
-          : "pill--green");
-    if (p.image) {
-      mMedia.style.backgroundImage = p.image;
-      mMedia.style.backgroundSize = "cover";
-      mMedia.textContent = "";
-    } else {
-      mMedia.style.background = ""; // Resetea al gradiente de CSS
-      mMedia.textContent = p.emoji;
+    if (!modal) return;
+    if (mTitle) mTitle.textContent = p.title;
+    if (mDesc) mDesc.textContent = p.desc;
+    if (mOrg) mOrg.textContent = p.org;
+    if (mType) mType.textContent = p.kind;
+    if (mDate) mDate.textContent = p.date;
+    if (mStatus) {
+      mStatus.textContent = p.status;
+      mStatus.className =
+        "pill " +
+        (p.type === "orange"
+          ? "pill--orange"
+          : p.type === "blue"
+            ? "pill--blue"
+            : "pill--green");
+    }
+    if (mMedia) {
+      if (p.image) {
+        mMedia.style.backgroundImage = p.image;
+        mMedia.style.backgroundSize = "cover";
+        mMedia.textContent = "";
+      } else {
+        mMedia.style.background = ""; // Resetea al gradiente de CSS
+        mMedia.textContent = p.emoji || "📦";
+      }
     }
     modal.removeAttribute("hidden");
-    modal.showModal();
+    if (typeof modal.showModal === "function") {
+      modal.showModal();
+    }
     document.body.style.overflow = "hidden";
   };
 
   const closeModal = () => {
-    modal.close();
+    if (modal && typeof modal.close === "function") {
+      modal.close();
+    }
   };
 
-  modal.querySelectorAll("[data-close]").forEach((el) =>
-    el.addEventListener("click", closeModal)
-  );
-  modal.addEventListener("close", () => {
-    modal.setAttribute("hidden", "");
-    document.body.style.overflow = "";
-  });
+  if (modal) {
+    modal.querySelectorAll("[data-close]").forEach((el) =>
+      el.addEventListener("click", closeModal)
+    );
+    modal.addEventListener("close", () => {
+      modal.setAttribute("hidden", "");
+      document.body.style.overflow = "";
+    });
+  }
 
-  const markers = [];
-  points.forEach((p, idx) => {
-    const icon = L.divIcon({
-      className: "",
-      html: `<div class="dt-marker dt-marker--${p.type}"></div>`,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
-    });
-    const popupContent = `
-      <div style="font-family: system-ui, -apple-system, sans-serif; font-size: 13px; line-height: 1.4; min-width: 200px;">
-        <strong style="color: #0b2147; font-size: 14px; display: block; margin-bottom: 2px;">${p.title}</strong>
-        <span style="color: #64748b; font-size: 12px;">${p.org}</span>
-        <p style="margin: 8px 0; color: #334155;">${p.desc}</p>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 10px; gap: 8px;">
-          <span style="display:inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${p.type === 'blue' ? '#e0f2fe; color: #0369a1' : p.type === 'green' ? '#dcfce7; color: #15803d' : '#ffedd5; color: #c2410c'};">${p.status}</span>
-          <button type="button" class="dt-popup-modal-btn" data-point-idx="${idx}" style="background:#0b4a8f; color:#ffffff; border:none; border-radius:4px; font-size:11px; font-weight:600; padding:4px 8px; cursor:pointer;">Ver foto & acta</button>
+  function renderizarMarcadores(puntos) {
+    // Limpiar marcadores previos
+    markers.forEach((m) => map.removeLayer(m));
+    markers = [];
+    currentPoints = puntos;
+
+    puntos.forEach((p, idx) => {
+      const icon = L.divIcon({
+        className: "",
+        html: `<div class="dt-marker dt-marker--${p.type}"></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+      const popupContent = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; font-size: 13px; line-height: 1.4; min-width: 210px;">
+          <strong style="color: #0b2147; font-size: 14px; display: block; margin-bottom: 2px;">${p.title}</strong>
+          <span style="color: #64748b; font-size: 12px;">${p.org}</span>
+          <p style="margin: 8px 0; color: #334155;">${p.desc}</p>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 10px; gap: 8px;">
+            <span style="display:inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${p.type === 'blue' ? '#e0f2fe; color: #0369a1' : p.type === 'green' ? '#dcfce7; color: #15803d' : '#ffedd5; color: #c2410c'};">${p.status}</span>
+            <button type="button" class="dt-popup-modal-btn" data-point-idx="${idx}" style="background:#0b4a8f; color:#ffffff; border:none; border-radius:4px; font-size:11px; font-weight:600; padding:4px 8px; cursor:pointer;">Ver foto & acta</button>
+          </div>
         </div>
-      </div>
-    `;
-    const marker = L.marker(p.coords, { icon, title: p.title })
-      .addTo(map)
-      .bindPopup(popupContent);
-    
-    marker.on("click", () => {
-      document.querySelectorAll("[data-coord-index]").forEach(b => b.classList.remove("is-active"));
-      const linkedBtn = document.querySelector(`[data-coord-index="${idx}"]`);
-      if (linkedBtn) linkedBtn.classList.add("is-active");
+      `;
+      const marker = L.marker(p.coords, { icon, title: p.title })
+        .addTo(map)
+        .bindPopup(popupContent);
+
+      marker.on("click", () => {
+        document.querySelectorAll("[data-coord-index]").forEach(b => b.classList.remove("is-active"));
+        const linkedBtn = document.querySelector(`[data-coord-index="${idx}"]`);
+        if (linkedBtn) linkedBtn.classList.add("is-active");
+      });
+
+      markers.push(marker);
     });
-    
-    markers.push(marker);
-  });
+  }
+
+  // Render inicial inmediato con staticPoints para CERO bloqueo percibido (ADR-03)
+  renderizarMarcadores(staticPoints);
 
   // Vincular apertura del modal fotográfico desde popups
   map.on("popupopen", (e) => {
@@ -178,7 +202,7 @@
     if (btn) {
       btn.onclick = () => {
         const idx = parseInt(btn.getAttribute("data-point-idx"), 10);
-        if (points[idx]) openModal(points[idx]);
+        if (currentPoints[idx]) openModal(currentPoints[idx]);
       };
     }
   });
@@ -187,7 +211,7 @@
   document.querySelectorAll("[data-coord-index]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const idx = parseInt(btn.getAttribute("data-coord-index"), 10);
-      const p = points[idx];
+      const p = currentPoints[idx];
       if (p && markers[idx]) {
         map.flyTo(p.coords, 14, { duration: 0.8 });
         markers[idx].openPopup();
@@ -196,4 +220,45 @@
       }
     });
   });
+
+  // Hidratación Asíncrona: consultar /api/public/mapa-entregas con AbortController defensivo (2000 ms)
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 2000) : null;
+
+  fetch("/api/public/mapa-entregas", {
+    headers: { "Accept": "application/json" },
+    signal: controller ? controller.signal : undefined,
+  })
+    .then((res) => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (!res.ok) throw new Error("API pública respondió con error: " + res.status);
+      return res.json();
+    })
+    .then((data) => {
+      if (!data || !Array.isArray(data) || data.length === 0) return;
+
+      const dynamicPoints = data.map((dto) => {
+        const tipo = dto.tipo || "orange";
+        const emoji = tipo === "blue" ? "📦" : (tipo === "green" ? "🏠" : "📍");
+        return {
+          type: tipo,
+          coords: [dto.lat, dto.lng],
+          title: dto.titulo || "Punto de Entrega",
+          desc: dto.descripcion || "Lote solidario auditado en destino.",
+          org: dto.organizacion || "DonaTrack Red",
+          kind: dto.subcategoria || "Bienes",
+          date: dto.fecha || "Reciente",
+          status: dto.estado || "Auditado",
+          emoji: emoji,
+          image: dto.fotoUrl ? `url('${dto.fotoUrl}')` : null,
+        };
+      });
+
+      renderizarMarcadores(dynamicPoints);
+    })
+    .catch((err) => {
+      if (timeoutId) clearTimeout(timeoutId);
+      // Falla silenciosa y transparente: el mapa ya renderizó staticPoints resilientes
+      console.info("Mapa público usando fallback resiliente estático:", err.message);
+    });
 })();

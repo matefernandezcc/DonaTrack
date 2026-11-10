@@ -392,6 +392,8 @@ public class AdminController {
       pos++;
     }
     model.addAttribute("ranking", ranking);
+    List<Map<String, Object>> historialRankings = incentivosGateway.obtenerHistorialRankings();
+    model.addAttribute("historial", historialRankings != null ? historialRankings : Collections.emptyList());
     return "admin/admin/ranking";
   }
 
@@ -1004,6 +1006,7 @@ public class AdminController {
 
     model.addAttribute("tabActiva", tab != null ? tab.toLowerCase() : "resumen");
     model.addAttribute("misDonaciones", misDonaciones);
+    model.addAttribute("beneficiarios", beneficiarios);
     model.addAttribute("causasActivas", causasActivas);
     model.addAttribute("metricas", metricas != null ? metricas : Collections.emptyMap());
     model.addAttribute("insignias", insignias);
