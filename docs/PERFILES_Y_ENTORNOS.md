@@ -146,6 +146,21 @@ SPRING_PROFILES_ACTIVE=prod mvn spring-boot:run -pl donatrack-web
 ### Modo 4: Despliegue en Render (Producción)
 En Render, cada servicio se despliega como un servicio web Docker independiente configurando `SPRING_PROFILES_ACTIVE=prod` en las variables de entorno del panel de control. Docker Compose no interviene en Render; los contenedores leen las variables directamente del entorno del sistema operativo.
 
+### 4.1. Resumen de Comandos Rápidos (Makefile & CLI)
+
+| Acción | Comando | Descripción |
+|---|---|---|
+| **Inicializar entorno local completo** | `make setup` | Levanta DBs, RabbitMQ y ejecuta migraciones iniciales. |
+| **Bajar todos los contenedores** | `docker compose down` | Detiene y remueve los contenedores locales. |
+| **Bajar contenedores y limpiar volúmenes** | `docker compose down -v` | Resetea completamente el estado de las BDs locales. |
+| **Ejecutar todos los tests unitarios** | `mvn test` | Corre los tests de los 8 submódulos del reactor Maven. |
+| **Iniciar Web SSR en modo Local** | `make server` | Arranca `donatrack-web` en puerto 8080 con perfil local. |
+| **Iniciar Web SSR en modo Prod (Híbrido)** | `make server PROFILE=prod` | Arranca `donatrack-web` conectando a Supabase/Atlas/CloudAMQP. |
+| **Iniciar Donaciones en modo Local** | `make donaciones` | Arranca microservicio de Donaciones (puerto 8000). |
+| **Iniciar Logística en modo Local** | `make logistica` | Arranca microservicio de Logística (puerto 8002). |
+| **Iniciar Logística en modo Prod** | `make logistica PROFILE=prod` | Arranca Logística conectando a MongoDB Atlas. |
+| **Ejecutar tests de Logística** | `make test-logistica` | Corre la suite de tests unitarios de Logística. |
+
 ---
 
 ## 5. Verificación de Salud de los Servicios (`Health Checks`)
@@ -202,3 +217,4 @@ Respuesta JSON esperada (`HTTP 200 OK`):
 - [`compose.yaml`](file:///c:/Users/asus/OneDrive/Escritorio/FACULTAD%20MAX/DonaTrack/compose.yaml)
 - [Documentación Oficial de Spring Boot Externalized Configuration](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config)
 - [Documentación Oficial de Supabase Connection Pooling](https://supabase.com/docs/guides/database/connecting-to-postgres#connection-pooler)
+
