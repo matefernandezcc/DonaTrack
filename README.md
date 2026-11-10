@@ -226,7 +226,7 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 
 #### Entregables
 1. **Modelo de Clases actualizado**: [`DonaTrack-Diagrama-Clases.puml`](docs/diagramas/DonaTrack-Diagrama-Clases.puml).
-2. **Modelo de Datos (DER Físicos)**: Diagramas entidad-relación físicos por servicio en [`docs/diagramas/`](docs/diagramas/) (`DER-Donaciones`, `DER-Logistica`, `DER-Incentivos`, `DER-Notificaciones`).
+2. **Modelo de Datos (DER Físicos)**: Diagramas entidad-relación físicos por microservicio en [`docs/diagramas/`](docs/diagramas/): [`DER-Donaciones`](docs/diagramas/donaciones/DER-Donaciones.puml), [`DER-Incentivos`](docs/diagramas/incentivos/DER-Incentivos.puml), [`DER-Logistica`](docs/diagramas/logistica/DER-Logistica.puml) y [`DER-Notificaciones`](docs/diagramas/notificaciones/DER-Notificaciones.puml).
 3. **Justificaciones de Diseño y Documento de Arquitectura**: [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md) (justificación de arquitectura SOA, hexagonal, capas y patrones).
 4. **Diagrama de Componentes y Despliegue**: [`DonaTrack-Diagrama-Componentes-y-Despliegue.puml`](docs/diagramas/DonaTrack-Diagrama-Componentes-y-Despliegue.puml).
 5. **Implementación de requerimientos de integración**: Mensajería con RabbitMQ y Broker de logística con fallback.

@@ -42,6 +42,8 @@ mvn clean package -DskipTests
 make build
 ```
 
+Esto generará los artefactos ejecutables en el directorio `target/` de cada microservicio (por ejemplo: `donatrack-donaciones/target/donatrack-donaciones-0.0.1-SNAPSHOT.jar`).
+
 ### 2. Levantar Todo el Stack con Docker
 Para compilar imágenes y levantar la plataforma completa (Postgres, Mongo, RabbitMQ, n8n y los 6 microservicios):
 
@@ -52,6 +54,11 @@ docker compose up --build -d
 # Detener todos los contenedores
 docker compose down
 ```
+
+Este proceso:
+- Utiliza la base de datos PostgreSQL (`postgres_donatrack`) compartida, aislando los datos por esquema mediante la propiedad `currentSchema` (`donaciones`, `incentivos`, `notificaciones` y `auth`).
+- Levanta el motor documental MongoDB (`mongo_donatrack`) para Logística (`donatrack_logistica`).
+- Inicializa RabbitMQ con el vhost y credenciales correspondientes, y el motor de flujos n8n.
 
 ### 3. Levantar Servicios Individuales (Desarrollo Local con Makefile)
 Para levantar servicios de forma aislada apuntando al perfil local (`PROFILE=local` por defecto):

@@ -99,7 +99,96 @@ public class NotificacionesListener {
 
 ---
 
-## 5. Resumen: Cuándo usarlo y cuándo no
+---
+
+## 5. Catálogo Formal de Exchanges, Routing Keys, Colas y Contratos de Eventos
+
+En DonaTrack la mensajería asíncrona está centralizada a través de dos **Topic Exchanges** que desacoplan completamente los Bounded Contexts:
+
+### 5.1. Matriz de Topología y Ruteo
+
+| Exchange (Tipo) | Routing Key | Cola Receptora | Microservicio Consumidor | Evento DTO Asociado | Propósito de Negocio |
+|---|---|---|---|---|---|
+| `logistica.exchange` (Topic) | `ruta.iniciada` | `donaciones.ruta_iniciada.queue` | `donatrack-donaciones` | `RutaIniciadaEvent` | Notifica que un chofer inició recorrido para marcar donaciones `EN_TRASLADO` y despachar notificaciones. |
+| `logistica.exchange` (Topic) | `entrega.realizada` | `donaciones.entrega_realizada.queue` | `donatrack-donaciones` | `EntregaRealizadaEvent` | Actualiza la donación a `ENTREGADA` y transiciona el bien a depósito/destino. |
+| `logistica.exchange` (Topic) | `entrega.realizada` | `incentivos.entrega_realizada.queue` | `donatrack-incentivos` | `EntregaRealizadaEvent` | Acredita puntos al donante y evalúa insignias/ranking por entrega completada. |
+| `logistica.exchange` (Topic) | `entrega.fallida` | `donaciones.entrega_fallida.queue` | `donatrack-donaciones` | `EntregaNoSatisfactoriaEvent` | Registra fallo de entrega, motivo y evalúa replanificación logística. |
+| `donaciones.exchange` (Topic) | `notificacion.inicio.ruta` | `notificaciones.ruta_iniciada.queue` | `donatrack-notificaciones` | `NotificacionInicioRutaEvent` | Despacha alertas multicanal (Email, SMS, WhatsApp) a donantes y entidades. |
+| `donaciones.exchange` (Topic) | `notificacion.entrega.exitosa` | `notificaciones.entrega_exitosa.queue` | `donatrack-notificaciones` | `NotificacionEntregaExitosaEvent` | Envía comprobante de entrega y fotos de remito a los involucrados. |
+| `donaciones.exchange` (Topic) | `notificacion.entrega.fallida` | `notificaciones.entrega_fallida.queue` | `donatrack-notificaciones` | `NotificacionEntregaFallidaEvent` | Alerta al donante y administrador sobre la entrega fallida. |
+| `donaciones.exchange` (Topic) | `donacion.replanificada` | `notificaciones.donacion_replanificada.queue` | `donatrack-notificaciones` | `DonacionReplanificadaEvent` | Notifica la nueva fecha de reprogramación de retiro/entrega. |
+
+---
+
+### 5.2. Especificación de Contratos de Eventos (DTOs)
+
+Todos los eventos viajan serializados en formato **JSON UTF-8** configurados con `Jackson2JsonMessageConverter` y residen en el módulo `donatrack-common` (`com.donatrack.common.events`):
+
+#### 1. `RutaIniciadaEvent`
+Publicado por `donatrack-logistica` al despachar un camión:
+```json
+{
+  "rutaId": "7b8e5c1a-2d3e-4f5a-8b9c-0d1e2f3a4b5c",
+  "patenteCamion": "AA123BB",
+  "nombreChofer": "Carlos Chofer",
+  "idsDonaciones": [
+    "a1111111-1111-4111-8111-111111111111",
+    "b2222222-2222-4222-8222-222222222222"
+  ]
+}
+```
+
+#### 2. `EntregaRealizadaEvent`
+Publicado por `donatrack-logistica` al registrar la entrega efectiva en destino:
+```json
+{
+  "idDonacion": "a1111111-1111-4111-8111-111111111111",
+  "fotos": [
+    "https://supabase.co/storage/v1/object/public/remitos/remito-001.jpg"
+  ],
+  "patenteCamion": "AA123BB",
+  "fechaHora": "2026-11-10T14:30:00"
+}
+```
+
+#### 3. `EntregaNoSatisfactoriaEvent`
+Publicado ante imposibilidad de entrega (destinatario ausente, dirección inaccesible, etc.):
+```json
+{
+  "idDonacion": "a1111111-1111-4111-8111-111111111111",
+  "motivo": "Destinatario no se encontraba en el domicilio",
+  "puedeReplanificarse": true
+}
+```
+
+#### 4. `NotificacionInicioRutaEvent`
+Generado por `donatrack-donaciones` con los datos de contacto resueltos para el despachador:
+```json
+{
+  "rutaId": "7b8e5c1a-2d3e-4f5a-8b9c-0d1e2f3a4b5c",
+  "patenteCamion": "AA123BB",
+  "nombreChofer": "Carlos Chofer",
+  "contactosDonantes": [
+    {
+      "destinatario": "donante@donatrack.com",
+      "medio": "EMAIL",
+      "rol": "DONANTE"
+    }
+  ],
+  "contactosEntidades": [
+    {
+      "destinatario": "+541112345678",
+      "medio": "WHATSAPP",
+      "rol": "ENTIDAD_BENEFICIARIA"
+    }
+  ],
+  "linkSeguimiento": "http://localhost:8080/app/donante/entregas/7b8e5c1a"
+}
+```
+
+---
+
+## 6. Resumen: Cuándo usarlo y cuándo no
 
 | ¿Cuándo usar RabbitMQ? | ¿Cuándo NO usar RabbitMQ? |
 |-------------------------|--------------------------|
@@ -108,4 +197,4 @@ public class NotificacionesListener {
 | Cuando necesitamos garantía de entrega (si el receptor cae, el mensaje queda guardado). | Consultas simples de lectura (GET) de una API a otra. Para eso usar REST (o gRPC). |
 
 > [!NOTE]
-> Para más detalles arquitectónicos, puedes revisar el archivo [`arquitectura.md`](../../arquitectura.md) y las [`Justificaciones de Diseño`](../pendientes/JustificacionesDiseño-Entrega3.md).
+> Para más detalles arquitectónicos, podés consultar la memoria técnica en [`arquitectura.md`](../../arquitectura.md) y la matriz de [`Justificación Decisiones - DonaTrack - Grupo 7.xlsx`](../../Justificación%20Decisiones%20-%20DonaTrack%20-%20Grupo%207.xlsx).

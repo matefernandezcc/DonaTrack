@@ -61,7 +61,7 @@ make setup
 docker compose ps
 
 # 3. Ejecutar los endpoints de la colección Bruno contra el entorno local (dev)
-cd "docs/donatrack-api/Donatrack - API"
+cd docs/donatrack-api/bruno-collection
 npx @usebruno/cli run --env dev
 cd ../../..
 ```
@@ -75,7 +75,7 @@ cd ../../..
 > - **Bases de Datos SaaS:** Supabase (PostgreSQL), MongoDB Atlas y CloudAMQP (RabbitMQ).
 
 ```bash
-cd "docs/donatrack-api/Donatrack - API"
+cd docs/donatrack-api/bruno-collection
 npx @usebruno/cli run --env prod
 cd ../../..
 ```
@@ -127,7 +127,7 @@ curl -s -X POST http://localhost:8000/api/personas \
 
 ```bash
 curl -s -X POST http://localhost:8000/api/personas/importar-csv \
-  -F "file=@docs/donatrack-api/Donatrack - API/Donaciones/Personas/donantes_sample.csv"
+  -F "file=@docs/donatrack-api/bruno-collection/Donaciones/Personas/donantes_sample.csv"
 echo ""
 ```
 
@@ -579,4 +579,159 @@ curl -s -i -b /tmp/demo_cookies.txt -X POST http://localhost:8080/app/beneficiar
 
 # 2. Listar entregas logísticas y rutas activas
 curl -s -b /tmp/demo_cookies.txt http://localhost:8080/app/beneficiaria/entregas | grep -A 4 "Rutas y Despachos en Operación"
+```
+
+---
+
+## 🗄️ 7. Consultas de Verificación en Base de Datos (DBeaver & MongoDB)
+
+Para corroborar la consistencia y la persistencia políglota real tras ejecutar los flujos, podés ejecutar las siguientes consultas en **DBeaver** o consola de base de datos:
+
+### 7.1. Verificación en PostgreSQL (`localhost:5432`)
+
+#### A. Personas, Roles y Direcciones (Schema `donaciones`)
+```sql
+-- Contar personas registradas
+SELECT COUNT(*) AS total_personas FROM donaciones.personas;
+
+-- Verificar persona humana creada y su herencia JOINED
+SELECT p.persona_id, p.email, p.doc_tipo, p.doc_numero, ph.nombre, ph.apellido, ph.edad
+FROM donaciones.personas p
+JOIN donaciones.personas_humanas ph ON p.persona_id = ph.persona_humana_id
+ORDER BY p.persona_id DESC LIMIT 5;
+
+-- Verificar persona jurídica
+SELECT p.persona_id, p.email, pj.razon_social, pj.tipo
+FROM donaciones.personas p
+JOIN donaciones.personas_juridicas pj ON p.persona_id = pj.persona_juridica_id;
+
+-- Verificar direcciones asociadas
+SELECT p.email, d.calle, d.altura, d.localidad, d.codigo_postal
+FROM donaciones.personas p
+JOIN donaciones.direcciones d ON p.direccion_id = d.direccion_id
+LIMIT 5;
+
+-- Identificar IDs de roles para pruebas manuales
+SELECT persona_id, dtype, rol_id FROM donaciones.roles WHERE dtype IN ('Donante', 'Administrador', 'Beneficiario');
+```
+
+#### B. Donaciones Originales, Segmentación y Bienes (Schema `donaciones`)
+```sql
+-- Donaciones originales ingresadas
+SELECT * FROM donaciones.donaciones_originales ORDER BY fecha_recepcion DESC LIMIT 5;
+
+-- Donaciones segmentadas por categoría
+SELECT d.donacion_id, d.estado, d.fecha_creacion, dorig.descripcion_general
+FROM donaciones.donaciones d
+JOIN donaciones.donaciones_originales dorig ON d.donacion_original_id = dorig.donacion_original_id
+ORDER BY d.fecha_creacion DESC LIMIT 10;
+
+-- Bienes individuales persistidos
+SELECT b.bien_id, b.descripcion, b.cantidad, b.unidad_medicion, b.es_usado, b.donacion_id
+FROM donaciones.bienes b
+ORDER BY b.bien_id DESC LIMIT 10;
+```
+
+#### C. Gamificación y Puntajes (Schema `incentivos`)
+```sql
+-- Perfiles y métricas acumuladas de donantes
+SELECT * FROM incentivos.perfiles_donante;
+SELECT * FROM incentivos.metricas_donante;
+
+-- Registro histórico de actividades por mes
+SELECT * FROM incentivos.registros_donacion ORDER BY mes_donacion DESC LIMIT 10;
+```
+
+#### D. Usuarios y Credenciales (Schema `auth`)
+```sql
+-- Cuentas de usuario y proveedores de identidad
+SELECT usuario_id, username, email, rol, persona_id, proveedor_oauth 
+FROM auth.usuarios;
+```
+
+### 7.2. Verificación en MongoDB NoSQL (`localhost:27017` / Atlas)
+
+Conectándote a la base de datos `donatrack_logistica` mediante DBeaver, MongoDB Compass o la terminal `mongosh`:
+
+```javascript
+use donatrack_logistica;
+
+// 1. Flota de camiones
+db.camiones.find().pretty();
+
+// 2. Choferes registrados
+db.choferes.find().pretty();
+
+// 3. Items recepcionados para planificación de rutas
+db.items_planificacion.find().sort({ _id: -1 }).limit(5).pretty();
+
+// 4. Rutas de reparto generadas con sus paradas y entregas embebidas
+db.rutas_reparto.find().sort({ _id: -1 }).limit(3).pretty();
+```
+
+---
+
+## 🔄 8. Procedimiento de Reset Total y Desarrollo en Caliente
+
+### 8.1. Reset Total ("Volver a Empezar desde Cero")
+Si requerís limpiar el estado de la persistencia para repetir una prueba limpia:
+
+```bash
+# 1. Bajar todos los microservicios Java (Ctrl+C en las terminales)
+
+# 2. Detener contenedores y eliminar volúmenes de datos
+docker compose down -v
+
+# 3. Levantar infraestructura Docker limpia (recrea schemas y ejecuta local-seed-data.sql y mongo-init.js)
+docker compose up -d postgres-donatrack mongo-donatrack rabbitmq n8n
+
+# 4. Limpiar artefactos compilados
+./mvnw clean   # o: make clean
+
+# 5. Volver a compilar y levantar
+make build
+make run       # o levantar individualmente con make donaciones, etc.
+```
+
+### 8.2. Recarga en Caliente de Código
+Si modificás clases `.java` y observás inconsistencias de caché o `NoClassDefFoundError`:
+
+```bash
+# 1. Detener el microservicio afectado (Ctrl+C)
+# 2. Recompilar limpiamente sin bajar Docker
+./mvnw clean compile -pl <nombre-del-modulo> -am
+# 3. Volver a ejecutar el servicio
+make <nombre-del-modulo>
+```
+
+---
+
+## 🛠️ 9. Tabla de Troubleshooting Rápido
+
+| Síntoma | Causa Probable | Solución Inmediata |
+|---|---|---|
+| `Connection refused` (:8000, :8002, etc.) | Microservicio o contenedor no iniciado | Verificar puertos activos con `docker compose ps` o levantar con `make <servicio>`. |
+| `500 Internal Server Error` | Fallo en mapper, entity o conexión inter-servicio | Inspeccionar el stacktrace en la consola del microservicio emisor. |
+| `415 Unsupported Media Type` | Falta header HTTP en la solicitud | Agregar `-H "Content-Type: application/json"` en la llamada curl. |
+| `400 Bad Request` en importación CSV | Archivo vacío o ruta errónea | Asegurar el prefijo `@` antes de la ruta: `-F "file=@ruta/al/archivo.csv"`. |
+| Datos no visibles en DBeaver | Transacción no confirmada o schema incorrecto | Presionar F5 (Refresh) y verificar el schema activo (`donaciones`, `incentivos`, `notificaciones`, `auth`). |
+| `could not determine recommended JdbcType` | Mapeo incompatible entre DTO y entidad | Asegurar que los UUIDs se envíen con formato RFC 4122 (`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`). |
+| Mensajes encolados sin consumir en RabbitMQ | Listener no suscripto o cola sin binding | Abrir consola Web [http://localhost:15672](http://localhost:15672) y verificar bindings de exchanges. |
+
+---
+
+## ✅ 10. Checklist Integral de Verificación E2E
+
+```markdown
+- [x] Infraestructura: Contenedores Postgres, Mongo, RabbitMQ y n8n saludables (`docker compose ps`).
+- [x] Autenticación: Login admin (:8004) emite token JWT HS256 válido.
+- [x] Frontend SSR: Acceso a http://localhost:8080 con layouts Público y Backoffice SLDS.
+- [x] Donantes: Creación de persona física (`/api/personas`) persistida en tabla `personas` y `personas_humanas`.
+- [x] Importación CSV: Ingesta batch sin duplicados de `donantes_sample.csv`.
+- [x] Beneficiarios: Alta de entidad y declaración de necesidades extraordinarias.
+- [x] Donaciones: Recepción de bienes físicos con segmentación automática en categorías.
+- [x] Logística: Alta de camión y chofer persistidos en colecciones NoSQL de MongoDB.
+- [x] Rutas y Despacho: Planificación de ruta e inicio de recorrido con publicación de eventos AMQP.
+- [x] Gamificación: Cómputo de puntos, actualización de ranking y asignación de insignias en Incentivos.
+- [x] Automatización: Disparo de webhooks a n8n y notificación en Discord.
 ```

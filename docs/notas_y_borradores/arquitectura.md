@@ -69,6 +69,59 @@ Organizamos cada microservicio en tres capas concéntricas con responsabilidades
 **¿Qué beneficio obtuvimos con esta decisión?**
 Pudimos escribir pruebas unitarias exhaustivas sobre el dominio y los casos de uso utilizando mocks para los puertos de salida, sin necesidad de levantar bases de datos en memoria, contenedores Docker ni el contexto pesado de Spring Boot. La velocidad de ejecución de nuestra suite de tests es instantánea.
 
+### 1.3. Estructura de Paquetes y Convenciones de Código
+Para asegurar la reproducibilidad y el orden en todos los microservicios del proyecto, estandarizamos la siguiente topología de paquetes bajo `ar.edu.utn.donatrack`:
+
+```text
+src/main/java/ar/edu/utn/donatrack/
+├── domain/
+│   ├── entities/          # Agregados y entidades con ciclo de vida e identidad propia (UUID)
+│   ├── models/            # Value Objects inmutables, enums y modelos estructurales sin identidad
+│   └── exceptions/        # Excepciones de negocio explícitas (ej. RutaYaIniciadaException)
+├── application/
+│   ├── ports/
+│   │   ├── in/            # Interfaces de casos de uso expuestas al exterior (API del core)
+│   │   └── out/           # Interfaces que abstraen persistencia, clientes externos o mensajería
+│   └── usecases/          # Orquestadores de negocio puros que implementan los ports.in
+└── infrastructure/
+    ├── adapters/
+    │   ├── in/            # Controladores REST (@RestController) y Listeners AMQP de RabbitMQ
+    │   └── out/           # Repositorios JPA/Mongo, clientes OpenFeign y publicadores de eventos
+    └── config/            # Clases @Configuration de Spring Boot, Swagger, CORS y beans
+```
+
+### 1.4. Flujo de Ejecución de Extremo a Extremo: Traza de un Caso de Uso
+Para ilustrar cómo colaboran los puertos, adaptadores y entidades aisladas, analizamos el ciclo de vida completo de una solicitud real: el chofer inicia un recorrido logístico (`IniciarRutaUseCase`).
+
+```text
+[Cliente Web / Chofer]
+        │  HTTP POST /api/rutas/{id}/iniciar
+        ▼
+[Adaptador In: LogisticaController]
+        │  Invoca el Puerto de Entrada IniciarRutaPort.iniciar(id)
+        ▼
+[Caso de Uso: IniciarRutaUseCase]
+        │  1. Recupera la ruta mediante el Puerto de Salida (RutaRepositoryPort.buscarPorId)
+        ▼
+[Adaptador Out: Repositorio de Persistencia (Mongo/JPA)]
+        │  Devuelve la entidad de dominio pura reconstruida en memoria
+        ▼
+[Entidad de Dominio: RutaDeReparto]
+        │  Ejecuta la regla de negocio pura: ruta.iniciarRuta()
+        │  (Valida estado previo, marca iniciada y transiciona paradas y entregas a EN_TRASLADO)
+        ▼
+[Caso de Uso: IniciarRutaUseCase]
+        │  2. Persiste el nuevo estado mediante RutaRepositoryPort.guardar(ruta)
+        │  3. Publica evento asíncrono mediante EventoNotificacionPort.publicarInicioRuta(...)
+        ▼
+[Adaptador Out: RabbitMqEventAdapter]
+        │  Emite el evento a RabbitMQ (los consumidores lo procesarán de forma asíncrona)
+        ▼
+[Respuesta HTTP: 200 OK hacia el Cliente Web]
+```
+
+Esta separación garantiza que la entidad `RutaDeReparto` ignore por completo si sus datos se guardan en PostgreSQL o MongoDB, y si sus notificaciones viajan por RabbitMQ o HTTP.
+
 ---
 
 ## 2. Estrategia de Persistencia Políglota y Bases de Datos (Entrega 5)
@@ -168,7 +221,7 @@ El documento ocupa **menos del 1% del límite máximo de 16 MB** permitido por M
 #### E. Mapeo BSON Binary $\leftrightarrow$ Java UUID (`MongoConfig.java`)
 Durante la integración entre Spring Data MongoDB y el cluster de base de datos, nos encontramos con una incompatibilidad técnica: Spring Data serializa por defecto los `java.util.UUID` de Java como tipo `Binary` (Subtipo 4) en BSON. Si bien esto es eficiente a nivel binario, al consultar la base desde herramientas administrativas externas como `mongosh` o Compass, o al correr scripts de inicialización, los identificadores resultaban difíciles de inspeccionar o sufrían discrepancias en el orden de bytes (*endianness*).
 
-Para resolver esto de raíz de forma elegante y centralizada, nosotros implementamos conversores personalizados registrados en nuestra clase de configuración [`MongoConfig.java`](file:///home/maximo/Documentos/Diseño de Sistemas/DonaTrack/donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/config/MongoConfig.java):
+Para resolver esto de raíz de forma elegante y centralizada, nosotros implementamos conversores personalizados registrados en nuestra clase de configuración [`MongoConfig.java`](../../donatrack-logistica/src/main/java/com/donatrack/logistica/infrastructure/config/MongoConfig.java):
 - `BinaryToUuidConverter` (`@ReadingConverter`): Toma los 16 bytes crudos del BSON Binary y reconstruye con precisión el objeto `java.util.UUID`.
 - `UuidToBinaryConverter` (`@WritingConverter`): Convierte el `UUID` de Java al formato binario estándar de MongoDB al persistir.
 
@@ -293,7 +346,7 @@ Durante el despliegue del sistema en la nube, nos encontramos con un problema re
 
 Si el microservicio `donatrack-donaciones` hiciera una llamada HTTP simple hacia `donatrack-logistica` para dar de alta un ítem donado, el usuario donante sufriría un error 504 Gateway Timeout en la pantalla de su navegador.
 
-Para blindar nuestro sistema contra esta falla, nosotros diseñamos e implementamos el patrón **Anticorruption Layer (ACL)** materializado en la clase [`LogisticaBrokerAdapter.java`](file:///home/maximo/Documentos/Diseño de Sistemas/DonaTrack/donatrack-donaciones/src/main/java/com/donatrack/donaciones/infrastructure/adapters/out/broker/LogisticaBrokerAdapter.java).
+Para blindar nuestro sistema contra esta falla, nosotros diseñamos e implementamos el patrón **Anticorruption Layer (ACL)** materializado en la clase [`LogisticaBrokerAdapter.java`](../../donatrack-donaciones/src/main/java/com/donatrack/donaciones/infrastructure/adapters/out/broker/LogisticaBrokerAdapter.java).
 
 Implementamos un algoritmo de **enrutamiento resiliente en 3 niveles con fallback automático**:
 
