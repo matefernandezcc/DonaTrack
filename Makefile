@@ -83,6 +83,8 @@ auth:
 web:
 	mvn install -pl donatrack-web -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-web
 
+server: web
+
 ngrok:
 	ngrok http --url=exclude-stoplight-registrar.ngrok-free.dev 8080
 

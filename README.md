@@ -27,13 +27,13 @@ La plataforma resuelve los desafíos de gestión y trazabilidad que enfrenta la 
 
 ---
 
-## 🌐 Despliegue en la Nube (Entrega 4)
+## 🌐 Despliegue en la Nube
 
-El microservicio de **Logística** se encuentra desplegado de forma independiente en la nube, conectado a una base de datos PostgreSQL en Supabase:
+Los microservicios se encuentran preparados y desplegados de forma distribuida en Render, vinculados a infraestructura gestionada:
 
-- 🚀 **Swagger UI (Producción):** [`https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html)
+- 🚀 **Logística Swagger UI:** [`https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html)
 - 📡 **Health Check:** [`https://donatrack-logistica-50xn.onrender.com/actuator/health`](https://donatrack-logistica-50xn.onrender.com/actuator/health)
-- 🗄️ **Base de Datos Cloud:** PostgreSQL en Supabase (Schema `logistica`, Connection Pooler AWS US-East-1)
+- 🗄️ **Persistencia Cloud:** PostgreSQL en Supabase (schemas `donaciones`, `incentivos`, `notificaciones`, `auth`), MongoDB Atlas (`donatrack_logistica`) y Supabase S3 Storage para remitos.
 
 ---
 
@@ -42,24 +42,27 @@ El microservicio de **Logística** se encuentra desplegado de forma independient
 El sistema está diseñado como una **arquitectura distribuida de microservicios**:
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        DonaTrack Platform                          │
-├──────────────┬──────────────┬──────────────┬───────────────────────┤
-│  Donaciones  │  Incentivos  │  Logística   │   Notificaciones      │
-│   :8000      │   :8001      │   :8002      │      :8003            │
-├──────────────┴──────────────┴──────────────┴───────────────────────┤
-│                     Server / Gateway :8080                          │
-├────────────────────────────────┬────────────────────────────────────┤
-│     PostgreSQL :5432           │         RabbitMQ :5672             │
-│     (schemas por servicio)     │         (Message Broker)           │
-├────────────────────────────────┴────────────────────────────────────┤
-│                             n8n :5678                               │
-│                     (automatización de flujos)                      │
-└─────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   DonaTrack Platform                                   │
+├──────────────┬──────────────┬──────────────┬───────────────────┬───────────────────────┤
+│  Donaciones  │  Incentivos  │  Logística   │  Notificaciones   │  Autenticación (Auth) │
+│    :8000     │    :8001     │    :8002     │       :8003       │         :8004         │
+├──────────────┴──────────────┴──────────────┴───────────────────┴───────────────────────┤
+│                         Cliente Web SSR (Thymeleaf + SLDS) :8080                       │
+├────────────────────────────────┬───────────────────────────────────────────────────────┤
+│      PostgreSQL 15 :5432       │                  MongoDB 7.0 :27017                   │
+│   (donaciones, incentivos,     │                 (donatrack_logistica)                 │
+│      notificaciones, auth)     │                                                       │
+├────────────────────────────────┴───────────────────────────────────────────────────────┤
+│                             RabbitMQ :5672 (Message Broker)                            │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                         n8n :5678 (automatización de flujos)                           │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 > Para más detalles sobre puertos, URLs de Swagger y comandos de ejecución, consultá [`SERVICIOS.md`](SERVICIOS.md).
-> Para el detalle del diseño SOA y arquitectura hexagonal, consultá [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md).
+> Para el detalle del diseño SOA, arquitectura hexagonal y persistencia políglota, consultá [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md).
+> Para los diagramas formales en PlantUML, consultá [`docs/diagramas/`](docs/diagramas/).
 
 ---
 
@@ -68,15 +71,18 @@ El sistema está diseñado como una **arquitectura distribuida de microservicios
 | Capa | Tecnología | Detalle |
 |---|---|---|
 | **Lenguaje** | Java 21 | Long-Term Support (LTS) |
-| **Framework** | Spring Boot 3.5 | Spring Data JPA, OpenFeign, Springdoc OpenAPI |
+| **Framework** | Spring Boot 3.5 | Spring Data JPA, Spring Data MongoDB, OpenFeign, Spring Security, Springdoc OpenAPI |
 | **Build** | Maven (multi-módulo) | Gestión centralizada de dependencias en `pom.xml` padre |
 | **API Docs** | SpringDoc OpenAPI | Swagger UI interactivo por microservicio y unificado |
-| **Base de Datos** | PostgreSQL 15 / Supabase / H2 | Schemas aislados (`donaciones`, `logistica`, `incentivos`, `notificaciones`) |
-| **Mensajería** | RabbitMQ | Topic Exchanges y colas asíncronas |
+| **Base de Datos Relacional** | PostgreSQL 15 / Supabase / H2 | Schemas aislados (`donaciones`, `incentivos`, `notificaciones`, `auth`) |
+| **Base de Datos NoSQL** | MongoDB 7.0 / Mongo Atlas | Persistencia documental para Logística (`donatrack_logistica`) |
+| **Almacenamiento de Archivos** | Supabase S3 Storage | Almacenamiento de remitos de entrega y comprobantes |
+| **Mensajería** | RabbitMQ | Topic Exchanges y colas asíncronas (`donaciones.exchange`, `logistica.exchange`) |
 | **Contenedores** | Docker + Docker Compose | Builds multi-stage optimizados para local y Render |
-| **Despliegue** | Render | Docker Web Service en la nube |
-| **Automatización** | n8n | Flujos low-code para difusión en redes sociales |
-| **Testing** | JUnit 5 + Mockito + H2 | Tests unitarios y de persistencia JPA |
+| **Despliegue** | Render | Docker Web Services en la nube con perfiles independientes |
+| **Automatización** | n8n | Flujos low-code para difusión en Discord y WhatsApp / Twilio |
+| **Frontend SSR** | Thymeleaf + SLDS 2.30 | Salesforce Lightning Design System con layouts dinámicos (Público y Backoffice) |
+| **Testing** | JUnit 5 + Mockito + H2 | Tests unitarios y de integración |
 
 ---
 
@@ -247,24 +253,29 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 ## ⚡ Quick Start
 
 ```bash
-# Clonar el repositorio
+# 1. Clonar el repositorio
 git clone https://github.com/matefernandezcc/DonaTrack.git
 cd DonaTrack
 
-# Compilar todo el proyecto
+# 2. Configurar variables de entorno (plantilla oficial)
+cp .env.template .env
+
+# 3. Compilar todo el proyecto
 make build
 
-# Levantar un servicio individual
-make donaciones      # Puerto 8000
-make incentivos      # Puerto 8001
-make logistica       # Puerto 8002
-make notificaciones  # Puerto 8003
-make server          # Puerto 8080
+# 4. Levantar un microservicio individual en local (Makefile)
+make donaciones      # Donaciones (Puerto 8000)
+make incentivos      # Incentivos (Puerto 8001)
+make logistica       # Logística (Puerto 8002)
+make notificaciones  # Notificaciones (Puerto 8003)
+make auth            # Autenticación (Puerto 8004)
+make web             # Cliente Web SSR (Puerto 8080)
 
-# Levantar toda la plataforma con Docker (Postgres, RabbitMQ, n8n y servicios)
+# O levantar toda la plataforma distribuida con Docker Compose:
 docker compose up --build -d
 ```
 
-> 📄 Ver [`SERVICIOS.md`](SERVICIOS.md) para la guía completa de puertos, Swagger y comandos.
+> 📄 Ver [`SERVICIOS.md`](SERVICIOS.md) para la guía completa de puertos, Swagger interactivo, healthchecks y comandos.
 > 📄 Ver [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md) para la documentación técnica de arquitectura y diseño.
+> 📄 Ver [`docs/diagramas/`](docs/diagramas/) para los diagramas de arquitectura y clases en formato PlantUML (`.puml`).
 

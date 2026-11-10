@@ -42,6 +42,7 @@ public class PublicController {
   private final JwtDecoder jwtDecoder;
   private final SecurityContextRepository securityContextRepository;
   private final com.donatrack.web.service.SolicitudOngService solicitudOngService;
+  private final com.donatrack.web.gateway.DonacionesGateway donacionesGateway;
 
   @org.springframework.beans.factory.annotation.Value(
       "${donatrack.n8n-url:${N8N_URL:http://localhost:5678}}")
@@ -63,7 +64,25 @@ public class PublicController {
         logisticaGateway,
         jwtDecoder,
         securityContextRepository,
-        new com.donatrack.web.service.SolicitudOngService());
+        new com.donatrack.web.service.SolicitudOngService(),
+        null);
+  }
+
+  public PublicController(
+      AuthGateway authGateway,
+      IncentivosGateway incentivosGateway,
+      LogisticaGateway logisticaGateway,
+      JwtDecoder jwtDecoder,
+      SecurityContextRepository securityContextRepository,
+      com.donatrack.web.service.SolicitudOngService solicitudOngService) {
+    this(
+        authGateway,
+        incentivosGateway,
+        logisticaGateway,
+        jwtDecoder,
+        securityContextRepository,
+        solicitudOngService,
+        null);
   }
 
   @org.springframework.beans.factory.annotation.Autowired
@@ -73,13 +92,16 @@ public class PublicController {
       LogisticaGateway logisticaGateway,
       JwtDecoder jwtDecoder,
       SecurityContextRepository securityContextRepository,
-      com.donatrack.web.service.SolicitudOngService solicitudOngService) {
+      com.donatrack.web.service.SolicitudOngService solicitudOngService,
+      @org.springframework.beans.factory.annotation.Autowired(required = false)
+          com.donatrack.web.gateway.DonacionesGateway donacionesGateway) {
     this.authGateway = authGateway;
     this.incentivosGateway = incentivosGateway;
     this.logisticaGateway = logisticaGateway;
     this.jwtDecoder = jwtDecoder;
     this.securityContextRepository = securityContextRepository;
     this.solicitudOngService = solicitudOngService;
+    this.donacionesGateway = donacionesGateway;
   }
 
   @GetMapping("/healthcheck")
@@ -428,6 +450,16 @@ public class PublicController {
     }
   }
 
+  @GetMapping("/privacidad")
+  public String mostrarPrivacidad() {
+    return "public/privacidad";
+  }
+
+  @GetMapping("/terminos")
+  public String mostrarTerminos() {
+    return "public/terminos";
+  }
+
   @GetMapping("/registro")
   public String mostrarRegistro(Model model) {
     return "public/registro";
@@ -439,10 +471,63 @@ public class PublicController {
       @RequestParam("username") String username,
       @RequestParam("email") String email,
       @RequestParam("password") String password,
+      @RequestParam(value = "rol", required = false, defaultValue = "DONANTE") String rolParam,
+      @RequestParam(value = "cuit", required = false) String cuit,
+      @RequestParam(value = "direccion", required = false) String direccion,
+      @RequestParam(value = "telefono", required = false) String telefono,
+      @RequestParam(value = "tipoEntidad", required = false) String tipoEntidad,
+      @RequestParam(value = "necesidades", required = false) String necesidades,
       HttpServletRequest request,
       HttpServletResponse response,
       RedirectAttributes redirectAttributes) {
     try {
+      if ("BENEFICIARIA".equalsIgnoreCase(rolParam) || "ONG".equalsIgnoreCase(rolParam)) {
+        // Registrar usuario en auth con rol seguro BENEFICIARIA_PENDIENTE
+        authGateway.registrar(
+            Map.of(
+                "nombre", nombre,
+                "username", username,
+                "email", email,
+                "password", password,
+                "rol", "BENEFICIARIA_PENDIENTE"));
+
+        // Registrar solicitud de adhesión en donatrack-donaciones
+        Map<String, String> solicitudData = new HashMap<>();
+        solicitudData.put("nombreOng", nombre);
+        solicitudData.put("cuit", cuit != null && !cuit.isBlank() ? cuit : "-");
+        solicitudData.put("direccion", direccion != null && !direccion.isBlank() ? direccion : "-");
+        solicitudData.put("email", email);
+        solicitudData.put("telefono", telefono != null && !telefono.isBlank() ? telefono : "-");
+        solicitudData.put("responsable", nombre);
+        solicitudData.put(
+            "tipoEntidad",
+            tipoEntidad != null && !tipoEntidad.isBlank() ? tipoEntidad : "Comedor Comunitario");
+        solicitudData.put(
+            "necesidades",
+            necesidades != null && !necesidades.isBlank()
+                ? necesidades
+                : "Registro inicial de adhesión institucional");
+
+        if (donacionesGateway != null) {
+          try {
+            donacionesGateway.registrarSolicitudOng(solicitudData);
+          } catch (Exception e) {
+            log.warn(
+                "Fallo al enviar solicitud a donacionesGateway, usando servicio local: {}",
+                e.getMessage());
+            solicitudOngService.registrarSolicitud(solicitudData);
+          }
+        } else {
+          solicitudOngService.registrarSolicitud(solicitudData);
+        }
+
+        redirectAttributes.addFlashAttribute(
+            "registerSuccess",
+            "Solicitud institucional registrada con éxito. Su cuenta se encuentra en revisión ('BENEFICIARIA_PENDIENTE') para verificación de personería jurídica. Le notificaremos por correo electrónico una vez habilitada.");
+        return "redirect:/login";
+      }
+
+      // Registro estándar de persona donante
       TokenResponse tokenResponse =
           authGateway.registrar(
               Map.of(

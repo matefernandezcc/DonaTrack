@@ -182,6 +182,24 @@ class PublicControllerTest {
     }
 
     @Test
+    @DisplayName("GET /privacidad debe responder 200 OK y retornar vista public/privacidad")
+    void testPrivacidadPage() throws Exception {
+      mockMvc
+          .perform(get("/privacidad"))
+          .andExpect(status().isOk())
+          .andExpect(view().name("public/privacidad"));
+    }
+
+    @Test
+    @DisplayName("GET /terminos debe responder 200 OK y retornar vista public/terminos")
+    void testTerminosPage() throws Exception {
+      mockMvc
+          .perform(get("/terminos"))
+          .andExpect(status().isOk())
+          .andExpect(view().name("public/terminos"));
+    }
+
+    @Test
     @DisplayName("GET /healthcheck debe retornar estado UP en formato JSON")
     void testHealthcheck() throws Exception {
       mockMvc
@@ -308,6 +326,30 @@ class PublicControllerTest {
           .andExpect(redirectedUrl("/app/donante"));
 
       verify(authGateway, times(1)).registrar(anyMap());
+    }
+
+    @Test
+    @DisplayName(
+        "POST /registro con rol BENEFICIARIA debe registrar como BENEFICIARIA_PENDIENTE y redirigir a /login sin login directo")
+    void testRegistroBeneficiariaPendiente() throws Exception {
+      mockMvc
+          .perform(
+              post("/registro")
+                  .param("nombre", "Comedor Solidario")
+                  .param("username", "comedorsolidario")
+                  .param("email", "contacto@comedorsolidario.org")
+                  .param("password", "clave123")
+                  .param("rol", "BENEFICIARIA")
+                  .param("cuit", "30-11223344-5")
+                  .param("direccion", "Av. Caseros 1234, CABA"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/login"))
+          .andExpect(flash().attributeExists("registerSuccess"));
+
+      verify(authGateway, times(1))
+          .registrar(
+              org.mockito.ArgumentMatchers.argThat(
+                  m -> "BENEFICIARIA_PENDIENTE".equals(m.get("rol"))));
     }
 
     @Test

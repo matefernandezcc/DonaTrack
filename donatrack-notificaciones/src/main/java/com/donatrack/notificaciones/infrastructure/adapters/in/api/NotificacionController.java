@@ -43,4 +43,14 @@ public class NotificacionController {
         request.destinatario(), request.mensaje(), request.medio(), "NOTIFICACION_API");
     return ResponseEntity.ok().build();
   }
+
+  @Operation(
+      summary = "Consultar mensajes o alertas por destinatario",
+      description = "Obtiene la lista de notificaciones enviadas a un destinatario específico")
+  @ApiResponse(responseCode = "200", description = "Listado de notificaciones obtenido exitosamente")
+  @GetMapping("/mensajes")
+  public ResponseEntity<java.util.List<com.donatrack.notificaciones.infrastructure.adapters.out.persistence.entities.NotificacionEntity>> obtenerMensajes(
+      @RequestParam(name = "destinatario", required = false) String destinatario) {
+    return ResponseEntity.ok(notificadorService.listarPorDestinatario(destinatario));
+  }
 }

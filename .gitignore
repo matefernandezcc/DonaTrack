@@ -6,6 +6,7 @@ HELP.md
 !**/src/test/**/target/
 .env
 .env.local
+.env.example
 .agent
 
 ### STS ###
@@ -36,7 +37,6 @@ build/
 ### VS Code ###
 .vscode/
 TODO.md
-.env.example
 
 ### Agents & AI Tools ###
 .agents/
