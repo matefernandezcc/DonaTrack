@@ -1,9 +1,7 @@
 package com.donatrack.web;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -242,8 +240,7 @@ class PublicControllerTest {
 
       // Act & Assert
       mockMvc
-          .perform(
-              post("/login").param("username", "donante1").param("password", "clave123"))
+          .perform(post("/login").param("username", "donante1").param("password", "clave123"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/donante"));
 
@@ -251,8 +248,7 @@ class PublicControllerTest {
     }
 
     @Test
-    @DisplayName(
-        "POST /login con credenciales válidas de ADMIN debe redirigir a /app/admin")
+    @DisplayName("POST /login con credenciales válidas de ADMIN debe redirigir a /app/admin")
     void testLoginExitosoAdmin() throws Exception {
       // Arrange
       TokenResponse tokenResp =
@@ -283,8 +279,7 @@ class PublicControllerTest {
         "POST /login con credenciales inválidas debe redirigir a /login con flash attribute loginError")
     void testLoginInvalido() throws Exception {
       // Arrange
-      when(authGateway.login("erroneo", "mal"))
-          .thenThrow(new RuntimeException("Bad credentials"));
+      when(authGateway.login("erroneo", "mal")).thenThrow(new RuntimeException("Bad credentials"));
 
       // Act & Assert
       mockMvc
@@ -374,7 +369,8 @@ class PublicControllerTest {
               flash()
                   .attribute(
                       "registerError",
-                      containsString("No se pudo crear la cuenta: El nombre de usuario ya está registrado")));
+                      containsString(
+                          "No se pudo crear la cuenta: El nombre de usuario ya está registrado")));
     }
   }
 
@@ -410,14 +406,17 @@ class PublicControllerTest {
               "entregas",
                   List.of(
                       Map.of(
-                          "idEntrega", "3300-ABCD-1234",
-                          "estado", "ENTREGADA",
-                          "pesoEstimado", 120.0,
-                          "volumenEstimado", 1.2,
+                          "idEntrega",
+                          "3300-ABCD-1234",
+                          "estado",
+                          "ENTREGADA",
+                          "pesoEstimado",
+                          120.0,
+                          "volumenEstimado",
+                          1.2,
                           "comprobanteRecepcion",
-                              Map.of(
-                                  "fotos",
-                                  List.of("https://storage.donatrack.org/remito-3300.jpg")))));
+                          Map.of(
+                              "fotos", List.of("https://storage.donatrack.org/remito-3300.jpg")))));
 
       Map<String, Object> ruta =
           Map.of(
@@ -453,10 +452,14 @@ class PublicControllerTest {
               "entregas",
                   List.of(
                       Map.of(
-                          "idEntrega", "3200-BXYZ",
-                          "estado", "EN_CAMINO",
-                          "pesoEstimado", 50.0,
-                          "volumenEstimado", 0.6)));
+                          "idEntrega",
+                          "3200-BXYZ",
+                          "estado",
+                          "EN_CAMINO",
+                          "pesoEstimado",
+                          50.0,
+                          "volumenEstimado",
+                          0.6)));
 
       Map<String, Object> ruta =
           Map.of(
@@ -475,7 +478,8 @@ class PublicControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/public/rastreo con código con espacios y minúsculas debe sanitizar y encontrar")
+    @DisplayName(
+        "GET /api/public/rastreo con código con espacios y minúsculas debe sanitizar y encontrar")
     void testRastreoConEspaciosYMinusculas() throws Exception {
       // Arrange
       Map<String, Object> parada =
@@ -723,10 +727,7 @@ class PublicControllerTest {
           .perform(get("/oauth2/authorization/github").param("mock", "true"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/login"))
-          .andExpect(
-              flash()
-                  .attribute(
-                      "loginError", "No se pudo iniciar sesión con github."));
+          .andExpect(flash().attribute("loginError", "No se pudo iniciar sesión con github."));
     }
 
     @Test
@@ -742,9 +743,7 @@ class PublicControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/login"))
           .andExpect(
-              flash()
-                  .attribute(
-                      "loginError", "No se pudo completar el inicio de sesión social."));
+              flash().attribute("loginError", "No se pudo completar el inicio de sesión social."));
     }
   }
 }

@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("hasAnyRole('DONANTE', 'ADMIN')")
 public class DonanteApiController {
 
-  private static final Logger log = LoggerFactory.getLogger(DonanteApiController.class);
   private static final UUID DEFAULT_DONANTE_ID =
       UUID.fromString("a1111111-1111-4111-8111-111111111111");
 
@@ -63,15 +60,16 @@ public class DonanteApiController {
       Map<String, Object> chofer =
           ruta.get("chofer") instanceof Map<?, ?> ch ? (Map<String, Object>) ch : null;
 
-      String patente = camion != null && camion.get("patente") != null
-          ? camion.get("patente").toString()
-          : "AE 884 PO";
-      String choferNombre = chofer != null && chofer.get("nombre") != null
-          ? chofer.get("nombre").toString()
-          : "Chofer Logística";
-      String fecha = ruta.get("fechaOperativa") != null
-          ? ruta.get("fechaOperativa").toString()
-          : "Hoy";
+      String patente =
+          camion != null && camion.get("patente") != null
+              ? camion.get("patente").toString()
+              : "AE 884 PO";
+      String choferNombre =
+          chofer != null && chofer.get("nombre") != null
+              ? chofer.get("nombre").toString()
+              : "Chofer Logística";
+      String fecha =
+          ruta.get("fechaOperativa") != null ? ruta.get("fechaOperativa").toString() : "Hoy";
 
       if (ruta.get("paradas") instanceof List<?> paradas) {
         for (Object pObj : paradas) {
@@ -82,11 +80,12 @@ public class DonanteApiController {
             Object calle = dir.get("calle");
             Object altura = dir.get("altura");
             Object localidad = dir.get("localidad");
-            destinoComedor = String.format(
-                "%s %s, %s",
-                calle != null ? calle : "Destino",
-                altura != null ? altura : "S/N",
-                localidad != null ? localidad : "CABA");
+            destinoComedor =
+                String.format(
+                    "%s %s, %s",
+                    calle != null ? calle : "Destino",
+                    altura != null ? altura : "S/N",
+                    localidad != null ? localidad : "CABA");
           }
 
           double lat = -34.615;
@@ -105,7 +104,8 @@ public class DonanteApiController {
               if (idEntregaStr == null) continue;
 
               boolean coincide = donacionesIds.contains(idEntregaStr.toLowerCase());
-              // Si no hay coincidencias estrictas por ID, permitir incluir si donacionesIds está vacío
+              // Si no hay coincidencias estrictas por ID, permitir incluir si donacionesIds está
+              // vacío
               // o si hay entregas activas
               if (coincide || donacionesIds.isEmpty()) {
                 UUID idDonacion;
@@ -119,7 +119,9 @@ public class DonanteApiController {
                 String shortCode = cleanId.length() >= 4 ? cleanId.substring(0, 4) : cleanId;
                 String codigoCorto = "DT-" + shortCode;
                 String estado =
-                    entrega.get("estado") != null ? entrega.get("estado").toString() : "EN_TRASLADO";
+                    entrega.get("estado") != null
+                        ? entrega.get("estado").toString()
+                        : "EN_TRASLADO";
 
                 entregasActivas.add(
                     new EntregaActivaDonanteDTO(

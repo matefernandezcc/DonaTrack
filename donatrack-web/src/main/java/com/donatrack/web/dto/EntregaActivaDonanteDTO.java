@@ -11,5 +11,4 @@ public record EntregaActivaDonanteDTO(
     String destinoComedor,
     double lat,
     double lng,
-    String ultimaActualizacion
-) {}
+    String ultimaActualizacion) {}

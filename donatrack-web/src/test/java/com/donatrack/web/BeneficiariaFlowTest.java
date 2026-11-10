@@ -112,18 +112,24 @@ class BeneficiariaFlowTest {
   class PanelBeneficiariaTests {
 
     @Test
-    @DisplayName("GET /app/beneficiaria debe cargar necesidades sanitizadas, entregas en camino y kilos recibidos")
+    @DisplayName(
+        "GET /app/beneficiaria debe cargar necesidades sanitizadas, entregas en camino y kilos recibidos")
     void testPanelBeneficiariaExitoso() throws Exception {
       // Arrange
       when(donacionesGateway.obtenerNecesidades(beneficiarioPersonaId))
           .thenReturn(
               List.of(
                   Map.of(
-                      "id", UUID.randomUUID(),
-                      "descripcion", "Leche y cacao para meriendas",
-                      "cantidadRequerida", 50.0,
-                      "subcategoriaRequerida", Map.of("nombre", "Lácteos"),
-                      "tipo", "Periódica"),
+                      "id",
+                      UUID.randomUUID(),
+                      "descripcion",
+                      "Leche y cacao para meriendas",
+                      "cantidadRequerida",
+                      50.0,
+                      "subcategoriaRequerida",
+                      Map.of("nombre", "Lácteos"),
+                      "tipo",
+                      "Periódica"),
                   Map.of(
                       "id", UUID.randomUUID(),
                       "descripcion", "Frazadas polares",
@@ -134,16 +140,17 @@ class BeneficiariaFlowTest {
       when(donacionesGateway.obtenerBeneficiario(beneficiarioPersonaId))
           .thenReturn(
               Map.of(
-                  "correoRepresentante", "coordinacion@esperanza.org",
+                  "correoRepresentante",
+                  "coordinacion@esperanza.org",
                   "persona",
-                      Map.of(
-                          "razonSocial", "Asociación Civil Comedor La Esperanza",
-                          "docNumero", "30-71482910-4",
-                          "direccion",
-                              Map.of(
-                                  "calle", "Av. San Martín",
-                                  "altura", "1450",
-                                  "localidad", "La Plata"))));
+                  Map.of(
+                      "razonSocial", "Asociación Civil Comedor La Esperanza",
+                      "docNumero", "30-71482910-4",
+                      "direccion",
+                          Map.of(
+                              "calle", "Av. San Martín",
+                              "altura", "1450",
+                              "localidad", "La Plata"))));
 
       Map<String, Object> parada1 =
           Map.of(
@@ -152,17 +159,26 @@ class BeneficiariaFlowTest {
               "entregas",
                   List.of(
                       Map.of(
-                          "idEntrega", "3300-AA",
-                          "estado", "ENTREGADA",
-                          "pesoEstimado", 150.0,
-                          "volumenEstimado", 1.5,
+                          "idEntrega",
+                          "3300-AA",
+                          "estado",
+                          "ENTREGADA",
+                          "pesoEstimado",
+                          150.0,
+                          "volumenEstimado",
+                          1.5,
                           "comprobanteRecepcion",
-                              Map.of("fotos", List.of("https://storage.donatrack.org/remito-3300.jpg"))),
+                          Map.of(
+                              "fotos", List.of("https://storage.donatrack.org/remito-3300.jpg"))),
                       Map.of(
-                          "idEntrega", "3400-BB",
-                          "estado", "EN_CAMINO",
-                          "pesoEstimado", 80.0,
-                          "volumenEstimado", 0.8)));
+                          "idEntrega",
+                          "3400-BB",
+                          "estado",
+                          "EN_CAMINO",
+                          "pesoEstimado",
+                          80.0,
+                          "volumenEstimado",
+                          0.8)));
 
       Map<String, Object> ruta1 =
           Map.of(
@@ -183,7 +199,8 @@ class BeneficiariaFlowTest {
           .andExpect(model().attribute("totalEnCamino", 1))
           .andExpect(model().attribute("totalRecibidas", 1))
           .andExpect(model().attribute("kilosRecibidos", 150L))
-          .andExpect(model().attribute("nombreOrganizacion", "Asociación Civil Comedor La Esperanza"))
+          .andExpect(
+              model().attribute("nombreOrganizacion", "Asociación Civil Comedor La Esperanza"))
           .andExpect(model().attribute("cuitOrganizacion", "30-71482910-4"))
           .andExpect(model().attribute("direccionOrganizacion", "Av. San Martín 1450, La Plata"))
           .andExpect(model().attribute("emailOrganizacion", "coordinacion@esperanza.org"))
@@ -194,7 +211,8 @@ class BeneficiariaFlowTest {
     }
 
     @Test
-    @DisplayName("GET /app/beneficiaria con vista ADMIN debe indicar (Vista Admin) y resolver correctamente")
+    @DisplayName(
+        "GET /app/beneficiaria con vista ADMIN debe indicar (Vista Admin) y resolver correctamente")
     void testPanelBeneficiariaVistaAdmin() throws Exception {
       when(donacionesGateway.obtenerNecesidades(any())).thenReturn(Collections.emptyList());
       when(donacionesGateway.obtenerBeneficiario(any())).thenReturn(Collections.emptyMap());
@@ -223,11 +241,16 @@ class BeneficiariaFlowTest {
           .thenReturn(
               List.of(
                   Map.of(
-                      "id", UUID.randomUUID(),
-                      "descripcion", "Arroz largo fino",
-                      "cantidadRequerida", 100.0,
-                      "subcategoriaRequerida", Map.of("nombre", "Alimentos Secos"),
-                      "tipo", "Ordinaria")));
+                      "id",
+                      UUID.randomUUID(),
+                      "descripcion",
+                      "Arroz largo fino",
+                      "cantidadRequerida",
+                      100.0,
+                      "subcategoriaRequerida",
+                      Map.of("nombre", "Alimentos Secos"),
+                      "tipo",
+                      "Ordinaria")));
 
       mockMvc
           .perform(get("/app/beneficiaria/necesidades").principal(benefAuth))
@@ -238,7 +261,8 @@ class BeneficiariaFlowTest {
     }
 
     @Test
-    @DisplayName("POST /app/beneficiaria/necesidades exitoso debe registrar en gateway y setear flashOk")
+    @DisplayName(
+        "POST /app/beneficiaria/necesidades exitoso debe registrar en gateway y setear flashOk")
     void testCrearNecesidadExitoso() throws Exception {
       mockMvc
           .perform(
@@ -257,13 +281,16 @@ class BeneficiariaFlowTest {
               eq(beneficiarioPersonaId),
               eq(
                   Map.of(
-                      "tipo", "Extraordinaria",
-                      "descripcion", "Zapatillas infantiles talles 28 a 34",
-                      "cantidadRequerida", 30.0,
+                      "tipo",
+                      "Extraordinaria",
+                      "descripcion",
+                      "Zapatillas infantiles talles 28 a 34",
+                      "cantidadRequerida",
+                      30.0,
                       "subcategoriaRequerida",
-                          Map.of(
-                              "nombre", "Calzado",
-                              "descripcion", "Categoría Calzado"))));
+                      Map.of(
+                          "nombre", "Calzado",
+                          "descripcion", "Categoría Calzado"))));
     }
 
     @Test
@@ -287,7 +314,8 @@ class BeneficiariaFlowTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString("Error al registrar necesidad: Microservicio de donaciones no responde")));
+                      containsString(
+                          "Error al registrar necesidad: Microservicio de donaciones no responde")));
     }
   }
 
@@ -316,18 +344,17 @@ class BeneficiariaFlowTest {
     }
 
     @Test
-    @DisplayName("POST /app/beneficiaria/entregas/confirmar con fotoArchivo debe subir a S3 y confirmar")
+    @DisplayName(
+        "POST /app/beneficiaria/entregas/confirmar con fotoArchivo debe subir a S3 y confirmar")
     void testConfirmarEntregaConArchivo() throws Exception {
       // Arrange
       UUID donacionId = UUID.randomUUID();
       MockMultipartFile file =
           new MockMultipartFile(
-              "fotoArchivo",
-              "acta_entrega.jpg",
-              "image/jpeg",
-              "fake-image-bytes".getBytes());
+              "fotoArchivo", "acta_entrega.jpg", "image/jpeg", "fake-image-bytes".getBytes());
 
-      String s3Url = "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/acta-123.jpg";
+      String s3Url =
+          "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/acta-123.jpg";
       when(logisticaGateway.subirFotoComprobante(eq(donacionId), any())).thenReturn(s3Url);
 
       // Act & Assert
@@ -340,7 +367,11 @@ class BeneficiariaFlowTest {
                   .param("patenteCamion", "AA111BB"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/beneficiaria/entregas"))
-          .andExpect(flash().attribute("flashOk", containsString("confirmada con éxito. Comprobante alojado en Supabase S3.")));
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk",
+                      containsString("confirmada con éxito. Comprobante alojado en Supabase S3.")));
 
       verify(logisticaGateway, times(1)).subirFotoComprobante(eq(donacionId), any());
       verify(logisticaGateway, times(1)).confirmarEntrega(donacionId, List.of(s3Url), "AA111BB");
@@ -363,11 +394,13 @@ class BeneficiariaFlowTest {
           .andExpect(redirectedUrl("/app/beneficiaria/entregas"))
           .andExpect(flash().attributeExists("flashOk"));
 
-      verify(logisticaGateway, times(1)).confirmarEntrega(donacionId, List.of(customUrl), "AF456CD");
+      verify(logisticaGateway, times(1))
+          .confirmarEntrega(donacionId, List.of(customUrl), "AF456CD");
     }
 
     @Test
-    @DisplayName("POST /app/beneficiaria/entregas/confirmar sin foto usa comprobante default de Supabase")
+    @DisplayName(
+        "POST /app/beneficiaria/entregas/confirmar sin foto usa comprobante default de Supabase")
     void testConfirmarEntregaDefaultSupabase() throws Exception {
       UUID donacionId = UUID.randomUUID();
 
@@ -409,8 +442,7 @@ class BeneficiariaFlowTest {
           .andExpect(
               flash()
                   .attribute(
-                      "flashError",
-                      containsString("Camión no coincide con la hoja de ruta")));
+                      "flashError", containsString("Camión no coincide con la hoja de ruta")));
     }
   }
 }

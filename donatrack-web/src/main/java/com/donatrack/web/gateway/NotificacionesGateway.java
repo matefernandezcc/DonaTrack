@@ -24,7 +24,9 @@ public class NotificacionesGateway {
     try {
       String uri = "/api/mensajes";
       if (destinatario != null && !destinatario.isBlank()) {
-        uri += "?destinatario=" + java.net.URLEncoder.encode(destinatario, java.nio.charset.StandardCharsets.UTF_8);
+        uri +=
+            "?destinatario="
+                + java.net.URLEncoder.encode(destinatario, java.nio.charset.StandardCharsets.UTF_8);
       }
       List<Map<String, Object>> result =
           notificacionesClient

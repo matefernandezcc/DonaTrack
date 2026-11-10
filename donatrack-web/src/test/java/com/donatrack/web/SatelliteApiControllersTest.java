@@ -3,7 +3,6 @@ package com.donatrack.web;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -23,7 +22,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -85,12 +83,14 @@ class SatelliteApiControllersTest {
     notificacionesMvc
         .perform(get("/api/notificaciones/mis-alertas").principal(auth))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].mensaje").value("Tu donación ha sido asignada al Comedor El Faro"))
+        .andExpect(
+            jsonPath("$[0].mensaje").value("Tu donación ha sido asignada al Comedor El Faro"))
         .andExpect(jsonPath("$[0].medio").value("EMAIL"));
   }
 
   @Test
-  @DisplayName("GET /api/notificaciones/mis-alertas — Retorna lista vacía si auth es nulo o sin email")
+  @DisplayName(
+      "GET /api/notificaciones/mis-alertas — Retorna lista vacía si auth es nulo o sin email")
   void testMisAlertasSinAuth() throws Exception {
     notificacionesMvc
         .perform(get("/api/notificaciones/mis-alertas"))
@@ -128,7 +128,8 @@ class SatelliteApiControllersTest {
   }
 
   @Test
-  @DisplayName("GET /api/public/mapa-entregas — Retorna centros de acopio, ONGs y entregas públicas")
+  @DisplayName(
+      "GET /api/public/mapa-entregas — Retorna centros de acopio, ONGs y entregas públicas")
   void testMapaEntregasPublico() throws Exception {
     when(donacionesGateway.obtenerBeneficiarios()).thenReturn(List.of());
 
@@ -143,8 +144,7 @@ class SatelliteApiControllersTest {
   @Test
   @DisplayName("CacheResilienteService — Almacena en caché respuesta fresca del gateway")
   void testCacheResilienteDatosFrescos() {
-    Map<String, Object> rutaSimulada =
-        Map.of("id", UUID.randomUUID().toString(), "iniciada", true);
+    Map<String, Object> rutaSimulada = Map.of("id", UUID.randomUUID().toString(), "iniciada", true);
     when(logisticaGateway.listarRutas()).thenReturn(List.of(rutaSimulada));
 
     List<Map<String, Object>> rutas = cacheResilienteService.obtenerRutasConCache();
@@ -164,7 +164,8 @@ class SatelliteApiControllersTest {
   @Test
   @DisplayName("CacheResilienteService — Utiliza fallback sanitizado ante timeout de logística")
   void testCacheResilienteFallback() {
-    when(logisticaGateway.listarRutas()).thenThrow(new RuntimeException("Simulated Render Cold-Start"));
+    when(logisticaGateway.listarRutas())
+        .thenThrow(new RuntimeException("Simulated Render Cold-Start"));
 
     List<Map<String, Object>> rutas = cacheResilienteService.obtenerRutasConCache();
     assertNotNull(rutas);

@@ -84,8 +84,7 @@ class AdminControllerTest {
             .expiresAt(Instant.now().plusSeconds(3600))
             .build();
     adminAuth =
-        new JwtAuthenticationToken(
-            jwtAdmin, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        new JwtAuthenticationToken(jwtAdmin, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
     Jwt jwtDonante =
         Jwt.withTokenValue("mock-jwt-donante")
@@ -98,8 +97,7 @@ class AdminControllerTest {
             .expiresAt(Instant.now().plusSeconds(3600))
             .build();
     donanteAuth =
-        new JwtAuthenticationToken(
-            jwtDonante, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
+        new JwtAuthenticationToken(jwtDonante, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
 
     Jwt jwtBenef =
         Jwt.withTokenValue("mock-jwt-benef")
@@ -152,7 +150,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/perfil/actualizar actualiza descripción y redirige al referer con flashOk")
+    @DisplayName(
+        "POST /app/perfil/actualizar actualiza descripción y redirige al referer con flashOk")
     void testActualizarPerfilExitoso() throws Exception {
       // Act & Assert
       mockMvc
@@ -168,9 +167,7 @@ class AdminControllerTest {
 
       verify(authGateway, times(1))
           .actualizarPerfil(
-              any(UUID.class),
-              eq("Nueva descripción institucional"),
-              eq("Córdoba, Argentina"));
+              any(UUID.class), eq("Nueva descripción institucional"), eq("Córdoba, Argentina"));
     }
 
     @Test
@@ -263,12 +260,12 @@ class AdminControllerTest {
           .andExpect(redirectedUrl("/app/admin/camiones"))
           .andExpect(flash().attribute("flashOk", "Camión AE789XY registrado con éxito."));
 
-      verify(logisticaGateway, times(1))
-          .crearCamion(new CamionDto("AE789XY", 35.0, 4.0, 6000.0));
+      verify(logisticaGateway, times(1)).crearCamion(new CamionDto("AE789XY", 35.0, 4.0, 6000.0));
     }
 
     @Test
-    @DisplayName("POST /app/admin/camiones con error en gateway debe atrapar excepción y setear flashError")
+    @DisplayName(
+        "POST /app/admin/camiones con error en gateway debe atrapar excepción y setear flashError")
     void testCrearCamionError() throws Exception {
       doThrow(new RuntimeException("Patente ya existente"))
           .when(logisticaGateway)
@@ -291,8 +288,7 @@ class AdminControllerTest {
     @DisplayName("POST /app/admin/camiones/{patente}/eliminar exitoso redirige con flashOk")
     void testEliminarCamionExitoso() throws Exception {
       mockMvc
-          .perform(
-              post("/app/admin/camiones/AE789XY/eliminar").principal(adminAuth))
+          .perform(post("/app/admin/camiones/AE789XY/eliminar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
           .andExpect(flash().attribute("flashOk", "Camión AE789XY eliminado."));
@@ -308,11 +304,11 @@ class AdminControllerTest {
           .eliminarCamion("AE789XY");
 
       mockMvc
-          .perform(
-              post("/app/admin/camiones/AE789XY/eliminar").principal(adminAuth))
+          .perform(post("/app/admin/camiones/AE789XY/eliminar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
-          .andExpect(flash().attribute("flashError", containsString("Camión asignado a una ruta activa")));
+          .andExpect(
+              flash().attribute("flashError", containsString("Camión asignado a una ruta activa")));
     }
   }
 
@@ -360,9 +356,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("POST /app/admin/choferes con error en gateway setea flashError")
     void testCrearChoferError() throws Exception {
-      doThrow(new RuntimeException("Legajo duplicado"))
-          .when(logisticaGateway)
-          .crearChofer(any());
+      doThrow(new RuntimeException("Legajo duplicado")).when(logisticaGateway).crearChofer(any());
 
       mockMvc
           .perform(
@@ -381,8 +375,7 @@ class AdminControllerTest {
     @DisplayName("POST /app/admin/choferes/{legajo}/eliminar exitoso redirige con flashOk")
     void testEliminarChoferExitoso() throws Exception {
       mockMvc
-          .perform(
-              post("/app/admin/choferes/CH-505/eliminar").principal(adminAuth))
+          .perform(post("/app/admin/choferes/CH-505/eliminar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/choferes"))
           .andExpect(flash().attribute("flashOk", "Chofer con legajo CH-505 eliminado."));
@@ -398,11 +391,11 @@ class AdminControllerTest {
           .eliminarChofer("CH-505");
 
       mockMvc
-          .perform(
-              post("/app/admin/choferes/CH-505/eliminar").principal(adminAuth))
+          .perform(post("/app/admin/choferes/CH-505/eliminar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/choferes"))
-          .andExpect(flash().attribute("flashError", containsString("Chofer con ruta en ejecución")));
+          .andExpect(
+              flash().attribute("flashError", containsString("Chofer con ruta en ejecución")));
     }
   }
 
@@ -444,9 +437,7 @@ class AdminControllerTest {
                   Map.of("user", "a1111111-1111-4111-8111-111111111111", "totalDonations", 25)));
 
       when(authGateway.listarUsuarios())
-          .thenReturn(
-              List.of(
-                  Map.of("id", userUuid.toString(), "nombre", "Martín Palermo")));
+          .thenReturn(List.of(Map.of("id", userUuid.toString(), "nombre", "Martín Palermo")));
 
       when(donacionesGateway.obtenerPersonas()).thenReturn(Collections.emptyList());
 
@@ -471,7 +462,8 @@ class AdminControllerTest {
   class MatchmakingTests {
 
     @Test
-    @DisplayName("GET /app/admin/matchmaking sin donacionId debe mostrar bandeja de donaciones y beneficiarios")
+    @DisplayName(
+        "GET /app/admin/matchmaking sin donacionId debe mostrar bandeja de donaciones y beneficiarios")
     void testMatchmakingBandejaPrincipal() throws Exception {
       // Arrange
       when(donacionesGateway.obtenerBeneficiarios())
@@ -506,7 +498,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("GET /app/admin/matchmaking con donacionId y algoritmo SEMANTICO debe obtener sugerencias enriquecidas")
+    @DisplayName(
+        "GET /app/admin/matchmaking con donacionId y algoritmo SEMANTICO debe obtener sugerencias enriquecidas")
     void testMatchmakingConDonacionYSugerencias() throws Exception {
       // Arrange
       UUID donacionId = UUID.randomUUID();
@@ -521,14 +514,10 @@ class AdminControllerTest {
                       "necesidadesDeclaradas", List.of())));
 
       when(donacionesGateway.listarDonaciones(null, null))
-          .thenReturn(
-              List.of(
-                  Map.of("id", donacionId.toString(), "estado", "EN_DEPOSITO")));
+          .thenReturn(List.of(Map.of("id", donacionId.toString(), "estado", "EN_DEPOSITO")));
 
       when(donacionesGateway.sugerirBeneficiarios(donacionId, "SEMANTICO"))
-          .thenReturn(
-              List.of(
-                  Map.of("id", benefId.toString(), "compatibilidad", 0.95)));
+          .thenReturn(List.of(Map.of("id", benefId.toString(), "compatibilidad", 0.95)));
 
       // Act & Assert
       mockMvc
@@ -545,7 +534,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/admin/matchmaking/asignar exitoso debe invocar donacionesGateway y setear flashOk")
+    @DisplayName(
+        "POST /app/admin/matchmaking/asignar exitoso debe invocar donacionesGateway y setear flashOk")
     void testAsignarDonacionExitoso() throws Exception {
       UUID donacionId = UUID.randomUUID();
       UUID benefId = UUID.randomUUID();
@@ -585,7 +575,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/admin/matchmaking/batch exitoso ejecuta batch sobre donaciones pendientes")
+    @DisplayName(
+        "POST /app/admin/matchmaking/batch exitoso ejecuta batch sobre donaciones pendientes")
     void testBatchMatchmakingExitoso() throws Exception {
       mockMvc
           .perform(post("/app/admin/matchmaking/batch").principal(adminAuth))
@@ -607,7 +598,8 @@ class AdminControllerTest {
           .perform(post("/app/admin/matchmaking/batch").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
-          .andExpect(flash().attribute("flashError", containsString("Fallo en optimizador genético")));
+          .andExpect(
+              flash().attribute("flashError", containsString("Fallo en optimizador genético")));
     }
   }
 
@@ -645,13 +637,11 @@ class AdminControllerTest {
       when(donacionesGateway.importarCsv(any())).thenReturn("1 registros procesados");
 
       mockMvc
-          .perform(
-              multipart("/app/admin/csv")
-                  .file(csvFile)
-                  .principal(adminAuth))
+          .perform(multipart("/app/admin/csv").file(csvFile).principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/csv"))
-          .andExpect(flash().attribute("flashOk", "Importación completada: 1 registros procesados"));
+          .andExpect(
+              flash().attribute("flashOk", "Importación completada: 1 registros procesados"));
 
       verify(donacionesGateway, times(1)).importarCsv(any());
     }
@@ -661,25 +651,17 @@ class AdminControllerTest {
     void testImportarCsvError() throws Exception {
       MockMultipartFile csvFile =
           new MockMultipartFile(
-              "file",
-              "personas_corrupto.csv",
-              "text/csv",
-              "bad;format".getBytes());
+              "file", "personas_corrupto.csv", "text/csv", "bad;format".getBytes());
 
       when(donacionesGateway.importarCsv(any()))
           .thenThrow(new RuntimeException("Formato de columnas inválido"));
 
       mockMvc
-          .perform(
-              multipart("/app/admin/csv")
-                  .file(csvFile)
-                  .principal(adminAuth))
+          .perform(multipart("/app/admin/csv").file(csvFile).principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/csv"))
           .andExpect(
-              flash()
-                  .attribute(
-                      "flashError", containsString("Formato de columnas inválido")));
+              flash().attribute("flashError", containsString("Formato de columnas inválido")));
     }
   }
 
@@ -783,7 +765,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/admin/solicitudes-ong/{id}/aprobar aprueba ONG y actualiza rol del usuario a BENEFICIARIA")
+    @DisplayName(
+        "POST /app/admin/solicitudes-ong/{id}/aprobar aprueba ONG y actualiza rol del usuario a BENEFICIARIA")
     void testAprobarSolicitudOngExitoso() throws Exception {
       // Arrange
       String solId = "SOL-202";
@@ -814,9 +797,7 @@ class AdminControllerTest {
 
       // Act & Assert
       mockMvc
-          .perform(
-              post("/app/admin/solicitudes-ong/" + solId + "/aprobar")
-                  .principal(adminAuth))
+          .perform(post("/app/admin/solicitudes-ong/" + solId + "/aprobar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/usuarios"))
           .andExpect(
@@ -830,7 +811,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/admin/solicitudes-ong/{id}/aprobar aprueba solicitud aunque aún no exista usuario con ese email")
+    @DisplayName(
+        "POST /app/admin/solicitudes-ong/{id}/aprobar aprueba solicitud aunque aún no exista usuario con ese email")
     void testAprobarSolicitudOngSinUsuarioCoincidente() throws Exception {
       // Arrange
       String solId = "SOL-999";
@@ -853,12 +835,11 @@ class AdminControllerTest {
 
       // Act & Assert
       mockMvc
-          .perform(
-              post("/app/admin/solicitudes-ong/" + solId + "/aprobar")
-                  .principal(adminAuth))
+          .perform(post("/app/admin/solicitudes-ong/" + solId + "/aprobar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/usuarios"))
-          .andExpect(flash().attribute("flashOk", containsString("verificada y aprobada con éxito.")));
+          .andExpect(
+              flash().attribute("flashOk", containsString("verificada y aprobada con éxito.")));
 
       verify(solicitudOngService, times(1)).actualizarEstado(solId, "APROBADA");
       verify(authGateway, never()).cambiarRol(any(), any());
@@ -874,7 +855,8 @@ class AdminControllerTest {
   class OperatoriaDepositoTests {
 
     @Test
-    @DisplayName("GET /app/admin/donaciones/recepcion debe retornar vista de recepción con listado de personas")
+    @DisplayName(
+        "GET /app/admin/donaciones/recepcion debe retornar vista de recepción con listado de personas")
     void testRecepcionDonacionForm() throws Exception {
       when(donacionesGateway.obtenerPersonas())
           .thenReturn(
@@ -893,7 +875,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/admin/donaciones/recepcion exitoso registra donación en depósito y redirige a matchmaking")
+    @DisplayName(
+        "POST /app/admin/donaciones/recepcion exitoso registra donación en depósito y redirige a matchmaking")
     void testRegistrarRecepcionDonacionExitoso() throws Exception {
       UUID donanteId = UUID.randomUUID();
 
@@ -912,8 +895,7 @@ class AdminControllerTest {
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
           .andExpect(
               flash()
-                  .attribute(
-                      "flashOk", "Donación recibida e ingresada a depósito correctamente."));
+                  .attribute("flashOk", "Donación recibida e ingresada a depósito correctamente."));
 
       verify(donacionesGateway, times(1))
           .crearRecepcion(
@@ -926,7 +908,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/admin/donaciones/recepcion con campos inválidos retorna formulario con error")
+    @DisplayName(
+        "POST /app/admin/donaciones/recepcion con campos inválidos retorna formulario con error")
     void testRegistrarRecepcionDonacionInvalido() throws Exception {
       when(donacionesGateway.obtenerPersonas()).thenReturn(Collections.emptyList());
 
@@ -948,7 +931,8 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/admin/donaciones/recepcion con error en gateway redirige a formulario con flashError")
+    @DisplayName(
+        "POST /app/admin/donaciones/recepcion con error en gateway redirige a formulario con flashError")
     void testRegistrarRecepcionDonacionErrorGateway() throws Exception {
       UUID donanteId = UUID.randomUUID();
       doThrow(new RuntimeException("Error en base de datos"))
@@ -971,18 +955,18 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString("Error al registrar la donación en depósito: Error en base de datos")));
+                      containsString(
+                          "Error al registrar la donación en depósito: Error en base de datos")));
     }
 
     @Test
-    @DisplayName("POST /app/admin/donaciones/{id}/vencer marca donación como vencida con código de seguimiento")
+    @DisplayName(
+        "POST /app/admin/donaciones/{id}/vencer marca donación como vencida con código de seguimiento")
     void testVencerDonacionExitoso() throws Exception {
       UUID donacionId = UUID.fromString("4444a111-0000-4000-8000-000000000001");
 
       mockMvc
-          .perform(
-              post("/app/admin/donaciones/{id}/vencer", donacionId)
-                  .principal(adminAuth))
+          .perform(post("/app/admin/donaciones/{id}/vencer", donacionId).principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
           .andExpect(
@@ -1003,25 +987,23 @@ class AdminControllerTest {
           .marcarDonacionVencida(donacionId);
 
       mockMvc
-          .perform(
-              post("/app/admin/donaciones/{id}/vencer", donacionId)
-                  .principal(adminAuth))
+          .perform(post("/app/admin/donaciones/{id}/vencer", donacionId).principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
           .andExpect(
               flash()
                   .attribute(
                       "flashError",
-                      containsString("No se pudo marcar la donación como vencida: Donación no encontrada")));
+                      containsString(
+                          "No se pudo marcar la donación como vencida: Donación no encontrada")));
     }
 
     @Test
-    @DisplayName("POST /app/admin/donaciones/auditoria-vencidos ejecuta barrido exitoso y setea flashOk")
+    @DisplayName(
+        "POST /app/admin/donaciones/auditoria-vencidos ejecuta barrido exitoso y setea flashOk")
     void testAuditarDonacionesVencidasExitoso() throws Exception {
       mockMvc
-          .perform(
-              post("/app/admin/donaciones/auditoria-vencidos")
-                  .principal(adminAuth))
+          .perform(post("/app/admin/donaciones/auditoria-vencidos").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
           .andExpect(
@@ -1034,23 +1016,23 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /app/admin/donaciones/auditoria-vencidos con error en gateway setea flashError")
+    @DisplayName(
+        "POST /app/admin/donaciones/auditoria-vencidos con error en gateway setea flashError")
     void testAuditarDonacionesVencidasError() throws Exception {
       doThrow(new RuntimeException("Fallo en servicio de inventario"))
           .when(donacionesGateway)
           .auditarVencidos();
 
       mockMvc
-          .perform(
-              post("/app/admin/donaciones/auditoria-vencidos")
-                  .principal(adminAuth))
+          .perform(post("/app/admin/donaciones/auditoria-vencidos").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
           .andExpect(
               flash()
                   .attribute(
                       "flashError",
-                      containsString("Error al ejecutar la auditoría de vencimientos: Fallo en servicio de inventario")));
+                      containsString(
+                          "Error al ejecutar la auditoría de vencimientos: Fallo en servicio de inventario")));
     }
   }
 }

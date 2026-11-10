@@ -263,15 +263,18 @@ public class IncentivoController {
 
   @Operation(
       summary = "Obtener historial de rankings mensuales",
-      description = "Devuelve los rankings mensuales históricos guardados con las posiciones de los donantes")
+      description =
+          "Devuelve los rankings mensuales históricos guardados con las posiciones de los donantes")
   @ApiResponse(responseCode = "200", description = "Historial de rankings obtenido")
   @GetMapping("/ranking/historial")
   public ResponseEntity<List<Map<String, Object>>> obtenerHistorialRankings() {
     if (rankingMensualJpaRepository == null) {
       return ResponseEntity.ok(Collections.emptyList());
     }
-    List<com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities.RankingMensualEntity> entities =
-        rankingMensualJpaRepository.findAll();
+    List<
+            com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
+                .RankingMensualEntity>
+        entities = rankingMensualJpaRepository.findAll();
     List<Map<String, Object>> result = new ArrayList<>();
     for (var r : entities) {
       if (r == null) continue;

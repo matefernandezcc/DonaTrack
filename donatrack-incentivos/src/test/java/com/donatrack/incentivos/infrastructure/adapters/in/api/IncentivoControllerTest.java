@@ -21,8 +21,6 @@ import com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
 import com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities.RankingMensualEntity;
 import com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.PerfilDonanteJpaRepository;
 import com.donatrack.incentivos.infrastructure.adapters.out.persistence.repositories.RankingMensualJpaRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,7 +47,6 @@ class IncentivoControllerTest {
   private DifusionPort difusionPort;
   private RankingMensualJpaRepository rankingMensualJpaRepository;
   private PerfilDonanteJpaRepository perfilDonanteJpaRepository;
-
 
   @BeforeEach
   void setUp() {
@@ -83,7 +80,8 @@ class IncentivoControllerTest {
   class HistorialRankingsTests {
 
     @Test
-    @DisplayName("GET /api/ranking/historial retorna historial completo con datos de personas resueltos")
+    @DisplayName(
+        "GET /api/ranking/historial retorna historial completo con datos de personas resueltos")
     void testObtenerHistorialConDatos() throws Exception {
       UUID rankingId = UUID.randomUUID();
       UUID donanteId1 = UUID.fromString("a1111111-1111-4111-8111-111111111111");
@@ -143,7 +141,8 @@ class IncentivoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/ranking/historial maneja fallback cuando personaClient falla o retorna null")
+    @DisplayName(
+        "GET /api/ranking/historial maneja fallback cuando personaClient falla o retorna null")
     void testObtenerHistorialFallbackPersonaClient() throws Exception {
       UUID rankingId = UUID.randomUUID();
       UUID donanteId = UUID.fromString("c3333333-3333-4333-8333-333333333333");
@@ -166,7 +165,8 @@ class IncentivoControllerTest {
       rankingEntity.setPosiciones(new ArrayList<>(List.of(pos)));
 
       when(rankingMensualJpaRepository.findAll()).thenReturn(List.of(rankingEntity));
-      when(personaClient.obtenerPersona(donanteId)).thenThrow(new RuntimeException("Servicio de personas caído"));
+      when(personaClient.obtenerPersona(donanteId))
+          .thenThrow(new RuntimeException("Servicio de personas caído"));
 
       mockMvc
           .perform(get("/api/ranking/historial"))
@@ -186,7 +186,8 @@ class IncentivoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/ranking/historial cuando rankingMensualJpaRepository es null retorna lista vacía")
+    @DisplayName(
+        "GET /api/ranking/historial cuando rankingMensualJpaRepository es null retorna lista vacía")
     void testObtenerHistorialRepositoryNull() throws Exception {
       IncentivoController controllerSinRepo =
           new IncentivoController(
@@ -290,8 +291,7 @@ class IncentivoControllerTest {
     void testObtenerRankingTop3() throws Exception {
       UUID donanteId = UUID.randomUUID();
       PerfilDonante p1 = new PerfilDonante(donanteId);
-      when(rankingMensualService.obtenerTop3Mensual(any(YearMonth.class)))
-          .thenReturn(List.of(p1));
+      when(rankingMensualService.obtenerTop3Mensual(any(YearMonth.class))).thenReturn(List.of(p1));
 
       mockMvc
           .perform(get("/api/ranking/top3"))

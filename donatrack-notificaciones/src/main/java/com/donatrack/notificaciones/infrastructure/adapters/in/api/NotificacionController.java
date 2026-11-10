@@ -2,12 +2,14 @@ package com.donatrack.notificaciones.infrastructure.adapters.in.api;
 
 import com.donatrack.common.dto.ErrorResponse;
 import com.donatrack.notificaciones.application.usecases.NotificadorService;
+import com.donatrack.notificaciones.infrastructure.adapters.in.api.dto.NotificacionResponseDTO;
 import com.donatrack.notificaciones.infrastructure.adapters.out.client.NotificacionRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,10 +49,24 @@ public class NotificacionController {
   @Operation(
       summary = "Consultar mensajes o alertas por destinatario",
       description = "Obtiene la lista de notificaciones enviadas a un destinatario específico")
-  @ApiResponse(responseCode = "200", description = "Listado de notificaciones obtenido exitosamente")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Listado de notificaciones obtenido exitosamente")
   @GetMapping("/mensajes")
-  public ResponseEntity<java.util.List<com.donatrack.notificaciones.infrastructure.adapters.out.persistence.entities.NotificacionEntity>> obtenerMensajes(
+  public ResponseEntity<List<NotificacionResponseDTO>> obtenerMensajes(
       @RequestParam(name = "destinatario", required = false) String destinatario) {
-    return ResponseEntity.ok(notificadorService.listarPorDestinatario(destinatario));
+    List<NotificacionResponseDTO> response =
+        notificadorService.listarPorDestinatario(destinatario).stream()
+            .map(
+                n ->
+                    new NotificacionResponseDTO(
+                        n.getId(),
+                        n.getDestinatario(),
+                        n.getMensaje(),
+                        n.getMedio(),
+                        n.getFechaEnvio(),
+                        Boolean.TRUE.equals(n.getCompletada())))
+            .toList();
+    return ResponseEntity.ok(response);
   }
 }

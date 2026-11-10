@@ -13,5 +13,4 @@ public record RecepcionDepositoRequest(
     @NotBlank String unidadMedicion,
     @NotBlank String nombreSubcategoria,
     boolean esUsado,
-    LocalDate fechaVencimiento
-) {}
+    LocalDate fechaVencimiento) {}

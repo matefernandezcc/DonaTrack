@@ -10,5 +10,4 @@ public record PuntoMapaPublicoDTO(
     String subcategoria,
     String fecha,
     String estado,
-    String fotoUrl
-) {}
+    String fotoUrl) {}

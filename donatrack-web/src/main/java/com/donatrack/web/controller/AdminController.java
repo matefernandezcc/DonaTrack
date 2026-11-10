@@ -393,7 +393,8 @@ public class AdminController {
     }
     model.addAttribute("ranking", ranking);
     List<Map<String, Object>> historialRankings = incentivosGateway.obtenerHistorialRankings();
-    model.addAttribute("historial", historialRankings != null ? historialRankings : Collections.emptyList());
+    model.addAttribute(
+        "historial", historialRankings != null ? historialRankings : Collections.emptyList());
     return "admin/admin/ranking";
   }
 
@@ -607,7 +608,8 @@ public class AdminController {
   @PostMapping("/admin/donaciones/recepcion")
   @PreAuthorize("hasRole('ADMIN')")
   public String registrarRecepcionDonacion(
-      @jakarta.validation.Valid @ModelAttribute com.donatrack.web.dto.RecepcionDepositoRequest request,
+      @jakarta.validation.Valid @ModelAttribute
+          com.donatrack.web.dto.RecepcionDepositoRequest request,
       org.springframework.validation.BindingResult bindingResult,
       Authentication auth,
       RedirectAttributes redirectAttributes,
@@ -621,7 +623,8 @@ public class AdminController {
       UUID adminId = resolverDonanteId(auth);
       Map<String, Object> payload = new HashMap<>();
       payload.put("idDonante", request.idDonante().toString());
-      payload.put("idAdministrador", adminId != null ? adminId.toString() : DEFAULT_ADMIN_ID.toString());
+      payload.put(
+          "idAdministrador", adminId != null ? adminId.toString() : DEFAULT_ADMIN_ID.toString());
 
       Map<String, Object> bien = new HashMap<>();
       bien.put("descripcion", request.descripcion());
@@ -648,8 +651,7 @@ public class AdminController {
 
   @PostMapping("/admin/donaciones/{id}/vencer")
   @PreAuthorize("hasRole('ADMIN')")
-  public String vencerDonacion(
-      @PathVariable("id") UUID id, RedirectAttributes redirectAttributes) {
+  public String vencerDonacion(@PathVariable("id") UUID id, RedirectAttributes redirectAttributes) {
     try {
       donacionesGateway.marcarDonacionVencida(id);
       String shortCode = "#DT-" + id.toString().substring(0, 4).toUpperCase();

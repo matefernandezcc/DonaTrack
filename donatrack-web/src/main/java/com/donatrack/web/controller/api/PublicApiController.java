@@ -130,7 +130,9 @@ public class PublicApiController {
       for (Map<String, Object> ruta : rutas) {
         if (ruta == null) continue;
         String fecha =
-            ruta.get("fechaOperativa") != null ? ruta.get("fechaOperativa").toString() : "12 May 2026";
+            ruta.get("fechaOperativa") != null
+                ? ruta.get("fechaOperativa").toString()
+                : "12 May 2026";
         if (ruta.get("paradas") instanceof List<?> paradas) {
           for (Object pObj : paradas) {
             if (!(pObj instanceof Map<?, ?> parada)) continue;

@@ -321,7 +321,8 @@ public class DonacionController {
 
   @Operation(
       summary = "Marcar donación como vencida",
-      description = "Actualiza el estado de una donación en depósito a VENCIDA con auditoría de motivo")
+      description =
+          "Actualiza el estado de una donación en depósito a VENCIDA con auditoría de motivo")
   @ApiResponse(responseCode = "200", description = "Donación marcada como vencida")
   @ApiResponse(
       responseCode = "400",

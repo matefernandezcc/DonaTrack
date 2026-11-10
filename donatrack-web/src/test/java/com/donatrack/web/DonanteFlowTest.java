@@ -146,7 +146,8 @@ class DonanteFlowTest {
     @CsvSource({"mis-donaciones", "causas", "insignias", "resumen"})
     void testTabsNavegacion(String tab) throws Exception {
       when(incentivosGateway.obtenerMetricas(donantePersonaId)).thenReturn(Collections.emptyMap());
-      when(donacionesGateway.listarDonaciones(null, donantePersonaId)).thenReturn(Collections.emptyList());
+      when(donacionesGateway.listarDonaciones(null, donantePersonaId))
+          .thenReturn(Collections.emptyList());
       when(donacionesGateway.obtenerBeneficiarios()).thenReturn(Collections.emptyList());
 
       mockMvc
@@ -175,7 +176,8 @@ class DonanteFlowTest {
                   "cantidadBienesDonados", 10L,
                   "puntosTotales", puntos));
 
-      when(donacionesGateway.listarDonaciones(null, donantePersonaId)).thenReturn(Collections.emptyList());
+      when(donacionesGateway.listarDonaciones(null, donantePersonaId))
+          .thenReturn(Collections.emptyList());
       when(donacionesGateway.obtenerBeneficiarios()).thenReturn(Collections.emptyList());
 
       mockMvc
@@ -186,7 +188,8 @@ class DonanteFlowTest {
     }
 
     @Test
-    @DisplayName("Etapas de trazabilidad deben mapearse adecuadamente según el estado de la donación")
+    @DisplayName(
+        "Etapas de trazabilidad deben mapearse adecuadamente según el estado de la donación")
     void testMapeoEtapasTrazabilidad() throws Exception {
       // Arrange
       UUID d1 = UUID.randomUUID();
@@ -198,7 +201,8 @@ class DonanteFlowTest {
               List.of(
                   Map.of("id", d1, "estado", "EN_DEPOSITO"),
                   Map.of("id", d2, "estado", "ASIGNADA", "correoBeneficiario", "comedor@sur.org"),
-                  Map.of("id", d3, "estado", "ENTREGADA", "correoBeneficiario", "hogar@norte.org")));
+                  Map.of(
+                      "id", d3, "estado", "ENTREGADA", "correoBeneficiario", "hogar@norte.org")));
 
       when(incentivosGateway.obtenerMetricas(donantePersonaId)).thenReturn(Collections.emptyMap());
       when(donacionesGateway.obtenerBeneficiarios()).thenReturn(Collections.emptyList());
@@ -216,7 +220,8 @@ class DonanteFlowTest {
                           allOf(
                               hasEntry("id", (Object) d1),
                               hasEntry("etapaNumero", (Object) 1),
-                              hasEntry("estadoLegible", (Object) "En Depósito · Auditada (+10 pts)")))))
+                              hasEntry(
+                                  "estadoLegible", (Object) "En Depósito · Auditada (+10 pts)")))))
           .andExpect(
               model()
                   .attribute(
@@ -234,10 +239,13 @@ class DonanteFlowTest {
                           allOf(
                               hasEntry("id", (Object) d3),
                               hasEntry("etapaNumero", (Object) 3),
-                              hasEntry("estadoLegible", (Object) "Entregada en Destino (+25 pts)")))));
+                              hasEntry(
+                                  "estadoLegible", (Object) "Entregada en Destino (+25 pts)")))));
     }
+
     @Test
-    @DisplayName("Donante sin donaciones personales debe utilizar fallback histórico de DEFAULT_DONANTE_ID")
+    @DisplayName(
+        "Donante sin donaciones personales debe utilizar fallback histórico de DEFAULT_DONANTE_ID")
     void testPanelDonanteFallbackDefaultDonante() throws Exception {
       // Arrange: donantePersonaId custom no tiene donaciones, pero DEFAULT_DONANTE_ID sí
       UUID customDonante = UUID.randomUUID();
@@ -256,7 +264,8 @@ class DonanteFlowTest {
 
       UUID defaultDonanteId = UUID.fromString("a1111111-1111-4111-8111-111111111111");
 
-      when(donacionesGateway.listarDonaciones(null, customDonante)).thenReturn(Collections.emptyList());
+      when(donacionesGateway.listarDonaciones(null, customDonante))
+          .thenReturn(Collections.emptyList());
       when(donacionesGateway.listarDonaciones(null, defaultDonanteId))
           .thenReturn(
               List.of(
@@ -319,15 +328,15 @@ class DonanteFlowTest {
     }
 
     @Test
-    @DisplayName("POST /app/donante/donaciones exitoso debe registrar recepción, sumar puntos en incentivos y redirigir")
+    @DisplayName(
+        "POST /app/donante/donaciones exitoso debe registrar recepción, sumar puntos en incentivos y redirigir")
     void testCrearDonacionExitoso() throws Exception {
       // Arrange
       UUID donacionGenId = UUID.randomUUID();
       Map<String, Object> respRecepcion =
           Map.of(
               "id", donacionGenId.toString(),
-              "donacionesSegmentadas",
-                  List.of(Map.of("id", donacionGenId.toString())));
+              "donacionesSegmentadas", List.of(Map.of("id", donacionGenId.toString())));
 
       when(donacionesGateway.crearRecepcion(any())).thenReturn(respRecepcion);
 
@@ -351,7 +360,8 @@ class DonanteFlowTest {
     }
 
     @Test
-    @DisplayName("POST /app/donante/donaciones con error 502/Bad Gateway debe mostrar mensaje amigable")
+    @DisplayName(
+        "POST /app/donante/donaciones con error 502/Bad Gateway debe mostrar mensaje amigable")
     void testCrearDonacionError502() throws Exception {
       // Arrange
       when(donacionesGateway.crearRecepcion(any()))
@@ -399,12 +409,13 @@ class DonanteFlowTest {
                       "flashError",
                       containsString("El microservicio de donaciones tardó en responder.")));
     }
+
     @Test
-    @DisplayName("POST /app/donante/donaciones sin array de segmentadas usa id de la raíz para flashOk")
+    @DisplayName(
+        "POST /app/donante/donaciones sin array de segmentadas usa id de la raíz para flashOk")
     void testCrearDonacionSinSegmentadasFallbackId() throws Exception {
       // Arrange
-      when(donacionesGateway.crearRecepcion(any()))
-          .thenReturn(Map.of("id", "REC-8888-PLANO"));
+      when(donacionesGateway.crearRecepcion(any())).thenReturn(Map.of("id", "REC-8888-PLANO"));
 
       // Act & Assert
       mockMvc
