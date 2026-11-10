@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,9 @@ public class AuthController {
   @Value("${donatrack.web-url:http://localhost:8080}")
   private String webUrl;
 
+  @Value("${donatrack.auth.mock-sso.enabled:true}")
+  private boolean mockSsoEnabled;
+
   public AuthController(AuthService authService) {
     this.authService = authService;
   }
@@ -30,6 +34,10 @@ public class AuthController {
   @GetMapping("/oauth2/authorization/{provider}")
   public void mockOAuth2Redirect(
       @PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
+    if (!mockSsoEnabled) {
+      response.sendRedirect(webUrl + "/login?error=sso_disabled");
+      return;
+    }
     String prov = provider.toLowerCase();
     String email = prov.equals("google") ? "donante.google@gmail.com" : "donante.github@gmail.com";
     String nombre = prov.equals("google") ? "Donante Google (SSO)" : "Donante GitHub (SSO)";
@@ -44,6 +52,10 @@ public class AuthController {
       @RequestParam("provider") String provider,
       @RequestParam(value = "email", required = false) String emailParam,
       @RequestParam(value = "nombre", required = false) String nombreParam) {
+    if (!mockSsoEnabled) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(Map.of("error", "Mock SSO no está habilitado en este entorno"));
+    }
     String prov = provider.toLowerCase();
     String email =
         (emailParam != null && !emailParam.isBlank())

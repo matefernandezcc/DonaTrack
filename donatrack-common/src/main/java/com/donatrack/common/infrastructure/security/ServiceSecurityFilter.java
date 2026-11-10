@@ -85,6 +85,9 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
         || path.startsWith("/v3/api-docs")
         || path.startsWith("/api-docs")
         || path.startsWith("/api/auth")
+        || path.startsWith("/auth/")
+        || path.startsWith("/oauth2/")
+        || path.startsWith("/healthcheck")
         || path.startsWith("/api/public")
         || path.startsWith("/favicon.ico")
         || path.startsWith("/error");

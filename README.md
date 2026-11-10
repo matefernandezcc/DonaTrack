@@ -61,6 +61,7 @@ El sistema está diseñado como una **arquitectura distribuida de microservicios
 ```
 
 > Para más detalles sobre puertos, URLs de Swagger y comandos de ejecución, consultá [`SERVICIOS.md`](SERVICIOS.md).
+> Para la guía de entornos (`local` vs `prod`), configuración de persistencia y seguridad M2M, consultá [`docs/PERFILES_Y_ENTORNOS.md`](docs/PERFILES_Y_ENTORNOS.md).
 > Para el detalle del diseño SOA, arquitectura hexagonal y persistencia políglota, consultá [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md).
 > Para los diagramas formales en PlantUML, consultá [`docs/diagramas/`](docs/diagramas/).
 
@@ -345,6 +346,7 @@ docker compose up --build -d
 ```
 
 > 📄 Ver [`SERVICIOS.md`](SERVICIOS.md) para la guía completa de puertos, Swagger interactivo, healthchecks y comandos.
+> 📄 Ver [`docs/PERFILES_Y_ENTORNOS.md`](docs/PERFILES_Y_ENTORNOS.md) para la guía completa de perfiles (`local` vs `prod`), Docker y cloud.
 > 📄 Ver [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md) para la documentación técnica de arquitectura y diseño.
 > 📄 Ver [`docs/diagramas/`](docs/diagramas/) para los diagramas de arquitectura y clases en formato PlantUML (`.puml`).
 
