@@ -36,7 +36,10 @@ public class NotificacionesGateway {
               .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
       return result != null ? result : Collections.emptyList();
     } catch (Exception e) {
-      log.warn("No se pudieron consultar notificaciones para {}: {}", destinatario, e.getMessage());
+      log.warn(
+          "No se pudieron consultar notificaciones para {}: {}",
+          enmascararDestinatario(destinatario),
+          e.getMessage());
       return Collections.emptyList();
     }
   }
@@ -50,7 +53,27 @@ public class NotificacionesGateway {
               "medio", medio != null ? medio : "EMAIL");
       notificacionesClient.post().uri("/api/mensajes").body(body).retrieve().toBodilessEntity();
     } catch (Exception e) {
-      log.warn("No se pudo emitir alerta a {}: {}", destinatario, e.getMessage());
+      log.warn(
+          "No se pudo emitir alerta a {}: {}",
+          enmascararDestinatario(destinatario),
+          e.getMessage());
     }
+  }
+
+  private String enmascararDestinatario(String dest) {
+    if (dest == null || dest.isBlank()) {
+      return "anónimo";
+    }
+    int atIndex = dest.indexOf('@');
+    if (atIndex > 1) {
+      String userPart = dest.substring(0, atIndex);
+      String domainPart = dest.substring(atIndex);
+      String maskedUser = userPart.charAt(0) + "***" + userPart.charAt(userPart.length() - 1);
+      return maskedUser + domainPart;
+    }
+    if (dest.length() > 4) {
+      return dest.substring(0, 2) + "***" + dest.substring(dest.length() - 2);
+    }
+    return "***";
   }
 }

@@ -177,6 +177,16 @@
           renderizarFilasRanking(listaAMostrar);
         };
 
+        function escapeHtml(str) {
+          if (!str) return '';
+          return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
         function renderizarFilasRanking(items) {
           var tbody = document.getElementById('ranking-tbody');
           if (!tbody) return;
@@ -206,7 +216,7 @@
               '<th scope="row">' +
                 '<span class="slds-badge" style="' + badgeStyle + '">#' + count + '</span>' +
               '</th>' +
-              '<td><strong style="color: #0f172a;">' + (pos.nombre || 'Donante') + '</strong></td>' +
+              '<td><strong style="color: #0f172a;">' + escapeHtml(pos.nombre || 'Donante') + '</strong></td>' +
               '<td><span class="slds-text-color_success" style="font-weight: 700;">' + (pos.donaciones != null ? pos.donaciones : 0) + ' donaciones</span></td>';
             tbody.appendChild(tr);
           });

@@ -56,7 +56,17 @@
       return mapInstance;
     }
 
-    function crearIconoCamion() {
+    function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function crearIconoCamion() {
       return L.divIcon({
         className: 'dt-truck-leaflet-marker',
         html: '<div style="background: #0176d3; color: #ffffff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(1, 118, 211, 0.45); border: 2px solid #ffffff; font-size: 16px;">🚚</div>',
@@ -109,15 +119,15 @@
             var popupHtml = '' +
               '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; font-size: 12px; line-height: 1.4; min-width: 210px; padding: 2px;">' +
                 '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">' +
-                  '<strong style="color: #014486; font-size: 13px; font-family: monospace;">' + (movil.codigoCorto || '#DT-DON') + '</strong>' +
-                  '<span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">' + (movil.estado || 'EN TRASLADO') + '</span>' +
+                  '<strong style="color: #014486; font-size: 13px; font-family: monospace;">' + escapeHtml(movil.codigoCorto || '#DT-DON') + '</strong>' +
+                  '<span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">' + escapeHtml(movil.estado || 'EN TRASLADO') + '</span>' +
                 '</div>' +
-                '<p style="margin: 3px 0; color: #0f172a;"><strong>Camión:</strong> ' + (movil.patenteCamion || 'En asignación') + '</p>' +
-                '<p style="margin: 3px 0; color: #0f172a;"><strong>Chofer:</strong> ' + (movil.choferNombre || 'Personal Logístico') + '</p>' +
-                '<p style="margin: 3px 0; color: #334155;"><strong>Destino:</strong> ' + (movil.destinoComedor || 'Comedor Comunitario') + '</p>' +
+                '<p style="margin: 3px 0; color: #0f172a;"><strong>Camión:</strong> ' + escapeHtml(movil.patenteCamion || 'En asignación') + '</p>' +
+                '<p style="margin: 3px 0; color: #0f172a;"><strong>Chofer:</strong> ' + escapeHtml(movil.choferNombre || 'Personal Logístico') + '</p>' +
+                '<p style="margin: 3px 0; color: #334155;"><strong>Destino:</strong> ' + escapeHtml(movil.destinoComedor || 'Comedor Comunitario') + '</p>' +
                 '<div style="margin-top: 8px; font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 4px;">' +
                   '<span>⏱</span>' +
-                  '<span>' + (movil.ultimaActualizacion || 'Actualizado recientemente') + '</span>' +
+                  '<span>' + escapeHtml(movil.ultimaActualizacion || 'Actualizado recientemente') + '</span>' +
                 '</div>' +
               '</div>';
 

@@ -97,12 +97,12 @@ El sistema está diseñado como una **arquitectura distribuida de microservicios
 
 ## 🚀 Entregas del Proyecto
 
-El trabajo práctico se construye de manera evolutiva e incremental a lo largo de 6 entregas (según el cronograma oficial de la cátedra):
+El trabajo práctico se construye de manera evolutiva e incremental a lo largo de **7 entregas** (según la planificación oficial de la cátedra de Diseño de Sistemas - UTN BA):
 
 ---
 
 ### ✅ Entrega 1 — Arquitectura y Modelado en Objetos (Parte I)
-> 📅 22 de Mayo
+> 📅 Viernes 22 de Mayo (Modalidad Presencial)
 
 <details>
 <summary><b>Ver alcance completo</b></summary>
@@ -133,7 +133,7 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 ---
 
 ### ✅ Entrega 2 — Arquitectura y Modelado en Objetos (Parte II)
-> 📅 19 de Junio
+> 📅 Viernes 19 de Junio (Modalidad Presencial)
 
 <details>
 <summary><b>Ver alcance completo</b></summary>
@@ -167,7 +167,7 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 ---
 
 ### ✅ Entrega 3 — Arquitectura y Modelado en Objetos (Parte III)
-> 📅 3 de Julio
+> 📅 Viernes 3 de Julio (Modalidad Presencial)
 
 <details>
 <summary><b>Ver alcance completo</b></summary>
@@ -205,7 +205,7 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 ---
 
 ### ✅ Entrega 4 — Persistencia, Integración y Despliegue
-> 📅 Semana del 14 de Septiembre
+> 📅 Viernes 9 de Octubre (Modalidad Sincrónica)
 
 <details>
 <summary><b>Ver alcance completo</b></summary>
@@ -236,17 +236,86 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 
 ---
 
-### ⏳ Entrega 5 — Arquitectura Web MVC
-> 📅 Semana del 19 de Octubre
+### ✅ Entrega 5 — Persistencia (Persistencia Políglota)
+> 📅 Viernes 30 de Octubre (Modalidad Sincrónica)
 
-*Los detalles de esta etapa se actualizarán próximamente.*
+<details>
+<summary><b>Ver alcance completo</b></summary>
+
+#### Alcance
+- **Persistencia Políglota** — Desacoplamiento del esquema relacional monolítico y adopción de motores especializados según la naturaleza de cada Bounded Context.
+- **Persistencia Documental en Logística (MongoDB 7.0)** — Migración completa de `donatrack-logistica` hacia MongoDB Atlas / local (`donatrack_logistica`) utilizando Spring Data MongoDB (ODM).
+- **Modelo Jerárquico de Rutas sin JOINs** — Agregado raíz `RutaDeReparto` con paradas, entregas, comprobantes y coordenadas embebidas ($O(1)$ de lectura en consultas del chofer).
+- **Snapshot Histórico Inmutable** — Almacenamiento desnormalizado de datos del chofer y vehículo en la ruta para garantizar auditoría legal inalterable.
+- **Persistencia Relacional (PostgreSQL 15 / JPA)** — Schemas aislados (`donaciones`, `incentivos`, `notificaciones`, `auth`) en Supabase / local.
+- **Almacenamiento de Archivos** — Integración con Supabase S3 Storage para remitos y fotos de entrega.
+- **Mapeo BSON Binary $\leftrightarrow$ Java UUID** — Conversores `@ReadingConverter` y `@WritingConverter` en `MongoConfig.java`.
+
+#### Entregables
+1. **Modelo de Dominio y Datos Actualizado**: Diagrama de Clases [`DonaTrack-Diagrama-Clases.puml`](docs/diagramas/DonaTrack-Diagrama-Clases.puml) y Comunicación entre Servicios [`DonaTrack-Diagrama-Clases-Comunicacion-Entre-Servicios.puml`](docs/diagramas/DonaTrack-Diagrama-Clases-Comunicacion-Entre-Servicios.puml).
+2. **Modelos de Persistencia (DDL y Scripts)**: Schemas relacionales en [`database/init.sql`](database/init.sql), datos semilla en [`database/local-seed-data.sql`](database/local-seed-data.sql) y colecciones NoSQL en [`database/mongo-init.js`](database/mongo-init.js).
+3. **Memoria Técnica y Justificaciones**: [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md) y matriz [`Justificación Decisiones - DonaTrack - Grupo 7.xlsx`](docs/notas_y_borradores/Justificación%20Decisiones%20-%20DonaTrack%20-%20Grupo%207.xlsx).
+4. **Diagrama de Componentes**: Actualización con persistencia políglota y Supabase S3 Storage.
+5. **Implementación de Código y Contenedores**: Servicios `postgres_donatrack` y `mongo_donatrack` en [`compose.yaml`](compose.yaml).
+
+</details>
 
 ---
 
-### ⏳ Entrega 6 — Despliegue, Observabilidad y Seguridad
-> 📅 Semana del 23 de Noviembre
+### 🚀 Entrega 6 — Interfaz de Usuario y Arquitectura MVC
+> 📅 Viernes 13 de Noviembre (Modalidad Sincrónica) — *En curso / Próxima defensa*
 
-*Los detalles de esta etapa se actualizarán próximamente.*
+<details open>
+<summary><b>Ver alcance completo</b></summary>
+
+#### Alcance
+- **Cliente Liviano Desacoplado (`donatrack-web`)** — Aplicación web SSR independiente con Spring Boot 3.5 y Thymeleaf, consumiendo APIs REST del backend mediante `RestClient` y Bearer JWT sin acoplamiento a base de datos.
+- **Servicio de Autenticación Centralizado (`donatrack-auth`)** — Servidor de identidad perimetral con Spring Security 6, emisión de JWT (HS256) y soporte de Single Sign-On (SSO / Social Login con Google y GitHub OAuth2).
+- **Aislamiento Dual de Layouts (Diseño UI/UX)**:
+  - **Layout Público (`layout-public.html`)**: Landing page moderna, amigable y accesible, catálogo de ONGs, mapa interactivo de donaciones entregadas y postulación de nuevas organizaciones.
+  - **Layout Administrativo (`layout-admin.html`)**: Backoffice para personas administradoras construido íntegramente sobre blueprints oficiales de **Salesforce Lightning Design System (SLDS 2.30.3)** (Global Header, Vertical Navigation, Data Tables, Cards, Modals, Toasts) sin clases CSS inventadas.
+- **Módulos y Portales por Rol**:
+  - **Público**: Landing page con impacto mensual, mapa interactivo de entregas, registro y login.
+  - **Portal Donante (`/app/donante`)**: Gamificación con insignias y progreso de misiones, cálculo de impacto ecológico/social, historial y alta de donaciones.
+  - **Portal Beneficiaria (`/app/beneficiaria`)**: Declaración de necesidades materiales (recurrentes y extraordinarias), seguimiento de camiones en mapa y confirmación de recepción con fotos.
+  - **Backoffice Administrador (`/app/admin`)**: Gestión de camiones y choferes con SLDS Data Table, confirmación de matchmaking y asignación de donaciones, auditoría de vencimientos en depósito, ranking mensual e importación batch de donantes por CSV (+10.000 filas).
+- **Despliegue Distribuido Multi-Cuenta (Render + SaaS)**:
+  - Cuenta 1: Core de datos (`donatrack-donaciones`, `donatrack-incentivos`, `donatrack-notificaciones`).
+  - Cuenta 2: Capa de interacción y logística (`donatrack-web`, `donatrack-auth`, `donatrack-logistica`).
+- **Accesibilidad y Usabilidad**: Cumplimiento de heurísticas de Nielsen y pautas de accesibilidad **WCAG 2.1 AA** (soporte ARIA, navegación por teclado, contraste y responsive design).
+
+#### Entregables
+1. **Cliente Liviano Desacoplado**: Módulo [`donatrack-web`](donatrack-web) renderizando dinámicamente vistas Thymeleaf.
+2. **Servicio de Autenticación**: Módulo [`donatrack-auth`](donatrack-auth) con endpoints `/auth/login`, `/auth/register`, `/auth/exchange` y `/auth/profile`.
+3. **Registro de Decisiones de Arquitectura (ADR)**: [`docs/notas_y_borradores/decisiones-arquitectura.md`](docs/notas_y_borradores/decisiones-arquitectura.md) (ADR-01 Desacoplamiento SSR, ADR-02 Dual Layouts, ADR-03 JWT & SSO, ADR-04 Despliegue Render).
+4. **Memoria Técnica de Implementación E6**: [`docs/notas_y_borradores/entrega-6-implementacion-ssr-seguridad.md`](docs/notas_y_borradores/entrega-6-implementacion-ssr-seguridad.md).
+5. **Guía de Demostración E2E y Pruebas**: [`docs/DEMO-PASO-A-PASO.md`](docs/DEMO-PASO-A-PASO.md) con validación paso a paso de flujos, comandos curl, consultas DBeaver/Mongo y troubleshooting.
+6. **Colección de APIs Bruno**: [`docs/donatrack-api/bruno-collection`](docs/donatrack-api/bruno-collection) para testing automatizado con entornos `dev` y `prod`.
+
+</details>
+
+---
+
+### ⏳ Entrega 7 — Observabilidad y Seguridad
+> 📅 Viernes 4 de Diciembre (Modalidad Presencial) — *Próxima entrega*
+
+<details>
+<summary><b>Ver alcance completo</b></summary>
+
+#### Alcance
+- **Herramientas de Observabilidad** — Recolección, visualización y análisis unificado de métricas, trazas distribuidas y logs centralizados para monitorear el estado y comportamiento de los microservicios.
+- **Monitoreo Proactivo y Resiliencia** — Supervisión continua de salud de los servicios con políticas de autorestart ante fallos.
+- **Seguridad y Control de Tráfico** — Implementación de Rate Limiting (limitación de solicitudes) para regular el tráfico entrante y prevenir abusos o sobrecargas en los microservicios.
+- **Evolución de Integración de Servicios**:
+  - *Opción 1:* Protocolo **gRPC** en reemplazo de HTTP para comunicaciones de alta performance y baja latencia entre servicios en tiempo real.
+  - *Opción 2:* Interfaz **GraphQL** en el Servicio de Donaciones o Logística para permitir consultas dinámicas con selección granular de campos y filtros avanzados.
+
+#### Entregables
+1. **Diagrama de Componentes y Despliegue de la solución actual**.
+2. **Implementación de Herramientas de Observabilidad, Monitoreo, Seguridad y Control**.
+3. **Implementación de Web Service utilizando gRPC o GraphQL**.
+
+</details>
 
 ---
 

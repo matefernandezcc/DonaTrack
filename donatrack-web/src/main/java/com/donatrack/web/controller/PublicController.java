@@ -246,11 +246,17 @@ public class PublicController {
       produces = "image/svg+xml")
   @ResponseBody
   public ResponseEntity<String> obtenerRemitoSvg(@PathVariable String filename) {
-    String cleanCode = filename.replaceAll("(?i)\\.(jpg|jpeg|png|svg|pdf)$", "").toUpperCase();
-    if (cleanCode.length() > 14) {
+    String cleanCode =
+        filename
+            .replaceAll("(?i)\\.(jpg|jpeg|png|svg|pdf)$", "")
+            .replaceAll("[^a-zA-Z0-9-]", "")
+            .toUpperCase();
+    if (cleanCode.isEmpty()) {
+      cleanCode = "DT-0000";
+    } else if (cleanCode.length() > 14) {
       cleanCode = cleanCode.substring(0, 14);
     }
-    if (!cleanCode.startsWith("DT-") && !cleanCode.startsWith("#")) {
+    if (!cleanCode.startsWith("DT-")) {
       cleanCode = "DT-" + cleanCode;
     }
 

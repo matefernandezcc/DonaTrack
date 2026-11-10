@@ -155,6 +155,16 @@
     });
   }
 
+  const escapeHtml = (str) => {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  };
+
   function renderizarMarcadores(puntos) {
     // Limpiar marcadores previos
     markers.forEach((m) => map.removeLayer(m));
@@ -170,11 +180,11 @@
       });
       const popupContent = `
         <div style="font-family: system-ui, -apple-system, sans-serif; font-size: 13px; line-height: 1.4; min-width: 210px;">
-          <strong style="color: #0b2147; font-size: 14px; display: block; margin-bottom: 2px;">${p.title}</strong>
-          <span style="color: #64748b; font-size: 12px;">${p.org}</span>
-          <p style="margin: 8px 0; color: #334155;">${p.desc}</p>
+          <strong style="color: #0b2147; font-size: 14px; display: block; margin-bottom: 2px;">${escapeHtml(p.title)}</strong>
+          <span style="color: #64748b; font-size: 12px;">${escapeHtml(p.org)}</span>
+          <p style="margin: 8px 0; color: #334155;">${escapeHtml(p.desc)}</p>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 10px; gap: 8px;">
-            <span style="display:inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${p.type === 'blue' ? '#e0f2fe; color: #0369a1' : p.type === 'green' ? '#dcfce7; color: #15803d' : '#ffedd5; color: #c2410c'};">${p.status}</span>
+            <span style="display:inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${p.type === 'blue' ? '#e0f2fe; color: #0369a1' : p.type === 'green' ? '#dcfce7; color: #15803d' : '#ffedd5; color: #c2410c'};">${escapeHtml(p.status)}</span>
             <button type="button" class="dt-popup-modal-btn" data-point-idx="${idx}" style="background:#0b4a8f; color:#ffffff; border:none; border-radius:4px; font-size:11px; font-weight:600; padding:4px 8px; cursor:pointer;">Ver foto & acta</button>
           </div>
         </div>
