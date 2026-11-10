@@ -931,9 +931,11 @@ public class AdminController {
 
     // 2. Obtener buscador de causas activas y necesidades de ONGs
     List<Map<String, Object>> beneficiarios = donacionesGateway.obtenerBeneficiarios();
+    List<Map<String, Object>> beneficiariosEnriquecidos = new ArrayList<>();
     List<Map<String, Object>> causasActivas = new ArrayList<>();
     for (Map<String, Object> b : beneficiarios) {
       if (b == null) continue;
+      Map<String, Object> bMap = new HashMap<>(b);
       String bId = String.valueOf(b.get("id"));
       String correo =
           b.get("correoRepresentante") != null
@@ -944,11 +946,24 @@ public class AdminController {
                   || correo.toLowerCase().contains("esperanza"))
               ? "Comedor Comunitario La Esperanza"
               : "Merendero & Hogar Solidario";
+      bMap.put("nombreLegible", nombreOrg);
+      bMap.put("correoRepresentante", correo);
+      bMap.put("fechaAlta", b.get("fechaAlta") != null ? b.get("fechaAlta") : "2026-10-30");
+
       List<Map<String, Object>> necsRaw =
           b.get("necesidadesDeclaradas") instanceof List<?> list
               ? (List<Map<String, Object>>) list
               : Collections.emptyList();
       List<Map<String, Object>> necsClean = sanitizarNecesidades(necsRaw);
+      String necsTexto =
+          necsClean.stream()
+              .map(n -> String.valueOf(n.getOrDefault("subcategoria", "Alimentos")))
+              .distinct()
+              .collect(java.util.stream.Collectors.joining(", "));
+      bMap.put(
+          "necesidadesTexto", necsTexto.isBlank() ? "Alimentos No Perecederos y Ropa" : necsTexto);
+      beneficiariosEnriquecidos.add(bMap);
+
       for (Map<String, Object> n : necsClean) {
         Map<String, Object> causa = new HashMap<>();
         causa.put("organizacion", nombreOrg);
@@ -1008,7 +1023,7 @@ public class AdminController {
 
     model.addAttribute("tabActiva", tab != null ? tab.toLowerCase() : "resumen");
     model.addAttribute("misDonaciones", misDonaciones);
-    model.addAttribute("beneficiarios", beneficiarios);
+    model.addAttribute("beneficiarios", beneficiariosEnriquecidos);
     model.addAttribute("causasActivas", causasActivas);
     model.addAttribute("metricas", metricas != null ? metricas : Collections.emptyMap());
     model.addAttribute("insignias", insignias);
