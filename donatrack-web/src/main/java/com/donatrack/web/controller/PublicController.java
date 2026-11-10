@@ -237,10 +237,10 @@ public class PublicController {
         <svg xmlns="http://www.w3.org/2000/svg" width="600" height="380" viewBox="0 0 600 380">
           <defs>
             <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#166534"/>
-              <stop offset="100%" stop-color="#15803d"/>
+              <stop offset="0%%" stop-color="#166534"/>
+              <stop offset="100%%" stop-color="#15803d"/>
             </linearGradient>
-            <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+            <filter id="shadow" x="-5%%" y="-5%%" width="110%%" height="110%%">
               <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.10"/>
             </filter>
           </defs>

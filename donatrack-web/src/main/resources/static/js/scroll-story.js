@@ -276,6 +276,19 @@
     observer.observe(section);
   }
 
+  // Soporte de teclado (Enter / Espacio) para los nodos accesibles del dial
+  document.querySelectorAll(".dial-node").forEach((node) => {
+    node.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        const step = parseInt(node.getAttribute("data-node"), 10);
+        if (step) {
+          selectCircleStep(step);
+        }
+      }
+    });
+  });
+
   // Inicialización
   renderTicks();
   selectCircleStep(1, false);

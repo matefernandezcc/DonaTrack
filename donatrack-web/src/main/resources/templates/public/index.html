@@ -283,12 +283,12 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
+          <div class="calculator-grid" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
             <div>
               <label for="calc-range" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 8px;">
                 Cantidad estimada a aportar: <strong id="calc-qty-label" style="font-size: 1.15rem; color: #0176d3;">15 kg</strong>
               </label>
-              <input type="range" id="calc-range" min="1" max="100" value="15" oninput="actualizarCalculoLive(this.value)" style="width: 100%; accent-color: #0176d3; cursor: pointer;" />
+              <input type="range" id="calc-range" min="1" max="100" value="15" aria-valuemin="1" aria-valuemax="100" aria-valuenow="15" aria-label="Cantidad estimada a aportar" oninput="actualizarCalculoLive(this.value)" style="width: 100%; accent-color: #0176d3; cursor: pointer;" />
               <span style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 4px;">
                 <span>1 unidad/kg</span>
                 <span>50 unidades/kg</span>
@@ -296,7 +296,7 @@
               </span>
             </div>
 
-            <div style="background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="calculator-results" style="background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <div>
                 <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Impacto Comunitario:</span>
                 <strong id="calc-impact-main" style="font-size: 1.05rem; color: var(--green); font-weight: 800;">60 raciones nutritivas</strong>
@@ -937,6 +937,10 @@
           m.removeAttribute("hidden");
           m.showModal();
           document.body.style.overflow = "hidden";
+          m.addEventListener("close", () => {
+            document.body.style.overflow = "";
+            m.setAttribute("hidden", "true");
+          }, { once: true });
         }
       }
 

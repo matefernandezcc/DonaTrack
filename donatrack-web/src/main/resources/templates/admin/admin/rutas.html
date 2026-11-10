@@ -69,7 +69,7 @@
               <tr class="slds-hint-parent" th:each="ruta : ${rutas}">
                 <th scope="row" data-label="Código">
                   <div class="slds-truncate">
-                    <strong style="color: #0176d3;" th:text="${ruta.id != null ? #strings.substring(ruta.id.toString(), 0, 8) : 'Ruta'}">R-001</strong>
+                    <strong style="color: #0176d3;" th:text="${ruta.id != null ? (ruta.id.toString().length() >= 8 ? #strings.substring(ruta.id.toString(), 0, 8) : ruta.id) : 'Ruta'}">R-001</strong>
                   </div>
                 </th>
                 <td data-label="Fecha Operativa">
