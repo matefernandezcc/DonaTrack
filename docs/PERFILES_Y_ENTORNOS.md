@@ -1,4 +1,4 @@
-# 📖 Guía Canónica de Perfiles y Entornos de Ejecución (DonaTrack)
+# 📖 Guía de Perfiles y Entornos de Ejecución (DonaTrack)
 
 DonaTrack implementa una **arquitectura distribuida de microservicios con persistencia políglota**, orientada a desacoplar responsabilidades funcionales y optimizar los motores de almacenamiento según las necesidades de cada *Bounded Context*:
 * **Donaciones, Incentivos, Notificaciones y Autenticación:** PostgreSQL (relacional con esquemas dedicados).
