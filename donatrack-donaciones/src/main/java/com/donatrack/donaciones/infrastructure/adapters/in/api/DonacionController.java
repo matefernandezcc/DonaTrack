@@ -320,6 +320,31 @@ public class DonacionController {
   }
 
   @Operation(
+      summary = "Marcar donación como vencida",
+      description =
+          "Actualiza el estado de una donación en depósito a VENCIDA con auditoría de motivo")
+  @ApiResponse(responseCode = "200", description = "Donación marcada como vencida")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Donación no encontrada o formato de ID inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/vencer")
+  public ResponseEntity<Void> marcarDonacionVencida(
+      @PathVariable UUID id,
+      @RequestParam(name = "observacion", defaultValue = "Vencida en depósito") String obs) {
+    Donacion donacion =
+        donacionRepository
+            .buscarPorId(id)
+            .orElseThrow(() -> new IllegalArgumentException("Donacion no encontrada"));
+    donacion.cambiarEstado(
+        com.donatrack.donaciones.domain.entities.enums.EstadoDonacion.VENCIDA,
+        obs != null && !obs.isBlank() ? obs : "Vencida en depósito",
+        null);
+    donacionRepository.guardar(donacion);
+    return ResponseEntity.ok().build();
+  }
+
+  @Operation(
       summary = "Asignar donación a beneficiario",
       description = "Asigna una donación a una entidad beneficiaria y notifica a las partes")
   @ApiResponse(responseCode = "200", description = "Donación asignada y notificaciones enviadas")

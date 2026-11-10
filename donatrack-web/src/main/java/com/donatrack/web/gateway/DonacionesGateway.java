@@ -219,4 +219,30 @@ public class DonacionesGateway {
         .retrieve()
         .body(new ParameterizedTypeReference<Map<String, Object>>() {});
   }
+
+  public void marcarDonacionVencida(UUID idDonacion) {
+    try {
+      donacionesClient
+          .put()
+          .uri("/api/donaciones/{id}/estado/vencer", idDonacion)
+          .retrieve()
+          .toBodilessEntity();
+    } catch (Exception e) {
+      log.error("Error al marcar donacion {} como vencida: {}", idDonacion, e.getMessage());
+      throw new RuntimeException("Error al marcar donación como vencida: " + e.getMessage());
+    }
+  }
+
+  public void auditarVencidos() {
+    try {
+      donacionesClient
+          .post()
+          .uri("/api/donaciones/auditoria/vencidos")
+          .retrieve()
+          .toBodilessEntity();
+    } catch (Exception e) {
+      log.error("Error al ejecutar auditoria de vencimientos: {}", e.getMessage());
+      throw new RuntimeException("Error al ejecutar auditoría de vencimientos: " + e.getMessage());
+    }
+  }
 }

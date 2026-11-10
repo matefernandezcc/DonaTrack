@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-public :: layout(~{::title}, ~{::#contenido}, ~{})}">
+<head>
+  <title>DonaTrack · Política de Privacidad &amp; Protección de Datos (Ley 25.326)</title>
+</head>
+<body>
+
+  <main id="contenido" class="container" style="padding-top: 48px; padding-bottom: 64px; max-width: 860px;">
+
+    <!-- Encabezado de la Sección Legal -->
+    <header style="margin-bottom: 36px; border-bottom: 1px solid var(--border-color, #e2e8f0); padding-bottom: 24px;">
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <span class="trust" style="background: #e0f2fe; color: #0369a1; font-weight: 700; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem;">
+          Marco Normativo de la República Argentina
+        </span>
+        <span class="trust" style="background: #dcfce7; color: #166534; font-weight: 700; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem;">
+          Ley N° 25.326
+        </span>
+      </div>
+      <h1 style="font-family: 'Manrope', var(--font-family, sans-serif); font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0b2147; letter-spacing: -0.5px; line-height: 1.25;">
+        Política de Privacidad y Tratamiento de Datos Personales
+      </h1>
+      <p style="font-size: 0.95rem; color: #64748b; margin-top: 8px;">
+        Última actualización: Noviembre de 2026 · Proyecto Académico DonaTrack / UTN FRBA Solidaria
+      </p>
+    </header>
+
+    <!-- Contenido Legal Exhaustivo -->
+    <article style="line-height: 1.7; color: #1e293b; font-size: 1rem; display: flex; flex-direction: column; gap: 28px;">
+
+      <!-- 1. Objeto y Alcance -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          1. Objeto y Compromiso de Protección
+        </h2>
+        <p>
+          En <strong>DonaTrack</strong>, entendemos que la solidaridad requiere de la más absoluta transparencia y confianza. La presente Política de Privacidad regula el tratamiento de los datos personales suministrados por personas donantes, representantes de entidades beneficiarias (comedores, hogares y organizaciones no gubernamentales) y usuarios de la plataforma, en estricto cumplimiento con la <strong>Ley Nacional de Protección de los Datos Personales N° 25.326</strong> y sus normas reglamentarias y complementarias dictadas por la Dirección Nacional de Protección de Datos Personales (Agencia de Acceso a la Información Pública - AAIP).
+        </p>
+      </section>
+
+      <!-- 2. Finalidad Exclusiva del Tratamiento -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          2. Finalidad Exclusiva del Tratamiento
+        </h2>
+        <p>
+          Los datos personales recabados a través de nuestros formularios públicos y backoffice (nombre, correo electrónico, documento, identificador fiscal CUIT, sede y geolocalización) tienen como <strong>única y exclusiva finalidad</strong>:
+        </p>
+        <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc; display: flex; flex-direction: column; gap: 6px;">
+          <li>Gestionar la logística y el transporte solidario de donaciones materiales hacia comedores verificados.</li>
+          <li>Emitir actas de remito digital y trazabilidad transparente de pesaje y entrega.</li>
+          <li>Calcular de manera automatizada las métricas de impacto social e insignias comunitarias del programa de incentivos.</li>
+          <li>Notificar al donante y a la entidad beneficiaria acerca del despacho y la recepción física de mercadería.</li>
+        </ul>
+        <p style="margin-top: 10px; background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 16px; border-radius: 4px; font-weight: 600; color: #166534;">
+          🔒 Prohibición Absoluta de Cesión Comercial: En ningún caso DonaTrack cede, comercializa, transfiere ni alquila bases de datos personales a empresas privadas, agencias publicitarias o terceros con fines de prospección comercial.
+        </p>
+      </section>
+
+      <!-- 3. Registro de Entidades y Verificación de Personería -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          3. Registro Institucional y Verificación de Entidades Beneficiarias
+        </h2>
+        <p>
+          Para salvaguardar la legitimidad de las donaciones, las organizaciones y comedores que solicitan adhesión son registradas bajo el estado seguro <code>BENEFICIARIA_PENDIENTE</code>. DonaTrack somete los números de CUIT y domicilios a auditoría previa por parte de administradores autorizados antes de habilitar la recepción de lotes materiales.
+        </p>
+      </section>
+
+      <!-- 4. Derechos ARCO -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          4. Derechos de los Titulares: Acceso, Rectificación y Supresión (Derechos ARCO)
+        </h2>
+        <p>
+          De conformidad con los artículos 14, 15 y 16 de la Ley 25.326, todo titular de datos personales tiene la facultad de ejercer en cualquier momento el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto. Asimismo, le asiste el derecho de solicitar la rectificación, actualización o supresión de sus datos de nuestros registros.
+        </p>
+        <p style="margin-top: 8px;">
+          Para ejercer cualquiera de estos derechos, podrá remitir un correo electrónico formal a <a href="mailto:privacidad@donatrack.org" style="color: #0176d3; font-weight: 700; text-decoration: underline;">privacidad@donatrack.org</a> o por correspondencia postal a la sede de UTN FRBA Solidaria (Medrano 951, CABA, Argentina), indicando nombre completo y número de documento.
+        </p>
+      </section>
+
+      <!-- 5. Medidas de Seguridad de la Información -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          5. Seguridad y Confidencialidad Técnica
+        </h2>
+        <p>
+          DonaTrack implementa protocolos de seguridad técnica y organizativa para garantizar la integridad y confidencialidad de la información:
+        </p>
+        <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc; display: flex; flex-direction: column; gap: 6px;">
+          <li>Transmisión cifrada punto a punto mediante protocolo TLS/HTTPS.</li>
+          <li>Contraseñas almacenadas exclusivamente con algoritmos de hashing criptográfico unidireccional (BCrypt).</li>
+          <li>Autenticación por tokens JSON Web Token (JWT) con rotación de claves y control de acceso basado en roles (RBAC).</li>
+          <li>Comprobantes fotográficos de remitos almacenados en infraestructura S3 protegida con políticas de control de acceso.</li>
+        </ul>
+      </section>
+
+      <!-- 6. Órgano de Control -->
+      <section style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px 24px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0b2147; margin-bottom: 6px;">
+          Órgano de Control de la República Argentina
+        </h3>
+        <p style="font-size: 0.92rem; color: #475569;">
+          La <strong>AGENCIA DE ACCESO A LA INFORMACIÓN PÚBLICA</strong>, en su carácter de Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales.
+        </p>
+        <div style="margin-top: 12px;">
+          <a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener"
+             class="btn btn--outline" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.88rem; min-height: 48px; min-width: 48px; padding: 10px 16px;">
+            Portal Oficial AAIP →
+          </a>
+        </div>
+      </section>
+
+    </article>
+
+    <!-- Navegación Inferior -->
+    <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <a th:href="@{/terminos}" style="color: #0b4a8f; font-weight: 700; text-decoration: none; min-height: 48px; display: inline-flex; align-items: center;">
+        ← Leer Términos y Condiciones
+      </a>
+      <a th:href="@{/}" class="btn btn--primary" style="font-weight: 700; min-height: 48px; min-width: 48px; display: inline-flex; align-items: center;">
+        Volver a la Portada
+      </a>
+    </div>
+
+  </main>
+
+</body>
+</html>

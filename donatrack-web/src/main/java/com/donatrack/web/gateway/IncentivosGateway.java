@@ -95,4 +95,19 @@ public class IncentivosGateway {
           e.getMessage());
     }
   }
+
+  public List<Map<String, Object>> obtenerHistorialRankings() {
+    try {
+      List<Map<String, Object>> result =
+          incentivosClient
+              .get()
+              .uri("/api/ranking/historial")
+              .retrieve()
+              .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+      return result != null ? result : Collections.emptyList();
+    } catch (Exception e) {
+      log.error("Error al consultar historial de rankings de incentivos: {}", e.getMessage());
+      return Collections.emptyList();
+    }
+  }
 }

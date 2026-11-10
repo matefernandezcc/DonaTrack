@@ -123,6 +123,12 @@ class AuthServiceTest {
     }
 
     @Override
+    public Optional<Usuario> findByPersonaId(UUID personaId) {
+      if (personaId == null) return Optional.empty();
+      return db.values().stream().filter(u -> personaId.equals(u.getPersonaId())).findFirst();
+    }
+
+    @Override
     public boolean existsByUsername(String username) {
       return findByUsername(username).isPresent();
     }

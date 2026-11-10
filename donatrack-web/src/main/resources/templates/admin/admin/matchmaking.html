@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
 <head>
   <title>DonaTrack · Matchmaking Inteligente</title>
 </head>
@@ -9,6 +9,17 @@
   <span id="page-header-title">Matchmaking Inteligente &amp; Bandeja de Asignación</span>
 
   <div id="main-content-slot">
+
+    <!-- Mensajes Flash de Notificación -->
+    <div th:if="${flashOk != null}" class="slds-notify slds-notify_alert slds-theme_success slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+      <span class="slds-assistive-text">Éxito</span>
+      <h2 th:text="${flashOk}">Operación completada con éxito.</h2>
+    </div>
+
+    <div th:if="${flashError != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+      <span class="slds-assistive-text">Error</span>
+      <h2 th:text="${flashError}">Ocurrió un error al procesar la donación.</h2>
+    </div>
 
     <!-- ==================== ARQUITECTURA DE LOS 2 ALGORITMOS + EJECUCIÓN MANUAL / BATCH ==================== -->
     <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1;">
@@ -30,7 +41,23 @@
             </p>
           </div>
         </header>
-        <div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <a th:href="@{/app/admin/donaciones/recepcion}" class="slds-button slds-button_brand" style="font-weight: 700;">
+            <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+              <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
+            </svg>
+            + Nueva Recepción en Depósito
+          </a>
+          <form th:action="@{/app/admin/donaciones/auditoria-vencidos}" method="post" style="display: inline;">
+            <button type="submit" class="slds-button slds-button_neutral" style="font-weight: 700;"
+                    onclick="return confirm('¿Desea ejecutar la auditoría de vencimientos sobre todas las donaciones en depósito?');"
+                    title="Ejecutar barrido sanitario de lotes vencidos">
+              <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#clear}"></use>
+              </svg>
+              Ejecutar Auditoría de Vencimientos
+            </button>
+          </form>
           <form th:action="@{/app/admin/matchmaking/batch}" method="post" style="display: inline;">
             <button type="submit" class="slds-button slds-button_outline-brand" style="font-weight: 700;">
               Ejecutar Asignación Automática Batch
@@ -215,10 +242,17 @@
                   <div class="slds-truncate" th:text="${d.fechaCreacion}">2026-11-06</div>
                 </td>
                 <td class="slds-text-align_right">
-                  <a th:href="@{/app/admin/matchmaking(donacionId=${d.id},algoritmo=${algoritmoActivo != null ? algoritmoActivo : 'HIBRIDO'})}"
-                     class="slds-button slds-button_brand" style="font-weight: 700;">
-                    Evaluar Matchmaking
-                  </a>
+                  <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+                    <a th:href="@{/app/admin/matchmaking(donacionId=${d.id},algoritmo=${algoritmoActivo != null ? algoritmoActivo : 'HIBRIDO'})}"
+                       class="slds-button slds-button_brand" style="font-weight: 700;">
+                      Evaluar Matchmaking
+                    </a>
+                    <button type="button" class="slds-button slds-button_destructive"
+                            th:onclick="abrirModalVencer([[${d.id}]], [[${d.codigoCorto}]], [[${d.descripcion}]])"
+                            style="font-weight: 700;" title="Marcar mercadería vencida en depósito">
+                      Marcar Vencida
+                    </button>
+                  </div>
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(donacionesPendientes)}">
@@ -312,7 +346,75 @@
         </div>
       </div>
     </article>
+
+    <!-- ==================== MODAL SLDS DE CONFIRMACIÓN: MARCAR VENCIDA ==================== -->
+    <div id="modal-confirmar-vencer" style="display: none;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true" style="z-index: 10001;">
+        <div class="slds-modal__container" style="max-width: 520px;">
+          <header class="slds-modal__header slds-theme_error slds-theme_alert-texture">
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="cerrarModalVencer()" title="Cerrar">
+              ✕
+              <span class="slds-assistive-text">Cerrar</span>
+            </button>
+            <h2 class="slds-modal__title slds-hyphenate" style="color: #ffffff; font-weight: 800;">
+              Confirmar Donación Vencida
+            </h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_large" style="background: #ffffff;">
+            <p style="font-size: 0.95rem; color: #1e293b;">
+              ¿Estás seguro de que deseas marcar como <strong>VENCIDA</strong> la donación <span id="vencer-codigo" style="font-family: monospace; font-weight: 800; color: #b91c1c;">#DT-0000</span>?
+            </p>
+            <p id="vencer-detalle" class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+              Detalle del lote
+            </p>
+            <p class="slds-text-body_small slds-m-top_small" style="color: #64748b; background: #fef2f2; border: 1px solid #fee2e2; padding: 10px; border-radius: 6px;">
+              ⚠️ Esta acción retirará inmediatamente los bienes de la bandeja de matchmaking y los registrará en auditoría de descarte sanitario.
+            </p>
+          </div>
+          <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalVencer()" style="min-height: 48px;">
+              Cancelar
+            </button>
+            <form id="form-vencer-donacion" method="post" action="">
+              <button type="submit" class="slds-button slds-button_destructive" style="font-weight: 800; min-height: 48px;">
+                Sí, marcar como Vencida
+              </button>
+            </form>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
+    </div>
+
   </div>
+
+  <th:block id="page-scripts">
+    <script>
+      window.abrirModalVencer = function (id, codigo, descripcion) {
+        var modal = document.getElementById('modal-confirmar-vencer');
+        var form = document.getElementById('form-vencer-donacion');
+        var codEl = document.getElementById('vencer-codigo');
+        var detEl = document.getElementById('vencer-detalle');
+        if (modal && form) {
+          form.action = '/app/admin/donaciones/' + id + '/vencer';
+          if (codEl) codEl.textContent = codigo || '#DT';
+          if (detEl) detEl.textContent = descripcion || 'Bienes en depósito';
+          modal.style.display = 'block';
+        }
+      };
+
+      window.cerrarModalVencer = function () {
+        var modal = document.getElementById('modal-confirmar-vencer');
+        if (modal) modal.style.display = 'none';
+      };
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          window.cerrarModalVencer();
+        }
+      });
+    </script>
+  </th:block>
 
 </body>
 </html>

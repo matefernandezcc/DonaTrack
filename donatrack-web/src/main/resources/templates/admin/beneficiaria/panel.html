@@ -17,7 +17,7 @@
         <div class="slds-col slds-no-flex">
           <span class="slds-avatar slds-avatar_large slds-avatar_circle"
                 style="width: 76px; height: 76px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #166534 0%, #15803d 100%); color: white; font-size: 32px; font-weight: 800; box-shadow: 0 4px 10px rgba(22,101,52,0.25);">
-            <span th:text="${#strings.substring(nombreOrganizacion != null ? nombreOrganizacion : 'B', 0, 1).toUpperCase()}">F</span>
+            <span th:text="${(nombreOrganizacion != null and !#strings.isEmpty(nombreOrganizacion)) ? #strings.substring(nombreOrganizacion, 0, 1).toUpperCase() : 'B'}">F</span>
           </span>
         </div>
 

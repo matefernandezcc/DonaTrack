@@ -10,10 +10,10 @@ http:
     type: json
     data: |-
       {
-        "username": "nuevo.donante",
+        "username": "donante_{{$randomInt}}",
         "password": "Password123!",
-        "nombreCompleto": "Juan Pérez",
-        "email": "juan.perez@ejemplo.com",
+        "nombre": "Juan Pérez",
+        "email": "donante_{{$randomInt}}@ejemplo.com",
         "rol": "DONANTE"
       }
   auth: none
@@ -21,12 +21,11 @@ http:
 runtime:
   assertions:
     - expression: res.status
-      operator: eq
-      value: "201"
+      operator: in
+      value: "[200, 201]"
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-

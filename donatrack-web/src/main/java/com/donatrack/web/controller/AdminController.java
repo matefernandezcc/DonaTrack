@@ -392,6 +392,9 @@ public class AdminController {
       pos++;
     }
     model.addAttribute("ranking", ranking);
+    List<Map<String, Object>> historialRankings = incentivosGateway.obtenerHistorialRankings();
+    model.addAttribute(
+        "historial", historialRankings != null ? historialRankings : Collections.emptyList());
     return "admin/admin/ranking";
   }
 
@@ -595,6 +598,88 @@ public class AdminController {
     return "redirect:/app/admin/matchmaking";
   }
 
+  @GetMapping("/admin/donaciones/recepcion")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String recepcionDonacionForm(Model model) {
+    model.addAttribute("personas", donacionesGateway.obtenerPersonas());
+    return "admin/admin/recepcion-donacion";
+  }
+
+  @PostMapping("/admin/donaciones/recepcion")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String registrarRecepcionDonacion(
+      @jakarta.validation.Valid @ModelAttribute
+          com.donatrack.web.dto.RecepcionDepositoRequest request,
+      org.springframework.validation.BindingResult bindingResult,
+      Authentication auth,
+      RedirectAttributes redirectAttributes,
+      Model model) {
+    if (bindingResult.hasErrors()) {
+      model.addAttribute("personas", donacionesGateway.obtenerPersonas());
+      model.addAttribute("errorForm", "Por favor revise los campos del formulario.");
+      return "admin/admin/recepcion-donacion";
+    }
+    try {
+      UUID adminId = resolverDonanteId(auth);
+      Map<String, Object> payload = new HashMap<>();
+      payload.put("idDonante", request.idDonante().toString());
+      payload.put(
+          "idAdministrador", adminId != null ? adminId.toString() : DEFAULT_ADMIN_ID.toString());
+
+      Map<String, Object> bien = new HashMap<>();
+      bien.put("descripcion", request.descripcion());
+      bien.put("cantidad", request.cantidad());
+      bien.put("unidadMedicion", request.unidadMedicion());
+      bien.put("esUsado", request.esUsado());
+      bien.put("nombreSubcategoria", request.nombreSubcategoria());
+      if (request.fechaVencimiento() != null) {
+        bien.put("fechaVencimiento", request.fechaVencimiento().toString());
+      }
+      payload.put("bienesBrutos", List.of(bien));
+
+      donacionesGateway.crearRecepcion(payload);
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Donación recibida e ingresada a depósito correctamente.");
+      return "redirect:/app/admin/matchmaking";
+    } catch (Exception e) {
+      log.error("Error al registrar recepcion en deposito: {}", e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al registrar la donación en depósito: " + e.getMessage());
+      return "redirect:/app/admin/donaciones/recepcion";
+    }
+  }
+
+  @PostMapping("/admin/donaciones/{id}/vencer")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String vencerDonacion(@PathVariable("id") UUID id, RedirectAttributes redirectAttributes) {
+    try {
+      donacionesGateway.marcarDonacionVencida(id);
+      String shortCode = "#DT-" + id.toString().substring(0, 4).toUpperCase();
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "La donación " + shortCode + " ha sido marcada como VENCIDA.");
+    } catch (Exception e) {
+      log.error("Error al marcar donacion como vencida: {}", e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "No se pudo marcar la donación como vencida: " + e.getMessage());
+    }
+    return "redirect:/app/admin/matchmaking";
+  }
+
+  @PostMapping("/admin/donaciones/auditoria-vencidos")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String auditarDonacionesVencidas(RedirectAttributes redirectAttributes) {
+    try {
+      donacionesGateway.auditarVencidos();
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Auditoría de vencimientos ejecutada exitosamente sobre el depósito.");
+    } catch (Exception e) {
+      log.error("Error al auditar vencimientos: {}", e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Error al ejecutar la auditoría de vencimientos: " + e.getMessage());
+    }
+    return "redirect:/app/admin/matchmaking";
+  }
+
   @GetMapping("/admin/csv")
   @PreAuthorize("hasRole('ADMIN')")
   public String adminCsv(Model model) {
@@ -714,6 +799,10 @@ public class AdminController {
     List<Map<String, Object>> insignias = incentivosGateway.obtenerInsignias(donanteId);
     if (insignias == null) {
       insignias = Collections.emptyList();
+    }
+    List<Map<String, Object>> misiones = incentivosGateway.obtenerMisiones(donanteId);
+    if (misiones == null) {
+      misiones = Collections.emptyList();
     }
 
     // Métricas dinámicas calculadas 100% de la base de datos real
@@ -919,10 +1008,12 @@ public class AdminController {
 
     model.addAttribute("tabActiva", tab != null ? tab.toLowerCase() : "resumen");
     model.addAttribute("misDonaciones", misDonaciones);
+    model.addAttribute("beneficiarios", beneficiarios);
     model.addAttribute("causasActivas", causasActivas);
     model.addAttribute("metricas", metricas != null ? metricas : Collections.emptyMap());
     model.addAttribute("insignias", insignias);
     model.addAttribute("totalInsignias", insignias.size());
+    model.addAttribute("misiones", misiones);
     model.addAttribute("puntosReales", puntosReales);
     model.addAttribute("rangoNombre", rangoNombre);
     model.addAttribute("rangoNivel", rangoNivel);

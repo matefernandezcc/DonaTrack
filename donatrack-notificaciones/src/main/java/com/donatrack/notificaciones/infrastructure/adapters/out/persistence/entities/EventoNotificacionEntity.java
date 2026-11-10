@@ -39,6 +39,7 @@ public class EventoNotificacionEntity {
   @Column(name = "fecha_recepcion")
   private LocalDateTime fechaRecepcion;
 
+  @com.fasterxml.jackson.annotation.JsonIgnore
   @OneToMany(mappedBy = "eventoNotificacion", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<NotificacionEntity> notificaciones = new ArrayList<>();
 }

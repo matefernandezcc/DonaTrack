@@ -2041,3 +2041,13 @@
         transform: translateY(-4px);
     }
 }
+
+@media (max-width: 768px) {
+  .calculator-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .calculator-results {
+    grid-template-columns: 1fr !important;
+  }
+}

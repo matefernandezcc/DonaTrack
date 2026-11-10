@@ -79,14 +79,9 @@
         <div class="msg msg--bot">¡Hola! Soy el asistente virtual de DonaTrack. ¿En qué te puedo ayudar hoy?</div>
       </div>
       <div class="chatbot__chips">
-        <button class="chip" type="button"
-          onclick="document.getElementById('chat-input').value = '¿Cómo donar?'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">¿Cómo
-          donar?</button>
-        <button class="chip" type="button"
-          onclick="document.getElementById('chat-input').value = 'Rastrear remito'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">Rastreo</button>
-        <button class="chip" type="button"
-          onclick="document.getElementById('chat-input').value = 'Verificar ONG'; document.getElementById('chat-form').dispatchEvent(new Event('submit'));">Verificar
-          ONG</button>
+        <button class="chip" type="button" data-q="¿Cómo donar?">¿Cómo donar?</button>
+        <button class="chip" type="button" data-q="Rastrear remito">Rastreo</button>
+        <button class="chip" type="button" data-q="Verificar ONG">Verificar ONG</button>
       </div>
       <form class="chatbot__form" id="chat-form">
         <label for="chat-input" class="sr-only">Escribí tu mensaje</label>

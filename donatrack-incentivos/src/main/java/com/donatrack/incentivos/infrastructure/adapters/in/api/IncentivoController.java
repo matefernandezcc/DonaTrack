@@ -261,6 +261,73 @@ public class IncentivoController {
     return ResponseEntity.ok(response);
   }
 
+  @Operation(
+      summary = "Obtener historial de rankings mensuales",
+      description =
+          "Devuelve los rankings mensuales históricos guardados con las posiciones de los donantes")
+  @ApiResponse(responseCode = "200", description = "Historial de rankings obtenido")
+  @GetMapping("/ranking/historial")
+  public ResponseEntity<List<Map<String, Object>>> obtenerHistorialRankings() {
+    if (rankingMensualJpaRepository == null) {
+      return ResponseEntity.ok(Collections.emptyList());
+    }
+    List<
+            com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
+                .RankingMensualEntity>
+        entities = rankingMensualJpaRepository.findAll();
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (var r : entities) {
+      if (r == null) continue;
+      Map<String, Object> map = new HashMap<>();
+      map.put("id", r.getId() != null ? r.getId().toString() : null);
+      map.put("mes", r.getMes());
+      map.put("anio", r.getAnio());
+
+      List<Map<String, Object>> posiciones = new ArrayList<>();
+      if (r.getPosiciones() != null) {
+        for (var pos : r.getPosiciones()) {
+          if (pos == null) continue;
+          Map<String, Object> pMap = new HashMap<>();
+          pMap.put("posicion", pos.getPosicion());
+          pMap.put("misionesCompletadasMes", pos.getMisionesCompletadasMes());
+          if (pos.getPerfil() != null) {
+            String donanteId =
+                pos.getPerfil().getPerfilDonanteId() != null
+                    ? pos.getPerfil().getPerfilDonanteId().toString()
+                    : null;
+            pMap.put("donanteId", donanteId);
+            String nombre =
+                "Donante "
+                    + (donanteId != null && donanteId.length() >= 4
+                        ? donanteId.substring(0, 4)
+                        : "");
+            try {
+              if (personaClient != null && pos.getPerfil().getPerfilDonanteId() != null) {
+                var persona = personaClient.obtenerPersona(pos.getPerfil().getPerfilDonanteId());
+                if (persona != null) {
+                  String n = persona.nombre() != null ? persona.nombre().trim() : "";
+                  String a = persona.apellido() != null ? persona.apellido().trim() : "";
+                  String completo = (n + " " + a).trim();
+                  if (!completo.isEmpty()) {
+                    nombre = completo;
+                  } else if (persona.razonSocial() != null && !persona.razonSocial().isBlank()) {
+                    nombre = persona.razonSocial();
+                  }
+                }
+              }
+            } catch (Exception ignored) {
+            }
+            pMap.put("user", nombre);
+          }
+          posiciones.add(pMap);
+        }
+      }
+      map.put("posiciones", posiciones);
+      result.add(map);
+    }
+    return ResponseEntity.ok(result);
+  }
+
   private void persistirRankingMensual(java.time.YearMonth mesActual, List<PerfilDonante> top3) {
     if (rankingMensualJpaRepository == null || perfilDonanteJpaRepository == null) {
       return;

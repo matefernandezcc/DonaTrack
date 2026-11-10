@@ -115,6 +115,7 @@ public class AuthService {
     Usuario usuario =
         usuarioRepository
             .findById(usuarioId)
+            .or(() -> usuarioRepository.findByPersonaId(usuarioId))
             .orElseThrow(
                 () -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
     com.donatrack.auth.domain.entities.Rol nuevoRol =
@@ -127,6 +128,7 @@ public class AuthService {
     Usuario usuario =
         usuarioRepository
             .findById(usuarioId)
+            .or(() -> usuarioRepository.findByPersonaId(usuarioId))
             .orElseThrow(
                 () -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
     usuario.setPassword(passwordEncoder.encode("password123"));
@@ -180,6 +182,7 @@ public class AuthService {
     Usuario usuario =
         usuarioRepository
             .findById(usuarioId)
+            .or(() -> usuarioRepository.findByPersonaId(usuarioId))
             .orElseThrow(
                 () -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
     if (descripcion != null && !descripcion.isBlank()) {
@@ -195,6 +198,7 @@ public class AuthService {
     Usuario usuario =
         usuarioRepository
             .findById(usuarioId)
+            .or(() -> usuarioRepository.findByPersonaId(usuarioId))
             .orElseThrow(
                 () -> new IllegalArgumentException("Usuario no encontrado con ID: " + usuarioId));
     Map<String, Object> map = new java.util.LinkedHashMap<>();

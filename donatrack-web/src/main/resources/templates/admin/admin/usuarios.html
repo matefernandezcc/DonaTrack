@@ -109,7 +109,7 @@
                   <!-- Formulario para cambiar rol del usuario en vivo -->
                   <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/rol'}" method="post"
                     style="display: flex; gap: 6px; align-items: center; margin: 0;">
-                    <select name="rol" class="slds-select"
+                    <select name="rol" class="slds-select" aria-label="Seleccionar nuevo rol"
                       style="font-size: 0.78rem; padding: 3px 6px; height: 30px; border-radius: 4px; width: 125px;">
                       <option value="DONANTE" th:selected="${u['rol'] == 'DONANTE'}">DONANTE</option>
                       <option value="BENEFICIARIA" th:selected="${u['rol'] == 'BENEFICIARIA'}">BENEFICIARIA</option>

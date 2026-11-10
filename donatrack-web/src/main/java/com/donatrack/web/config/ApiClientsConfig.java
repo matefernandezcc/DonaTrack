@@ -73,4 +73,10 @@ public class ApiClientsConfig {
       ApiProperties props, ClientHttpRequestInterceptor interceptor) {
     return createClient(props.donacionesUrl(), props, interceptor);
   }
+
+  @Bean
+  public RestClient notificacionesClient(
+      ApiProperties props, ClientHttpRequestInterceptor interceptor) {
+    return createClient(props.notificacionesUrl(), props, interceptor);
+  }
 }

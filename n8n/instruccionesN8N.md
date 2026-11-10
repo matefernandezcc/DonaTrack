@@ -7,11 +7,11 @@ Este documento define el entorno de ejecución, las herramientas, los comandos y
 ## 📍 Información de Conexión y Entorno
 
 > [!IMPORTANT]
-> El entorno local de n8n corre en contenedores Docker y se encuentra disponitest/donatrack/badge-earnedble en la siguiente dirección:
+> El entorno local de n8n corre en contenedores Docker y se encuentra disponible en la siguiente dirección:
 > - **URL Local:** [http://localhost:5678/](http://localhost:5678/)
 > - **Nombre del Workflow:** `DonaTrack - Insignias`
 > - **Contenedor n8n:** `n8n_donatrack`
-> - **Contenedor Base de Datos:** `db_donatrack`
+> - **Contenedores de Base de Datos:** `postgres_donatrack` y `mongo_donatrack`
 
 ---
 
