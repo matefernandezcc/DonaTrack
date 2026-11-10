@@ -27,8 +27,16 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
   private String internalApiKey;
 
   @Value(
-      "${JWT_SECRET:${donatrack.jwt-secret:d0n4tr4ck-s3cur3-k3y-sup3r-s3cr3t-pr0d-2026-min-256-bits!}}")
+      "${JWT_SECRET:${donatrack.jwt-secret:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}}")
   private String jwtSecret;
+
+  public ServiceSecurityFilter() {}
+
+  public ServiceSecurityFilter(boolean securityEnabled, String internalApiKey, String jwtSecret) {
+    this.securityEnabled = securityEnabled;
+    this.internalApiKey = internalApiKey;
+    this.jwtSecret = jwtSecret;
+  }
 
   @Override
   protected void doFilterInternal(
@@ -84,7 +92,7 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
         || path.startsWith("/swagger-ui")
         || path.startsWith("/v3/api-docs")
         || path.startsWith("/api-docs")
-        || path.startsWith("/api/auth")
+        || path.startsWith("/api/auth/sso/")
         || path.startsWith("/auth/")
         || path.startsWith("/oauth2/")
         || path.startsWith("/healthcheck")

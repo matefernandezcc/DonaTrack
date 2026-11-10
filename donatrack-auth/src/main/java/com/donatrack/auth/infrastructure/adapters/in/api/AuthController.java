@@ -20,15 +20,29 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
   private final AuthService authService;
+  private final String webUrl;
+  private final boolean mockSsoEnabled;
 
-  @Value("${donatrack.web-url:http://localhost:8080}")
-  private String webUrl;
-
-  @Value("${donatrack.auth.mock-sso.enabled:true}")
-  private boolean mockSsoEnabled;
-
-  public AuthController(AuthService authService) {
+  public AuthController(
+      AuthService authService,
+      @Value("${donatrack.web-url:http://localhost:8080}") String webUrl,
+      @Value("${donatrack.auth.mock-sso.enabled:false}") boolean mockSsoEnabled) {
     this.authService = authService;
+    this.webUrl = webUrl;
+    this.mockSsoEnabled = mockSsoEnabled;
+  }
+
+  private record MockIdentity(String email, String nombre) {}
+
+  private MockIdentity resolveMockIdentity(String provider, String emailParam, String nombreParam) {
+    String prov = provider != null ? provider.toLowerCase() : "";
+    String defaultEmail =
+        "google".equals(prov) ? "donante.google@gmail.com" : "donante.github@gmail.com";
+    String defaultNombre = "google".equals(prov) ? "Donante Google (SSO)" : "Donante GitHub (SSO)";
+
+    String email = (emailParam != null && !emailParam.isBlank()) ? emailParam : defaultEmail;
+    String nombre = (nombreParam != null && !nombreParam.isBlank()) ? nombreParam : defaultNombre;
+    return new MockIdentity(email, nombre);
   }
 
   @GetMapping("/oauth2/authorization/{provider}")
@@ -38,11 +52,10 @@ public class AuthController {
       response.sendRedirect(webUrl + "/login?error=sso_disabled");
       return;
     }
-    String prov = provider.toLowerCase();
-    String email = prov.equals("google") ? "donante.google@gmail.com" : "donante.github@gmail.com";
-    String nombre = prov.equals("google") ? "Donante Google (SSO)" : "Donante GitHub (SSO)";
-
-    Usuario usuario = authService.obtenerOCrearUsuarioSocial(email, nombre, provider.toUpperCase());
+    MockIdentity identity = resolveMockIdentity(provider, null, null);
+    Usuario usuario =
+        authService.obtenerOCrearUsuarioSocial(
+            identity.email(), identity.nombre(), provider.toUpperCase());
     String code = authService.generarCodigoIntercambio(usuario);
     response.sendRedirect(webUrl + "/auth/callback?code=" + code);
   }
@@ -56,17 +69,10 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(Map.of("error", "Mock SSO no está habilitado en este entorno"));
     }
-    String prov = provider.toLowerCase();
-    String email =
-        (emailParam != null && !emailParam.isBlank())
-            ? emailParam
-            : (prov.equals("google") ? "donante.google@gmail.com" : "donante.github@gmail.com");
-    String nombre =
-        (nombreParam != null && !nombreParam.isBlank())
-            ? nombreParam
-            : (prov.equals("google") ? "Donante Google (SSO)" : "Donante GitHub (SSO)");
-
-    Usuario usuario = authService.obtenerOCrearUsuarioSocial(email, nombre, provider.toUpperCase());
+    MockIdentity identity = resolveMockIdentity(provider, emailParam, nombreParam);
+    Usuario usuario =
+        authService.obtenerOCrearUsuarioSocial(
+            identity.email(), identity.nombre(), provider.toUpperCase());
     String code = authService.generarCodigoIntercambio(usuario);
     return ResponseEntity.ok(Map.of("code", code));
   }
