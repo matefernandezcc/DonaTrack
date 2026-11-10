@@ -33,6 +33,17 @@
         // El contenedor del mapa permanece visible salvo si hay error antes de iniciar
         container.style.opacity = (estado === 'loading') ? '0.35' : '1';
       }
+      if (retryBtn) {
+        if (estado === 'loading') {
+          retryBtn.setAttribute('disabled', 'disabled');
+          retryBtn.style.opacity = '0.6';
+          retryBtn.style.cursor = 'not-allowed';
+        } else {
+          retryBtn.removeAttribute('disabled');
+          retryBtn.style.opacity = '1';
+          retryBtn.style.cursor = 'pointer';
+        }
+      }
     }
 
     function asegurarMapa() {
