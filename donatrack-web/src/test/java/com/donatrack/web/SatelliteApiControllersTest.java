@@ -90,6 +90,15 @@ class SatelliteApiControllersTest {
   }
 
   @Test
+  @DisplayName("GET /api/notificaciones/mis-alertas — Retorna lista vacía si auth es nulo o sin email")
+  void testMisAlertasSinAuth() throws Exception {
+    notificacionesMvc
+        .perform(get("/api/notificaciones/mis-alertas"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
+  }
+
+  @Test
   @DisplayName("GET /api/donante/mapa-camiones — Retorna seguimiento de entregas del donante")
   void testMapaCamionesDonante() throws Exception {
     UUID donanteId = UUID.randomUUID();
@@ -129,6 +138,27 @@ class SatelliteApiControllersTest {
         .andExpect(jsonPath("$[?(@.tipo == 'blue')]").isNotEmpty())
         .andExpect(jsonPath("$[?(@.tipo == 'green')]").isNotEmpty())
         .andExpect(jsonPath("$[?(@.tipo == 'orange')]").isNotEmpty());
+  }
+
+  @Test
+  @DisplayName("CacheResilienteService — Almacena en caché respuesta fresca del gateway")
+  void testCacheResilienteDatosFrescos() {
+    Map<String, Object> rutaSimulada =
+        Map.of("id", UUID.randomUUID().toString(), "iniciada", true);
+    when(logisticaGateway.listarRutas()).thenReturn(List.of(rutaSimulada));
+
+    List<Map<String, Object>> rutas = cacheResilienteService.obtenerRutasConCache();
+    assertNotNull(rutas);
+    assertFalse(rutas.isEmpty());
+
+    // Invocación subsiguiente debe obtener de caché sin llamar de nuevo a logisticaGateway
+    cacheResilienteService.obtenerRutasConCache();
+    org.mockito.Mockito.verify(logisticaGateway, org.mockito.Mockito.times(1)).listarRutas();
+
+    // Invalidar caché debe permitir volver a consultar
+    cacheResilienteService.invalidarCache();
+    cacheResilienteService.obtenerRutasConCache();
+    org.mockito.Mockito.verify(logisticaGateway, org.mockito.Mockito.times(2)).listarRutas();
   }
 
   @Test

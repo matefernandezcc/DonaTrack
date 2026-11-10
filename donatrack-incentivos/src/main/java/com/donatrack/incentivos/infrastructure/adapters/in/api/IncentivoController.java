@@ -288,14 +288,28 @@ public class IncentivoController {
           pMap.put("posicion", pos.getPosicion());
           pMap.put("misionesCompletadasMes", pos.getMisionesCompletadasMes());
           if (pos.getPerfil() != null) {
-            String donanteId = pos.getPerfil().getId() != null ? pos.getPerfil().getId().toString() : null;
+            String donanteId =
+                pos.getPerfil().getPerfilDonanteId() != null
+                    ? pos.getPerfil().getPerfilDonanteId().toString()
+                    : null;
             pMap.put("donanteId", donanteId);
-            String nombre = "Donante " + (donanteId != null && donanteId.length() >= 4 ? donanteId.substring(0, 4) : "");
+            String nombre =
+                "Donante "
+                    + (donanteId != null && donanteId.length() >= 4
+                        ? donanteId.substring(0, 4)
+                        : "");
             try {
-              if (personaClient != null && pos.getPerfil().getId() != null) {
-                var persona = personaClient.obtenerPersona(pos.getPerfil().getId());
-                if (persona != null && persona.get("nombre") != null) {
-                  nombre = persona.get("nombre") + " " + persona.getOrDefault("apellido", "");
+              if (personaClient != null && pos.getPerfil().getPerfilDonanteId() != null) {
+                var persona = personaClient.obtenerPersona(pos.getPerfil().getPerfilDonanteId());
+                if (persona != null) {
+                  String n = persona.nombre() != null ? persona.nombre().trim() : "";
+                  String a = persona.apellido() != null ? persona.apellido().trim() : "";
+                  String completo = (n + " " + a).trim();
+                  if (!completo.isEmpty()) {
+                    nombre = completo;
+                  } else if (persona.razonSocial() != null && !persona.razonSocial().isBlank()) {
+                    nombre = persona.razonSocial();
+                  }
                 }
               }
             } catch (Exception ignored) {

@@ -864,4 +864,193 @@ class AdminControllerTest {
       verify(authGateway, never()).cambiarRol(any(), any());
     }
   }
+
+  // ==========================================
+  // OPERATORIA DE DEPÓSITO Y VENCIMIENTOS
+  // ==========================================
+
+  @Nested
+  @DisplayName("Operatoria de Depósito: Recepción, Vencimiento y Auditoría")
+  class OperatoriaDepositoTests {
+
+    @Test
+    @DisplayName("GET /app/admin/donaciones/recepcion debe retornar vista de recepción con listado de personas")
+    void testRecepcionDonacionForm() throws Exception {
+      when(donacionesGateway.obtenerPersonas())
+          .thenReturn(
+              List.of(
+                  Map.of("id", UUID.randomUUID().toString(), "nombre", "Donante A"),
+                  Map.of("id", UUID.randomUUID().toString(), "nombre", "Donante B")));
+
+      mockMvc
+          .perform(get("/app/admin/donaciones/recepcion").principal(adminAuth))
+          .andExpect(status().isOk())
+          .andExpect(view().name("admin/admin/recepcion-donacion"))
+          .andExpect(model().attributeExists("personas"))
+          .andExpect(model().attribute("personas", hasSize(2)));
+
+      verify(donacionesGateway, times(1)).obtenerPersonas();
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/donaciones/recepcion exitoso registra donación en depósito y redirige a matchmaking")
+    void testRegistrarRecepcionDonacionExitoso() throws Exception {
+      UUID donanteId = UUID.randomUUID();
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/recepcion")
+                  .principal(adminAuth)
+                  .param("idDonante", donanteId.toString())
+                  .param("descripcion", "Caja de leche en polvo")
+                  .param("cantidad", "15.0")
+                  .param("unidadMedicion", "UNIDADES")
+                  .param("nombreSubcategoria", "Lácteos")
+                  .param("esUsado", "false")
+                  .param("fechaVencimiento", "2027-01-01"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/matchmaking"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk", "Donación recibida e ingresada a depósito correctamente."));
+
+      verify(donacionesGateway, times(1))
+          .crearRecepcion(
+              argThat(
+                  payload ->
+                      donanteId.toString().equals(payload.get("idDonante"))
+                          && payload.containsKey("bienesBrutos")
+                          && payload.get("bienesBrutos") instanceof List<?> list
+                          && !list.isEmpty()));
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/donaciones/recepcion con campos inválidos retorna formulario con error")
+    void testRegistrarRecepcionDonacionInvalido() throws Exception {
+      when(donacionesGateway.obtenerPersonas()).thenReturn(Collections.emptyList());
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/recepcion")
+                  .principal(adminAuth)
+                  .param("idDonante", "")
+                  .param("descripcion", "")
+                  .param("cantidad", "-5.0")
+                  .param("unidadMedicion", "")
+                  .param("nombreSubcategoria", ""))
+          .andExpect(status().isOk())
+          .andExpect(view().name("admin/admin/recepcion-donacion"))
+          .andExpect(model().attributeExists("errorForm"))
+          .andExpect(model().attributeExists("personas"));
+
+      verify(donacionesGateway, never()).crearRecepcion(any());
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/donaciones/recepcion con error en gateway redirige a formulario con flashError")
+    void testRegistrarRecepcionDonacionErrorGateway() throws Exception {
+      UUID donanteId = UUID.randomUUID();
+      doThrow(new RuntimeException("Error en base de datos"))
+          .when(donacionesGateway)
+          .crearRecepcion(any());
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/recepcion")
+                  .principal(adminAuth)
+                  .param("idDonante", donanteId.toString())
+                  .param("descripcion", "Fideos secos")
+                  .param("cantidad", "10.0")
+                  .param("unidadMedicion", "KILOGRAMOS")
+                  .param("nombreSubcategoria", "Alimentos")
+                  .param("esUsado", "false"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/donaciones/recepcion"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashError",
+                      containsString("Error al registrar la donación en depósito: Error en base de datos")));
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/donaciones/{id}/vencer marca donación como vencida con código de seguimiento")
+    void testVencerDonacionExitoso() throws Exception {
+      UUID donacionId = UUID.fromString("4444a111-0000-4000-8000-000000000001");
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/{id}/vencer", donacionId)
+                  .principal(adminAuth))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/matchmaking"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk",
+                      containsString("La donación #DT-4444 ha sido marcada como VENCIDA.")));
+
+      verify(donacionesGateway, times(1)).marcarDonacionVencida(donacionId);
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/donaciones/{id}/vencer con error en gateway setea flashError")
+    void testVencerDonacionError() throws Exception {
+      UUID donacionId = UUID.randomUUID();
+      doThrow(new RuntimeException("Donación no encontrada"))
+          .when(donacionesGateway)
+          .marcarDonacionVencida(donacionId);
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/{id}/vencer", donacionId)
+                  .principal(adminAuth))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/matchmaking"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashError",
+                      containsString("No se pudo marcar la donación como vencida: Donación no encontrada")));
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/donaciones/auditoria-vencidos ejecuta barrido exitoso y setea flashOk")
+    void testAuditarDonacionesVencidasExitoso() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/auditoria-vencidos")
+                  .principal(adminAuth))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/matchmaking"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk",
+                      "Auditoría de vencimientos ejecutada exitosamente sobre el depósito."));
+
+      verify(donacionesGateway, times(1)).auditarVencidos();
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/donaciones/auditoria-vencidos con error en gateway setea flashError")
+    void testAuditarDonacionesVencidasError() throws Exception {
+      doThrow(new RuntimeException("Fallo en servicio de inventario"))
+          .when(donacionesGateway)
+          .auditarVencidos();
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/auditoria-vencidos")
+                  .principal(adminAuth))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/matchmaking"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashError",
+                      containsString("Error al ejecutar la auditoría de vencimientos: Fallo en servicio de inventario")));
+    }
+  }
 }
