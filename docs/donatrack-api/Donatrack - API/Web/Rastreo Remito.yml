@@ -1,0 +1,24 @@
+info:
+  name: Rastreo Remito
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{webUrl}}/api/public/rastreo?codigo=DT-3300"
+  auth: none
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.codigo
+      operator: eq
+      value: "#DT-3300"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
