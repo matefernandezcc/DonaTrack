@@ -156,10 +156,10 @@
 
               <!-- Botón Accionable Directo -->
               <div>
-                <button type="button" class="slds-button slds-button_brand slds-button_stretch"
+                <button type="button" class="slds-button slds-button_brand slds-button_stretch dt-touch-target"
                         th:attr="data-id=${e.idEntrega},data-patente=${e.patente},data-codigo=${e.codigoCorto},data-chofer=${e.choferNombre},data-peso=${e.peso},data-dir=${e.direccion}"
                         onclick="abrirModalConfirmacionDesdeBoton(this)"
-                        style="border-radius: 6px; font-weight: 700; height: 36px;">
+                        style="border-radius: 6px; font-weight: 700; min-height: 48px;">
                   Recepcionar
                 </button>
               </div>
@@ -171,13 +171,13 @@
         <!-- Paginador de Entregas -->
         <div id="paginacion-entregas" th:unless="${#lists.isEmpty(entregasEnCamino)}"
              style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
-          <button type="button" id="btn-pag-prev" onclick="cambiarPagina(-1)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem;">
+          <button type="button" id="btn-pag-prev" onclick="cambiarPagina(-1)" class="slds-button slds-button_neutral dt-touch-target" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 48px; min-width: 48px;">
             ← Anterior
           </button>
           <span id="texto-paginacion" style="font-size: 0.86rem; font-weight: 700; color: #475569;">
             Página 1 de 1
           </span>
-          <button type="button" id="btn-pag-next" onclick="cambiarPagina(1)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem;">
+          <button type="button" id="btn-pag-next" onclick="cambiarPagina(1)" class="slds-button slds-button_neutral dt-touch-target" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 48px; min-width: 48px;">
             Siguiente →
           </button>
         </div>
@@ -265,8 +265,8 @@
                     <button type="button" th:each="foto : ${r.fotos}"
                             th:attr="data-url=${foto},data-cod=${r.codigoCorto},data-sub=${'Patente ' + r.patente + ' · ' + (r.fechaHoraRecepcion != null ? r.fechaHoraRecepcion : r.fechaOperativa)}"
                             onclick="abrirVisorRemito(this.getAttribute('data-url'), this.getAttribute('data-cod'), this.getAttribute('data-sub'))"
-                            class="slds-button slds-button_icon slds-button_icon-border" title="Inspeccionar Comprobante"
-                            style="cursor: pointer; padding: 2px 8px; border-radius: 4px; font-size: 0.95rem; background: #f8fafc;">
+                            class="slds-button slds-button_icon slds-button_icon-border dt-touch-target" title="Inspeccionar Comprobante"
+                            style="cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 1rem; background: #f8fafc; min-width: 48px; min-height: 48px;">
                       📷
                     </button>
                     <span class="slds-badge slds-theme_success" style="font-size: 0.7rem; font-weight: 700;">Firmado</span>
@@ -435,28 +435,89 @@
           var entregasRecibidas = /*[[${entregasRecibidas}]]*/ [];
           var bounds = [];
 
-          // Puntos por defecto en caso de no tener coordenadas
-          var defaultPoints = [
-            { lat: -34.6037, lng: -58.3816, name: 'DonaTrack Hub Central', dir: 'Av. Corrientes 1234, CABA', state: 'HUB' },
-            { lat: -34.5863, lng: -58.4103, name: 'Comedor El Faro', dir: 'Av. Santa Fe 3200, Palermo', state: 'ACTIVO' },
-            { lat: -34.6186, lng: -58.3712, name: 'Hogar Caminos', dir: 'Defensa 800, San Telmo', state: 'ACTIVO' },
-            { lat: -34.9214, lng: -57.9545, name: 'Fundación Raíces', dir: 'Calle 50 742, La Plata', state: 'ENTREGADO' }
-          ];
+          function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#39;');
+          }
 
-          defaultPoints.forEach(function (pt) {
-            var iconColor = pt.state === 'ENTREGADO' ? '#166534' : (pt.state === 'HUB' ? '#014486' : '#c2410c');
-            var marker = L.circleMarker([pt.lat, pt.lng], {
-              radius: 9,
-              fillColor: iconColor,
-              color: '#ffffff',
-              weight: 2,
-              opacity: 1,
-              fillOpacity: 0.9
-            }).addTo(map);
+          var plottedReal = 0;
 
-            marker.bindPopup('<strong>' + pt.name + '</strong><br>' + pt.dir + '<br><span style="font-size:0.75rem; color:#666;">Estado: ' + pt.state + '</span>');
-            bounds.push([pt.lat, pt.lng]);
-          });
+          if (Array.isArray(entregasPendientes)) {
+            entregasPendientes.forEach(function (e) {
+              var lat = Number(e && e.lat);
+              var lng = Number(e && e.lng);
+              if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+              plottedReal++;
+              var esActiva = e.estado === 'EN_CAMINO';
+              var truckIcon = L.divIcon({
+                className: 'dt-truck-marker',
+                html: '<div style="background:' + (esActiva ? '#ea580c' : '#0176d3') + ';color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);font-size:14px;">🚚</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+              });
+              var marker = L.marker([lat, lng], { icon: truckIcon }).addTo(map);
+              var popupHtml = '<strong>🚚 ' + escapeHtml(e.codigoCorto || 'Envío') + '</strong>'
+                + '<br>Patente: <code>' + escapeHtml(e.patente || 'S/D') + '</code>'
+                + '<br>Chofer: ' + escapeHtml(e.choferNombre || 'Asignado')
+                + '<br>Destino: ' + escapeHtml(e.direccion || 'Punto de entrega')
+                + '<br>Estado: <strong>' + escapeHtml(e.estado || 'PLANIFICADA') + '</strong>'
+                + (e.ultimaActualizacion ? '<br><span style="font-size:0.75rem;color:#64748b;">Última act.: ' + escapeHtml(e.ultimaActualizacion) + '</span>' : '');
+              marker.bindPopup(popupHtml);
+              bounds.push([lat, lng]);
+            });
+          }
+
+          if (Array.isArray(entregasRecibidas)) {
+            entregasRecibidas.forEach(function (r) {
+              var lat = Number(r && r.lat);
+              var lng = Number(r && r.lng);
+              if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+              plottedReal++;
+              var marker = L.circleMarker([lat, lng], {
+                radius: 8,
+                fillColor: '#166534',
+                color: '#ffffff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.9
+              }).addTo(map);
+              var popupHtml = '<strong>✓ Entregado · ' + escapeHtml(r.codigoCorto || 'Envío') + '</strong>'
+                + '<br>Patente: <code>' + escapeHtml(r.patente || 'S/D') + '</code>'
+                + '<br>Destino: ' + escapeHtml(r.direccion || 'Recibido')
+                + (r.ultimaActualizacion ? '<br><span style="font-size:0.75rem;color:#64748b;">Última act.: ' + escapeHtml(r.ultimaActualizacion) + '</span>' : '');
+              marker.bindPopup(popupHtml);
+              bounds.push([lat, lng]);
+            });
+          }
+
+          if (plottedReal === 0) {
+            var defaultPoints = [
+              { lat: -34.6037, lng: -58.3816, name: 'DonaTrack Hub Central', dir: 'Av. Corrientes 1234, CABA', state: 'HUB' },
+              { lat: -34.5863, lng: -58.4103, name: 'Comedor El Faro', dir: 'Av. Santa Fe 3200, Palermo', state: 'ACTIVO' },
+              { lat: -34.6186, lng: -58.3712, name: 'Hogar Caminos', dir: 'Defensa 800, San Telmo', state: 'ACTIVO' },
+              { lat: -34.9214, lng: -57.9545, name: 'Fundación Raíces', dir: 'Calle 50 742, La Plata', state: 'ENTREGADO' }
+            ];
+
+            defaultPoints.forEach(function (pt) {
+              var iconColor = pt.state === 'ENTREGADO' ? '#166534' : (pt.state === 'HUB' ? '#014486' : '#c2410c');
+              var marker = L.circleMarker([pt.lat, pt.lng], {
+                radius: 9,
+                fillColor: iconColor,
+                color: '#ffffff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.9
+              }).addTo(map);
+
+              marker.bindPopup('<strong>' + escapeHtml(pt.name) + '</strong><br>' + escapeHtml(pt.dir) + '<br><span style="font-size:0.75rem; color:#666;">Estado: ' + escapeHtml(pt.state) + '</span>');
+              bounds.push([pt.lat, pt.lng]);
+            });
+          }
 
           if (bounds.length > 0) {
             map.fitBounds(bounds, { padding: [30, 30] });

@@ -376,6 +376,7 @@
               Cancelar
             </button>
             <form id="form-vencer-donacion" method="post" action="">
+              <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <button type="submit" class="slds-button slds-button_destructive" style="font-weight: 800; min-height: 48px;">
                 Sí, marcar como Vencida
               </button>

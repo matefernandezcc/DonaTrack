@@ -38,16 +38,12 @@
           </label>
           <div class="slds-select_container" style="min-width: 230px;">
             <select id="selector-periodo-ranking" class="slds-select" onchange="cambiarPeriodoRanking(this.value)" aria-label="Seleccionar período del ranking">
-              <option value="ACTUAL" selected>Noviembre 2026 (En Curso)</option>
+              <option value="ACTUAL" selected th:text="${periodoActualLabel != null ? periodoActualLabel : 'Período En Curso'}">Noviembre 2026 (En Curso)</option>
               <option th:each="h : ${historial}"
-                      th:value="${h.anio + '-' + h.mes}"
-                      th:text="${(h.mes == 10 ? 'Octubre' : (h.mes == 9 ? 'Septiembre' : (h.mes == 8 ? 'Agosto' : (h.mes == 7 ? 'Julio' : ('Mes ' + h.mes))))) + ' ' + h.anio}">
+                      th:value="${h.periodoKey != null ? h.periodoKey : (h.anio + '-' + h.mes)}"
+                      th:text="${(h.mesNombre != null ? h.mesNombre : ('Mes ' + h.mes)) + ' ' + h.anio}">
                 Octubre 2026
               </option>
-              <!-- Opciones de referencia histórica auditada -->
-              <option value="2026-10" th:if="${#lists.isEmpty(historial)}">Octubre 2026</option>
-              <option value="2026-9" th:if="${#lists.isEmpty(historial)}">Septiembre 2026</option>
-              <option value="2026-8" th:if="${#lists.isEmpty(historial)}">Agosto 2026</option>
             </select>
           </div>
         </div>
@@ -156,7 +152,7 @@
             var encontrado = null;
             if (historialData && historialData.length > 0) {
               encontrado = historialData.find(function (h) {
-                return (h.anio + '-' + h.mes) === periodo;
+                return h.periodoKey === periodo || (h.anio + '-' + h.mesNumero) === periodo || (h.anio + '-' + h.mes) === periodo;
               });
             }
 

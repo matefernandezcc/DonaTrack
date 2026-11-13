@@ -5,6 +5,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}" />
   <title th:replace="${title}">DonaTrack · Backoffice</title>
   <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}" />
 
@@ -19,6 +21,14 @@
     @media (min-width: 768px) {
       #admin-nav {
         display: block !important;
+      }
+      #admin-nav.is-collapsed {
+        display: none !important;
+      }
+      #main-content.nav-collapsed {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
       }
     }
 
@@ -40,16 +50,18 @@
     }
 
     /* ========================================================
-       BOTONES DE CIERRE (X) EN MODALES - ALTO CONTRASTE Y ACCESIBILIDAD
+       BOTONES DE CIERRE (X) EN MODALES Y TARGETS TÁCTILES WCAG (>= 48x48px)
        ======================================================== */
     .slds-modal__close,
     button.slds-modal__close,
     .dt-modal-close-btn {
       position: absolute !important;
-      top: 12px !important;
-      right: 12px !important;
-      width: 32px !important;
-      height: 32px !important;
+      top: 8px !important;
+      right: 8px !important;
+      width: 48px !important;
+      height: 48px !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
       padding: 0 !important;
       display: inline-flex !important;
       align-items: center !important;
@@ -59,13 +71,23 @@
       border: 1px solid rgba(0, 0, 0, 0.15) !important;
       background: #ffffff !important;
       color: #0f172a !important;
-      font-size: 1.15rem !important;
+      font-size: 1.2rem !important;
       font-weight: 800 !important;
       line-height: 1 !important;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
       transition: all 0.15s ease-in-out !important;
       z-index: 10002 !important;
       text-decoration: none !important;
+    }
+
+    .dt-touch-target,
+    #admin-menu-toggle,
+    .slds-notify__close .slds-button {
+      min-width: 48px !important;
+      min-height: 48px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
 
     .slds-modal__close span[aria-hidden="true"],
@@ -133,9 +155,9 @@
 
       <!-- Brand Logo DonaTrack Package (Cajita Oficial) -->
       <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
-        <!-- Botón Hamburguesa Móvil (Visible en viewport < 768px) -->
+        <!-- Botón Hamburguesa de Navegación (Mobile y Desktop) -->
         <button type="button"
-          class="slds-button slds-button_icon slds-button_icon-border-filled slds-hide_medium slds-m-right_small"
+          class="slds-button slds-button_icon slds-button_icon-border-filled dt-touch-target slds-m-right_small"
           id="admin-menu-toggle" aria-expanded="false" aria-controls="admin-nav"
           aria-label="Alternar menú de navegación">
           <svg class="slds-button__icon" aria-hidden="true">
@@ -153,8 +175,73 @@
         <span class="slds-badge slds-badge_lightest slds-m-left_small">Backoffice</span>
       </div>
 
-      <!-- User Profile & Actions con Blobatar Avatar -->
+      <!-- User Profile, Notificaciones & Actions con Blobatar Avatar -->
       <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
+        <!-- Centro de Notificaciones SLDS (UX-08 / UX-13) -->
+        <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-m-right_small" style="position: relative;">
+          <button type="button" id="btn-notificaciones-toggle"
+            class="slds-button slds-button_icon slds-button_icon-border-filled dt-touch-target"
+            aria-haspopup="dialog" aria-expanded="false" aria-controls="popover-notificaciones"
+            title="Ver notificaciones del sistema"
+            style="position: relative; border-radius: 6px;">
+            <svg class="slds-button__icon" aria-hidden="true">
+              <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#notification}"></use>
+            </svg>
+            <span class="slds-assistive-text">Notificaciones</span>
+            <span id="notif-badge-count" class="slds-badge slds-theme_error"
+              style="display: none; position: absolute; top: 2px; right: 2px; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; line-height: 1.2;">0</span>
+          </button>
+
+          <section id="popover-notificaciones" aria-label="Notificaciones recientes"
+            class="slds-popover slds-popover_large slds-nubbin_top-right" role="dialog"
+            style="display: none; position: absolute; right: 0; top: 54px; width: 360px; max-width: 92vw; z-index: 9999; background: #ffffff;">
+            <header class="slds-popover__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+              <h2 class="slds-text-heading_small" style="font-weight: 800; color: #014486; margin: 0;">Notificaciones</h2>
+              <div class="slds-grid" style="gap: 4px;">
+                <button type="button" id="btn-notificaciones-refresh"
+                  class="slds-button slds-button_icon slds-button_icon-border dt-touch-target"
+                  title="Actualizar notificaciones">
+                  <svg class="slds-button__icon" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#refresh}"></use>
+                  </svg>
+                  <span class="slds-assistive-text">Actualizar</span>
+                </button>
+                <button type="button" id="btn-notificaciones-close"
+                  class="slds-button slds-button_icon slds-button_icon-border dt-touch-target"
+                  title="Cerrar notificaciones">
+                  <svg class="slds-button__icon" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
+                  </svg>
+                  <span class="slds-assistive-text">Cerrar</span>
+                </button>
+              </div>
+            </header>
+            <div class="slds-popover__body slds-p-around_none" style="max-height: 320px; overflow-y: auto;">
+              <div id="notif-state-loading" class="slds-p-around_medium slds-text-align_center" style="display: none;">
+                <div role="status" class="slds-spinner slds-spinner_small slds-spinner_brand slds-is-relative" style="margin: 12px auto;">
+                  <span class="slds-assistive-text">Cargando alertas...</span>
+                  <div class="slds-spinner__dot-a"></div>
+                  <div class="slds-spinner__dot-b"></div>
+                </div>
+                <p class="slds-text-body_small slds-text-color_weak">Consultando alertas...</p>
+              </div>
+              <div id="notif-state-error" class="slds-p-around_small" style="display: none;">
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert" style="border-radius: 4px;">
+                  <span class="slds-assistive-text">Error</span>
+                  <p id="notif-error-msg" style="margin: 0; font-size: 0.8rem;">No se pudieron cargar tus notificaciones.</p>
+                </div>
+                <button type="button" id="notif-retry-btn" class="slds-button slds-button_neutral slds-m-top_x-small dt-touch-target" style="width: 100%;">
+                  Reintentar
+                </button>
+              </div>
+              <div id="notif-state-empty" class="slds-p-around_medium slds-text-align_center" style="display: none;">
+                <p class="slds-text-body_small slds-text-color_weak" style="margin: 0;">No tenés notificaciones registradas por el momento.</p>
+              </div>
+              <ul id="notif-lista-items" class="slds-has-dividers_bottom-space" style="display: none; margin: 0; padding: 0; list-style: none;"></ul>
+            </div>
+          </section>
+        </div>
+
         <div class="slds-grid slds-grid_vertical-align-center slds-m-right_medium">
           <img src="/img/package.svg"
             th:src="@{'https://blobatar.dev/avatar/' + ${nombreUsuario != null ? nombreUsuario : #authentication.name} + '?size=32&background=circle'}"
@@ -541,14 +628,38 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-      // Toggle de navegación móvil
+      // Toggle de navegación (Mobile: is-open, Desktop: is-collapsed / nav-collapsed)
       var toggleBtn = document.getElementById('admin-menu-toggle');
       var nav = document.getElementById('admin-nav');
+      var mainContent = document.getElementById('main-content');
       if (toggleBtn && nav) {
+        function sincronizarAriaExpanded() {
+          var isDesktop = window.innerWidth >= 768;
+          if (isDesktop) {
+            var isCollapsed = nav.classList.contains('is-collapsed');
+            toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+          } else {
+            var isOpen = nav.classList.contains('is-open');
+            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          }
+        }
+        sincronizarAriaExpanded();
+
         toggleBtn.addEventListener('click', function () {
-          var isOpen = nav.classList.toggle('is-open');
-          toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          var isDesktop = window.innerWidth >= 768;
+          if (isDesktop) {
+            var isCollapsed = nav.classList.toggle('is-collapsed');
+            if (mainContent) {
+              mainContent.classList.toggle('nav-collapsed', isCollapsed);
+            }
+            toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+          } else {
+            var isOpen = nav.classList.toggle('is-open');
+            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          }
         });
+
+        window.addEventListener('resize', sincronizarAriaExpanded, { passive: true });
       }
 
       // FASE 2: Intercepción de navegación client-side en menú lateral Donante
@@ -620,6 +731,8 @@
       }
     });
   </script>
+
+  <script th:src="@{/js/notificaciones-panel.js}" defer></script>
 
   <!-- Scripts específicos de la vista -->
   <th:block th:replace="${scripts}"></th:block>

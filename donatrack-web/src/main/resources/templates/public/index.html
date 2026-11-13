@@ -346,6 +346,33 @@
       </div>
     </section>
 
+    <!-- ============ TOP 3 DONANTES DEL MES ============ -->
+    <section class="ranking-pub" id="ranking" aria-labelledby="ranking-pub-title">
+      <div class="container">
+        <div class="section-head section-head--center">
+          <span class="eyebrow">Reconocimiento comunitario</span>
+          <h2 id="ranking-pub-title">Donantes destacados del mes</h2>
+          <p class="section-head__lead">
+            Personas y empresas que lideran el impacto solidario auditado en la red DonaTrack.
+          </p>
+        </div>
+
+        <div class="ranking-pub__grid" th:if="${ranking != null and not #lists.isEmpty(ranking)}">
+          <article class="ranking-pub__card" th:each="item, iter : ${ranking}">
+            <span class="ranking-pub__pos" th:text="'#' + ${iter.count}">#1</span>
+            <div class="ranking-pub__info">
+              <strong class="ranking-pub__name" th:text="${item['user'] != null ? item['user'] : 'Donante Solidario'}">María González</strong>
+              <span class="ranking-pub__stats" th:text="${(item['donations'] != null ? item['donations'] : 0)} + ' aportes verificados este mes'">5 aportes verificados este mes</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="ranking-pub__empty" th:if="${ranking == null or #lists.isEmpty(ranking)}">
+          <p>El podio mensual se actualiza automáticamente al consolidarse las entregas certificadas del período.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ MAP ============ -->
     <section class="map-sec" id="mapa" aria-labelledby="map-title">
       <div class="container">
@@ -370,10 +397,10 @@
           </div>
           <aside class="map-sec__sidebar" aria-label="Lista de ubicaciones">
             <div class="map-sec__sidebar-head">
-              <h3>Ubicaciones Activas (6)</h3>
+              <h3 id="map-sidebar-count">Ubicaciones Activas (6)</h3>
               <p>Hacé clic en cualquier punto para enfocar el mapa</p>
             </div>
-            <ul class="map-sec__list">
+            <ul class="map-sec__list" id="map-sidebar-list">
               <li>
                 <button type="button" class="map-sec__item is-active" data-coord-index="0">
                   <span class="dot dot--blue" aria-hidden="true"></span>
@@ -700,7 +727,7 @@
               impacto medible.
             </p>
             <div class="access__ctas">
-              <a th:href="@{/login(rol='DONANTE')}" class="btn btn--primary">Crear cuenta donante</a>
+              <a th:href="@{/registro(rol='DONANTE')}" class="btn btn--primary">Crear cuenta donante</a>
               <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
@@ -717,7 +744,8 @@
               gestionar entregas con transparencia.
             </p>
             <div class="access__ctas">
-              <button type="button" onclick="abrirModalSolicitudOng(event)" class="btn btn--secondary" style="cursor: pointer;">Solicitar verificación ONG</button>
+              <a th:href="@{/registro(rol='BENEFICIARIA')}" class="btn btn--secondary">Registrar organización</a>
+              <button type="button" onclick="abrirModalSolicitudOng(event)" class="btn btn--ghost" style="cursor: pointer;">Solicitud rápida ONG</button>
               <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
@@ -974,9 +1002,20 @@
         };
 
         try {
+          const headers = { "Content-Type": "application/json" };
+          const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+          const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+          if (csrfTokenMeta && csrfHeaderMeta && csrfTokenMeta.content && csrfHeaderMeta.content) {
+            headers[csrfHeaderMeta.content] = csrfTokenMeta.content;
+          } else {
+            const xsrfMatch = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+            if (xsrfMatch) {
+              headers["X-XSRF-TOKEN"] = decodeURIComponent(xsrfMatch[1]);
+            }
+          }
           const res = await fetch("/api/public/solicitudes-ong", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: headers,
             body: JSON.stringify(payload)
           });
           const data = await res.json();

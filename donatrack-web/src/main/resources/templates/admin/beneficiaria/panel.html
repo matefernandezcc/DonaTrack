@@ -230,6 +230,43 @@
 
     </div>
 
+    <!-- Notificaciones Recientes (SLDS Card) -->
+    <div class="slds-m-top_medium">
+      <article id="panel-notificaciones-card" class="slds-card" aria-live="polite" style="border-top: 3px solid #0176d3; border-radius: 8px;">
+        <div class="slds-card__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+          <header class="slds-media slds-media_center slds-has-flexi-truncate">
+            <div class="slds-media__figure">
+              <span class="slds-icon_container slds-icon-standard-announcement" style="background-color: #0176d3;">
+                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#notification}"></use>
+                </svg>
+              </span>
+            </div>
+            <div class="slds-media__body">
+              <h2 class="slds-card__header-title" style="display: flex; align-items: center; gap: 6px;">
+                <span class="slds-text-heading_small" style="font-weight: 800; color: #0f172a;">Notificaciones</span>
+                <span id="panel-notif-badge" class="slds-badge" style="display: none; background: #0176d3; color: #ffffff; font-weight: 800;">0</span>
+              </h2>
+            </div>
+          </header>
+          <div class="slds-no-flex">
+            <button type="button" id="panel-notif-refresh" class="slds-button slds-button_neutral dt-touch-target" style="min-height: 48px;">
+              Actualizar
+            </button>
+          </div>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+          <div id="panel-notif-loading" class="slds-text-body_small" style="color: #475569;">Cargando alertas...</div>
+          <div id="panel-notif-error" role="alert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 12px;">
+            <p id="panel-notif-error-msg" class="slds-text-body_small" style="color: #991b1b; font-weight: 600; margin-bottom: 6px;">No pudimos cargar las alertas.</p>
+            <button type="button" id="panel-notif-retry" class="slds-button slds-button_destructive dt-touch-target" style="min-height: 48px;">Reintentar</button>
+          </div>
+          <div id="panel-notif-empty" class="slds-text-body_small" style="display: none; color: #64748b;">No tenés notificaciones recientes.</div>
+          <ul id="panel-notif-lista" style="display: none; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;"></ul>
+        </div>
+      </article>
+    </div>
+
   </div>
 
 </body>

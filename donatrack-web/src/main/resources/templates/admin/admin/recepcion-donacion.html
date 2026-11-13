@@ -47,7 +47,7 @@
           </div>
         </header>
         <div>
-          <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral" style="font-weight: 600;">
+          <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral dt-touch-target" style="font-weight: 600; min-height: 48px; display: inline-flex; align-items: center;">
             ← Ir a Matchmaking
           </a>
         </div>
@@ -58,16 +58,22 @@
 
           <!-- Persona Donante Registrada -->
           <div class="slds-form-element slds-m-bottom_medium">
-            <label class="slds-form-element__label" for="idDonante" style="font-weight: 700; color: #1e293b;">
-              <abbr class="slds-required" title="obligatorio">*</abbr> Persona Donante Registrada
-            </label>
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap slds-m-bottom_xx-small" style="gap: 8px;">
+              <label class="slds-form-element__label" for="idDonante" style="font-weight: 700; color: #1e293b; margin-bottom: 0;">
+                <abbr class="slds-required" title="obligatorio">*</abbr> Persona Donante Registrada
+              </label>
+              <button type="button" id="btn-abrir-modal-persona" onclick="abrirModalNuevaPersona()" class="slds-button slds-button_neutral dt-touch-target" style="min-height: 48px; font-weight: 700;">
+                + Registrar Nueva Persona Donante
+              </button>
+            </div>
             <div class="slds-form-element__control">
               <div class="slds-select_container">
                 <select class="slds-select" id="idDonante" name="idDonante" required>
-                  <option value="" disabled selected>-- Seleccioná a nombre de quién ingresa la donación --</option>
+                  <option value="" disabled th:selected="${personaCreadaId == null || personaCreadaId == ''}">-- Seleccioná a nombre de quién ingresa la donación --</option>
                   <option th:each="p : ${personas}"
-                          th:value="${p.id}"
-                          th:text="${(p.nombre != null ? p.nombre : '') + ' ' + (p.apellido != null ? p.apellido : '') + ' · ' + (p.documento != null ? ('DNI/Doc: ' + p.documento) : (p.email != null ? p.email : 'Donante'))}">
+                          th:value="${p['id']}"
+                          th:selected="${personaCreadaId != null && p['id'] != null && personaCreadaId == p['id'].toString()}"
+                          th:text="${((p['razonSocial'] != null && !#strings.isEmpty(p['razonSocial'])) ? p['razonSocial'] : ((p['nombre'] != null ? p['nombre'] : '') + ' ' + (p['apellido'] != null ? p['apellido'] : ''))) + ' · ' + (p['documento'] != null ? (p['documento'] instanceof T(java.util.Map) ? ((p['documento']['tipo'] != null ? p['documento']['tipo'] + ': ' : '') + (p['documento']['numero'] != null ? p['documento']['numero'] : 'S/N')) : p['documento']) : (p['email'] != null ? p['email'] : 'Donante'))}">
                     Juan Pérez (DNI: 12345678)
                   </option>
                 </select>
@@ -197,16 +203,186 @@
       </div>
     </article>
 
+    <!-- Modal SLDS: Registrar Nueva Persona Donante -->
+    <div id="modal-nueva-persona-donante" style="display: none;">
+      <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-persona-heading" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container" style="max-width: 680px;">
+          <header class="slds-modal__header">
+            <button type="button" class="slds-button slds-button_icon slds-modal__close dt-modal-close-btn" title="Cerrar modal" onclick="cerrarModalNuevaPersona()">
+              <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
+              </svg>
+              <span class="slds-assistive-text">Cerrar</span>
+            </button>
+            <h2 id="modal-persona-heading" class="slds-modal__title slds-hyphenate" style="font-weight: 800; color: #014486;">
+              Registrar Nueva Persona Donante
+            </h2>
+          </header>
+          <form id="form-nueva-persona" th:action="@{/app/admin/personas}" method="post">
+            <div class="slds-modal__content slds-p-around_medium">
+              <div class="slds-grid slds-wrap slds-gutters_small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-tipo" style="font-weight: 700;">Tipo de Persona</label>
+                  <select class="slds-select" id="np-tipo" name="tipo" onchange="toggleTipoPersonaDonante()" required>
+                    <option value="HUMANA" selected>Persona Humana</option>
+                    <option value="JURIDICA">Persona Jurídica</option>
+                  </select>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-docTipo" style="font-weight: 700;">Tipo Doc.</label>
+                  <select class="slds-select" id="np-docTipo" name="docTipo" required>
+                    <option value="DNI" selected>DNI</option>
+                    <option value="CUIT">CUIT</option>
+                    <option value="CUIL">CUIL</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                  </select>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-docNumero" style="font-weight: 700;">Nro. Documento</label>
+                  <input type="text" class="slds-input" id="np-docNumero" name="docNumero" required placeholder="Ej: 30123456" />
+                </div>
+
+                <!-- Campos Persona Humana -->
+                <div id="grupo-persona-humana" class="slds-col slds-size_1-of-1 slds-grid slds-wrap slds-gutters_small" style="padding: 0; margin: 0;">
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-nombre" style="font-weight: 700;">Nombre</label>
+                    <input type="text" class="slds-input" id="np-nombre" name="nombre" required placeholder="Ej: Lucía" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-apellido" style="font-weight: 700;">Apellido</label>
+                    <input type="text" class="slds-input" id="np-apellido" name="apellido" required placeholder="Ej: Gómez" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-edad" style="font-weight: 700;">Edad</label>
+                    <input type="number" class="slds-input" id="np-edad" name="edad" min="18" max="120" value="30" />
+                  </div>
+                </div>
+
+                <!-- Campos Persona Jurídica -->
+                <div id="grupo-persona-juridica" class="slds-col slds-size_1-of-1 slds-grid slds-wrap slds-gutters_small" style="display: none; padding: 0; margin: 0;">
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-razonSocial" style="font-weight: 700;">Razón Social</label>
+                    <input type="text" class="slds-input" id="np-razonSocial" name="razonSocial" placeholder="Ej: Distribuidora Sur SRL" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-tipoJuridica" style="font-weight: 700;">Tipo Entidad</label>
+                    <select class="slds-select" id="np-tipoJuridica" name="tipoJuridica">
+                      <option value="EMPRESA" selected>Empresa</option>
+                      <option value="ONG">ONG</option>
+                      <option value="GUBERNAMENTAL">Gubernamental</option>
+                      <option value="OTRA">Otra</option>
+                    </select>
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-rubro" style="font-weight: 700;">Rubro</label>
+                    <input type="text" class="slds-input" id="np-rubro" name="rubro" placeholder="Ej: Alimentación" />
+                  </div>
+                </div>
+
+                <!-- Contacto -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-email" style="font-weight: 700;">Correo Electrónico</label>
+                  <input type="email" class="slds-input" id="np-email" name="email" required placeholder="donante@ejemplo.org" />
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-medio" style="font-weight: 700;">Medio Preferido</label>
+                  <select class="slds-select" id="np-medio" name="medioPredeterminado">
+                    <option value="CORREO" selected>Correo Electrónico</option>
+                    <option value="TELEFONO">Teléfono</option>
+                    <option value="WHATSAPP">WhatsApp</option>
+                  </select>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-telefono" style="font-weight: 700;">Teléfono</label>
+                  <input type="text" class="slds-input" id="np-telefono" name="telefono" placeholder="+54 11 5555-0100" />
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-whatsapp" style="font-weight: 700;">WhatsApp</label>
+                  <input type="text" class="slds-input" id="np-whatsapp" name="whatsapp" placeholder="+54 9 11 5555-0100" />
+                </div>
+
+                <!-- Dirección opcional -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-calle" style="font-weight: 700;">Calle</label>
+                  <input type="text" class="slds-input" id="np-calle" name="calle" placeholder="Av. Corrientes" />
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-altura" style="font-weight: 700;">Altura</label>
+                  <input type="number" class="slds-input" id="np-altura" name="altura" placeholder="1234" />
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-localidad" style="font-weight: 700;">Localidad</label>
+                  <input type="text" class="slds-input" id="np-localidad" name="localidad" placeholder="CABA" />
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-cp" style="font-weight: 700;">CP</label>
+                  <input type="text" class="slds-input" id="np-cp" name="codigoPostal" placeholder="1043" />
+                </div>
+              </div>
+            </div>
+            <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+              <button type="button" class="slds-button slds-button_neutral dt-touch-target" onclick="cerrarModalNuevaPersona()" style="min-height: 48px;">
+                Cancelar
+              </button>
+              <button type="submit" id="btn-submit-nueva-persona" class="slds-button slds-button_brand dt-touch-target" style="min-height: 48px; font-weight: 700;">
+                Guardar Persona Donante
+              </button>
+            </footer>
+          </form>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" onclick="cerrarModalNuevaPersona()"></div>
+    </div>
+
   </div>
 
   <th:block id="page-scripts">
     <script>
+      function abrirModalNuevaPersona() {
+        var modal = document.getElementById('modal-nueva-persona-donante');
+        if (modal) modal.style.display = 'block';
+        toggleTipoPersonaDonante();
+      }
+
+      function cerrarModalNuevaPersona() {
+        var modal = document.getElementById('modal-nueva-persona-donante');
+        if (modal) modal.style.display = 'none';
+      }
+
+      function toggleTipoPersonaDonante() {
+        var tipoEl = document.getElementById('np-tipo');
+        var tipo = tipoEl ? tipoEl.value : 'HUMANA';
+        var grupoHumana = document.getElementById('grupo-persona-humana');
+        var grupoJuridica = document.getElementById('grupo-persona-juridica');
+        var nombreEl = document.getElementById('np-nombre');
+        var apellidoEl = document.getElementById('np-apellido');
+        var razonEl = document.getElementById('np-razonSocial');
+        var esJuridica = tipo === 'JURIDICA';
+
+        if (grupoHumana) grupoHumana.style.display = esJuridica ? 'none' : 'flex';
+        if (grupoJuridica) grupoJuridica.style.display = esJuridica ? 'flex' : 'none';
+        if (nombreEl) nombreEl.required = !esJuridica;
+        if (apellidoEl) apellidoEl.required = !esJuridica;
+        if (razonEl) razonEl.required = esJuridica;
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          cerrarModalNuevaPersona();
+        }
+      });
+
       document.addEventListener('DOMContentLoaded', function () {
         var form = document.getElementById('form-recepcion-deposito');
         var submitBtn = document.getElementById('btn-submit-recepcion');
 
         if (window.DonaTrackForms) {
           DonaTrackForms.registrarProteccion(form, submitBtn);
+          var formPersona = document.getElementById('form-nueva-persona');
+          var submitPersonaBtn = document.getElementById('btn-submit-nueva-persona');
+          if (formPersona && submitPersonaBtn) {
+            DonaTrackForms.registrarProteccion(formPersona, submitPersonaBtn);
+          }
         } else if (form && submitBtn) {
           form.addEventListener('submit', function (e) {
             if (!form.checkValidity()) return;

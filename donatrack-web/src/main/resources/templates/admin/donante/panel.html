@@ -90,9 +90,9 @@
 
             <p class="slds-m-top_x-small slds-grid slds-grid_vertical-align-center" style="font-style: italic; color: #4b5563; font-size: 0.88rem; flex-wrap: wrap; gap: 6px;">
               <span>&ldquo;<span th:text="${descripcion != null ? descripcion : 'Comprometidos con una logística solidaria eficiente y transparente.'}">Comprometidos con una logística solidaria eficiente y transparente.</span>&rdquo;</span>
-              <button type="button" onclick="abrirPerfilModal()" class="slds-button slds-button_icon slds-button_icon-border" title="Editar lema y ubicación"
-                      style="width: 24px; height: 24px; min-width: 24px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; line-height: 1;">
-                <svg class="slds-button__icon slds-button__icon_x-small" aria-hidden="true">
+              <button type="button" onclick="abrirPerfilModal()" class="slds-button slds-button_icon slds-button_icon-border dt-touch-target" title="Editar lema y ubicación"
+                      style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; line-height: 1;">
+                <svg class="slds-button__icon" aria-hidden="true">
                   <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#edit}"></use>
                 </svg>
                 <span class="slds-assistive-text">Editar lema y ubicación</span>
@@ -119,8 +119,8 @@
     </article>
 
     <!-- ==================== NAVEGACIÓN POR PESTAÑAS DEL PORTAL DONANTE ==================== -->
-    <div class="slds-tabs_default slds-m-bottom_large" style="background: #ffffff; border-radius: 8px; border: 1px solid #dddbda; padding: 0 16px;">
-      <ul class="slds-tabs_default__nav" role="tablist" style="border-bottom: none;">
+    <div class="slds-tabs_default slds-m-bottom_large" style="background: #ffffff; border-radius: 8px; border: 1px solid #dddbda; padding: 0 16px; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch;">
+      <ul class="slds-tabs_default__nav" role="tablist" style="border-bottom: none; display: flex; flex-wrap: nowrap; min-width: max-content;">
         <li class="slds-tabs_default__item" th:classappend="${tabActiva == null || tabActiva == 'resumen'} ? 'slds-is-active' : ''" role="presentation">
           <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
              th:attr="tabindex=${tabActiva == null || tabActiva == 'resumen' ? 0 : -1},aria-selected=${tabActiva == null || tabActiva == 'resumen' ? 'true' : 'false'}"
@@ -405,7 +405,10 @@
                     <div>
                       <strong style="color: #0f172a; font-size: 0.95rem;" th:text="${mision.nombre}">Nombre de Misión</strong>
                       <span class="slds-badge slds-badge_lightest slds-m-left_x-small" style="font-size: 0.72rem; font-weight: 700;"
-                            th:text="'Meta: ' + ${mision.objetivo} + ' aportes'">Meta: 5 aportes</span>
+                            th:text="'Meta: ' + ${mision.objetivo} + ' ' + ${mision.unidadLabel != null ? mision.unidadLabel : 'aportes'}">Meta: 5 aportes</span>
+                      <span th:if="${mision.completada == true}" class="slds-badge slds-m-left_xx-small" style="background: #dcfce7; color: #166534; font-size: 0.7rem; font-weight: 700;">Completada</span>
+                      <span th:if="${mision.completada != true && mision.bloqueada == true}" class="slds-badge slds-m-left_xx-small" style="background: #f1f5f9; color: #475569; font-size: 0.7rem; font-weight: 700;">Próxima</span>
+                      <span th:if="${mision.completada != true && mision.bloqueada != true}" class="slds-badge slds-m-left_xx-small" style="background: #dbeafe; color: #1e40af; font-size: 0.7rem; font-weight: 700;">En Curso</span>
                     </div>
                   </div>
                   <div>
@@ -417,24 +420,24 @@
 
                 <!-- Barra de progreso SLDS Blueprint -->
                 <div class="slds-progress-bar slds-progress-bar_large" aria-valuemin="0" aria-valuemax="100"
-                     th:with="donCount=${misDonaciones != null ? misDonaciones.size() : 0}, metaVal=${mision.objetivo != null && mision.objetivo > 0 ? mision.objetivo : 1}, pctVal=${T(java.lang.Math).min(100, (donCount * 100) / metaVal)}, faltanVal=${T(java.lang.Math).max(0, metaVal - donCount)}"
+                     th:with="valAct=${mision.valorActual != null ? mision.valorActual : 0}, metaVal=${mision.objetivo != null && mision.objetivo > 0 ? mision.objetivo : 1}, pctVal=${mision.porcentaje != null ? mision.porcentaje : T(java.lang.Math).min(100, (valAct * 100) / metaVal)}, faltanVal=${mision.faltante != null ? mision.faltante : T(java.lang.Math).max(0, metaVal - valAct)}, unidadTxt=${mision.unidadLabel != null ? mision.unidadLabel : 'aportes'}"
                      th:attr="aria-valuenow=${pctVal}" role="progressbar">
-                  <span class="slds-progress-bar__value" th:style="'width: ' + ${pctVal} + '%; background-color: ' + (${pctVal >= 100} ? '#166534' : '#0176d3') + ';'">
+                  <span class="slds-progress-bar__value" th:style="'width: ' + ${pctVal} + '%; background-color: ' + (${pctVal >= 100 || mision.completada == true} ? '#166534' : (${mision.bloqueada == true} ? '#94a3b8' : '#0176d3')) + ';'">
                     <span class="slds-assistive-text" th:text="'Progreso: ' + ${pctVal} + '%'">Progreso</span>
                   </span>
                 </div>
 
                 <!-- Distancia a la meta -->
                 <div class="slds-grid slds-grid_align-spread slds-m-top_xx-small" style="font-size: 0.8rem;"
-                     th:with="donCount=${misDonaciones != null ? misDonaciones.size() : 0}, metaVal=${mision.objetivo != null && mision.objetivo > 0 ? mision.objetivo : 1}, pctVal=${T(java.lang.Math).min(100, (donCount * 100) / metaVal)}, faltanVal=${T(java.lang.Math).max(0, metaVal - donCount)}">
+                     th:with="valAct=${mision.valorActual != null ? mision.valorActual : 0}, metaVal=${mision.objetivo != null && mision.objetivo > 0 ? mision.objetivo : 1}, pctVal=${mision.porcentaje != null ? mision.porcentaje : T(java.lang.Math).min(100, (valAct * 100) / metaVal)}, faltanVal=${mision.faltante != null ? mision.faltante : T(java.lang.Math).max(0, metaVal - valAct)}, unidadTxt=${mision.unidadLabel != null ? mision.unidadLabel : 'aportes'}">
                   <span style="color: #475569;">
-                    Avance actual: <strong th:text="${donCount} + ' / ' + ${metaVal} + ' donaciones'">0 / 5 donaciones</strong>
+                    Avance actual: <strong th:text="${valAct} + ' / ' + ${metaVal} + ' ' + ${unidadTxt} + ' (' + ${pctVal} + '%)'">0 / 5 aportes (0%)</strong>
                   </span>
-                  <span th:if="${faltanVal > 0}" style="font-weight: 700; color: #0176d3;"
-                        th:text="'Faltan ' + ${faltanVal} + ' donaciones para desbloquear la insignia'">
-                    Faltan donaciones
+                  <span th:if="${mision.completada != true && faltanVal > 0}" style="font-weight: 700; color: #0176d3;"
+                        th:text="'Faltan ' + ${faltanVal} + ' ' + ${unidadTxt} + ' para desbloquear la insignia'">
+                    Faltan aportes
                   </span>
-                  <span th:unless="${faltanVal > 0}" style="font-weight: 800; color: #166534;">
+                  <span th:if="${mision.completada == true || faltanVal <= 0}" style="font-weight: 800; color: #166534;">
                     ✓ ¡Misión Completada con Éxito!
                   </span>
                 </div>
@@ -573,10 +576,12 @@
                   <div class="slds-form-element__control">
                     <select id="filtro-donacion-subcategoria" class="slds-select" onchange="filtrarMisDonaciones()">
                       <option value="">Todas las subcategorías</option>
-                      <option value="Alimentos">Alimentos No Perecederos</option>
-                      <option value="Abrigo">Abrigo / Ropa</option>
-                      <option value="Mobiliario">Mobiliario / Enseres</option>
-                      <option value="Higiene">Higiene y Limpieza</option>
+                      <option value="ALIMENTOS">Alimentos</option>
+                      <option value="ABRIGO">Abrigo / Ropa</option>
+                      <option value="HIGIENE">Higiene y Limpieza</option>
+                      <option value="MOBILIARIO">Mobiliario / Útiles</option>
+                      <option value="MEDICAMENTOS">Medicamentos y Salud</option>
+                      <option value="JUGUETES">Juguetes / Recreación</option>
                     </select>
                   </div>
                 </div>
@@ -603,7 +608,7 @@
               <!-- Tarjetas de Seguimiento Paso a Paso -->
               <div th:unless="${#lists.isEmpty(misDonaciones)}" id="lista-donaciones-container" style="display: flex; flex-direction: column; gap: 14px;">
                 <div th:each="don : ${misDonaciones}" class="donacion-item-card"
-                     th:attr="data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
+                     th:attr="data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-subcategoria-grupo=${don.subcategoriaGrupo},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
                      style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
                   <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-wrap" style="gap: 10px; margin-bottom: 12px;">
                     <div>
@@ -944,17 +949,17 @@
               <!-- Controles de Paginación (máximo 3 por página) -->
               <div th:if="${#lists.size(insignias) > 3}" id="badges-pagination-controls"
                    style="display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid #e2e8f0; margin-top: 4px;">
-                <button type="button" id="badges-prev-btn" class="slds-button slds-button_neutral"
+                <button type="button" id="badges-prev-btn" class="slds-button slds-button_neutral dt-touch-target"
                         onclick="cambiarPaginaBadges(-1)" disabled
-                        style="font-size: 0.74rem; padding: 0 10px; height: 28px; line-height: 26px;">
+                        style="font-size: 0.78rem; padding: 0 12px; min-height: 48px; min-width: 48px;">
                   ← Anterior
                 </button>
                 <span id="badges-page-indicator" style="font-size: 0.75rem; font-weight: 700; color: #475569;">
                   Página 1
                 </span>
-                <button type="button" id="badges-next-btn" class="slds-button slds-button_neutral"
+                <button type="button" id="badges-next-btn" class="slds-button slds-button_neutral dt-touch-target"
                         onclick="cambiarPaginaBadges(1)"
-                        style="font-size: 0.74rem; padding: 0 10px; height: 28px; line-height: 26px;">
+                        style="font-size: 0.78rem; padding: 0 12px; min-height: 48px; min-width: 48px;">
                   Siguiente →
                 </button>
               </div>
@@ -988,7 +993,40 @@
           </div>
         </article>
 
-
+        <!-- Notificaciones Recientes (SLDS Card) -->
+        <article id="panel-notificaciones-card" class="slds-card" aria-live="polite" style="border-top: 3px solid #0176d3; border-radius: 8px;">
+          <div class="slds-card__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-announcement" style="background-color: #0176d3;">
+                  <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#notification}"></use>
+                  </svg>
+                </span>
+              </div>
+              <div class="slds-media__body">
+                <h2 class="slds-card__header-title" style="display: flex; align-items: center; gap: 6px;">
+                  <span class="slds-text-heading_small" style="font-weight: 800; color: #0f172a;">Notificaciones</span>
+                  <span id="panel-notif-badge" class="slds-badge" style="display: none; background: #0176d3; color: #ffffff; font-weight: 800;">0</span>
+                </h2>
+              </div>
+            </header>
+            <div class="slds-no-flex">
+              <button type="button" id="panel-notif-refresh" class="slds-button slds-button_neutral dt-touch-target" style="min-height: 48px;">
+                Actualizar
+              </button>
+            </div>
+          </div>
+          <div class="slds-card__body slds-card__body_inner">
+            <div id="panel-notif-loading" class="slds-text-body_small" style="color: #475569;">Cargando alertas...</div>
+            <div id="panel-notif-error" role="alert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 12px;">
+              <p id="panel-notif-error-msg" class="slds-text-body_small" style="color: #991b1b; font-weight: 600; margin-bottom: 6px;">No pudimos cargar las alertas.</p>
+              <button type="button" id="panel-notif-retry" class="slds-button slds-button_destructive dt-touch-target" style="min-height: 48px;">Reintentar</button>
+            </div>
+            <div id="panel-notif-empty" class="slds-text-body_small" style="display: none; color: #64748b;">No tenés notificaciones recientes.</div>
+            <ul id="panel-notif-lista" style="display: none; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;"></ul>
+          </div>
+        </article>
 
       </div>
 
@@ -1046,7 +1084,7 @@
           </div>
         </div>
       </section>
-      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
+      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; background: rgba(0,0,0,0.5);" onclick="cerrarPerfilModal()"></div>
     </div>
 
     <!-- ==================== MODAL DE BIENVENIDA / ROADMAP SOLIDARIO ==================== -->
@@ -1131,7 +1169,7 @@
           </footer>
         </div>
       </section>
-      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; opacity: 0.6;"></div>
+      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; opacity: 0.6;" onclick="cerrarWelcomeModal()"></div>
     </div>
 
   </div>
@@ -1144,6 +1182,220 @@
     <script th:src="@{/js/donante-mapa.js}"></script>
 
     <script th:inline="javascript">
+      // ========================================================
+      // 1. GESTIÓN DE MODALES (PERFIL & ROADMAP DE BIENVENIDA)
+      // ========================================================
+      window.abrirPerfilModal = function () {
+        const modal = document.getElementById('modal-editar-perfil');
+        if (modal) modal.style.display = 'block';
+      };
+
+      window.cerrarPerfilModal = function () {
+        const modal = document.getElementById('modal-editar-perfil');
+        if (modal) modal.style.display = 'none';
+      };
+
+      window.abrirWelcomeModal = function () {
+        const modal = document.getElementById('welcome-roadmap-modal');
+        if (modal) modal.style.display = 'block';
+      };
+
+      window.cerrarWelcomeModal = function () {
+        const modal = document.getElementById('welcome-roadmap-modal');
+        if (modal) modal.style.display = 'none';
+        try {
+          localStorage.setItem('donatrack_welcome_seen', 'true');
+        } catch (e) {}
+      };
+
+      // Escucha global de tecla Escape para cerrar modales
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          if (typeof window.cerrarWelcomeModal === 'function') window.cerrarWelcomeModal();
+          if (typeof window.cerrarPerfilModal === 'function') window.cerrarPerfilModal();
+        }
+      });
+
+      // ========================================================
+      // 2. CONTROL DE PESTAÑAS DEL PORTAL DONANTE (FASE 2)
+      // ========================================================
+      window.cambiarTabDonante = function (tabId, shouldPushState) {
+        const targetTab = tabId || 'resumen';
+        const tabs = ['resumen', 'seguimiento', 'causas', 'directorio'];
+        tabs.forEach(function (t) {
+          const panel = document.getElementById('tab-panel-' + t);
+          const btn = document.getElementById('tab-btn-' + t);
+          const isActive = (t === targetTab);
+          if (panel) {
+            panel.style.display = isActive ? 'block' : 'none';
+          }
+          if (btn) {
+            btn.setAttribute('tabindex', isActive ? '0' : '-1');
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            if (btn.parentElement) {
+              if (isActive) {
+                btn.parentElement.classList.add('slds-is-active');
+              } else {
+                btn.parentElement.classList.remove('slds-is-active');
+              }
+            }
+          }
+        });
+
+        if (targetTab === 'seguimiento') {
+          if (typeof window.inicializarOMostrarMapaDonante === 'function') {
+            window.inicializarOMostrarMapaDonante();
+          } else if (typeof window.refrescarMapaDonante === 'function') {
+            window.refrescarMapaDonante();
+          }
+        }
+
+        if (shouldPushState) {
+          const url = new URL(window.location.href);
+          if (targetTab === 'resumen') {
+            url.searchParams.delete('tab');
+          } else {
+            url.searchParams.set('tab', targetTab);
+          }
+          window.history.pushState({ tab: targetTab }, '', url.toString());
+        }
+
+        if (typeof window.sincronizarSidebarDonante === 'function') {
+          window.sincronizarSidebarDonante(targetTab);
+        }
+      };
+
+      // ========================================================
+      // 3. FILTRADO REACTIVO DE MIS DONACIONES (UX-05)
+      // ========================================================
+      window.filtrarMisDonaciones = function () {
+        const estadoSelect = document.getElementById('filtro-donacion-estado');
+        const subcatSelect = document.getElementById('filtro-donacion-subcategoria');
+        const busquedaInput = document.getElementById('filtro-donacion-busqueda');
+
+        const estadoFiltro = (estadoSelect ? estadoSelect.value : '').trim().toUpperCase();
+        const subcatFiltro = (subcatSelect ? subcatSelect.value : '').trim().toUpperCase();
+        const busquedaFiltro = (busquedaInput ? busquedaInput.value : '').trim().toLowerCase();
+
+        const cards = document.querySelectorAll('.donacion-item-card');
+        let visibles = 0;
+
+        cards.forEach(function (card) {
+          const cardEstado = (card.getAttribute('data-estado') || '').toUpperCase();
+          const cardSubcat = (card.getAttribute('data-subcategoria') || '').toUpperCase();
+          const cardSubcatGrupo = (card.getAttribute('data-subcategoria-grupo') || '').toUpperCase();
+          const cardBusqueda = (card.getAttribute('data-busqueda') || '').toLowerCase();
+
+          const coincideEstado = !estadoFiltro || cardEstado === estadoFiltro || (estadoFiltro === 'EN_DEPOSITO' && cardEstado.indexOf('DEPOSITO') !== -1);
+          const coincideSubcat = !subcatFiltro || cardSubcatGrupo === subcatFiltro || cardSubcat.indexOf(subcatFiltro) !== -1;
+          const coincideBusqueda = !busquedaFiltro || cardBusqueda.indexOf(busquedaFiltro) !== -1;
+
+          if (coincideEstado && coincideSubcat && coincideBusqueda) {
+            card.style.display = 'block';
+            visibles++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        const emptyState = document.getElementById('donaciones-sin-resultados');
+        if (emptyState) {
+          emptyState.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
+        }
+      };
+
+      // ========================================================
+      // 4. DIRECTORIO DE ORGANIZACIONES (UX-06)
+      // ========================================================
+      window.filtrarDirectorioBeneficiarias = function () {
+        const input = document.getElementById('buscador-directorio-input');
+        const query = (input ? input.value : '').trim().toLowerCase();
+        const cards = document.querySelectorAll('.directorio-ong-card');
+        let visibles = 0;
+
+        cards.forEach(function (card) {
+          const dataSearch = (card.getAttribute('data-search') || '').toLowerCase();
+          if (!query || dataSearch.indexOf(query) !== -1) {
+            card.style.display = 'flex';
+            visibles++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        const emptyState = document.getElementById('directorio-sin-resultados');
+        if (emptyState) {
+          emptyState.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
+        }
+      };
+
+      // ========================================================
+      // 5. BUSCADOR DE CAUSAS ACTIVAS
+      // ========================================================
+      window.filtrarCausasActivas = function () {
+        const qInput = document.getElementById('buscador-causas-input');
+        const catSelect = document.getElementById('filtro-categoria-causas');
+        const query = (qInput ? qInput.value : '').trim().toLowerCase();
+        const cat = (catSelect ? catSelect.value : '').trim().toLowerCase();
+
+        const cards = document.querySelectorAll('.causa-ong-card');
+        let visibles = 0;
+        cards.forEach(function (card) {
+          const searchData = (card.getAttribute('data-search') || '').toLowerCase();
+          const catData = (card.getAttribute('data-cat') || '').toLowerCase();
+          const matchQuery = !query || searchData.indexOf(query) !== -1;
+          const matchCat = !cat || catData.indexOf(cat) !== -1;
+          if (matchQuery && matchCat) {
+            card.style.display = 'flex';
+            visibles++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+        const emptyMsg = document.getElementById('causas-sin-resultados');
+        if (emptyMsg) {
+          emptyMsg.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
+        }
+      };
+
+      // ========================================================
+      // 6. PAGINACIÓN DE INSIGNIAS (MÁX 3 POR VISTA)
+      // ========================================================
+      const BADGES_PER_PAGE = 3;
+      let currentBadgePage = 0;
+
+      function actualizarPaginacionBadges() {
+        const items = document.querySelectorAll('.donante-badge-item');
+        if (!items || items.length === 0) return;
+        const totalPages = Math.max(1, Math.ceil(items.length / BADGES_PER_PAGE));
+        if (currentBadgePage < 0) currentBadgePage = 0;
+        if (currentBadgePage >= totalPages) currentBadgePage = totalPages - 1;
+
+        const startIdx = currentBadgePage * BADGES_PER_PAGE;
+        const endIdx = startIdx + BADGES_PER_PAGE;
+
+        items.forEach(function (el, idx) {
+          el.style.display = (idx >= startIdx && idx < endIdx) ? 'flex' : 'none';
+        });
+
+        const indicator = document.getElementById('badges-page-indicator');
+        if (indicator) {
+          indicator.textContent = 'Página ' + (currentBadgePage + 1) + ' de ' + totalPages;
+        }
+        const prevBtn = document.getElementById('badges-prev-btn');
+        const nextBtn = document.getElementById('badges-next-btn');
+        if (prevBtn) prevBtn.disabled = (currentBadgePage === 0);
+        if (nextBtn) nextBtn.disabled = (currentBadgePage >= totalPages - 1);
+      }
+
+      window.cambiarPaginaBadges = function (delta) {
+        currentBadgePage += delta;
+        actualizarPaginacionBadges();
+      };
+
+      // ========================================================
+      // 7. INTERACTIVIDAD BLOBATAR (EYE TRACKING CON POINTER)
+      // ========================================================
       function initBlobatarInteractive() {
         const container = document.getElementById('blobatar-interactive');
         if (!container) return;
@@ -1263,89 +1515,17 @@
         initBlobatarInteractive();
       }
 
-      // Lógica de apertura/cierre de Modal Roadmap y Perfil
-      document.addEventListener('DOMContentLoaded', function () {
+      // ========================================================
+      // 8. INICIALIZACIÓN DEL PANEL DONANTE AL CARGAR EL DOM
+      // ========================================================
+      function initPanelDonante() {
         const isNuevo = /*[[${isNuevoUsuario}]]*/ false;
-        if (isNuevo && !localStorage.getItem('donatrack_welcome_seen')) {
-          const modal = document.getElementById('welcome-roadmap-modal');
-          if (modal) modal.style.display = 'block';
-        }
-
-        window.abrirWelcomeModal = function () {
-          const modal = document.getElementById('welcome-roadmap-modal');
-          if (modal) modal.style.display = 'block';
-        };
-
-        window.cerrarWelcomeModal = function () {
-          const modal = document.getElementById('welcome-roadmap-modal');
-          if (modal) modal.style.display = 'none';
-          localStorage.setItem('donatrack_welcome_seen', 'true');
-        };
-
-        window.abrirPerfilModal = function () {
-          const modal = document.getElementById('modal-editar-perfil');
-          if (modal) modal.style.display = 'block';
-        };
-
-        window.cerrarPerfilModal = function () {
-          const modal = document.getElementById('modal-editar-perfil');
-          if (modal) modal.style.display = 'none';
-        };
-
-        // Escucha de tecla Escape para cerrar modales
-        document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' || e.key === 'Esc') {
-            cerrarWelcomeModal();
-            cerrarPerfilModal();
+        try {
+          if (isNuevo && !localStorage.getItem('donatrack_welcome_seen')) {
+            const modal = document.getElementById('welcome-roadmap-modal');
+            if (modal) modal.style.display = 'block';
           }
-        });
-
-        // ==================== CONTROL DE PESTAÑAS DEL DONANTE (FASE 2) ====================
-        window.cambiarTabDonante = function (tabId, shouldPushState) {
-          const targetTab = tabId || 'resumen';
-          const tabs = ['resumen', 'seguimiento', 'causas', 'directorio'];
-          tabs.forEach(function (t) {
-            const panel = document.getElementById('tab-panel-' + t);
-            const btn = document.getElementById('tab-btn-' + t);
-            const isActive = (t === targetTab);
-            if (panel) {
-              panel.style.display = isActive ? 'block' : 'none';
-            }
-            if (btn) {
-              btn.setAttribute('tabindex', isActive ? '0' : '-1');
-              btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
-              if (btn.parentElement) {
-                if (isActive) {
-                  btn.parentElement.classList.add('slds-is-active');
-                } else {
-                  btn.parentElement.classList.remove('slds-is-active');
-                }
-              }
-            }
-          });
-
-          if (targetTab === 'seguimiento') {
-            if (typeof window.inicializarOMostrarMapaDonante === 'function') {
-              window.inicializarOMostrarMapaDonante();
-            } else if (typeof window.refrescarMapaDonante === 'function') {
-              window.refrescarMapaDonante();
-            }
-          }
-
-          if (shouldPushState) {
-            const url = new URL(window.location.href);
-            if (targetTab === 'resumen') {
-              url.searchParams.delete('tab');
-            } else {
-              url.searchParams.set('tab', targetTab);
-            }
-            window.history.pushState({ tab: targetTab }, '', url.toString());
-          }
-
-          if (typeof window.sincronizarSidebarDonante === 'function') {
-            window.sincronizarSidebarDonante(targetTab);
-          }
-        };
+        } catch (e) {}
 
         // Protección de Formulario Perfil con Modal Spinner SLDS (FASE 3)
         if (window.DonaTrackForms) {
@@ -1355,127 +1535,15 @@
           );
         }
 
-        // ==================== FILTRADO REACTIVO DE MIS DONACIONES (UX-05) ====================
-        window.filtrarMisDonaciones = function () {
-          const estadoSelect = document.getElementById('filtro-donacion-estado');
-          const subcatSelect = document.getElementById('filtro-donacion-subcategoria');
-          const busquedaInput = document.getElementById('filtro-donacion-busqueda');
-
-          const estadoFiltro = (estadoSelect ? estadoSelect.value : '').trim().toUpperCase();
-          const subcatFiltro = (subcatSelect ? subcatSelect.value : '').trim().toLowerCase();
-          const busquedaFiltro = (busquedaInput ? busquedaInput.value : '').trim().toLowerCase();
-
-          const cards = document.querySelectorAll('.donacion-item-card');
-          let visibles = 0;
-
-          cards.forEach(function (card) {
-            const cardEstado = (card.getAttribute('data-estado') || '').toUpperCase();
-            const cardSubcat = (card.getAttribute('data-subcategoria') || '').toLowerCase();
-            const cardBusqueda = (card.getAttribute('data-busqueda') || '').toLowerCase();
-
-            const coincideEstado = !estadoFiltro || cardEstado === estadoFiltro || (estadoFiltro === 'EN_DEPOSITO' && cardEstado.indexOf('DEPOSITO') !== -1);
-            const coincideSubcat = !subcatFiltro || cardSubcat.indexOf(subcatFiltro) !== -1;
-            const coincideBusqueda = !busquedaFiltro || cardBusqueda.indexOf(busquedaFiltro) !== -1;
-
-            if (coincideEstado && coincideSubcat && coincideBusqueda) {
-              card.style.display = 'block';
-              visibles++;
-            } else {
-              card.style.display = 'none';
-            }
-          });
-
-          const emptyState = document.getElementById('donaciones-sin-resultados');
-          if (emptyState) {
-            emptyState.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
-          }
-        };
-
-        // ==================== DIRECTORIO DE ORGANIZACIONES (UX-06) ====================
-        window.filtrarDirectorioBeneficiarias = function () {
-          const input = document.getElementById('buscador-directorio-input');
-          const query = (input ? input.value : '').trim().toLowerCase();
-          const cards = document.querySelectorAll('.directorio-ong-card');
-          let visibles = 0;
-
-          cards.forEach(function (card) {
-            const dataSearch = (card.getAttribute('data-search') || '').toLowerCase();
-            if (!query || dataSearch.indexOf(query) !== -1) {
-              card.style.display = 'flex';
-              visibles++;
-            } else {
-              card.style.display = 'none';
-            }
-          });
-
-          const emptyState = document.getElementById('directorio-sin-resultados');
-          if (emptyState) {
-            emptyState.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
-          }
-        };
-
-        // ==================== BUSCADOR DE CAUSAS ACTIVAS ====================
-        window.filtrarCausasActivas = function () {
-          const qInput = document.getElementById('buscador-causas-input');
-          const catSelect = document.getElementById('filtro-categoria-causas');
-          const query = (qInput ? qInput.value : '').trim().toLowerCase();
-          const cat = (catSelect ? catSelect.value : '').trim().toLowerCase();
-
-          const cards = document.querySelectorAll('.causa-ong-card');
-          let visibles = 0;
-          cards.forEach(function (card) {
-            const searchData = (card.getAttribute('data-search') || '').toLowerCase();
-            const catData = (card.getAttribute('data-cat') || '').toLowerCase();
-            const matchQuery = !query || searchData.indexOf(query) !== -1;
-            const matchCat = !cat || catData.indexOf(cat) !== -1;
-            if (matchQuery && matchCat) {
-              card.style.display = 'flex';
-              visibles++;
-            } else {
-              card.style.display = 'none';
-            }
-          });
-          const emptyMsg = document.getElementById('causas-sin-resultados');
-          if (emptyMsg) {
-            emptyMsg.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
-          }
-        };
-
-        // ==================== PAGINACIÓN DE INSIGNIAS (MÁX 3 POR VISTA) ====================
-        const BADGES_PER_PAGE = 3;
-        let currentBadgePage = 0;
-
-        function actualizarPaginacionBadges() {
-          const items = document.querySelectorAll('.donante-badge-item');
-          if (!items || items.length === 0) return;
-          const totalPages = Math.max(1, Math.ceil(items.length / BADGES_PER_PAGE));
-          if (currentBadgePage < 0) currentBadgePage = 0;
-          if (currentBadgePage >= totalPages) currentBadgePage = totalPages - 1;
-
-          const startIdx = currentBadgePage * BADGES_PER_PAGE;
-          const endIdx = startIdx + BADGES_PER_PAGE;
-
-          items.forEach(function (el, idx) {
-            el.style.display = (idx >= startIdx && idx < endIdx) ? 'flex' : 'none';
-          });
-
-          const indicator = document.getElementById('badges-page-indicator');
-          if (indicator) {
-            indicator.textContent = 'Página ' + (currentBadgePage + 1) + ' de ' + totalPages;
-          }
-          const prevBtn = document.getElementById('badges-prev-btn');
-          const nextBtn = document.getElementById('badges-next-btn');
-          if (prevBtn) prevBtn.disabled = (currentBadgePage === 0);
-          if (nextBtn) nextBtn.disabled = (currentBadgePage >= totalPages - 1);
-        }
-
-        window.cambiarPaginaBadges = function (delta) {
-          currentBadgePage += delta;
-          actualizarPaginacionBadges();
-        };
-
         actualizarPaginacionBadges();
-      });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPanelDonante);
+      } else {
+        initPanelDonante();
+      }
+    </script>
     </script>
   </th:block>
 
