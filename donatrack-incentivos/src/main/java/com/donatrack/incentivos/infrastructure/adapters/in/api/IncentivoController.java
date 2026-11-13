@@ -121,6 +121,11 @@ public class IncentivoController {
       historialMap.merge(d.getMesDonacion(), 1, Integer::sum);
     }
 
+    int donacionesEnDeposito = Math.max(0, totalHistorico - totalExitosas);
+    // Esquema justo por etapas: +10 puntos inmediatos en depósito, +25 puntos extra al confirmarse
+    // la entrega a la entidad
+    int puntos = (donacionesEnDeposito * 10) + (totalExitosas * 35) + (bienesDonados * 2);
+
     MetricasDonanteDTO dto =
         MetricasDonanteDTO.builder()
             .donanteId(perfil.getDonanteId())
@@ -130,7 +135,8 @@ public class IncentivoController {
             .donacionesExitosas(totalExitosas)
             .totalOrganizacionesAyudadas((int) organizacionesAyudadas)
             .historialDonacionesPorMes(historialMap)
-            .posicionRanking(5) // Mock
+            .posicionRanking(totalHistorico > 0 ? 5 : 0)
+            .puntosTotales(puntos)
             .build();
 
     return ResponseEntity.ok(dto);
@@ -170,26 +176,13 @@ public class IncentivoController {
         perfilDonanteRepository.findById(id).orElseGet(() -> new PerfilDonante(id));
     List<Insignia> insignias = new ArrayList<>(perfil.getInsigniasObtenidas());
 
-    if (insignias.isEmpty()) {
-      Insignia insigniaDefault =
-          new Insignia("Primer Aporte", "Otorgada al realizar la primera donación en el sistema");
-      insigniaDefault.setId(UUID.fromString("e1111111-1111-4111-8111-111111111111"));
-      insigniaDefault.setFechaObtencion(java.time.LocalDate.now());
-      insigniaDefault.setVisiblePublicamente(true);
-      insignias.add(insigniaDefault);
-      perfil.setInsigniasObtenidas(insignias);
+    if (!insignias.isEmpty()) {
+      Insignia insigniaADifundir = insignias.get(insignias.size() - 1);
       try {
-        perfilDonanteRepository.save(perfil);
+        difusionPort.difundirInsignia(new InsigniaObtenidaEvent(id, insigniaADifundir));
       } catch (Exception e) {
-        // Tolerancia a fallos en persistencia
+        // Tolerancia a fallos si n8n no está disponible
       }
-    }
-
-    Insignia insigniaADifundir = insignias.get(insignias.size() - 1);
-    try {
-      difusionPort.difundirInsignia(new InsigniaObtenidaEvent(id, insigniaADifundir));
-    } catch (Exception e) {
-      // Tolerancia a fallos si n8n no está disponible
     }
 
     return ResponseEntity.ok(insignias);
@@ -205,56 +198,166 @@ public class IncentivoController {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/ranking/top3")
   public ResponseEntity<List<java.util.Map<String, Object>>> obtenerRankingMensual() {
+    List<java.util.Map<String, Object>> response = calcularRankingTop3();
+    return ResponseEntity.ok(response);
+  }
+
+  @Operation(
+      summary = "Publicar ranking mensual a canales de difusión (Discord vía n8n)",
+      description =
+          "Calcula el Top 3 mensual y lo despacha al webhook de automatización de n8n para su difusión en Discord")
+  @ApiResponse(responseCode = "200", description = "Ranking publicado exitosamente")
+  @ApiResponse(
+      responseCode = "500",
+      description = "Error publicando ranking",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PostMapping("/ranking/publicar")
+  public ResponseEntity<java.util.Map<String, Object>> publicarRankingMensual() {
+    List<java.util.Map<String, Object>> ranking = calcularRankingTop3();
+    boolean notificado = enviarRankingAN8n(ranking);
+
+    java.util.Map<String, Object> result = new java.util.HashMap<>();
+    result.put(
+        "mensaje",
+        notificado
+            ? "Ranking publicado exitosamente a Discord vía n8n"
+            : "Ranking calculado pero no se pudo contactar a n8n");
+    result.put("notificado", notificado);
+    result.put("ranking", ranking);
+    return ResponseEntity.ok(result);
+  }
+
+  private List<java.util.Map<String, Object>> calcularRankingTop3() {
     java.time.YearMonth mesActual = java.time.YearMonth.now();
     List<PerfilDonante> top3 = rankingMensualService.obtenerTop3Mensual(mesActual);
 
     persistirRankingMensual(mesActual, top3);
 
-    List<java.util.Map<String, Object>> response =
-        top3.stream()
-            .map(
-                p -> {
-                  String nombreUsuario = p.getDonanteId().toString();
-                  try {
-                    com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient
-                            .PersonaDTO
-                        persona = personaClient.obtenerPersona(p.getDonanteId());
-                    if (persona != null) {
-                      if ("JURIDICA".equals(persona.tipo())) {
-                        nombreUsuario = persona.razonSocial();
-                      } else {
-                        nombreUsuario = persona.nombre() + " " + persona.apellido();
-                      }
+    return top3.stream()
+        .map(
+            p -> {
+              String nombreUsuario = p.getDonanteId().toString();
+              try {
+                com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient
+                        .PersonaDTO
+                    persona = personaClient.obtenerPersona(p.getDonanteId());
+                if (persona != null) {
+                  if ("JURIDICA".equalsIgnoreCase(persona.tipo())
+                      && persona.razonSocial() != null
+                      && !persona.razonSocial().isBlank()) {
+                    nombreUsuario = persona.razonSocial();
+                  } else {
+                    String n = persona.nombre() != null ? persona.nombre().trim() : "";
+                    String a = persona.apellido() != null ? persona.apellido().trim() : "";
+                    String completo = (n + " " + a).trim();
+                    if (!completo.isEmpty()) {
+                      nombreUsuario = completo;
+                    } else if (persona.razonSocial() != null
+                        && !persona.razonSocial().isBlank()) {
+                      nombreUsuario = persona.razonSocial();
                     }
-                  } catch (Exception e) {
-                    // Ignore
                   }
+                }
+              } catch (Exception e) {
+                // Ignore
+              }
 
-                  int misionesMes = p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size();
-                  int donacionesTotales = p.getMetricas().obtenerTodasLasDonaciones().size();
-                  java.util.Map<String, Object> map = new java.util.HashMap<>();
-                  map.put("user", nombreUsuario);
-                  map.put("donations", misionesMes > 0 ? misionesMes : donacionesTotales);
-                  map.put("totalDonations", donacionesTotales);
-                  return map;
-                })
-            .collect(java.util.stream.Collectors.toList());
+              int misionesMes = p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size();
+              int donacionesTotales = p.getMetricas().obtenerTodasLasDonaciones().size();
+              java.util.Map<String, Object> map = new java.util.HashMap<>();
+              map.put("donanteId", p.getDonanteId().toString());
+              map.put("user", nombreUsuario);
+              map.put("donations", misionesMes > 0 ? misionesMes : donacionesTotales);
+              map.put("totalDonations", donacionesTotales);
+              return map;
+            })
+        .collect(java.util.stream.Collectors.toList());
+  }
 
+  private boolean enviarRankingAN8n(List<java.util.Map<String, Object>> ranking) {
     try {
-      restTemplate.postForObject(n8nWebhookRankingUrl, response, String.class);
+      restTemplate.postForObject(n8nWebhookRankingUrl, ranking, String.class);
+      return true;
     } catch (Exception e) {
       if (n8nWebhookRankingUrl != null && n8nWebhookRankingUrl.contains("http://n8n:5678")) {
         try {
           restTemplate.postForObject(
               n8nWebhookRankingUrl.replace("http://n8n:5678", "http://localhost:5678"),
-              response,
+              ranking,
               String.class);
+          return true;
         } catch (Exception ignored) {
         }
       }
+      return false;
     }
+  }
 
-    return ResponseEntity.ok(response);
+  @Operation(
+      summary = "Obtener historial de rankings mensuales",
+      description =
+          "Devuelve los rankings mensuales históricos guardados con las posiciones de los donantes")
+  @ApiResponse(responseCode = "200", description = "Historial de rankings obtenido")
+  @GetMapping("/ranking/historial")
+  public ResponseEntity<List<Map<String, Object>>> obtenerHistorialRankings() {
+    if (rankingMensualJpaRepository == null) {
+      return ResponseEntity.ok(Collections.emptyList());
+    }
+    List<
+            com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
+                .RankingMensualEntity>
+        entities = rankingMensualJpaRepository.findAll();
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (var r : entities) {
+      if (r == null) continue;
+      Map<String, Object> map = new HashMap<>();
+      map.put("id", r.getId() != null ? r.getId().toString() : null);
+      map.put("mes", r.getMes());
+      map.put("anio", r.getAnio());
+
+      List<Map<String, Object>> posiciones = new ArrayList<>();
+      if (r.getPosiciones() != null) {
+        for (var pos : r.getPosiciones()) {
+          if (pos == null) continue;
+          Map<String, Object> pMap = new HashMap<>();
+          pMap.put("posicion", pos.getPosicion());
+          pMap.put("misionesCompletadasMes", pos.getMisionesCompletadasMes());
+          if (pos.getPerfil() != null) {
+            String donanteId =
+                pos.getPerfil().getPerfilDonanteId() != null
+                    ? pos.getPerfil().getPerfilDonanteId().toString()
+                    : null;
+            pMap.put("donanteId", donanteId);
+            String nombre =
+                "Donante "
+                    + (donanteId != null && donanteId.length() >= 4
+                        ? donanteId.substring(0, 4)
+                        : "");
+            try {
+              if (personaClient != null && pos.getPerfil().getPerfilDonanteId() != null) {
+                var persona = personaClient.obtenerPersona(pos.getPerfil().getPerfilDonanteId());
+                if (persona != null) {
+                  String n = persona.nombre() != null ? persona.nombre().trim() : "";
+                  String a = persona.apellido() != null ? persona.apellido().trim() : "";
+                  String completo = (n + " " + a).trim();
+                  if (!completo.isEmpty()) {
+                    nombre = completo;
+                  } else if (persona.razonSocial() != null && !persona.razonSocial().isBlank()) {
+                    nombre = persona.razonSocial();
+                  }
+                }
+              }
+            } catch (Exception ignored) {
+            }
+            pMap.put("user", nombre);
+          }
+          posiciones.add(pMap);
+        }
+      }
+      map.put("posiciones", posiciones);
+      result.add(map);
+    }
+    return ResponseEntity.ok(result);
   }
 
   private void persistirRankingMensual(java.time.YearMonth mesActual, List<PerfilDonante> top3) {

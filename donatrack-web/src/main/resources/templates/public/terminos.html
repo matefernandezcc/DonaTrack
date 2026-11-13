@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-public :: layout(~{::title}, ~{::#contenido}, ~{})}">
+<head>
+  <title>DonaTrack · Términos y Condiciones de Uso del Servicio</title>
+</head>
+<body>
+
+  <main id="contenido" class="container" style="padding-top: 48px; padding-bottom: 64px; max-width: 860px;">
+
+    <!-- Encabezado de la Sección Legal -->
+    <header style="margin-bottom: 36px; border-bottom: 1px solid var(--border-color, #e2e8f0); padding-bottom: 24px;">
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <span class="trust" style="background: #e0f2fe; color: #0369a1; font-weight: 700; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem;">
+          Términos de Servicio
+        </span>
+        <span class="trust" style="background: #fef3c7; color: #92400e; font-weight: 700; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem;">
+          UTN Solidaria
+        </span>
+      </div>
+      <h1 style="font-family: 'Manrope', var(--font-family, sans-serif); font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0b2147; letter-spacing: -0.5px; line-height: 1.25;">
+        Términos y Condiciones Generales de Uso
+      </h1>
+      <p style="font-size: 0.95rem; color: #64748b; margin-top: 8px;">
+        Vigencia a partir de: Noviembre de 2026 · Plataforma Comunitaria y Educativa DonaTrack
+      </p>
+    </header>
+
+    <!-- Contenido Legal de Términos y Condiciones -->
+    <article style="line-height: 1.7; color: #1e293b; font-size: 1rem; display: flex; flex-direction: column; gap: 28px;">
+
+      <!-- 1. Aceptación de los Términos -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          1. Aceptación de los Términos
+        </h2>
+        <p>
+          El acceso y utilización de la plataforma web <strong>DonaTrack</strong> atribuye la condición de usuario e implica la aceptación plena y sin reservas de todas y cada una de las disposiciones incluidas en estos Términos y Condiciones Generales de Uso. Si el usuario no estuviere de acuerdo con alguno de los términos aquí consignados, deberá abstenerse de utilizar el servicio.
+        </p>
+      </section>
+
+      <!-- 2. Naturaleza del Servicio y Finalidad Social -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          2. Naturaleza del Servicio y Finalidad Social
+        </h2>
+        <p>
+          DonaTrack es una plataforma solidaria desarrollada sin fines de lucro en el marco institucional de la <strong>Universidad Tecnológica Nacional (UTN FRBA)</strong> con el objetivo de optimizar la distribución equitativa de donaciones materiales (alimentos no perecederos, abrigo, calzado, útiles escolares y mobiliario) hacia comedores y merenderos comunitarios en la República Argentina.
+        </p>
+        <p style="margin-top: 8px;">
+          La plataforma provee herramientas informáticas de trazabilidad, cálculo logístico de capacidad de carga, algoritmos de matchmaking y certificación digital de entregas con registro fotográfico.
+        </p>
+      </section>
+
+      <!-- 3. Registro y Cuentas de Usuario -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          3. Registro, Perfiles y Verificación de Cuentas
+        </h2>
+        <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc; display: flex; flex-direction: column; gap: 8px;">
+          <li>
+            <strong>Personas Donantes:</strong> El registro habilita el seguimiento en línea de sus aportes, la obtención de insignias del programa de incentivos y el acceso al mapa de entregas activas.
+          </li>
+          <li>
+            <strong>Organizaciones Beneficiarias:</strong> Las entidades que soliciten su adhesión declaran bajo juramento que los datos de personería, CUIT y representación legal son fidedignos. El acceso a la operatoria queda condicionado al dictamen favorable de auditoría y otorgamiento formal del rol operativo.
+          </li>
+          <li>
+            <strong>Custodia de Credenciales:</strong> El usuario es el único responsable de preservar la confidencialidad de su contraseña y de los accesos originados desde su cuenta.
+          </li>
+        </ul>
+      </section>
+
+      <!-- 4. Bienes Aceptados y Normas Sanitarias -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          4. Bienes Donados y Normas Sanitarias de Depósito
+        </h2>
+        <p>
+          Queda terminantemente prohibido el registro o ingreso físico de mercadería perecedera sin fecha de vencimiento legible, medicamentos vencidos, sustancias peligrosas o inflamables. La administración de DonaTrack se reserva el derecho de auditar y descartar sanitariamente cualquier lote en depósito que presente fecha caducada o deterioro material, notificando tal circunstancia en el libro de auditoría digital.
+        </p>
+      </section>
+
+      <!-- 5. Trazabilidad Pública y Evidencia Fotográfica -->
+      <section>
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: #0b4a8f; margin-bottom: 10px;">
+          5. Trazabilidad Pública y Remitos Digitales
+        </h2>
+        <p>
+          Al confirmar la recepción de donaciones, las entidades beneficiarias suscriben un remito digital y adjuntan fotografías del lote descargado. El usuario presta su consentimiento para que dichas imágenes y datos de entrega se exhiban en el mapa público de transparencia, omitiendo cualquier dato sensible de menores de edad o beneficiarios en situación de vulnerabilidad.
+        </p>
+      </section>
+
+      <!-- 6. Propiedad Intelectual y Jurisdicción -->
+      <section style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px 24px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0b2147; margin-bottom: 6px;">
+          Legislación Aplicable y Jurisdicción
+        </h3>
+        <p style="font-size: 0.92rem; color: #475569;">
+          Estos Términos y Condiciones se rigen e interpretan de conformidad con las leyes vigentes de la <strong>República Argentina</strong>. Para cualquier controversia legal derivada del uso de la plataforma, las partes se someten voluntariamente a la jurisdicción de los Tribunales Ordinarios en lo Contencioso y Comercial de la Ciudad Autónoma de Buenos Aires, con renuncia a cualquier otro fuero o jurisdicción.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Navegación Inferior -->
+    <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <a th:href="@{/privacidad}" style="color: #0b4a8f; font-weight: 700; text-decoration: none; min-height: 48px; display: inline-flex; align-items: center;">
+        ← Consultar Política de Privacidad (Ley 25.326)
+      </a>
+      <a th:href="@{/}" class="btn btn--primary" style="font-weight: 700; min-height: 48px; min-width: 48px; display: inline-flex; align-items: center;">
+        Volver a la Portada
+      </a>
+    </div>
+
+  </main>
+
+</body>
+</html>

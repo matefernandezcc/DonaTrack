@@ -1,2 +1,3 @@
 com.donatrack.common.infrastructure.config.RabbitMQCommonConfig
 com.donatrack.common.infrastructure.config.GlobalExceptionHandler
+com.donatrack.common.infrastructure.security.ServiceSecurityAutoConfiguration

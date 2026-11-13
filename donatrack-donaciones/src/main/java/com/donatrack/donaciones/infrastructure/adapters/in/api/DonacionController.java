@@ -148,6 +148,101 @@ public class DonacionController {
   }
 
   @Operation(
+      summary = "Listar donaciones registradas",
+      description =
+          "Devuelve el listado de donaciones con su estado actual, bienes, categoría, donante y entidad asignada")
+  @GetMapping("/donaciones")
+  public ResponseEntity<List<java.util.Map<String, Object>>> listarDonaciones(
+      @RequestParam(name = "estado", required = false) String estado,
+      @RequestParam(name = "idDonante", required = false) UUID idDonante) {
+    List<Donacion> base;
+    if (estado != null && !estado.isBlank()) {
+      try {
+        EstadoDonacion est = EstadoDonacion.valueOf(estado.trim().toUpperCase());
+        base = donacionRepository.buscarPorEstado(est);
+      } catch (Exception e) {
+        base = donacionRepository.buscarTodas();
+      }
+    } else {
+      base = donacionRepository.buscarTodas();
+      if (base.isEmpty()) {
+        List<Donacion> acum = new java.util.ArrayList<>();
+        for (EstadoDonacion est : EstadoDonacion.values()) {
+          try {
+            List<Donacion> porEst = donacionRepository.buscarPorEstado(est);
+            if (porEst != null) acum.addAll(porEst);
+          } catch (Exception ignored) {
+          }
+        }
+        base = acum;
+      }
+    }
+
+    List<java.util.Map<String, Object>> resultado = new java.util.ArrayList<>();
+    for (Donacion d : base) {
+      if (d == null || d.getId() == null) continue;
+      UUID donanteRealId = resolverPersonaDonanteId(d.getId());
+      if (idDonante != null && !idDonante.equals(donanteRealId)) {
+        continue;
+      }
+      java.util.Map<String, Object> item = new java.util.HashMap<>();
+      String idStr = d.getId().toString();
+      item.put("id", idStr);
+      item.put(
+          "codigoCorto",
+          "#DT-" + (idStr.length() >= 4 ? idStr.substring(0, 4).toUpperCase() : idStr));
+      item.put("estado", d.getEstado() != null ? d.getEstado().name() : "EN_DEPOSITO");
+      item.put(
+          "fechaCreacion",
+          d.getFechaCreacion() != null
+              ? d.getFechaCreacion().toString()
+              : LocalDate.now().toString());
+
+      String subcat = "Alimentos";
+      if (d.getSubCategoria() != null && d.getSubCategoria().getNombre() != null) {
+        subcat = d.getSubCategoria().getNombre();
+      } else if (!d.getCategoriasString().isEmpty()) {
+        subcat = d.getCategoriasString().get(0);
+      }
+      item.put("subcategoria", subcat);
+
+      double cantTotal = 0;
+      List<String> descripciones = new java.util.ArrayList<>();
+      if (d.getBienes() != null && !d.getBienes().isEmpty()) {
+        for (var b : d.getBienes()) {
+          cantTotal += b.getCantidad();
+          String unidad = b.getUnidadMedicion() != null ? b.getUnidadMedicion() : "unid.";
+          String desc = b.getDescripcion() != null ? b.getDescripcion() : subcat;
+          descripciones.add(b.getCantidad() + " " + unidad + " de " + desc);
+        }
+      }
+      if (descripciones.isEmpty()) {
+        descripciones.add("Lote clasificado de " + subcat);
+        cantTotal = 1;
+      }
+      item.put("descripcion", String.join(" · ", descripciones));
+      item.put("cantidadTotal", cantTotal);
+      item.put("idDonante", donanteRealId.toString());
+      item.put("correoDonante", resolverCorreoDonante(d.getId()));
+
+      if (d.getEntidadAsignada() != null && d.getEntidadAsignada().getId() != null) {
+        item.put("idBeneficiario", d.getEntidadAsignada().getId().toString());
+        item.put(
+            "correoBeneficiario",
+            d.getEntidadAsignada().getCorreoRepresentante() != null
+                ? d.getEntidadAsignada().getCorreoRepresentante()
+                : "Organización Asignada");
+      } else {
+        item.put("idBeneficiario", null);
+        item.put("correoBeneficiario", null);
+      }
+
+      resultado.add(item);
+    }
+    return ResponseEntity.ok(resultado);
+  }
+
+  @Operation(
       summary = "Obtener donación por ID",
       description = "Devuelve el estado y la asignación de una donación específica")
   @ApiResponse(responseCode = "200", description = "Donación encontrada")
@@ -222,6 +317,31 @@ public class DonacionController {
     java.util.Map<String, String> response = new java.util.HashMap<>();
     response.put("mensaje", "Donación en depósito exitosa");
     return ResponseEntity.ok(response);
+  }
+
+  @Operation(
+      summary = "Marcar donación como vencida",
+      description =
+          "Actualiza el estado de una donación en depósito a VENCIDA con auditoría de motivo")
+  @ApiResponse(responseCode = "200", description = "Donación marcada como vencida")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Donación no encontrada o formato de ID inválido",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PutMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/estado/vencer")
+  public ResponseEntity<Void> marcarDonacionVencida(
+      @PathVariable UUID id,
+      @RequestParam(name = "observacion", defaultValue = "Vencida en depósito") String obs) {
+    Donacion donacion =
+        donacionRepository
+            .buscarPorId(id)
+            .orElseThrow(() -> new IllegalArgumentException("Donacion no encontrada"));
+    donacion.cambiarEstado(
+        com.donatrack.donaciones.domain.entities.enums.EstadoDonacion.VENCIDA,
+        obs != null && !obs.isBlank() ? obs : "Vencida en depósito",
+        null);
+    donacionRepository.guardar(donacion);
+    return ResponseEntity.ok().build();
   }
 
   @Operation(
@@ -348,7 +468,10 @@ public class DonacionController {
       description = "ID con formato inválido",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}/matchmaking")
-  public ResponseEntity<List<BeneficiarioResponseDTO>> sugerirBeneficiarios(@PathVariable UUID id) {
+  public ResponseEntity<List<BeneficiarioResponseDTO>> sugerirBeneficiarios(
+      @PathVariable UUID id,
+      @RequestParam(name = "algoritmo", required = false, defaultValue = "HIBRIDO")
+          String algoritmo) {
     Donacion donacion =
         donacionRepository
             .buscarPorId(id)
@@ -360,7 +483,8 @@ public class DonacionController {
                 });
 
     List<Beneficiario> disponibles = beneficiarioRepository.buscarTodos();
-    List<Beneficiario> sugerencias = matchmakerService.obtenerSugerencias(donacion, disponibles);
+    List<Beneficiario> sugerencias =
+        matchmakerService.obtenerSugerenciasPorAlgoritmo(donacion, disponibles, algoritmo);
 
     List<BeneficiarioResponseDTO> sugerenciasDTO =
         sugerencias.stream()
@@ -368,6 +492,23 @@ public class DonacionController {
             .collect(Collectors.toList());
 
     return ResponseEntity.ok(sugerenciasDTO);
+  }
+
+  public ResponseEntity<List<BeneficiarioResponseDTO>> sugerirBeneficiarios(UUID id) {
+    return sugerirBeneficiarios(id, "HIBRIDO");
+  }
+
+  @Operation(
+      summary = "Ejecutar asignación masiva (Batch Matchmaking)",
+      description =
+          "Ejecuta el motor de matchmaking sobre todas las donaciones actualmente en estado EN_DEPOSITO")
+  @PostMapping("/donaciones/matchmaking/batch")
+  public ResponseEntity<java.util.Map<String, String>> ejecutarMatchmakingBatch() {
+    if (asignacionBatchJob != null) {
+      asignacionBatchJob.asignarDonacionesEnDeposito();
+    }
+    return ResponseEntity.ok(
+        java.util.Map.of("mensaje", "Proceso de matchmaking automático ejecutado con éxito"));
   }
 
   private UUID resolverPersonaDonanteId(UUID donacionId) {

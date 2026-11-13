@@ -7,6 +7,10 @@ import java.util.List;
 public interface DonacionRepository {
   List<Donacion> buscarPorEstado(EstadoDonacion estado);
 
+  default List<Donacion> buscarTodas() {
+    return java.util.Collections.emptyList();
+  }
+
   java.util.Optional<Donacion> buscarPorId(java.util.UUID id);
 
   void guardar(Donacion donacion);

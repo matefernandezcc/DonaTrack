@@ -73,8 +73,12 @@ public class PerfilDonante {
   }
 
   public void evaluarMisiones(YearMonth mesActual) {
+    CategoriaDonante categoriaInicial = this.categoria;
     while ((misionActual != null) && (misionActual.evaluar(this))) {
       completarMisionActual(mesActual);
+      if (this.categoria != categoriaInicial) {
+        break;
+      }
     }
   }
 

@@ -44,6 +44,11 @@ public class JpaDonacionRepository implements DonacionRepository {
   }
 
   @Override
+  public List<Donacion> buscarTodas() {
+    return jpaRepository.findAll().stream().map(DonacionMapper::toDomain).toList();
+  }
+
+  @Override
   public Optional<Donacion> buscarPorId(UUID id) {
     return jpaRepository.findById(id).map(DonacionMapper::toDomain);
   }

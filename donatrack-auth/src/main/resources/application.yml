@@ -1,0 +1,82 @@
+server:
+  port: ${PORT:8004}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: donatrack-auth
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:donatrack}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        default_schema: auth
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+donatrack:
+  jwt-secret: ${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+  jwt-ttl-minutes: ${JWT_TTL_MINUTES:120}
+  web-url: ${WEB_URL:http://localhost:8080}
+  security:
+    enabled: false
+  auth:
+    mock-sso:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  health:
+    rabbit:
+      enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:postgresql://${SUPABASE_HOST}:${SUPABASE_PORT:5432}/postgres
+    username: ${SUPABASE_USER}
+    password: ${SUPABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: public
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+donatrack:
+  security:
+    enabled: true
+  auth:
+    mock-sso:
+      enabled: false
+

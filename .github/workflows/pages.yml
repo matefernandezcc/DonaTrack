@@ -22,7 +22,7 @@ jobs:
       - name: Copy static frontend
         run: |
           mkdir public
-          cp -R donatrack-server/src/main/resources/static/* public/
+          cp -R donatrack-web/src/main/resources/static/* public/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

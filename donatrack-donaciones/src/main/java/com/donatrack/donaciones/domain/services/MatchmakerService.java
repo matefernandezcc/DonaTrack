@@ -58,6 +58,31 @@ public class MatchmakerService {
     }
   }
 
+  public List<Beneficiario> obtenerSugerenciasPorAlgoritmo(
+      Donacion donacion, List<Beneficiario> disponibles, String modoAlgoritmo) {
+    if (modoAlgoritmo == null
+        || modoAlgoritmo.isBlank()
+        || "HIBRIDO".equalsIgnoreCase(modoAlgoritmo)) {
+      return obtenerSugerencias(donacion, disponibles);
+    }
+    List<Necesidad> necesidades =
+        disponibles.stream()
+            .flatMap(b -> b.getNecesidadesDeclaradas().stream())
+            .collect(Collectors.toList());
+    List<Donacion> donaciones = List.of(donacion);
+
+    if ("SEMANTICO".equalsIgnoreCase(modoAlgoritmo)) {
+      List<ResultadoMatch> matches =
+          algoritmoPrimario.recomendarNecesidades(donaciones, necesidades);
+      return buscarBeneficiariosDeNecesidades(matches, disponibles);
+    } else if ("SUBATENDIDOS".equalsIgnoreCase(modoAlgoritmo)) {
+      List<ResultadoMatch> matches =
+          algoritmoSecundario.recomendarNecesidades(donaciones, necesidades);
+      return buscarBeneficiariosDeNecesidades(matches, disponibles);
+    }
+    return obtenerSugerencias(donacion, disponibles);
+  }
+
   private List<Beneficiario> buscarBeneficiariosDeNecesidades(
       List<ResultadoMatch> matches, List<Beneficiario> disponibles) {
     List<Beneficiario> resultado = new ArrayList<>();

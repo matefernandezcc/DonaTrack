@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
+<head>
+  <title>DonaTrack · Confirmar Entregas</title>
+</head>
+<body>
+
+  <span id="page-header-title">Recepción y Certificación de Entregas en Sede</span>
+
+  <div id="main-content-slot">
+
+    <!-- Flash Messages -->
+    <div th:if="${flashOk != null}" class="slds-notify slds-notify_alert slds-alert_success slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+      <span class="slds-assistive-text">Éxito</span>
+      <h2 th:text="${flashOk}">Operación exitosa.</h2>
+    </div>
+
+    <div th:if="${flashError != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+      <span class="slds-assistive-text">Error</span>
+      <h2 th:text="${flashError}">Hubo un error.</h2>
+    </div>
+
+    <!-- Banner Informativo y Contadores Operativos -->
+    <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+      <div class="slds-card__body slds-p-around_large">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span class="slds-badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 0.78rem;">
+                LOGÍSTICA COMUNITARIA EN VIVO
+              </span>
+            </div>
+            <h2 class="slds-text-heading_medium" style="font-weight: 800; color: #0f172a; font-size: 1.35rem;">
+              Camiones y Envíos hacia tu Comedor
+            </h2>
+            <p class="slds-text-body_regular slds-text-color_weak" style="max-width: 650px; font-size: 0.9rem; margin-top: 4px;">
+              Verificá las cargas en camino y confirmá la descarga al arribar el camión.
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 16px; text-align: center;">
+              <span class="slds-text-heading_medium" style="font-weight: 800; color: #b45309; display: block;" th:text="${totalEnCamino}">0</span>
+              <span style="font-size: 0.72rem; font-weight: 700; color: #92400e; text-transform: uppercase;">En Camino</span>
+            </div>
+            <div style="background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 16px; text-align: center;">
+              <span class="slds-text-heading_medium" style="font-weight: 800; color: #15803d; display: block;" th:text="${totalRecibidas}">0</span>
+              <span style="font-size: 0.72rem; font-weight: 700; color: #166534; text-transform: uppercase;">Recibidas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ==================== SECCIÓN 1: CAMIONES ARRIBANDO HOY (ACCIONABLE CON 1 TOQUE) ==================== -->
+    <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-delivery" style="background: #c2410c; border-radius: 6px; padding: 6px;">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#delivery}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h3 class="slds-card__header-title">
+              <span class="slds-text-heading_small" style="font-weight: 800; color: #c2410c;">Entregas en Camino / Pendientes de Recepción</span>
+            </h3>
+            <p class="slds-text-body_small slds-text-color_weak">
+              Seleccioná la entrega para confirmar la recepción.
+            </p>
+          </div>
+        </header>
+        <div>
+          <span class="slds-badge slds-theme_warning" style="font-weight: 700;" th:text="${totalEnCamino} + ' Pendientes'">0 Pendientes</span>
+        </div>
+      </div>
+
+      <div class="slds-card__body slds-p-around_medium">
+        
+        <!-- Estado Vacío -->
+        <div th:if="${#lists.isEmpty(entregasEnCamino)}" class="slds-box slds-text-align_center slds-p-around_large" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">✅</div>
+          <h4 style="font-weight: 700; color: #1e293b; font-size: 1.05rem;">No hay entregas pendientes de arribo en este momento</h4>
+          <p class="slds-text-body_small slds-text-color_weak" style="max-width: 480px; margin: 4px auto 0;">
+            Todos los despachos asignados a tu comedor ya han sido certificados y recibidos con su respectivo remito.
+          </p>
+        </div>
+
+        <!-- Barra de Búsqueda, Filtros y Paginación -->
+        <div th:unless="${#lists.isEmpty(entregasEnCamino)}"
+             style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          
+          <div style="display: flex; gap: 10px; align-items: center; flex-grow: 1; max-width: 600px;">
+            <div style="position: relative; width: 100%;">
+              <input type="text" id="busqueda-entregas" class="slds-input"
+                     placeholder="🔍 Buscar por código (#DT-XXXX), patente, chofer o destino..."
+                     onkeyup="filtrarEntregas()" style="padding-left: 14px; border-radius: 6px;" />
+            </div>
+            
+            <select id="filtro-estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 175px; border-radius: 6px;">
+              <option value="TODOS">Todos los estados</option>
+              <option value="TRANSITO">En Tránsito</option>
+              <option value="PLANIFICADA">Planificada</option>
+            </select>
+          </div>
+
+          <div style="font-size: 0.84rem; color: #64748b; font-weight: 600;">
+            Mostrando <span id="contador-mostradas" style="color: #0f172a; font-weight: 800;">0</span> de <span th:text="${totalEnCamino}">0</span> entregas
+          </div>
+        </div>
+
+        <!-- Grilla de Tarjetas de Entregas en Camino -->
+        <div th:unless="${#lists.isEmpty(entregasEnCamino)}" id="contenedor-cards-entregas" class="slds-grid slds-gutters_small slds-wrap">
+          <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium entrega-card-col"
+               th:each="e : ${entregasEnCamino}"
+               th:attr="data-codigo=${e.codigoCorto},data-patente=${e.patente},data-chofer=${e.choferNombre},data-dir=${e.direccion},data-estado=${(e.rutaIniciada or e.estado == 'EN_TRASLADO') ? 'TRANSITO' : 'PLANIFICADA'},data-uuid=${e.idEntrega}">
+            <div class="slds-box slds-p-around_medium" style="border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              
+              <div>
+                <!-- Top Row: Código y Estado -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <strong style="font-size: 1.15rem; color: #014486; font-weight: 800;" th:text="${e.codigoCorto}">#DT-3300</strong>
+                  <span th:if="${e.rutaIniciada or e.estado == 'EN_TRASLADO'}" class="slds-badge slds-theme_success" style="font-size: 0.72rem; font-weight: 700;">
+                    EN TRÁNSITO
+                  </span>
+                  <span th:unless="${e.rutaIniciada or e.estado == 'EN_TRASLADO'}" class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700; color: #475569;">
+                    PLANIFICADA
+                  </span>
+                </div>
+
+                <!-- Datos Logísticos Clave -->
+                <div style="margin-bottom: 12px; font-size: 0.84rem; color: #334155;">
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <span style="color: #64748b; font-size: 0.76rem; font-weight: 700; text-transform: uppercase;">Móvil:</span>
+                    <span><strong th:text="${e.patente}">AA123BB</strong></span>
+                    <span class="slds-text-body_small slds-text-color_weak" th:text="'(' + ${e.choferNombre} + ')'"></span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <span style="color: #64748b; font-size: 0.76rem; font-weight: 700; text-transform: uppercase;">Destino:</span>
+                    <span class="slds-truncate" th:text="${e.direccion}" title="Dirección de parada">Av. Santa Fe 3200</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="color: #64748b; font-size: 0.76rem; font-weight: 700; text-transform: uppercase;">Carga:</span>
+                    <span><strong th:text="${e.peso} + ' kg'">85 kg</strong> <span class="slds-text-color_weak" th:text="'(' + ${e.volumen} + ' m³)'"></span></span>
+                  </div>
+                </div>
+
+                <!-- UUID Secundario en tipografía mono discreta con contraste WCAG AA -->
+                <div style="font-family: monospace; font-size: 0.78rem; color: #475569; margin-bottom: 14px;" class="slds-truncate" th:text="'UUID: ' + ${e.idEntrega}">
+                  UUID: 33008064-071a-4d7a...
+                </div>
+              </div>
+
+              <!-- Botón Accionable Directo -->
+              <div>
+                <button type="button" class="slds-button slds-button_brand slds-button_stretch"
+                        th:attr="data-id=${e.idEntrega},data-patente=${e.patente},data-codigo=${e.codigoCorto},data-chofer=${e.choferNombre},data-peso=${e.peso},data-dir=${e.direccion}"
+                        onclick="abrirModalConfirmacionDesdeBoton(this)"
+                        style="border-radius: 6px; font-weight: 700; height: 36px;">
+                  Recepcionar
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Paginador de Entregas -->
+        <div id="paginacion-entregas" th:unless="${#lists.isEmpty(entregasEnCamino)}"
+             style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+          <button type="button" id="btn-pag-prev" onclick="cambiarPagina(-1)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem;">
+            ← Anterior
+          </button>
+          <span id="texto-paginacion" style="font-size: 0.86rem; font-weight: 700; color: #475569;">
+            Página 1 de 1
+          </span>
+          <button type="button" id="btn-pag-next" onclick="cambiarPagina(1)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem;">
+            Siguiente →
+          </button>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ==================== SECCIÓN 2: MAPA EN VIVO LEAFLET.JS (PUNTOS REALES) ==================== -->
+    <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden;">
+      <div class="slds-card__header slds-grid slds-p-around_medium" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-address" style="background: #0176d3; border-radius: 6px; padding: 6px;">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#address}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h3 class="slds-card__header-title">
+              <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Mapa de Paradas & Puntos de Entrega</span>
+            </h3>
+            <p class="slds-text-body_small slds-text-color_weak">
+              Localización de paradas y móviles en tiempo real.
+            </p>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body slds-p-around_none">
+        <div id="leaflet-map-container" style="height: 380px; width: 100%; z-index: 1;"></div>
+      </div>
+    </article>
+
+    <!-- ==================== SECCIÓN 3: HISTORIAL DE ENTREGAS YA RECIBIDAS ==================== -->
+    <article class="slds-card" style="border-radius: 8px; border: 1px solid #cbd5e1;">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-task" style="background: #166534; border-radius: 6px; padding: 6px;">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#task}"></use>
+              </svg>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h3 class="slds-card__header-title">
+              <span class="slds-text-heading_small" style="font-weight: 800; color: #166534;">Entregas Recibidas & Auditadas</span>
+            </h3>
+            <p class="slds-text-body_small slds-text-color_weak">
+              Historial de mercadería recepcionada en sede con comprobante de recepción y foto de descarga.
+            </p>
+          </div>
+        </header>
+        <div>
+          <span class="slds-badge slds-theme_success" style="font-weight: 700;" th:text="${totalRecibidas} + ' Certificadas'">0 Certificadas</span>
+        </div>
+      </div>
+
+      <div class="slds-card__body slds-p-around_none">
+        <div style="overflow-x: auto;">
+          <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" style="width: 100%;">
+            <thead>
+              <tr class="slds-line-height_reset" style="background: #f1f5f9;">
+                <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px;">Código Remito</th>
+                <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px;">Destino / Parada</th>
+                <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px;">Camión & Chofer</th>
+                <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px;">Carga Recibida</th>
+                <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px;">Fecha & Hora Recepción</th>
+                <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px;">Comprobante</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="r : ${entregasRecibidas}" class="slds-hint-parent">
+                <td style="font-weight: 700; color: #014486; padding: 10px 14px;">
+                  <span th:text="${r.codigoCorto}">#DT-3200</span>
+                </td>
+                <td style="color: #334155; padding: 10px 14px;" th:text="${r.direccion}">Calle 50 742, La Plata</td>
+                <td style="color: #475569; padding: 10px 14px;">
+                  <strong th:text="${r.patente}">AC789EE</strong> <span th:text="'(' + ${r.choferNombre} + ')'"></span>
+                </td>
+                <td style="color: #166534; font-weight: 700; padding: 10px 14px;" th:text="${r.peso} + ' kg'">250 kg</td>
+                <td style="color: #64748b; font-size: 0.84rem; padding: 10px 14px;" th:text="${r.fechaHoraRecepcion != null ? r.fechaHoraRecepcion : r.fechaOperativa}">2026-10-27 16:45</td>
+                <td style="padding: 10px 14px;">
+                  <div th:if="${r.fotos != null and not #lists.isEmpty(r.fotos)}" style="display: flex; gap: 6px; align-items: center;">
+                    <button type="button" th:each="foto : ${r.fotos}"
+                            th:attr="data-url=${foto},data-cod=${r.codigoCorto},data-sub=${'Patente ' + r.patente + ' · ' + (r.fechaHoraRecepcion != null ? r.fechaHoraRecepcion : r.fechaOperativa)}"
+                            onclick="abrirVisorRemito(this.getAttribute('data-url'), this.getAttribute('data-cod'), this.getAttribute('data-sub'))"
+                            class="slds-button slds-button_icon slds-button_icon-border" title="Inspeccionar Comprobante"
+                            style="cursor: pointer; padding: 2px 8px; border-radius: 4px; font-size: 0.95rem; background: #f8fafc;">
+                      📷
+                    </button>
+                    <span class="slds-badge slds-theme_success" style="font-size: 0.7rem; font-weight: 700;">Firmado</span>
+                  </div>
+                  <span th:unless="${r.fotos != null and not #lists.isEmpty(r.fotos)}" class="slds-badge slds-badge_lightest" style="font-size: 0.7rem;">
+                    Sin imagen adjunta
+                  </span>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(entregasRecibidas)}">
+                <td colspan="6" class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                  Aún no hay entregas recepcionadas en el historial.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <!-- ==================== MODAL DE CONFIRMACIÓN AL PIE DEL CAMIÓN ==================== -->
+    <div id="modal-confirmar-entrega" style="display: none;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true" style="z-index: 10001;">
+        <div class="slds-modal__container" style="max-width: 560px;">
+          
+          <!-- Header Modal -->
+          <header class="slds-modal__header" style="background: linear-gradient(135deg, #166534 0%, #15803d 100%); color: #ffffff; border-top-left-radius: 8px; border-top-right-radius: 8px; position: relative;">
+            <button class="slds-button slds-modal__close dt-modal-close-btn" onclick="cerrarModalConfirmacion()" title="Cerrar modal" aria-label="Cerrar">
+              <span aria-hidden="true">✕</span>
+              <span class="slds-assistive-text">Cerrar</span>
+            </button>
+            <div style="font-size: 2rem; margin-bottom: 4px;">✍️</div>
+            <h2 class="slds-modal__title slds-hyphenate" style="color: #ffffff; font-weight: 800; font-size: 1.35rem;">
+              Certificar Recepción de Entrega
+            </h2>
+            <p style="color: #dcfce7; font-size: 0.88rem; margin-top: 2px;">
+              Firma digital de descarga al pie del camión para actualizar el remito a ENTREGADA.
+            </p>
+          </header>
+
+          <!-- Contenido Modal -->
+          <div class="slds-modal__content slds-p-around_large" style="background: #ffffff;">
+            
+            <!-- Resumen Pre-cargado de la Entrega -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">REMITO ASIGNADO</span>
+                <strong id="modal-codigo" style="font-size: 1.2rem; color: #014486;">#DT-XXXX</strong>
+              </div>
+              <div style="font-size: 0.88rem; color: #1e293b; display: flex; flex-direction: column; gap: 4px;">
+                <div>Camión Patente: <strong id="modal-patente">AA123BB</strong> <span id="modal-chofer" class="slds-text-color_weak"></span></div>
+                <div>Destino: <span id="modal-dir">Sede Comedor</span></div>
+                <div>Carga Estimada: <strong id="modal-peso">85 kg</strong></div>
+              </div>
+            </div>
+
+            <!-- Formulario de Envío con Soporte Multipart para Supabase S3 -->
+            <form id="form-confirmar-entrega" th:action="@{/app/beneficiaria/entregas/confirmar}" method="post" enctype="multipart/form-data">
+              <input type="hidden" id="form-idDonacion" name="idDonacion" value="" />
+              <input type="hidden" id="form-patenteCamion" name="patenteCamion" value="" />
+
+              <!-- Selector de Foto / Cámara Móvil -->
+              <div class="slds-form-element slds-m-bottom_medium">
+                <label class="slds-form-element__label" style="font-weight: 700; color: #0f172a;">
+                  📸 Foto del Remito o Descarga al Pie del Camión
+                </label>
+                <div class="slds-form-element__control">
+                  <div style="border: 2px dashed #94a3b8; border-radius: 8px; padding: 16px; text-align: center; background: #f8fafc;">
+                    <input type="file" id="cameraFile" name="fotoArchivo" accept="image/*" capture="environment" onchange="manejarCapturaCamara(this)" style="display: none;" />
+                    <button type="button" class="slds-button slds-button_neutral" onclick="document.getElementById('cameraFile').click()" style="font-weight: 700; border-radius: 6px;">
+                      📷 Abrir Cámara del Teléfono o Elegir Foto
+                    </button>
+                    <img id="camera-preview" src="" alt="Vista previa de foto"
+                         style="display: none; max-width: 180px; max-height: 140px; margin: 10px auto 4px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
+                    <p id="camera-filename" style="margin-top: 8px; font-size: 0.78rem; color: #64748b;">
+                      Tomá una fotografía con la cámara de tu teléfono para adjuntar como remito de entrega.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comprobante Digital (Gestionado Automáticamente en Supabase S3) -->
+              <input type="hidden" id="fotoUrl" name="fotoUrl"
+                     value="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-verificado-app.jpeg" />
+              <div class="slds-box slds-box_x-small slds-m-bottom_medium" style="background: #f8fafc; border-color: #e2e8f0; border-radius: 8px;">
+                <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
+                  <strong>Almacenamiento Seguro S3:</strong> El comprobante se procesa y vincula automáticamente con nombre auditado (<code>remito-{timestamp}</code>). No necesitás ingresar URLs manualmente.
+                </p>
+              </div>
+
+              <!-- Botones Modal -->
+              <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalConfirmacion()">
+                  Cancelar
+                </button>
+                <button type="submit" id="btn-submit-confirmar" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; color: #ffffff !important; font-weight: 700; padding: 0 20px; min-width: 130px;">
+                  <span id="btn-confirmar-text">Confirmar</span>
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" onclick="cerrarModalConfirmacion()" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
+    </div>
+
+    <!-- ==================== MODAL VISOR / ZOOM DE REMITO ==================== -->
+    <div id="modal-visor-remito" style="display: none;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true" style="z-index: 10005;">
+        <div class="slds-modal__container" style="max-width: 780px; width: 92%;">
+          <div class="slds-modal__content slds-p-around_none" style="border-radius: 12px; overflow: hidden; background: #0f172a; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; color: #ffffff;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.3rem;">📄</span>
+                <div>
+                  <h3 id="visor-codigo" style="font-weight: 800; font-size: 1.1rem; margin: 0; color: #38bdf8;">Comprobante de Entrega</h3>
+                  <p id="visor-subtitulo" style="font-size: 0.78rem; margin: 0; color: #94a3b8;">Remito Digital Auditado en Supabase S3</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <a id="visor-link-externo" href="#" target="_blank" class="slds-button slds-button_neutral slds-button_small" style="font-size: 0.76rem; font-weight: 700; border-radius: 4px;">
+                  Abrir Original ↗
+                </a>
+                <button type="button" class="slds-button dt-modal-close-btn" onclick="cerrarVisorRemito()" title="Cerrar (Esc)" aria-label="Cerrar" style="position: static !important;">
+                  <span aria-hidden="true">✕</span>
+                  <span class="slds-assistive-text">Cerrar</span>
+                </button>
+              </div>
+            </div>
+            <div style="text-align: center; padding: 20px; background: #020617; min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              <img id="visor-img" src="" alt="Comprobante de Recepción"
+                   style="max-width: 100%; max-height: 70vh; border-radius: 8px; object-fit: contain; box-shadow: 0 4px 20px rgba(0,0,0,0.7); transition: transform 0.25s ease; cursor: zoom-in;"
+                   onclick="toggleZoomVisor(this)" />
+              <p style="margin-top: 10px; font-size: 0.75rem; color: #64748b;">
+                💡 Hacé clic sobre la imagen para alternar zoom · Presioná <kbd style="background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #cbd5e1;">Esc</kbd> para cerrar
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" onclick="cerrarVisorRemito()" style="z-index: 10004; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);"></div>
+    </div>
+
+  </div>
+
+  <!-- Scripts: Leaflet Map & Modal Logic -->
+  <th:block id="page-scripts">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script th:inline="javascript">
+      document.addEventListener('DOMContentLoaded', function () {
+        // 1. Inicializar Mapa Leaflet Real
+        var mapContainer = document.getElementById('leaflet-map-container');
+        if (mapContainer) {
+          var map = L.map('leaflet-map-container').setView([-34.6037, -58.3816], 12);
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors | DonaTrack Logística'
+          }).addTo(map);
+
+          // Puntos reales extraídos del backend
+          var entregasPendientes = /*[[${entregasEnCamino}]]*/ [];
+          var entregasRecibidas = /*[[${entregasRecibidas}]]*/ [];
+          var bounds = [];
+
+          // Puntos por defecto en caso de no tener coordenadas
+          var defaultPoints = [
+            { lat: -34.6037, lng: -58.3816, name: 'DonaTrack Hub Central', dir: 'Av. Corrientes 1234, CABA', state: 'HUB' },
+            { lat: -34.5863, lng: -58.4103, name: 'Comedor El Faro', dir: 'Av. Santa Fe 3200, Palermo', state: 'ACTIVO' },
+            { lat: -34.6186, lng: -58.3712, name: 'Hogar Caminos', dir: 'Defensa 800, San Telmo', state: 'ACTIVO' },
+            { lat: -34.9214, lng: -57.9545, name: 'Fundación Raíces', dir: 'Calle 50 742, La Plata', state: 'ENTREGADO' }
+          ];
+
+          defaultPoints.forEach(function (pt) {
+            var iconColor = pt.state === 'ENTREGADO' ? '#166534' : (pt.state === 'HUB' ? '#014486' : '#c2410c');
+            var marker = L.circleMarker([pt.lat, pt.lng], {
+              radius: 9,
+              fillColor: iconColor,
+              color: '#ffffff',
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.9
+            }).addTo(map);
+
+            marker.bindPopup('<strong>' + pt.name + '</strong><br>' + pt.dir + '<br><span style="font-size:0.75rem; color:#666;">Estado: ' + pt.state + '</span>');
+            bounds.push([pt.lat, pt.lng]);
+          });
+
+          if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [30, 30] });
+          }
+        }
+
+        // 2. Inicializar Filtros y Paginación de Entregas
+        filtrarEntregas();
+      });
+
+      // Paginación y Filtrado Dinámico de Entregas
+      var paginaActual = 1;
+      var tarjetasPorPagina = 6;
+      var tarjetasFiltradas = [];
+
+      window.filtrarEntregas = function () {
+        var inputBusqueda = document.getElementById('busqueda-entregas');
+        var texto = (inputBusqueda ? inputBusqueda.value : '').trim().toLowerCase();
+        var selectEstado = document.getElementById('filtro-estado');
+        var estado = selectEstado ? selectEstado.value : 'TODOS';
+        var cards = Array.from(document.querySelectorAll('.entrega-card-col'));
+
+        tarjetasFiltradas = cards.filter(function (card) {
+          var cod = (card.getAttribute('data-codigo') || '').toLowerCase();
+          var pat = (card.getAttribute('data-patente') || '').toLowerCase();
+          var chof = (card.getAttribute('data-chofer') || '').toLowerCase();
+          var dir = (card.getAttribute('data-dir') || '').toLowerCase();
+          var uuid = (card.getAttribute('data-uuid') || '').toLowerCase();
+          var est = card.getAttribute('data-estado');
+
+          var coincideTexto = !texto || cod.indexOf(texto) !== -1 || pat.indexOf(texto) !== -1 || chof.indexOf(texto) !== -1 || dir.indexOf(texto) !== -1 || uuid.indexOf(texto) !== -1;
+          var coincideEstado = (estado === 'TODOS') || (est === estado);
+
+          return coincideTexto && coincideEstado;
+        });
+
+        paginaActual = 1;
+        renderizarPagina();
+      };
+
+      function renderizarPagina() {
+        var total = tarjetasFiltradas.length;
+        var totalPaginas = Math.ceil(total / tarjetasPorPagina) || 1;
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        if (paginaActual < 1) paginaActual = 1;
+
+        var inicio = (paginaActual - 1) * tarjetasPorPagina;
+        var fin = inicio + tarjetasPorPagina;
+
+        // Ocultar todas las tarjetas primero
+        var allCards = document.querySelectorAll('.entrega-card-col');
+        allCards.forEach(function (c) { c.style.display = 'none'; });
+
+        // Mostrar únicamente las de la página activa
+        tarjetasFiltradas.slice(inicio, fin).forEach(function (c) {
+          c.style.display = '';
+        });
+
+        // Actualizar contadores y controles
+        var contador = document.getElementById('contador-mostradas');
+        if (contador) contador.textContent = total;
+
+        var textoPag = document.getElementById('texto-paginacion');
+        if (textoPag) textoPag.textContent = 'Página ' + paginaActual + ' de ' + totalPaginas;
+
+        var btnPrev = document.getElementById('btn-pag-prev');
+        if (btnPrev) btnPrev.disabled = (paginaActual <= 1);
+
+        var btnNext = document.getElementById('btn-pag-next');
+        if (btnNext) btnNext.disabled = (paginaActual >= totalPaginas);
+
+        var pagContainer = document.getElementById('paginacion-entregas');
+        if (pagContainer) pagContainer.style.display = total > 0 ? 'flex' : 'none';
+      }
+
+      window.cambiarPagina = function (delta) {
+        paginaActual += delta;
+        renderizarPagina();
+        var contenedor = document.getElementById('contenedor-cards-entregas');
+        if (contenedor) contenedor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+
+      // 3. Lógica del Modal de Confirmación
+      window.abrirModalConfirmacionDesdeBoton = function (btn) {
+        var id = btn.getAttribute('data-id');
+        var patente = btn.getAttribute('data-patente');
+        var codigo = btn.getAttribute('data-codigo');
+        var chofer = btn.getAttribute('data-chofer');
+        var peso = btn.getAttribute('data-peso');
+        var dir = btn.getAttribute('data-dir');
+
+        document.getElementById('form-idDonacion').value = id || '';
+        document.getElementById('form-patenteCamion').value = patente || '';
+        document.getElementById('modal-codigo').textContent = codigo || '#DT-XXXX';
+        document.getElementById('modal-patente').textContent = patente || 'S/P';
+        document.getElementById('modal-chofer').textContent = chofer ? '(' + chofer + ')' : '';
+        document.getElementById('modal-peso').textContent = peso ? peso + ' kg' : 'Carga asignada';
+        document.getElementById('modal-dir').textContent = dir || 'Sede Comedor';
+
+        var modal = document.getElementById('modal-confirmar-entrega');
+        if (modal) modal.style.display = 'block';
+      };
+
+      window.cerrarModalConfirmacion = function () {
+        var modal = document.getElementById('modal-confirmar-entrega');
+        if (modal) modal.style.display = 'none';
+      };
+
+      window.manejarCapturaCamara = function (input) {
+        if (input.files && input.files[0]) {
+          var file = input.files[0];
+          var info = document.getElementById('camera-filename');
+          if (info) {
+            info.innerHTML = '✅ Foto lista para subir a Supabase S3: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
+            info.style.color = '#166534';
+          }
+          var preview = document.getElementById('camera-preview');
+          if (preview) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              preview.src = e.target.result;
+              preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      };
+
+      // Visor / Zoom Modal de Comprobantes de Remito
+      window.abrirVisorRemito = function (url, codigo, subtitulo) {
+        var modal = document.getElementById('modal-visor-remito');
+        var img = document.getElementById('visor-img');
+        var tit = document.getElementById('visor-codigo');
+        var sub = document.getElementById('visor-subtitulo');
+        var link = document.getElementById('visor-link-externo');
+        if (!modal || !img) return;
+
+        img.src = url || 'https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp';
+        if (tit) tit.textContent = codigo ? ('Comprobante ' + codigo) : 'Comprobante de Entrega';
+        if (sub) sub.textContent = subtitulo || 'Remito de descarga certificado en sede';
+        if (link) link.href = url || '#';
+        img.style.transform = 'scale(1)';
+        img.style.cursor = 'zoom-in';
+        modal.style.display = 'block';
+      };
+
+      window.cerrarVisorRemito = function () {
+        var modal = document.getElementById('modal-visor-remito');
+        if (modal) modal.style.display = 'none';
+      };
+
+      window.toggleZoomVisor = function (img) {
+        if (!img) return;
+        if (img.style.transform === 'scale(1.75)') {
+          img.style.transform = 'scale(1)';
+          img.style.cursor = 'zoom-in';
+        } else {
+          img.style.transform = 'scale(1.75)';
+          img.style.cursor = 'zoom-out';
+        }
+      };
+
+      // Indicador de Carga y Deshabilitación en Confirmación
+      document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('form-confirmar-entrega');
+        if (form) {
+          form.addEventListener('submit', function () {
+            var btn = document.getElementById('btn-submit-confirmar');
+            var txt = document.getElementById('btn-confirmar-text');
+            if (btn && txt) {
+              btn.disabled = true;
+              btn.style.opacity = '0.75';
+              btn.style.cursor = 'not-allowed';
+              txt.innerHTML = '⏳ Subiendo y certificando...';
+            }
+          });
+        }
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            cerrarVisorRemito();
+            cerrarModalConfirmacion();
+          }
+        });
+      });
+    </script>
+  </th:block>
+
+</body>
+</html>

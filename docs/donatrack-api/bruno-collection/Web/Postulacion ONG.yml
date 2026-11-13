@@ -1,0 +1,35 @@
+info:
+  name: Postulacion ONG
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{webUrl}}/api/public/solicitudes-ong"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreOng": "Comedor Barrial San Cayetano",
+        "cuit": "30-71122334-5",
+        "responsable": "Estela Gómez",
+        "tipo": "COMEDOR",
+        "tipoEntidad": "HUMANA",
+        "email": "contacto@sancayetano.org",
+        "telefono": "+54 11 4455-6677",
+        "direccion": "Av. Mitre 2540, Quilmes",
+        "necesidades": "Alimentos secos y abrigo"
+      }
+  auth: none
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

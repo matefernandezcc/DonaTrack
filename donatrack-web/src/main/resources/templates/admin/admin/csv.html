@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+<head>
+  <title>DonaTrack · Importación Masiva CSV</title>
+</head>
+<body>
+
+  <span id="page-header-title">Importación Masiva de Donantes (CSV)</span>
+
+  <div id="main-content-slot">
+    <!-- Card de subida de archivo CSV -->
+    <article class="slds-card slds-m-bottom_large">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Carga de Lotes Masivos (> 10,000 registros)</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body slds-card__body_inner">
+        <p class="slds-m-bottom_medium">
+          Seleccioná un archivo CSV con el formato estándar (Nombre, Apellido, DNI/CUIT, Email, TipoPersona) para dar de alta masivamente a los donantes y sincronizarlos con la base de datos relacional.
+        </p>
+
+        <form th:action="@{/app/admin/csv}" method="post" enctype="multipart/form-data">
+          <!-- Blueprint Oficial SLDS: File Selector / Dropzone -->
+          <div class="slds-form-element slds-m-bottom_medium" role="group" aria-labelledby="file-selector-primary-label">
+            <span class="slds-form-element__label" id="file-selector-primary-label">Archivo de Importación (.csv)</span>
+            <div class="slds-form-element__control slds-m-top_x-small">
+              <div class="slds-file-selector slds-file-selector_files">
+                <div class="slds-file-selector__dropzone">
+                  <input class="slds-file-selector__input slds-assistive-text" accept=".csv" type="file" id="file-upload-input-11" name="file" required
+                         onchange="document.getElementById('file-selector-chosen-text').innerText = this.files[0] ? this.files[0].name : 'o arrastrar aquí';" />
+                  <label class="slds-file-selector__body" for="file-upload-input-11" id="file-selector-secondary-label10">
+                    <span class="slds-file-selector__button slds-button slds-button_neutral">
+                      <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#upload}"></use>
+                      </svg>Seleccionar Archivo</span>
+                    <span class="slds-file-selector__text slds-medium-show" id="file-selector-chosen-text">o arrastrar aquí</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="slds-form-element__help slds-m-top_x-small">Formatos aceptados: .csv (máximo 10MB) delimitado por comas.</div>
+          </div>
+
+          <button class="slds-button slds-button_brand" type="submit">
+            Procesar e Importar CSV
+          </button>
+        </form>
+      </div>
+    </article>
+
+    <!-- Lista de Personas Registradas -->
+    <article class="slds-card">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-text-heading_small">Donantes Registrados en Base de Datos</span>
+            </h2>
+          </div>
+        </header>
+      </div>
+      <div class="slds-card__body">
+        <div class="slds-scrollable_x table-scroll-container">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Personas registradas">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th scope="col"><div class="slds-truncate" title="ID">UUID</div></th>
+              <th scope="col"><div class="slds-truncate" title="Nombre">Nombre / Razón Social</div></th>
+              <th scope="col"><div class="slds-truncate" title="Identificación">Doc / CUIT</div></th>
+              <th scope="col"><div class="slds-truncate" title="Email">Email de Contacto</div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent" th:each="p : ${personas}">
+              <th scope="row"><div class="slds-truncate" th:text="${p['id']}">a1111111-1111-4111-8111-111111111111</div></th>
+              <td><div class="slds-truncate" th:text="${p['nombre'] != null ? (p['nombre'] + ' ' + (p['apellido'] != null ? p['apellido'] : '')) : (p['razonSocial'] != null ? p['razonSocial'] : 'N/A')}">María González</div></td>
+              <td><div class="slds-truncate" th:text="${p['documento'] != null ? (p['documento']['tipo'] + ' ' + p['documento']['numero']) : '-'}">DNI 32111222</div></td>
+              <td><div class="slds-truncate" th:text="${p['email']}">donante@donatrack.org</div></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(personas)}">
+              <td colspan="4" class="slds-text-color_weak slds-p-around_medium">No hay donantes registrados aún en el sistema.</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </article>
+  </div>
+
+</body>
+</html>
