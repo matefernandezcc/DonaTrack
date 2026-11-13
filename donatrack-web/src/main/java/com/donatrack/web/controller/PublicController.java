@@ -49,8 +49,8 @@ public class PublicController {
   private String n8nUrl = "http://localhost:5678";
 
   @org.springframework.beans.factory.annotation.Value(
-      "${donatrack.api.auth-url:${AUTH_URL:http://localhost:8004}}")
-  private String authUrl = "http://localhost:8004";
+      "${donatrack.auth.public-url:${AUTH_PUBLIC_URL:http://localhost:8004}}")
+  private String authPublicUrl = "http://localhost:8004";
 
   public PublicController(
       AuthGateway authGateway,
@@ -579,8 +579,8 @@ public class PublicController {
       HttpServletResponse response,
       RedirectAttributes redirectAttributes) {
     try {
-      if (!mock && authUrl != null && !authUrl.isBlank()) {
-        return "redirect:" + authUrl + "/oauth2/authorization/" + provider.toLowerCase();
+      if (!mock && authPublicUrl != null && !authPublicUrl.isBlank()) {
+        return "redirect:" + authPublicUrl + "/oauth2/authorization/" + provider.toLowerCase();
       }
       String code = authGateway.obtenerCodigoSocial(provider);
       if (code != null && !code.isBlank()) {

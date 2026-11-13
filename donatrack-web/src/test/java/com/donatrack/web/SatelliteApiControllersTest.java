@@ -99,6 +99,104 @@ class SatelliteApiControllersTest {
   }
 
   @Test
+  @DisplayName(
+      "GET /api/notificaciones/mis-alertas — Consulta email real en DonacionesGateway y técnico sin duplicar")
+  void testMisAlertasConDonacionesGatewayMultiDestinatario() throws Exception {
+    UUID personaId = UUID.randomUUID();
+    NotificacionesApiController controllerConDonaciones =
+        new NotificacionesApiController(notificacionesGateway, donacionesGateway);
+    MockMvc mvcConDonaciones = MockMvcBuilders.standaloneSetup(controllerConDonaciones).build();
+
+    when(donacionesGateway.obtenerPersona(personaId))
+        .thenReturn(Map.of("email", "persona.real@ejemplo.org"));
+    when(notificacionesGateway.obtenerNotificacionesUsuario(
+            List.of("donante" + personaId + "@test.com", "persona.real@ejemplo.org")))
+        .thenReturn(
+            List.of(
+                Map.of("mensaje", "Insignia desbloqueada", "medio", "EMAIL", "completada", true)));
+
+    Jwt jwt =
+        Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("personaId", personaId.toString())
+            .build();
+    JwtAuthenticationToken auth =
+        new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
+
+    mvcConDonaciones
+        .perform(get("/api/notificaciones/mis-alertas").principal(auth))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].mensaje").value("Insignia desbloqueada"));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /api/notificaciones/mis-alertas — Retorna 503 estructurado cuando falla NotificacionesGateway")
+  void testMisAlertasError503CuandoFallaGateway() throws Exception {
+    when(notificacionesGateway.obtenerNotificacionesUsuario("donante@test.com"))
+        .thenThrow(new RuntimeException("Timeout en notificaciones"));
+
+    Jwt jwt =
+        Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("email", "donante@test.com")
+            .build();
+    JwtAuthenticationToken auth =
+        new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
+
+    notificacionesMvc
+        .perform(get("/api/notificaciones/mis-alertas").principal(auth))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.error").value("NOTIFICACIONES_UNAVAILABLE"))
+        .andExpect(jsonPath("$.message").exists());
+  }
+
+  @Test
+  @DisplayName(
+      "GET /api/notificaciones/mis-alertas — Retorna HTTP 200 con array vacío cuando gateway responde null")
+  void testMisAlertasRetornaVacioCuandoGatewayRespondeNull() throws Exception {
+    when(notificacionesGateway.obtenerNotificacionesUsuario("donante@test.com")).thenReturn(null);
+
+    Jwt jwt =
+        Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("email", "donante@test.com")
+            .build();
+    JwtAuthenticationToken auth =
+        new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
+
+    notificacionesMvc
+        .perform(get("/api/notificaciones/mis-alertas").principal(auth))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /api/notificaciones/mis-alertas — Retorna HTTP 200 con array vacío cuando NotificacionesGateway es null")
+  void testMisAlertasRetornaVacioCuandoGatewayEsNull() throws Exception {
+    NotificacionesApiController controllerSinGateway = new NotificacionesApiController(null);
+    MockMvc mvcSinGateway = MockMvcBuilders.standaloneSetup(controllerSinGateway).build();
+
+    Jwt jwt =
+        Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("email", "donante@test.com")
+            .build();
+    JwtAuthenticationToken auth =
+        new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
+
+    mvcSinGateway
+        .perform(get("/api/notificaciones/mis-alertas").principal(auth))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
+  }
+
+  @Test
   @DisplayName("GET /api/donante/mapa-camiones — Retorna seguimiento de entregas del donante")
   void testMapaCamionesDonante() throws Exception {
     UUID donanteId = UUID.randomUUID();

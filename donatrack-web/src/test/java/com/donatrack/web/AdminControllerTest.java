@@ -1,6 +1,7 @@
 package com.donatrack.web;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -27,9 +28,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -195,6 +196,101 @@ class AdminControllerTest {
     }
 
     @Test
+    @DisplayName("POST /app/perfil/actualizar con espacios vacíos o nulos normaliza sin NPE")
+    void actualizarPerfil_conValoresEspaciosONull_normalizaSinNPE() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .param("descripcion", "   ")
+                  .param("ubicacion", "  "))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+
+      verify(authGateway, times(1)).actualizarPerfil(any(UUID.class), eq(""), eq(""));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar sin parámetros obligatorios normaliza a vacío sin NPE")
+    void actualizarPerfil_sinParametros_normalizaSinNPE() throws Exception {
+      mockMvc
+          .perform(post("/app/perfil/actualizar").principal(adminAuth))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+
+      verify(authGateway, times(1)).actualizarPerfil(any(UUID.class), eq(""), eq(""));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con usuario mock o anónimo maneja con elegancia y preserva sesión")
+    void actualizarPerfil_conUsuarioMockOAnonimo_manejaConElegancia() throws Exception {
+      MockHttpSession session = new MockHttpSession();
+      UsernamePasswordAuthenticationToken mockAuth =
+          new UsernamePasswordAuthenticationToken(
+              "usuario-mock-sin-uuid", "password", List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
+
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(mockAuth)
+                  .session(session)
+                  .param("descripcion", "Descripción Donante Mock")
+                  .param("ubicacion", "Mendoza, Argentina"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+
+      assertEquals("Descripción Donante Mock", session.getAttribute("perfil_descripcion"));
+      assertEquals("Mendoza, Argentina", session.getAttribute("perfil_ubicacion"));
+      verifyNoInteractions(authGateway);
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con referer absoluto válido preserva query string")
+    void actualizarPerfil_conRefererAbsolutoValido_preservaQueryString() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .header("Referer", "http://localhost/app/donante?tab=mis-donaciones")
+                  .param("descripcion", "Desc")
+                  .param("ubicacion", "Ubi"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante?tab=mis-donaciones"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con referer externo o malicioso redirige a fallback seguro")
+    void actualizarPerfil_conRefererExterno_fallbackADonante() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .header("Referer", "https://sitio-malicioso.com/app/phishing")
+                  .param("descripcion", "Desc")
+                  .param("ubicacion", "Ubi"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con referer de protocolo relativo redirige a fallback seguro")
+    void actualizarPerfil_conRefererProtocolRelative_fallbackADonante() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .header("Referer", "//sitio-malicioso.com/app/admin")
+                  .param("descripcion", "Desc")
+                  .param("ubicacion", "Ubi"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"));
+    }
+
+    @Test
     @DisplayName(
         "populateUserAttributes desacoplado: obtiene atributos de usuario desde claims de JWT sin invocar AuthGateway")
     void populateUserAttributes_fromJwtClaims_withoutAuthGatewayCall() throws Exception {
@@ -212,8 +308,7 @@ class AdminControllerTest {
               .expiresAt(Instant.now().plusSeconds(3600))
               .build();
       JwtAuthenticationToken customAuth =
-          new JwtAuthenticationToken(
-              jwtCustom, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+          new JwtAuthenticationToken(jwtCustom, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
       when(logisticaGateway.listarCamiones()).thenReturn(Collections.emptyList());
       when(logisticaGateway.listarChoferes()).thenReturn(Collections.emptyList());
@@ -1100,6 +1195,122 @@ class AdminControllerTest {
                       "flashError",
                       containsString(
                           "Error al ejecutar la auditoría de vencimientos: Fallo en servicio de inventario")));
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/personas registra persona HUMANA y redirige con personaCreadaId")
+    void testRegistrarPersonaHumanaExitoso() throws Exception {
+      UUID nuevaId = UUID.randomUUID();
+      when(donacionesGateway.crearPersona(any())).thenReturn(Map.of("id", nuevaId.toString()));
+
+      mockMvc
+          .perform(
+              post("/app/admin/personas")
+                  .principal(adminAuth)
+                  .param("tipo", "HUMANA")
+                  .param("email", "lucia@ejemplo.org")
+                  .param("docTipo", "DNI")
+                  .param("docNumero", "33444555")
+                  .param("nombre", "Lucía")
+                  .param("apellido", "Gómez")
+                  .param("edad", "28"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/donaciones/recepcion?personaCreadaId=" + nuevaId))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk", containsString("Persona donante 'Lucía Gómez' registrada")));
+
+      verify(donacionesGateway, times(1))
+          .crearPersona(
+              org.mockito.ArgumentMatchers.argThat(
+                  m ->
+                      "HUMANA".equals(m.get("tipo"))
+                          && "Lucía".equals(m.get("nombre"))
+                          && "Gómez".equals(m.get("apellido"))));
+    }
+
+    @Test
+    @DisplayName(
+        "POST /app/admin/personas registra persona JURIDICA usando tipoJuridica sin colisión")
+    void testRegistrarPersonaJuridicaExitoso() throws Exception {
+      UUID nuevaId = UUID.randomUUID();
+      when(donacionesGateway.crearPersona(any())).thenReturn(Map.of("id", nuevaId.toString()));
+
+      mockMvc
+          .perform(
+              post("/app/admin/personas")
+                  .principal(adminAuth)
+                  .param("tipo", "JURIDICA")
+                  .param("email", "contacto@empresasur.org")
+                  .param("docTipo", "CUIT")
+                  .param("docNumero", "30711223349")
+                  .param("razonSocial", "Empresa Sur SRL")
+                  .param("tipoJuridica", "EMPRESA")
+                  .param("rubro", "Alimentos"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/donaciones/recepcion?personaCreadaId=" + nuevaId));
+
+      verify(donacionesGateway, times(1))
+          .crearPersona(
+              org.mockito.ArgumentMatchers.argThat(
+                  m ->
+                      "JURIDICA".equals(m.get("tipo"))
+                          && "EMPRESA".equals(m.get("tipoJuridica"))
+                          && "Empresa Sur SRL".equals(m.get("razonSocial"))));
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/personas rechaza HUMANA sin nombre/apellido mostrando flashError")
+    void testRegistrarPersonaHumanaSinNombre() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/admin/personas")
+                  .principal(adminAuth)
+                  .param("tipo", "HUMANA")
+                  .param("email", "incompleto@ejemplo.org")
+                  .param("docTipo", "DNI")
+                  .param("docNumero", "12345678"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/donaciones/recepcion"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashError", containsString("el nombre y el apellido son obligatorios")));
+
+      verify(donacionesGateway, never()).crearPersona(any());
+    }
+
+    @Test
+    @DisplayName("GET /app/admin/ranking enriquece período actual e historial ordenado")
+    void testAdminRankingHistorialNormalizado() throws Exception {
+      when(incentivosGateway.obtenerTop3()).thenReturn(Collections.emptyList());
+      when(incentivosGateway.obtenerHistorialRankings())
+          .thenReturn(
+              List.of(
+                  Map.of(
+                      "id",
+                      UUID.randomUUID().toString(),
+                      "mes",
+                      "OCTUBRE",
+                      "anio",
+                      2026,
+                      "posiciones",
+                      List.of(
+                          Map.of(
+                              "posicion", 1,
+                              "user", "María",
+                              "misionesCompletadasMes", 4)))));
+      when(donacionesGateway.obtenerPersonas()).thenReturn(Collections.emptyList());
+      when(authGateway.listarUsuarios()).thenReturn(Collections.emptyList());
+
+      mockMvc
+          .perform(get("/app/admin/ranking").principal(adminAuth))
+          .andExpect(status().isOk())
+          .andExpect(view().name("admin/admin/ranking"))
+          .andExpect(model().attributeExists("periodoActualLabel"))
+          .andExpect(model().attribute("historial", hasItem(hasEntry("periodoKey", "2026-10"))))
+          .andExpect(model().attribute("historial", hasItem(hasEntry("mesNombre", "Octubre"))));
     }
   }
 }

@@ -444,5 +444,54 @@ class BeneficiariaFlowTest {
                   .attribute(
                       "flashError", containsString("Camión no coincide con la hoja de ruta")));
     }
+
+    @Test
+    @DisplayName(
+        "GET /app/beneficiaria/entregas incluye ultimaActualizacion en entregas en camino para el mapa")
+    void testEntregasIncluyeUltimaActualizacion() throws Exception {
+      UUID donacionId = UUID.randomUUID();
+      when(logisticaGateway.listarRutas())
+          .thenReturn(
+              List.of(
+                  Map.of(
+                      "fechaOperativa",
+                      "2026-11-12",
+                      "fechaHoraInicio",
+                      "2026-11-12 09:30",
+                      "iniciada",
+                      true,
+                      "camion",
+                      Map.of("patente", "AB123CD"),
+                      "chofer",
+                      Map.of("nombre", "Carlos Chofer"),
+                      "paradas",
+                      List.of(
+                          Map.of(
+                              "direccion",
+                              Map.of(
+                                  "calle", "Av. Corrientes",
+                                  "altura", "1234",
+                                  "localidad", "CABA"),
+                              "coordenada",
+                              Map.of("latitud", -34.60, "longitud", -58.38),
+                              "entregas",
+                              List.of(
+                                  Map.of(
+                                      "idEntrega",
+                                      donacionId.toString(),
+                                      "estado",
+                                      "EN_CAMINO",
+                                      "pesoEstimado",
+                                      40.0)))))));
+
+      mockMvc
+          .perform(get("/app/beneficiaria/entregas").principal(benefAuth))
+          .andExpect(status().isOk())
+          .andExpect(
+              model()
+                  .attribute(
+                      "entregasEnCamino",
+                      hasItem(hasEntry("ultimaActualizacion", "En ruta · 2026-11-12"))));
+    }
   }
 }

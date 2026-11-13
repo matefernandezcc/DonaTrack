@@ -464,5 +464,50 @@ class DonanteFlowTest {
           .andExpect(redirectedUrl("/app/donante?tab=seguimiento"))
           .andExpect(flash().attribute("flashOk", containsString("#DT-REC-")));
     }
+
+    @Test
+    @DisplayName(
+        "GET /app/donante?tab=seguimiento normaliza subcategoriaGrupo y misiones enriquecidas")
+    void testPanelNormalizaSubcategoriaYMisiones() throws Exception {
+      when(incentivosGateway.obtenerMetricas(donantePersonaId)).thenReturn(Collections.emptyMap());
+      when(incentivosGateway.obtenerInsignias(donantePersonaId))
+          .thenReturn(Collections.emptyList());
+      when(incentivosGateway.obtenerMisiones(donantePersonaId))
+          .thenReturn(
+              List.of(
+                  Map.of(
+                      "nombre", "Primer Impacto",
+                      "tipoMetrica", "DONACIONES_EXITOSAS",
+                      "objetivo", 1,
+                      "valorActual", 1,
+                      "porcentaje", 100,
+                      "faltante", 0,
+                      "completada", true)));
+      when(donacionesGateway.listarDonaciones(null, donantePersonaId))
+          .thenReturn(
+              List.of(
+                  Map.of(
+                      "id",
+                      UUID.randomUUID().toString(),
+                      "descripcion",
+                      "Frazadas de invierno",
+                      "cantidad",
+                      4,
+                      "unidad",
+                      "UNIDADES",
+                      "subcategoria",
+                      Map.of("nombre", "Ropa de Abrigo"),
+                      "estado",
+                      "EN_DEPOSITO")));
+
+      mockMvc
+          .perform(get("/app/donante").param("tab", "seguimiento").principal(donanteAuth))
+          .andExpect(status().isOk())
+          .andExpect(
+              model().attribute("misDonaciones", hasItem(hasEntry("subcategoriaGrupo", "ABRIGO"))))
+          .andExpect(model().attribute("misiones", hasItem(hasEntry("unidadLabel", "aportes"))))
+          .andExpect(model().attribute("misiones", hasItem(hasEntry("porcentaje", 100))))
+          .andExpect(model().attribute("misiones", hasItem(hasEntry("completada", true))));
+    }
   }
 }
