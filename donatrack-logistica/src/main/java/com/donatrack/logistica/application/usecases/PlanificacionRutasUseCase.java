@@ -141,9 +141,7 @@ public class PlanificacionRutasUseCase implements ProcesarPlanificacionesPendien
       Direccion destino = item.getDestino();
       Parada parada = paradasDeRutaActual.get(destino);
       if (parada == null) {
-        // Generar coordenadas dummy/mock para la parada
-        Coordenada coordenada =
-            new Coordenada(-34.6037, -58.3816); // Obelisco Buenos Aires por defecto
+        Coordenada coordenada = resolverCoordenadas(destino);
         parada = new Parada(ordenParada++, destino, coordenada, new ArrayList<>());
         paradasDeRutaActual.put(destino, parada);
       }
@@ -181,5 +179,26 @@ public class PlanificacionRutasUseCase implements ProcesarPlanificacionesPendien
 
   private void guardarRutaYAsociarParadas(RutaDeReparto ruta, Map<Direccion, Parada> paradasMap) {
     ruta.setParadas(new ArrayList<>(paradasMap.values()));
+  }
+
+  private Coordenada resolverCoordenadas(Direccion destino) {
+    if (destino == null) {
+      return new Coordenada(-34.6037, -58.3816);
+    }
+    String loc = destino.getLocalidad() != null ? destino.getLocalidad().toLowerCase() : "";
+    String c = destino.getCalle() != null ? destino.getCalle().toLowerCase() : "";
+
+    if (loc.contains("la plata")) return new Coordenada(-34.9214, -57.9545);
+    if (loc.contains("san isidro")) return new Coordenada(-34.4716, -58.5284);
+    if (loc.contains("quilmes")) return new Coordenada(-34.7242, -58.2608);
+    if (loc.contains("berazategui")) return new Coordenada(-34.7634, -58.2128);
+    if (loc.contains("flores") || c.contains("rivadavia")) return new Coordenada(-34.6300, -58.4815);
+    if (loc.contains("san telmo") || c.contains("defensa")) return new Coordenada(-34.6186, -58.3712);
+    if (loc.contains("palermo") || c.contains("santa fe")) return new Coordenada(-34.5863, -58.4103);
+    if (loc.contains("vicente l") || c.contains("libertador")) return new Coordenada(-34.5298, -58.4732);
+    if (c.contains("corrientes")) return new Coordenada(-34.6037, -58.3816);
+    if (c.contains("san juan")) return new Coordenada(-34.6241, -58.4038);
+
+    return new Coordenada(-34.6037, -58.3816);
   }
 }

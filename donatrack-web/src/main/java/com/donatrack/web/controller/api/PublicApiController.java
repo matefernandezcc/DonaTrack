@@ -124,7 +124,7 @@ public class PublicApiController {
 
     // 3. Entregas Reales Auditadas (Naranja)
     List<Map<String, Object>> rutas = cacheResilienteService.obtenerRutasConCache();
-    boolean tieneEntregasDinamicas = false;
+    java.util.Map<String, PuntoMapaPublicoDTO> entregasMap = new java.util.LinkedHashMap<>();
 
     if (rutas != null) {
       for (Map<String, Object> ruta : rutas) {
@@ -144,11 +144,17 @@ public class PublicApiController {
               if (coord.get("longitud") instanceof Number nLng) lng = nLng.doubleValue();
             }
 
+            String calleStr = "";
+            String alturaStr = "";
+            String localidadStr = "";
             String destinoOrg = "Hogar / Comedor Social";
             if (parada.get("direccion") instanceof Map<?, ?> dir) {
               Object calle = dir.get("calle");
               Object altura = dir.get("altura");
               Object localidad = dir.get("localidad");
+              calleStr = calle != null ? calle.toString() : "";
+              alturaStr = altura != null ? altura.toString() : "";
+              localidadStr = localidad != null ? localidad.toString() : "";
               destinoOrg =
                   String.format(
                       "%s %s, %s",
@@ -156,6 +162,10 @@ public class PublicApiController {
                       altura != null ? altura : "S/N",
                       localidad != null ? localidad : "CABA");
             }
+
+            double[] coordsFinales = resolverCoordenadas(calleStr, alturaStr, localidadStr, lat, lng);
+            lat = coordsFinales[0];
+            lng = coordsFinales[1];
 
             if (parada.get("entregas") instanceof List<?> entregas) {
               for (Object eObj : entregas) {
@@ -175,19 +185,23 @@ public class PublicApiController {
                   }
                 }
 
-                puntos.add(
+                String key = "Entrega #DT-" + shortCode;
+                PuntoMapaPublicoDTO dto =
                     new PuntoMapaPublicoDTO(
                         "orange",
                         lat,
                         lng,
-                        "Entrega #DT-" + shortCode,
+                        key,
                         "Lote solidario auditado y entregado mediante remito oficial.",
                         destinoOrg,
                         "Alimentos · Ropa",
                         fecha,
                         "Entregado",
-                        fotoUrl));
-                tieneEntregasDinamicas = true;
+                        fotoUrl);
+
+                if (!entregasMap.containsKey(key) || (fotoUrl != null && entregasMap.get(key).fotoUrl() == null)) {
+                  entregasMap.put(key, dto);
+                }
               }
             }
           }
@@ -195,7 +209,9 @@ public class PublicApiController {
       }
     }
 
-    if (!tieneEntregasDinamicas) {
+    if (!entregasMap.isEmpty()) {
+      puntos.addAll(entregasMap.values());
+    } else {
       puntos.add(
           new PuntoMapaPublicoDTO(
               "orange",
@@ -224,5 +240,50 @@ public class PublicApiController {
     }
 
     return ResponseEntity.ok(puntos);
+  }
+
+  private double[] resolverCoordenadas(
+      String calle, String altura, String localidad, double latActual, double lngActual) {
+    String loc = (localidad != null ? localidad : "").toLowerCase();
+    String c = (calle != null ? calle : "").toLowerCase();
+
+    if (loc.contains("la plata")) {
+      return new double[] {-34.9214, -57.9545};
+    }
+    if (loc.contains("san isidro")) {
+      return new double[] {-34.4716, -58.5284};
+    }
+    if (loc.contains("quilmes")) {
+      return new double[] {-34.7242, -58.2608};
+    }
+    if (loc.contains("berazategui")) {
+      return new double[] {-34.7634, -58.2128};
+    }
+    if (loc.contains("flores") || c.contains("rivadavia")) {
+      return new double[] {-34.6300, -58.4815};
+    }
+    if (loc.contains("san telmo") || c.contains("defensa")) {
+      return new double[] {-34.6186, -58.3712};
+    }
+    if (loc.contains("palermo") || c.contains("santa fe")) {
+      return new double[] {-34.5863, -58.4103};
+    }
+    if (loc.contains("vicente l") || c.contains("libertador")) {
+      return new double[] {-34.5298, -58.4732};
+    }
+    if (c.contains("corrientes")) {
+      return new double[] {-34.6037, -58.3816};
+    }
+    if (c.contains("san juan")) {
+      return new double[] {-34.6241, -58.4038};
+    }
+
+    boolean esDummyObelisco =
+        Math.abs(latActual - (-34.6037)) < 0.001 && Math.abs(lngActual - (-58.3816)) < 0.001;
+    if (latActual != 0.0 && lngActual != 0.0 && !esDummyObelisco) {
+      return new double[] {latActual, lngActual};
+    }
+
+    return new double[] {-34.6037, -58.3816};
   }
 }

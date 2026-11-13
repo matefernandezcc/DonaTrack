@@ -621,14 +621,42 @@ public class PublicController {
   @ResponseBody
   public ResponseEntity<Map<String, Object>> proxyChatbot(
       @RequestBody Map<String, Object> payload) {
+    String mensaje = payload != null && payload.get("mensaje") != null
+        ? payload.get("mensaje").toString().trim()
+        : "";
+    String lower = mensaje.toLowerCase();
+
+    // Respuestas directas para intenciones locales claras
+    if (lower.contains("ong") || lower.contains("verificar")) {
+      return ResponseEntity.ok(
+          Map.of(
+              "respuesta",
+              "<h4 style=\"margin-top: 0; color: #0176d3;\">🏢 Verificación de Organizaciones</h4><p>En DonaTrack auditamos a cada comedor u ONG antes de asignarle donaciones.</p><p>Las organizaciones pueden postularse completando el formulario público desde el botón <b>Sumar mi Organización</b> en la barra superior o en el pie de página.</p>"));
+    }
+
+    // Normalizar intención para concordar con los disparadores estrictos del Switch de n8n
+    Map<String, Object> payloadNormalizado = new java.util.HashMap<>(payload != null ? payload : Map.of());
+    if (lower.contains("donar") || lower.contains("dono") || lower.contains("donaci")) {
+      payloadNormalizado.put("mensaje", "¿Cómo dono?");
+    } else if (lower.contains("rastre") || lower.contains("remito") || lower.contains("seguimiento")) {
+      payloadNormalizado.put("mensaje", "Seguimiento de mi donación");
+    } else if (lower.contains("campa")) {
+      payloadNormalizado.put("mensaje", "Ver campañas");
+    } else if (lower.contains("registr")) {
+      payloadNormalizado.put("mensaje", "Quiero registrarme");
+    } else if (lower.contains("voluntari")) {
+      payloadNormalizado.put("mensaje", "Quiero ser voluntario");
+    } else if (lower.contains("horario") || lower.contains("sede") || lower.contains("donde")) {
+      payloadNormalizado.put("mensaje", "Horarios y puntos de entrega");
+    } else if (lower.contains("tipo") || lower.contains("que donar") || lower.contains("aceptan")) {
+      payloadNormalizado.put("mensaje", "¿Qué tipo de donaciones aceptan?");
+    }
+
     try {
-      java.net.http.HttpClient httpClient =
-          java.net.http.HttpClient.newBuilder()
-              .connectTimeout(java.time.Duration.ofSeconds(2))
-              .build();
-      org.springframework.http.client.JdkClientHttpRequestFactory requestFactory =
-          new org.springframework.http.client.JdkClientHttpRequestFactory(httpClient);
-      requestFactory.setReadTimeout(java.time.Duration.ofSeconds(3));
+      org.springframework.http.client.SimpleClientHttpRequestFactory requestFactory =
+          new org.springframework.http.client.SimpleClientHttpRequestFactory();
+      requestFactory.setConnectTimeout(java.time.Duration.ofSeconds(2));
+      requestFactory.setReadTimeout(java.time.Duration.ofSeconds(4));
 
       org.springframework.web.client.RestClient restClient =
           org.springframework.web.client.RestClient.builder()
@@ -640,14 +668,14 @@ public class PublicController {
               .post()
               .uri("/webhook/chatbot")
               .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-              .body(payload)
+              .body(payloadNormalizado)
               .retrieve()
               .body(
                   new org.springframework.core.ParameterizedTypeReference<
                       Map<String, Object>>() {});
       return ResponseEntity.ok(resp != null ? resp : Map.of("respuesta", "Mensaje procesado."));
     } catch (Exception e) {
-      log.warn("No se pudo conectar con el servicio de chatbot n8n: {}", e.getMessage());
+      log.warn("No se pudo conectar con el servicio de chatbot n8n ({}): {}", n8nUrl, e.getMessage());
       return ResponseEntity.ok(
           Map.of(
               "respuesta",
