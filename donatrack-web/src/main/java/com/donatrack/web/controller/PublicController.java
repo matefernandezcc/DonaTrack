@@ -197,25 +197,25 @@ public class PublicController {
                 if (compObj instanceof Map<?, ?> compMap) {
                   Map<String, Object> compSanitizado = new HashMap<>();
                   compMap.forEach((k, v) -> compSanitizado.put(String.valueOf(k), v));
+                  String defaultRemito = "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp";
                   if (compMap.get("fotos") instanceof List<?> fotosList) {
                     List<String> fotosSanitizadas = new ArrayList<>();
                     for (Object f : fotosList) {
                       if (f != null) {
-                        String fStr = f.toString();
-                        if (fStr.contains("storage.donatrack.org")) {
-                          String filename = fStr.substring(fStr.lastIndexOf("/") + 1);
-                          if ("remito-3300.jpg".equalsIgnoreCase(filename)) {
-                            filename = "remito-3300.webp";
-                          } else if ("remito-3200.jpg".equalsIgnoreCase(filename)) {
-                            filename = "remito-3200.webp";
-                          }
-                          fotosSanitizadas.add(
-                              "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/"
-                                  + filename);
+                        String fStr = f.toString().trim();
+                        if (fStr.contains("storage.donatrack.org")
+                            || fStr.endsWith(".pdf")
+                            || fStr.contains("remito-3200")
+                            || fStr.contains("remito-lp-742")
+                            || fStr.contains("remito-verificado-app.jpeg")) {
+                          fotosSanitizadas.add(defaultRemito);
                         } else {
                           fotosSanitizadas.add(fStr);
                         }
                       }
+                    }
+                    if (fotosSanitizadas.isEmpty()) {
+                      fotosSanitizadas.add(defaultRemito);
                     }
                     compSanitizado.put("fotos", fotosSanitizadas);
                   }
@@ -428,7 +428,11 @@ public class PublicController {
       @RequestParam(value = "logout", required = false) String logout,
       Model model) {
     if (error != null) {
-      model.addAttribute("loginError", "Usuario o contraseña inválidos.");
+      if ("oauth_cancelled".equalsIgnoreCase(error)) {
+        model.addAttribute("loginError", "Inicio de sesión social cancelado por el usuario.");
+      } else {
+        model.addAttribute("loginError", "Usuario o contraseña inválidos.");
+      }
     }
     if (logout != null) {
       model.addAttribute("logoutMessage", "Sesión cerrada correctamente.");

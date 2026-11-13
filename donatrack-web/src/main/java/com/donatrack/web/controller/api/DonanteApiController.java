@@ -38,8 +38,8 @@ public class DonanteApiController {
   public ResponseEntity<List<EntregaActivaDonanteDTO>> obtenerCamionesEnVivo(Authentication auth) {
     UUID donanteId = resolverDonanteId(auth);
     List<Map<String, Object>> misDonaciones = donacionesGateway.listarDonaciones(null, donanteId);
-    if (misDonaciones.isEmpty() && !DEFAULT_DONANTE_ID.equals(donanteId)) {
-      misDonaciones = donacionesGateway.listarDonaciones(null, DEFAULT_DONANTE_ID);
+    if (misDonaciones == null) {
+      misDonaciones = Collections.emptyList();
     }
 
     Set<String> donacionesIds = new HashSet<>();

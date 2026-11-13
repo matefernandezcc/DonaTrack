@@ -133,45 +133,50 @@ public class SecurityConfig {
     if (hasSocialProviders) {
       http.oauth2Login(
           oauth2 ->
-              oauth2.successHandler(
-                  (request, response, authentication) -> {
-                    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-                    String email = oAuth2User.getAttribute("email");
-                    String name = oAuth2User.getAttribute("name");
-                    if (email == null) {
-                      email = oAuth2User.getAttribute("login") + "@github.user";
-                    }
-                    if (name == null) {
-                      name = email;
-                    }
+              oauth2
+                  .successHandler(
+                      (request, response, authentication) -> {
+                        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                        String email = oAuth2User.getAttribute("email");
+                        String name = oAuth2User.getAttribute("name");
+                        if (email == null) {
+                          email = oAuth2User.getAttribute("login") + "@github.user";
+                        }
+                        if (name == null) {
+                          name = email;
+                        }
 
-                    // Buscar o crear usuario
-                    Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
-                    Usuario usuario;
-                    if (userOpt.isPresent()) {
-                      usuario = userOpt.get();
-                      if (usuario.getPersonaId() == null) {
-                        usuario.setPersonaId(UUID.randomUUID());
-                        usuario = usuarioRepository.save(usuario);
-                      }
-                    } else {
-                      usuario =
-                          Usuario.builder()
-                              .username(email.split("@")[0].toLowerCase())
-                              .password(
-                                  new BCryptPasswordEncoder().encode(UUID.randomUUID().toString()))
-                              .nombre(name)
-                              .email(email)
-                              .rol(Rol.DONANTE)
-                              .proveedorOAuth("SOCIAL")
-                              .personaId(UUID.randomUUID())
-                              .build();
-                      usuario = usuarioRepository.save(usuario);
-                    }
+                        // Buscar o crear usuario
+                        Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
+                        Usuario usuario;
+                        if (userOpt.isPresent()) {
+                          usuario = userOpt.get();
+                          if (usuario.getPersonaId() == null) {
+                            usuario.setPersonaId(UUID.randomUUID());
+                            usuario = usuarioRepository.save(usuario);
+                          }
+                        } else {
+                          usuario =
+                              Usuario.builder()
+                                  .username(email.split("@")[0].toLowerCase())
+                                  .password(
+                                      new BCryptPasswordEncoder().encode(UUID.randomUUID().toString()))
+                                  .nombre(name)
+                                  .email(email)
+                                  .rol(Rol.DONANTE)
+                                  .proveedorOAuth("SOCIAL")
+                                  .personaId(UUID.randomUUID())
+                                  .build();
+                          usuario = usuarioRepository.save(usuario);
+                        }
 
-                    String code = authService.generarCodigoIntercambio(usuario);
-                    response.sendRedirect(webUrl + "/auth/callback?code=" + code);
-                  }));
+                        String code = authService.generarCodigoIntercambio(usuario);
+                        response.sendRedirect(webUrl + "/auth/callback?code=" + code);
+                      })
+                  .failureHandler(
+                      (request, response, exception) -> {
+                        response.sendRedirect(webUrl + "/login?error=oauth_cancelled");
+                      }));
     }
 
     return http.build();

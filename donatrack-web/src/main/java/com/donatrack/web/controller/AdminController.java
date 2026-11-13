@@ -911,9 +911,6 @@ public class AdminController {
                 () -> {
                   List<Map<String, Object>> list =
                       donacionesGateway.listarDonaciones(null, donanteId);
-                  if ((list == null || list.isEmpty()) && !DEFAULT_DONANTE_ID.equals(donanteId)) {
-                    list = donacionesGateway.listarDonaciones(null, DEFAULT_DONANTE_ID);
-                  }
                   return list != null ? list : Collections.<Map<String, Object>>emptyList();
                 },
                 securityTaskExecutor)
@@ -1335,8 +1332,10 @@ public class AdminController {
   }
 
   private Map<String, List<Map<String, Object>>> extraerEntregas(List<Map<String, Object>> rutas) {
-    List<Map<String, Object>> enCamino = new ArrayList<>();
-    List<Map<String, Object>> recibidas = new ArrayList<>();
+    Map<String, Map<String, Object>> enCaminoMap = new LinkedHashMap<>();
+    Map<String, Map<String, Object>> recibidasMap = new LinkedHashMap<>();
+    String defaultRemito =
+        "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp";
 
     if (rutas != null) {
       for (Map<String, Object> r : rutas) {
@@ -1416,35 +1415,41 @@ public class AdminController {
                 Map<String, Object> comp = (Map<String, Object>) e.get("comprobanteRecepcion");
                 if (comp != null) {
                   item.put("fechaHoraRecepcion", comp.get("fechaHora"));
+                  List<String> sanitizedFotos = new ArrayList<>();
                   if (comp.get("fotos") instanceof List<?> fList) {
-                    List<String> sanitizedFotos = new ArrayList<>();
                     for (Object f : fList) {
                       if (f != null) {
-                        String fStr = f.toString();
-                        if (fStr.contains("storage.donatrack.org")) {
-                          String filename = fStr.substring(fStr.lastIndexOf("/") + 1);
-                          if ("remito-3300.jpg".equalsIgnoreCase(filename)) {
-                            filename = "remito-3300.webp";
-                          } else if ("remito-3200.jpg".equalsIgnoreCase(filename)) {
-                            filename = "remito-3200.webp";
-                          }
-                          sanitizedFotos.add(
-                              "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/"
-                                  + filename);
+                        String fStr = f.toString().trim();
+                        if (fStr.contains("storage.donatrack.org")
+                            || fStr.endsWith(".pdf")
+                            || fStr.contains("remito-3200")
+                            || fStr.contains("remito-lp-742")
+                            || fStr.contains("remito-verificado-app.jpeg")) {
+                          sanitizedFotos.add(defaultRemito);
                         } else {
                           sanitizedFotos.add(fStr);
                         }
                       }
                     }
-                    item.put("fotos", sanitizedFotos);
                   }
+                  if (sanitizedFotos.isEmpty()) {
+                    sanitizedFotos.add(defaultRemito);
+                  }
+                  item.put("fotos", sanitizedFotos);
                   item.put("camionPatenteComprobante", comp.get("camionPatente"));
+                } else if ("ENTREGADA".equalsIgnoreCase(estado)) {
+                  item.put("fotos", List.of(defaultRemito));
                 }
 
                 if ("ENTREGADA".equalsIgnoreCase(estado)) {
-                  recibidas.add(item);
+                  recibidasMap.put(idEntrega, item);
+                  enCaminoMap.remove(idEntrega);
                 } else {
-                  enCamino.add(item);
+                  if (!recibidasMap.containsKey(idEntrega)) {
+                    if (!enCaminoMap.containsKey(idEntrega) || iniciada) {
+                      enCaminoMap.put(idEntrega, item);
+                    }
+                  }
                 }
               }
             }
@@ -1452,6 +1457,8 @@ public class AdminController {
         }
       }
     }
+    List<Map<String, Object>> enCamino = new ArrayList<>(enCaminoMap.values());
+    List<Map<String, Object>> recibidas = new ArrayList<>(recibidasMap.values());
     return Map.of("enCamino", enCamino, "recibidas", recibidas);
   }
 
@@ -1609,7 +1616,7 @@ public class AdminController {
       }
       if (fotos.isEmpty()) {
         fotos.add(
-            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-verificado-app.jpeg");
+            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp");
       }
       logisticaGateway.confirmarEntrega(idDonacion, fotos, patenteCamion);
       redirectAttributes.addFlashAttribute(
