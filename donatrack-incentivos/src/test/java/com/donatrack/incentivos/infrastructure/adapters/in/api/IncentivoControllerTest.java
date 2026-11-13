@@ -301,6 +301,21 @@ class IncentivoControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/ranking/publicar difunde el ranking y devuelve 200 OK")
+    void testPublicarRankingTop3() throws Exception {
+      UUID donanteId = UUID.randomUUID();
+      PerfilDonante p1 = new PerfilDonante(donanteId);
+      when(rankingMensualService.obtenerTop3Mensual(any(YearMonth.class))).thenReturn(List.of(p1));
+
+      mockMvc
+          .perform(post("/api/ranking/publicar"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.notificado").exists())
+          .andExpect(jsonPath("$.ranking", hasSize(1)))
+          .andExpect(jsonPath("$.ranking[0].donanteId").value(donanteId.toString()));
+    }
+
+    @Test
     @DisplayName("POST /api/donantes/{id}/actividad invoca use case y devuelve 200 OK")
     void testRegistrarActividadExitosa() throws Exception {
       UUID donanteId = UUID.randomUUID();

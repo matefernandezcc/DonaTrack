@@ -198,67 +198,99 @@ public class IncentivoController {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/ranking/top3")
   public ResponseEntity<List<java.util.Map<String, Object>>> obtenerRankingMensual() {
+    List<java.util.Map<String, Object>> response = calcularRankingTop3();
+    return ResponseEntity.ok(response);
+  }
+
+  @Operation(
+      summary = "Publicar ranking mensual a canales de difusión (Discord vía n8n)",
+      description =
+          "Calcula el Top 3 mensual y lo despacha al webhook de automatización de n8n para su difusión en Discord")
+  @ApiResponse(responseCode = "200", description = "Ranking publicado exitosamente")
+  @ApiResponse(
+      responseCode = "500",
+      description = "Error publicando ranking",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @PostMapping("/ranking/publicar")
+  public ResponseEntity<java.util.Map<String, Object>> publicarRankingMensual() {
+    List<java.util.Map<String, Object>> ranking = calcularRankingTop3();
+    boolean notificado = enviarRankingAN8n(ranking);
+
+    java.util.Map<String, Object> result = new java.util.HashMap<>();
+    result.put(
+        "mensaje",
+        notificado
+            ? "Ranking publicado exitosamente a Discord vía n8n"
+            : "Ranking calculado pero no se pudo contactar a n8n");
+    result.put("notificado", notificado);
+    result.put("ranking", ranking);
+    return ResponseEntity.ok(result);
+  }
+
+  private List<java.util.Map<String, Object>> calcularRankingTop3() {
     java.time.YearMonth mesActual = java.time.YearMonth.now();
     List<PerfilDonante> top3 = rankingMensualService.obtenerTop3Mensual(mesActual);
 
     persistirRankingMensual(mesActual, top3);
 
-    List<java.util.Map<String, Object>> response =
-        top3.stream()
-            .map(
-                p -> {
-                  String nombreUsuario = p.getDonanteId().toString();
-                  try {
-                    com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient
-                            .PersonaDTO
-                        persona = personaClient.obtenerPersona(p.getDonanteId());
-                    if (persona != null) {
-                      if ("JURIDICA".equalsIgnoreCase(persona.tipo())
-                          && persona.razonSocial() != null
-                          && !persona.razonSocial().isBlank()) {
-                        nombreUsuario = persona.razonSocial();
-                      } else {
-                        String n = persona.nombre() != null ? persona.nombre().trim() : "";
-                        String a = persona.apellido() != null ? persona.apellido().trim() : "";
-                        String completo = (n + " " + a).trim();
-                        if (!completo.isEmpty()) {
-                          nombreUsuario = completo;
-                        } else if (persona.razonSocial() != null
-                            && !persona.razonSocial().isBlank()) {
-                          nombreUsuario = persona.razonSocial();
-                        }
-                      }
+    return top3.stream()
+        .map(
+            p -> {
+              String nombreUsuario = p.getDonanteId().toString();
+              try {
+                com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient
+                        .PersonaDTO
+                    persona = personaClient.obtenerPersona(p.getDonanteId());
+                if (persona != null) {
+                  if ("JURIDICA".equalsIgnoreCase(persona.tipo())
+                      && persona.razonSocial() != null
+                      && !persona.razonSocial().isBlank()) {
+                    nombreUsuario = persona.razonSocial();
+                  } else {
+                    String n = persona.nombre() != null ? persona.nombre().trim() : "";
+                    String a = persona.apellido() != null ? persona.apellido().trim() : "";
+                    String completo = (n + " " + a).trim();
+                    if (!completo.isEmpty()) {
+                      nombreUsuario = completo;
+                    } else if (persona.razonSocial() != null
+                        && !persona.razonSocial().isBlank()) {
+                      nombreUsuario = persona.razonSocial();
                     }
-                  } catch (Exception e) {
-                    // Ignore
                   }
+                }
+              } catch (Exception e) {
+                // Ignore
+              }
 
-                  int misionesMes = p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size();
-                  int donacionesTotales = p.getMetricas().obtenerTodasLasDonaciones().size();
-                  java.util.Map<String, Object> map = new java.util.HashMap<>();
-                  map.put("donanteId", p.getDonanteId().toString());
-                  map.put("user", nombreUsuario);
-                  map.put("donations", misionesMes > 0 ? misionesMes : donacionesTotales);
-                  map.put("totalDonations", donacionesTotales);
-                  return map;
-                })
-            .collect(java.util.stream.Collectors.toList());
+              int misionesMes = p.getMetricas().obtenerMisionesCompletadasEn(mesActual).size();
+              int donacionesTotales = p.getMetricas().obtenerTodasLasDonaciones().size();
+              java.util.Map<String, Object> map = new java.util.HashMap<>();
+              map.put("donanteId", p.getDonanteId().toString());
+              map.put("user", nombreUsuario);
+              map.put("donations", misionesMes > 0 ? misionesMes : donacionesTotales);
+              map.put("totalDonations", donacionesTotales);
+              return map;
+            })
+        .collect(java.util.stream.Collectors.toList());
+  }
 
+  private boolean enviarRankingAN8n(List<java.util.Map<String, Object>> ranking) {
     try {
-      restTemplate.postForObject(n8nWebhookRankingUrl, response, String.class);
+      restTemplate.postForObject(n8nWebhookRankingUrl, ranking, String.class);
+      return true;
     } catch (Exception e) {
       if (n8nWebhookRankingUrl != null && n8nWebhookRankingUrl.contains("http://n8n:5678")) {
         try {
           restTemplate.postForObject(
               n8nWebhookRankingUrl.replace("http://n8n:5678", "http://localhost:5678"),
-              response,
+              ranking,
               String.class);
+          return true;
         } catch (Exception ignored) {
         }
       }
+      return false;
     }
-
-    return ResponseEntity.ok(response);
   }
 
   @Operation(
