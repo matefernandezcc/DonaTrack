@@ -287,6 +287,40 @@ class DonanteFlowTest {
       verify(donacionesGateway, times(1)).listarDonaciones(null, customDonante);
       verify(donacionesGateway, times(1)).listarDonaciones(null, defaultDonanteId);
     }
+
+    @Test
+    @DisplayName(
+        "donantePanel es resiliente y degrada gracefully ante fallos de microservicios secundarios")
+    void donantePanel_resilienteAnteFalloDeMicroservicios() throws Exception {
+      // Arrange: simular fallo/cold-start en microservicios secundarios
+      when(incentivosGateway.obtenerMetricas(any()))
+          .thenThrow(new RuntimeException("Simulated Render Cold-Start"));
+      when(incentivosGateway.obtenerInsignias(any()))
+          .thenThrow(new RuntimeException("Simulated Insignias Timeout"));
+      when(incentivosGateway.obtenerMisiones(any()))
+          .thenThrow(new RuntimeException("Simulated Misiones Error"));
+      when(donacionesGateway.listarDonaciones(any(), any()))
+          .thenThrow(new RuntimeException("Simulated Donaciones Timeout"));
+      when(donacionesGateway.obtenerBeneficiarios())
+          .thenThrow(new RuntimeException("Simulated Beneficiarios Error"));
+
+      // Act & Assert
+      mockMvc
+          .perform(get("/app/donante").principal(donanteAuth))
+          .andExpect(status().isOk())
+          .andExpect(view().name("admin/donante/panel"))
+          .andExpect(model().attributeExists("tabActiva"))
+          .andExpect(model().attributeExists("misDonaciones"))
+          .andExpect(model().attributeExists("beneficiarios"))
+          .andExpect(model().attributeExists("causasActivas"))
+          .andExpect(model().attributeExists("metricas"))
+          .andExpect(model().attributeExists("insignias"))
+          .andExpect(model().attribute("tabActiva", "resumen"))
+          .andExpect(model().attribute("totalInsignias", 0))
+          .andExpect(model().attribute("isNuevoUsuario", true))
+          .andExpect(model().attribute("rangoNombre", "Donante Inicial"))
+          .andExpect(model().attribute("rangoNivel", 1));
+    }
   }
 
   // ==========================================

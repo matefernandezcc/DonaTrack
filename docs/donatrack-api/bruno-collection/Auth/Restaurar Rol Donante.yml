@@ -1,0 +1,27 @@
+info:
+  name: Restaurar Rol Donante
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{authUrl}}/admin/usuarios/a1111111-1111-4111-8111-111111111111/rol"
+  body:
+    type: json
+    data: |-
+      {
+        "rol": "DONANTE"
+      }
+  auth: none
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

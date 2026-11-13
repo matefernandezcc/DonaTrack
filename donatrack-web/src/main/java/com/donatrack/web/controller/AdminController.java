@@ -5,6 +5,7 @@ import com.donatrack.web.gateway.DonacionesGateway;
 import com.donatrack.web.gateway.IncentivosGateway;
 import com.donatrack.web.gateway.LogisticaGateway;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,8 +13,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -36,6 +43,10 @@ public class AdminController {
       UUID.fromString("a2222222-2222-4222-8222-222222222222");
   private static final UUID DEFAULT_BENEFICIARIA_ID =
       UUID.fromString("b2222222-2222-4222-8222-222222222222");
+
+  @Autowired
+  @Qualifier("securityTaskExecutor")
+  private AsyncTaskExecutor securityTaskExecutor = new SimpleAsyncTaskExecutor();
 
   private final LogisticaGateway logisticaGateway;
   private final IncentivosGateway incentivosGateway;
@@ -70,13 +81,25 @@ public class AdminController {
   }
 
   @ModelAttribute
-  public void populateUserAttributes(Model model, Authentication auth) {
+  public void populateUserAttributes(
+      Model model, Authentication auth, HttpSession session) {
     if (auth != null) {
       String nombreCompleto = auth.getName();
       String username = auth.getName();
       String usuarioId = "";
-      String descripcion = "Comprometidos con una logística solidaria eficiente y transparente.";
-      String ubicacion = "Buenos Aires, Argentina";
+      String descripcion = null;
+      String ubicacion = null;
+
+      if (session != null) {
+        Object sDesc = session.getAttribute("perfil_descripcion");
+        if (sDesc instanceof String s && !s.isBlank()) {
+          descripcion = s;
+        }
+        Object sUbi = session.getAttribute("perfil_ubicacion");
+        if (sUbi instanceof String s && !s.isBlank()) {
+          ubicacion = s;
+        }
+      }
 
       if (auth instanceof JwtAuthenticationToken jwtAuth) {
         Jwt token = jwtAuth.getToken();
@@ -86,32 +109,26 @@ public class AdminController {
         if (token.getClaimAsString("username") != null) {
           username = token.getClaimAsString("username");
         }
-        if (token.getClaimAsString("descripcion") != null
+        if (descripcion == null
+            && token.getClaimAsString("descripcion") != null
             && !token.getClaimAsString("descripcion").isBlank()) {
           descripcion = token.getClaimAsString("descripcion");
         }
-        if (token.getClaimAsString("ubicacion") != null
+        if (ubicacion == null
+            && token.getClaimAsString("ubicacion") != null
             && !token.getClaimAsString("ubicacion").isBlank()) {
           ubicacion = token.getClaimAsString("ubicacion");
         }
         usuarioId = token.getSubject();
-
-        // Si tenemos usuarioId y authGateway, intentamos consultar el perfil más reciente
-        if (usuarioId != null && !usuarioId.isBlank() && authGateway != null) {
-          try {
-            Map<String, Object> perfil = authGateway.obtenerPerfil(UUID.fromString(usuarioId));
-            if (perfil != null) {
-              if (perfil.get("descripcion") instanceof String desc && !desc.isBlank()) {
-                descripcion = desc;
-              }
-              if (perfil.get("ubicacion") instanceof String ubi && !ubi.isBlank()) {
-                ubicacion = ubi;
-              }
-            }
-          } catch (Exception ignored) {
-          }
-        }
       }
+
+      if (descripcion == null || descripcion.isBlank()) {
+        descripcion = "Comprometidos con una logística solidaria eficiente y transparente.";
+      }
+      if (ubicacion == null || ubicacion.isBlank()) {
+        ubicacion = "Buenos Aires, Argentina";
+      }
+
       model.addAttribute("nombreCompleto", nombreCompleto);
       model.addAttribute("nombreUsuario", username);
       model.addAttribute("usuarioId", usuarioId);
@@ -126,19 +143,29 @@ public class AdminController {
       @RequestParam("ubicacion") String ubicacion,
       Authentication auth,
       HttpServletRequest request,
+      HttpSession session,
       RedirectAttributes redirectAttributes) {
     try {
       if (auth instanceof JwtAuthenticationToken jwt && authGateway != null) {
         UUID usuarioId = UUID.fromString(jwt.getToken().getSubject());
         authGateway.actualizarPerfil(usuarioId, descripcion, ubicacion);
+        if (session != null) {
+          session.setAttribute("perfil_descripcion", descripcion);
+          session.setAttribute("perfil_ubicacion", ubicacion);
+        }
         redirectAttributes.addFlashAttribute("flashOk", "Perfil actualizado con éxito.");
       }
     } catch (Exception e) {
+      log.error("Error al actualizar perfil: {}", e.getMessage(), e);
       redirectAttributes.addFlashAttribute(
           "flashError", "Error al actualizar perfil: " + e.getMessage());
     }
     String referer = request.getHeader("Referer");
-    return "redirect:" + (referer != null ? referer : "/app/donante");
+    String target = "/app/donante";
+    if (referer != null && referer.startsWith("/") && !referer.startsWith("//") && referer.startsWith("/app/")) {
+      target = referer;
+    }
+    return "redirect:" + target;
   }
 
   private UUID resolverDonanteId(Authentication auth) {
@@ -198,9 +225,53 @@ public class AdminController {
   @GetMapping("/admin")
   @PreAuthorize("hasRole('ADMIN')")
   public String adminResumen(Model model) {
-    model.addAttribute("totalCamiones", logisticaGateway.listarCamiones().size());
-    model.addAttribute("totalChoferes", logisticaGateway.listarChoferes().size());
-    model.addAttribute("totalRutas", logisticaGateway.listarRutas().size());
+    CompletableFuture<Integer> fCamiones =
+        CompletableFuture.supplyAsync(
+                () -> {
+                  List<CamionDto> list = logisticaGateway.listarCamiones();
+                  return list != null ? list.size() : 0;
+                },
+                securityTaskExecutor)
+            .exceptionally(
+                ex -> {
+                  log.warn("Error al listar camiones en adminResumen: {}", ex.getMessage());
+                  return 0;
+                });
+
+    CompletableFuture<Integer> fChoferes =
+        CompletableFuture.supplyAsync(
+                () -> {
+                  List<com.donatrack.web.dto.ChoferDto> list = logisticaGateway.listarChoferes();
+                  return list != null ? list.size() : 0;
+                },
+                securityTaskExecutor)
+            .exceptionally(
+                ex -> {
+                  log.warn("Error al listar choferes en adminResumen: {}", ex.getMessage());
+                  return 0;
+                });
+
+    CompletableFuture<Integer> fRutas =
+        CompletableFuture.supplyAsync(
+                () -> {
+                  List<Map<String, Object>> list = logisticaGateway.listarRutas();
+                  return list != null ? list.size() : 0;
+                },
+                securityTaskExecutor)
+            .exceptionally(
+                ex -> {
+                  log.warn("Error al listar rutas en adminResumen: {}", ex.getMessage());
+                  return 0;
+                });
+
+    CompletableFuture.allOf(fCamiones, fChoferes, fRutas)
+        .orTimeout(3, TimeUnit.SECONDS)
+        .exceptionally(ex -> null)
+        .join();
+
+    model.addAttribute("totalCamiones", fCamiones.getNow(0));
+    model.addAttribute("totalChoferes", fChoferes.getNow(0));
+    model.addAttribute("totalRutas", fRutas.getNow(0));
     return "admin/admin/resumen";
   }
 
@@ -795,14 +866,100 @@ public class AdminController {
       Model model,
       Authentication auth) {
     UUID donanteId = resolverDonanteId(auth);
-    Map<String, Object> metricas = incentivosGateway.obtenerMetricas(donanteId);
-    List<Map<String, Object>> insignias = incentivosGateway.obtenerInsignias(donanteId);
+
+    CompletableFuture<Map<String, Object>> fMetricas =
+        CompletableFuture.supplyAsync(
+                () -> {
+                  Map<String, Object> m = incentivosGateway.obtenerMetricas(donanteId);
+                  return m != null ? m : Collections.<String, Object>emptyMap();
+                },
+                securityTaskExecutor)
+            .exceptionally(
+                ex -> {
+                  log.warn("Error al obtener métricas en donantePanel: {}", ex.getMessage());
+                  return Collections.<String, Object>emptyMap();
+                });
+
+    CompletableFuture<List<Map<String, Object>>> fInsignias =
+        CompletableFuture.supplyAsync(
+                () -> {
+                  List<Map<String, Object>> list = incentivosGateway.obtenerInsignias(donanteId);
+                  return list != null ? list : Collections.<Map<String, Object>>emptyList();
+                },
+                securityTaskExecutor)
+            .exceptionally(
+                ex -> {
+                  log.warn("Error al obtener insignias en donantePanel: {}", ex.getMessage());
+                  return Collections.<Map<String, Object>>emptyList();
+                });
+
+    CompletableFuture<List<Map<String, Object>>> fMisiones =
+        CompletableFuture.supplyAsync(
+                () -> {
+                  List<Map<String, Object>> list = incentivosGateway.obtenerMisiones(donanteId);
+                  return list != null ? list : Collections.<Map<String, Object>>emptyList();
+                },
+                securityTaskExecutor)
+            .exceptionally(
+                ex -> {
+                  log.warn("Error al obtener misiones en donantePanel: {}", ex.getMessage());
+                  return Collections.<Map<String, Object>>emptyList();
+                });
+
+    CompletableFuture<List<Map<String, Object>>> fDonaciones =
+        CompletableFuture.supplyAsync(
+                () -> {
+                  List<Map<String, Object>> list =
+                      donacionesGateway.listarDonaciones(null, donanteId);
+                  if ((list == null || list.isEmpty()) && !DEFAULT_DONANTE_ID.equals(donanteId)) {
+                    list = donacionesGateway.listarDonaciones(null, DEFAULT_DONANTE_ID);
+                  }
+                  return list != null ? list : Collections.<Map<String, Object>>emptyList();
+                },
+                securityTaskExecutor)
+            .exceptionally(
+                ex -> {
+                  log.warn("Error al listar donaciones en donantePanel: {}", ex.getMessage());
+                  return Collections.<Map<String, Object>>emptyList();
+                });
+
+    CompletableFuture<List<Map<String, Object>>> fBeneficiarios =
+        CompletableFuture.supplyAsync(
+                () -> {
+                  List<Map<String, Object>> list = donacionesGateway.obtenerBeneficiarios();
+                  return list != null ? list : Collections.<Map<String, Object>>emptyList();
+                },
+                securityTaskExecutor)
+            .exceptionally(
+                ex -> {
+                  log.warn("Error al obtener beneficiarios en donantePanel: {}", ex.getMessage());
+                  return Collections.<Map<String, Object>>emptyList();
+                });
+
+    CompletableFuture.allOf(fMetricas, fInsignias, fMisiones, fDonaciones, fBeneficiarios)
+        .orTimeout(3, TimeUnit.SECONDS)
+        .exceptionally(ex -> null)
+        .join();
+
+    Map<String, Object> metricas = fMetricas.getNow(Collections.<String, Object>emptyMap());
+    if (metricas == null) {
+      metricas = Collections.emptyMap();
+    }
+    List<Map<String, Object>> insignias = fInsignias.getNow(Collections.<Map<String, Object>>emptyList());
     if (insignias == null) {
       insignias = Collections.emptyList();
     }
-    List<Map<String, Object>> misiones = incentivosGateway.obtenerMisiones(donanteId);
+    List<Map<String, Object>> misiones = fMisiones.getNow(Collections.<Map<String, Object>>emptyList());
     if (misiones == null) {
       misiones = Collections.emptyList();
+    }
+    List<Map<String, Object>> rawDonaciones = fDonaciones.getNow(Collections.<Map<String, Object>>emptyList());
+    if (rawDonaciones == null) {
+      rawDonaciones = Collections.emptyList();
+    }
+    List<Map<String, Object>> beneficiarios = fBeneficiarios.getNow(Collections.<Map<String, Object>>emptyList());
+    if (beneficiarios == null) {
+      beneficiarios = Collections.emptyList();
     }
 
     // Métricas dinámicas calculadas 100% de la base de datos real
@@ -861,10 +1018,6 @@ public class AdminController {
     long entregasCompletadas = donaciones;
 
     // 1. Obtener seguimiento de las donaciones del donante
-    List<Map<String, Object>> rawDonaciones = donacionesGateway.listarDonaciones(null, donanteId);
-    if (rawDonaciones.isEmpty() && !DEFAULT_DONANTE_ID.equals(donanteId)) {
-      rawDonaciones = donacionesGateway.listarDonaciones(null, DEFAULT_DONANTE_ID);
-    }
     List<Map<String, Object>> misDonaciones = new ArrayList<>();
     for (Map<String, Object> d : rawDonaciones) {
       if (d == null) continue;
@@ -930,7 +1083,6 @@ public class AdminController {
     }
 
     // 2. Obtener buscador de causas activas y necesidades de ONGs
-    List<Map<String, Object>> beneficiarios = donacionesGateway.obtenerBeneficiarios();
     List<Map<String, Object>> beneficiariosEnriquecidos = new ArrayList<>();
     List<Map<String, Object>> causasActivas = new ArrayList<>();
     for (Map<String, Object> b : beneficiarios) {

@@ -205,17 +205,13 @@
         var form = document.getElementById('form-recepcion-deposito');
         var submitBtn = document.getElementById('btn-submit-recepcion');
 
-        if (form && submitBtn) {
+        if (window.DonaTrackForms) {
+          DonaTrackForms.registrarProteccion(form, submitBtn);
+        } else if (form && submitBtn) {
           form.addEventListener('submit', function (e) {
-            if (submitBtn.disabled) {
-              e.preventDefault();
-              return false;
-            }
-            // Bloqueo de doble clic para prevenir submits duplicados
+            if (!form.checkValidity()) return;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Registrando en depósito...';
-            submitBtn.style.opacity = '0.75';
-            submitBtn.style.cursor = 'wait';
+            submitBtn.classList.add('slds-is-disabled');
           });
         }
       });

@@ -6,7 +6,7 @@ spring:
   application:
     name: donatrack-web
   thymeleaf:
-    cache: false
+    cache: ${SPRING_THYMELEAF_CACHE:true}
     mode: HTML
     encoding: UTF-8
 
@@ -19,11 +19,10 @@ donatrack:
     incentivos-url: ${INCENTIVOS_URL:http://localhost:8001}
     logistica-url: ${LOGISTICA_URL:http://localhost:8002}
     notificaciones-url: ${NOTIFICACIONES_URL:http://localhost:8003}
-    timeout-seconds: ${API_TIMEOUT_SECONDS:60}
+    timeout-seconds: ${API_TIMEOUT_SECONDS:3}
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-

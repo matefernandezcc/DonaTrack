@@ -72,6 +72,8 @@ make auth            # Autenticación (Puerto 8004)
 make web             # Cliente Web SSR (Puerto 8080)
 ```
 
+> 📄 **Configuración de Perfiles y Entornos:** Para conocer cómo alternar entre los perfiles `local` y `prod`, la persistencia políglota y la seguridad M2M, consultá la guía canónica en [`docs/PERFILES_Y_ENTORNOS.md`](docs/PERFILES_Y_ENTORNOS.md).
+
 ---
 
 ## 🧭 Diagramas de Arquitectura y Clases (PlantUML)

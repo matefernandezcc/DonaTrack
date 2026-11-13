@@ -31,6 +31,11 @@ donatrack:
   jwt-secret: ${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
   jwt-ttl-minutes: ${JWT_TTL_MINUTES:120}
   web-url: ${WEB_URL:http://localhost:8080}
+  security:
+    enabled: false
+  auth:
+    mock-sso:
+      enabled: true
 
 management:
   endpoints:
@@ -62,9 +67,16 @@ spring:
       max-lifetime: 1800000
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         default_schema: public
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+donatrack:
+  security:
+    enabled: true
+  auth:
+    mock-sso:
+      enabled: false
 

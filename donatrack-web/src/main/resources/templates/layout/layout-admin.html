@@ -38,6 +38,68 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
+
+    /* ========================================================
+       BOTONES DE CIERRE (X) EN MODALES - ALTO CONTRASTE Y ACCESIBILIDAD
+       ======================================================== */
+    .slds-modal__close,
+    button.slds-modal__close,
+    .dt-modal-close-btn {
+      position: absolute !important;
+      top: 12px !important;
+      right: 12px !important;
+      width: 32px !important;
+      height: 32px !important;
+      padding: 0 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      border: 1px solid rgba(0, 0, 0, 0.15) !important;
+      background: #ffffff !important;
+      color: #0f172a !important;
+      font-size: 1.15rem !important;
+      font-weight: 800 !important;
+      line-height: 1 !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+      transition: all 0.15s ease-in-out !important;
+      z-index: 10002 !important;
+      text-decoration: none !important;
+    }
+
+    .slds-modal__close span[aria-hidden="true"],
+    button.slds-modal__close span[aria-hidden="true"],
+    .dt-modal-close-btn span[aria-hidden="true"] {
+      color: inherit !important;
+      font-size: 1.15rem !important;
+      font-weight: 800 !important;
+      line-height: 1 !important;
+      display: inline-block !important;
+    }
+
+    .slds-modal__close:hover,
+    button.slds-modal__close:hover,
+    .dt-modal-close-btn:hover {
+      background: #f1f5f9 !important;
+      color: #000000 !important;
+      border-color: rgba(0, 0, 0, 0.3) !important;
+      transform: scale(1.08) !important;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .slds-modal__close:active,
+    button.slds-modal__close:active,
+    .dt-modal-close-btn:active {
+      transform: scale(0.96) !important;
+    }
+
+    .slds-modal__close:focus,
+    button.slds-modal__close:focus,
+    .dt-modal-close-btn:focus {
+      outline: 2px solid #0176d3 !important;
+      outline-offset: 2px !important;
+    }
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
@@ -46,6 +108,23 @@
 </head>
 
 <body class="slds-scope" style="background-color: #f3f3f3; min-height: 100vh;">
+
+  <!-- ==================== SLDS BLUEPRINT: TOP PROGRESS BAR SLIM ==================== -->
+  <div id="donatrack-top-loader" class="slds-progress-bar slds-progress-bar_x-small" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" role="progressbar"
+       style="position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 99999; display: none; background: transparent;">
+    <span id="donatrack-top-loader-val" class="slds-progress-bar__value" style="width: 0%; background-color: #0176d3; transition: width 0.25s ease;">
+      <span class="slds-assistive-text">Cargando...</span>
+    </span>
+  </div>
+
+  <!-- ==================== SLDS BLUEPRINT: GLOBAL FORM MODAL SPINNER ==================== -->
+  <div id="donatrack-form-spinner" class="slds-spinner_container slds-is-fixed" style="display: none; z-index: 10005; background: rgba(255, 255, 255, 0.75);">
+    <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+      <span class="slds-assistive-text">Guardando información de forma segura, por favor espere...</span>
+      <div class="slds-spinner__dot-a"></div>
+      <div class="slds-spinner__dot-b"></div>
+    </div>
+  </div>
 
   <!-- ==================== SLDS BLUEPRINT: GLOBAL HEADER ==================== -->
   <header class="slds-global-header_container">
@@ -196,9 +275,9 @@
           <li class="slds-nav-vertical__item">
             <a th:href="@{/app/donante}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#metrics}"></use>
               </svg>
-              <span class="slds-truncate">Mi Perfil & Rango</span>
+              <span class="slds-truncate">Resumen &amp; Impacto</span>
             </a>
           </li>
           <li class="slds-nav-vertical__item">
@@ -216,7 +295,7 @@
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
               </svg>
-              <span class="slds-truncate">Mis Donaciones (Seguimiento)</span>
+              <span class="slds-truncate">Seguimiento de Mis Donaciones</span>
             </a>
           </li>
           <li class="slds-nav-vertical__item">
@@ -225,7 +304,16 @@
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
               </svg>
-              <span class="slds-truncate">Buscador Causas ONG</span>
+              <span class="slds-truncate">Buscador de ONGs &amp; Necesidades Activas</span>
+            </a>
+          </li>
+          <li class="slds-nav-vertical__item">
+            <a th:href="@{/app/donante(tab='directorio')}"
+              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
+              </svg>
+              <span class="slds-truncate">Organizaciones y Comedores</span>
             </a>
           </li>
         </ul>
@@ -348,9 +436,112 @@
 
   </div>
 
-  <!-- Script responsive drawer y resaltado activo para navegación vertical -->
+  <!-- ==================== SCRIPTS GLOBALES DE NAVEGACIÓN Y FEEDBACK ==================== -->
   <script>
+    // Utilidad Global: Barra de Progreso Superior SLDS (Feedback visual inmediato en navegación)
+    window.DonaTrackLoader = (function () {
+      var loader = document.getElementById('donatrack-top-loader');
+      var val = document.getElementById('donatrack-top-loader-val');
+      var timer = null;
+      var current = 0;
+
+      function setProgress(p) {
+        current = p;
+        if (loader) {
+          loader.style.display = 'block';
+          loader.setAttribute('aria-valuenow', String(p));
+        }
+        if (val) {
+          val.style.width = p + '%';
+        }
+      }
+
+      return {
+        start: function () {
+          if (timer) clearInterval(timer);
+          setProgress(15);
+          timer = setInterval(function () {
+            if (current < 85) {
+              setProgress(current + Math.floor(Math.random() * 15 + 5));
+            }
+          }, 250);
+        },
+        done: function () {
+          if (timer) clearInterval(timer);
+          setProgress(100);
+          setTimeout(function () {
+            if (loader) loader.style.display = 'none';
+            setProgress(0);
+          }, 300);
+        }
+      };
+    })();
+
+    // Disparar barra de progreso slim ante navegación saliente de la página
+    window.addEventListener('beforeunload', function () {
+      if (window.DonaTrackLoader) window.DonaTrackLoader.start();
+    });
+
+    // Utilidad Global: Protección de Formularios con Spinner Modal SLDS y Bloqueo Doble Envío
+    window.DonaTrackForms = {
+      registrarProteccion: function (formElement, submitButton) {
+        if (!formElement || !submitButton) return;
+        formElement.addEventListener('submit', function (e) {
+          if (!formElement.checkValidity()) return;
+          submitButton.disabled = true;
+          submitButton.classList.add('slds-is-disabled');
+          var spinner = document.getElementById('donatrack-form-spinner');
+          if (spinner) spinner.style.display = 'block';
+        });
+      }
+    };
+
+    // Sincronización Reactiva de Menú Lateral para el Portal Donante
+    function sincronizarSidebarDonante(tabId) {
+      var targetTab = tabId || 'resumen';
+      var links = document.querySelectorAll('#admin-nav a.slds-nav-vertical__action');
+      links.forEach(function (link) {
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var item = link.closest('.slds-nav-vertical__item');
+        if (!item) return;
+
+        var isMatch = false;
+        if (targetTab === 'resumen') {
+          isMatch = (href === '/app/donante' || href === '/app/donante?tab=resumen');
+        } else if (targetTab === 'seguimiento') {
+          isMatch = (href.indexOf('/app/donante') !== -1 && href.indexOf('tab=seguimiento') !== -1);
+        } else if (targetTab === 'causas') {
+          isMatch = (href.indexOf('/app/donante') !== -1 && href.indexOf('tab=causas') !== -1);
+        } else if (targetTab === 'directorio') {
+          isMatch = (href.indexOf('/app/donante') !== -1 && href.indexOf('tab=directorio') !== -1);
+        }
+
+        if (isMatch) {
+          item.classList.add('slds-is-active');
+          link.setAttribute('aria-current', 'page');
+        } else if (href.indexOf('/app/donante') !== -1 && href.indexOf('/app/donante/donaciones') === -1) {
+          item.classList.remove('slds-is-active');
+          link.removeAttribute('aria-current');
+        }
+      });
+    }
+    window.sincronizarSidebarDonante = sincronizarSidebarDonante;
+
+    // Escucha de eventos de historial del navegador (Atrás / Adelante)
+    window.addEventListener('popstate', function (e) {
+      if (window.location.pathname === '/app/donante') {
+        var params = new URLSearchParams(window.location.search);
+        var tab = (e.state && e.state.tab) ? e.state.tab : (params.get('tab') || 'resumen');
+        if (typeof window.cambiarTabDonante === 'function') {
+          window.cambiarTabDonante(tab, false);
+        }
+        sincronizarSidebarDonante(tab);
+      }
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
+      // Toggle de navegación móvil
       var toggleBtn = document.getElementById('admin-menu-toggle');
       var nav = document.getElementById('admin-nav');
       if (toggleBtn && nav) {
@@ -360,27 +551,69 @@
         });
       }
 
-      // Resaltar automáticamente el tab vertical activo según la URL
+      // FASE 2: Intercepción de navegación client-side en menú lateral Donante
+      document.querySelectorAll('#admin-nav a.slds-nav-vertical__action').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+          var href = link.getAttribute('href');
+          if (!href) return;
+          if (window.location.pathname === '/app/donante' && href.startsWith('/app/donante') && href.indexOf('/app/donante/donaciones') === -1) {
+            if (typeof window.cambiarTabDonante === 'function') {
+              var targetUrl = new URL(href, window.location.origin);
+              var targetTab = targetUrl.searchParams.get('tab') || 'resumen';
+              e.preventDefault();
+              window.cambiarTabDonante(targetTab, true);
+              sincronizarSidebarDonante(targetTab);
+            }
+          }
+        });
+      });
+
+      // Resaltado inicial robusto del menú lateral evaluando pathname + query params
       var currentPath = window.location.pathname;
+      var fullCurrent = window.location.pathname + window.location.search;
       var links = document.querySelectorAll('.slds-nav-vertical__action');
+      var matched = false;
+
+      // 1. Coincidencia exacta completa (ej: /app/donante?tab=seguimiento)
       links.forEach(function (link) {
         var href = link.getAttribute('href');
-        if (href && (currentPath === href || (href !== '/app/admin' && href !== '/app/donante' && href !== '/app/beneficiaria' && currentPath.startsWith(href)))) {
+        if (href && (fullCurrent === href || href === window.location.pathname + (window.location.search ? window.location.search : ''))) {
           var item = link.closest('.slds-nav-vertical__item');
-          if (item) {
+          if (item && !matched) {
             item.classList.add('slds-is-active');
             link.setAttribute('aria-current', 'page');
+            matched = true;
           }
         }
       });
-      if (!document.querySelector('.slds-nav-vertical__item.slds-is-active')) {
+
+      // 2. Si no hubo coincidencia exacta con query params, evaluar pathname puro para rutas raíz
+      if (!matched) {
         links.forEach(function (link) {
           var href = link.getAttribute('href');
-          if (href && currentPath === href) {
+          if (!href) return;
+          var cleanHref = href.split('?')[0];
+          if (cleanHref === currentPath && (href.indexOf('?') === -1 || href.indexOf('tab=resumen') !== -1)) {
             var item = link.closest('.slds-nav-vertical__item');
-            if (item) {
+            if (item && !matched) {
               item.classList.add('slds-is-active');
               link.setAttribute('aria-current', 'page');
+              matched = true;
+            }
+          }
+        });
+      }
+
+      // 3. Fallback de subrutas para secciones administrativas (ej: /app/admin/camiones)
+      if (!matched) {
+        links.forEach(function (link) {
+          var href = link.getAttribute('href');
+          if (href && href !== '/app/admin' && href !== '/app/donante' && href !== '/app/beneficiaria' && currentPath.startsWith(href)) {
+            var item = link.closest('.slds-nav-vertical__item');
+            if (item && !matched) {
+              item.classList.add('slds-is-active');
+              link.setAttribute('aria-current', 'page');
+              matched = true;
             }
           }
         });

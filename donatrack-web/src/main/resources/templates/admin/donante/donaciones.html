@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
 <head>
   <title>DonaTrack · Registrar Donación Solidaria</title>
 </head>
@@ -45,7 +45,7 @@
               <span class="slds-badge" style="background: #166534; color: #fff; font-weight: 700; font-size: 0.7rem;">PRIORIDAD ACTIVA</span>
             </div>
 
-            <form th:action="@{/app/donante/donaciones}" method="post">
+            <form id="form-donante-donacion" th:action="@{/app/donante/donaciones}" method="post">
               <div class="slds-form slds-form_stacked">
                 
                 <div class="slds-form-element slds-m-bottom_small">
@@ -112,7 +112,7 @@
                 </div>
 
                 <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
-                  <button class="slds-button slds-button_brand" type="submit" style="font-weight: 700; padding: 0 20px;">
+                  <button class="slds-button slds-button_brand" id="btn-submit-donacion" type="submit" style="font-weight: 700; padding: 0 20px;">
                     Confirmar Donación
                   </button>
                   <a th:href="@{/app/donante}" class="slds-button slds-button_neutral">
@@ -175,6 +175,25 @@
 
     </div>
   </div>
+
+  <th:block id="page-scripts">
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('form-donante-donacion');
+        var submitBtn = document.getElementById('btn-submit-donacion');
+
+        if (window.DonaTrackForms) {
+          DonaTrackForms.registrarProteccion(form, submitBtn);
+        } else if (form && submitBtn) {
+          form.addEventListener('submit', function (e) {
+            if (!form.checkValidity()) return;
+            submitBtn.disabled = true;
+            submitBtn.classList.add('slds-is-disabled');
+          });
+        }
+      });
+    </script>
+  </th:block>
 
 </body>
 </html>

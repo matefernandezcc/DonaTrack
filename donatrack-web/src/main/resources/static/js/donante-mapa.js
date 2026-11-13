@@ -8,6 +8,7 @@
 
   var mapInstance = null;
   var markersGroup = null;
+  var mapaDonanteInicializado = false;
 
   function initDonanteMapa() {
     var container = document.getElementById('mapa-donante-camiones');
@@ -31,6 +32,17 @@
       if (container) {
         // El contenedor del mapa permanece visible salvo si hay error antes de iniciar
         container.style.opacity = (estado === 'loading') ? '0.35' : '1';
+      }
+      if (retryBtn) {
+        if (estado === 'loading') {
+          retryBtn.setAttribute('disabled', 'disabled');
+          retryBtn.style.opacity = '0.6';
+          retryBtn.style.cursor = 'not-allowed';
+        } else {
+          retryBtn.removeAttribute('disabled');
+          retryBtn.style.opacity = '1';
+          retryBtn.style.cursor = 'pointer';
+        }
       }
     }
 
@@ -57,16 +69,16 @@
     }
 
     function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
-  function crearIconoCamion() {
+    function crearIconoCamion() {
       return L.divIcon({
         className: 'dt-truck-leaflet-marker',
         html: '<div style="background: #0176d3; color: #ffffff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(1, 118, 211, 0.45); border: 2px solid #ffffff; font-size: 16px;">🚚</div>',
@@ -159,21 +171,41 @@
         });
     }
 
-    cargarCamiones();
-
-    // Reajustar tamaño de Leaflet si el usuario cambia a la pestaña de seguimiento
-    window.refrescarMapaDonante = function () {
-      if (mapInstance) {
+    // FASE 2: Lazy Mounting idempotente del Mapa de Camiones
+    window.inicializarOMostrarMapaDonante = function () {
+      var panel = document.getElementById('tab-panel-seguimiento');
+      if (!panel || panel.style.display === 'none') {
+        return;
+      }
+      if (!mapaDonanteInicializado) {
+        mapaDonanteInicializado = true;
+        asegurarMapa();
+        cargarCamiones();
+      } else {
         setTimeout(function () {
-          mapInstance.invalidateSize();
-        }, 150);
+          if (mapInstance) mapInstance.invalidateSize();
+        }, 100);
       }
     };
+
+    // Reajustar tamaño de Leaflet / compatibilidad hacia atrás
+    window.refrescarMapaDonante = window.inicializarOMostrarMapaDonante;
+  }
+
+  function autoInitSiVisible() {
+    initDonanteMapa();
+    var panel = document.getElementById('tab-panel-seguimiento');
+    var tabParam = new URLSearchParams(window.location.search).get('tab');
+    if ((panel && panel.style.display !== 'none') || tabParam === 'seguimiento') {
+      if (typeof window.inicializarOMostrarMapaDonante === 'function') {
+        window.inicializarOMostrarMapaDonante();
+      }
+    }
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDonanteMapa);
+    document.addEventListener('DOMContentLoaded', autoInitSiVisible);
   } else {
-    initDonanteMapa();
+    autoInitSiVisible();
   }
 })();

@@ -294,8 +294,8 @@
           
           <!-- Header Modal -->
           <header class="slds-modal__header" style="background: linear-gradient(135deg, #166534 0%, #15803d 100%); color: #ffffff; border-top-left-radius: 8px; border-top-right-radius: 8px; position: relative;">
-            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="cerrarModalConfirmacion()" style="position: absolute; top: 12px; right: 12px; color: #fff;">
-              ✕
+            <button class="slds-button slds-modal__close dt-modal-close-btn" onclick="cerrarModalConfirmacion()" title="Cerrar modal" aria-label="Cerrar">
+              <span aria-hidden="true">✕</span>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
             <div style="font-size: 2rem; margin-bottom: 4px;">✍️</div>
@@ -392,8 +392,9 @@
                 <a id="visor-link-externo" href="#" target="_blank" class="slds-button slds-button_neutral slds-button_small" style="font-size: 0.76rem; font-weight: 700; border-radius: 4px;">
                   Abrir Original ↗
                 </a>
-                <button type="button" class="slds-button slds-button_icon slds-button_icon-inverse" onclick="cerrarVisorRemito()" title="Cerrar (Esc)" style="font-size: 1.3rem; color: #ffffff; cursor: pointer; padding: 0 8px; line-height: 1;">
-                  ✕
+                <button type="button" class="slds-button dt-modal-close-btn" onclick="cerrarVisorRemito()" title="Cerrar (Esc)" aria-label="Cerrar" style="position: static !important;">
+                  <span aria-hidden="true">✕</span>
+                  <span class="slds-assistive-text">Cerrar</span>
                 </button>
               </div>
             </div>
