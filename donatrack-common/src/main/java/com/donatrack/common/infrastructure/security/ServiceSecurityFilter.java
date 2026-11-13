@@ -88,7 +88,9 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
   }
 
   private boolean isPublicPath(String path) {
-    return path.startsWith("/actuator")
+    return path.equals("/")
+        || path.equals("/index.html")
+        || path.startsWith("/actuator")
         || path.startsWith("/swagger-ui")
         || path.startsWith("/v3/api-docs")
         || path.startsWith("/api-docs")
