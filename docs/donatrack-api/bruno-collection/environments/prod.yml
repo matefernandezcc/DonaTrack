@@ -1,0 +1,20 @@
+name: prod
+variables:
+  - name: baseUrl
+    value: https://donatrack-web.onrender.com
+  - name: authUrl
+    value: https://donatrack-auth.onrender.com
+  - name: webUrl
+    value: https://donatrack-web.onrender.com
+  - name: donacionesUrl
+    value: https://donatrack-donaciones.onrender.com
+  - name: incentivosUrl
+    value: https://donatrack-incentivos.onrender.com
+  - name: logisticaUrl
+    value: https://donatrack-logistica.onrender.com
+  - name: notificacionesUrl
+    value: https://donatrack-notificaciones.onrender.com
+  - name: n8nUrl
+    value: https://donatrack-n8n.onrender.com
+  - name: token
+    value: ""

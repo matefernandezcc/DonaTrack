@@ -5,6 +5,9 @@ HELP.md
 !**/src/main/**/target/
 !**/src/test/**/target/
 .env
+.env.local
+.env.example
+.agent
 
 ### STS ###
 .apt_generated
@@ -34,9 +37,8 @@ build/
 ### VS Code ###
 .vscode/
 TODO.md
-.env.example
-TODO.md
 
-### Agents ###
+### Agents & AI Tools ###
 .agents/
 *skills-lock.json
+.impeccable/

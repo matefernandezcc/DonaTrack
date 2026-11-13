@@ -27,15 +27,34 @@ public class ConfirmarRecepcionYNotificarUseCase {
   private final PersonaRepository personaRepository;
   private final ApplicationEventPublisher eventPublisher;
 
+  private com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient
+      incentivoClient;
+
+  private static final org.slf4j.Logger log =
+      org.slf4j.LoggerFactory.getLogger(ConfirmarRecepcionYNotificarUseCase.class);
+
   public ConfirmarRecepcionYNotificarUseCase(
       DonacionRepository donacionRepository,
       DonacionOriginalRepository recepcionRepository,
       PersonaRepository personaRepository,
       ApplicationEventPublisher eventPublisher) {
+    this(donacionRepository, recepcionRepository, personaRepository, eventPublisher, null);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public ConfirmarRecepcionYNotificarUseCase(
+      DonacionRepository donacionRepository,
+      DonacionOriginalRepository recepcionRepository,
+      PersonaRepository personaRepository,
+      ApplicationEventPublisher eventPublisher,
+      @org.springframework.beans.factory.annotation.Autowired(required = false)
+          com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient
+              incentivoClient) {
     this.donacionRepository = donacionRepository;
     this.recepcionRepository = recepcionRepository;
     this.personaRepository = personaRepository;
     this.eventPublisher = eventPublisher;
+    this.incentivoClient = incentivoClient;
   }
 
   @Transactional
@@ -51,6 +70,39 @@ public class ConfirmarRecepcionYNotificarUseCase {
       boolean confirmado = beneficiario.confirmarRecepcion(donacion, event.getFotos());
       if (confirmado) {
         donacionRepository.guardar(donacion);
+      }
+    }
+
+    if (incentivoClient != null) {
+      try {
+        java.util.UUID idDonante = null;
+        var recepcionOpt = recepcionRepository.buscarPorIdDonacion(donacion.getId());
+        if (recepcionOpt.isPresent() && recepcionOpt.get().getDonante() != null) {
+          idDonante = recepcionOpt.get().getDonante().getId();
+        }
+        if (idDonante != null) {
+          int cantidadBienes = donacion.getBienes() != null ? donacion.getBienes().size() : 1;
+          List<String> categorias = donacion.getCategoriasString();
+          if (categorias == null || categorias.isEmpty()) {
+            categorias = List.of("Alimentos");
+          }
+          java.util.UUID idEntidad = beneficiario != null ? beneficiario.getId() : null;
+          com.donatrack.common.dto.ActividadDonacionDTO dto =
+              new com.donatrack.common.dto.ActividadDonacionDTO(
+                  donacion.getId(),
+                  idDonante,
+                  cantidadBienes,
+                  categorias,
+                  idEntidad,
+                  java.time.LocalDate.now());
+          incentivoClient.registrarActividadDonacionExitosa(idDonante, dto);
+          log.info(
+              "Incentivos actualizados para donante {} tras entrega exitosa de donación {}",
+              idDonante,
+              donacion.getId());
+        }
+      } catch (Exception ex) {
+        log.warn("No se pudo notificar a incentivos al confirmar entrega: {}", ex.getMessage());
       }
     }
 

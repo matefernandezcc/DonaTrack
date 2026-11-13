@@ -85,4 +85,14 @@ public class NotificadorService {
           "No se pudo persistir la notificación en base de datos: " + e.getMessage());
     }
   }
+
+  public java.util.List<NotificacionEntity> listarPorDestinatario(String destinatario) {
+    if (notificacionRepository == null) {
+      return java.util.Collections.emptyList();
+    }
+    if (destinatario == null || destinatario.isBlank()) {
+      return notificacionRepository.findAll();
+    }
+    return notificacionRepository.findByDestinatarioOrderByFechaEnvioDesc(destinatario);
+  }
 }

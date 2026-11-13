@@ -1,79 +1,81 @@
 # 🚀 DonaTrack — Guía de Demo Paso a Paso (End-to-End & Persistencia Políglota)
 
-Esta guía interactiva está diseñada para ejecutar una **demostración en vivo de punta a punta** de **DonaTrack**, validando tanto los **52 endpoints de la colección de Bruno** como la **persistencia políglota real** en **PostgreSQL** (`donaciones`, `incentivos`, `notificaciones`) y **MongoDB** (`donatrack_logistica`), junto con la mensajería asincrónica en **RabbitMQ / CloudAMQP** y las automatizaciones en **n8n / Discord**.
+Esta guía interactiva está diseñada para ejecutar una **demostración en vivo de punta a punta** de **DonaTrack (Entrega 6)**, validando tanto los endpoints de la colección de Bruno como la **arquitectura distribuida multi-cuenta en Render**, el **cliente liviano SSR con Thymeleaf (`donatrack-web`)**, el **microservicio de autenticación centralizada (`donatrack-auth`) con JWT/SSO**, la separación de layouts (Público moderno vs. Administrativo con blueprints oficiales de Salesforce Lightning Design System - SLDS 2.30.3), y la **persistencia políglota real** en **PostgreSQL** (`donaciones`, `incentivos`, `notificaciones`, `auth`) y **MongoDB** (`donatrack_logistica`), junto con la mensajería asincrónica en **RabbitMQ / CloudAMQP** y las automatizaciones en **n8n / Discord**.
 
 ---
 
-## 🗺️ Arquitectura en Acción durante la Demo
+## 🗺️ Arquitectura Distribuida (Multi-Cuenta Render)
 
 ```mermaid
 flowchart LR
-    subgraph API["Colección Bruno / cURL (52 Endpoints)"]
-        CLI["Cliente Demo / Bruno CLI"]
+    subgraph Browser["Navegador / Cliente Demo"]
+        U["Usuario Web (SSR)"]
+        BRU["Colección Bruno CLI"]
     end
 
-    subgraph MS["Microservicios DonaTrack (Spring Boot 3)"]
-        DON["donatrack-donaciones :8000"]
-        INC["donatrack-incentivos :8001"]
-        LOG["donatrack-logistica :8002 / Render Cloud"]
-        NOT["donatrack-notificaciones :8003"]
-        SRV["donatrack-server :8080"]
+    subgraph R2["Render - Cuenta 2 (Frontend & Auth & Logística)"]
+        WEB["donatrack-web :8080<br/>(Thymeleaf SSR + Dual Layout)"]
+        AUTH["donatrack-auth :8004<br/>(JWT HS256 + SSO OAuth2)"]
+        LOG["donatrack-logistica :8002<br/>(Rutas, Camiones, Choferes)"]
     end
 
-    subgraph DB_REL["PostgreSQL (Local :5432 / Supabase Cloud)"]
-        PG_DON[("Schema: donaciones\n(12 tablas)")]
-        PG_INC[("Schema: incentivos\n(8 tablas)")]
-        PG_NOT[("Schema: notificaciones\n(2 tablas)")]
+    subgraph R1["Render - Cuenta 1 (Core de Datos)"]
+        DON["donatrack-donaciones :8000<br/>(Recepción, Matchmaking, CSV)"]
+        INC["donatrack-incentivos :8001<br/>(Ranking, Métricas, Insignias)"]
+        NOT["donatrack-notificaciones :8003<br/>(Multicanal & Auditoría)"]
     end
 
-    subgraph DB_NOSQL["MongoDB (Local :27017 / MongoDB Atlas)"]
-        MONGO[("DB: donatrack_logistica\n(6 colecciones)")]
+    subgraph SaaS["Servicios Gestionados Nube"]
+        PG[("PostgreSQL / Supabase<br/>Schemas: donaciones, incentivos, notificaciones, auth")]
+        MONGO[("MongoDB Atlas<br/>DB: donatrack_logistica")]
+        RMQ(("CloudAMQP / RabbitMQ"))
+        N8N["n8n :5678<br/>(Discord, WhatsApp, Email)"]
     end
 
-    subgraph ASYNC["Eventos & Automatización"]
-        RMQ(("RabbitMQ / CloudAMQP"))
-        N8N["n8n :5678\n(Email / WhatsApp / SMS / Discord)"]
-    end
-
-    CLI --> DON & INC & LOG & NOT & SRV
-    DON --> PG_DON
-    INC --> PG_INC
-    NOT --> PG_NOT
+    U -->|HTML público / SLDS backoffice| WEB
+    BRU -->|REST APIs| DON & INC & LOG & NOT & AUTH
+    WEB -->|"POST /auth/login / exchange"| AUTH
+    WEB -->|"Bearer JWT (Server-side)"| DON & INC & LOG
+    DON --> PG
+    INC --> PG
+    NOT --> PG
+    AUTH --> PG
     LOG --> MONGO
-    DON -- "Feign REST" --> INC
-    DON -- "Broker Adapter (Failover)" --> LOG
-    LOG <-- "Sagas AMQP" --> RMQ
-    RMQ --> DON & NOT & INC
+    LOG <-- "Eventos AMQP" --> RMQ
+    RMQ --> DON & INC & NOT
     NOT & INC -- "Webhooks HTTP" --> N8N
 ```
 
 ---
 
-## ⚡ 0. Puesta en Marcha y Validación Automática de los 52 Endpoints (Bruno CLI)
+## ⚡ 0. Puesta en Marcha y Validación Automática (Bruno CLI)
 
 ### Opción A — Entorno Local (`dev` con Docker Compose)
 
 ```bash
-# 1. Levantar toda la infraestructura y microservicios locales
-docker compose --profile local up -d
+# 1. Levantar toda la arquitectura distribuida local (8 contenedores)
+make setup
+# o directamente: docker compose up -d
 
-# 2. Inicializar/sincronizar esquemas y datos semilla en PostgreSQL y MongoDB
-make db-init
+# 2. Verificar que los servicios estén saludables
+docker compose ps
 
-# 3. Ejecutar los 52 endpoints de la colección Bruno contra el entorno local (dev)
-cd "docs/donatrack-api/Donatrack - API"
+# 3. Ejecutar los endpoints de la colección Bruno contra el entorno local (dev)
+cd docs/donatrack-api/bruno-collection
 npx @usebruno/cli run --env dev
 cd ../../..
 ```
 
-### Opción B — Entorno Cloud Híbrido (`prod` con Supabase + MongoDB Atlas + CloudAMQP + Render)
+### Opción B — Entorno Cloud Híbrido (`prod` multi-cuenta Render + SaaS)
 
 > [!TIP]
-> En el entorno `prod`, el pre-request script de `opencollection.yml` y el `LogisticaBrokerAdapter` detectan automáticamente la instancia activa de **Logística en Render** (`https://dona-logistica.onrender.com`), mientras que los servicios locales con `SPRING_PROFILES_ACTIVE=prod` persisten directamente en **Supabase PostgreSQL**, **MongoDB Atlas** y **CloudAMQP**.
+> En la arquitectura distribuida de producción:
+> - **Cuenta 1 (Compañero):** Core de Datos (`donaciones`, `incentivos`, `notificaciones`).
+> - **Cuenta 2 (Mía):** Capa de Interacción y Logística (`donatrack-web`, `donatrack-auth`, `donatrack-logistica`).
+> - **Bases de Datos SaaS:** Supabase (PostgreSQL), MongoDB Atlas y CloudAMQP (RabbitMQ).
 
 ```bash
-# Ejecutar la suite completa apuntando al entorno productivo (prod)
-cd "docs/donatrack-api/Donatrack - API"
+cd docs/donatrack-api/bruno-collection
 npx @usebruno/cli run --env prod
 cd ../../..
 ```
@@ -125,7 +127,7 @@ curl -s -X POST http://localhost:8000/api/personas \
 
 ```bash
 curl -s -X POST http://localhost:8000/api/personas/importar-csv \
-  -F "file=@docs/donatrack-api/Donatrack - API/Donaciones/Personas/donantes_sample.csv"
+  -F "file=@docs/donatrack-api/bruno-collection/Donaciones/Personas/donantes_sample.csv"
 echo ""
 ```
 
@@ -419,8 +421,19 @@ curl -s http://localhost:8001/api/donantes/a1111111-1111-4111-8111-111111111111/
 ### Paso 4.3 — Calcular y Persistir el Ranking Mensual Top 3 (`GET /api/ranking/top3`)
 *(Equivalente en Bruno: `Incentivos/Obtener Ranking`)*
 
+Consulta idempotente de solo lectura utilizada por la página web sin efectos secundarios:
+
 ```bash
 curl -s http://localhost:8001/api/ranking/top3 | jq .
+```
+
+### Paso 4.4 — Publicar y Difundir el Ranking a Discord vía n8n (`POST /api/ranking/publicar`)
+*(Equivalente en Bruno: `Incentivos/Publicar Ranking Podio`)*
+
+Dispara la difusión oficial del podio mensual hacia n8n y el webhook de Discord:
+
+```bash
+curl -i -s -X POST http://localhost:8001/api/ranking/publicar | jq .
 ```
 
 ### 🔍 Verificación de Persistencia en PostgreSQL (`schema: incentivos`)
@@ -488,3 +501,248 @@ ORDER BY n.fecha_envio DESC LIMIT 10;
 "
 ```
 
+
+
+---
+
+## 🖥️ Flujo 6: Cliente Liviano SSR, Autenticación Centralizada y Backoffice Administrativo (SLDS)
+**Módulos:** `donatrack-web` (`:8080`) + `donatrack-auth` (`:8004`) | **Bases de Datos:** PostgreSQL (`schema: auth`)  
+**Requerimientos de Entrega 6:**
+1. **Cliente Liviano SSR con Thymeleaf:** Aplicación desacoplada sin dependencias a entidades pesadas ni JPA; orquesta llamadas REST seguras inyectando tokens Bearer.
+2. **Servicio Central de Auth:** Emisión y validación de tokens JWT simétricos (HS256) y soporte de intercambio de códigos de un solo uso para SSO (Google / GitHub).
+3. **Estrategia Dual de UI (Aislamiento Estricto):**
+   - **Layout Público (`layout-public.html`):** Estilo moderno/e-commerce, amigable, accesible (WCAG AA). Totalmente libre de clases o resets de SLDS.
+   - **Layout Administrativo (`layout-admin.html`):** Backoffice puro basado en blueprints oficiales de **Salesforce Lightning Design System (SLDS 2.30.3)** (Global Header, Vertical Navigation, Data Tables, Cards, Modals, Toasts) sin inventar CSS personalizado (`dt-*`).
+
+### Paso 6.1 — Autenticación Centralizada y Emisión de JWT (`POST /auth/login`)
+*(Equivalente en Bruno: `Auth/Login`)*
+
+```bash
+# 1. Login con credenciales sembradas (admin / admin)
+curl -s -X POST http://localhost:8004/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin"}' | jq .
+
+# 2. Login con rol Donante (donante / donante)
+curl -s -X POST http://localhost:8004/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "donante", "password": "donante"}' | jq .
+```
+
+### Paso 6.2 — Acceso al Portal Público y Login Web vía SSR (`POST /login`)
+
+```bash
+# El usuario inicia sesión en el frontend liviano SSR:
+# Guarda el SecurityContext y JWT en HttpSession del servidor y emite cookie HttpOnly JSESSIONID.
+curl -s -i -c /tmp/demo_cookies.txt -X POST http://localhost:8080/login \
+  -d "username=admin&password=admin"
+
+# Acceso al portal público moderno (consume ranking real de incentivos)
+curl -s -b /tmp/demo_cookies.txt http://localhost:8080/ | head -n 30
+```
+
+### Paso 6.3 — Gestión de Flota en Backoffice SLDS (`/app/admin/camiones`)
+
+```bash
+# 1. Ver tabla de camiones renderizada con SLDS Data Table
+curl -s -b /tmp/demo_cookies.txt http://localhost:8080/app/admin/camiones | grep -A 5 "slds-table"
+
+# 2. Registrar un camión desde el formulario modal de SLDS
+curl -s -i -b /tmp/demo_cookies.txt -X POST http://localhost:8080/app/admin/camiones \
+  -d "patente=ZZ999XX&capacidadVolumen=28.0&altura=3.6&capacidadCarga=6000.0"
+
+# 3. Verificar persistencia directa en MongoDB (donatrack_logistica.camiones)
+docker exec mongo_donatrack mongosh donatrack_logistica --quiet \
+  --eval "db.camiones.find({patente: 'ZZ999XX'}).pretty()"
+```
+
+### Paso 6.4 — Matchmaking Inteligente de Donaciones (`/app/admin/matchmaking`)
+
+```bash
+# Ejecutar sugerencia de compatibilidad para una donación con las organizaciones registradas
+curl -s -b /tmp/demo_cookies.txt "http://localhost:8080/app/admin/matchmaking?donacionId=5cd80011-2a54-4ca7-a39c-28b2b53d8c55" | grep -A 4 "Resultados de compatibilidad"
+```
+
+### Paso 6.5 — Importación Masiva de Donantes por CSV (`/app/admin/csv`)
+
+```bash
+# Carga masiva de personas y sincronización con el schema 'donaciones'
+curl -s -b /tmp/demo_cookies.txt http://localhost:8080/app/admin/csv | grep -A 4 "Donantes Registrados en Base de Datos"
+```
+
+### Paso 6.6 — Portal Donante con Gamificación y Registro de Bienes (`/app/donante`)
+
+```bash
+# 1. Visualizar panel de gamificación con métricas e insignias reales
+curl -s -b /tmp/demo_cookies.txt http://localhost:8080/app/donante | grep -A 3 "Insignias y Reconocimientos"
+
+# 2. Registrar una nueva donación de bienes en depósito
+curl -s -i -b /tmp/demo_cookies.txt -X POST http://localhost:8080/app/donante/donaciones \
+  -d "descripcion=Leche en polvo 800g&cantidad=25&unidadMedicion=KILOS&nombreSubcategoria=No Perecederos&esUsado=false"
+```
+
+### Paso 6.7 — Portal Beneficiaria y Certificación de Entrega (`/app/beneficiaria`)
+
+```bash
+# 1. Declarar una nueva necesidad material para matchmaking
+curl -s -i -b /tmp/demo_cookies.txt -X POST http://localhost:8080/app/beneficiaria/necesidades \
+  -d "descripcion=Frazadas polares de una plaza&cantidadRequerida=40&tipo=extraordinaria&nombreSubcategoria=Abrigo"
+
+# 2. Listar entregas logísticas y rutas activas
+curl -s -b /tmp/demo_cookies.txt http://localhost:8080/app/beneficiaria/entregas | grep -A 4 "Rutas y Despachos en Operación"
+```
+
+---
+
+## 🗄️ 7. Consultas de Verificación en Base de Datos (DBeaver & MongoDB)
+
+Para corroborar la consistencia y la persistencia políglota real tras ejecutar los flujos, podés ejecutar las siguientes consultas en **DBeaver** o consola de base de datos:
+
+### 7.1. Verificación en PostgreSQL (`localhost:5432`)
+
+#### A. Personas, Roles y Direcciones (Schema `donaciones`)
+```sql
+-- Contar personas registradas
+SELECT COUNT(*) AS total_personas FROM donaciones.personas;
+
+-- Verificar persona humana creada y su herencia JOINED
+SELECT p.persona_id, p.email, p.doc_tipo, p.doc_numero, ph.nombre, ph.apellido, ph.edad
+FROM donaciones.personas p
+JOIN donaciones.personas_humanas ph ON p.persona_id = ph.persona_humana_id
+ORDER BY p.persona_id DESC LIMIT 5;
+
+-- Verificar persona jurídica
+SELECT p.persona_id, p.email, pj.razon_social, pj.tipo
+FROM donaciones.personas p
+JOIN donaciones.personas_juridicas pj ON p.persona_id = pj.persona_juridica_id;
+
+-- Verificar direcciones asociadas
+SELECT p.email, d.calle, d.altura, d.localidad, d.codigo_postal
+FROM donaciones.personas p
+JOIN donaciones.direcciones d ON p.direccion_id = d.direccion_id
+LIMIT 5;
+
+-- Identificar IDs de roles para pruebas manuales
+SELECT persona_id, dtype, rol_id FROM donaciones.roles WHERE dtype IN ('Donante', 'Administrador', 'Beneficiario');
+```
+
+#### B. Donaciones Originales, Segmentación y Bienes (Schema `donaciones`)
+```sql
+-- Donaciones originales ingresadas
+SELECT * FROM donaciones.donaciones_originales ORDER BY fecha_recepcion DESC LIMIT 5;
+
+-- Donaciones segmentadas por categoría
+SELECT d.donacion_id, d.estado, d.fecha_creacion, dorig.descripcion_general
+FROM donaciones.donaciones d
+JOIN donaciones.donaciones_originales dorig ON d.donacion_original_id = dorig.donacion_original_id
+ORDER BY d.fecha_creacion DESC LIMIT 10;
+
+-- Bienes individuales persistidos
+SELECT b.bien_id, b.descripcion, b.cantidad, b.unidad_medicion, b.es_usado, b.donacion_id
+FROM donaciones.bienes b
+ORDER BY b.bien_id DESC LIMIT 10;
+```
+
+#### C. Gamificación y Puntajes (Schema `incentivos`)
+```sql
+-- Perfiles y métricas acumuladas de donantes
+SELECT * FROM incentivos.perfiles_donante;
+SELECT * FROM incentivos.metricas_donante;
+
+-- Registro histórico de actividades por mes
+SELECT * FROM incentivos.registros_donacion ORDER BY mes_donacion DESC LIMIT 10;
+```
+
+#### D. Usuarios y Credenciales (Schema `auth`)
+```sql
+-- Cuentas de usuario y proveedores de identidad
+SELECT usuario_id, username, email, rol, persona_id, proveedor_oauth 
+FROM auth.usuarios;
+```
+
+### 7.2. Verificación en MongoDB NoSQL (`localhost:27017` / Atlas)
+
+Conectándote a la base de datos `donatrack_logistica` mediante DBeaver, MongoDB Compass o la terminal `mongosh`:
+
+```javascript
+use donatrack_logistica;
+
+// 1. Flota de camiones
+db.camiones.find().pretty();
+
+// 2. Choferes registrados
+db.choferes.find().pretty();
+
+// 3. Items recepcionados para planificación de rutas
+db.items_planificacion.find().sort({ _id: -1 }).limit(5).pretty();
+
+// 4. Rutas de reparto generadas con sus paradas y entregas embebidas
+db.rutas_reparto.find().sort({ _id: -1 }).limit(3).pretty();
+```
+
+---
+
+## 🔄 8. Procedimiento de Reset Total y Desarrollo en Caliente
+
+### 8.1. Reset Total ("Volver a Empezar desde Cero")
+Si requerís limpiar el estado de la persistencia para repetir una prueba limpia:
+
+```bash
+# 1. Bajar todos los microservicios Java (Ctrl+C en las terminales)
+
+# 2. Detener contenedores y eliminar volúmenes de datos
+docker compose down -v
+
+# 3. Levantar infraestructura Docker limpia (recrea schemas y ejecuta local-seed-data.sql y mongo-init.js)
+docker compose up -d postgres-donatrack mongo-donatrack rabbitmq n8n
+
+# 4. Limpiar artefactos compilados
+./mvnw clean   # o: make clean
+
+# 5. Volver a compilar y levantar
+make build
+make run       # o levantar individualmente con make donaciones, etc.
+```
+
+### 8.2. Recarga en Caliente de Código
+Si modificás clases `.java` y observás inconsistencias de caché o `NoClassDefFoundError`:
+
+```bash
+# 1. Detener el microservicio afectado (Ctrl+C)
+# 2. Recompilar limpiamente sin bajar Docker
+./mvnw clean compile -pl <nombre-del-modulo> -am
+# 3. Volver a ejecutar el servicio
+make <nombre-del-modulo>
+```
+
+---
+
+## 🛠️ 9. Tabla de Troubleshooting Rápido
+
+| Síntoma | Causa Probable | Solución Inmediata |
+|---|---|---|
+| `Connection refused` (:8000, :8002, etc.) | Microservicio o contenedor no iniciado | Verificar puertos activos con `docker compose ps` o levantar con `make <servicio>`. |
+| `500 Internal Server Error` | Fallo en mapper, entity o conexión inter-servicio | Inspeccionar el stacktrace en la consola del microservicio emisor. |
+| `415 Unsupported Media Type` | Falta header HTTP en la solicitud | Agregar `-H "Content-Type: application/json"` en la llamada curl. |
+| `400 Bad Request` en importación CSV | Archivo vacío o ruta errónea | Asegurar el prefijo `@` antes de la ruta: `-F "file=@ruta/al/archivo.csv"`. |
+| Datos no visibles en DBeaver | Transacción no confirmada o schema incorrecto | Presionar F5 (Refresh) y verificar el schema activo (`donaciones`, `incentivos`, `notificaciones`, `auth`). |
+| `could not determine recommended JdbcType` | Mapeo incompatible entre DTO y entidad | Asegurar que los UUIDs se envíen con formato RFC 4122 (`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`). |
+| Mensajes encolados sin consumir en RabbitMQ | Listener no suscripto o cola sin binding | Abrir consola Web [http://localhost:15672](http://localhost:15672) y verificar bindings de exchanges. |
+
+---
+
+## ✅ 10. Checklist Integral de Verificación E2E
+
+```markdown
+- [x] Infraestructura: Contenedores Postgres, Mongo, RabbitMQ y n8n saludables (`docker compose ps`).
+- [x] Autenticación: Login admin (:8004) emite token JWT HS256 válido.
+- [x] Frontend SSR: Acceso a http://localhost:8080 con layouts Público y Backoffice SLDS.
+- [x] Donantes: Creación de persona física (`/api/personas`) persistida en tabla `personas` y `personas_humanas`.
+- [x] Importación CSV: Ingesta batch sin duplicados de `donantes_sample.csv`.
+- [x] Beneficiarios: Alta de entidad y declaración de necesidades extraordinarias.
+- [x] Donaciones: Recepción de bienes físicos con segmentación automática en categorías.
+- [x] Logística: Alta de camión y chofer persistidos en colecciones NoSQL de MongoDB.
+- [x] Rutas y Despacho: Planificación de ruta e inicio de recorrido con publicación de eventos AMQP.
+- [x] Gamificación: Cómputo de puntos, actualización de ranking y asignación de insignias en Incentivos.
+- [x] Automatización: Disparo de webhooks a n8n y notificación en Discord.
+```

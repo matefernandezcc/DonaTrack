@@ -19,4 +19,5 @@ public class MetricasDonanteDTO {
   private Map<YearMonth, Integer> historialDonacionesPorMes;
   // mock ranking
   private int posicionRanking;
+  private int puntosTotales;
 }

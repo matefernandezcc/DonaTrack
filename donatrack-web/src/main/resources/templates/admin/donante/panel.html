@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
+<head>
+  <title>DonaTrack · Perfil Trailblazer del Donante</title>
+</head>
+<body>
+
+  <span id="page-header-title">Perfil del Donante · Trailblazer Solidario</span>
+
+  <div id="main-content-slot">
+
+    <!-- ==================== HERO PROFILE BANNER (TRAILHEAD STYLE) ==================== -->
+    <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; overflow: hidden; border: 1px solid #dddbda; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+      
+      <!-- Scenic Landscape Backdrop con Gradiente de Amanecer y Montañas -->
+      <div style="height: 150px; background: linear-gradient(135deg, #012b5b 0%, #0176d3 55%, #fca311 100%); position: relative; overflow: hidden;">
+        <!-- Silueta orgánica de montañas / colinas -->
+        <svg viewBox="0 0 1000 150" preserveAspectRatio="none" style="position: absolute; bottom: 0; width: 100%; height: 80px; fill: rgba(255, 255, 255, 0.12);">
+          <path d="M0 150 L100 85 L220 130 L380 60 L500 120 L660 70 L800 130 L930 75 L1000 110 L1000 150 Z" />
+        </svg>
+        <svg viewBox="0 0 1000 150" preserveAspectRatio="none" style="position: absolute; bottom: 0; width: 100%; height: 48px; fill: rgba(255, 255, 255, 0.2);">
+          <path d="M0 150 L140 105 L300 140 L450 95 L610 135 L760 90 L900 135 L1000 110 L1000 150 Z" />
+        </svg>
+        <div style="position: absolute; top: 16px; right: 20px; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); color: #fff; padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          <svg class="slds-icon slds-icon_x-small" aria-hidden="true" style="fill: #fbbf24;">
+            <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
+          </svg>
+          <span th:text="${rangoNombre} + ' · Nivel ' + ${rangoNivel}">Donante Inicial · Nivel 1</span>
+        </div>
+      </div>
+
+      <!-- Cuerpo del Perfil -->
+      <div class="slds-card__body slds-card__body_inner slds-p-horizontal_large slds-p-bottom_large" style="position: relative; background: #ffffff;">
+        
+        <div class="slds-grid slds-grid_vertical-align-start slds-wrap" style="padding-top: 10px;">
+          
+          <!-- Avatar con Anillo Trailhead (Blobatar Interactivo que sigue el mouse con la mirada) -->
+          <div class="slds-col slds-no-flex" style="position: relative; z-index: 5; margin-top: -65px;">
+            <div style="position: relative; width: 116px; height: 116px;">
+              <div style="position: absolute; inset: -4px; border-radius: 50%; border: 3px solid #0176d3; box-shadow: 0 0 0 2px #f59e0b; pointer-events: none; z-index: 3;"></div>
+              
+              <!-- Contenedor del Avatar SVG interactivo -->
+              <div id="blobatar-interactive" style="width: 116px; height: 116px; border-radius: 50%; background: #ffffff; border: 4px solid #ffffff; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">
+                <!-- SVG embebido con IDs listos para eye-tracking inmediato en cualquier navegador -->
+                <svg id="blobatar-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" style="display: block;">
+                  <path d="M100 50C100 77.61 77.61 100 50 100C22.39 100 0 77.61 0 50C0 22.39 22.39 0 50 0C77.61 0 100 22.39 100 50Z" fill="#fef08a"/>
+                  <g fill="#0284c7">
+                    <circle cx="31.02" cy="33.11" r="8.31"/>
+                    <path d="M79.62 51.3C79.62 70.11 68.49 81.34 49.86 81.34C31.23 81.34 20.1 70.11 20.1 51.3C20.1 32.5 31.23 21.27 49.86 21.27C68.49 21.27 79.62 32.5 79.62 51.3Z"/>
+                  </g>
+                  <g id="blobatar-eyes-group" fill="#0f172a" style="transform-origin: 50px 48px; transform-box: fill-box; will-change: transform;">
+                    <path d="M45.68 47.81C46.08 54.93 46.06 55.02 43.69 55.15C41.32 55.28 41.28 55.2 40.88 48.08C40.48 40.96 40.51 40.87 42.88 40.74C45.24 40.61 45.28 40.69 45.68 47.81Z"/>
+                    <path d="M63.02 47.69C63.62 54.41 63.6 54.49 61.3 54.7C59.01 54.9 58.97 54.82 58.37 48.1C57.78 41.38 57.8 41.3 60.09 41.09C62.39 40.89 62.42 40.97 63.02 47.69Z"/>
+                  </g>
+                </svg>
+              </div>
+
+              <span style="position: absolute; bottom: 2px; right: 2px; background: #0176d3; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; z-index: 4;" title="Nivel Verificado">
+                <svg class="slds-icon slds-icon_xx-small" aria-hidden="true" style="fill: #ffffff;">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Información del Usuario (Texto oscuro nítido con contraste óptimo) -->
+          <div class="slds-col slds-p-left_medium slds-m-top_xx-small" style="min-width: 280px; flex: 1;">
+            <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
+              <h1 class="slds-text-heading_medium" style="font-weight: 800; color: #080707; margin-right: 12px;"
+                  th:text="${nombreCompleto != null ? nombreCompleto : nombreUsuario}">
+                María González
+              </h1>
+              <span class="slds-badge slds-badge_lightest" style="color: #014486; font-weight: 700; font-size: 0.74rem;"
+                    th:text="${rangoNombre}">
+                Donante Inicial
+              </span>
+            </div>
+
+            <p class="slds-text-body_regular" style="color: #2e3440; font-weight: 600; margin-top: 4px;"
+               th:text="${rangoNombre} + ' · ' + ${#numbers.formatInteger(puntosReales, 0, 'POINT')} + ' Puntos Solidarios'">
+              Donante Inicial · 0 Puntos Solidarios
+            </p>
+            <p class="slds-text-body_small slds-text-color_weak slds-grid slds-grid_vertical-align-center slds-m-top_xx-small">
+              <svg class="slds-icon slds-icon_xx-small slds-icon-text-default slds-m-right_xx-small" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#location}"></use>
+              </svg>
+              <span th:text="${ubicacion != null ? ubicacion : 'Buenos Aires, Argentina'}">Buenos Aires, Argentina</span> · Entregas Auditadas
+            </p>
+
+            <p class="slds-m-top_x-small slds-grid slds-grid_vertical-align-center" style="font-style: italic; color: #4b5563; font-size: 0.88rem; flex-wrap: wrap; gap: 6px;">
+              <span>&ldquo;<span th:text="${descripcion != null ? descripcion : 'Comprometidos con una logística solidaria eficiente y transparente.'}">Comprometidos con una logística solidaria eficiente y transparente.</span>&rdquo;</span>
+              <button type="button" onclick="abrirPerfilModal()" class="slds-button slds-button_icon slds-button_icon-border" title="Editar lema y ubicación"
+                      style="width: 24px; height: 24px; min-width: 24px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; line-height: 1;">
+                <svg class="slds-button__icon slds-button__icon_x-small" aria-hidden="true">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#edit}"></use>
+                </svg>
+                <span class="slds-assistive-text">Editar lema y ubicación</span>
+              </button>
+            </p>
+          </div>
+
+          <!-- Botones de Acción Principal -->
+          <div class="slds-col slds-no-flex slds-m-top_xx-small" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" onclick="abrirWelcomeModal()" class="slds-button slds-button_neutral" style="border-radius: 4px; font-weight: 600;">
+              Guía de Inicio
+            </button>
+            <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" style="border-radius: 4px; font-weight: 700;">
+              <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
+              </svg>
+              Nueva Donación
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ==================== NAVEGACIÓN POR PESTAÑAS DEL PORTAL DONANTE ==================== -->
+    <div class="slds-tabs_default slds-m-bottom_large" style="background: #ffffff; border-radius: 8px; border: 1px solid #dddbda; padding: 0 16px;">
+      <ul class="slds-tabs_default__nav" role="tablist" style="border-bottom: none;">
+        <li class="slds-tabs_default__item" th:classappend="${tabActiva == null || tabActiva == 'resumen'} ? 'slds-is-active' : ''" role="presentation">
+          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
+             th:attr="tabindex=${tabActiva == null || tabActiva == 'resumen' ? 0 : -1},aria-selected=${tabActiva == null || tabActiva == 'resumen' ? 'true' : 'false'}"
+             id="tab-btn-resumen" aria-controls="tab-panel-resumen" onclick="cambiarTabDonante('resumen', true)"
+             style="font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
+              <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#metrics}"></use>
+            </svg>
+            Resumen &amp; Impacto
+          </a>
+        </li>
+        <li class="slds-tabs_default__item" th:classappend="${tabActiva == 'seguimiento'} ? 'slds-is-active' : ''" role="presentation">
+          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
+             th:attr="tabindex=${tabActiva == 'seguimiento' ? 0 : -1},aria-selected=${tabActiva == 'seguimiento' ? 'true' : 'false'}"
+             id="tab-btn-seguimiento" aria-controls="tab-panel-seguimiento" onclick="cambiarTabDonante('seguimiento', true)"
+             style="font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
+              <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
+            </svg>
+            Seguimiento de Mis Donaciones
+            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.7rem;"
+                  th:text="${misDonaciones != null ? misDonaciones.size() : 0}">0</span>
+          </a>
+        </li>
+        <li class="slds-tabs_default__item" th:classappend="${tabActiva == 'causas'} ? 'slds-is-active' : ''" role="presentation">
+          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
+             th:attr="tabindex=${tabActiva == 'causas' ? 0 : -1},aria-selected=${tabActiva == 'causas' ? 'true' : 'false'}"
+             id="tab-btn-causas" aria-controls="tab-panel-causas" onclick="cambiarTabDonante('causas', true)"
+             style="font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
+              <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
+            </svg>
+            Buscador de ONGs &amp; Necesidades Activas
+            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.7rem;"
+                  th:text="${causasActivas != null ? causasActivas.size() : 0}">0</span>
+          </a>
+        </li>
+        <li class="slds-tabs_default__item" th:classappend="${tabActiva == 'directorio'} ? 'slds-is-active' : ''" role="presentation">
+          <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
+             th:attr="tabindex=${tabActiva == 'directorio' ? 0 : -1},aria-selected=${tabActiva == 'directorio' ? 'true' : 'false'}"
+             id="tab-btn-directorio" aria-controls="tab-panel-directorio" onclick="cambiarTabDonante('directorio', true)"
+             style="font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
+              <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
+            </svg>
+            Organizaciones y Comedores
+            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.7rem;"
+                  th:text="${beneficiarios != null ? beneficiarios.size() : 0}">0</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ==================== GRID PRINCIPAL ==================== -->
+    <div class="slds-grid slds-gutters slds-wrap">
+
+      <!-- ==================== COLUMNA IZQUIERDA (8 DE 12) ==================== -->
+      <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
+
+        <!-- ==================== PESTAÑA 1: RESUMEN & IMPACTO ==================== -->
+        <div id="tab-panel-resumen" th:style="${tabActiva == null || tabActiva == 'resumen'} ? 'display: block;' : 'display: none;'">
+        
+        <!-- ==================== HERO DE IMPACTO SOCIAL TANGIBLE ==================== -->
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04); overflow: hidden;">
+          <div class="slds-card__body slds-p-around_large">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+              <div>
+                <span class="slds-badge" style="background: #e8f5e9; color: #166534; font-weight: 700; font-size: 0.78rem; margin-bottom: 6px; padding: 4px 10px; border-radius: 4px;">
+                  IMPACTO SOCIAL TANGIBLE
+                </span>
+                <h2 class="slds-text-heading_medium" style="font-weight: 800; color: #0f172a; font-size: 1.45rem;"
+                    th:text="'El Impacto de tus Donaciones, ' + (${nombreCompleto != null ? nombreCompleto : nombreUsuario})">
+                  El Impacto de tus Donaciones
+                </h2>
+                <p class="slds-text-body_regular slds-text-color_weak" style="max-width: 620px; font-size: 0.92rem; margin-top: 4px;">
+                  Cada donación entregada se transforma en platos calientes, abrigo y sustento real para familias que asisten a comedores comunitarios.
+                </p>
+              </div>
+              <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" style="border-radius: 4px; font-weight: 700;">
+                <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
+                </svg>
+                Donar Alimentos o Bienes
+              </a>
+            </div>
+
+            <!-- Grilla de 4 Métricas de Impacto Concreto -->
+            <div class="slds-grid slds-gutters_small slds-wrap" style="margin-top: 10px;">
+              
+              <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="font-weight: 800; color: #014486; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                       th:text="${#numbers.formatInteger(platosComida, 0, 'POINT')} + ' raciones'">
+                    0 raciones
+                  </div>
+                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
+                    PLATOS DE COMIDA
+                  </span>
+                </div>
+              </div>
+
+              <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="font-weight: 800; color: #166534; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                       th:text="${#numbers.formatInteger(kilosTotales, 0, 'POINT')} + ' kg'">
+                    0 kg
+                  </div>
+                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
+                    ALIMENTOS DONADOS
+                  </span>
+                </div>
+              </div>
+
+              <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="font-weight: 800; color: #c2410c; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                       th:text="${comedoresAsistidos} + ' comedores'">
+                    0 comedores
+                  </div>
+                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
+                    CENTROS ASISTIDOS
+                  </span>
+                </div>
+              </div>
+
+              <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="font-weight: 800; color: #4338ca; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                       th:text="${entregasCompletadas} + ' entregas'">
+                    0 entregas
+                  </div>
+                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
+                    LOGÍSTICA AUDITADA
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </article>
+
+        <!-- Campaña en Curso / Progreso hacia el siguiente objetivo -->
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px;">
+          <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-campaign">
+                  <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#campaign}"></use>
+                  </svg>
+                </span>
+              </div>
+              <div class="slds-media__body">
+                <h2 class="slds-card__header-title">
+                  <span class="slds-text-heading_small" th:text="${isNuevoUsuario ? 'Misión de Bienvenida · Tu Primer Aporte' : 'Hito de Impacto · Nivel ' + rangoNivel}">Campaña Activa</span>
+                </h2>
+              </div>
+            </header>
+          </div>
+          <div class="slds-card__body slds-card__body_inner">
+            <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12">
+                <h3 style="font-weight: 700; font-size: 1.05rem; color: #014486;"
+                    th:text="${isNuevoUsuario ? 'Completá tu primera donación trazable' : 'Objetivo: ' + rangoNombre + ' (' + #numbers.formatInteger(proximoObjetivo, 0, 'POINT') + ' pts)'}">
+                  Completá tu primera donación trazable
+                </h3>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small"
+                   th:text="${isNuevoUsuario ? 'Registrá alimentos no perecederos o abrigo para que un camión auditado lo transporte hacia comedores verificados.' : 'Acumulá ' + puntosFaltantes + ' puntos más para alcanzar el siguiente nivel comunitario.'}">
+                  Registrá alimentos o abrigo para que un camión auditado lo transporte.
+                </p>
+                <!-- Barra de Progreso Dinámica -->
+                <div class="slds-m-top_small" style="background: #e5e5e5; border-radius: 10px; height: 10px; overflow: hidden; width: 90%;">
+                  <div th:style="'background: #0176d3; height: 100%; border-radius: 10px; width: ' + ${progresoPct} + '%;'"></div>
+                </div>
+                <div class="slds-grid slds-grid_align-spread slds-m-top_xx-small" style="width: 90%; font-size: 0.78rem;">
+                  <strong style="color: #0176d3;" th:text="${isNuevoUsuario ? '+10 Puntos con tu primer aporte en depósito' : '+' + puntosFaltantes + ' Puntos para el siguiente nivel'}">+10 Puntos con tu primer aporte</strong>
+                  <span style="font-weight: 700; color: #444;" th:text="${progresoPct} + '%'">0%</span>
+                </div>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-text-align_right slds-m-top_small">
+                <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" style="border-radius: 4px;"
+                   th:text="${isNuevoUsuario ? 'Primera Donación' : 'Nueva Donación'}">
+                  Primera Donación
+                </a>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Compromiso Solidario y Trazabilidad -->
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff;">
+          <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-task">
+                  <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#task}"></use>
+                  </svg>
+                </span>
+              </div>
+              <div class="slds-media__body">
+                <h2 class="slds-card__header-title">
+                  <span class="slds-text-heading_small" style="font-weight: 700; color: #014486;">Compromiso Comunitario & Trazabilidad</span>
+                </h2>
+              </div>
+            </header>
+          </div>
+          <div class="slds-card__body slds-card__body_inner">
+            <p class="slds-text-body_regular" style="color: #475569; line-height: 1.5; margin-bottom: 14px;">
+              Como donante activo de DonaTrack, contás con trazabilidad completa de extremo a extremo: remito digital, control de pesaje y fotografía de recepción al pie del camión.
+            </p>
+            <div class="slds-grid slds-gutters_small slds-wrap">
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 700;">
+                  <span style="color: #166534; font-size: 1.1rem;">✓</span> Donante Verificado en Red
+                </div>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 700;">
+                  <span style="color: #166534; font-size: 1.1rem;">✓</span> Auditoría Cero Faltantes
+                </div>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 700;">
+                  <span style="color: #166534; font-size: 1.1rem;">✓</span> Remito Digital en Destino
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ==================== MISIONES EN CURSO & DESAFÍOS TRAILBLAZER ==================== -->
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff;">
+          <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-reward" style="background: #0176d3; border-radius: 6px; padding: 6px;">
+                  <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                    <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
+                  </svg>
+                </span>
+              </div>
+              <div class="slds-media__body">
+                <h2 class="slds-card__header-title">
+                  <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Misiones en Curso &amp; Desafíos Trailblazer</span>
+                </h2>
+                <p class="slds-text-body_small slds-text-color_weak">
+                  Cumplí metas solidarias para desbloquear nuevas insignias oficiales en tu perfil público.
+                </p>
+              </div>
+            </header>
+            <div>
+              <span class="slds-badge slds-badge_lightest" style="font-weight: 700;"
+                    th:text="${misiones != null ? misiones.size() : 0} + ' activas'">0 activas</span>
+            </div>
+          </div>
+          <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
+            <!-- Estado vacío cuando no hay misiones -->
+            <div th:if="${#lists.isEmpty(misiones)}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 24px; text-align: center;">
+              <span class="slds-icon_container slds-icon-standard-task slds-m-bottom_x-small" style="background: #166534; border-radius: 50%; padding: 8px; display: inline-flex;">
+                <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
+                </svg>
+              </span>
+              <h3 style="font-weight: 700; color: #0f172a; font-size: 1rem; margin-top: 6px;">¡Estás al día con todos tus desafíos!</h3>
+              <p class="slds-text-body_small slds-text-color_weak" style="max-width: 440px; margin: 4px auto 0;">
+                No tenés misiones pendientes en este ciclo mensual. Tus próximas metas solidarias se activarán automáticamente al registrar nuevos aportes.
+              </p>
+            </div>
+
+            <!-- Listado de misiones -->
+            <div th:unless="${#lists.isEmpty(misiones)}" style="display: flex; flex-direction: column; gap: 14px;">
+              <div th:each="mision : ${misiones}" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap" style="gap: 8px; margin-bottom: 8px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: #014486; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <svg class="slds-icon slds-icon_x-small" aria-hidden="true" style="fill: #ffffff;">
+                        <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#goals}"></use>
+                      </svg>
+                    </div>
+                    <div>
+                      <strong style="color: #0f172a; font-size: 0.95rem;" th:text="${mision.nombre}">Nombre de Misión</strong>
+                      <span class="slds-badge slds-badge_lightest slds-m-left_x-small" style="font-size: 0.72rem; font-weight: 700;"
+                            th:text="'Meta: ' + ${mision.objetivo} + ' aportes'">Meta: 5 aportes</span>
+                    </div>
+                  </div>
+                  <div>
+                    <span th:if="${mision.recompensa != null}" class="slds-badge" style="background: #fef08a; color: #854d0e; font-weight: 700; border: 1px solid #fde047;">
+                      Premio: <span th:text="${mision.recompensa.nombre}">Insignia</span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Barra de progreso SLDS Blueprint -->
+                <div class="slds-progress-bar slds-progress-bar_large" aria-valuemin="0" aria-valuemax="100"
+                     th:with="donCount=${misDonaciones != null ? misDonaciones.size() : 0}, metaVal=${mision.objetivo != null && mision.objetivo > 0 ? mision.objetivo : 1}, pctVal=${T(java.lang.Math).min(100, (donCount * 100) / metaVal)}, faltanVal=${T(java.lang.Math).max(0, metaVal - donCount)}"
+                     th:attr="aria-valuenow=${pctVal}" role="progressbar">
+                  <span class="slds-progress-bar__value" th:style="'width: ' + ${pctVal} + '%; background-color: ' + (${pctVal >= 100} ? '#166534' : '#0176d3') + ';'">
+                    <span class="slds-assistive-text" th:text="'Progreso: ' + ${pctVal} + '%'">Progreso</span>
+                  </span>
+                </div>
+
+                <!-- Distancia a la meta -->
+                <div class="slds-grid slds-grid_align-spread slds-m-top_xx-small" style="font-size: 0.8rem;"
+                     th:with="donCount=${misDonaciones != null ? misDonaciones.size() : 0}, metaVal=${mision.objetivo != null && mision.objetivo > 0 ? mision.objetivo : 1}, pctVal=${T(java.lang.Math).min(100, (donCount * 100) / metaVal)}, faltanVal=${T(java.lang.Math).max(0, metaVal - donCount)}">
+                  <span style="color: #475569;">
+                    Avance actual: <strong th:text="${donCount} + ' / ' + ${metaVal} + ' donaciones'">0 / 5 donaciones</strong>
+                  </span>
+                  <span th:if="${faltanVal > 0}" style="font-weight: 700; color: #0176d3;"
+                        th:text="'Faltan ' + ${faltanVal} + ' donaciones para desbloquear la insignia'">
+                    Faltan donaciones
+                  </span>
+                  <span th:unless="${faltanVal > 0}" style="font-weight: 800; color: #166534;">
+                    ✓ ¡Misión Completada con Éxito!
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        </div>
+        <!-- FIN PESTAÑA 1: RESUMEN -->
+
+        <!-- ==================== PESTAÑA 2: SEGUIMIENTO DE MIS DONACIONES ==================== -->
+        <div id="tab-panel-seguimiento" th:style="${tabActiva == 'seguimiento'} ? 'display: block;' : 'display: none;'">
+
+          <!-- ==================== MAPA DE CAMIONES EN RUTA (UX-09) ==================== -->
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; background: #ffffff;">
+            <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
+              <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                  <span class="slds-icon_container slds-icon-standard-address" style="background: #0176d3; border-radius: 6px; padding: 6px;">
+                    <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                      <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#address}"></use>
+                    </svg>
+                  </span>
+                </div>
+                <div class="slds-media__body">
+                  <h3 class="slds-card__header-title">
+                    <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Seguimiento en Vivo: Camiones &amp; Logística en Ruta</span>
+                  </h3>
+                  <p class="slds-text-body_small slds-text-color_weak">
+                    Móviles transportando tus donaciones hacia las sedes de las organizaciones beneficiarias.
+                  </p>
+                </div>
+              </header>
+              <div>
+                <button type="button" id="mapa-donante-retry" class="slds-button slds-button_neutral" title="Actualizar ubicación de móviles en el mapa"
+                        style="border-radius: 6px; font-weight: 700; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; cursor: pointer; color: #0176d3; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.15s ease;">
+                  <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true" style="width: 14px; height: 14px; fill: #0176d3; margin-right: 4px;">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#refresh}"></use>
+                  </svg>
+                  Actualizar mapa
+                </button>
+              </div>
+            </div>
+
+            <!-- Contenedor del Mapa con los 3 Estados UI -->
+            <div class="slds-card__body slds-p-around_none" style="position: relative; min-height: 350px;">
+              <!-- Estado de Carga: Blueprint SLDS Box Theme Shade + Spinner -->
+              <div id="mapa-donante-loading" class="slds-box slds-theme_shade slds-align_absolute-center"
+                   style="position: absolute; inset: 0; z-index: 500; min-height: 350px; background: rgba(248, 250, 252, 0.85); border: none; border-radius: 0 0 8px 8px;">
+                <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center">
+                  <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand slds-is-relative slds-m-bottom_medium">
+                    <span class="slds-assistive-text">Cargando ubicación de móviles...</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                  </div>
+                  <p class="slds-text-body_small slds-text-color_weak" style="font-weight: 600; color: #475569;">
+                    Conectando con logística en ruta...
+                  </p>
+                </div>
+              </div>
+
+              <!-- Estado de Error SLDS -->
+              <div id="mapa-donante-error" style="display: none; padding: 24px; text-align: center; background: #fff5f5;">
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert" style="border-radius: 6px;">
+                  <span class="slds-assistive-text">error</span>
+                  <h2>No se pudo conectar con el microservicio de logística. Puede que la instancia esté iniciando.</h2>
+                </div>
+              </div>
+
+              <!-- Estado Vacío SLDS -->
+              <div id="mapa-donante-empty" style="display: none; padding: 28px 20px; text-align: center; background: #f8fafc;">
+                <span class="slds-icon_container slds-icon-standard-task" style="background: #64748b; border-radius: 50%; padding: 8px; display: inline-flex;">
+                  <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#info}"></use>
+                  </svg>
+                </span>
+                <h4 style="font-weight: 700; color: #0f172a; margin-top: 8px; font-size: 0.95rem;">No hay camiones en tránsito para tus donaciones</h4>
+                <p class="slds-text-body_small slds-text-color_weak" style="max-width: 480px; margin: 4px auto 0;">
+                  Cuando tus donaciones en depósito sean asignadas y un camión inicie la ruta operativa, vas a poder ver acá la patente, chofer y destino en tiempo real.
+                </p>
+              </div>
+
+              <!-- Contenedor Leaflet -->
+              <div id="mapa-donante-camiones" style="height: 350px; width: 100%; z-index: 1;"></div>
+            </div>
+          </article>
+
+          <!-- ==================== BANDEJA TRAZABLE DE DONACIONES ==================== -->
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+            <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
+              <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                  <span class="slds-icon_container slds-icon-standard-shipment">
+                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                      <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#shipment}"></use>
+                    </svg>
+                  </span>
+                </div>
+                <div class="slds-media__body">
+                  <h2 class="slds-card__header-title">
+                    <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Seguimiento Trazable de Mis Donaciones</span>
+                  </h2>
+                  <p class="slds-text-body_small slds-text-color_weak">
+                    Consultá en tiempo real en qué etapa logística se encuentra cada aporte realizado y a qué comedor u ONG fue asignado.
+                  </p>
+                </div>
+              </header>
+              <div>
+                <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand">
+                  <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
+                  </svg>
+                  Nueva Donación
+                </a>
+              </div>
+            </div>
+
+            <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
+              <!-- Barra de Filtros SLDS Reactivos (UX-05) -->
+              <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_medium slds-p-around_small" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                  <label class="slds-form-element__label" for="filtro-donacion-estado" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Filtrar por Estado</label>
+                  <div class="slds-form-element__control">
+                    <select id="filtro-donacion-estado" class="slds-select" onchange="filtrarMisDonaciones()">
+                      <option value="">Todos los estados</option>
+                      <option value="EN_DEPOSITO">En Depósito</option>
+                      <option value="ASIGNADA">Asignada a ONG</option>
+                      <option value="ENTREGADA">Entregada en Destino</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                  <label class="slds-form-element__label" for="filtro-donacion-subcategoria" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Filtrar por Subcategoría</label>
+                  <div class="slds-form-element__control">
+                    <select id="filtro-donacion-subcategoria" class="slds-select" onchange="filtrarMisDonaciones()">
+                      <option value="">Todas las subcategorías</option>
+                      <option value="Alimentos">Alimentos No Perecederos</option>
+                      <option value="Abrigo">Abrigo / Ropa</option>
+                      <option value="Mobiliario">Mobiliario / Enseres</option>
+                      <option value="Higiene">Higiene y Limpieza</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                  <label class="slds-form-element__label" for="filtro-donacion-busqueda" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Búsqueda por Texto</label>
+                  <div class="slds-form-element__control">
+                    <input type="search" id="filtro-donacion-busqueda" class="slds-input"
+                           placeholder="Buscar por código (#DT-XXXX) o descripción..."
+                           oninput="filtrarMisDonaciones()" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estado vacío si no hay donaciones en backend -->
+              <div th:if="${#lists.isEmpty(misDonaciones)}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 28px 18px; text-align: center;">
+                <h3 style="font-weight: 700; color: #0f172a; font-size: 1.05rem; margin-bottom: 6px;">Aún no tenés donaciones en seguimiento</h3>
+                <p class="slds-text-body_small slds-text-color_weak" style="max-width: 480px; margin: 0 auto 14px;">
+                  Cuando registres una donación, acá vas a poder ver su código corto (#DT-XXXX), el estado del depósito, el matchmaking hacia una ONG y la entrega auditada.
+                </p>
+                <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand">Registrar mi primera donación</a>
+              </div>
+
+              <!-- Tarjetas de Seguimiento Paso a Paso -->
+              <div th:unless="${#lists.isEmpty(misDonaciones)}" id="lista-donaciones-container" style="display: flex; flex-direction: column; gap: 14px;">
+                <div th:each="don : ${misDonaciones}" class="donacion-item-card"
+                     th:attr="data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
+                     style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                  <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-wrap" style="gap: 10px; margin-bottom: 12px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span class="slds-badge" style="background: #014486; color: #ffffff; font-weight: 800; font-family: monospace; font-size: 0.78rem;"
+                              th:text="${don.codigoCorto}">#DT-0001</span>
+                        <strong style="font-size: 1rem; color: #0f172a; font-weight: 800;" th:text="${don.descripcion}">Alimentos no perecederos</strong>
+                        <span class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700;" th:text="${don.subcategoria}">No Perecederos</span>
+                      </div>
+                      <p class="slds-text-body_small slds-text-color_weak" style="margin-top: 4px;">
+                        Fecha de registro: <strong th:text="${don.fechaCreacion}">2026-11-06</strong> ·
+                        ID de auditoría: <code style="font-size: 0.72rem; background: #f1f5f9; padding: 1px 6px; border-radius: 4px;" th:text="${don.id}">uuid</code>
+                      </p>
+                    </div>
+                    <div>
+                      <span th:if="${don.pasoActual == 1}" class="slds-badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-weight: 700;" th:text="${don.estadoLegible}">En Depósito</span>
+                      <span th:if="${don.pasoActual == 2}" class="slds-badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 700;" th:text="${don.estadoLegible}">Asignada a ONG</span>
+                      <span th:if="${don.pasoActual == 3}" class="slds-badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 700;" th:text="${don.estadoLegible}">Entregada</span>
+                    </div>
+                  </div>
+
+                  <!-- Stepper de 3 Etapas Trazables -->
+                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px;">
+                    <div class="slds-grid slds-gutters_x-small slds-wrap" style="align-items: center;">
+                      <!-- Etapa 1 -->
+                      <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12" style="display: flex; align-items: center; gap: 8px; padding: 4px 0;">
+                        <span style="width: 24px; height: 24px; border-radius: 50%; background: #166534; color: #fff; font-weight: 800; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">✓</span>
+                        <div>
+                          <strong style="display: block; font-size: 0.78rem; color: #0f172a;">1. Recepción en Depósito</strong>
+                          <span style="font-size: 0.7rem; color: #166534; font-weight: 600;">Verificado e inventariado</span>
+                        </div>
+                      </div>
+                      <!-- Etapa 2 -->
+                      <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12" style="display: flex; align-items: center; gap: 8px; padding: 4px 0;">
+                        <span th:style="${don.pasoActual >= 2} ? 'width: 24px; height: 24px; border-radius: 50%; background: #0176d3; color: #fff; font-weight: 800; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;' : 'width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; color: #475569; font-weight: 800; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;'"
+                              th:text="${don.pasoActual >= 2 ? '✓' : '2'}">2</span>
+                        <div>
+                          <strong style="display: block; font-size: 0.78rem; color: #0f172a;">2. Matchmaking &amp; ONG</strong>
+                          <span style="font-size: 0.7rem; color: #475569;" th:text="${don.ongAsignada}">En evaluación</span>
+                        </div>
+                      </div>
+                      <!-- Etapa 3 -->
+                      <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12" style="display: flex; align-items: center; gap: 8px; padding: 4px 0;">
+                        <span th:style="${don.pasoActual >= 3} ? 'width: 24px; height: 24px; border-radius: 50%; background: #166534; color: #fff; font-weight: 800; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;' : 'width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; color: #475569; font-weight: 800; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;'"
+                              th:text="${don.pasoActual >= 3 ? '✓' : '3'}">3</span>
+                        <div>
+                          <strong style="display: block; font-size: 0.78rem; color: #0f172a;">3. Entrega Auditada</strong>
+                          <span style="font-size: 0.7rem; color: #475569;" th:text="${don.pasoActual >= 3 ? 'Remito firmado en destino' : 'Pendiente de descarga en comedor'}">Pendiente</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estado vacío por filtrado reactivo -->
+              <div id="donaciones-sin-resultados" style="display: none; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 24px; text-align: center; margin-top: 8px;">
+                <strong style="color: #334155;">No se encontraron donaciones con los filtros seleccionados.</strong>
+                <p class="slds-text-body_small slds-text-color_weak" style="margin-top: 4px;">Probá seleccionando "Todos los estados" o borrando el término de búsqueda.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+        <!-- FIN PESTAÑA 2: SEGUIMIENTO -->
+
+        <!-- ==================== PESTAÑA 3: BUSCADOR DE CAUSAS & NECESIDADES ONG ==================== -->
+        <div id="tab-panel-causas" th:style="${tabActiva == 'causas'} ? 'display: block;' : 'display: none;'">
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+            <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
+              <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                  <span class="slds-icon_container slds-icon-standard-account">
+                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                      <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#account}"></use>
+                    </svg>
+                  </span>
+                </div>
+                <div class="slds-media__body">
+                  <h2 class="slds-card__header-title">
+                    <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Directorio de ONGs &amp; Necesidades Activas</span>
+                  </h2>
+                  <p class="slds-text-body_small slds-text-color_weak">
+                    ¿No sabés qué donar hoy? Buscá comedores y organizaciones verificadas para conocer qué insumos necesitan con mayor urgencia.
+                  </p>
+                </div>
+              </header>
+            </div>
+
+            <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
+              <!-- Barra de Búsqueda y Filtro por Categoría -->
+              <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-m-bottom_x-small">
+                  <label class="slds-form-element__label" for="buscador-causas-input" style="font-weight: 700; color: #1e293b;">Buscar por ONG, barrio o insumo requerido</label>
+                  <input type="search" id="buscador-causas-input" class="slds-input"
+                         placeholder="Ej: Comedor Los Pekes, leche, fideos, abrigo, La Matanza..."
+                         oninput="filtrarCausasActivas()" />
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_x-small">
+                  <label class="slds-form-element__label" for="filtro-categoria-causas" style="font-weight: 700; color: #1e293b;">Filtrar por Categoría</label>
+                  <select id="filtro-categoria-causas" class="slds-select" onchange="filtrarCausasActivas()">
+                    <option value="">Todas las categorías</option>
+                    <option value="No Perecederos">Alimentos No Perecederos</option>
+                    <option value="Abrigo">Abrigo / Ropa</option>
+                    <option value="Higiene">Artículos de Higiene</option>
+                    <option value="Medicamentos">Medicamentos</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Lista de Causas / Necesidades de ONGs -->
+              <div id="lista-causas-container" style="display: flex; flex-direction: column; gap: 12px;">
+                <div th:each="causa : ${causasActivas}" class="causa-ong-card"
+                     th:attr="data-search=${#strings.toLowerCase(causa.ongNombre + ' ' + causa.ubicacion + ' ' + causa.descripcion + ' ' + causa.categoria)},data-cat=${causa.categoria}"
+                     style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                  <div style="flex: 1; min-width: 240px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                      <strong style="font-size: 0.98rem; color: #014486; font-weight: 800;" th:text="${causa.ongNombre}">Comedor Los Pekes</strong>
+                      <span class="slds-badge slds-badge_lightest" style="font-size: 0.7rem; font-weight: 700;" th:text="${causa.categoria}">No Perecederos</span>
+                      <span th:if="${#strings.contains(causa.urgencia, 'Alta')}" class="slds-badge" style="background: #fee2e2; color: #991b1b; font-size: 0.75rem; font-weight: 800;" th:text="'Prioridad ' + ${causa.urgencia}">Prioridad Alta</span>
+                      <span th:unless="${#strings.contains(causa.urgencia, 'Alta')}" class="slds-badge" style="background: #fef3c7; color: #92400e; font-size: 0.75rem; font-weight: 700;" th:text="'Prioridad ' + ${causa.urgencia}">Prioridad Media</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #0f172a; font-weight: 600; margin-top: 6px;" th:text="'Necesidad actual: ' + ${causa.descripcion}">
+                      Necesidad actual: Fideos secos, arroz y leche larga vida
+                    </p>
+                    <p class="slds-text-body_small slds-text-color_weak" style="margin-top: 2px;">
+                      <span th:text="${causa.ubicacion}">Buenos Aires</span> · Contacto verificado: <span th:text="${causa.correo}">ong@donatrack.org</span>
+                    </p>
+                  </div>
+                  <div>
+                    <a th:href="@{/app/donante/donaciones(categoria=${causa.categoria},descripcion=${causa.descripcion},ong=${causa.ongNombre})}"
+                       class="slds-button slds-button_brand" style="font-weight: 700;">
+                      Donar a esta causa →
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div id="causas-sin-resultados" style="display: none; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 20px; text-align: center; margin-top: 8px;">
+                <strong style="color: #334155;">No se encontraron causas que coincidan con tu filtro.</strong>
+                <p class="slds-text-body_small slds-text-color_weak">Probá buscando otro insumo o seleccionando "Todas las categorías".</p>
+              </div>
+            </div>
+          </article>
+        </div>
+        <!-- FIN PESTAÑA 3: CAUSAS -->
+
+        <!-- ==================== PESTAÑA 4: DIRECTORIO DE ORGANIZACIONES Y COMEDORES (UX-06) ==================== -->
+        <div id="tab-panel-directorio" th:style="${tabActiva == 'directorio'} ? 'display: block;' : 'display: none;'">
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+            <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
+              <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                  <span class="slds-icon_container slds-icon-standard-account" style="background: #166534; border-radius: 6px; padding: 6px;">
+                    <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                      <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#account}"></use>
+                    </svg>
+                  </span>
+                </div>
+                <div class="slds-media__body">
+                  <h2 class="slds-card__header-title">
+                    <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Directorio de Organizaciones y Comedores Verificados</span>
+                  </h2>
+                  <p class="slds-text-body_small slds-text-color_weak">
+                    Navegá por todas las entidades comunitarias registradas y auditadas en la red de DonaTrack.
+                  </p>
+                </div>
+              </header>
+            </div>
+
+            <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
+              <!-- Barra de Búsqueda de Organizaciones -->
+              <div class="slds-form-element slds-m-bottom_medium">
+                <label class="slds-form-element__label" for="buscador-directorio-input" style="font-weight: 700; color: #1e293b;">Buscar organización por nombre, ubicación o correo de contacto</label>
+                <div class="slds-form-element__control">
+                  <input type="search" id="buscador-directorio-input" class="slds-input"
+                         placeholder="Ej: Comedor La Esperanza, Merendero, contacto@comedor.org..."
+                         oninput="filtrarDirectorioBeneficiarias()" />
+                </div>
+              </div>
+
+              <!-- Listado de Organizaciones en Tarjetas SLDS -->
+              <div id="lista-directorio-container" style="display: flex; flex-direction: column; gap: 12px;">
+                <div th:each="b : ${beneficiarios}" class="directorio-ong-card"
+                     th:with="orgNombre=${(b['nombreLegible'] != null ? b['nombreLegible'] : (b['correoRepresentante'] != null && #strings.contains(b['correoRepresentante'], 'esperanza') ? 'Comedor Comunitario La Esperanza' : 'Organización Comunitaria Verificada'))}, correo=${b['correoRepresentante'] != null ? b['correoRepresentante'] : 'contacto@ong.org'}"
+                     th:attr="data-search=${#strings.toLowerCase(orgNombre + ' ' + correo + ' ' + (b['id'] != null ? b['id'] : ''))}"
+                     style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                  <div style="flex: 1; min-width: 250px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                      <strong style="font-size: 1.05rem; color: #014486; font-weight: 800;" th:text="${orgNombre}">Comedor La Esperanza</strong>
+                      <span class="slds-badge" style="background: #dcfce7; color: #166534; font-weight: 700; font-size: 0.72rem;">✓ Verificada en Red</span>
+                    </div>
+                    <p class="slds-text-body_small slds-text-color_weak" style="margin-top: 4px;">
+                      Contacto institucional: <strong th:text="${correo}">contacto@comedor.org</strong> ·
+                      Fecha de alta: <span th:text="${b['fechaAlta'] != null ? b['fechaAlta'] : '2026-10-30'}">2026-10-30</span>
+                    </p>
+                    <p style="font-size: 0.85rem; color: #334155; margin-top: 4px;"
+                       th:text="${b['necesidadesTexto'] != null ? ('Necesidades: ' + b['necesidadesTexto']) : 'Recepción activa de alimentos secos y abrigo'}">
+                      Necesidades: Alimentos No Perecederos
+                    </p>
+                  </div>
+                  <div>
+                    <a th:href="@{/app/donante/donaciones(ong=${orgNombre})}" class="slds-button slds-button_brand" style="font-weight: 700;">
+                      Donar a esta Organización →
+                    </a>
+                  </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(beneficiarios)}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 24px; text-align: center;">
+                  <strong style="color: #334155;">No hay entidades registradas en este momento.</strong>
+                </div>
+              </div>
+
+              <div id="directorio-sin-resultados" style="display: none; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 20px; text-align: center; margin-top: 8px;">
+                <strong style="color: #334155;">No se encontraron organizaciones que coincidan con la búsqueda.</strong>
+                <p class="slds-text-body_small slds-text-color_weak">Probá con otro término de búsqueda.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+        <!-- FIN PESTAÑA 4: DIRECTORIO -->
+
+      </div>
+
+      <!-- ==================== COLUMNA DERECHA (4 DE 12) ==================== -->
+      <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+        
+        <!-- Tarjeta de Métricas de Aporte (Datos 100% Reales) -->
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; text-align: center; overflow: hidden; border: 1px solid #dddbda;">
+          <div class="slds-card__header slds-grid slds-grid_align-center slds-border_bottom slds-p-vertical_small">
+            <h2 class="slds-text-heading_small" style="font-weight: 700; color: #014486;">Métricas de Aporte Solidario</h2>
+          </div>
+
+          <div class="slds-card__body slds-card__body_inner slds-p-around_large">
+            
+            <!-- Métricas Clave (3 Columnas con Datos 100% Reales) -->
+            <div class="slds-grid slds-gutters_small slds-m-bottom_medium slds-border_bottom slds-p-bottom_medium">
+              <div class="slds-col slds-size_1-of-3">
+                <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
+                        th:text="${insignias != null ? insignias.size() : 0}">0</strong>
+                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.72rem; text-transform: uppercase;">Badges</span>
+              </div>
+              <div class="slds-col slds-size_1-of-3">
+                <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
+                        th:text="${#numbers.formatInteger(puntosReales, 0, 'POINT')}">0</strong>
+                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.72rem; text-transform: uppercase;">Puntos</span>
+              </div>
+              <div class="slds-col slds-size_1-of-3">
+                <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
+                        th:text="${metricas != null && metricas.totalOrganizacionesAyudadas != null ? metricas.totalOrganizacionesAyudadas : (metricas != null && metricas.totalDonacionesHistoricas != null ? metricas.totalDonacionesHistoricas : 0)}">0</strong>
+                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.72rem; text-transform: uppercase;">Campañas</span>
+              </div>
+            </div>
+
+            <!-- Reconocimiento según antigüedad/donaciones -->
+            <div th:if="${isNuevoUsuario}" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; text-align: left;">
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #166534;">
+                  <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
+                </svg>
+              </div>
+              <div>
+                <strong style="display: block; font-size: 0.85rem; color: #334155;">Perfil Inicial Creado</strong>
+                <span style="font-size: 0.72rem; color: #64748b;">Hacé tu primera donación para activar reconocimientos de la red.</span>
+              </div>
+            </div>
+
+            <div th:unless="${isNuevoUsuario}" style="background: #fdf8e2; border: 1px solid #fde047; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; text-align: left;">
+              <!-- Medalla Dorada -->
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #fef08a 0%, #ca8a04 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(202, 138, 4, 0.4); flex-shrink: 0; border: 2px solid #eab308;">
+                <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #78350f;">
+                  <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
+                </svg>
+              </div>
+              <div>
+                <strong style="display: block; font-size: 0.85rem; color: #854d0e;">DonaTrack Solidario</strong>
+                <span style="font-size: 0.72rem; color: #a16207;">Reconocimiento por entregas y remitos auditados en destino.</span>
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- ==================== INSIGNIAS & LOGROS SOLIDARIOS (COLUMNA DERECHA · PAGINADO MAX 3) ==================== -->
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #dddbda; overflow: hidden;">
+          <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-reward">
+                  <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
+                  </svg>
+                </span>
+              </div>
+              <div class="slds-media__body">
+                <h2 class="slds-card__header-title">
+                  <span class="slds-text-heading_small" style="font-weight: 700; color: #014486;">Insignias Obtenidas</span>
+                </h2>
+              </div>
+            </header>
+            <div>
+              <span class="slds-badge slds-badge_lightest" style="font-weight: 700;" th:text="${totalInsignias} + ' Badges'">0 Badges</span>
+            </div>
+          </div>
+
+          <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
+            <!-- Estado Vacío cuando no tiene insignias -->
+            <div th:if="${#lists.isEmpty(insignias)}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 18px 14px; text-align: center;">
+              <h3 style="font-weight: 700; color: #334155; font-size: 0.95rem; margin-bottom: 4px;">Aún no tenés insignias</h3>
+              <p class="slds-text-body_small slds-text-color_weak" style="font-size: 0.78rem; line-height: 1.4; margin-bottom: 12px;">
+                Tus insignias se desbloquean progresivamente por categoría al registrar donaciones y entregas auditadas.
+              </p>
+              <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_outline-brand" style="border-radius: 4px; font-size: 0.78rem; font-weight: 700; width: 100%;">
+                Ganar "Primer Aporte"
+              </a>
+            </div>
+
+            <!-- Listado dinámico de insignias obtenidas (Paginado de a 3 por vista) -->
+            <div th:unless="${#lists.isEmpty(insignias)}" id="badges-paginated-list" style="display: flex; flex-direction: column; gap: 10px;">
+              <div th:each="insignia, iterStat : ${insignias}"
+                   class="donante-badge-item"
+                   th:attr="data-index=${iterStat.index}"
+                   th:style="${iterStat.index < 3} ? 'background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);' : 'background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: none; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);'">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: #014486; border: 2px solid #0176d3; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg class="slds-icon slds-icon_x-small" aria-hidden="true" style="fill: #ffffff;">
+                    <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
+                  </svg>
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                    <strong style="font-size: 0.88rem; color: #014486; font-weight: 700;" th:text="${insignia.nombre}">Insignia</strong>
+                    <span class="slds-badge slds-badge_lightest" style="font-size: 0.75rem; font-weight: 700; padding: 2px 6px;">OFICIAL</span>
+                  </div>
+                  <p style="font-size: 0.75rem; color: #64748b; line-height: 1.3; margin-top: 2px;" th:text="${insignia.descripcion}">Descripción</p>
+                  <span style="font-size: 0.7rem; color: #166534; font-weight: 600; display: block; margin-top: 2px;" th:text="'✓ Obtenida ' + (${insignia.fechaObtencion != null ? insignia.fechaObtencion : 'Recientemente'})">2026-11-05</span>
+                </div>
+              </div>
+
+              <!-- Controles de Paginación (máximo 3 por página) -->
+              <div th:if="${#lists.size(insignias) > 3}" id="badges-pagination-controls"
+                   style="display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid #e2e8f0; margin-top: 4px;">
+                <button type="button" id="badges-prev-btn" class="slds-button slds-button_neutral"
+                        onclick="cambiarPaginaBadges(-1)" disabled
+                        style="font-size: 0.74rem; padding: 0 10px; height: 28px; line-height: 26px;">
+                  ← Anterior
+                </button>
+                <span id="badges-page-indicator" style="font-size: 0.75rem; font-weight: 700; color: #475569;">
+                  Página 1
+                </span>
+                <button type="button" id="badges-next-btn" class="slds-button slds-button_neutral"
+                        onclick="cambiarPaginaBadges(1)"
+                        style="font-size: 0.74rem; padding: 0 10px; height: 28px; line-height: 26px;">
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- Tarjeta Racha Mensual (Streak Flame) -->
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #dddbda;">
+          <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
+            <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" class="slds-m-right_x-small">
+                <path d="M12 2C8 7 5 10 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10 16 7 12 2Z" fill="#ea580c" />
+                <path d="M12 9C10 12 8 14 8 17C8 19.209 9.791 21 12 21C14.209 21 16 19.209 16 17C16 14 14 12 12 9Z" fill="#ffedd5" />
+              </svg>
+              <div>
+                <h3 style="font-weight: 700; font-size: 0.95rem; color: #c2410c;"
+                    th:text="${metricas.rachaDeMeses != null && metricas.rachaDeMeses > 0 ? (metricas.rachaDeMeses + ' Meses de Racha Activa') : 'Sin racha iniciada'}">
+                  Sin racha iniciada
+                </h3>
+                <span class="slds-text-body_small slds-text-color_weak"
+                      th:text="${metricas.rachaDeMeses != null && metricas.rachaDeMeses > 0 ? '¡Mantené tu aporte este mes!' : 'Doná este mes para iniciar tu racha solidaria'}">
+                  Doná este mes para iniciar tu racha solidaria
+                </span>
+              </div>
+            </div>
+            <p class="slds-text-body_small" style="color: #555; line-height: 1.4;">
+              Cada entrega certificada mensualmente mantiene activo el multiplicador de impacto social.
+            </p>
+          </div>
+        </article>
+
+
+
+      </div>
+
+    </div>
+
+    <!-- ==================== MODAL PARA EDITAR PERFIL ==================== -->
+    <div id="modal-editar-perfil" style="display: none;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true" style="z-index: 10001;">
+        <div class="slds-modal__container" style="max-width: 540px;">
+          <header class="slds-modal__header" style="background: #014486; color: #fff; border-top-left-radius: 8px; border-top-right-radius: 8px; position: relative;">
+            <button class="slds-button slds-modal__close dt-modal-close-btn" onclick="cerrarPerfilModal()" title="Cerrar modal" aria-label="Cerrar">
+              <span aria-hidden="true">✕</span>
+              <span class="slds-assistive-text">Cerrar</span>
+            </button>
+            <h2 class="slds-modal__title slds-hyphenate" style="color: #ffffff; font-weight: 800; font-size: 1.25rem;">
+              Modificar Lema &amp; Ubicación
+            </h2>
+            <p style="color: #e0f2fe; font-size: 0.85rem; margin-top: 2px;">
+              Personalizá los datos públicos que identifican a tu usuario o empresa en la red solidaria.
+            </p>
+          </header>
+          <div class="slds-modal__content slds-p-around_large" style="background: #ffffff;">
+            <form id="form-editar-perfil" th:action="@{/app/perfil/actualizar}" method="post">
+              <div class="slds-form-element slds-m-bottom_medium">
+                <label class="slds-form-element__label" for="inputUbicacion" style="font-weight: 700; color: #1e293b;">
+                  Ubicación / Sede
+                </label>
+                <div class="slds-form-element__control">
+                  <input class="slds-input" type="text" id="inputUbicacion" name="ubicacion"
+                         th:value="${ubicacion != null ? ubicacion : 'Buenos Aires, Argentina'}"
+                         placeholder="Ej: Palermo, CABA o Córdoba, Argentina" required />
+                </div>
+                <div class="slds-form-element__help" style="font-size: 0.76rem; color: #64748b;">
+                  Indica tu ciudad o barrio de referencia para asignación logística.
+                </div>
+              </div>
+
+              <div class="slds-form-element slds-m-bottom_medium">
+                <label class="slds-form-element__label" for="inputDescripcion" style="font-weight: 700; color: #1e293b;">
+                  Lema / Descripción Solidaria
+                </label>
+                <div class="slds-form-element__control">
+                  <textarea class="slds-textarea" id="inputDescripcion" name="descripcion" rows="3"
+                            placeholder="Contá brevemente el compromiso solidario de tu empresa o familia..."
+                            th:text="${descripcion != null ? descripcion : 'Comprometidos con una logística solidaria eficiente y transparente.'}"
+                            maxlength="450" required></textarea>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+                <button type="button" class="slds-button slds-button_neutral" onclick="cerrarPerfilModal()">Cancelar</button>
+                <button type="submit" id="btn-guardar-perfil" class="slds-button slds-button_brand" style="font-weight: 700;">Guardar Cambios</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
+    </div>
+
+    <!-- ==================== MODAL DE BIENVENIDA / ROADMAP SOLIDARIO ==================== -->
+    <div id="welcome-roadmap-modal" style="display: none;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true" style="z-index: 10001;">
+        <div class="slds-modal__container" style="max-width: 680px;">
+          <!-- Header -->
+          <header class="slds-modal__header" style="background: linear-gradient(135deg, #014486 0%, #0176d3 100%); color: #fff; border-top-left-radius: 8px; border-top-right-radius: 8px; position: relative;">
+            <button class="slds-button slds-modal__close dt-modal-close-btn" onclick="cerrarWelcomeModal()" title="Cerrar modal" aria-label="Cerrar">
+              <span aria-hidden="true">✕</span>
+              <span class="slds-assistive-text">Cerrar</span>
+            </button>
+            <h2 class="slds-modal__title slds-hyphenate" style="color: #ffffff; font-weight: 800; font-size: 1.35rem;">
+              ¡Bienvenido a DonaTrack, <span th:text="${nombreCompleto != null ? nombreCompleto : nombreUsuario}">Donante</span>!
+            </h2>
+            <p style="color: #e0f2fe; font-size: 0.88rem; margin-top: 4px;">
+              Tu camino hacia una logística solidaria 100% transparente y auditada comienza hoy.
+            </p>
+          </header>
+
+          <!-- Content: Roadmap 4 Pasos -->
+          <div class="slds-modal__content slds-p-around_large" style="background: #ffffff;">
+            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 18px; text-align: center;">
+              En DonaTrack, cada aporte genera impacto medible y verificable en 4 etapas:
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Paso 1 -->
+              <div style="display: flex; gap: 14px; align-items: flex-start; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #0176d3; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; font-size: 0.9rem;">1</div>
+                <div>
+                  <strong style="display: block; color: #0f172a; font-size: 0.92rem;">Registrá tus donaciones reales</strong>
+                  <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">
+                    Declarás qué bienes donás (alimentos secos, ropa clasificada, útiles escolares). Cada bien ingresa al stock auditado del sistema.
+                  </span>
+                </div>
+              </div>
+
+              <!-- Paso 2 -->
+              <div style="display: flex; gap: 14px; align-items: flex-start; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #0b4a8f; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; font-size: 0.9rem;">2</div>
+                <div>
+                  <strong style="display: block; color: #0f172a; font-size: 0.92rem;">Asignación logística y remito digital</strong>
+                  <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">
+                    El microservicio de logística calcula peso y volumen, asignando un camión real con patente y chofer identificado.
+                  </span>
+                </div>
+              </div>
+
+              <!-- Paso 3 -->
+              <div style="display: flex; gap: 14px; align-items: flex-start; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #166534; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; font-size: 0.9rem;">3</div>
+                <div>
+                  <strong style="display: block; color: #0f172a; font-size: 0.92rem;">Entrega en comedor con foto de recepción</strong>
+                  <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">
+                    Al llegar a la ONG beneficiaria, el remito se firma y se sube evidencia fotográfica disponible públicamente en el mapa.
+                  </span>
+                </div>
+              </div>
+
+              <!-- Paso 4 -->
+              <div style="display: flex; gap: 14px; align-items: flex-start; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #b45309; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; font-size: 0.9rem;">4</div>
+                <div>
+                  <strong style="display: block; color: #0f172a; font-size: 0.92rem;">Puntos e insignias comunitarias</strong>
+                  <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">
+                    Sumás +10 puntos inmediatos al ingresar tu aporte en depósito (asegurando tu racha) y +25 puntos adicionales al confirmarse la entrega en el comedor con foto.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <footer class="slds-modal__footer" style="background: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" class="slds-button slds-button_neutral" onclick="cerrarWelcomeModal()">
+              Explorar mi perfil
+            </button>
+            <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" onclick="cerrarWelcomeModal()">
+              Comenzar mi primera donación →
+            </a>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; opacity: 0.6;"></div>
+    </div>
+
+  </div>
+
+  <!-- Script de Interactividad: Blobatar con Seguimiento de Mirada (Eye Tracking con Pointer) -->
+  <th:block id="page-scripts">
+    <!-- Leaflet JS oficial para Mapa de Camiones Donante -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script th:src="@{/js/donante-mapa.js}"></script>
+
+    <script th:inline="javascript">
+      function initBlobatarInteractive() {
+        const container = document.getElementById('blobatar-interactive');
+        if (!container) return;
+
+        let eyesGroup = document.getElementById('blobatar-eyes-group');
+        if (!eyesGroup) {
+          const groups = container.querySelectorAll('svg g');
+          if (groups.length > 0) {
+            eyesGroup = groups[groups.length - 1];
+          }
+        }
+        if (!eyesGroup) return;
+
+        eyesGroup.style.transformOrigin = '50px 48px';
+        eyesGroup.style.transformBox = 'fill-box';
+        eyesGroup.style.willChange = 'transform';
+        eyesGroup.style.transition = 'transform 0.04s ease-out';
+
+        let targetX = 0, targetY = 0;
+        let currentX = 0, currentY = 0;
+        let rafId = null;
+
+        function animLoop() {
+          currentX += (targetX - currentX) * 0.28;
+          currentY += (targetY - currentY) * 0.28;
+
+          // Safari y navegadores basados en WebKit requieren setAttribute('transform', ...) nativo en SVG
+          const tx = currentX.toFixed(2);
+          const ty = currentY.toFixed(2);
+          if (eyesGroup) {
+            eyesGroup.setAttribute('transform', 'translate(' + tx + ' ' + ty + ')');
+            eyesGroup.style.transform = 'translate(' + tx + 'px, ' + ty + 'px)';
+          }
+
+          if (Math.abs(targetX - currentX) > 0.02 || Math.abs(targetY - currentY) > 0.02) {
+            rafId = requestAnimationFrame(animLoop);
+          } else {
+            rafId = null;
+          }
+        }
+
+        function handlePointer(clientX, clientY) {
+          const rect = container.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+
+          const deltaX = clientX - centerX;
+          const deltaY = clientY - centerY;
+          const distance = Math.hypot(deltaX, deltaY);
+
+          if (distance > 0) {
+            // Rango de desplazamiento de las pupilas dentro de la esclerótica del SVG
+            const maxTravel = 5.6;
+            const factor = Math.min(maxTravel, distance / 32);
+            targetX = (deltaX / distance) * factor;
+            targetY = (deltaY / distance) * factor;
+          }
+
+          if (!rafId) {
+            rafId = requestAnimationFrame(animLoop);
+          }
+        }
+
+        window.addEventListener('pointermove', function(e) {
+          handlePointer(e.clientX, e.clientY);
+        }, { passive: true });
+
+        window.addEventListener('mousemove', function(e) {
+          handlePointer(e.clientX, e.clientY);
+        }, { passive: true });
+
+        document.addEventListener('mouseleave', function() {
+          targetX = 0;
+          targetY = 0;
+          if (!rafId) {
+            rafId = requestAnimationFrame(animLoop);
+          }
+        });
+
+        // Intentar actualizar con el avatar con semilla oficial del usuario si está disponible en blobatar
+        const username = /*[[${nombreUsuario}]]*/ 'donante';
+        if (username) {
+          fetch('https://blobatar.dev/avatar/' + encodeURIComponent(username) + '?size=160&background=circle')
+            .then(function(res) {
+              if (!res.ok) throw new Error('Blobatar network response not ok');
+              return res.text();
+            })
+            .then(function(svgText) {
+              if (!svgText || !svgText.includes('<svg')) return;
+              container.innerHTML = svgText;
+              const newSvg = container.querySelector('svg');
+              if (!newSvg) return;
+
+              newSvg.style.width = '100%';
+              newSvg.style.height = '100%';
+              newSvg.style.display = 'block';
+
+              const newGroups = newSvg.querySelectorAll('g');
+              if (newGroups.length > 0) {
+                eyesGroup = newGroups[newGroups.length - 1];
+                eyesGroup.id = 'blobatar-eyes-group';
+                eyesGroup.style.transformOrigin = 'center center';
+                eyesGroup.style.transformBox = 'fill-box';
+                eyesGroup.style.willChange = 'transform';
+                eyesGroup.style.transition = 'transform 0.04s ease-out';
+              }
+            })
+            .catch(function(err) {
+              // Si falla el fetch de la red, el SVG embebido predeterminado ya está animando sin interrupción
+            });
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBlobatarInteractive);
+      } else {
+        initBlobatarInteractive();
+      }
+
+      // Lógica de apertura/cierre de Modal Roadmap y Perfil
+      document.addEventListener('DOMContentLoaded', function () {
+        const isNuevo = /*[[${isNuevoUsuario}]]*/ false;
+        if (isNuevo && !localStorage.getItem('donatrack_welcome_seen')) {
+          const modal = document.getElementById('welcome-roadmap-modal');
+          if (modal) modal.style.display = 'block';
+        }
+
+        window.abrirWelcomeModal = function () {
+          const modal = document.getElementById('welcome-roadmap-modal');
+          if (modal) modal.style.display = 'block';
+        };
+
+        window.cerrarWelcomeModal = function () {
+          const modal = document.getElementById('welcome-roadmap-modal');
+          if (modal) modal.style.display = 'none';
+          localStorage.setItem('donatrack_welcome_seen', 'true');
+        };
+
+        window.abrirPerfilModal = function () {
+          const modal = document.getElementById('modal-editar-perfil');
+          if (modal) modal.style.display = 'block';
+        };
+
+        window.cerrarPerfilModal = function () {
+          const modal = document.getElementById('modal-editar-perfil');
+          if (modal) modal.style.display = 'none';
+        };
+
+        // Escucha de tecla Escape para cerrar modales
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' || e.key === 'Esc') {
+            cerrarWelcomeModal();
+            cerrarPerfilModal();
+          }
+        });
+
+        // ==================== CONTROL DE PESTAÑAS DEL DONANTE (FASE 2) ====================
+        window.cambiarTabDonante = function (tabId, shouldPushState) {
+          const targetTab = tabId || 'resumen';
+          const tabs = ['resumen', 'seguimiento', 'causas', 'directorio'];
+          tabs.forEach(function (t) {
+            const panel = document.getElementById('tab-panel-' + t);
+            const btn = document.getElementById('tab-btn-' + t);
+            const isActive = (t === targetTab);
+            if (panel) {
+              panel.style.display = isActive ? 'block' : 'none';
+            }
+            if (btn) {
+              btn.setAttribute('tabindex', isActive ? '0' : '-1');
+              btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+              if (btn.parentElement) {
+                if (isActive) {
+                  btn.parentElement.classList.add('slds-is-active');
+                } else {
+                  btn.parentElement.classList.remove('slds-is-active');
+                }
+              }
+            }
+          });
+
+          if (targetTab === 'seguimiento') {
+            if (typeof window.inicializarOMostrarMapaDonante === 'function') {
+              window.inicializarOMostrarMapaDonante();
+            } else if (typeof window.refrescarMapaDonante === 'function') {
+              window.refrescarMapaDonante();
+            }
+          }
+
+          if (shouldPushState) {
+            const url = new URL(window.location.href);
+            if (targetTab === 'resumen') {
+              url.searchParams.delete('tab');
+            } else {
+              url.searchParams.set('tab', targetTab);
+            }
+            window.history.pushState({ tab: targetTab }, '', url.toString());
+          }
+
+          if (typeof window.sincronizarSidebarDonante === 'function') {
+            window.sincronizarSidebarDonante(targetTab);
+          }
+        };
+
+        // Protección de Formulario Perfil con Modal Spinner SLDS (FASE 3)
+        if (window.DonaTrackForms) {
+          DonaTrackForms.registrarProteccion(
+            document.getElementById('form-editar-perfil'),
+            document.getElementById('btn-guardar-perfil')
+          );
+        }
+
+        // ==================== FILTRADO REACTIVO DE MIS DONACIONES (UX-05) ====================
+        window.filtrarMisDonaciones = function () {
+          const estadoSelect = document.getElementById('filtro-donacion-estado');
+          const subcatSelect = document.getElementById('filtro-donacion-subcategoria');
+          const busquedaInput = document.getElementById('filtro-donacion-busqueda');
+
+          const estadoFiltro = (estadoSelect ? estadoSelect.value : '').trim().toUpperCase();
+          const subcatFiltro = (subcatSelect ? subcatSelect.value : '').trim().toLowerCase();
+          const busquedaFiltro = (busquedaInput ? busquedaInput.value : '').trim().toLowerCase();
+
+          const cards = document.querySelectorAll('.donacion-item-card');
+          let visibles = 0;
+
+          cards.forEach(function (card) {
+            const cardEstado = (card.getAttribute('data-estado') || '').toUpperCase();
+            const cardSubcat = (card.getAttribute('data-subcategoria') || '').toLowerCase();
+            const cardBusqueda = (card.getAttribute('data-busqueda') || '').toLowerCase();
+
+            const coincideEstado = !estadoFiltro || cardEstado === estadoFiltro || (estadoFiltro === 'EN_DEPOSITO' && cardEstado.indexOf('DEPOSITO') !== -1);
+            const coincideSubcat = !subcatFiltro || cardSubcat.indexOf(subcatFiltro) !== -1;
+            const coincideBusqueda = !busquedaFiltro || cardBusqueda.indexOf(busquedaFiltro) !== -1;
+
+            if (coincideEstado && coincideSubcat && coincideBusqueda) {
+              card.style.display = 'block';
+              visibles++;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+
+          const emptyState = document.getElementById('donaciones-sin-resultados');
+          if (emptyState) {
+            emptyState.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
+          }
+        };
+
+        // ==================== DIRECTORIO DE ORGANIZACIONES (UX-06) ====================
+        window.filtrarDirectorioBeneficiarias = function () {
+          const input = document.getElementById('buscador-directorio-input');
+          const query = (input ? input.value : '').trim().toLowerCase();
+          const cards = document.querySelectorAll('.directorio-ong-card');
+          let visibles = 0;
+
+          cards.forEach(function (card) {
+            const dataSearch = (card.getAttribute('data-search') || '').toLowerCase();
+            if (!query || dataSearch.indexOf(query) !== -1) {
+              card.style.display = 'flex';
+              visibles++;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+
+          const emptyState = document.getElementById('directorio-sin-resultados');
+          if (emptyState) {
+            emptyState.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
+          }
+        };
+
+        // ==================== BUSCADOR DE CAUSAS ACTIVAS ====================
+        window.filtrarCausasActivas = function () {
+          const qInput = document.getElementById('buscador-causas-input');
+          const catSelect = document.getElementById('filtro-categoria-causas');
+          const query = (qInput ? qInput.value : '').trim().toLowerCase();
+          const cat = (catSelect ? catSelect.value : '').trim().toLowerCase();
+
+          const cards = document.querySelectorAll('.causa-ong-card');
+          let visibles = 0;
+          cards.forEach(function (card) {
+            const searchData = (card.getAttribute('data-search') || '').toLowerCase();
+            const catData = (card.getAttribute('data-cat') || '').toLowerCase();
+            const matchQuery = !query || searchData.indexOf(query) !== -1;
+            const matchCat = !cat || catData.indexOf(cat) !== -1;
+            if (matchQuery && matchCat) {
+              card.style.display = 'flex';
+              visibles++;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+          const emptyMsg = document.getElementById('causas-sin-resultados');
+          if (emptyMsg) {
+            emptyMsg.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
+          }
+        };
+
+        // ==================== PAGINACIÓN DE INSIGNIAS (MÁX 3 POR VISTA) ====================
+        const BADGES_PER_PAGE = 3;
+        let currentBadgePage = 0;
+
+        function actualizarPaginacionBadges() {
+          const items = document.querySelectorAll('.donante-badge-item');
+          if (!items || items.length === 0) return;
+          const totalPages = Math.max(1, Math.ceil(items.length / BADGES_PER_PAGE));
+          if (currentBadgePage < 0) currentBadgePage = 0;
+          if (currentBadgePage >= totalPages) currentBadgePage = totalPages - 1;
+
+          const startIdx = currentBadgePage * BADGES_PER_PAGE;
+          const endIdx = startIdx + BADGES_PER_PAGE;
+
+          items.forEach(function (el, idx) {
+            el.style.display = (idx >= startIdx && idx < endIdx) ? 'flex' : 'none';
+          });
+
+          const indicator = document.getElementById('badges-page-indicator');
+          if (indicator) {
+            indicator.textContent = 'Página ' + (currentBadgePage + 1) + ' de ' + totalPages;
+          }
+          const prevBtn = document.getElementById('badges-prev-btn');
+          const nextBtn = document.getElementById('badges-next-btn');
+          if (prevBtn) prevBtn.disabled = (currentBadgePage === 0);
+          if (nextBtn) nextBtn.disabled = (currentBadgePage >= totalPages - 1);
+        }
+
+        window.cambiarPaginaBadges = function (delta) {
+          currentBadgePage += delta;
+          actualizarPaginacionBadges();
+        };
+
+        actualizarPaginacionBadges();
+      });
+    </script>
+  </th:block>
+
+</body>
+</html>

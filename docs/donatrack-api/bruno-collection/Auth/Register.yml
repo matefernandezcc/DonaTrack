@@ -1,0 +1,31 @@
+info:
+  name: Register
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{authUrl}}/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "donante_{{$randomInt}}",
+        "password": "Password123!",
+        "nombre": "Juan Pérez",
+        "email": "donante_{{$randomInt}}@ejemplo.com",
+        "rol": "DONANTE"
+      }
+  auth: none
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: in
+      value: "[200, 201]"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

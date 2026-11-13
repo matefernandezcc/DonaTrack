@@ -1,0 +1,28 @@
+info:
+  name: Exchange Token
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{authUrl}}/auth/token/exchange"
+  body:
+    type: json
+    data: |-
+      {
+        "code": "EXCHANGE_CODE_HERE"
+      }
+  auth: none
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: in
+      value: "[200, 400]"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

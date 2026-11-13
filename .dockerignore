@@ -1,7 +1,37 @@
+# Git y VCS
 .git
+.gitignore
+.gitattributes
+.github
+
+# Entorno y credenciales sensibles (se inyectan por docker-compose en runtime)
+.env
+.env.*
+
+# IDEs y SO
+.idea
+.vscode
+*.iml
+.DS_Store
+**/.DS_Store
+
+# Maven build outputs
+target/
+**/target/
 .mvn
-_notas_y_borradores
-diagramas
-docs
-enunciado
-n8n/workflows
+
+# Módulos o carpetas obsoletas
+donatrack-server/
+
+# Servicios de terceros / infraestructura local (montados por volumen en runtime)
+database/
+n8n/
+
+# Documentación, diagramas y notas de diseño (no requeridos para compilar)
+notas_y_borradores/
+diagramas/
+docs/
+enunciado/
+.impeccable/
+*.pdf
+*.md

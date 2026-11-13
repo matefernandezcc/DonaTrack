@@ -69,7 +69,8 @@ services:
 
   donaciones:
     build:
-      context: ./donatrack-donaciones
+      context: .
+      dockerfile: ./donatrack-donaciones/Dockerfile
     container_name: donatrack-donaciones
     restart: always
     ports:
@@ -100,7 +101,8 @@ services:
 
   incentivos:
     build:
-      context: ./donatrack-incentivos
+      context: .
+      dockerfile: ./donatrack-incentivos/Dockerfile
     container_name: donatrack-incentivos
     restart: always
     ports:
@@ -158,7 +160,8 @@ services:
 
   notificaciones:
     build:
-      context: ./donatrack-notificaciones
+      context: .
+      dockerfile: ./donatrack-notificaciones/Dockerfile
     container_name: donatrack-notificaciones
     restart: always
     ports:
@@ -183,21 +186,16 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
 
-  server:
+  auth:
     build:
-      context: ./donatrack-server
-    container_name: donatrack-server
+      context: .
+      dockerfile: ./donatrack-auth/Dockerfile
+    container_name: donatrack-auth
     restart: always
     ports:
-      - "8080:8080"
+      - "8004:8004"
     depends_on:
       postgres-donatrack:
-        condition: service_started
-        required: false
-      mongo-donatrack:
-        condition: service_started
-        required: false
-      rabbitmq:
         condition: service_started
         required: false
     env_file:
@@ -205,14 +203,37 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - POSTGRES_HOST=postgres-donatrack
-      - MONGO_HOST=mongo-donatrack
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_SSL_ENABLED=false
-      - RABBITMQ_VIRTUAL_HOST=/
-      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
-      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
-      - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
+      - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+      - WEB_URL=${WEB_URL:-http://localhost:8080}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+
+  web:
+    build:
+      context: .
+      dockerfile: ./donatrack-web/Dockerfile
+    container_name: donatrack-web
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth
+      - logistica
+      - donaciones
+      - incentivos
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
+      - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+      - AUTH_URL=http://auth:8004
+      - DONACIONES_URL=http://donaciones:8000
+      - INCENTIVOS_URL=http://incentivos:8001
+      - LOGISTICA_URL=http://logistica:8002
+      - NOTIFICACIONES_URL=http://notificaciones:8003
+      - N8N_URL=${N8N_URL:-http://n8n:5678}
 
 volumes:
   postgres_data:

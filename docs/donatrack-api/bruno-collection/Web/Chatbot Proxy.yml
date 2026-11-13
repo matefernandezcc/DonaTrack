@@ -1,0 +1,27 @@
+info:
+  name: Chatbot Proxy
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{webUrl}}/api/public/chatbot"
+  body:
+    type: json
+    data: |-
+      {
+        "mensaje": "Hola DonaTrack"
+      }
+  auth: none
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

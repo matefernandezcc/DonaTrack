@@ -1,4 +1,10 @@
+# Multi-stage build for Render & Docker
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests -pl donatrack-incentivos -am
+
 FROM eclipse-temurin:21-jre-alpine
-VOLUME /tmp
-COPY target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+WORKDIR /app
+COPY --from=builder /app/donatrack-incentivos/target/*.jar app.jar
+ENTRYPOINT ["java","-jar","app.jar"]
