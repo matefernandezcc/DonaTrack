@@ -229,6 +229,7 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
       - AUTH_URL=http://auth:8004
+      - AUTH_PUBLIC_URL=${AUTH_PUBLIC_URL:-http://localhost:8004}
       - DONACIONES_URL=http://donaciones:8000
       - INCENTIVOS_URL=http://incentivos:8001
       - LOGISTICA_URL=http://logistica:8002

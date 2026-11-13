@@ -4,7 +4,7 @@ WORKDIR /app
 # Copiamos todo el repositorio (contexto de build es la raiz)
 COPY . .
 # Compilamos especificamente el modulo de logistica y sus dependencias (common, etc)
-RUN mvn clean package -DskipTests -pl donatrack-logistica -am
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests -pl donatrack-logistica -am
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
