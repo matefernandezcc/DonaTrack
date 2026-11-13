@@ -32,14 +32,14 @@ public class Mision {
   }
 
   public boolean evaluar(PerfilDonante perfil) {
-    return extraerValor(perfil) >= objetivo;
+    return calcularValorActual(perfil) >= objetivo;
   }
 
   public String getProgresoActual(PerfilDonante perfil) {
-    return extraerValor(perfil) + " / " + objetivo;
+    return calcularValorActual(perfil) + " / " + objetivo;
   }
 
-  private int extraerValor(PerfilDonante perfil) {
+  public int calcularValorActual(PerfilDonante perfil) {
     if (perfil.getMetricas() == null) {
       return 0;
     }

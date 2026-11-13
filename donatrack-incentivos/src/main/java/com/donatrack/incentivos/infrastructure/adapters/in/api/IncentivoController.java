@@ -10,6 +10,7 @@ import com.donatrack.incentivos.domain.entities.InsigniaObtenidaEvent;
 import com.donatrack.incentivos.domain.entities.PerfilDonante;
 import com.donatrack.incentivos.domain.entities.RegistroDonacion;
 import com.donatrack.incentivos.domain.entities.misiones.Mision;
+import com.donatrack.incentivos.domain.entities.misiones.TipoMetricaMision;
 import com.donatrack.incentivos.domain.services.RankingMensualService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -151,14 +152,53 @@ public class IncentivoController {
       description = "ID de donante con formato inválido",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   @GetMapping("/donantes/{id}/misiones")
-  public ResponseEntity<List<Mision>> obtenerMisionesDisponibles(@PathVariable UUID id) {
+  public ResponseEntity<List<MisionProgresoDTO>> obtenerMisionesDisponibles(@PathVariable UUID id) {
     PerfilDonante perfil =
         perfilDonanteRepository.findById(id).orElseGet(() -> new PerfilDonante(id));
-    List<Mision> respuesta =
-        perfil.getMisionActual() != null
-            ? java.util.List.of(perfil.getMisionActual())
-            : new java.util.ArrayList<>();
+    List<MisionProgresoDTO> respuesta = new ArrayList<>();
+    if (perfil.getMisionActual() != null) {
+      respuesta.add(toMisionProgresoDto(perfil.getMisionActual(), perfil, false));
+    }
+    if (perfil.getMisionesPendientes() != null) {
+      for (Mision pendiente : perfil.getMisionesPendientes()) {
+        if (pendiente != null) {
+          respuesta.add(toMisionProgresoDto(pendiente, perfil, true));
+        }
+      }
+    }
     return ResponseEntity.ok(respuesta);
+  }
+
+  private MisionProgresoDTO toMisionProgresoDto(Mision m, PerfilDonante perfil, boolean bloqueada) {
+    int valorActual = m.calcularValorActual(perfil);
+    int objetivo = Math.max(1, m.getObjetivo());
+    int porcentaje = Math.min(100, (valorActual * 100) / objetivo);
+    int faltante = Math.max(0, objetivo - valorActual);
+    boolean completada = valorActual >= objetivo;
+    return new MisionProgresoDTO(
+        m.getId(),
+        m.getNombre(),
+        m.getRecompensa(),
+        m.getTipoMetrica(),
+        objetivo,
+        valorActual,
+        porcentaje,
+        faltante,
+        completada,
+        bloqueada,
+        obtenerUnidadLabel(m.getTipoMetrica()));
+  }
+
+  private String obtenerUnidadLabel(TipoMetricaMision tipo) {
+    if (tipo == null) {
+      return "aportes";
+    }
+    return switch (tipo) {
+      case DONACIONES_EXITOSAS -> "donaciones exitosas";
+      case MAX_BIENES -> "bienes en una donación";
+      case MESES_CONSECUTIVOS -> "meses consecutivos";
+      case CATEGORIAS_DISTINTAS -> "categorías distintas";
+    };
   }
 
   @Operation(
@@ -282,6 +322,14 @@ public class IncentivoController {
       map.put("id", r.getId() != null ? r.getId().toString() : null);
       map.put("mes", r.getMes());
       map.put("anio", r.getAnio());
+      int mesNumero = resolverMesNumero(r.getMes());
+      map.put("mesNumero", mesNumero);
+      map.put("mesNombre", mesNumero > 0 ? nombreMesEs(mesNumero) : String.valueOf(r.getMes()));
+      if (r.getAnio() != null && mesNumero > 0) {
+        map.put("periodoKey", r.getAnio() + "-" + mesNumero);
+      } else {
+        map.put("periodoKey", r.getAnio() + "-" + r.getMes());
+      }
 
       List<Map<String, Object>> posiciones = new ArrayList<>();
       if (r.getPosiciones() != null) {
@@ -325,6 +373,17 @@ public class IncentivoController {
       map.put("posiciones", posiciones);
       result.add(map);
     }
+    result.sort(
+        (a, b) -> {
+          int anioA = a.get("anio") instanceof Number n ? n.intValue() : 0;
+          int anioB = b.get("anio") instanceof Number n ? n.intValue() : 0;
+          if (anioB != anioA) {
+            return Integer.compare(anioB, anioA);
+          }
+          int mesA = a.get("mesNumero") instanceof Number n ? n.intValue() : 0;
+          int mesB = b.get("mesNumero") instanceof Number n ? n.intValue() : 0;
+          return Integer.compare(mesB, mesA);
+        });
     return ResponseEntity.ok(result);
   }
 
@@ -333,12 +392,14 @@ public class IncentivoController {
       return;
     }
     try {
-      String mes = mesActual.getMonth().name();
+      String mesNum = String.valueOf(mesActual.getMonthValue());
+      String mesEs = nombreMesEs(mesActual.getMonthValue()).toUpperCase();
+      String mesEn = mesActual.getMonth().name();
       Integer anio = mesActual.getYear();
       com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities.RankingMensualEntity
           ranking =
               rankingMensualJpaRepository
-                  .findFirstByMesAndAnio(mes, anio)
+                  .findFirstByMesInAndAnio(List.of(mesNum, mesEn, mesEs), anio)
                   .orElseGet(
                       () -> {
                         com.donatrack.incentivos.infrastructure.adapters.out.persistence.entities
@@ -347,10 +408,11 @@ public class IncentivoController {
                                 new com.donatrack.incentivos.infrastructure.adapters.out.persistence
                                     .entities.RankingMensualEntity();
                         r.setId(UUID.randomUUID());
-                        r.setMes(mes);
+                        r.setMes(mesNum);
                         r.setAnio(anio);
                         return r;
                       });
+      ranking.setMes(mesNum);
 
       ranking.getPosiciones().clear();
       int pos = 1;
@@ -437,5 +499,50 @@ public class IncentivoController {
       }
     }
     return racha;
+  }
+
+  private int resolverMesNumero(String rawMes) {
+    if (rawMes == null || rawMes.isBlank()) {
+      return 0;
+    }
+    String clean = rawMes.trim().toUpperCase();
+    try {
+      int num = Integer.parseInt(clean);
+      return (num >= 1 && num <= 12) ? num : 0;
+    } catch (NumberFormatException ignored) {
+    }
+    return switch (clean) {
+      case "JANUARY", "ENERO" -> 1;
+      case "FEBRUARY", "FEBRERO" -> 2;
+      case "MARCH", "MARZO" -> 3;
+      case "APRIL", "ABRIL" -> 4;
+      case "MAY", "MAYO" -> 5;
+      case "JUNE", "JUNIO" -> 6;
+      case "JULY", "JULIO" -> 7;
+      case "AUGUST", "AGOSTO" -> 8;
+      case "SEPTEMBER", "SEPTIEMBRE", "SETIEMBRE" -> 9;
+      case "OCTOBER", "OCTUBRE" -> 10;
+      case "NOVEMBER", "NOVIEMBRE" -> 11;
+      case "DECEMBER", "DICIEMBRE" -> 12;
+      default -> 0;
+    };
+  }
+
+  private String nombreMesEs(int mesNumero) {
+    return switch (mesNumero) {
+      case 1 -> "Enero";
+      case 2 -> "Febrero";
+      case 3 -> "Marzo";
+      case 4 -> "Abril";
+      case 5 -> "Mayo";
+      case 6 -> "Junio";
+      case 7 -> "Julio";
+      case 8 -> "Agosto";
+      case 9 -> "Septiembre";
+      case 10 -> "Octubre";
+      case 11 -> "Noviembre";
+      case 12 -> "Diciembre";
+      default -> "Mes " + mesNumero;
+    };
   }
 }
