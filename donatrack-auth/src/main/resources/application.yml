@@ -30,6 +30,7 @@ spring:
 donatrack:
   jwt-secret: ${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
   jwt-ttl-minutes: ${JWT_TTL_MINUTES:120}
+  internal-api-key: ${INTERNAL_API_KEY:donatrack-internal-key-change-in-prod}
   web-url: ${WEB_URL:http://localhost:8080}
   security:
     enabled: false

@@ -76,6 +76,7 @@ class ServiceSecurityFilterTest {
         "/auth/login",
         "/auth/register",
         "/oauth2/authorization/google",
+        "/login/oauth2/code/google",
         "/healthcheck",
         "/api/auth/sso/codigo"
       })
@@ -180,5 +181,19 @@ class ServiceSecurityFilterTest {
 
     assertEquals(401, response.getStatus());
     assertNull(filterChain.getRequest());
+  }
+
+  @Test
+  @DisplayName(
+      "Por defecto (sin propiedad explícita), ServiceSecurityFilter debe activar fail-closed (true)")
+  void testDefaultSecurityEnabledDefaultsToTrue() throws Exception {
+    org.springframework.beans.factory.annotation.Value valueAnnotation =
+        ServiceSecurityFilter.class
+            .getDeclaredField("securityEnabled")
+            .getAnnotation(org.springframework.beans.factory.annotation.Value.class);
+    assertNotNull(valueAnnotation);
+    assertEquals(
+        "${donatrack.security.enabled:${DONATRACK_SECURITY_ENABLED:true}}",
+        valueAnnotation.value());
   }
 }

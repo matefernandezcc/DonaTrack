@@ -20,7 +20,7 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
 
   private static final Logger log = LoggerFactory.getLogger(ServiceSecurityFilter.class);
 
-  @Value("${donatrack.security.enabled:${DONATRACK_SECURITY_ENABLED:false}}")
+  @Value("${donatrack.security.enabled:${DONATRACK_SECURITY_ENABLED:true}}")
   private boolean securityEnabled;
 
   @Value("${INTERNAL_API_KEY:${donatrack.internal-api-key:donatrack-internal-key-change-in-prod}}")
@@ -95,6 +95,7 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
         || path.startsWith("/api/auth/sso/")
         || path.startsWith("/auth/")
         || path.startsWith("/oauth2/")
+        || path.startsWith("/login/")
         || path.startsWith("/healthcheck")
         || path.startsWith("/api/public")
         || path.startsWith("/favicon.ico")

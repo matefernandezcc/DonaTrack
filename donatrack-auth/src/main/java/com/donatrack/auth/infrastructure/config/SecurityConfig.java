@@ -3,8 +3,11 @@ package com.donatrack.auth.infrastructure.config;
 import com.donatrack.auth.application.service.AuthService;
 import com.donatrack.auth.domain.entities.Rol;
 import com.donatrack.auth.domain.entities.Usuario;
+import com.donatrack.auth.infrastructure.adapters.out.jwt.JwtService;
 import com.donatrack.auth.infrastructure.adapters.out.persistence.UsuarioRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +27,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,7 +37,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
   @Value("${donatrack.web-url:http://localhost:8080}")
-  private String webUrl;
+  private String webUrl = "http://localhost:8080";
+
+  @Value("${INTERNAL_API_KEY:${donatrack.internal-api-key:donatrack-internal-key-change-in-prod}}")
+  private String internalApiKey = "donatrack-internal-key-change-in-prod";
 
   @Bean
   public ClientRegistrationRepository clientRegistrationRepository(
@@ -99,27 +106,39 @@ public class SecurityConfig {
       HttpSecurity http,
       UsuarioRepository usuarioRepository,
       AuthService authService,
+      JwtService jwtService,
       @Autowired(required = false) ClientRegistrationRepository clientRegistrationRepository)
       throws Exception {
+
+    AuthHeaderAuthenticationFilter headerFilter =
+        new AuthHeaderAuthenticationFilter(jwtService, internalApiKey);
 
     http.csrf(AbstractHttpConfigurer::disable)
         .cors(c -> c.configurationSource(corsConfigurationSource()))
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+        .exceptionHandling(
+            ex ->
+                ex.authenticationEntryPoint(
+                    (request, response, authException) ->
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
+        .addFilterBefore(headerFilter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
                         "/auth/login",
                         "/auth/register",
                         "/auth/token/exchange",
-                        "/api/auth/perfil/**",
                         "/api/auth/sso/**",
-                        "/admin/usuarios/**",
                         "/healthcheck",
                         "/actuator/**",
                         "/oauth2/**",
                         "/login/**",
                         "/error")
                     .permitAll()
+                    .requestMatchers("/admin/usuarios/**")
+                    .hasAnyRole("ADMIN", "INTERNAL_SERVICE")
+                    .requestMatchers("/api/auth/perfil/**")
+                    .authenticated()
                     .anyRequest()
                     .authenticated());
 
@@ -178,9 +197,16 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("*"));
+    List<String> allowedOrigins =
+        Arrays.stream((webUrl != null ? webUrl : "http://localhost:8080").split(","))
+            .map(String::trim)
+            .filter(s -> !s.isBlank())
+            .toList();
+    configuration.setAllowedOrigins(
+        allowedOrigins.isEmpty() ? List.of("http://localhost:8080") : allowedOrigins);
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Service-Key"));
+    configuration.setAllowCredentials(true);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;
