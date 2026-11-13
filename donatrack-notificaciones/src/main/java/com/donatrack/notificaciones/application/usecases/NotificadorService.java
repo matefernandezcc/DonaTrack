@@ -93,6 +93,27 @@ public class NotificadorService {
     if (destinatario == null || destinatario.isBlank()) {
       return notificacionRepository.findAll();
     }
-    return notificacionRepository.findByDestinatarioOrderByFechaEnvioDesc(destinatario);
+    return notificacionRepository.findByDestinatarioInIgnoreCaseOrderByFechaEnvioDesc(
+        java.util.List.of(destinatario.trim()));
+  }
+
+  public java.util.List<NotificacionEntity> listarPorDestinatarios(
+      java.util.List<String> destinatarios) {
+    if (notificacionRepository == null) {
+      return java.util.Collections.emptyList();
+    }
+    if (destinatarios == null) {
+      return notificacionRepository.findAll();
+    }
+    java.util.List<String> limpios =
+        destinatarios.stream()
+            .filter(d -> d != null && !d.isBlank())
+            .map(String::trim)
+            .distinct()
+            .toList();
+    if (limpios.isEmpty()) {
+      return notificacionRepository.findAll();
+    }
+    return notificacionRepository.findByDestinatarioInIgnoreCaseOrderByFechaEnvioDesc(limpios);
   }
 }

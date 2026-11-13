@@ -54,9 +54,9 @@ public class NotificacionController {
       description = "Listado de notificaciones obtenido exitosamente")
   @GetMapping("/mensajes")
   public ResponseEntity<List<NotificacionResponseDTO>> obtenerMensajes(
-      @RequestParam(name = "destinatario", required = false) String destinatario) {
+      @RequestParam(name = "destinatario", required = false) List<String> destinatarios) {
     List<NotificacionResponseDTO> response =
-        notificadorService.listarPorDestinatario(destinatario).stream()
+        notificadorService.listarPorDestinatarios(destinatarios).stream()
             .map(
                 n ->
                     new NotificacionResponseDTO(
