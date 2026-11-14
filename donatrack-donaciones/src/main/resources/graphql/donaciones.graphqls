@@ -1,0 +1,49 @@
+type Query {
+    donaciones(
+        estado: EstadoDonacion
+        idDonante: ID
+        categoriaId: ID
+        pagina: Int = 0
+        tamanio: Int = 10
+    ): DonacionPage!
+    donacion(id: ID!): Donacion
+    estadisticasDonante(idDonante: ID!): EstadisticasDonante!
+}
+
+enum EstadoDonacion {
+    PENDIENTE
+    EN_DEPOSITO
+    ASIGNADA
+    EN_CAMINO
+    ENTREGADA
+    VENCIDA
+    CANCELADA
+}
+
+type DonacionPage {
+    contenido: [Donacion!]!
+    totalElementos: Int!
+    totalPaginas: Int!
+    paginaActual: Int!
+}
+
+type Donacion {
+    id: ID!
+    descripcion: String
+    estado: EstadoDonacion!
+    fechaCreacion: String!
+    items: [ItemDonacion!]!
+}
+
+type ItemDonacion {
+    id: ID!
+    nombre: String!
+    cantidad: Int!
+    categoria: String
+}
+
+type EstadisticasDonante {
+    idDonante: ID!
+    totalDonaciones: Int!
+    donacionesEntregadas: Int!
+}

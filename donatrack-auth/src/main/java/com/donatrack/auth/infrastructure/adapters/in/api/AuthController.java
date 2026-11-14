@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,7 @@ public class AuthController {
         "donatrack-internal-key-change-in-prod");
   }
 
+  @Autowired
   public AuthController(
       AuthService authService,
       @Value("${donatrack.web-url:http://localhost:8080}") String webUrl,
