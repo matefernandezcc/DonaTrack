@@ -40,6 +40,12 @@ public final class RutaDeRepartoMongoMapper {
       doc.setCamionCapacidadVolumen(c.getCapacidadVolumen());
       doc.setCamionAltura(c.getAltura());
       doc.setCamionCapacidadCarga(c.getCapacidadCarga());
+    } else {
+      doc.setCamionId(null);
+      doc.setCamionPatente(null);
+      doc.setCamionCapacidadVolumen(null);
+      doc.setCamionAltura(null);
+      doc.setCamionCapacidadCarga(null);
     }
 
     // Desnormalización de Chofer
@@ -48,6 +54,10 @@ public final class RutaDeRepartoMongoMapper {
       doc.setChoferId(ch.getId());
       doc.setChoferLegajo(ch.getLegajo());
       doc.setChoferNombre(ch.getNombre());
+    } else {
+      doc.setChoferId(null);
+      doc.setChoferLegajo(null);
+      doc.setChoferNombre(null);
     }
 
     // Paradas embebidas
