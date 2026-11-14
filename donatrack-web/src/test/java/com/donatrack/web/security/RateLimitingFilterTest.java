@@ -1,7 +1,9 @@
 package com.donatrack.web.security;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -35,6 +38,16 @@ class RateLimitingFilterTest {
     @GetMapping("/actuator/health")
     public String actuatorHealth() {
       return "{\"status\":\"UP\"}";
+    }
+
+    @GetMapping("/slds-icons/icon.png")
+    public String icon() {
+      return "PNG_BYTES";
+    }
+
+    @GetMapping("/error")
+    public String errorPage() {
+      return "error-view";
     }
   }
 
@@ -101,7 +114,8 @@ class RateLimitingFilterTest {
   class RafagaExcedeLimite {
 
     @Test
-    @DisplayName("Petición N+1 retorna 429 Too Many Requests con payload JSON estructurado")
+    @DisplayName(
+        "Petición N+1 retorna 429 Too Many Requests con Retry-After y campos error, message y mensaje")
     void peticionNMasUnoRetorna429ConJson() throws Exception {
       String ip = "10.0.0.99";
 
@@ -110,11 +124,11 @@ class RateLimitingFilterTest {
         mockMvc
             .perform(
                 get("/api/recurso")
-                    .with(
-                        req -> {
-                          req.setRemoteAddr(ip);
-                          return req;
-                        }))
+                  .with(
+                      req -> {
+                        req.setRemoteAddr(ip);
+                        return req;
+                      }))
             .andExpect(status().isOk());
       }
 
@@ -128,7 +142,12 @@ class RateLimitingFilterTest {
                         return req;
                       }))
           .andExpect(status().isTooManyRequests())
+          .andExpect(header().exists("Retry-After"))
           .andExpect(jsonPath("$.error", is("RATE_LIMIT_EXCEEDED")))
+          .andExpect(
+              jsonPath(
+                  "$.message",
+                  is("Demasiadas solicitudes. Por favor, reintente en unos instantes.")))
           .andExpect(
               jsonPath(
                   "$.mensaje",
@@ -204,7 +223,8 @@ class RateLimitingFilterTest {
                         req.setRemoteAddr(ip);
                         return req;
                       }))
-          .andExpect(status().isTooManyRequests());
+          .andExpect(status().isTooManyRequests())
+          .andExpect(header().exists("Retry-After"));
 
       // Petición a /actuator/health desde la misma IP debe ser admitida sin 429
       mockMvc
@@ -219,28 +239,33 @@ class RateLimitingFilterTest {
     }
 
     @Test
-    @DisplayName("Rutas especiales de infraestructura (/healthcheck, /favicon.ico, /js/) están exentas de limitación")
+    @DisplayName("Rutas especiales (/slds-icons/, /error, /healthcheck, /favicon.ico, /js/) están exentas de limitación")
     void rutasEspecialesExentasDeLimitacion() {
-      org.springframework.mock.web.MockHttpServletRequest reqHealth =
-          new org.springframework.mock.web.MockHttpServletRequest("GET", "/healthcheck");
+      MockHttpServletRequest reqHealth = new MockHttpServletRequest("GET", "/healthcheck");
       reqHealth.setServletPath("/healthcheck");
 
-      org.springframework.mock.web.MockHttpServletRequest reqFavicon =
-          new org.springframework.mock.web.MockHttpServletRequest("GET", "/favicon.ico");
+      MockHttpServletRequest reqFavicon = new MockHttpServletRequest("GET", "/favicon.ico");
       reqFavicon.setServletPath("/favicon.ico");
 
-      org.springframework.mock.web.MockHttpServletRequest reqJs =
-          new org.springframework.mock.web.MockHttpServletRequest("GET", "/js/app.js");
+      MockHttpServletRequest reqJs = new MockHttpServletRequest("GET", "/js/app.js");
       reqJs.setServletPath("/js/app.js");
 
-      org.springframework.mock.web.MockHttpServletRequest reqApi =
-          new org.springframework.mock.web.MockHttpServletRequest("GET", "/api/recurso");
+      MockHttpServletRequest reqSlds =
+          new MockHttpServletRequest("GET", "/slds-icons/action/approval_60.png");
+      reqSlds.setServletPath("/slds-icons/action/approval_60.png");
+
+      MockHttpServletRequest reqError = new MockHttpServletRequest("GET", "/error");
+      reqError.setServletPath("/error");
+
+      MockHttpServletRequest reqApi = new MockHttpServletRequest("GET", "/api/recurso");
       reqApi.setServletPath("/api/recurso");
 
-      org.junit.jupiter.api.Assertions.assertTrue(filter.shouldNotFilter(reqHealth));
-      org.junit.jupiter.api.Assertions.assertTrue(filter.shouldNotFilter(reqFavicon));
-      org.junit.jupiter.api.Assertions.assertTrue(filter.shouldNotFilter(reqJs));
-      org.junit.jupiter.api.Assertions.assertFalse(filter.shouldNotFilter(reqApi));
+      assertTrue(filter.shouldNotFilter(reqHealth));
+      assertTrue(filter.shouldNotFilter(reqFavicon));
+      assertTrue(filter.shouldNotFilter(reqJs));
+      assertTrue(filter.shouldNotFilter(reqSlds));
+      assertTrue(filter.shouldNotFilter(reqError));
+      assertFalse(filter.shouldNotFilter(reqApi));
     }
   }
 
@@ -267,7 +292,7 @@ class RateLimitingFilterTest {
             .andExpect(status().isOk());
       }
 
-      // La petición 4 con la misma IP cliente primaria debe fallar
+      // La petición 4 con la misma IP cliente primaria debe fallar y tener Retry-After
       mockMvc
           .perform(
               get("/api/recurso")
@@ -277,7 +302,8 @@ class RateLimitingFilterTest {
                         req.setRemoteAddr("10.0.0.1");
                         return req;
                       }))
-          .andExpect(status().isTooManyRequests());
+          .andExpect(status().isTooManyRequests())
+          .andExpect(header().exists("Retry-After"));
 
       // Otra IP primaria a través del mismo proxy debe tener su cuota completa
       mockMvc

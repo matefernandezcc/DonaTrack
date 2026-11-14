@@ -31,7 +31,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
   private static final Logger log = LoggerFactory.getLogger(RateLimitingFilter.class);
 
   private static final String ERROR_PAYLOAD =
-      "{\"error\": \"RATE_LIMIT_EXCEEDED\", \"mensaje\": \"Demasiadas solicitudes. Por favor, reintente en unos instantes.\"}";
+      "{\"error\":\"RATE_LIMIT_EXCEEDED\",\"message\":\"Demasiadas solicitudes. Por favor, reintente en unos instantes.\",\"mensaje\":\"Demasiadas solicitudes. Por favor, reintente en unos instantes.\"}";
 
   private final boolean enabled;
   private final int requestsPerMinute;
@@ -74,6 +74,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     } else {
       log.warn(
           "Rate limit excedido para IP [{}] en endpoint [{}]", clientIp, request.getRequestURI());
+      long waitSeconds =
+          Math.max(1, TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill()));
+      response.setHeader("Retry-After", String.valueOf(waitSeconds));
       response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
       response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -117,10 +120,12 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     return path.startsWith("/css/")
         || path.startsWith("/js/")
         || path.startsWith("/assets/")
+        || path.startsWith("/slds-icons/")
         || path.startsWith("/img/")
         || path.startsWith("/remitos/")
         || path.startsWith("/fotos/")
         || path.startsWith("/actuator")
+        || path.startsWith("/error")
         || path.equals("/favicon.ico")
         || path.equals("/favicon.svg")
         || path.equals("/healthcheck");
