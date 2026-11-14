@@ -26,17 +26,21 @@ import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import com.donatrack.donaciones.domain.services.MatchmakerService;
 import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
+import com.donatrack.common.infrastructure.security.JwtClaimsExtractor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -60,6 +64,14 @@ public class DonacionController {
   private final DonacionOriginalRepository donacionOriginalRepository;
   private final PersonaRepository personaRepository;
   private final LogisticaPort logisticaPort;
+
+  @Value(
+      "${donatrack.jwt-secret:${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}}")
+  private String jwtSecret = "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!";
+
+  @Value(
+      "${donatrack.internal-api-key:${INTERNAL_API_KEY:donatrack-internal-key-change-in-prod}}")
+  private String internalApiKey = "donatrack-internal-key-change-in-prod";
 
   public DonacionController(
       MatchmakerService matchmakerService,
@@ -250,8 +262,25 @@ public class DonacionController {
       responseCode = "400",
       description = "ID con formato inválido (debe ser UUID)",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  @ApiResponse(
+      responseCode = "403",
+      description = "Acceso denegado: no es dueño de la donación ni administrador")
   @GetMapping("/donaciones/{id:[a-fA-F0-9\\-]{36}}")
-  public ResponseEntity<DonacionResponseDTO> obtenerDonacion(@PathVariable UUID id) {
+  public ResponseEntity<DonacionResponseDTO> obtenerDonacion(
+      @PathVariable UUID id, HttpServletRequest request) {
+    UUID idDonanteDueno = resolverPersonaDonanteId(id);
+    UUID callerUserId = JwtClaimsExtractor.extraerUserId(request, jwtSecret).orElse(null);
+    UUID callerPersonaId = JwtClaimsExtractor.extraerPersonaId(request, jwtSecret).orElse(null);
+    boolean esAdminOInternal = JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey);
+
+    boolean esDueno =
+        idDonanteDueno != null
+            && (idDonanteDueno.equals(callerUserId) || idDonanteDueno.equals(callerPersonaId));
+
+    if (!esAdminOInternal && !esDueno) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     return donacionRepository
         .buscarPorId(id)
         .map(

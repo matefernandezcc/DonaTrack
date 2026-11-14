@@ -124,4 +124,12 @@ class AuthSecurityIntegrationTest {
                 .header("Access-Control-Request-Method", "POST"))
         .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
   }
+
+  @Test
+  @DisplayName("GET /api/auth/sso/codigo en perfil prod retorna 404 Not Found")
+  void testMockSsoNoExisteEnProd() throws Exception {
+    mockMvc
+        .perform(get("/api/auth/sso/codigo").param("provider", "google"))
+        .andExpect(status().isNotFound());
+  }
 }

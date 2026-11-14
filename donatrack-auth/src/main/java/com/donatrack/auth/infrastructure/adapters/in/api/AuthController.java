@@ -1,13 +1,12 @@
 package com.donatrack.auth.infrastructure.adapters.in.api;
 
 import com.donatrack.auth.application.service.AuthService;
-import com.donatrack.auth.domain.entities.Usuario;
 import com.donatrack.auth.infrastructure.adapters.in.api.dto.ExchangeRequest;
 import com.donatrack.auth.infrastructure.adapters.in.api.dto.LoginRequest;
 import com.donatrack.auth.infrastructure.adapters.in.api.dto.TokenResponse;
-import jakarta.servlet.http.HttpServletResponse;
+import com.donatrack.common.infrastructure.security.JwtClaimsExtractor;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,60 +20,40 @@ public class AuthController {
 
   private final AuthService authService;
   private final String webUrl;
-  private final boolean mockSsoEnabled;
+  private final String jwtSecret;
+  private final String internalApiKey;
+
+  public AuthController(AuthService authService) {
+    this(
+        authService,
+        "http://localhost:8080",
+        "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!",
+        "donatrack-internal-key-change-in-prod");
+  }
+
+  public AuthController(
+      AuthService authService,
+      @Value("${donatrack.web-url:http://localhost:8080}") String webUrl) {
+    this(
+        authService,
+        webUrl,
+        "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!",
+        "donatrack-internal-key-change-in-prod");
+  }
 
   public AuthController(
       AuthService authService,
       @Value("${donatrack.web-url:http://localhost:8080}") String webUrl,
-      @Value("${donatrack.auth.mock-sso.enabled:false}") boolean mockSsoEnabled) {
+      @Value(
+          "${donatrack.jwt-secret:${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}}")
+          String jwtSecret,
+      @Value(
+          "${donatrack.internal-api-key:${INTERNAL_API_KEY:donatrack-internal-key-change-in-prod}}")
+          String internalApiKey) {
     this.authService = authService;
     this.webUrl = webUrl;
-    this.mockSsoEnabled = mockSsoEnabled;
-  }
-
-  private record MockIdentity(String email, String nombre) {}
-
-  private MockIdentity resolveMockIdentity(String provider, String emailParam, String nombreParam) {
-    String prov = provider != null ? provider.toLowerCase() : "";
-    String defaultEmail =
-        "google".equals(prov) ? "donante.google@gmail.com" : "donante.github@gmail.com";
-    String defaultNombre = "google".equals(prov) ? "Donante Google (SSO)" : "Donante GitHub (SSO)";
-
-    String email = (emailParam != null && !emailParam.isBlank()) ? emailParam : defaultEmail;
-    String nombre = (nombreParam != null && !nombreParam.isBlank()) ? nombreParam : defaultNombre;
-    return new MockIdentity(email, nombre);
-  }
-
-  @GetMapping("/oauth2/authorization/{provider}")
-  public void mockOAuth2Redirect(
-      @PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
-    if (!mockSsoEnabled) {
-      response.sendRedirect(webUrl + "/login?error=sso_disabled");
-      return;
-    }
-    MockIdentity identity = resolveMockIdentity(provider, null, null);
-    Usuario usuario =
-        authService.obtenerOCrearUsuarioSocial(
-            identity.email(), identity.nombre(), provider.toUpperCase());
-    String code = authService.generarCodigoIntercambio(usuario);
-    response.sendRedirect(webUrl + "/auth/callback?code=" + code);
-  }
-
-  @GetMapping("/api/auth/sso/codigo")
-  public ResponseEntity<Map<String, String>> obtenerCodigoSocial(
-      @RequestParam("provider") String provider,
-      @RequestParam(value = "email", required = false) String emailParam,
-      @RequestParam(value = "nombre", required = false) String nombreParam) {
-    if (!mockSsoEnabled) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(Map.of("error", "Mock SSO no está habilitado en este entorno"));
-    }
-    MockIdentity identity = resolveMockIdentity(provider, emailParam, nombreParam);
-    Usuario usuario =
-        authService.obtenerOCrearUsuarioSocial(
-            identity.email(), identity.nombre(), provider.toUpperCase());
-    String code = authService.generarCodigoIntercambio(usuario);
-    return ResponseEntity.ok(Map.of("code", code));
+    this.jwtSecret = jwtSecret;
+    this.internalApiKey = internalApiKey;
   }
 
   @PostMapping("/auth/login")
@@ -115,13 +94,36 @@ public class AuthController {
   }
 
   @GetMapping("/api/auth/perfil/{id}")
-  public ResponseEntity<Map<String, Object>> obtenerPerfil(@PathVariable UUID id) {
+  public ResponseEntity<Map<String, Object>> obtenerPerfil(
+      @PathVariable UUID id, HttpServletRequest request) {
+    boolean esAdminOInternal =
+        JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey);
+    UUID callerUserId = JwtClaimsExtractor.extraerUserId(request, jwtSecret).orElse(null);
+    UUID callerPersonaId = JwtClaimsExtractor.extraerPersonaId(request, jwtSecret).orElse(null);
+
+    boolean esDueno = id != null && (id.equals(callerUserId) || id.equals(callerPersonaId));
+
+    if (!esAdminOInternal && !esDueno) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
     return ResponseEntity.ok(authService.obtenerPerfil(id));
   }
 
   @PutMapping("/api/auth/perfil/{id}")
   public ResponseEntity<Map<String, String>> actualizarPerfil(
-      @PathVariable UUID id, @RequestBody Map<String, String> body) {
+      @PathVariable UUID id,
+      @RequestBody Map<String, String> body,
+      HttpServletRequest request) {
+    boolean esAdminOInternal =
+        JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey);
+    UUID callerUserId = JwtClaimsExtractor.extraerUserId(request, jwtSecret).orElse(null);
+    UUID callerPersonaId = JwtClaimsExtractor.extraerPersonaId(request, jwtSecret).orElse(null);
+
+    boolean esDueno = id != null && (id.equals(callerUserId) || id.equals(callerPersonaId));
+
+    if (!esAdminOInternal && !esDueno) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
     authService.actualizarPerfil(id, body.get("descripcion"), body.get("ubicacion"));
     return ResponseEntity.ok(Map.of("mensaje", "Perfil actualizado con éxito"));
   }
