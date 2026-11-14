@@ -56,14 +56,26 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
         personaRepository
             .buscarPorId(idAdmin)
             .or(() -> personaRepository.buscarPorId(DEFAULT_ADMIN_UUID))
-            .orElseThrow(() -> new IllegalArgumentException("Administrador no encontrado"));
+            .orElse(null);
+
+    String usuarioAdminIdStr =
+        adminPersona != null
+            ? adminPersona.getId().toString()
+            : (idAdmin != null ? idAdmin.toString() : "ADMIN");
 
     Donante donante =
         donantePersona.getRoles().stream()
             .filter(r -> r instanceof Donante)
             .map(r -> (Donante) r)
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("La persona no tiene rol Donante"));
+            .orElseGet(() -> {
+              Donante nuevoDonante = new Donante();
+              if (!donantePersona.agregarRol(nuevoDonante)) {
+                donantePersona.getRoles().add(nuevoDonante);
+              }
+              personaRepository.guardar(donantePersona);
+              return nuevoDonante;
+            });
 
     // 2. Mapear DTOs a Entidades de Dominio
     List<Bien> bienesBrutos =
@@ -72,13 +84,13 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
     // 3. Crear acta de Recepción (Entidad)
     DonacionOriginal recepcion =
         new DonacionOriginal(
-            "Carga de donación original", donante, requestDTO.idAdministrador().toString());
+            "Carga de donación original", donante, usuarioAdminIdStr);
 
     // 4. Procesar Carga Inicial delegando en la entidad DonacionOriginal
     recepcion.segmentarBienes(bienesBrutos, procesadorCargaInicial);
 
     // Registrar historial de estado inicial (EN_DEPOSITO) en cada donación segmentada
-    String usuarioIdStr = requestDTO.idAdministrador().toString();
+    String usuarioIdStr = usuarioAdminIdStr;
     recepcion
         .getDonacionesSegmentadas()
         .forEach(
