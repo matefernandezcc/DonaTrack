@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +29,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -79,6 +81,11 @@ public class AdminController {
     this.donacionesGateway = donacionesGateway;
     this.authGateway = authGateway;
     this.solicitudOngService = solicitudOngService;
+  }
+
+  @InitBinder
+  public void initBinder(WebDataBinder binder) {
+    binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
   }
 
   @ModelAttribute
@@ -188,7 +195,7 @@ public class AdminController {
     } catch (Exception e) {
       log.error("Error al actualizar perfil: {}", e.getMessage(), e);
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al actualizar perfil: " + e.getMessage());
+          "flashError", "No se pudo actualizar el perfil. Por favor, intentá nuevamente más tarde.");
     }
 
     String referer = request != null ? request.getHeader("Referer") : null;
@@ -341,7 +348,7 @@ public class AdminController {
           "flashOk", "Camión " + nuevoCamion.patente() + " registrado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al crear camión: " + e.getMessage());
+          "flashError", "No se pudo registrar el camión. Verificá los datos e intentá nuevamente.");
     }
     return "redirect:/app/admin/camiones";
   }
@@ -352,10 +359,10 @@ public class AdminController {
       @PathVariable("patente") String patente, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarCamion(patente);
-      redirectAttributes.addFlashAttribute("flashOk", "Camión " + patente + " eliminado.");
+      redirectAttributes.addFlashAttribute("flashOk", "Camión " + patente + " eliminado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo eliminar el camión: " + e.getMessage());
+          "flashError", "No se pudo eliminar el camión. Verificá que no tenga tareas asociadas e intentá nuevamente.");
     }
     return "redirect:/app/admin/camiones";
   }
@@ -383,7 +390,7 @@ public class AdminController {
           "flashOk", "Chofer " + nomCompleto.trim() + " registrado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al registrar chofer: " + e.getMessage());
+          "flashError", "No se pudo registrar el chofer. Verificá los datos ingresados e intentá nuevamente.");
     }
     return "redirect:/app/admin/choferes";
   }
@@ -395,10 +402,10 @@ public class AdminController {
     try {
       logisticaGateway.eliminarChofer(legajo);
       redirectAttributes.addFlashAttribute(
-          "flashOk", "Chofer con legajo " + legajo + " eliminado.");
+          "flashOk", "Chofer con legajo " + legajo + " eliminado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo eliminar el chofer: " + e.getMessage());
+          "flashError", "No se pudo eliminar el chofer. Verificá que no tenga viajes asignados e intentá nuevamente.");
     }
     return "redirect:/app/admin/choferes";
   }
@@ -795,7 +802,7 @@ public class AdminController {
               + " asignada exitosamente a la organización beneficiaria y enviada a planificación logística.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo asignar la donación: " + e.getMessage());
+          "flashError", "No se pudo realizar la asignación de la donación. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/matchmaking";
   }
@@ -806,11 +813,10 @@ public class AdminController {
     try {
       donacionesGateway.ejecutarMatchmakingBatch();
       redirectAttributes.addFlashAttribute(
-          "flashOk",
-          "Matchmaking automático por lotes ejecutado sobre todas las donaciones en depósito.");
+          "flashOk", "Asignación automática completada exitosamente.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al ejecutar asignación automática: " + e.getMessage());
+          "flashError", "No se pudo completar la asignación automática. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/matchmaking";
   }
@@ -925,22 +931,15 @@ public class AdminController {
       Map<String, Object> creada = donacionesGateway.crearPersona(payload);
       String creadaId =
           creada != null && creada.get("id") != null ? creada.get("id").toString() : "";
-      String nombreMostrar =
-          "JURIDICA".equals(tipoUpper)
-              ? request.razonSocial().trim()
-              : (request.nombre().trim() + " " + request.apellido().trim());
       redirectAttributes.addFlashAttribute(
-          "flashOk",
-          "Persona donante '"
-              + nombreMostrar
-              + "' registrada con éxito. Ya podés cargar su donación.");
+          "flashOk", "Persona donante registrada con éxito.");
       if (!creadaId.isBlank()) {
         return "redirect:/app/admin/donaciones/recepcion?personaCreadaId=" + creadaId;
       }
     } catch (Exception e) {
       log.error("Error al registrar persona donante en backoffice: {}", e.getMessage());
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo registrar la persona donante: " + e.getMessage());
+          "flashError", "No se pudo registrar la persona donante. Verificá los datos ingresados e intentá nuevamente.");
     }
     return "redirect:/app/admin/donaciones/recepcion";
   }
@@ -984,7 +983,7 @@ public class AdminController {
     } catch (Exception e) {
       log.error("Error al registrar recepcion en deposito: {}", e.getMessage());
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al registrar la donación en depósito: " + e.getMessage());
+          "flashError", "No se pudo registrar el ingreso de la donación en depósito. Verificá los datos e intentá nuevamente.");
       return "redirect:/app/admin/donaciones/recepcion";
     }
   }
@@ -1000,7 +999,7 @@ public class AdminController {
     } catch (Exception e) {
       log.error("Error al marcar donacion como vencida: {}", e.getMessage());
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo marcar la donación como vencida: " + e.getMessage());
+          "flashError", "No se pudo actualizar el estado de la donación. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/matchmaking";
   }
@@ -1011,11 +1010,11 @@ public class AdminController {
     try {
       donacionesGateway.auditarVencidos();
       redirectAttributes.addFlashAttribute(
-          "flashOk", "Auditoría de vencimientos ejecutada exitosamente sobre el depósito.");
+          "flashOk", "Auditoría de vencimientos ejecutada con éxito.");
     } catch (Exception e) {
       log.error("Error al auditar vencimientos: {}", e.getMessage());
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al ejecutar la auditoría de vencimientos: " + e.getMessage());
+          "flashError", "No se pudo completar la auditoría de vencimientos. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/matchmaking";
   }
@@ -1032,11 +1031,11 @@ public class AdminController {
   public String importarCsv(
       @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
     try {
-      String resultado = donacionesGateway.importarCsv(file);
-      redirectAttributes.addFlashAttribute("flashOk", "Importación completada: " + resultado);
+      donacionesGateway.importarCsv(file);
+      redirectAttributes.addFlashAttribute("flashOk", "Archivo CSV procesado e importado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al importar CSV: " + e.getMessage());
+          "flashError", "No se pudo procesar el archivo CSV. Verificá el formato e intentá nuevamente.");
     }
     return "redirect:/app/admin/csv";
   }
@@ -1066,11 +1065,11 @@ public class AdminController {
       if (authGateway != null) {
         authGateway.cambiarRol(usuarioId, rol);
         redirectAttributes.addFlashAttribute(
-            "flashOk", "Rol actualizado exitosamente a " + rol.toUpperCase());
+            "flashOk", "Rol del usuario actualizado exitosamente.");
       }
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al actualizar rol: " + e.getMessage());
+          "flashError", "No se pudo actualizar el rol del usuario. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/usuarios";
   }
@@ -1084,14 +1083,12 @@ public class AdminController {
     try {
       if (authGateway != null) {
         authGateway.resetearPassword(usuarioId);
-        String label = (email != null && !email.isBlank()) ? email : usuarioId.toString();
         redirectAttributes.addFlashAttribute(
-            "flashOk",
-            "Contraseña del usuario " + label + " restablecida con éxito a 'password123'.");
+            "flashOk", "Contraseña restablecida con éxito.");
       }
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al restablecer contraseña: " + e.getMessage());
+          "flashError", "No se pudo restablecer la contraseña. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/usuarios";
   }
@@ -1118,10 +1115,10 @@ public class AdminController {
         }
       }
       redirectAttributes.addFlashAttribute(
-          "flashOk", "Solicitud de ONG #" + solicitudId + " verificada y aprobada con éxito.");
+          "flashOk", "Solicitud de organización aprobada con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al aprobar solicitud: " + e.getMessage());
+          "flashError", "No se pudo aprobar la solicitud. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/usuarios";
   }
@@ -1552,24 +1549,12 @@ public class AdminController {
       }
 
       redirectAttributes.addFlashAttribute(
-          "flashOk",
-          "Donación "
-              + codigoCorto
-              + " registrada en depósito con éxito. Sumaste +10 puntos y podés seguir su estado de asignación en la pestaña 'Mis Donaciones'.");
+          "flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!");
       return "redirect:/app/donante?tab=seguimiento";
     } catch (Exception e) {
-      String msg = e.getMessage() != null ? e.getMessage() : "Error en el servicio";
-      if (msg.contains("502") || msg.contains("Bad Gateway") || msg.contains("<!DOCTYPE html>")) {
-        msg =
-            "El microservicio de donaciones está iniciando en la nube. Por favor, reintentá tu donación en unos segundos.";
-      } else if (msg.contains("503")
-          || msg.contains("504")
-          || msg.contains("Timeout")
-          || msg.contains("timed out")) {
-        msg =
-            "El microservicio de donaciones tardó en responder. Por favor, reintentá en un instante.";
-      }
-      redirectAttributes.addFlashAttribute("flashError", "Error al registrar donación: " + msg);
+      log.error("Error al registrar donación: {}", e.getMessage(), e);
+      redirectAttributes.addFlashAttribute(
+          "flashError", "No se pudo registrar la donación. Por favor, intentá nuevamente más tarde.");
     }
     return "redirect:/app/donante";
   }
@@ -1854,7 +1839,7 @@ public class AdminController {
       redirectAttributes.addFlashAttribute("flashOk", "Necesidad declarada con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al registrar necesidad: " + e.getMessage());
+          "flashError", "No se pudo registrar la necesidad. Verificá los datos e intentá nuevamente.");
     }
     return "redirect:/app/beneficiaria/necesidades";
   }
@@ -1900,13 +1885,10 @@ public class AdminController {
       }
       logisticaGateway.confirmarEntrega(idDonacion, fotos, patenteCamion);
       redirectAttributes.addFlashAttribute(
-          "flashOk",
-          "Recepción de entrega "
-              + idDonacion
-              + " confirmada con éxito. Comprobante alojado en Supabase S3.");
+          "flashOk", "Entrega confirmada con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al confirmar entrega: " + e.getMessage());
+          "flashError", "No se pudo confirmar la recepción de la entrega. Verificá los datos e intentá nuevamente.");
     }
     return "redirect:/app/beneficiaria/entregas";
   }

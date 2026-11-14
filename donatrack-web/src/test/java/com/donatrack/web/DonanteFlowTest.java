@@ -387,7 +387,7 @@ class DonanteFlowTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/donante?tab=seguimiento"))
           .andExpect(flash().attributeExists("flashOk"))
-          .andExpect(flash().attribute("flashOk", containsString("Sumaste +10 puntos")));
+          .andExpect(flash().attribute("flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!"));
 
       verify(donacionesGateway, times(1)).crearRecepcion(any());
       verify(incentivosGateway, times(1)).registrarActividad(eq(donantePersonaId), any());
@@ -416,7 +416,7 @@ class DonanteFlowTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString("El microservicio de donaciones está iniciando en la nube.")));
+                      "No se pudo registrar la donación. Por favor, intentá nuevamente más tarde."));
     }
 
     @Test
@@ -441,7 +441,7 @@ class DonanteFlowTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString("El microservicio de donaciones tardó en responder.")));
+                      "No se pudo registrar la donación. Por favor, intentá nuevamente más tarde."));
     }
 
     @Test
@@ -462,7 +462,7 @@ class DonanteFlowTest {
                   .param("nombreSubcategoria", "Educación"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/donante?tab=seguimiento"))
-          .andExpect(flash().attribute("flashOk", containsString("#DT-REC-")));
+          .andExpect(flash().attribute("flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!"));
     }
 
     @Test

@@ -192,7 +192,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString("Error al actualizar perfil: Servicio no disponible")));
+                      "No se pudo actualizar el perfil. Por favor, intentá nuevamente más tarde."));
     }
 
     @Test
@@ -443,7 +443,7 @@ class AdminControllerTest {
                   .param("capacidadCarga", "4000.0"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
-          .andExpect(flash().attribute("flashError", containsString("Patente ya existente")));
+          .andExpect(flash().attribute("flashError", "No se pudo registrar el camión. Verificá los datos e intentá nuevamente."));
     }
 
     @Test
@@ -453,7 +453,7 @@ class AdminControllerTest {
           .perform(post("/app/admin/camiones/AE789XY/eliminar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
-          .andExpect(flash().attribute("flashOk", "Camión AE789XY eliminado."));
+          .andExpect(flash().attribute("flashOk", "Camión AE789XY eliminado con éxito."));
 
       verify(logisticaGateway, times(1)).eliminarCamion("AE789XY");
     }
@@ -470,7 +470,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
           .andExpect(
-              flash().attribute("flashError", containsString("Camión asignado a una ruta activa")));
+              flash().attribute("flashError", "No se pudo eliminar el camión. Verificá que no tenga tareas asociadas e intentá nuevamente."));
     }
   }
 
@@ -530,7 +530,7 @@ class AdminControllerTest {
                   .param("telefono", "+54 11 9988-7766"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/choferes"))
-          .andExpect(flash().attribute("flashError", containsString("Legajo duplicado")));
+          .andExpect(flash().attribute("flashError", "No se pudo registrar el chofer. Verificá los datos ingresados e intentá nuevamente."));
     }
 
     @Test
@@ -540,7 +540,7 @@ class AdminControllerTest {
           .perform(post("/app/admin/choferes/CH-505/eliminar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/choferes"))
-          .andExpect(flash().attribute("flashOk", "Chofer con legajo CH-505 eliminado."));
+          .andExpect(flash().attribute("flashOk", "Chofer con legajo CH-505 eliminado con éxito."));
 
       verify(logisticaGateway, times(1)).eliminarChofer("CH-505");
     }
@@ -557,7 +557,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/choferes"))
           .andExpect(
-              flash().attribute("flashError", containsString("Chofer con ruta en ejecución")));
+              flash().attribute("flashError", "No se pudo eliminar el chofer. Verificá que no tenga viajes asignados e intentá nuevamente."));
     }
   }
 
@@ -733,7 +733,7 @@ class AdminControllerTest {
                   .param("beneficiarioId", benefId.toString()))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
-          .andExpect(flash().attribute("flashError", containsString("Donación ya fue asignada")));
+          .andExpect(flash().attribute("flashError", "No se pudo realizar la asignación de la donación. Por favor, intentá nuevamente."));
     }
 
     @Test
@@ -744,7 +744,7 @@ class AdminControllerTest {
           .perform(post("/app/admin/matchmaking/batch").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
-          .andExpect(flash().attributeExists("flashOk"));
+          .andExpect(flash().attribute("flashOk", "Asignación automática completada exitosamente."));
 
       verify(donacionesGateway, times(1)).ejecutarMatchmakingBatch();
     }
@@ -761,7 +761,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
           .andExpect(
-              flash().attribute("flashError", containsString("Fallo en optimizador genético")));
+              flash().attribute("flashError", "No se pudo completar la asignación automática. Por favor, intentá nuevamente."));
     }
   }
 
@@ -803,7 +803,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/csv"))
           .andExpect(
-              flash().attribute("flashOk", "Importación completada: 1 registros procesados"));
+              flash().attribute("flashOk", "Archivo CSV procesado e importado con éxito."));
 
       verify(donacionesGateway, times(1)).importarCsv(any());
     }
@@ -823,7 +823,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/csv"))
           .andExpect(
-              flash().attribute("flashError", containsString("Formato de columnas inválido")));
+              flash().attribute("flashError", "No se pudo procesar el archivo CSV. Verificá el formato e intentá nuevamente."));
     }
   }
 
@@ -882,7 +882,7 @@ class AdminControllerTest {
                   .param("rol", "BENEFICIARIA"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/usuarios"))
-          .andExpect(flash().attribute("flashOk", "Rol actualizado exitosamente a BENEFICIARIA"));
+          .andExpect(flash().attribute("flashOk", "Rol del usuario actualizado exitosamente."));
 
       verify(authGateway, times(1)).cambiarRol(usuarioId, "BENEFICIARIA");
     }
@@ -902,7 +902,7 @@ class AdminControllerTest {
                   .param("rol", "ADMIN"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/usuarios"))
-          .andExpect(flash().attribute("flashError", containsString("Usuario no encontrado")));
+          .andExpect(flash().attribute("flashError", "No se pudo actualizar el rol del usuario. Por favor, intentá nuevamente."));
     }
 
     @Test
@@ -921,7 +921,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashOk",
-                      "Contraseña del usuario usuario@mail.com restablecida con éxito a 'password123'."));
+                      "Contraseña restablecida con éxito."));
 
       verify(authGateway, times(1)).resetearPassword(usuarioId);
     }
@@ -953,7 +953,7 @@ class AdminControllerTest {
           .thenReturn(
               List.of(
                   Map.of(
-                      "id", userId.toString(),
+                       "id", userId.toString(),
                       "email", "contacto@losninos.org",
                       "rol", "DONANTE")));
 
@@ -966,7 +966,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashOk",
-                      "Solicitud de ONG #" + solId + " verificada y aprobada con éxito."));
+                      "Solicitud de organización aprobada con éxito."));
 
       verify(solicitudOngService, times(1)).actualizarEstado(solId, "APROBADA");
       verify(authGateway, times(1)).cambiarRol(userId, "BENEFICIARIA");
@@ -1001,7 +1001,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/usuarios"))
           .andExpect(
-              flash().attribute("flashOk", containsString("verificada y aprobada con éxito.")));
+              flash().attribute("flashOk", "Solicitud de organización aprobada con éxito."));
 
       verify(solicitudOngService, times(1)).actualizarEstado(solId, "APROBADA");
       verify(authGateway, never()).cambiarRol(any(), any());
@@ -1071,6 +1071,47 @@ class AdminControllerTest {
 
     @Test
     @DisplayName(
+        "POST /app/admin/donaciones/recepcion con fechaVencimiento vacía convierte a null vía StringTrimmerEditor y procesa exitosamente")
+    void testRegistrarRecepcionDonacionConFechaVencimientoVacia_convierteANullYProcesaExitosamente()
+        throws Exception {
+      UUID donanteId = UUID.randomUUID();
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/recepcion")
+                  .principal(adminAuth)
+                  .param("idDonante", donanteId.toString())
+                  .param("descripcion", "Harina de trigo 000")
+                  .param("cantidad", "20.0")
+                  .param("unidadMedicion", "KG")
+                  .param("nombreSubcategoria", "Alimentos Secos")
+                  .param("esUsado", "false")
+                  .param("fechaVencimiento", ""))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/matchmaking"))
+          .andExpect(
+              flash()
+                  .attribute("flashOk", "Donación recibida e ingresada a depósito correctamente."));
+
+      verify(donacionesGateway, times(1))
+          .crearRecepcion(
+              argThat(
+                  payload -> {
+                    if (!donanteId.toString().equals(payload.get("idDonante"))) {
+                      return false;
+                    }
+                    if (!(payload.get("bienesBrutos") instanceof List<?> list) || list.isEmpty()) {
+                      return false;
+                    }
+                    if (list.get(0) instanceof Map<?, ?> bien) {
+                      return !bien.containsKey("fechaVencimiento") || bien.get("fechaVencimiento") == null;
+                    }
+                    return false;
+                  }));
+    }
+
+    @Test
+    @DisplayName(
         "POST /app/admin/donaciones/recepcion con campos inválidos retorna formulario con error")
     void testRegistrarRecepcionDonacionInvalido() throws Exception {
       when(donacionesGateway.obtenerPersonas()).thenReturn(Collections.emptyList());
@@ -1117,8 +1158,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString(
-                          "Error al registrar la donación en depósito: Error en base de datos")));
+                      "No se pudo registrar el ingreso de la donación en depósito. Verificá los datos e intentá nuevamente."));
     }
 
     @Test
@@ -1156,8 +1196,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString(
-                          "No se pudo marcar la donación como vencida: Donación no encontrada")));
+                      "No se pudo actualizar el estado de la donación. Por favor, intentá nuevamente."));
     }
 
     @Test
@@ -1172,7 +1211,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashOk",
-                      "Auditoría de vencimientos ejecutada exitosamente sobre el depósito."));
+                      "Auditoría de vencimientos ejecutada con éxito."));
 
       verify(donacionesGateway, times(1)).auditarVencidos();
     }
@@ -1193,8 +1232,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString(
-                          "Error al ejecutar la auditoría de vencimientos: Fallo en servicio de inventario")));
+                      "No se pudo completar la auditoría de vencimientos. Por favor, intentá nuevamente."));
     }
 
     @Test
@@ -1219,7 +1257,7 @@ class AdminControllerTest {
           .andExpect(
               flash()
                   .attribute(
-                      "flashOk", containsString("Persona donante 'Lucía Gómez' registrada")));
+                      "flashOk", "Persona donante registrada con éxito."));
 
       verify(donacionesGateway, times(1))
           .crearPersona(

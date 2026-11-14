@@ -314,8 +314,7 @@ class BeneficiariaFlowTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString(
-                          "Error al registrar necesidad: Microservicio de donaciones no responde")));
+                      "No se pudo registrar la necesidad. Verificá los datos e intentá nuevamente."));
     }
   }
 
@@ -371,7 +370,7 @@ class BeneficiariaFlowTest {
               flash()
                   .attribute(
                       "flashOk",
-                      containsString("confirmada con éxito. Comprobante alojado en Supabase S3.")));
+                      "Entrega confirmada con éxito."));
 
       verify(logisticaGateway, times(1)).subirFotoComprobante(eq(donacionId), any());
       verify(logisticaGateway, times(1)).confirmarEntrega(donacionId, List.of(s3Url), "AA111BB");
@@ -442,7 +441,7 @@ class BeneficiariaFlowTest {
           .andExpect(
               flash()
                   .attribute(
-                      "flashError", containsString("Camión no coincide con la hoja de ruta")));
+                      "flashError", "No se pudo confirmar la recepción de la entrega. Verificá los datos e intentá nuevamente."));
     }
 
     @Test

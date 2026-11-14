@@ -11,18 +11,27 @@
   <div id="main-content-slot">
 
     <!-- Mensajes Flash de Notificación -->
-    <div th:if="${flashOk != null}" class="slds-notify slds-notify_alert slds-theme_success slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+    <div th:if="${flashOk != null}" class="slds-notify slds-notify_alert slds-theme_success slds-m-bottom_medium" role="alert" style="border-radius: 6px; font-weight: 700;">
       <span class="slds-assistive-text">Éxito</span>
+      <svg class="slds-icon slds-icon_x-small slds-m-right_x-small" aria-hidden="true" style="fill: #ffffff;">
+        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
+      </svg>
       <h2 th:text="${flashOk}">Operación completada con éxito.</h2>
     </div>
 
-    <div th:if="${flashError != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+    <div th:if="${flashError != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px; font-weight: 700;">
       <span class="slds-assistive-text">Error</span>
+      <svg class="slds-icon slds-icon_x-small slds-m-right_x-small" aria-hidden="true" style="fill: #ffffff;">
+        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#ban}"></use>
+      </svg>
       <h2 th:text="${flashError}">Ocurrió un error al procesar el ingreso.</h2>
     </div>
 
-    <div th:if="${errorForm != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px;">
+    <div th:if="${errorForm != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px; font-weight: 700;">
       <span class="slds-assistive-text">Error en formulario</span>
+      <svg class="slds-icon slds-icon_x-small slds-m-right_x-small" aria-hidden="true" style="fill: #ffffff;">
+        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#warning}"></use>
+      </svg>
       <h2 th:text="${errorForm}">Revise los datos ingresados en el formulario.</h2>
     </div>
 
@@ -42,7 +51,7 @@
               <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Registro de Recepción Física en Depósito</span>
             </h2>
             <p class="slds-text-body_small slds-text-color_weak">
-              Ingresá la mercadería o bultos entregados presencialmente por una persona donante para su auditoría y matchmaking.
+              Registrá los bienes y mercadería entregados presencialmente por una persona donante para su ingreso en depósito y posterior asignación comunitaria.
             </p>
           </div>
         </header>
@@ -80,7 +89,7 @@
               </div>
             </div>
             <div class="slds-form-element__help" style="font-size: 0.78rem; color: #64748b;">
-              La donación ingresará automáticamente a stock <code>EN_DEPOSITO</code> a nombre del donante seleccionado.
+              La donación ingresará automáticamente al depósito a nombre de la persona donante seleccionada.
             </div>
           </div>
 
@@ -184,7 +193,7 @@
           <!-- Botones de Acción con Prevención de Doble Clic -->
           <div class="slds-border_top slds-p-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
             <span class="slds-text-body_small slds-text-color_weak">
-              Se generará un código corto único <code>#DT-XXXX</code> al confirmar la recepción.
+              Se generará un código único de seguimiento (<code>#DT-XXXX</code>) al confirmar la recepción.
             </span>
             <div style="display: flex; gap: 10px;">
               <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral" style="min-height: 48px; min-width: 48px;">
