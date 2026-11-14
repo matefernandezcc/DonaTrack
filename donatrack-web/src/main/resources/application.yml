@@ -22,9 +22,20 @@ donatrack:
     logistica-url: ${LOGISTICA_URL:http://localhost:8002}
     notificaciones-url: ${NOTIFICACIONES_URL:http://localhost:8003}
     timeout-seconds: ${API_TIMEOUT_SECONDS:3}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    requests-per-minute: ${RATE_LIMIT_RPM:60}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,metrics
+  endpoint:
+    prometheus:
+      access: unrestricted
+    health:
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: donatrack-web
