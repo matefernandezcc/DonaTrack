@@ -1,7 +1,9 @@
 package com.donatrack.donaciones.infrastructure.adapters.in.graphql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.BienEntity;
@@ -16,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -178,5 +181,96 @@ class DonacionGraphQLControllerTest {
         .path("estadisticasDonante.donacionesEntregadas")
         .entity(Integer.class)
         .isEqualTo(8);
+  }
+
+  @Test
+  @DisplayName("GraphQL: Consulta donacion inexistente retorna null defensivamente")
+  void testConsultaDonacionInexistenteRetornaNull() {
+    UUID donacionId = UUID.randomUUID();
+    when(donacionJpaRepository.buscarPorIdConBienes(donacionId)).thenReturn(Optional.empty());
+
+    String document =
+        """
+        query ObtenerDonacion($id: ID!) {
+          donacion(id: $id) {
+            id
+            descripcion
+          }
+        }
+        """;
+
+    graphQlTester
+        .document(document)
+        .variable("id", donacionId.toString())
+        .execute()
+        .path("donacion")
+        .valueIsNull();
+  }
+
+  @Test
+  @DisplayName("GraphQL: Consulta donacion con UUID malformado retorna null sin lanzar 500")
+  void testConsultaDonacionConIdInvalidoRetornaNull() {
+    String document =
+        """
+        query {
+          donacion(id: "formato-no-uuid-invalido") {
+            id
+            descripcion
+          }
+        }
+        """;
+
+    graphQlTester.document(document).execute().path("donacion").valueIsNull();
+  }
+
+  @Test
+  @DisplayName("GraphQL: Consulta estadisticas con UUID donante invalido retorna ceros")
+  void testConsultaEstadisticasConDonanteInvalidoRetornaCeros() {
+    String document =
+        """
+        query {
+          estadisticasDonante(idDonante: "donante-invalido") {
+            idDonante
+            totalDonaciones
+            donacionesEntregadas
+          }
+        }
+        """;
+
+    graphQlTester
+        .document(document)
+        .execute()
+        .path("estadisticasDonante.totalDonaciones")
+        .entity(Integer.class)
+        .isEqualTo(0)
+        .path("estadisticasDonante.donacionesEntregadas")
+        .entity(Integer.class)
+        .isEqualTo(0);
+  }
+
+  @Test
+  @DisplayName("GraphQL: Consulta donaciones acota tamanio excesivo a 50 y pagina negativa a 0")
+  void testConsultaDonacionesAcotaPaginacionDefensiva() {
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    when(donacionJpaRepository.buscarConFiltrosPaginados(any(), any(), any(), pageableCaptor.capture()))
+        .thenReturn(new PageImpl<>(List.of()));
+
+    String document =
+        """
+        query {
+          donaciones(pagina: -5, tamanio: 150) {
+            totalElementos
+            contenido {
+              id
+            }
+          }
+        }
+        """;
+
+    graphQlTester.document(document).execute().path("donaciones.totalElementos").entity(Integer.class).isEqualTo(0);
+
+    Pageable captured = pageableCaptor.getValue();
+    assertEquals(0, captured.getPageNumber());
+    assertEquals(50, captured.getPageSize());
   }
 }

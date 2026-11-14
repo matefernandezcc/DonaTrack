@@ -217,6 +217,31 @@ class RateLimitingFilterTest {
                       }))
           .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("Rutas especiales de infraestructura (/healthcheck, /favicon.ico, /js/) están exentas de limitación")
+    void rutasEspecialesExentasDeLimitacion() {
+      org.springframework.mock.web.MockHttpServletRequest reqHealth =
+          new org.springframework.mock.web.MockHttpServletRequest("GET", "/healthcheck");
+      reqHealth.setServletPath("/healthcheck");
+
+      org.springframework.mock.web.MockHttpServletRequest reqFavicon =
+          new org.springframework.mock.web.MockHttpServletRequest("GET", "/favicon.ico");
+      reqFavicon.setServletPath("/favicon.ico");
+
+      org.springframework.mock.web.MockHttpServletRequest reqJs =
+          new org.springframework.mock.web.MockHttpServletRequest("GET", "/js/app.js");
+      reqJs.setServletPath("/js/app.js");
+
+      org.springframework.mock.web.MockHttpServletRequest reqApi =
+          new org.springframework.mock.web.MockHttpServletRequest("GET", "/api/recurso");
+      reqApi.setServletPath("/api/recurso");
+
+      org.junit.jupiter.api.Assertions.assertTrue(filter.shouldNotFilter(reqHealth));
+      org.junit.jupiter.api.Assertions.assertTrue(filter.shouldNotFilter(reqFavicon));
+      org.junit.jupiter.api.Assertions.assertTrue(filter.shouldNotFilter(reqJs));
+      org.junit.jupiter.api.Assertions.assertFalse(filter.shouldNotFilter(reqApi));
+    }
   }
 
   @Nested
@@ -262,6 +287,37 @@ class RateLimitingFilterTest {
                   .with(
                       req -> {
                         req.setRemoteAddr("10.0.0.1");
+                        return req;
+                      }))
+          .andExpect(status().isOk())
+          .andExpect(header().string("X-Rate-Limit-Remaining", "2"));
+    }
+
+    @Test
+    @DisplayName("Fallback a getRemoteAddr() si cabecera X-Forwarded-For está vacía o en blanco")
+    void fallbackARemoteAddrSiXForwardedForEnBlanco() throws Exception {
+      mockMvc
+          .perform(
+              get("/api/recurso")
+                  .header("X-Forwarded-For", "   ")
+                  .with(
+                      req -> {
+                        req.setRemoteAddr("192.168.1.77");
+                        return req;
+                      }))
+          .andExpect(status().isOk())
+          .andExpect(header().string("X-Rate-Limit-Remaining", "2"));
+    }
+
+    @Test
+    @DisplayName("Fallback seguro a 'unknown' si X-Forwarded-For y getRemoteAddr son nulos o blancos")
+    void fallbackASeguroUnknownSiAmbosNulos() throws Exception {
+      mockMvc
+          .perform(
+              get("/api/recurso")
+                  .with(
+                      req -> {
+                        req.setRemoteAddr(null);
                         return req;
                       }))
           .andExpect(status().isOk())

@@ -88,7 +88,7 @@ public class DonacionGraphQLController {
   @QueryMapping
   public EstadisticasDonanteGraphQLDTO estadisticasDonante(@Argument String idDonante) {
     if (idDonante == null || idDonante.isBlank()) {
-      return new EstadisticasDonanteGraphQLDTO(null, 0, 0);
+      return new EstadisticasDonanteGraphQLDTO(UUID.fromString("00000000-0000-0000-0000-000000000000"), 0, 0);
     }
     try {
       UUID donanteUuid = UUID.fromString(idDonante);
@@ -96,7 +96,8 @@ public class DonacionGraphQLController {
       long entregadas = donacionJpaRepository.contarEntregadasPorDonante(donanteUuid);
       return new EstadisticasDonanteGraphQLDTO(donanteUuid, (int) total, (int) entregadas);
     } catch (IllegalArgumentException e) {
-      return new EstadisticasDonanteGraphQLDTO(null, 0, 0);
+      return new EstadisticasDonanteGraphQLDTO(
+          UUID.nameUUIDFromBytes(idDonante.getBytes(java.nio.charset.StandardCharsets.UTF_8)), 0, 0);
     }
   }
 

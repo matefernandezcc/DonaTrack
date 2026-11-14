@@ -136,4 +136,60 @@ class JwtClaimsExtractorTest {
 
     assertFalse(JwtClaimsExtractor.esAdminOInternalService(request, INTERNAL_KEY));
   }
+
+  @Test
+  @DisplayName("Petición sin cabecera Authorization retorna Optional.empty()")
+  void testSinCabeceraAuthorizationRetornaEmpty() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+
+    assertTrue(JwtClaimsExtractor.extraerUserId(request, SECRET).isEmpty());
+    assertTrue(JwtClaimsExtractor.extraerPersonaId(request, SECRET).isEmpty());
+  }
+
+  @Test
+  @DisplayName("Cabecera Authorization sin prefijo Bearer retorna Optional.empty()")
+  void testCabeceraSinBearerRetornaEmpty() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("Authorization", "Basic dXNlcjpwYXNz");
+
+    assertTrue(JwtClaimsExtractor.extraerUserId(request, SECRET).isEmpty());
+    assertTrue(JwtClaimsExtractor.extraerPersonaId(request, SECRET).isEmpty());
+  }
+
+  @Test
+  @DisplayName("Token JWT malformado con menos de 3 partes retorna Optional.empty()")
+  void testTokenMalformadoRetornaEmpty() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("Authorization", "Bearer encabezado.cuerpoSolamente");
+
+    assertTrue(JwtClaimsExtractor.extraerUserId(request, SECRET).isEmpty());
+    assertTrue(JwtClaimsExtractor.extraerPersonaId(request, SECRET).isEmpty());
+  }
+
+  @Test
+  @DisplayName("Token sin claim personaId realiza fallback automático al userId para personaId")
+  void testTokenSinPersonaIdFallbackAUserId() throws Exception {
+    UUID userId = UUID.randomUUID();
+    long exp = Instant.now().getEpochSecond() + 3600;
+    String token = createJwt(userId, null, "DONANTE", exp, SECRET);
+
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("Authorization", "Bearer " + token);
+
+    assertEquals(Optional.of(userId), JwtClaimsExtractor.extraerUserId(request, SECRET));
+    assertEquals(Optional.of(userId), JwtClaimsExtractor.extraerPersonaId(request, SECRET));
+  }
+
+  @Test
+  @DisplayName("Token sin sub ni personaId retorna Optional.empty() para ambos")
+  void testTokenSinSubNiPersonaIdRetornaEmpty() throws Exception {
+    long exp = Instant.now().getEpochSecond() + 3600;
+    String token = createJwt(null, null, "DONANTE", exp, SECRET);
+
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("Authorization", "Bearer " + token);
+
+    assertTrue(JwtClaimsExtractor.extraerUserId(request, SECRET).isEmpty());
+    assertTrue(JwtClaimsExtractor.extraerPersonaId(request, SECRET).isEmpty());
+  }
 }
