@@ -134,7 +134,7 @@ public class AuthService {
     usuario.setPassword(passwordEncoder.encode("password123"));
     usuarioRepository.save(usuario);
     log.info(
-        "Contraseña del usuario {} ({}) restablecida a 'password123' por el Administrador",
+        "Contraseña del usuario {} ({}) restablecida por el Administrador",
         usuario.getUsername(),
         usuario.getEmail());
   }

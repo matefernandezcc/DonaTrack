@@ -18,12 +18,12 @@ public interface DonacionJpaRepository extends JpaRepository<DonacionEntity, UUI
 
   @Query(
       value =
-          "SELECT DISTINCT d FROM DonacionEntity d LEFT JOIN FETCH d.bienes WHERE "
+          "SELECT d FROM DonacionEntity d WHERE "
               + "(:estado IS NULL OR d.estado = :estado) AND "
               + "(:idDonante IS NULL OR d.donacionOriginal.donante.persona.id = :idDonante OR d.donacionOriginal.donante.id = :idDonante) AND "
               + "(:categoriaId IS NULL OR d.subcategoriaAsignada.categoria.id = :categoriaId)",
       countQuery =
-          "SELECT count(DISTINCT d) FROM DonacionEntity d WHERE "
+          "SELECT count(d) FROM DonacionEntity d WHERE "
               + "(:estado IS NULL OR d.estado = :estado) AND "
               + "(:idDonante IS NULL OR d.donacionOriginal.donante.persona.id = :idDonante OR d.donacionOriginal.donante.id = :idDonante) AND "
               + "(:categoriaId IS NULL OR d.subcategoriaAsignada.categoria.id = :categoriaId)")

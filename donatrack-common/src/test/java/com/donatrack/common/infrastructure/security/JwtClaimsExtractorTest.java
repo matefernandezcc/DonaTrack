@@ -107,12 +107,12 @@ class JwtClaimsExtractorTest {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.addHeader("X-Service-Key", INTERNAL_KEY);
 
-    assertTrue(JwtClaimsExtractor.esAdminOInternalService(request, INTERNAL_KEY));
-    assertFalse(JwtClaimsExtractor.esAdminOInternalService(request, "clave-invalida"));
+    assertTrue(JwtClaimsExtractor.esAdminOInternalService(request, INTERNAL_KEY, SECRET));
+    assertFalse(JwtClaimsExtractor.esAdminOInternalService(request, "clave-invalida", SECRET));
   }
 
   @Test
-  @DisplayName("Verifica que JWT con rol ADMIN califica como Admin/InternalService")
+  @DisplayName("Verifica que JWT con rol ADMIN y firma válida califica como Admin/InternalService")
   void testEsAdminOInternalServiceConJwtAdmin() throws Exception {
     UUID userId = UUID.randomUUID();
     long exp = Instant.now().getEpochSecond() + 3600;
@@ -121,7 +121,20 @@ class JwtClaimsExtractorTest {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.addHeader("Authorization", "Bearer " + token);
 
-    assertTrue(JwtClaimsExtractor.esAdminOInternalService(request, INTERNAL_KEY));
+    assertTrue(JwtClaimsExtractor.esAdminOInternalService(request, INTERNAL_KEY, SECRET));
+  }
+
+  @Test
+  @DisplayName("JWT con rol ADMIN pero firma inválida es rechazado en esAdminOInternalService")
+  void testEsAdminOInternalServiceRechazaFirmaInvalida() throws Exception {
+    UUID userId = UUID.randomUUID();
+    long exp = Instant.now().getEpochSecond() + 3600;
+    String token = createJwt(userId, null, "ADMIN", exp, "clave-falsa-atacante-12345678901234567890");
+
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("Authorization", "Bearer " + token);
+
+    assertFalse(JwtClaimsExtractor.esAdminOInternalService(request, INTERNAL_KEY, SECRET));
   }
 
   @Test
@@ -134,7 +147,7 @@ class JwtClaimsExtractorTest {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.addHeader("Authorization", "Bearer " + token);
 
-    assertFalse(JwtClaimsExtractor.esAdminOInternalService(request, INTERNAL_KEY));
+    assertFalse(JwtClaimsExtractor.esAdminOInternalService(request, INTERNAL_KEY, SECRET));
   }
 
   @Test

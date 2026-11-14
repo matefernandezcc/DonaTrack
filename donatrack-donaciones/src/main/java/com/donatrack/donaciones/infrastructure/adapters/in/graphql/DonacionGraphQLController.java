@@ -1,5 +1,6 @@
 package com.donatrack.donaciones.infrastructure.adapters.in.graphql;
 
+import com.donatrack.common.infrastructure.security.JwtClaimsExtractor;
 import com.donatrack.donaciones.infrastructure.adapters.in.graphql.dto.DonacionGraphQLDTO;
 import com.donatrack.donaciones.infrastructure.adapters.in.graphql.dto.DonacionPageGraphQLDTO;
 import com.donatrack.donaciones.infrastructure.adapters.in.graphql.dto.EstadisticasDonanteGraphQLDTO;
@@ -7,26 +8,68 @@ import com.donatrack.donaciones.infrastructure.adapters.in.graphql.dto.ItemDonac
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.BienEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities.DonacionEntity;
 import com.donatrack.donaciones.infrastructure.adapters.out.persistence.repositories.DonacionJpaRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Controller
 public class DonacionGraphQLController {
 
   private final DonacionJpaRepository donacionJpaRepository;
 
+  @Autowired(required = false)
+  private HttpServletRequest request;
+
+  @Value(
+      "${donatrack.jwt-secret:${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}}")
+  private String jwtSecret = "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!";
+
+  @Value(
+      "${donatrack.internal-api-key:${INTERNAL_API_KEY:donatrack-internal-key-change-in-prod}}")
+  private String internalApiKey = "donatrack-internal-key-change-in-prod";
+
+  @Autowired
   public DonacionGraphQLController(DonacionJpaRepository donacionJpaRepository) {
     this.donacionJpaRepository = donacionJpaRepository;
+  }
+
+  public DonacionGraphQLController(
+      DonacionJpaRepository donacionJpaRepository,
+      HttpServletRequest request,
+      String jwtSecret,
+      String internalApiKey) {
+    this.donacionJpaRepository = donacionJpaRepository;
+    this.request = request;
+    this.jwtSecret = jwtSecret;
+    this.internalApiKey = internalApiKey;
+  }
+
+  private HttpServletRequest resolveRequest() {
+    if (this.request != null) {
+      return this.request;
+    }
+    RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+    if (attrs instanceof ServletRequestAttributes servletAttrs) {
+      return servletAttrs.getRequest();
+    }
+    return null;
   }
 
   @QueryMapping
@@ -36,6 +79,18 @@ public class DonacionGraphQLController {
       @Argument String categoriaId,
       @Argument Integer pagina,
       @Argument Integer tamanio) {
+
+    HttpServletRequest req = resolveRequest();
+    if (req != null) {
+      boolean esAdminOInternal =
+          JwtClaimsExtractor.esAdminOInternalService(req, internalApiKey, jwtSecret);
+      if (!esAdminOInternal) {
+        Optional<UUID> callerUserIdOpt = JwtClaimsExtractor.extraerUserId(req, jwtSecret);
+        if (callerUserIdOpt.isPresent()) {
+          idDonante = callerUserIdOpt.get().toString();
+        }
+      }
+    }
 
     int tamanioSeguro = Math.min(Math.max(tamanio != null ? tamanio : 10, 1), 50);
     int paginaSegura = Math.max(pagina != null ? pagina : 0, 0);
@@ -87,6 +142,34 @@ public class DonacionGraphQLController {
 
   @QueryMapping
   public EstadisticasDonanteGraphQLDTO estadisticasDonante(@Argument String idDonante) {
+    HttpServletRequest req = resolveRequest();
+    if (req != null) {
+      boolean esAdminOInternal =
+          JwtClaimsExtractor.esAdminOInternalService(req, internalApiKey, jwtSecret);
+      if (!esAdminOInternal) {
+        Optional<UUID> callerUserIdOpt = JwtClaimsExtractor.extraerUserId(req, jwtSecret);
+        Optional<UUID> callerPersonaIdOpt = JwtClaimsExtractor.extraerPersonaId(req, jwtSecret);
+        if (callerUserIdOpt.isPresent()) {
+          UUID callerUserId = callerUserIdOpt.get();
+          UUID callerPersonaId = callerPersonaIdOpt.orElse(callerUserId);
+          if (idDonante != null && !idDonante.isBlank()) {
+            try {
+              UUID requestedUuid = UUID.fromString(idDonante);
+              if (!requestedUuid.equals(callerUserId) && !requestedUuid.equals(callerPersonaId)) {
+                throw new AccessDeniedException(
+                    "Acceso denegado: no posee permisos para consultar estadísticas de otro donante");
+              }
+            } catch (IllegalArgumentException e) {
+              throw new AccessDeniedException(
+                  "Acceso denegado: identificador de donante inválido o no autorizado");
+            }
+          } else {
+            idDonante = callerUserId.toString();
+          }
+        }
+      }
+    }
+
     if (idDonante == null || idDonante.isBlank()) {
       return new EstadisticasDonanteGraphQLDTO(UUID.fromString("00000000-0000-0000-0000-000000000000"), 0, 0);
     }

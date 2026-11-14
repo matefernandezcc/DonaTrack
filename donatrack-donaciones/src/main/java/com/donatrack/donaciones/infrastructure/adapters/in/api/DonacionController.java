@@ -271,7 +271,8 @@ public class DonacionController {
     UUID idDonanteDueno = resolverPersonaDonanteId(id);
     UUID callerUserId = JwtClaimsExtractor.extraerUserId(request, jwtSecret).orElse(null);
     UUID callerPersonaId = JwtClaimsExtractor.extraerPersonaId(request, jwtSecret).orElse(null);
-    boolean esAdminOInternal = JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey);
+    boolean esAdminOInternal =
+        JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey, jwtSecret);
 
     boolean esDueno =
         idDonanteDueno != null

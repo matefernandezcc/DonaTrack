@@ -110,6 +110,7 @@ services:
     image: willfarrell/autoheal:latest
     container_name: autoheal_donatrack
     restart: unless-stopped
+    profiles: ["local"]
     environment:
       - AUTOHEAL_CONTAINER_LABEL=autoheal
       - AUTOHEAL_INTERVAL=10

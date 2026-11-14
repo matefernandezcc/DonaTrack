@@ -273,4 +273,118 @@ class DonacionGraphQLControllerTest {
     assertEquals(0, captured.getPageNumber());
     assertEquals(50, captured.getPageSize());
   }
+
+  private String crearJwt(UUID userId, String rol, String secret) throws Exception {
+    String header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+    String payload =
+        String.format(
+            "{\"sub\":\"%s\",\"roles\":[\"%s\"],\"exp\":%d}",
+            userId, rol, java.time.Instant.now().getEpochSecond() + 3600);
+    String b64Header =
+        java.util.Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(header.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    String b64Payload =
+        java.util.Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+    mac.init(
+        new javax.crypto.spec.SecretKeySpec(
+            secret.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA256"));
+    byte[] sig =
+        mac.doFinal((b64Header + "." + b64Payload).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    String b64Sig = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(sig);
+    return b64Header + "." + b64Payload + "." + b64Sig;
+  }
+
+  @Test
+  @DisplayName("GraphQL Anti-IDOR: Donante no puede consultar estadísticas de otro donante")
+  void testAntiIdorEstadisticasDonanteRechazaOtroUsuario() throws Exception {
+    String secret = "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!";
+    UUID callerId = UUID.randomUUID();
+    UUID otroId = UUID.randomUUID();
+    String token = crearJwt(callerId, "DONANTE", secret);
+
+    org.springframework.mock.web.MockHttpServletRequest mockRequest =
+        new org.springframework.mock.web.MockHttpServletRequest();
+    mockRequest.addHeader("Authorization", "Bearer " + token);
+
+    DonacionGraphQLController controller =
+        new DonacionGraphQLController(donacionJpaRepository, mockRequest, secret, "key-interna-segura");
+
+    org.junit.jupiter.api.Assertions.assertThrows(
+        org.springframework.security.access.AccessDeniedException.class,
+        () -> controller.estadisticasDonante(otroId.toString()));
+  }
+
+  @Test
+  @DisplayName("GraphQL Anti-IDOR: Donante puede consultar sus propias estadísticas")
+  void testAntiIdorEstadisticasDonantePermiteMismoUsuario() throws Exception {
+    String secret = "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!";
+    UUID callerId = UUID.randomUUID();
+    String token = crearJwt(callerId, "DONANTE", secret);
+
+    org.springframework.mock.web.MockHttpServletRequest mockRequest =
+        new org.springframework.mock.web.MockHttpServletRequest();
+    mockRequest.addHeader("Authorization", "Bearer " + token);
+
+    DonacionGraphQLController controller =
+        new DonacionGraphQLController(donacionJpaRepository, mockRequest, secret, "key-interna-segura");
+
+    when(donacionJpaRepository.contarPorDonante(callerId)).thenReturn(5L);
+    when(donacionJpaRepository.contarEntregadasPorDonante(callerId)).thenReturn(3L);
+
+    var stats = controller.estadisticasDonante(callerId.toString());
+    assertEquals(5, stats.totalDonaciones());
+    assertEquals(3, stats.donacionesEntregadas());
+  }
+
+  @Test
+  @DisplayName("GraphQL Anti-IDOR: Admin puede consultar estadísticas de cualquier donante")
+  void testAntiIdorEstadisticasDonantePermiteAdmin() throws Exception {
+    String secret = "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!";
+    UUID adminId = UUID.randomUUID();
+    UUID donanteId = UUID.randomUUID();
+    String token = crearJwt(adminId, "ADMIN", secret);
+
+    org.springframework.mock.web.MockHttpServletRequest mockRequest =
+        new org.springframework.mock.web.MockHttpServletRequest();
+    mockRequest.addHeader("Authorization", "Bearer " + token);
+
+    DonacionGraphQLController controller =
+        new DonacionGraphQLController(donacionJpaRepository, mockRequest, secret, "key-interna-segura");
+
+    when(donacionJpaRepository.contarPorDonante(donanteId)).thenReturn(10L);
+    when(donacionJpaRepository.contarEntregadasPorDonante(donanteId)).thenReturn(6L);
+
+    var stats = controller.estadisticasDonante(donanteId.toString());
+    assertEquals(10, stats.totalDonaciones());
+    assertEquals(6, stats.donacionesEntregadas());
+  }
+
+  @Test
+  @DisplayName("GraphQL Anti-IDOR: Donante no-admin es forzado a filtrar sus propias donaciones")
+  void testAntiIdorDonacionesFuerzaDonanteAutenticado() throws Exception {
+    String secret = "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!";
+    UUID callerId = UUID.randomUUID();
+    UUID idAtacante = UUID.randomUUID();
+    String token = crearJwt(callerId, "DONANTE", secret);
+
+    org.springframework.mock.web.MockHttpServletRequest mockRequest =
+        new org.springframework.mock.web.MockHttpServletRequest();
+    mockRequest.addHeader("Authorization", "Bearer " + token);
+
+    DonacionGraphQLController controller =
+        new DonacionGraphQLController(donacionJpaRepository, mockRequest, secret, "key-interna-segura");
+
+    when(donacionJpaRepository.buscarConFiltrosPaginados(any(), eq(callerId), any(), any()))
+        .thenReturn(new PageImpl<>(List.of()));
+
+    // Intenta pasar el id de otro usuario
+    controller.donaciones("EN_DEPOSITO", idAtacante.toString(), null, 0, 10);
+
+    // Debe invocar el repositorio con el callerId forzado
+    verify(donacionJpaRepository).buscarConFiltrosPaginados(eq("EN_DEPOSITO"), eq(callerId), any(), any());
+  }
 }

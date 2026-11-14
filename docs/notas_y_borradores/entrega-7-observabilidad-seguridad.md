@@ -49,17 +49,17 @@ public class MockSsoController {
 }
 ```
 
-### 2.2 Hardening de Entropía en Clave Interna
-`ServiceSecurityAutoConfiguration` centraliza el filtro de seguridad de llamadas inter-servicio (`ServiceSecurityFilter`). Se introdujo una validación obligatoria en `@PostConstruct`:
-- Si el perfil activo es `prod`, la propiedad `donatrack.internal-api-key` no puede coincidir con el valor por defecto (`donatrack-internal-key-change-in-prod`) y debe tener al menos 32 caracteres.
+### 2.2 Hardening de Entropía y Desacoplamiento de Validación (`CredencialesEntropiaValidator`)
+Para evitar que la configuración de seguridad M2M quede inactiva en microservicios con cadenas de filtros personalizadas (como `donatrack-auth`), la validación de entropía se desacopló a un componente dedicado `CredencialesEntropiaValidator` en `donatrack-common`, registrado globalmente:
+- **Validación M2M:** Si el perfil activo es `prod`, `donatrack.internal-api-key` no puede coincidir con el valor por defecto (`donatrack-internal-key-change-in-prod`) ni poseer menos de 32 caracteres.
+- **Validación JWT:** En `prod`, `donatrack.jwt-secret` no puede ser nula, debe tener una longitud mínima de 32 caracteres y no puede ser la clave de prueba por defecto.
 - En caso de incumplimiento, la aplicación aborta el arranque lanzando `IllegalStateException`.
 
-### 2.3 Mitigación de Broken Object-Level Authorization (BOLA / IDOR)
-Se implementó `JwtClaimsExtractor` en `donatrack-common` para extraer de manera determinista el identificador de usuario (`userId`) y los roles declarados en el token JWT.
-
-En `DonacionController.java` (`GET /api/donaciones/{id}`) y `AuthController.java` (`GET /api/auth/perfil/{id}`), se aplica una validación estricta de titularidad:
-- Si el llamador es `INTERNAL_SERVICE` o posee el rol `ADMIN`, el acceso es irrestricto.
-- Si el llamador es un donante o usuario autenticado, su `userId` del JWT debe coincidir exactamente con el titular del recurso. En caso contrario, se rechaza la solicitud con HTTP 403 Forbidden.
+### 2.3 Mitigación Criptográfica y Anti-IDOR (BOLA)
+Se implementó `JwtClaimsExtractor` en `donatrack-common`:
+- **Verificación HMAC en Roles Administrativos:** `esAdminOInternalService(request, internalApiKey, jwtSecret)` valida criptográficamente la firma HS256 y la fecha de expiración del token JWT antes de admitir privilegios de `ADMIN` o `INTERNAL_SERVICE`, previniendo la inyección de roles mediante tokens forjados sin firma.
+- **Control de Titularidad en REST:** En `DonacionController.java` (`GET /api/donaciones/{id}`) y `AuthController.java` (`GET /api/auth/perfil/{id}`), los usuarios no administradores solo pueden acceder a recursos asociados a su propio `userId` o `personaId` (HTTP 403 Forbidden en caso de discrepancia).
+- **Sanitización de Logs de Credenciales:** En `AuthService.java`, se eliminó cualquier emisión de contraseñas en texto plano en los eventos de auditoría y restablecimiento.
 
 > [!TIP]
 > **Trade-off arquitectónico (Validación programática vs `@PreAuthorize` con SpEL):** Se optó por la validación en servicio/controlador desacoplada mediante `JwtClaimsExtractor` para evitar la carga de reflexión en runtime y mantener la resolución de entidades delegada en repositorios de dominio puros sin acoplamiento a SpEL.
@@ -193,44 +193,35 @@ type Donacion {
 }
 ```
 
-### 6.3 Prevención del Problema N+1 y Optimización JPA
-Para evitar la degradación de rendimiento generada por consultas subsecuentes a la tabla de bienes de cada donación, se implementó en `DonacionJpaRepository.java`:
+### 6.3 Prevención del Problema N+1 sin Paginación en Memoria
+Para evitar la advertencia de Hibernate `HHH000104: firstResult/maxResults specified with collection fetch; applying in memory!`, se desacopló la consulta de paginación de la carga de relaciones coleccionadas:
+- En `DonacionJpaRepository.java`, la query paginada `buscarConFiltrosPaginados` opera directamente sobre `DonacionEntity` sin `JOIN FETCH`, permitiendo a Postgres ejecutar LIMIT y OFFSET directamente en el motor de base de datos.
+- En `DonacionEntity.java`, la relación `@OneToMany` hacia `bienes` se decoró con `@BatchSize(size = 30)`. Hibernate agrupa la carga diferida de bienes en lotes eficientes de hasta 30 donaciones en un único `WHERE donacion_id IN (...)`, erradicando el problema N+1 sin degradar la memoria de la JVM.
 
-```java
-@Query(
-    value = "SELECT DISTINCT d FROM DonacionJpaEntity d LEFT JOIN FETCH d.bienes "
-          + "WHERE (:estado IS NULL OR d.estado = :estado) "
-          + "AND (:donanteId IS NULL OR d.donanteId = :donanteId)",
-    countQuery = "SELECT COUNT(d) FROM DonacionJpaEntity d "
-               + "WHERE (:estado IS NULL OR d.estado = :estado) "
-               + "AND (:donanteId IS NULL OR d.donanteId = :donanteId)"
-)
-Page<DonacionJpaEntity> buscarConFiltrosPaginados(
-    @Param("estado") EstadoDonacion estado,
-    @Param("donanteId") UUID donanteId,
-    Pageable pageable);
-```
-
-### 6.4 Seguridad y Protección contra Sobrecarga
-- El endpoint `/graphql` está protegido por el filtro global `ServiceSecurityFilter`, exigiendo cabecera `Authorization: Bearer <JWT>` o `X-Internal-API-Key`.
-- En `DonacionGraphQLController.java` se limita el tamaño máximo de página defensivamente mediante `Math.min(tamanio, 50)`, evitando ataques de denegación de servicio por paginación masiva.
+### 6.4 Seguridad, Anti-IDOR (BOLA) y Hardening en Producción
+- **Protección de Red:** El endpoint `/graphql` está protegido por el filtro global `ServiceSecurityFilter`, exigiendo cabecera `Authorization: Bearer <JWT>` o `X-Service-Key`.
+- **Anti-IDOR en Resolvers:**
+  - En `estadisticasDonante(idDonante)`: si el llamador no es `ADMIN` ni `INTERNAL_SERVICE`, se valida que `idDonante` coincida con su propio `userId` o `personaId` (arrojando `AccessDeniedException` si intenta consultar métricas ajenas).
+  - En `donaciones(...)`: para usuarios no administradores, se fuerza que el filtro de consulta aplique sobre su propio `callerUserId`.
+- **Paginación Defensiva:** Se acota el parámetro `tamanio` mediante `Math.min(tamanio, 50)` para mitigar ataques de denegación de servicio por consultas masivas.
+- **Deshabilitación de GraphiQL en Producción:** En `application-prod.properties` se configuró `spring.graphql.graphiql.enabled=false`.
 
 ---
 
 ## 7. Verificación y Resultados de Pruebas
 
-Toda la implementación fue validada exhaustivamente mediante la suite de integración de Maven sobre los 8 módulos del proyecto:
+Toda la implementación y sus remediaciones fueron validadas exhaustivamente mediante la suite de integración de Maven sobre los 8 módulos del proyecto:
 
 | Módulo | Tipo de Pruebas | Resultado |
 |---|---|---|
-| `donatrack-common` | Tests de seguridad JWT, filtros y excepciones | 23 / 23 exitosos |
-| `donatrack-donaciones` | REST, persistencia JPA y queries GraphQL (`@GraphQlTest`) | 27 / 27 exitosos |
+| `donatrack-common` | Tests de seguridad JWT, validación de entropía y filtros | 34 / 34 exitosos |
+| `donatrack-donaciones` | REST, persistencia JPA, queries GraphQL (`@GraphQlTest`) y Anti-IDOR | 31 / 31 exitosos |
 | `donatrack-logistica` | Asignación de rutas, persistencia MongoDB y RabbitMQ | 15 / 15 exitosos |
 | `donatrack-incentivos` | Misiones, perfiles donante y rankings mensuales | 26 / 26 exitosos |
 | `donatrack-notificaciones` | Plantillas, despacho multicanal y persistencia | 21 / 21 exitosos |
-| `donatrack-auth` | Seguridad P0, Mock SSO profile isolation, JWT y anti-IDOR | 24 / 24 exitosos |
+| `donatrack-auth` | Seguridad P0, Mock SSO isolation, JWT, CORS y anti-IDOR | 24 / 24 exitosos |
 | `donatrack-web` | SSR Thymeleaf, protección CSRF y Rate Limiting Bucket4j | 8 / 8 exitosos |
-| **Total General** | **Suite Completa del Proyecto** | **144 / 144 exitosos (100% verde)** |
+| **Total General** | **Suite Completa del Proyecto** | **147 / 147 exitosos (100% verde)** |
 
 ---
 

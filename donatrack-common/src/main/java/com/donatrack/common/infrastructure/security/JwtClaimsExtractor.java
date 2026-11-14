@@ -61,6 +61,11 @@ public final class JwtClaimsExtractor {
 
   public static boolean esAdminOInternalService(
       HttpServletRequest request, String internalApiKey) {
+    return esAdminOInternalService(request, internalApiKey, null);
+  }
+
+  public static boolean esAdminOInternalService(
+      HttpServletRequest request, String internalApiKey, String jwtSecret) {
     if (request == null) {
       return false;
     }
@@ -75,34 +80,11 @@ public final class JwtClaimsExtractor {
       }
     }
 
-    // 2. Validación de JWT Bearer token para roles ADMIN o INTERNAL_SERVICE
-    String authHeader = request.getHeader("Authorization");
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-      String token = authHeader.substring(7).trim();
-      try {
-        String[] parts = token.split("\\.");
-        if (parts.length == 3) {
-          JsonNode payload =
-              objectMapper.readTree(
-                  new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8));
-          if (payload.has("roles")) {
-            JsonNode rolesNode = payload.get("roles");
-            if (rolesNode.isArray()) {
-              for (JsonNode r : rolesNode) {
-                String role = r.asText("");
-                if ("ADMIN".equalsIgnoreCase(role)
-                    || "ROLE_ADMIN".equalsIgnoreCase(role)
-                    || "INTERNAL_SERVICE".equalsIgnoreCase(role)
-                    || "ROLE_INTERNAL_SERVICE".equalsIgnoreCase(role)) {
-                  return true;
-                }
-              }
-            }
-          }
-        }
-      } catch (Exception e) {
-        log.debug("Error al inspeccionar roles en token: {}", e.getMessage());
-      }
+    // 2. Validación de JWT Bearer token validando firma criptográfica y expiración
+    if (extraerClaims(request, jwtSecret)
+        .map(claims -> claims.hasRole("ADMIN") || claims.hasRole("INTERNAL_SERVICE"))
+        .orElse(false)) {
+      return true;
     }
 
     // 3. Validación de SecurityContext de Spring si estuviera autenticado

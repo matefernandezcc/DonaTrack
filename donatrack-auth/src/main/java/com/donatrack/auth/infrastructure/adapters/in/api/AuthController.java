@@ -99,7 +99,7 @@ public class AuthController {
   public ResponseEntity<Map<String, Object>> obtenerPerfil(
       @PathVariable UUID id, HttpServletRequest request) {
     boolean esAdminOInternal =
-        JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey);
+        JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey, jwtSecret);
     UUID callerUserId = JwtClaimsExtractor.extraerUserId(request, jwtSecret).orElse(null);
     UUID callerPersonaId = JwtClaimsExtractor.extraerPersonaId(request, jwtSecret).orElse(null);
 
@@ -117,7 +117,7 @@ public class AuthController {
       @RequestBody Map<String, String> body,
       HttpServletRequest request) {
     boolean esAdminOInternal =
-        JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey);
+        JwtClaimsExtractor.esAdminOInternalService(request, internalApiKey, jwtSecret);
     UUID callerUserId = JwtClaimsExtractor.extraerUserId(request, jwtSecret).orElse(null);
     UUID callerPersonaId = JwtClaimsExtractor.extraerPersonaId(request, jwtSecret).orElse(null);
 

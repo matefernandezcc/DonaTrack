@@ -29,8 +29,8 @@ import org.springframework.test.web.servlet.MockMvc;
       "spring.jpa.properties.hibernate.hbm2ddl.create_namespaces=true",
       "spring.jpa.properties.hibernate.default_schema=auth",
       "donatrack.security.enabled=true",
-      "donatrack.internal-api-key=test-auth-internal-key",
-      "donatrack.jwt-secret=SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!",
+      "donatrack.internal-api-key=clave-interna-segura-prod-con-al-menos-32-caracteres-ok",
+      "donatrack.jwt-secret=clave-jwt-segura-prod-con-al-menos-32-caracteres-ok-12345678",
       "donatrack.web-url=https://web.donatrack.test"
     })
 @ActiveProfiles("prod")
@@ -86,7 +86,7 @@ class AuthSecurityIntegrationTest {
   @DisplayName("GET /admin/usuarios con X-Service-Key válida retorna 200")
   void testAdminUsuariosConServiceKeyRetorna200() throws Exception {
     mockMvc
-        .perform(get("/admin/usuarios").header("X-Service-Key", "test-auth-internal-key"))
+        .perform(get("/admin/usuarios").header("X-Service-Key", "clave-interna-segura-prod-con-al-menos-32-caracteres-ok"))
         .andExpect(status().isOk());
   }
 
