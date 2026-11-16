@@ -2840,6 +2840,12 @@ public class AdminController {
                   "estado", "ENTREGADA",
                   "remitoUrl",
                       "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"));
+    } else if (esNuevaOngAprobada) {
+      long entregadasReales =
+          historial.stream()
+              .filter(h -> "ENTREGADA".equalsIgnoreCase(String.valueOf(h.get("estado"))))
+              .count();
+      org.put("entregasVerificadas", entregadasReales);
     }
     org.put("historialDonaciones", historial);
 
