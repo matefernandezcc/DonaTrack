@@ -81,8 +81,7 @@
     }
 
     .dt-touch-target,
-    #admin-menu-toggle,
-    .slds-notify__close .slds-button {
+    #admin-menu-toggle {
       min-width: 48px !important;
       min-height: 48px !important;
       display: inline-flex !important;
@@ -140,6 +139,111 @@
       padding-bottom: 0 !important;
       overflow: hidden;
       pointer-events: none;
+    }
+
+    /* Alineación y centrado vertical milimétrico de Toast y botón de cierre (X) */
+    .slds-notify_toast,
+    .slds-notify--toast {
+      display: inline-flex !important;
+      align-items: center !important;
+      position: relative !important;
+      min-height: 48px !important;
+      padding-top: 0.75rem !important;
+      padding-bottom: 0.75rem !important;
+      padding-left: 1.25rem !important;
+      padding-right: 3.5rem !important;
+      box-sizing: border-box !important;
+    }
+
+    .slds-notify_toast .slds-icon_container,
+    .slds-notify--toast .slds-icon_container {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      align-self: center !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      flex-shrink: 0 !important;
+    }
+
+    .slds-notify_toast .slds-notify__content,
+    .slds-notify--toast .slds-notify__content {
+      display: flex !important;
+      align-items: center !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+    }
+
+    .slds-notify_toast .slds-notify__content h2,
+    .slds-notify--toast .slds-notify__content h2 {
+      margin: 0 !important;
+      line-height: 1.35 !important;
+      font-size: 0.95rem !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+    }
+
+    .slds-notify_toast .slds-notify__close,
+    .slds-notify--toast .slds-notify__close {
+      position: absolute !important;
+      top: 50% !important;
+      right: 0.75rem !important;
+      transform: translateY(-50%) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+      z-index: 2 !important;
+    }
+
+    .slds-notify_toast .dt-toast-close,
+    .slds-notify--toast .dt-toast-close {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      min-height: 36px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 1px solid transparent !important;
+      border-radius: 6px !important;
+      background: transparent !important;
+      color: #ffffff !important;
+      cursor: pointer !important;
+      transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.15s ease !important;
+    }
+
+    .slds-notify_toast .dt-toast-close:hover,
+    .slds-notify--toast .dt-toast-close:hover {
+      background-color: rgba(255, 255, 255, 0.22) !important;
+      color: #ffffff !important;
+    }
+
+    .slds-notify_toast .dt-toast-close:active,
+    .slds-notify--toast .dt-toast-close:active {
+      transform: scale(0.92) !important;
+      background-color: rgba(255, 255, 255, 0.35) !important;
+    }
+
+    .slds-notify_toast .dt-toast-close:focus,
+    .slds-notify--toast .dt-toast-close:focus {
+      outline: 2px solid #ffffff !important;
+      outline-offset: 2px !important;
+    }
+
+    .slds-notify_toast .dt-toast-close svg,
+    .slds-notify_toast .dt-toast-close .slds-button__icon {
+      width: 1.15rem !important;
+      height: 1.15rem !important;
+      display: block !important;
+      margin: 0 auto !important;
+      fill: currentColor !important;
+      color: inherit !important;
+      pointer-events: none !important;
     }
 
     /* Botón de eliminación en lista de notificaciones */
@@ -514,7 +618,7 @@
            th:attr="data-mensaje=${flashOk != null ? flashOk : flashError}, data-tipo=${flashOk != null ? 'success' : 'error'}">
         <div th:if="${flashOk != null}" class="slds-notify slds-notify_toast slds-theme_success" role="status">
           <span class="slds-assistive-text">Éxito</span>
-          <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top"
+          <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex"
             title="Éxito">
             <svg class="slds-icon slds-icon_small" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#success}"></use>
@@ -536,7 +640,7 @@
 
         <div th:if="${flashError != null and flashOk == null}" class="slds-notify slds-notify_toast slds-theme_error" role="alert">
           <span class="slds-assistive-text">Error</span>
-          <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top"
+          <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex"
             title="Error">
             <svg class="slds-icon slds-icon_small" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#error}"></use>
