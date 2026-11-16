@@ -32,7 +32,10 @@ public class MetricasDonante {
 
   public void registrarDonacion(RegistroDonacion donacion) {
     for (int i = 0; i < registrosDonacion.size(); i++) {
-      if (registrosDonacion.get(i).getIdDonacion().equals(donacion.getIdDonacion())) {
+      RegistroDonacion existente = registrosDonacion.get(i);
+      if (existente.getIdDonacion().equals(donacion.getIdDonacion())) {
+        donacion.setCantidadBienes(
+            Math.max(existente.getCantidadBienes(), donacion.getCantidadBienes()));
         registrosDonacion.set(i, donacion);
         return;
       }

@@ -96,13 +96,13 @@
                   <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/rol'}" method="post"
                     style="display: flex; gap: 6px; align-items: center; margin: 0;">
                     <select name="rol" class="slds-select" aria-label="Seleccionar nuevo rol"
-                      style="font-size: 0.78rem; padding: 4px 8px; min-height: 40px; border-radius: 4px; width: 125px;">
+                      style="font-size: 0.78rem; padding: 4px 8px; height: 34px; border-radius: 6px; width: 125px;">
                       <option value="DONANTE" th:selected="${u['rol'] == 'DONANTE'}">DONANTE</option>
                       <option value="BENEFICIARIA" th:selected="${u['rol'] == 'BENEFICIARIA'}">BENEFICIARIA</option>
                       <option value="ADMIN" th:selected="${u['rol'] == 'ADMIN'}">ADMIN</option>
                     </select>
                     <button type="submit" class="slds-button slds-button_brand slds-button_sm"
-                      style="min-height: 40px; border-radius: 4px; font-size: 0.78rem; padding: 0 12px; white-space: nowrap;">
+                      style="min-height: 34px; border-radius: 6px; font-size: 0.78rem; padding: 0 12px; white-space: nowrap;">
                       Cambiar
                     </button>
                   </form>
@@ -114,7 +114,7 @@
                     <input type="hidden" name="email" th:value="${u['email']}" />
                     <button type="submit" class="slds-button slds-button_neutral"
                       title="Restablecer a contraseña temporal"
-                      style="min-height: 40px; border-radius: 4px; font-size: 0.78rem; padding: 0 12px; font-weight: 700; color: #92400e; border-color: #fcd34d; background: #fef9c3; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
+                      style="min-height: 34px; border-radius: 6px; font-size: 0.78rem; padding: 0 12px; font-weight: 700; color: #92400e; border-color: #fcd34d; background: #fef9c3; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
                       🔑 Resetear Clave
                     </button>
                   </form>
@@ -212,7 +212,7 @@
                   th:action="@{'/app/admin/solicitudes-ong/' + ${s.id()} + '/aprobar'}" method="post"
                   style="margin: 0;">
                   <button type="submit" class="slds-button slds-button_success slds-button_sm"
-                    style="font-weight: 700; border-radius: 4px; font-size: 0.78rem; padding: 0 14px; min-height: 48px; display: inline-flex; align-items: center;">
+                    style="font-weight: 700; border-radius: 6px; font-size: 0.78rem; padding: 0 14px; min-height: 36px; display: inline-flex; align-items: center;">
                     Aprobar
                   </button>
                 </form>

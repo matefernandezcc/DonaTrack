@@ -193,45 +193,6 @@
       border-color: #b0adab;
     }
 
-    .demo-badges {
-      margin-top: 24px;
-      padding: 12px;
-      background: #eaf5fe;
-      border: 1px solid #cbe5fb;
-      border-radius: 6px;
-      text-align: left;
-      font-size: 0.775rem;
-      color: #032d60;
-      line-height: 1.5;
-    }
-
-    .demo-badges strong {
-      display: block;
-      margin-bottom: 4px;
-      color: #014486;
-    }
-
-    .demo-chip {
-      display: inline-flex;
-      align-items: center;
-      min-height: 36px;
-      background: #ffffff;
-      border: 1px solid #b8daf8;
-      border-radius: 4px;
-      padding: 6px 12px;
-      margin: 2px 4px 2px 0;
-      cursor: pointer;
-      font-family: monospace;
-      font-size: 0.78rem;
-      transition: background-color 0.1s ease;
-    }
-
-    .demo-chip:hover {
-      background: #0176d3;
-      color: #ffffff;
-      border-color: #0176d3;
-    }
-
     .login-footer {
       margin-top: 24px;
       font-size: 0.75rem;
@@ -455,13 +416,6 @@
           </a>
         </div>
 
-        <!-- Credenciales Demo Interactivas -->
-        <div class="demo-badges">
-          <strong>Acceso Rápido para Evaluación:</strong>
-          <span class="demo-chip" onclick="fillCreds('admin', 'admin')">🔑 Admin</span>
-          <span class="demo-chip" onclick="fillCreds('donante', 'donante')">🎁 Donante</span>
-          <span class="demo-chip" onclick="fillCreds('beneficiaria', 'beneficiaria')">🏢 Beneficiaria</span>
-        </div>
 
         <!-- Acceso a Registro -->
         <div
@@ -523,12 +477,7 @@
 
   </div>
 
-  <script>
-    function fillCreds(u, p) {
-      document.getElementById('username').value = u;
-      document.getElementById('password').value = p;
-    }
-  </script>
+
 </body>
 
 </html>

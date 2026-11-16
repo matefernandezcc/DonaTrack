@@ -40,6 +40,8 @@ public class AdminController {
 
   private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
+  private static final UUID ANONIMO_DONANTE_ID =
+      UUID.fromString("a0000000-0000-4000-8000-000000000000");
   private static final UUID DEFAULT_DONANTE_ID =
       UUID.fromString("a1111111-1111-4111-8111-111111111111");
   private static final UUID DEFAULT_ADMIN_ID =
@@ -246,9 +248,116 @@ public class AdminController {
   }
 
   private UUID resolverBeneficiarioId(Authentication auth) {
+    if (auth == null) {
+      return DEFAULT_BENEFICIARIA_ID;
+    }
     if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
       return DEFAULT_BENEFICIARIA_ID;
     }
+    String principalName = auth.getName() != null ? auth.getName().trim() : "";
+    if ("beneficiaria".equalsIgnoreCase(principalName)) {
+      return DEFAULT_BENEFICIARIA_ID;
+    }
+
+    String email = null;
+    UUID pId = null;
+    UUID sub = null;
+    if (auth instanceof JwtAuthenticationToken jwt) {
+      String pIdStr = jwt.getToken().getClaimAsString("personaId");
+      if (pIdStr != null && !pIdStr.isBlank()) {
+        try {
+          pId = UUID.fromString(pIdStr);
+        } catch (IllegalArgumentException ignored) {
+        }
+      }
+      String subStr = jwt.getToken().getSubject();
+      if (subStr != null && !subStr.isBlank()) {
+        try {
+          sub = UUID.fromString(subStr);
+        } catch (IllegalArgumentException ignored) {
+        }
+      }
+      email = jwt.getToken().getClaimAsString("email");
+    }
+
+    if ((email == null || email.isBlank() || pId == null) && authGateway != null) {
+      for (Map<String, Object> u : authGateway.listarUsuarios()) {
+        if (u == null) continue;
+        String uName = String.valueOf(u.getOrDefault("username", ""));
+        String uId = String.valueOf(u.getOrDefault("id", ""));
+        if (principalName.equalsIgnoreCase(uName)
+            || (sub != null && sub.toString().equalsIgnoreCase(uId))) {
+          if (email == null || email.isBlank()) {
+            Object eObj = u.get("email");
+            if (eObj != null) email = eObj.toString().trim();
+          }
+          if (pId == null && u.get("personaId") != null && !u.get("personaId").toString().isBlank()) {
+            try {
+              pId = UUID.fromString(u.get("personaId").toString());
+            } catch (IllegalArgumentException ignored) {
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    List<Map<String, Object>> beneficiarios = donacionesGateway.obtenerBeneficiarios();
+    if (beneficiarios != null) {
+      for (Map<String, Object> b : beneficiarios) {
+        if (b == null || b.get("id") == null) continue;
+        String bIdStr = b.get("id").toString();
+        String bEmail =
+            b.get("correoRepresentante") != null
+                ? b.get("correoRepresentante").toString().trim()
+                : "";
+        if ((pId != null && pId.toString().equalsIgnoreCase(bIdStr))
+            || (sub != null && sub.toString().equalsIgnoreCase(bIdStr))
+            || (email != null && !email.isBlank() && email.equalsIgnoreCase(bEmail))) {
+          try {
+            return UUID.fromString(bIdStr);
+          } catch (IllegalArgumentException ignored) {
+          }
+        }
+      }
+    }
+
+    UUID targetId = pId != null ? pId : sub;
+    if (targetId != null) {
+      String resolvedEmail =
+          (email != null && !email.isBlank()) ? email : (principalName + "@donatrack.org");
+      try {
+        donacionesGateway.crearBeneficiario(
+            Map.of("id", targetId.toString(), "correoRepresentante", resolvedEmail));
+        for (var s : solicitudOngService.listarTodas()) {
+          if (s.email() != null && s.email().equalsIgnoreCase(resolvedEmail)) {
+            if (s.necesidades() != null
+                && !s.necesidades().isBlank()
+                && !"-".equals(s.necesidades().trim())) {
+              try {
+                donacionesGateway.agregarNecesidad(
+                    targetId,
+                    Map.of(
+                        "tipo", "extraordinaria",
+                        "descripcion", s.necesidades().trim(),
+                        "cantidadRequerida", 50.0,
+                        "subcategoriaRequerida",
+                            Map.of(
+                                "nombre",
+                                "No Perecederos",
+                                "descripcion",
+                                "Categoría No Perecederos")));
+              } catch (Exception ignored) {
+              }
+            }
+            break;
+          }
+        }
+      } catch (Exception ignored) {
+      }
+      return targetId;
+    }
+
     return resolverPersonaId(auth, DEFAULT_BENEFICIARIA_ID);
   }
 
@@ -436,22 +545,12 @@ public class AdminController {
       return clean;
     }
 
-    if ("a1111111-1111-4111-8111-111111111111".equalsIgnoreCase(clean)) {
-      return "María González";
-    }
-    if ("d3333333-3333-4333-8333-333333333333".equalsIgnoreCase(clean)) {
-      return "Fundación Alimentos del Sur";
-    }
-    if ("f2077235-6a90-4a07-879a-4d9c0ae92922".equalsIgnoreCase(clean)) {
-      return "Carlos Rodríguez · Red Solidaria";
-    }
-    if ("8ee90cad-e249-48c1-bce7-b51f0dfe6b6e".equalsIgnoreCase(clean)) {
-      return "Lucía Martínez · Cooperativa El Ceibo";
-    }
-
     if (usuariosAuth != null) {
       for (Map<String, Object> u : usuariosAuth) {
-        if (u != null && clean.equalsIgnoreCase(String.valueOf(u.get("id")))) {
+        if (u == null) continue;
+        String uId = String.valueOf(u.getOrDefault("id", ""));
+        String uPersonaId = String.valueOf(u.getOrDefault("personaId", ""));
+        if (clean.equalsIgnoreCase(uId) || clean.equalsIgnoreCase(uPersonaId)) {
           Object nom = u.get("nombre");
           if (nom != null
               && !nom.toString().isBlank()
@@ -476,11 +575,29 @@ public class AdminController {
           String n = p.get("nombre") != null ? p.get("nombre").toString().trim() : "";
           String a = p.get("apellido") != null ? p.get("apellido").toString().trim() : "";
           String full = (n + " " + a).trim();
-          if (!full.isEmpty() && !"null null".equalsIgnoreCase(full)) {
+          if (!full.isEmpty()
+              && !"null null".equalsIgnoreCase(full)
+              && !"Donante Solidario".equalsIgnoreCase(full)) {
             return full;
           }
         }
       }
+    }
+
+    if (ANONIMO_DONANTE_ID.toString().equalsIgnoreCase(clean)) {
+      return "Donante Anónimo";
+    }
+    if ("a1111111-1111-4111-8111-111111111111".equalsIgnoreCase(clean)) {
+      return "María González";
+    }
+    if ("d3333333-3333-4333-8333-333333333333".equalsIgnoreCase(clean)) {
+      return "Fundación Alimentos del Sur";
+    }
+    if ("f2077235-6a90-4a07-879a-4d9c0ae92922".equalsIgnoreCase(clean)) {
+      return "Carlos Rodríguez · Red Solidaria";
+    }
+    if ("8ee90cad-e249-48c1-bce7-b51f0dfe6b6e".equalsIgnoreCase(clean)) {
+      return "Lucía Martínez · Cooperativa El Ceibo";
     }
 
     String shortCode = clean.substring(0, 4).toUpperCase();
@@ -625,6 +742,181 @@ public class AdminController {
     };
   }
 
+  @SuppressWarnings("unchecked")
+  private List<Map<String, Object>> enriquecerBeneficiariosConSolicitudes(
+      List<Map<String, Object>> beneficiariosRaw,
+      List<Map<String, Object>> usuariosAuth,
+      List<Map<String, Object>> personasDonaciones) {
+    List<com.donatrack.web.service.SolicitudOngService.SolicitudOng> solicitudes =
+        solicitudOngService != null ? solicitudOngService.listarTodas() : Collections.emptyList();
+
+    List<Map<String, Object>> resultado = new ArrayList<>();
+    java.util.Set<String> correosRegistrados = new java.util.HashSet<>();
+    int bIdx = 1;
+
+    if (beneficiariosRaw != null) {
+      for (Map<String, Object> b : beneficiariosRaw) {
+        if (b == null) continue;
+        Map<String, Object> copy = new HashMap<>(b);
+        String bId = String.valueOf(b.get("id"));
+        String correo =
+            b.get("correoRepresentante") != null
+                ? b.get("correoRepresentante").toString().trim()
+                : "contacto@comedor.org";
+        correosRegistrados.add(correo.toLowerCase());
+
+        com.donatrack.web.service.SolicitudOngService.SolicitudOng matchedSolicitud = null;
+        for (var s : solicitudes) {
+          if (s.email() != null && s.email().equalsIgnoreCase(correo)) {
+            matchedSolicitud = s;
+            break;
+          }
+        }
+
+        String nombreOrg = null;
+        if (matchedSolicitud != null
+            && matchedSolicitud.nombreOng() != null
+            && !matchedSolicitud.nombreOng().isBlank()) {
+          nombreOrg = matchedSolicitud.nombreOng().trim();
+          copy.put("cuit", matchedSolicitud.cuit());
+          copy.put("direccion", matchedSolicitud.direccion());
+          copy.put("telefono", matchedSolicitud.telefono());
+          copy.put("responsable", matchedSolicitud.responsable());
+          copy.put("tipoEntidad", matchedSolicitud.tipoEntidad());
+        } else if (personasDonaciones != null) {
+          for (Map<String, Object> p : personasDonaciones) {
+            if (p != null && correo.equalsIgnoreCase(String.valueOf(p.getOrDefault("email", "")))) {
+              if (p.get("razonSocial") != null && !p.get("razonSocial").toString().isBlank()) {
+                nombreOrg = p.get("razonSocial").toString().trim();
+                break;
+              }
+            }
+          }
+        }
+        if ((nombreOrg == null || nombreOrg.isBlank()) && usuariosAuth != null) {
+          for (Map<String, Object> u : usuariosAuth) {
+            if (u != null && correo.equalsIgnoreCase(String.valueOf(u.getOrDefault("email", "")))) {
+              if (u.get("nombre") != null && !u.get("nombre").toString().isBlank()) {
+                nombreOrg = u.get("nombre").toString().trim();
+                break;
+              }
+            }
+          }
+        }
+        if (nombreOrg == null || nombreOrg.isBlank()) {
+          if ("b2222222-2222-4222-8222-222222222222".equalsIgnoreCase(bId)
+              || correo.toLowerCase().contains("esperanza")) {
+            nombreOrg = "Comedor Comunitario La Esperanza";
+          } else if (bIdx == 2 && correo.contains("comedor.org")) {
+            nombreOrg = "Merendero & Hogar Solidario";
+          } else if (correo.contains("@")) {
+            String prefix = correo.split("@")[0].replace(".", " ").replace("-", " ");
+            nombreOrg =
+                "Organización " + Character.toUpperCase(prefix.charAt(0)) + prefix.substring(1);
+          } else {
+            nombreOrg = "Comedor Comunitario #" + bIdx;
+          }
+        }
+
+        copy.put("nombreOrganizacion", nombreOrg);
+        copy.put("nombreLegible", nombreOrg);
+        copy.put("correoRepresentante", correo);
+        copy.put("fechaAlta", b.get("fechaAlta") != null ? b.get("fechaAlta") : "2026-10-30");
+
+        List<Map<String, Object>> necsRaw =
+            b.get("necesidadesDeclaradas") instanceof List<?> list
+                ? (List<Map<String, Object>>) list
+                : Collections.emptyList();
+        List<Map<String, Object>> necsClean = sanitizarNecesidades(necsRaw);
+        if (necsClean.isEmpty()
+            && matchedSolicitud != null
+            && matchedSolicitud.necesidades() != null
+            && !matchedSolicitud.necesidades().isBlank()
+            && !"-".equals(matchedSolicitud.necesidades().trim())) {
+          necsClean =
+              List.of(
+                  Map.of(
+                      "descripcion", matchedSolicitud.necesidades().trim(),
+                      "cantidad", 50,
+                      "subcategoria", "No Perecederos",
+                      "tipo", "Extraordinaria",
+                      "fechaSolicitud", matchedSolicitud.fecha()));
+        }
+        copy.put("necesidadesDetalle", necsClean);
+        String resumenNecs =
+            necsClean.isEmpty()
+                ? "Recibe alimentos secos, abrigo e insumos generales"
+                : necsClean.stream()
+                    .map(n -> n.get("subcategoria") + " (" + n.get("descripcion") + ")")
+                    .reduce((a, c) -> a + " · " + c)
+                    .orElse("Alimentos y Abrigo");
+        copy.put("resumenNecesidades", resumenNecs);
+        String necsTexto =
+            necsClean.stream()
+                .map(n -> String.valueOf(n.getOrDefault("subcategoria", "Alimentos")))
+                .distinct()
+                .collect(java.util.stream.Collectors.joining(", "));
+        copy.put("necesidadesTexto", necsTexto.isBlank() ? "Alimentos No Perecederos y Ropa" : necsTexto);
+
+        resultado.add(copy);
+        bIdx++;
+      }
+    }
+
+    // Incluir solicitudes de ONGs ya APROBADAS que aún no tengan entidad Beneficiario en memoria/BD
+    for (var s : solicitudes) {
+      if (s == null || !"APROBADA".equalsIgnoreCase(s.estado())) continue;
+      String sEmail = s.email() != null ? s.email().trim() : "";
+      if (sEmail.isBlank() || "-".equals(sEmail) || correosRegistrados.contains(sEmail.toLowerCase())) {
+        continue;
+      }
+      correosRegistrados.add(sEmail.toLowerCase());
+      String synthId = s.id();
+      if (usuariosAuth != null) {
+        for (Map<String, Object> u : usuariosAuth) {
+          if (u != null && sEmail.equalsIgnoreCase(String.valueOf(u.getOrDefault("email", "")))) {
+            Object pIdObj = u.get("personaId") != null ? u.get("personaId") : u.get("id");
+            if (pIdObj != null && !pIdObj.toString().isBlank()) {
+              synthId = pIdObj.toString();
+            }
+            break;
+          }
+        }
+      }
+      Map<String, Object> copy = new HashMap<>();
+      copy.put("id", synthId);
+      copy.put("nombreOrganizacion", s.nombreOng());
+      copy.put("nombreLegible", s.nombreOng());
+      copy.put("correoRepresentante", sEmail);
+      copy.put("cuit", s.cuit());
+      copy.put("direccion", s.direccion());
+      copy.put("telefono", s.telefono());
+      copy.put("responsable", s.responsable());
+      copy.put("tipoEntidad", s.tipoEntidad());
+      copy.put("fechaAlta", s.fecha() != null && !s.fecha().isBlank() ? s.fecha() : "Reciente");
+      List<Map<String, Object>> necsClean =
+          (s.necesidades() != null && !s.necesidades().isBlank() && !"-".equals(s.necesidades().trim()))
+              ? List.of(
+                  Map.of(
+                      "descripcion", s.necesidades().trim(),
+                      "cantidad", 50,
+                      "subcategoria", "No Perecederos",
+                      "tipo", "Extraordinaria",
+                      "fechaSolicitud", s.fecha()))
+              : Collections.emptyList();
+      copy.put("necesidadesDetalle", necsClean);
+      String resumen =
+          necsClean.isEmpty()
+              ? "Alimentos No Perecederos y Ropa"
+              : "No Perecederos (" + s.necesidades().trim() + ")";
+      copy.put("resumenNecesidades", resumen);
+      copy.put("necesidadesTexto", necsClean.isEmpty() ? "Alimentos No Perecederos y Ropa" : "No Perecederos");
+      resultado.add(copy);
+    }
+
+    return resultado;
+  }
+
   @GetMapping("/admin/matchmaking")
   @PreAuthorize("hasRole('ADMIN')")
   public String adminMatchmaking(
@@ -637,48 +929,11 @@ public class AdminController {
         authGateway != null ? authGateway.listarUsuarios() : Collections.emptyList();
     List<Map<String, Object>> personasDonaciones = donacionesGateway.obtenerPersonas();
 
-    // Enriquecer beneficiarios con nombre legible y detalle de necesidades
+    List<Map<String, Object>> beneficiariosEnriquecidos =
+        enriquecerBeneficiariosConSolicitudes(beneficiarios, usuariosAuth, personasDonaciones);
     Map<String, Map<String, Object>> benefIndex = new HashMap<>();
-    List<Map<String, Object>> beneficiariosEnriquecidos = new ArrayList<>();
-    int bIdx = 1;
-    for (Map<String, Object> b : beneficiarios) {
-      if (b == null) continue;
-      Map<String, Object> copy = new HashMap<>(b);
-      String bId = String.valueOf(b.get("id"));
-      String correo =
-          b.get("correoRepresentante") != null
-              ? b.get("correoRepresentante").toString()
-              : "contacto@comedor.org";
-      String nombreOrg = "Comedor Comunitario #" + bIdx;
-      if ("b2222222-2222-4222-8222-222222222222".equalsIgnoreCase(bId)
-          || correo.toLowerCase().contains("esperanza")) {
-        nombreOrg = "Comedor Comunitario La Esperanza";
-      } else if (correo.contains("@")) {
-        String prefix = correo.split("@")[0].replace(".", " ").replace("-", " ");
-        nombreOrg = "Organización " + Character.toUpperCase(prefix.charAt(0)) + prefix.substring(1);
-      }
-      copy.put("nombreOrganizacion", nombreOrg);
-      copy.put("nombreLegible", nombreOrg);
-
-      List<Map<String, Object>> necsRaw =
-          b.get("necesidadesDeclaradas") instanceof List<?> list
-              ? (List<Map<String, Object>>) list
-              : Collections.emptyList();
-      List<Map<String, Object>> necsClean = sanitizarNecesidades(necsRaw);
-      copy.put("necesidadesDetalle", necsClean);
-      String resumenNecs =
-          necsClean.isEmpty()
-              ? "Recibe alimentos secos, abrigo e insumos generales"
-              : necsClean.stream()
-                  .map(n -> n.get("subcategoria") + " (" + n.get("descripcion") + ")")
-                  .reduce((a, c) -> a + " · " + c)
-                  .orElse("Alimentos y Abrigo");
-      copy.put("resumenNecesidades", resumenNecs);
-      copy.put("necesidadesTexto", resumenNecs);
-
-      benefIndex.put(bId, copy);
-      beneficiariosEnriquecidos.add(copy);
-      bIdx++;
+    for (Map<String, Object> copy : beneficiariosEnriquecidos) {
+      benefIndex.put(String.valueOf(copy.get("id")), copy);
     }
 
     String algUpper = algoritmo != null ? algoritmo.toUpperCase() : "HIBRIDO";
@@ -766,12 +1021,22 @@ public class AdminController {
         sugerenciasEnriquecidas.add(enrich);
       }
 
-      // Si el motor no arrojó match estricto pero hay beneficiarios, mostrar los disponibles como
-      // candidatos secundarios por equidad para que el admin siempre pueda asignar
-      if (sugerenciasEnriquecidas.isEmpty() && !beneficiariosEnriquecidos.isEmpty()) {
+      // Completar candidatos con el resto de las organizaciones verificadas que aún no figuren
+      // para que el administrador siempre pueda asignar a cualquier entidad habilitada
+      if (!beneficiariosEnriquecidos.isEmpty()) {
+        java.util.Set<String> sugeridosIds = new java.util.HashSet<>();
+        for (Map<String, Object> sug : sugerenciasEnriquecidas) {
+          if (sug.get("id") != null) {
+            sugeridosIds.add(sug.get("id").toString().toLowerCase());
+          }
+        }
         for (Map<String, Object> bInfo : beneficiariosEnriquecidos) {
+          String bIdStr = bInfo.get("id") != null ? bInfo.get("id").toString() : "";
+          if (bIdStr.isBlank() || sugeridosIds.contains(bIdStr.toLowerCase())) {
+            continue;
+          }
           Map<String, Object> fallbackMatch = new HashMap<>();
-          fallbackMatch.put("id", bInfo.get("id"));
+          fallbackMatch.put("id", bIdStr);
           fallbackMatch.put("nombreOrganizacion", bInfo.get("nombreOrganizacion"));
           fallbackMatch.put("nombreLegible", bInfo.get("nombreLegible"));
           fallbackMatch.put("correoRepresentante", bInfo.get("correoRepresentante"));
@@ -781,6 +1046,7 @@ public class AdminController {
               "motivoMatch",
               "Candidato por Prioridad a Sub-Atendidos (Recepción General Habilitada)");
           sugerenciasEnriquecidas.add(fallbackMatch);
+          sugeridosIds.add(bIdStr.toLowerCase());
         }
       }
 
@@ -838,12 +1104,82 @@ public class AdminController {
     return "redirect:/app/admin/matchmaking";
   }
 
+  private List<Map<String, Object>> obtenerPersonasConFallback() {
+    List<Map<String, Object>> personasRaw = donacionesGateway.obtenerPersonas();
+    List<Map<String, Object>> resultado =
+        personasRaw != null && !personasRaw.isEmpty()
+            ? new ArrayList<>(personasRaw)
+            : new ArrayList<>(
+                List.of(
+                    Map.of(
+                        "id", DEFAULT_DONANTE_ID.toString(),
+                        "nombre", "Juan",
+                        "apellido", "Pérez",
+                        "documento", Map.of("tipo", "DNI", "numero", "32123456"),
+                        "email", "donante@donatrack.org"),
+                    Map.of(
+                        "id", "d8404b9a-0504-40c7-b8c5-0635faae4f2e",
+                        "nombre", "Carlos",
+                        "apellido", "Rodríguez",
+                        "documento", Map.of("tipo", "DNI", "numero", "35111222"),
+                        "email", "carlos.rodriguez@donatrack.org"),
+                    Map.of(
+                        "id", DEFAULT_ADMIN_ID.toString(),
+                        "razonSocial", "Fundación Solidaria",
+                        "documento", Map.of("tipo", "CUIT", "numero", "30-12345678-9"),
+                        "email", "contacto@fundacionsolidaria.org")));
+
+    if (authGateway != null) {
+      try {
+        List<Map<String, Object>> usuarios = authGateway.listarUsuarios();
+        if (usuarios != null) {
+          for (Map<String, Object> u : usuarios) {
+            if (u == null) continue;
+            String rol = String.valueOf(u.getOrDefault("rol", ""));
+            if (!"DONANTE".equalsIgnoreCase(rol)) continue;
+            String uEmail = String.valueOf(u.getOrDefault("email", "")).trim();
+            String uId =
+                u.get("personaId") != null && !u.get("personaId").toString().isBlank()
+                    ? u.get("personaId").toString()
+                    : String.valueOf(u.getOrDefault("id", ""));
+            if (uId.isBlank()) continue;
+
+            boolean yaPresente =
+                resultado.stream()
+                    .anyMatch(
+                        p ->
+                            p != null
+                                && (uId.equalsIgnoreCase(String.valueOf(p.get("id")))
+                                    || (!uEmail.isBlank()
+                                        && uEmail.equalsIgnoreCase(
+                                            String.valueOf(p.getOrDefault("email", ""))))));
+            if (!yaPresente) {
+              String fullName =
+                  u.get("nombre") != null && !u.get("nombre").toString().isBlank()
+                      ? u.get("nombre").toString().trim()
+                      : String.valueOf(u.getOrDefault("username", "Donante Web"));
+              Map<String, Object> pMap = new HashMap<>();
+              pMap.put("id", uId);
+              pMap.put("nombre", fullName);
+              pMap.put("apellido", "");
+              pMap.put("email", uEmail);
+              pMap.put("documento", Map.of("tipo", "DNI", "numero", "Usuario Web"));
+              resultado.add(pMap);
+            }
+          }
+        }
+      } catch (Exception ignored) {
+      }
+    }
+    return resultado;
+  }
+
   @GetMapping("/admin/donaciones/recepcion")
   @PreAuthorize("hasRole('ADMIN')")
   public String recepcionDonacionForm(
       @RequestParam(name = "personaCreadaId", required = false) String personaCreadaId,
       Model model) {
-    model.addAttribute("personas", donacionesGateway.obtenerPersonas());
+    model.addAttribute("personas", obtenerPersonasConFallback());
     if (personaCreadaId != null && !personaCreadaId.isBlank()) {
       model.addAttribute("personaCreadaId", personaCreadaId);
     }
@@ -868,9 +1204,7 @@ public class AdminController {
     }
 
     String tipoUpper = request.tipo().trim().toUpperCase();
-    if ("HUMANA".equals(tipoUpper)
-        && ((request.nombre() == null || request.nombre().isBlank())
-            || (request.apellido() == null || request.apellido().isBlank()))) {
+    if ("HUMANA".equals(tipoUpper) && (request.nombre() == null || request.nombre().isBlank())) {
       redirectAttributes.addFlashAttribute(
           "flashError", "Para persona humana, el nombre y el apellido son obligatorios.");
       return "redirect:/app/admin/donaciones/recepcion";
@@ -887,10 +1221,16 @@ public class AdminController {
       payload.put("tipo", tipoUpper);
       payload.put("email", request.email().trim());
 
-      Map<String, Object> documento = new HashMap<>();
-      documento.put("tipo", request.docTipo().trim().toUpperCase());
-      documento.put("numero", request.docNumero().trim());
-      payload.put("documento", documento);
+      if (request.docNumero() != null && !request.docNumero().isBlank()) {
+        Map<String, Object> documento = new HashMap<>();
+        String docTipoNorm =
+            request.docTipo() != null && !request.docTipo().isBlank()
+                ? request.docTipo().trim().toUpperCase()
+                : "DNI";
+        documento.put("tipo", docTipoNorm);
+        documento.put("numero", request.docNumero().trim());
+        payload.put("documento", documento);
+      }
 
       Map<String, Object> contacto = new HashMap<>();
       contacto.put("correoElectronico", request.email().trim());
@@ -941,7 +1281,11 @@ public class AdminController {
                 : "Comercial / Solidario");
       } else {
         payload.put("nombre", request.nombre().trim());
-        payload.put("apellido", request.apellido().trim());
+        payload.put(
+            "apellido",
+            request.apellido() != null && !request.apellido().isBlank()
+                ? request.apellido().trim()
+                : "");
         payload.put("edad", request.edad() != null && request.edad() > 0 ? request.edad() : 30);
       }
 
@@ -971,8 +1315,21 @@ public class AdminController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      model.addAttribute("personas", donacionesGateway.obtenerPersonas());
-      model.addAttribute("errorForm", "Por favor revise los campos del formulario.");
+      model.addAttribute("personas", obtenerPersonasConFallback());
+      String fieldErrors =
+          bindingResult.getFieldErrors().stream()
+              .map(
+                  err ->
+                      err.getDefaultMessage() != null && !err.getDefaultMessage().isBlank()
+                          ? err.getDefaultMessage()
+                          : err.getField())
+              .distinct()
+              .collect(java.util.stream.Collectors.joining(" · "));
+      model.addAttribute(
+          "errorForm",
+          fieldErrors.isBlank()
+              ? "Por favor revise los campos del formulario."
+              : "Por favor revise los campos del formulario: " + fieldErrors);
       return "admin/admin/recepcion-donacion";
     }
     try {
@@ -986,7 +1343,7 @@ public class AdminController {
       bien.put("descripcion", request.descripcion());
       bien.put("cantidad", request.cantidad());
       bien.put("unidadMedicion", request.unidadMedicion());
-      bien.put("esUsado", request.esUsado());
+      bien.put("esUsado", request.esUsadoValue());
       bien.put("nombreSubcategoria", request.nombreSubcategoria());
       if (request.fechaVencimiento() != null) {
         bien.put("fechaVencimiento", request.fechaVencimiento().toString());
@@ -1119,6 +1476,7 @@ public class AdminController {
       var solicitudOpt = solicitudOngService.obtenerPorId(solicitudId);
       if (solicitudOpt.isPresent()) {
         var s = solicitudOpt.get();
+        UUID benefUuid = null;
         if (authGateway != null) {
           var usuarios = authGateway.listarUsuarios();
           var userMatch =
@@ -1128,7 +1486,63 @@ public class AdminController {
           if (userMatch.isPresent()) {
             UUID uId = UUID.fromString(String.valueOf(userMatch.get().get("id")));
             authGateway.cambiarRol(uId, "BENEFICIARIA");
+            Object pIdObj = userMatch.get().get("personaId");
+            if (pIdObj != null && !pIdObj.toString().isBlank()) {
+              try {
+                benefUuid = UUID.fromString(pIdObj.toString());
+              } catch (IllegalArgumentException ignored) {
+              }
+            }
+            if (benefUuid == null) {
+              benefUuid = uId;
+            }
           }
+        }
+        if (benefUuid == null) {
+          benefUuid = UUID.randomUUID();
+        }
+        try {
+          List<Map<String, Object>> existentes = donacionesGateway.obtenerBeneficiarios();
+          UUID existenteId = null;
+          if (existentes != null) {
+            for (Map<String, Object> b : existentes) {
+              if (b != null
+                  && s.email() != null
+                  && s.email().equalsIgnoreCase(String.valueOf(b.get("correoRepresentante")))) {
+                existenteId = UUID.fromString(String.valueOf(b.get("id")));
+                break;
+              }
+            }
+          }
+          if (existenteId == null) {
+            donacionesGateway.crearBeneficiario(
+                Map.of(
+                    "id", benefUuid.toString(),
+                    "correoRepresentante", s.email() != null ? s.email() : "org@donatrack.org"));
+            existenteId = benefUuid;
+          }
+          if (s.necesidades() != null
+              && !s.necesidades().isBlank()
+              && !"-".equals(s.necesidades().trim())) {
+            List<Map<String, Object>> necsActuales =
+                donacionesGateway.obtenerNecesidades(existenteId);
+            if (necsActuales == null || necsActuales.isEmpty()) {
+              donacionesGateway.agregarNecesidad(
+                  existenteId,
+                  Map.of(
+                      "tipo", "extraordinaria",
+                      "descripcion", s.necesidades().trim(),
+                      "cantidadRequerida", 50.0,
+                      "subcategoriaRequerida",
+                          Map.of(
+                              "nombre",
+                              "No Perecederos",
+                              "descripcion",
+                              "Categoría No Perecederos")));
+            }
+          }
+        } catch (Exception ex) {
+          log.warn("No se pudo sincronizar entidad Beneficiario para {}: {}", s.email(), ex.getMessage());
         }
       }
       redirectAttributes.addFlashAttribute(
@@ -1301,11 +1715,19 @@ public class AdminController {
     long comedoresAsistidos = donaciones > 0 ? Math.max(1, Math.min(donaciones, 5)) : 0;
     long entregasCompletadas = donaciones;
 
-    // 1. Obtener seguimiento de las donaciones del donante
+    // 1. Obtener seguimiento de las donaciones del donante y métricas reales
+    double sumaKilosReales = 0.0;
+    long entregasRealmenteCompletadas = 0L;
+    java.util.Set<String> comedoresConEntrega = new java.util.HashSet<>();
     List<Map<String, Object>> misDonaciones = new ArrayList<>();
     for (Map<String, Object> d : rawDonaciones) {
       if (d == null) continue;
       Map<String, Object> row = new HashMap<>(d);
+      if (d.get("cantidadTotal") instanceof Number cNum) {
+        sumaKilosReales += Math.max(0.0, cNum.doubleValue());
+      } else {
+        sumaKilosReales += 1.0;
+      }
       String est =
           d.get("estado") != null ? d.get("estado").toString().toUpperCase() : "EN_DEPOSITO";
       int etapa = 1;
@@ -1318,13 +1740,16 @@ public class AdminController {
             d.get("correoBeneficiario") != null
                 ? d.get("correoBeneficiario").toString()
                 : "Comedor Comunitario La Esperanza";
+        comedoresConEntrega.add(destinoLabel.toLowerCase());
       } else if ("ENTREGADA".equals(est)) {
         etapa = 3;
+        entregasRealmenteCompletadas++;
         estadoLabel = "Entregada en Destino (+25 pts)";
         destinoLabel =
             d.get("correoBeneficiario") != null
                 ? d.get("correoBeneficiario").toString()
                 : "Comedor Comunitario La Esperanza";
+        comedoresConEntrega.add(destinoLabel.toLowerCase());
       }
       row.put("etapaNumero", etapa);
       row.put("pasoActual", etapa);
@@ -1340,7 +1765,7 @@ public class AdminController {
     // Fallback resiliente si el microservicio de incentivos está despertando en Render Free Tier
     if (donaciones == 0 && !misDonaciones.isEmpty()) {
       donaciones = misDonaciones.size();
-      bienes = Math.max(bienes, donaciones * 5L);
+      bienes = Math.max(bienes, Math.round(sumaKilosReales));
       puntosReales = Math.max(puntosReales, (donaciones * 10L) + (bienes * 2L));
       if (puntosReales >= 350) {
         rangoNombre = "Líder Comunitario";
@@ -1363,52 +1788,62 @@ public class AdminController {
       progresoPct =
           proximoObjetivo > 0 ? (int) Math.min(100, (puntosReales * 100) / proximoObjetivo) : 0;
       isNuevoUsuario = false;
-      kilosTotales = (donaciones * 30) + (bienes * 8);
-      platosComida = kilosTotales * 4;
-      comedoresAsistidos = Math.max(1, Math.min(donaciones, 5));
-      entregasCompletadas = donaciones;
     }
 
-    // 2. Obtener buscador de causas activas y necesidades de ONGs
-    List<Map<String, Object>> beneficiariosEnriquecidos = new ArrayList<>();
+    if (!misDonaciones.isEmpty()) {
+      kilosTotales = Math.max(1L, Math.round(sumaKilosReales));
+      platosComida = kilosTotales * 4;
+      entregasCompletadas = entregasRealmenteCompletadas;
+      comedoresAsistidos =
+          !comedoresConEntrega.isEmpty()
+              ? comedoresConEntrega.size()
+              : (donacionesExitosas > 0 ? 1L : 0L);
+    }
+
+    // Insignias de hito comunitario verificadas cuando el servicio aún no asignó insignias al perfil
+    List<Map<String, Object>> insigniasEnriquecidas = new ArrayList<>(insignias);
+    if (insigniasEnriquecidas.isEmpty() && (donaciones > 0 || !misDonaciones.isEmpty())) {
+      String fechaHoy = java.time.LocalDate.now().toString();
+      insigniasEnriquecidas.add(
+          Map.of(
+              "nombre", "Primer Aporte",
+              "descripcion", "Registraste tu primera donación solidaria verificada en DonaTrack.",
+              "fechaObtencion", fechaHoy));
+      if (donacionesExitosas > 0 || entregasRealmenteCompletadas > 0) {
+        insigniasEnriquecidas.add(
+            Map.of(
+                "nombre", "Entrega Certificada",
+                "descripcion", "Tu aporte fue entregado en destino con remito digital firmado.",
+                "fechaObtencion", fechaHoy));
+      }
+    }
+
+    // 2. Obtener buscador de causas activas y necesidades de ONGs (incluyendo nuevas aprobadas)
+    List<Map<String, Object>> usuariosAuthDir =
+        authGateway != null ? authGateway.listarUsuarios() : Collections.emptyList();
+    List<Map<String, Object>> beneficiariosEnriquecidos =
+        enriquecerBeneficiariosConSolicitudes(beneficiarios, usuariosAuthDir, Collections.emptyList());
     List<Map<String, Object>> causasActivas = new ArrayList<>();
-    for (Map<String, Object> b : beneficiarios) {
-      if (b == null) continue;
-      Map<String, Object> bMap = new HashMap<>(b);
-      String bId = String.valueOf(b.get("id"));
-      String correo =
-          b.get("correoRepresentante") != null
-              ? b.get("correoRepresentante").toString()
-              : "contacto@comedor.org";
-      String nombreOrg =
-          ("b2222222-2222-4222-8222-222222222222".equalsIgnoreCase(bId)
-                  || correo.toLowerCase().contains("esperanza"))
-              ? "Comedor Comunitario La Esperanza"
-              : "Merendero & Hogar Solidario";
-      bMap.put("nombreLegible", nombreOrg);
-      bMap.put("correoRepresentante", correo);
-      bMap.put("fechaAlta", b.get("fechaAlta") != null ? b.get("fechaAlta") : "2026-10-30");
-
-      List<Map<String, Object>> necsRaw =
-          b.get("necesidadesDeclaradas") instanceof List<?> list
-              ? (List<Map<String, Object>>) list
+    for (Map<String, Object> bMap : beneficiariosEnriquecidos) {
+      String bId = String.valueOf(bMap.get("id"));
+      String nombreOrg = String.valueOf(bMap.get("nombreLegible"));
+      String correo = String.valueOf(bMap.get("correoRepresentante"));
+      String ubicOrg =
+          bMap.get("direccion") != null && !"-".equals(String.valueOf(bMap.get("direccion")))
+              ? String.valueOf(bMap.get("direccion"))
+              : "Buenos Aires, Argentina";
+      @SuppressWarnings("unchecked")
+      List<Map<String, Object>> necsClean =
+          bMap.get("necesidadesDetalle") instanceof List<?> l
+              ? (List<Map<String, Object>>) l
               : Collections.emptyList();
-      List<Map<String, Object>> necsClean = sanitizarNecesidades(necsRaw);
-      String necsTexto =
-          necsClean.stream()
-              .map(n -> String.valueOf(n.getOrDefault("subcategoria", "Alimentos")))
-              .distinct()
-              .collect(java.util.stream.Collectors.joining(", "));
-      bMap.put(
-          "necesidadesTexto", necsTexto.isBlank() ? "Alimentos No Perecederos y Ropa" : necsTexto);
-      beneficiariosEnriquecidos.add(bMap);
-
       for (Map<String, Object> n : necsClean) {
         Map<String, Object> causa = new HashMap<>();
+        causa.put("ongId", bId);
         causa.put("organizacion", nombreOrg);
         causa.put("ongNombre", nombreOrg);
         causa.put("correo", correo);
-        causa.put("ubicacion", "Buenos Aires, Argentina");
+        causa.put("ubicacion", ubicOrg);
         causa.put("categoria", n.getOrDefault("subcategoria", "No Perecederos"));
         causa.put(
             "descripcion", n.getOrDefault("descripcion", "Alimentos secos para raciones diarias"));
@@ -1420,6 +1855,7 @@ public class AdminController {
     // Asegurar causas comunitarias activas representativas para el buscador
     causasActivas.add(
         Map.of(
+            "ongId", "el-faro",
             "organizacion", "Comedor Comunitario El Faro",
             "ongNombre", "Comedor Comunitario El Faro",
             "correo", "coordinacion@elfaro.org.ar",
@@ -1430,6 +1866,7 @@ public class AdminController {
             "urgencia", "Alta (Urgente)"));
     causasActivas.add(
         Map.of(
+            "ongId", "los-gurises",
             "organizacion", "Hogar de Niñez Los Gurises",
             "ongNombre", "Hogar de Niñez Los Gurises",
             "correo", "recepcion@losgurises.org.ar",
@@ -1440,6 +1877,7 @@ public class AdminController {
             "urgencia", "Alta"));
     causasActivas.add(
         Map.of(
+            "ongId", "raices",
             "organizacion", "Fundación Raíces Solidarias",
             "ongNombre", "Fundación Raíces Solidarias",
             "correo", "logistica@raices.org.ar",
@@ -1450,6 +1888,7 @@ public class AdminController {
             "urgencia", "Media"));
     causasActivas.add(
         Map.of(
+            "ongId", "posta-sur",
             "organizacion", "Posta Sanitaria Barrial Sur",
             "ongNombre", "Posta Sanitaria Barrial Sur",
             "correo", "salud@postasur.org.ar",
@@ -1468,8 +1907,8 @@ public class AdminController {
     model.addAttribute("beneficiarios", beneficiariosEnriquecidos);
     model.addAttribute("causasActivas", causasActivas);
     model.addAttribute("metricas", metricas != null ? metricas : Collections.emptyMap());
-    model.addAttribute("insignias", insignias);
-    model.addAttribute("totalInsignias", insignias.size());
+    model.addAttribute("insignias", insigniasEnriquecidas);
+    model.addAttribute("totalInsignias", insigniasEnriquecidas.size());
     model.addAttribute("misiones", misionesNormalizadas);
     model.addAttribute("puntosReales", puntosReales);
     model.addAttribute("rangoNombre", rangoNombre);
@@ -1748,33 +2187,118 @@ public class AdminController {
       }
     }
     List<Map<String, Object>> enCamino = new ArrayList<>(enCaminoMap.values());
+    Collections.reverse(enCamino);
     List<Map<String, Object>> recibidas = new ArrayList<>(recibidasMap.values());
     return Map.of("enCamino", enCamino, "recibidas", recibidas);
   }
 
-  @GetMapping("/beneficiaria")
-  @PreAuthorize("hasRole('BENEFICIARIA') or hasRole('ADMIN')")
-  public String beneficiariaPanel(Model model, Authentication auth) {
-    UUID beneficiarioId = resolverBeneficiarioId(auth);
-    List<Map<String, Object>> rawNec = donacionesGateway.obtenerNecesidades(beneficiarioId);
-    List<Map<String, Object>> necesidades = sanitizarNecesidades(rawNec);
-
-    List<Map<String, Object>> rutas = logisticaGateway.listarRutas();
-    Map<String, List<Map<String, Object>>> agrupadas = extraerEntregas(rutas);
-    List<Map<String, Object>> enCamino = agrupadas.get("enCamino");
-    List<Map<String, Object>> recibidas = agrupadas.get("recibidas");
-
-    double kilosRecibidos = 0;
-    for (Map<String, Object> r : recibidas) {
-      if (r.get("peso") instanceof Number n) {
-        kilosRecibidos += n.doubleValue();
+  private List<Map<String, Object>> filtrarEntregasDeBeneficiario(
+      List<Map<String, Object>> entregas,
+      UUID beneficiarioId,
+      String emailOrganizacion) {
+    if (entregas == null
+        || entregas.isEmpty()
+        || beneficiarioId == null
+        || DEFAULT_BENEFICIARIA_ID.equals(beneficiarioId)) {
+      return entregas != null ? entregas : Collections.emptyList();
+    }
+    List<Map<String, Object>> todasDonaciones = donacionesGateway.listarDonaciones(null, null);
+    java.util.Set<String> donacionIdsPropios = new java.util.HashSet<>();
+    if (todasDonaciones != null) {
+      for (Map<String, Object> d : todasDonaciones) {
+        if (d == null || d.get("id") == null) continue;
+        String dBenefId = d.get("idBeneficiario") != null ? d.get("idBeneficiario").toString() : "";
+        String dBenefEmail =
+            d.get("correoBeneficiario") != null ? d.get("correoBeneficiario").toString() : "";
+        boolean matchId = beneficiarioId.toString().equalsIgnoreCase(dBenefId);
+        boolean matchEmail =
+            emailOrganizacion != null
+                && !emailOrganizacion.isBlank()
+                && emailOrganizacion.equalsIgnoreCase(dBenefEmail);
+        if (matchId || matchEmail) {
+          donacionIdsPropios.add(d.get("id").toString().toLowerCase());
+        }
       }
     }
+    return entregas.stream()
+        .filter(
+            e ->
+                e != null
+                    && e.get("idEntrega") != null
+                    && donacionIdsPropios.contains(e.get("idEntrega").toString().toLowerCase()))
+        .toList();
+  }
 
+  private Map<String, String> resolverDatosOrganizacionBeneficiaria(
+      UUID beneficiarioId, Authentication auth) {
     String orgNombre = "Fundación Esperanza";
     String cuitOrg = "30-71482910-4";
     String emailOrg = "contacto@fundacionesperanza.org";
     String direccionOrg = "Calle 50 742, La Plata, Buenos Aires";
+
+    if (!DEFAULT_BENEFICIARIA_ID.equals(beneficiarioId)) {
+      List<Map<String, Object>> usuariosAuth =
+          authGateway != null ? authGateway.listarUsuarios() : Collections.emptyList();
+      List<Map<String, Object>> enriched =
+          enriquecerBeneficiariosConSolicitudes(
+              donacionesGateway.obtenerBeneficiarios(), usuariosAuth, Collections.emptyList());
+      Map<String, Object> match = null;
+      for (Map<String, Object> b : enriched) {
+        if (b != null && beneficiarioId.toString().equalsIgnoreCase(String.valueOf(b.get("id")))) {
+          match = b;
+          break;
+        }
+      }
+      if (match != null) {
+        orgNombre = String.valueOf(match.getOrDefault("nombreOrganizacion", orgNombre));
+        if (match.get("correoRepresentante") != null) {
+          emailOrg = String.valueOf(match.get("correoRepresentante"));
+        }
+        cuitOrg =
+            match.get("cuit") != null && !"-".equals(String.valueOf(match.get("cuit")))
+                ? String.valueOf(match.get("cuit"))
+                : "En verificación";
+        direccionOrg =
+            match.get("direccion") != null && !"-".equals(String.valueOf(match.get("direccion")))
+                ? String.valueOf(match.get("direccion"))
+                : "Buenos Aires, Argentina";
+        return Map.of(
+            "nombre", orgNombre,
+            "cuit", cuitOrg,
+            "email", emailOrg,
+            "direccion", direccionOrg);
+      }
+
+      if (auth != null) {
+        String principalName = auth.getName() != null ? auth.getName() : "Organización";
+        orgNombre = principalName;
+        emailOrg = principalName + "@donatrack.org";
+        if (auth instanceof JwtAuthenticationToken jwt) {
+          if (jwt.getToken().getClaimAsString("name") != null) {
+            orgNombre = jwt.getToken().getClaimAsString("name");
+          }
+          if (jwt.getToken().getClaimAsString("email") != null) {
+            emailOrg = jwt.getToken().getClaimAsString("email");
+          }
+        }
+        for (var s : solicitudOngService.listarTodas()) {
+          if (s.email() != null && s.email().equalsIgnoreCase(emailOrg)) {
+            orgNombre = s.nombreOng();
+            cuitOrg = s.cuit();
+            direccionOrg = s.direccion();
+            break;
+          }
+        }
+        return Map.of(
+            "nombre", orgNombre,
+            "cuit", cuitOrg.equals("30-71482910-4") ? "En verificación" : cuitOrg,
+            "email", emailOrg,
+            "direccion",
+                direccionOrg.equals("Calle 50 742, La Plata, Buenos Aires")
+                    ? "Buenos Aires, Argentina"
+                    : direccionOrg);
+      }
+    }
 
     Map<String, Object> benInfo = donacionesGateway.obtenerBeneficiario(beneficiarioId);
     if (benInfo != null && !benInfo.isEmpty()) {
@@ -1806,12 +2330,45 @@ public class AdminController {
           }
         }
       }
-    } else if (auth.getName() != null && auth.getName().equalsIgnoreCase("admin")) {
+    } else if (auth != null && auth.getName() != null && auth.getName().equalsIgnoreCase("admin")) {
       orgNombre = "Fundación Esperanza (Vista Admin)";
-    } else if (auth.getName() != null && !auth.getName().isBlank()) {
-      orgNombre = "Organización " + auth.getName();
     }
 
+    return Map.of(
+        "nombre", orgNombre,
+        "cuit", cuitOrg,
+        "email", emailOrg,
+        "direccion", direccionOrg);
+  }
+
+  @GetMapping("/beneficiaria")
+  @PreAuthorize("hasRole('BENEFICIARIA') or hasRole('ADMIN')")
+  public String beneficiariaPanel(Model model, Authentication auth) {
+    UUID beneficiarioId = resolverBeneficiarioId(auth);
+    Map<String, String> orgDatos = resolverDatosOrganizacionBeneficiaria(beneficiarioId, auth);
+    String orgNombre = orgDatos.get("nombre");
+    String cuitOrg = orgDatos.get("cuit");
+    String emailOrg = orgDatos.get("email");
+    String direccionOrg = orgDatos.get("direccion");
+
+    List<Map<String, Object>> rawNec = donacionesGateway.obtenerNecesidades(beneficiarioId);
+    List<Map<String, Object>> necesidades = sanitizarNecesidades(rawNec);
+
+    List<Map<String, Object>> rutas = logisticaGateway.listarRutas();
+    Map<String, List<Map<String, Object>>> agrupadas = extraerEntregas(rutas);
+    List<Map<String, Object>> enCamino =
+        filtrarEntregasDeBeneficiario(agrupadas.get("enCamino"), beneficiarioId, emailOrg);
+    List<Map<String, Object>> recibidas =
+        filtrarEntregasDeBeneficiario(agrupadas.get("recibidas"), beneficiarioId, emailOrg);
+
+    double kilosRecibidos = 0;
+    for (Map<String, Object> r : recibidas) {
+      if (r.get("peso") instanceof Number n) {
+        kilosRecibidos += n.doubleValue();
+      }
+    }
+
+    model.addAttribute("beneficiarioId", beneficiarioId.toString());
     model.addAttribute("nombreUsuario", auth.getName());
     model.addAttribute("nombreOrganizacion", orgNombre);
     model.addAttribute("cuitOrganizacion", cuitOrg);
@@ -1871,11 +2428,17 @@ public class AdminController {
 
   @GetMapping("/beneficiaria/entregas")
   @PreAuthorize("hasRole('BENEFICIARIA') or hasRole('ADMIN')")
-  public String beneficiariaEntregas(Model model) {
+  public String beneficiariaEntregas(Model model, Authentication auth) {
+    UUID beneficiarioId = resolverBeneficiarioId(auth);
+    Map<String, String> orgDatos = resolverDatosOrganizacionBeneficiaria(beneficiarioId, auth);
+    String emailOrg = orgDatos.get("email");
+
     List<Map<String, Object>> rutas = logisticaGateway.listarRutas();
     Map<String, List<Map<String, Object>>> agrupadas = extraerEntregas(rutas);
-    List<Map<String, Object>> entregasEnCamino = agrupadas.get("enCamino");
-    List<Map<String, Object>> entregasRecibidas = agrupadas.get("recibidas");
+    List<Map<String, Object>> entregasEnCamino =
+        filtrarEntregasDeBeneficiario(agrupadas.get("enCamino"), beneficiarioId, emailOrg);
+    List<Map<String, Object>> entregasRecibidas =
+        filtrarEntregasDeBeneficiario(agrupadas.get("recibidas"), beneficiarioId, emailOrg);
 
     model.addAttribute("rutas", rutas);
     model.addAttribute("entregasEnCamino", entregasEnCamino);
@@ -1897,8 +2460,29 @@ public class AdminController {
       List<String> fotos = new ArrayList<>();
       if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
         String s3Url = logisticaGateway.subirFotoComprobante(idDonacion, fotoArchivo);
-        if (s3Url != null && !s3Url.isBlank()) {
+        if (s3Url != null
+            && !s3Url.isBlank()
+            && !s3Url.contains("remito-3300")
+            && !s3Url.contains("remito-placeholder")) {
           fotos.add(s3Url);
+        } else {
+          try {
+            byte[] fileBytes = fotoArchivo.getBytes();
+            if (fileBytes.length > 0 && fileBytes.length <= 2_000_000) {
+              String mime =
+                  fotoArchivo.getContentType() != null && !fotoArchivo.getContentType().isBlank()
+                      ? fotoArchivo.getContentType()
+                      : "image/png";
+              fotos.add(
+                  "data:" + mime + ";base64," + java.util.Base64.getEncoder().encodeToString(fileBytes));
+            } else if (s3Url != null && !s3Url.isBlank()) {
+              fotos.add(s3Url);
+            }
+          } catch (Exception ignored) {
+            if (s3Url != null && !s3Url.isBlank()) {
+              fotos.add(s3Url);
+            }
+          }
         }
       }
       if (fotos.isEmpty() && fotoUrl != null && !fotoUrl.isBlank()) {
@@ -1919,6 +2503,366 @@ public class AdminController {
           "flashError", "No se pudo confirmar la recepción de la entrega. Verificá los datos e intentá nuevamente.");
     }
     return "redirect:/app/beneficiaria/entregas";
+  }
+
+  @GetMapping("/organizaciones/{id}")
+  @PreAuthorize("hasRole('DONANTE') or hasRole('ADMIN') or hasRole('BENEFICIARIA')")
+  public String organizacionPerfil(
+      @PathVariable("id") String id,
+      @RequestParam(name = "nombre", required = false) String nombreParam,
+      Model model,
+      Authentication auth) {
+    List<Map<String, Object>> usuariosAuth =
+        authGateway != null ? authGateway.listarUsuarios() : Collections.emptyList();
+    List<Map<String, Object>> beneficiarios =
+        enriquecerBeneficiariosConSolicitudes(
+            donacionesGateway.obtenerBeneficiarios(), usuariosAuth, Collections.emptyList());
+    Map<String, Object> matchedBenef = null;
+    if (beneficiarios != null) {
+      for (Map<String, Object> b : beneficiarios) {
+        if (b == null) continue;
+        String bId = b.get("id") != null ? b.get("id").toString() : "";
+        String correo =
+            b.get("correoRepresentante") != null ? b.get("correoRepresentante").toString() : "";
+        String nom =
+            b.get("nombreOrganizacion") != null ? b.get("nombreOrganizacion").toString() : "";
+        if (bId.equalsIgnoreCase(id)
+            || (nombreParam != null
+                && !nombreParam.isBlank()
+                && (correo.toLowerCase().contains(nombreParam.toLowerCase())
+                    || nom.equalsIgnoreCase(nombreParam.trim())))) {
+          matchedBenef = b;
+          break;
+        }
+      }
+    }
+
+    String lookupKey =
+        ((id != null ? id : "") + " " + (nombreParam != null ? nombreParam : "")).toLowerCase();
+    Map<String, Object> org = new LinkedHashMap<>();
+    org.put("id", id);
+
+    boolean esNuevaOngAprobada = false;
+    if (matchedBenef != null
+        && !"b2222222-2222-4222-8222-222222222222".equalsIgnoreCase(String.valueOf(matchedBenef.get("id")))
+        && !lookupKey.contains("faro")
+        && !lookupKey.contains("gurises")
+        && !lookupKey.contains("raices")
+        && !lookupKey.contains("posta")
+        && !lookupKey.contains("esperanza")) {
+      esNuevaOngAprobada = true;
+      String resolvedName =
+          String.valueOf(
+              matchedBenef.getOrDefault(
+                  "nombreOrganizacion",
+                  nombreParam != null && !nombreParam.isBlank()
+                      ? nombreParam
+                      : "Organización Verificada"));
+      String correo =
+          String.valueOf(matchedBenef.getOrDefault("correoRepresentante", "contacto@ong.org"));
+      org.put("nombre", resolvedName);
+      org.put(
+          "tipo",
+          String.valueOf(matchedBenef.getOrDefault("tipoEntidad", "Organización Verificada"))
+              + " · Red DonaTrack");
+      org.put(
+          "zona",
+          String.valueOf(matchedBenef.getOrDefault("direccion", "Buenos Aires, Argentina")));
+      org.put(
+          "direccion",
+          String.valueOf(matchedBenef.getOrDefault("direccion", "Buenos Aires, Argentina")));
+      org.put("cuit", String.valueOf(matchedBenef.getOrDefault("cuit", "Verificado")));
+      org.put("responsable", String.valueOf(matchedBenef.getOrDefault("responsable", resolvedName)));
+      org.put("correo", correo);
+      org.put("telefono", String.valueOf(matchedBenef.getOrDefault("telefono", "+54 11 5555-0100")));
+      org.put("anioFundacion", "2026");
+      org.put("familiasAsistidas", 120);
+      org.put("entregasVerificadas", 0);
+      org.put("horarioAtencion", "Lunes a Sábados · 08:30 a 18:00 hs");
+      org.put(
+          "resumenInstitucional",
+          resolvedName
+              + " integra la red verificada de DonaTrack articulando asistencia directa y trazable para familias de su comunidad.");
+      org.put(
+          "mision",
+          "Garantizar asistencia alimentaria, abrigo e insumos esenciales con total transparencia y cercanía territorial.");
+      org.put(
+          "vision",
+          "Construir una red solidaria auditada donde cada aporte llegue directamente a quienes más lo necesitan.");
+    } else if (lookupKey.contains("faro") || lookupKey.contains("el-faro")) {
+      org.put("nombre", "Comedor Comunitario El Faro");
+      org.put("tipo", "Comedor Comunitario · Personería Jurídica #4821");
+      org.put("zona", "Palermo / Barracas, CABA");
+      org.put("direccion", "Av. Santa Fe 3200, CABA");
+      org.put("cuit", "30-71520394-8");
+      org.put("responsable", "Juan Pablo Méndez");
+      org.put("correo", "coordinacion@elfaro.org.ar");
+      org.put("telefono", "+54 11 4789-2210");
+      org.put("anioFundacion", "2014");
+      org.put("familiasAsistidas", 220);
+      org.put("entregasVerificadas", 64);
+      org.put("horarioAtencion", "Lunes a Sábados · 08:30 a 18:00 hs");
+      org.put(
+          "resumenInstitucional",
+          "Comedor Comunitario El Faro brinda asistencia alimentaria diaria, apoyo escolar y contención comunitaria a 220 familias del corredor norte y sur de la Ciudad Autónoma de Buenos Aires.");
+      org.put(
+          "mision",
+          "Garantizar platos nutritivos diarios y acompañamiento integral a niñas, niños y adultos mayores en situación de vulnerabilidad mediante una gestión logística transparente y participativa.");
+      org.put(
+          "vision",
+          "Construir redes barriales sostenibles donde cada donación se convierta en oportunidades concretas de inclusión alimentaria, educativa y laboral.");
+    } else if (lookupKey.contains("gurises")) {
+      org.put("nombre", "Hogar de Niñez Los Gurises");
+      org.put("tipo", "Hogar Convivencial de Niñez · Registro Provincial #1192");
+      org.put("zona", "La Matanza, Provincia de Buenos Aires");
+      org.put("direccion", "Av. Brigadier Juan Manuel de Rosas 4820, La Matanza");
+      org.put("cuit", "30-71690211-3");
+      org.put("responsable", "Valeria Sosa");
+      org.put("correo", "recepcion@losgurises.org.ar");
+      org.put("telefono", "+54 11 4620-8834");
+      org.put("anioFundacion", "2011");
+      org.put("familiasAsistidas", 145);
+      org.put("entregasVerificadas", 49);
+      org.put("horarioAtencion", "Todos los días · 09:00 a 19:00 hs");
+      org.put(
+          "resumenInstitucional",
+          "Hogar de Niñez Los Gurises acompaña a infancias y adolescentes en La Matanza brindando abrigo, alimentación equilibrada, recreación y resguardo afectivo durante todo el año.");
+      org.put(
+          "mision",
+          "Proteger los derechos de niñas y niños proporcionando vestimenta adecuada, alimentación saludable y espacios seguros de cuidado y aprendizaje.");
+      org.put(
+          "vision",
+          "Ser un hogar de puertas abiertas articulado con donantes y voluntarios que asegure un crecimiento digno y pleno para cada niño de la comunidad.");
+    } else if (lookupKey.contains("raices")) {
+      org.put("nombre", "Fundación Raíces Solidarias");
+      org.put("tipo", "Fundación Social & Educativa · IGJ #8932");
+      org.put("zona", "Avellaneda y Zona Sur, PBA");
+      org.put("direccion", "Av. Mitre 1450, Avellaneda");
+      org.put("cuit", "30-71349012-7");
+      org.put("responsable", "Sofía Ramírez");
+      org.put("correo", "logistica@raices.org.ar");
+      org.put("telefono", "+54 11 4201-5520");
+      org.put("anioFundacion", "2016");
+      org.put("familiasAsistidas", 310);
+      org.put("entregasVerificadas", 82);
+      org.put("horarioAtencion", "Lunes a Viernes · 08:00 a 17:30 hs");
+      org.put(
+          "resumenInstitucional",
+          "Fundación Raíces Solidarias coordina centros de apoyo escolar, roperos comunitarios y distribución de kits de higiene familiar para 310 hogares del sur del conurbano.");
+      org.put(
+          "mision",
+          "Fortalecer la autonomía de las familias a través de insumos esenciales de higiene, educación y equipamiento comunitario auditado de punta a punta.");
+      org.put(
+          "vision",
+          "Una sociedad solidaria con puentes logísticos confiables entre quienes pueden aportar y las escuelas y centros comunitarios que más lo necesitan.");
+    } else if (lookupKey.contains("posta")) {
+      org.put("nombre", "Posta Sanitaria Barrial Sur");
+      org.put("tipo", "Centro Comunitario de Salud · Reg. Sanitario #304");
+      org.put("zona", "Quilmes, Provincia de Buenos Aires");
+      org.put("direccion", "Av. Calchaquí 2910, Quilmes");
+      org.put("cuit", "30-71843209-1");
+      org.put("responsable", "Dr. Hernán Quiroga");
+      org.put("correo", "salud@postasur.org.ar");
+      org.put("telefono", "+54 11 4257-9040");
+      org.put("anioFundacion", "2018");
+      org.put("familiasAsistidas", 190);
+      org.put("entregasVerificadas", 38);
+      org.put("horarioAtencion", "Lunes a Sábados · 08:00 a 16:00 hs");
+      org.put(
+          "resumenInstitucional",
+          "Posta Sanitaria Barrial Sur asiste de manera gratuita a vecinos de Quilmes con botiquines de primeros auxilios, elementos de higiene sanitaria y control preventivo comunitario.");
+      org.put(
+          "mision",
+          "Acercar atención primaria, insumos de curación y cuidado sanitario básico a barrios vulnerables con trazabilidad médica garantizada.");
+      org.put(
+          "vision",
+          "Garantizar que ningún barrio carezca de elementos esenciales de prevención y primeros auxilios mediante alianzas solidarias trazables.");
+    } else {
+      String resolvedName =
+          (nombreParam != null && !nombreParam.isBlank())
+              ? nombreParam
+              : "Comedor Comunitario La Esperanza";
+      String correo =
+          matchedBenef != null && matchedBenef.get("correoRepresentante") != null
+              ? matchedBenef.get("correoRepresentante").toString()
+              : "contacto@fundacionesperanza.org";
+      org.put("nombre", resolvedName);
+      org.put("tipo", "Comedor y Centro Comunitario Verificado · DonaTrack");
+      org.put("zona", "La Plata, Provincia de Buenos Aires");
+      org.put("direccion", "Calle 50 742, La Plata, Buenos Aires");
+      org.put("cuit", "30-71482910-4");
+      org.put("responsable", "Marta González");
+      org.put("correo", correo);
+      org.put("telefono", "+54 221 424-8812");
+      org.put("anioFundacion", "2015");
+      org.put("familiasAsistidas", 260);
+      org.put("entregasVerificadas", 71);
+      org.put("horarioAtencion", "Lunes a Sábados · 08:00 a 18:00 hs");
+      org.put(
+          "resumenInstitucional",
+          resolvedName
+              + " trabaja diariamente junto a familias de la comunidad organizando viandas nutritivas, merenderos y entrega de abrigo e insumos escolares con rendición pública.");
+      org.put(
+          "mision",
+          "Acompañar a familias, infancias y adultos mayores brindando asistencia alimentaria y material con respeto, cercanía territorial y total transparencia.");
+      org.put(
+          "vision",
+          "Consolidar una comunidad integrada y solidaria donde cada donante conozca exactamente el destino y el impacto de su aporte.");
+    }
+
+    org.put(
+        "valores",
+        List.of(
+            Map.of(
+                "titulo", "Transparencia Total",
+                "detalle", "Cada carga recibida cuenta con remito digital firmado y fotografía al pie del camión."),
+            Map.of(
+                "titulo", "Cercanía Territorial",
+                "detalle", "Atención directa por referentes barriales que conocen las urgencias reales de cada familia."),
+            Map.of(
+                "titulo", "Dignidad e Inclusión",
+                "detalle", "Recepción ordenada con control bromatológico y clasificación por grupo etario."),
+            Map.of(
+                "titulo", "Trabajo en Red",
+                "detalle", "Articulación activa con escuelas, voluntarios y transportistas solidarios de DonaTrack.")));
+
+    org.put(
+        "fotos",
+        List.of(
+            Map.of(
+                "url", "/img/org-sede.jpg",
+                "titulo", "Sede y Comedor Comunitario",
+                "caption", "Espacio de recepción, almacenamiento ordenado y preparación diaria de raciones."),
+            Map.of(
+                "url", "/img/org-despensa.jpg",
+                "titulo", "Clasificación y Acopio Auditado",
+                "caption", "Voluntarios revisando fechas de vencimiento y embalaje por categoría."),
+            Map.of(
+                "url", "/img/org-entrega.jpg",
+                "titulo", "Recepción al Pie del Camión",
+                "caption", "Descarga logística acompañada por el referente institucional con acta digital.")));
+
+    List<Map<String, Object>> necesidades = new ArrayList<>();
+    if (matchedBenef != null && matchedBenef.get("necesidadesDeclaradas") instanceof List<?> necRaw) {
+      @SuppressWarnings("unchecked")
+      List<Map<String, Object>> castNec = (List<Map<String, Object>>) necRaw;
+      necesidades.addAll(sanitizarNecesidades(castNec));
+    }
+    if (necesidades.isEmpty()) {
+      necesidades =
+          List.of(
+              Map.of(
+                  "descripcion", "Fideos secos, arroz largo fino y puré de tomate",
+                  "cantidad", "120 kg",
+                  "subcategoria", "No Perecederos",
+                  "tipo", "Extraordinaria"),
+              Map.of(
+                  "descripcion", "Leche larga vida o en polvo fortificada",
+                  "cantidad", "80 litros",
+                  "subcategoria", "No Perecederos",
+                  "tipo", "Extraordinaria"),
+              Map.of(
+                  "descripcion", "Frazadas polares y camperas infantiles de invierno",
+                  "cantidad", "45 prendas",
+                  "subcategoria", "Abrigo",
+                  "tipo", "Ordinaria"));
+    }
+    org.put("necesidadesActivas", necesidades);
+
+    List<Map<String, Object>> historial = new ArrayList<>();
+    try {
+      List<Map<String, Object>> donaciones = donacionesGateway.listarDonaciones(null, null);
+      if (donaciones != null) {
+        for (Map<String, Object> d : donaciones) {
+          if (d == null) continue;
+          String dId = d.get("id") != null ? d.get("id").toString() : UUID.randomUUID().toString();
+          String codigo =
+              d.get("codigoCorto") != null
+                  ? d.get("codigoCorto").toString()
+                  : "#DT-" + (dId.length() >= 4 ? dId.substring(0, 4).toUpperCase() : "0001");
+          String correoBen =
+              d.get("correoBeneficiario") != null ? d.get("correoBeneficiario").toString() : "";
+          String benefIdStr =
+              d.get("idBeneficiario") != null ? d.get("idBeneficiario").toString() : "";
+          boolean matchesOrg =
+              (id != null && id.equalsIgnoreCase(benefIdStr))
+                  || (!correoBen.isBlank()
+                      && String.valueOf(org.get("correo")).equalsIgnoreCase(correoBen));
+          if (matchesOrg && historial.size() < 6) {
+            historial.add(
+                Map.of(
+                    "codigo", codigo,
+                    "fecha",
+                        d.get("fechaCreacion") != null
+                            ? d.get("fechaCreacion").toString()
+                            : "2026-11-10",
+                    "detalle",
+                        d.get("descripcion") != null
+                            ? d.get("descripcion").toString()
+                            : "Insumos comunitarios",
+                    "subcategoria",
+                        d.get("subcategoria") != null
+                            ? d.get("subcategoria").toString()
+                            : "Alimentos",
+                    "estado",
+                        d.get("estado") != null ? d.get("estado").toString() : "ENTREGADA",
+                    "remitoUrl",
+                        "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"));
+          }
+        }
+      }
+    } catch (Exception ignored) {
+    }
+    if (historial.isEmpty() && !esNuevaOngAprobada) {
+      historial =
+          List.of(
+              Map.of(
+                  "codigo", "#DT-3300",
+                  "fecha", "2026-11-12",
+                  "detalle", "85 kg · Canasta de alimentos secos y aceite",
+                  "subcategoria", "Alimentos No Perecederos",
+                  "estado", "ENTREGADA",
+                  "remitoUrl",
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"),
+              Map.of(
+                  "codigo", "#DT-3200",
+                  "fecha", "2026-10-28",
+                  "detalle", "250 kg · Lote de leche larga vida y legumbres",
+                  "subcategoria", "Alimentos No Perecederos",
+                  "estado", "ENTREGADA",
+                  "remitoUrl",
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"),
+              Map.of(
+                  "codigo", "#DT-2418",
+                  "fecha", "2026-10-14",
+                  "detalle", "40 prendas · Camperas de abrigo y frazadas térmicas",
+                  "subcategoria", "Abrigo",
+                  "estado", "ENTREGADA",
+                  "remitoUrl",
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"));
+    } else if (esNuevaOngAprobada) {
+      long entregadasReales =
+          historial.stream()
+              .filter(h -> "ENTREGADA".equalsIgnoreCase(String.valueOf(h.get("estado"))))
+              .count();
+      org.put("entregasVerificadas", entregadasReales);
+    }
+    org.put("historialDonaciones", historial);
+
+    String volverUrl = "/app/donante?tab=directorio";
+    if (auth != null
+        && auth.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
+      volverUrl = "/app/admin/matchmaking";
+    } else if (auth != null
+        && auth.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_BENEFICIARIA".equals(a.getAuthority()))) {
+      volverUrl = "/app/beneficiaria";
+    }
+
+    model.addAttribute("org", org);
+    model.addAttribute("volverUrl", volverUrl);
+    return "admin/donante/organizacion-detalle";
   }
 
   private String normalizarGrupoSubcategoria(String raw) {

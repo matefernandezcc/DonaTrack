@@ -13,5 +13,10 @@ public record RecepcionDepositoRequest(
     @NotNull @Positive(message = "Cantidad debe ser mayor a cero") Double cantidad,
     @NotBlank String unidadMedicion,
     @NotBlank String nombreSubcategoria,
-    boolean esUsado,
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaVencimiento) {}
+    Boolean esUsado,
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaVencimiento) {
+
+  public boolean esUsadoValue() {
+    return Boolean.TRUE.equals(esUsado);
+  }
+}

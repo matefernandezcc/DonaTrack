@@ -30,6 +30,6 @@ public class FotoEntity {
   @Column(name = "descripcion")
   private String descripcion;
 
-  @Column(name = "url", length = 500)
+  @Column(name = "url", columnDefinition = "TEXT")
   private String url;
 }

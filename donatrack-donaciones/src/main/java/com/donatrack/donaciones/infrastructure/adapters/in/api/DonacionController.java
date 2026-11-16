@@ -329,7 +329,14 @@ public class DonacionController {
 
     UUID idDonante = resolverPersonaDonanteId(id);
 
-    int cantidadBienes = Math.max(1, donacion.getBienes().size());
+    int cantidadBienes =
+        (int)
+            Math.max(
+                1,
+                Math.round(
+                    donacion.getBienes() != null
+                        ? donacion.getBienes().stream().mapToDouble(b -> b.getCantidad()).sum()
+                        : 1.0));
     List<String> categorias = donacion.getCategoriasString();
     if (categorias.isEmpty()) {
       categorias = List.of("Alimentos");
@@ -431,7 +438,12 @@ public class DonacionController {
               }
             }
           }
-          double pesoTotal = Math.max(1, donacion.getBienes().size()) * 2.5;
+          double sumaCantidad =
+              donacion.getBienes() != null
+                  ? donacion.getBienes().stream().mapToDouble(b -> b.getCantidad()).sum()
+                  : 0.0;
+          double pesoTotal =
+              sumaCantidad > 0 ? sumaCantidad : Math.max(1, donacion.getBienes().size()) * 2.5;
           double volumenTotal = Math.max(1, donacion.getBienes().size()) * 0.5;
           logisticaPort.solicitarRetiro(
               donacion.getId(), pesoTotal, volumenTotal, calle, altura, localidad);
@@ -479,7 +491,12 @@ public class DonacionController {
         donacionRepository.guardar(donacion);
       }
       if (!donacion.getBienes().isEmpty()) {
-        cantidadBienes = donacion.getBienes().size();
+        double sumaBienes =
+            donacion.getBienes().stream().mapToDouble(b -> b.getCantidad()).sum();
+        cantidadBienes =
+            sumaBienes > 0
+                ? (int) Math.max(1, Math.round(sumaBienes))
+                : donacion.getBienes().size();
       }
       if (!donacion.getCategoriasString().isEmpty()) {
         categorias = donacion.getCategoriasString();

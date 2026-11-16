@@ -49,6 +49,15 @@ public class DonacionesGateway {
     }
   }
 
+  public Map<String, Object> crearBeneficiario(Map<String, Object> payload) {
+    return donacionesClient
+        .post()
+        .uri("/api/beneficiarios")
+        .body(payload)
+        .retrieve()
+        .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+  }
+
   public Map<String, Object> obtenerBeneficiario(UUID beneficiarioId) {
     try {
       return donacionesClient

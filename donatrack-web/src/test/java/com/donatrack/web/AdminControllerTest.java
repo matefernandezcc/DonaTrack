@@ -1112,6 +1112,74 @@ class AdminControllerTest {
 
     @Test
     @DisplayName(
+        "POST /app/admin/donaciones/recepcion sin parámetro esUsado (checkbox desmarcado) procesa exitosamente como false")
+    void testRegistrarRecepcionDonacionSinCheckboxEsUsado_procesaExitosamenteComoFalse()
+        throws Exception {
+      UUID donanteId = UUID.randomUUID();
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/recepcion")
+                  .principal(adminAuth)
+                  .param("idDonante", donanteId.toString())
+                  .param("descripcion", "Arroz largo fino 1kg")
+                  .param("cantidad", "10.0")
+                  .param("unidadMedicion", "kg")
+                  .param("nombreSubcategoria", "Alimentos No Perecederos")
+                  .param("fechaVencimiento", "2027-06-30"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/matchmaking"))
+          .andExpect(
+              flash()
+                  .attribute("flashOk", "Donación recibida e ingresada a depósito correctamente."));
+
+      verify(donacionesGateway, times(1))
+          .crearRecepcion(
+              argThat(
+                  payload -> {
+                    if (!(payload.get("bienesBrutos") instanceof List<?> list) || list.isEmpty()) {
+                      return false;
+                    }
+                    if (list.get(0) instanceof Map<?, ?> bien) {
+                      return Boolean.FALSE.equals(bien.get("esUsado"));
+                    }
+                    return false;
+                  }));
+    }
+
+    @Test
+    @DisplayName(
+        "GET /app/organizaciones/{id} retorna perfil institucional completo con misión, visión, valores, fotos e historial")
+    void testOrganizacionPerfilDetalle() throws Exception {
+      UUID orgUuid = UUID.fromString("b2222222-2222-4222-8222-222222222222");
+      when(donacionesGateway.obtenerBeneficiarios())
+          .thenReturn(
+              List.of(
+                  Map.of(
+                      "id", orgUuid.toString(),
+                      "correoRepresentante", "esperanza@donatrack.org",
+                      "necesidadesDeclaradas", List.of())));
+      when(donacionesGateway.listarDonaciones(null, null)).thenReturn(Collections.emptyList());
+
+      mockMvc
+          .perform(
+              get("/app/organizaciones/" + orgUuid)
+                  .param("nombre", "Comedor Comunitario La Esperanza")
+                  .principal(donanteAuth))
+          .andExpect(status().isOk())
+          .andExpect(view().name("admin/donante/organizacion-detalle"))
+          .andExpect(model().attribute("volverUrl", "/app/donante?tab=directorio"))
+          .andExpect(model().attribute("org", hasEntry("nombre", "Comedor Comunitario La Esperanza")))
+          .andExpect(model().attribute("org", hasKey("mision")))
+          .andExpect(model().attribute("org", hasKey("vision")))
+          .andExpect(model().attribute("org", hasKey("valores")))
+          .andExpect(model().attribute("org", hasKey("fotos")))
+          .andExpect(model().attribute("org", hasKey("necesidadesActivas")))
+          .andExpect(model().attribute("org", hasKey("historialDonaciones")));
+    }
+
+    @Test
+    @DisplayName(
         "POST /app/admin/donaciones/recepcion con campos inválidos retorna formulario con error")
     void testRegistrarRecepcionDonacionInvalido() throws Exception {
       when(donacionesGateway.obtenerPersonas()).thenReturn(Collections.emptyList());

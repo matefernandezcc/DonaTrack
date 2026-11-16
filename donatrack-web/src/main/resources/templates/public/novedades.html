@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-public :: layout(~{::title}, ~{::main}, ~{::scripts})}">
+<head>
+  <title>DonaTrack · Novedades y Comunidad</title>
+</head>
+<body>
+  <main id="contenido">
+    <section class="novedades-sec" style="padding: 72px 0 96px;">
+      <div class="container">
+        <div class="section-head section-head--row" style="margin-bottom: 36px;">
+          <div>
+            <span class="eyebrow eyebrow--green">Actualidad de la Red</span>
+            <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 10px;">Novedades</h1>
+            <p class="section-head__lead" style="margin-bottom: 0;">
+              Jornadas solidarias, campañas activas, nuevas organizaciones verificadas e historias de impacto en todo el país.
+            </p>
+          </div>
+          <a th:href="@{/login}" class="btn btn--primary btn--sm">Donar aquí</a>
+        </div>
+
+        <!-- Grilla de Novedades -->
+        <div class="novedades-grid" th:if="${novedades != null and not #lists.isEmpty(novedades)}">
+          <article class="novedad-card" th:each="n : ${novedades}">
+            <a class="novedad-card__media" th:href="@{/novedades/{id}(id=${n['id']})}">
+              <img class="novedad-card__img" th:src="@{${n['imagen']}}" th:alt="${n['titulo']}" loading="lazy" />
+            </a>
+            <div class="novedad-card__body">
+              <h2 class="novedad-card__title">
+                <a th:href="@{/novedades/{id}(id=${n['id']})}" th:text="${n['titulo']}">Título de novedad</a>
+              </h2>
+              <div class="novedad-card__date-row">
+                <svg class="novedad-card__date-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <time class="novedad-card__date" th:text="${n['fecha']}">noviembre 15, 2026</time>
+              </div>
+              <p class="novedad-card__excerpt" th:text="${n['resumen']}">
+                Resumen editorial del artículo solidario...
+              </p>
+              <div class="novedad-card__actions">
+                <a th:href="@{/novedades/{id}(id=${n['id']})}" class="novedad-card__btn">Leer más</a>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Estado vacío -->
+        <div th:if="${novedades == null or #lists.isEmpty(novedades)}"
+             style="text-align: center; padding: 48px 24px; background: var(--bg-soft); border: 1px dashed var(--line); border-radius: var(--radius-lg);">
+          <h3>No encontramos artículos con esos criterios</h3>
+          <p>Probá con otro término o explorá todas las novedades de la red solidaria.</p>
+          <a th:href="@{/novedades}" class="btn btn--primary btn--sm">Ver todas las novedades</a>
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Paginación de novedades" th:if="${totalPaginas > 1}"
+             style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; flex-wrap: wrap;">
+          <a th:if="${paginaActual > 1}"
+             th:href="@{/novedades(page=${paginaActual - 1}, q=${busqueda}, categoria=${categoriaSeleccionada})}"
+             class="btn btn--ghost" style="--h: 40px; padding: 0 14px; font-size: 0.88rem;">« Anterior</a>
+
+          <a th:each="p : ${#numbers.sequence(1, totalPaginas)}"
+             th:href="@{/novedades(page=${p}, q=${busqueda}, categoria=${categoriaSeleccionada})}"
+             th:text="${p}"
+             th:class="${p == paginaActual} ? 'btn btn--primary' : 'btn btn--ghost'"
+             style="--h: 40px; min-width: 40px; padding: 0 12px; font-size: 0.88rem;">1</a>
+
+          <a th:if="${paginaActual < totalPaginas}"
+             th:href="@{/novedades(page=${paginaActual + 1}, q=${busqueda}, categoria=${categoriaSeleccionada})}"
+             class="btn btn--ghost" style="--h: 40px; padding: 0 14px; font-size: 0.88rem;">Siguiente »</a>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <th:block th:fragment="scripts"></th:block>
+</body>
+</html>

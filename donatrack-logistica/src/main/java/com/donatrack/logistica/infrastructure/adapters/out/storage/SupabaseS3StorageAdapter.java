@@ -28,7 +28,15 @@ public class SupabaseS3StorageAdapter implements StoragePort {
 
   @Override
   public String subirArchivo(String originalFilename, String contentType, byte[] bytes) {
+    String mime = (contentType != null && !contentType.isBlank()) ? contentType : "image/png";
     if (s3Client == null) {
+      if (bytes != null && bytes.length > 0 && bytes.length <= 2_000_000) {
+        log.info(
+            "Entorno local detectado (S3 deshabilitado). Codificando foto '{}' en data URI base64 ({} bytes).",
+            originalFilename,
+            bytes.length);
+        return "data:" + mime + ";base64," + java.util.Base64.getEncoder().encodeToString(bytes);
+      }
       log.info(
           "Entorno local detectado (S3 deshabilitado). Utilizando remito modelo para desarrollo offline.");
       return "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp";
@@ -47,7 +55,6 @@ public class SupabaseS3StorageAdapter implements StoragePort {
       // Nombre estructurado auditado: remito-{timestamp}-{shortUuid}.{ext}
       String shortUuid = UUID.randomUUID().toString().substring(0, 8);
       String filename = "remito-" + System.currentTimeMillis() + "-" + shortUuid + extension;
-      String mime = (contentType != null && !contentType.isBlank()) ? contentType : "image/webp";
 
       PutObjectRequest req =
           PutObjectRequest.builder().bucket(bucketName).key(filename).contentType(mime).build();
@@ -60,6 +67,9 @@ public class SupabaseS3StorageAdapter implements StoragePort {
     } catch (Exception e) {
       log.error(
           "Fallo al subir objeto a Supabase S3 (bucket: {}): {}", bucketName, e.getMessage(), e);
+      if (bytes.length <= 2_000_000) {
+        return "data:" + mime + ";base64," + java.util.Base64.getEncoder().encodeToString(bytes);
+      }
       return null;
     }
   }

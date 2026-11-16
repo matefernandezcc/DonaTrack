@@ -79,29 +79,23 @@
       <div class="container story-circle__container">
         <!-- Columna Izquierda: Copy y Detalles Dinámicos de Etapa -->
         <div class="story-circle__copy">
-          <span class="eyebrow eyebrow--green">Ciclo Integral de Trazabilidad 360°</span>
           <h2 id="story-title" class="story-circle__title">
             De tu mano a quien lo necesita.<br />
             <span class="text-gradient">El círculo se cierra.</span>
           </h2>
           <p class="story-circle__lead">
-            Seguí cada etapa física y digital en tiempo real. Cuando la mercadería llega al comedor comunitario y se certifica con foto al pie del camión, el ciclo solidario se completa.
+            Seguí cada etapa desde el registro hasta la recepción certificada en destino.
           </p>
 
           <!-- Tarjeta dinámica de la etapa activa -->
           <div class="story-card" id="story-active-card">
             <div class="story-card__header">
-              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 05</span>
-              <span class="story-card__status" id="story-stage-status">Trazabilidad Iniciada</span>
+              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 04</span>
             </div>
             <h3 class="story-card__title" id="story-stage-title">Donación Realizada</h3>
             <p class="story-card__desc" id="story-stage-desc">
-              Registrás tu donación en segundos indicando tipo de bien, peso aproximado y punto de retiro o entrega. Se genera el remito digital con código de seguimiento único.
+              Registrás los insumos y se emite tu remito digital de seguimiento.
             </p>
-            <div class="story-card__meta" id="story-stage-meta">
-              <span class="story-meta-badge" id="story-meta-origin">Recepción en depósito</span>
-              <span class="story-meta-points" id="story-meta-points">+10 Puntos de Impacto</span>
-            </div>
           </div>
 
           <!-- Selector Interactivo de Etapas (Pills) -->
@@ -119,28 +113,20 @@
               <button type="button" class="story-pill" data-step="4" role="tab" aria-selected="false" onclick="selectCircleStep(4)">
                 <span>04</span> En Sede
               </button>
-              <button type="button" class="story-pill" data-step="5" role="tab" aria-selected="false" onclick="selectCircleStep(5)">
-                <span>05</span> Círculo Cerrado
-              </button>
-            </div>
-            <div class="story-actions">
-              <button type="button" id="story-autoplay-toggle" class="btn btn--sm btn--ghost" onclick="toggleCircleAutoplay()" aria-label="Pausar ciclo automático">
-                <span id="story-autoplay-icon" aria-hidden="true">⏸</span> <span id="story-autoplay-text">Pausar ciclo automático</span>
-              </button>
             </div>
           </div>
         </div>
 
-        <!-- Columna Derecha: Dial Circular con Camión y 5 Hitos -->
+        <!-- Columna Derecha: Dial Circular con Camión y 4 Hitos -->
         <div class="story-circle__visual">
           <div class="dial-container" id="dial-container">
             <!-- SVG del Dial con Ticks y Track -->
             <svg class="dial-svg" viewBox="0 0 540 540" id="dial-svg" aria-hidden="true">
               <defs>
                 <linearGradient id="circleTrackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#0b4a8f" />
-                  <stop offset="50%" stop-color="#0284c7" />
-                  <stop offset="100%" stop-color="#16a34a" />
+                  <stop offset="0%" stop-color="#157a4f" />
+                  <stop offset="50%" stop-color="#16a34a" />
+                  <stop offset="100%" stop-color="#22c55e" />
                 </linearGradient>
               </defs>
 
@@ -155,15 +141,13 @@
               <!-- Track de Progreso Activo -->
               <circle id="dial-progress-circle" cx="270" cy="270" r="190" fill="none"
                       stroke="url(#circleTrackGrad)" stroke-width="6" stroke-linecap="round"
-                      stroke-dasharray="1194" stroke-dashoffset="1194"
-                      transform="rotate(-90 270 270)" style="transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);" />
+                      stroke-dasharray="1193.8" stroke-dashoffset="1193.8"
+                      transform="rotate(-90 270 270)" />
             </svg>
 
             <!-- Hub Central del Dial -->
             <div class="dial-hub" id="dial-hub">
-              <div class="dial-hub__badge">DONATRACK</div>
               <div class="dial-hub__title" id="dial-hub-stage">Registro</div>
-              <div class="dial-hub__sub">Trazabilidad 360°</div>
               <div class="dial-hub__pulse"></div>
             </div>
 
@@ -174,133 +158,39 @@
               </div>
             </div>
 
-            <!-- 5 Nodos / Hitos Alrededor de la Circunferencia -->
+            <!-- 4 Nodos / Hitos Alrededor de la Circunferencia -->
             <!-- 01: Top 0° (12hs) -->
             <div class="dial-node is-active" data-node="1" style="--angle: 0deg;" onclick="selectCircleStep(1)" role="button" tabindex="0" aria-label="Etapa 1: Donación">
               <div class="dial-node__dot">01</div>
               <div class="dial-node__label dial-node__label--top">
                 <strong>Donación</strong>
-                <span>Carga inicial</span>
               </div>
             </div>
 
-            <!-- 02: Top-Right 72° -->
-            <div class="dial-node" data-node="2" style="--angle: 72deg;" onclick="selectCircleStep(2)" role="button" tabindex="0" aria-label="Etapa 2: Acopio">
+            <!-- 02: Right 90° (3hs) -->
+            <div class="dial-node" data-node="2" style="--angle: 90deg;" onclick="selectCircleStep(2)" role="button" tabindex="0" aria-label="Etapa 2: Acopio">
               <div class="dial-node__dot">02</div>
-              <div class="dial-node__label dial-node__label--right-top">
+              <div class="dial-node__label dial-node__label--right">
                 <strong>Acopio</strong>
-                <span>Pesaje y control</span>
               </div>
             </div>
 
-            <!-- 03: Bottom-Right 144° -->
-            <div class="dial-node" data-node="3" style="--angle: 144deg;" onclick="selectCircleStep(3)" role="button" tabindex="0" aria-label="Etapa 3: Transporte">
+            <!-- 03: Bottom 180° (6hs) -->
+            <div class="dial-node" data-node="3" style="--angle: 180deg;" onclick="selectCircleStep(3)" role="button" tabindex="0" aria-label="Etapa 3: Transporte">
               <div class="dial-node__dot">03</div>
-              <div class="dial-node__label dial-node__label--right-bottom">
+              <div class="dial-node__label dial-node__label--bottom">
                 <strong>Transporte</strong>
-                <span>Logística en ruta</span>
               </div>
             </div>
 
-            <!-- 04: Bottom-Left 216° -->
-            <div class="dial-node" data-node="4" style="--angle: 216deg;" onclick="selectCircleStep(4)" role="button" tabindex="0" aria-label="Etapa 4: ONG Receptora">
+            <!-- 04: Left 270° (9hs) -->
+            <div class="dial-node" data-node="4" style="--angle: 270deg;" onclick="selectCircleStep(4)" role="button" tabindex="0" aria-label="Etapa 4: ONG Receptora">
               <div class="dial-node__dot">04</div>
-              <div class="dial-node__label dial-node__label--left-bottom">
+              <div class="dial-node__label dial-node__label--left">
                 <strong>ONG Receptora</strong>
-                <span>Arribo a sede</span>
               </div>
             </div>
 
-            <!-- 05: Top-Left 288° -->
-            <div class="dial-node" data-node="5" style="--angle: 288deg;" onclick="selectCircleStep(5)" role="button" tabindex="0" aria-label="Etapa 5: Círculo Cerrado">
-              <div class="dial-node__dot">05</div>
-              <div class="dial-node__label dial-node__label--left-top">
-                <strong>Círculo Cerrado</strong>
-                <span>Remito y foto de entrega</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ QUE PODES DONAR ============ -->
-    <section class="how" id="que-donar" aria-labelledby="how-title">
-      <div class="container">
-        <div class="section-head">
-          <h2 id="how-title">Bienes tangibles para cada necesidad urgente</h2>
-          <p style="color: var(--muted); max-width: 620px;">Canalizamos insumos auditados por peso, volumen y fecha de vencimiento hacia comedores y escuelas con remito digital.</p>
-        </div>
-        <div class="how__grid">
-          <article class="card card--hover">
-            <div style="font-size: 2rem; margin-bottom: 12px;">🥫</div>
-            <h3>Alimentos no perecederos</h3>
-            <p>
-              Leche en polvo, fideos, arroz, legumbres y conservas. Control bromatológico y pesaje directo en centros de acopio.
-            </p>
-          </article>
-          <article class="card card--hover">
-            <div style="font-size: 2rem; margin-bottom: 12px;">🧥</div>
-            <h3>Indumentaria y abrigo</h3>
-            <p>
-              Frazadas, camperas y calzado infantil clasificados por talle y temporada para comedores y hogares de niñez.
-            </p>
-          </article>
-          <article class="card card--hover">
-            <div style="font-size: 2rem; margin-bottom: 12px;">📚</div>
-            <h3>Mobiliario y útiles escolares</h3>
-            <p>
-              Pupitres, pizarrones, mochilas y kits didácticos acondicionados para escuelas rurales y centros de apoyo comunitario.
-            </p>
-          </article>
-        </div>
-
-        <!-- Calculador de Impacto Tangible -->
-        <div class="calculator-card" style="margin-top: 36px; padding: 28px; background: var(--bg-soft); border: 1px solid var(--line-2); border-radius: var(--radius-lg); box-shadow: var(--shadow);">
-          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px;">
-            <div>
-              <h3 style="margin-bottom: 4px; font-size: 1.35rem; color: var(--fg);">Calculá el impacto de tu donación</h3>
-              <p style="margin: 0; font-size: 0.9rem; color: var(--muted);">Conocé con precisión cuántas familias, raciones o escuelas transformás antes de donar.</p>
-            </div>
-            <!-- Tabs de Categoría -->
-            <div style="display: flex; gap: 8px;" id="calc-tabs">
-              <button type="button" onclick="seleccionarCategoriaCalc('alimentos')" class="btn-calc-tab is-active" data-cat="alimentos" style="padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line-2); background: #0176d3; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer;">🥫 Alimentos</button>
-              <button type="button" onclick="seleccionarCategoriaCalc('abrigo')" class="btn-calc-tab" data-cat="abrigo" style="padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line-2); background: var(--bg); color: var(--muted); font-size: 0.85rem; font-weight: 600; cursor: pointer;">🧥 Abrigo</button>
-              <button type="button" onclick="seleccionarCategoriaCalc('utiles')" class="btn-calc-tab" data-cat="utiles" style="padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line-2); background: var(--bg); color: var(--muted); font-size: 0.85rem; font-weight: 600; cursor: pointer;">📚 Mobiliario / Útiles</button>
-            </div>
-          </div>
-
-          <div class="calculator-grid" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
-            <div>
-              <label for="calc-range" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 8px;">
-                Cantidad estimada a aportar: <strong id="calc-qty-label" style="font-size: 1.15rem; color: #0176d3;">15 kg</strong>
-              </label>
-              <input type="range" id="calc-range" min="1" max="100" value="15" aria-valuemin="1" aria-valuemax="100" aria-valuenow="15" aria-label="Cantidad estimada a aportar" oninput="actualizarCalculoLive(this.value)" style="width: 100%; accent-color: #0176d3; cursor: pointer;" />
-              <span style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 4px;">
-                <span>1 unidad/kg</span>
-                <span>50 unidades/kg</span>
-                <span>100 unidades/kg</span>
-              </span>
-            </div>
-
-            <div class="calculator-results" style="background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-              <div>
-                <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Impacto Comunitario:</span>
-                <strong id="calc-impact-main" style="font-size: 1.05rem; color: var(--green); font-weight: 800;">60 raciones nutritivas</strong>
-              </div>
-              <div>
-                <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Familias asistidas:</span>
-                <strong id="calc-impact-sec" style="font-size: 1.05rem; color: var(--fg); font-weight: 700;">6 familias en Comedor El Faro</strong>
-              </div>
-              <div>
-                <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Puntos de impacto solidario:</span>
-                <strong id="calc-puntos" style="font-size: 1rem; color: var(--orange); font-weight: 700;">+150 puntos</strong>
-              </div>
-              <div style="display: flex; align-items: flex-end;">
-                <a id="calc-cta-btn" th:href="@{/login(campana='alimentos',cantidad='15')}" class="btn btn--primary btn--sm" style="width: 100%; text-align: center; font-size: 0.8rem;">Donar esta cantidad →</a>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -310,24 +200,24 @@
     <section class="metrics" id="impacto" aria-labelledby="metrics-title">
       <div class="container">
         <div class="section-head section-head--center">
-          <span class="eyebrow eyebrow--light">Impacto</span>
+          <span class="eyebrow eyebrow--light">Nuestro Aporte</span>
           <h2 id="metrics-title">Números que cuentan historias</h2>
         </div>
         <div class="metrics__grid">
           <div class="metric">
-            <strong class="metric__num" data-count="14820">0</strong>
+            <strong class="metric__num" data-count="14820">14.820</strong>
             <span>Donaciones completadas</span>
           </div>
           <div class="metric">
-            <strong class="metric__num" data-count="237">0</strong>
+            <strong class="metric__num" data-count="237">237</strong>
             <span>Campañas activas</span>
           </div>
           <div class="metric">
-            <strong class="metric__num" data-count="128">0</strong>
+            <strong class="metric__num" data-count="128">128</strong>
             <span>ONG verificadas</span>
           </div>
           <div class="metric">
-            <strong class="metric__num" data-count="36412">0</strong>
+            <strong class="metric__num" data-count="36412">36.412</strong>
             <span>Personas ayudadas este mes</span>
           </div>
         </div>
@@ -347,11 +237,17 @@
 
         <div class="ranking-pub__grid" th:if="${ranking != null and not #lists.isEmpty(ranking)}">
           <article class="ranking-pub__card" th:each="item, iter : ${ranking}">
-            <span class="ranking-pub__pos" th:text="'#' + ${iter.count}">#1</span>
-            <div class="ranking-pub__info">
+            <img class="avatar"
+                 th:src="@{https://blobatar.dev/avatar/{seed}(seed=${item['user'] != null ? #strings.toLowerCase(#strings.replace(item['user'], ' ', '-')) : ('donante-' + iter.index)}, size=48, background='circle')}"
+                 th:alt="'Avatar de ' + ${item['user'] != null ? item['user'] : 'Donante Solidario'}"
+                 width="48" height="48"
+                 onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><circle cx=%2224%22 cy=%2224%22 r=%2224%22 fill=%22%23ea580c%22/><circle cx=%2224%22 cy=%2219%22 r=%227%22 fill=%22%23fff%22/><path d=%22M11 40c2-7 8-10 13-10s11 3 13 10%22 fill=%22%23fff%22/></svg>';"
+                 style="border-radius: 50%; object-fit: cover; flex-shrink: 0;" />
+            <div class="ranking-pub__info" style="flex: 1;">
               <strong class="ranking-pub__name" th:text="${item['user'] != null ? item['user'] : 'Donante Solidario'}">María González</strong>
               <span class="ranking-pub__stats" th:text="${(item['donations'] != null ? item['donations'] : 0)} + ' aportes verificados este mes'">5 aportes verificados este mes</span>
             </div>
+            <span class="ranking-pub__pos" th:text="'#' + ${iter.count}">#1</span>
           </article>
         </div>
 
@@ -575,6 +471,43 @@
       </div>
     </section>
 
+    <!-- ============ NOVEDADES ============ -->
+    <section class="novedades-sec" id="novedades" aria-labelledby="novedades-title">
+      <div class="container">
+        <div class="section-head section-head--row">
+          <div>
+            <span class="eyebrow eyebrow--green">Actualidad comunitaria</span>
+            <h2 id="novedades-title">Novedades</h2>
+          </div>
+          <a th:href="@{/novedades}" class="link-arrow">Ver todas las novedades →</a>
+        </div>
+
+        <div class="novedades-grid" th:if="${novedadesDestacadas != null and not #lists.isEmpty(novedadesDestacadas)}">
+          <article class="novedad-card" th:each="nov : ${novedadesDestacadas}">
+            <a class="novedad-card__media" th:href="@{/novedades/{id}(id=${nov['id']})}">
+              <img class="novedad-card__img" th:src="@{${nov['imagen']}}" th:alt="${nov['titulo']}" loading="lazy" />
+            </a>
+            <div class="novedad-card__body">
+              <h3 class="novedad-card__title">
+                <a th:href="@{/novedades/{id}(id=${nov['id']})}" th:text="${nov['titulo']}">Título novedad</a>
+              </h3>
+              <div class="novedad-card__date-row">
+                <svg class="novedad-card__date-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <time class="novedad-card__date" th:text="${nov['fecha']}">noviembre 15, 2026</time>
+              </div>
+              <p class="novedad-card__excerpt" th:text="${nov['resumen']}">Resumen de novedad...</p>
+              <div class="novedad-card__actions">
+                <a th:href="@{/novedades/{id}(id=${nov['id']})}" class="novedad-card__btn">Leer más</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ TESTIMONIALS ============ -->
     <section class="testi" id="historias" aria-labelledby="testi-title">
       <div class="container">
@@ -715,7 +648,7 @@
               impacto medible.
             </p>
             <div class="access__ctas">
-              <a th:href="@{/registro(rol='DONANTE')}" class="btn btn--primary">Crear cuenta donante</a>
+              <a th:href="@{/registro(rol='DONANTE')}" class="btn btn--primary">Comenzar a donar</a>
               <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
@@ -732,9 +665,8 @@
               gestionar entregas con transparencia.
             </p>
             <div class="access__ctas">
-              <a th:href="@{/registro(rol='BENEFICIARIA')}" class="btn btn--secondary">Registrar organización</a>
+              <a th:href="@{/registro(rol='BENEFICIARIA')}" class="btn btn--primary">Registrar organización</a>
               <button type="button" onclick="abrirModalSolicitudOng(event)" class="btn btn--ghost" style="cursor: pointer;">Solicitud rápida ONG</button>
-              <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
         </div>
@@ -907,43 +839,6 @@
         modal.removeAttribute("hidden");
         modal.showModal();
         document.body.style.overflow = "hidden";
-      }
-
-      let currentCalcCat = "alimentos";
-      function seleccionarCategoriaCalc(cat) {
-        currentCalcCat = cat;
-        document.querySelectorAll("#calc-tabs button").forEach(b => {
-          if (b.getAttribute("data-cat") === cat) {
-            b.style.background = "#0176d3";
-            b.style.color = "#ffffff";
-          } else {
-            b.style.background = "var(--bg)";
-            b.style.color = "var(--muted)";
-          }
-        });
-        const range = document.getElementById("calc-range");
-        actualizarCalculoLive(range ? range.value : 15);
-      }
-
-      async function actualizarCalculoLive(val) {
-        const qtyLabel = document.getElementById("calc-qty-label");
-        const unitSuffix = currentCalcCat === "alimentos" ? " kg" : currentCalcCat === "abrigo" ? " prendas" : " unidades";
-        if (qtyLabel) qtyLabel.textContent = val + unitSuffix;
-
-        try {
-          const res = await fetch("/api/public/calculador-impacto?categoria=" + currentCalcCat + "&cantidad=" + val);
-          const data = await res.json();
-          document.getElementById("calc-impact-main").textContent = data.impactoPrincipal;
-          document.getElementById("calc-impact-sec").textContent = data.impactoSecundario;
-          document.getElementById("calc-puntos").textContent = data.puntos;
-          const ctaBtn = document.getElementById("calc-cta-btn");
-          if (ctaBtn) {
-            ctaBtn.href = "/login?campana=" + currentCalcCat + "&cantidad=" + val;
-            ctaBtn.textContent = "Donar " + val + unitSuffix + " →";
-          }
-        } catch (err) {
-          console.error("Error calculando impacto:", err);
-        }
       }
 
       function abrirModalSolicitudOng(e) {

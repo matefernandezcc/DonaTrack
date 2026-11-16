@@ -12,7 +12,7 @@
 
     <!-- ==================== ARQUITECTURA DE LOS 2 ALGORITMOS + EJECUCIÓN MANUAL / BATCH ==================== -->
     <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1;">
-      <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-around_medium">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-border_bottom" style="padding: 14px 18px;">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
           <div class="slds-media__figure">
             <span class="slds-icon_container slds-icon-standard-Einstein-Replies" style="background: #014486; border-radius: 6px; padding: 6px;">
@@ -31,21 +31,21 @@
           </div>
         </header>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-          <a th:href="@{/app/admin/donaciones/recepcion}" class="slds-button slds-button_brand dt-touch-target" style="font-weight: 700; min-height: 48px; display: inline-flex; align-items: center;">
+          <a th:href="@{/app/admin/donaciones/recepcion}" class="slds-button slds-button_brand" style="font-weight: 700; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;">
             <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
             </svg>
             Nueva Recepción en Depósito
           </a>
           <form th:action="@{/app/admin/donaciones/auditoria-vencidos}" method="post" style="display: inline;">
-            <button type="submit" class="slds-button slds-button_neutral dt-touch-target" style="font-weight: 700; min-height: 48px; display: inline-flex; align-items: center;"
+            <button type="submit" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;"
                     onclick="return confirm('¿Desea ejecutar la auditoría de vencimientos sobre todas las donaciones en depósito?');"
                     title="Ejecutar barrido sanitario de lotes vencidos">
               Ejecutar Auditoría de Vencimientos
             </button>
           </form>
           <form th:action="@{/app/admin/matchmaking/batch}" method="post" style="display: inline;">
-            <button type="submit" class="slds-button slds-button_outline-brand dt-touch-target" style="font-weight: 700; min-height: 48px; display: inline-flex; align-items: center;">
+            <button type="submit" class="slds-button slds-button_outline-brand" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;">
               Ejecutar Asignación Automática
             </button>
           </form>
@@ -77,7 +77,7 @@
             </div>
           </div>
           <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_x-small">
-            <button class="slds-button slds-button_brand" type="submit" style="width: 100%; min-height: 48px; font-weight: 700;">Evaluar</button>
+            <button class="slds-button slds-button_brand" type="submit" style="width: 100%; min-height: 36px; border-radius: 6px; font-weight: 700;">Evaluar</button>
           </div>
         </form>
 
@@ -308,6 +308,7 @@
                 <th scope="col"><div class="slds-truncate" title="Correo">Correo Representante</div></th>
                 <th scope="col"><div class="slds-truncate" title="Fecha Alta">Fecha Alta</div></th>
                 <th scope="col"><div class="slds-truncate" title="Necesidades">Necesidades Declaradas</div></th>
+                <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Perfil">Perfil</div></th>
               </tr>
             </thead>
             <tbody>
@@ -321,9 +322,15 @@
                   <div class="slds-truncate" style="max-width: 340px; font-size: 0.82rem; color: #334155;"
                        th:text="${b['necesidadesTexto'] != null ? b['necesidadesTexto'] : (b['necesidadesDeclaradas'] != null ? (#lists.size(b['necesidadesDeclaradas']) + ' necesidades') : '0 necesidades')}">1 necesidad</div>
                 </td>
+                <td class="slds-text-align_right">
+                  <a th:href="@{/app/organizaciones/{id}(id=${b['id'] != null ? b['id'] : 'esperanza'}, nombre=${b['nombreLegible'] != null ? b['nombreLegible'] : b['correoRepresentante']})}"
+                     class="slds-button slds-button_neutral" style="min-height: 32px; padding: 0 10px; font-size: 0.78rem; border-radius: 6px; font-weight: 600;">
+                    Ver Perfil →
+                  </a>
+                </td>
               </tr>
               <tr th:if="${#lists.isEmpty(beneficiarios)}">
-                <td colspan="4" class="slds-text-color_weak slds-p-around_medium">No hay beneficiarios registrados en el sistema de donaciones.</td>
+                <td colspan="5" class="slds-text-color_weak slds-p-around_medium">No hay beneficiarios registrados en el sistema de donaciones.</td>
               </tr>
             </tbody>
           </table>
@@ -356,12 +363,12 @@
             </p>
           </div>
           <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalVencer()" style="min-height: 48px;">
+            <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalVencer()" style="min-height: 36px; padding: 0 14px; border-radius: 6px; font-weight: 600;">
               Cancelar
             </button>
             <form id="form-vencer-donacion" method="post" action="">
               <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-              <button type="submit" class="slds-button slds-button_destructive" style="font-weight: 800; min-height: 48px;">
+              <button type="submit" class="slds-button slds-button_destructive" style="font-weight: 700; min-height: 36px; padding: 0 14px; border-radius: 6px;">
                 Sí, marcar como Vencida
               </button>
             </form>

@@ -8,9 +8,9 @@
     --blue-50: #e8f1fb;
     --green: #157a4f;
     --green-50: #e6f6ef;
-    --orange: #c9430c;
-    --orange-600: #a83508;
-    --orange-50: #fdece2;
+    --orange: #b11f24;
+    --orange-600: #8f161a;
+    --orange-50: #fce8e9;
 
     --ink: #0e1726;
     --ink-2: #1f2a3d;
@@ -30,8 +30,8 @@
     --radius-lg: 22px;
     --radius-xl: 28px;
 
-    --btn-primary-bg: #c9430c;
-    --btn-primary-hover: #a83508;
+    --btn-primary-bg: #b11f24;
+    --btn-primary-hover: #8f161a;
     --btn-secondary-bg: #157a4f;
     --btn-secondary-hover: #0f5c3b;
     --btn-blue-bg: #0b4a8f;
@@ -67,14 +67,14 @@
 
     --blue-50: #172554;
     --green-50: #064e3b;
-    --orange-50: #431407;
+    --orange-50: #450a0a;
     --blue: #60a5fa;
     --green: #34d399;
-    --orange: #fb923c;
-    --orange-600: #fdba74;
+    --orange: #ef4444;
+    --orange-600: #f87171;
 
-    --btn-primary-bg: #c9430c;
-    --btn-primary-hover: #a83508;
+    --btn-primary-bg: #b11f24;
+    --btn-primary-hover: #8f161a;
     --btn-secondary-bg: #157a4f;
     --btn-secondary-hover: #0f5c3b;
     --btn-blue-bg: #1d4ed8;

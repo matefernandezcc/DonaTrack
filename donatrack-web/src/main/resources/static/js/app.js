@@ -85,7 +85,7 @@
         }
       });
     },
-    { threshold: 0.4 }
+    { threshold: 0.1 }
   );
   counters.forEach((c) => io.observe(c));
 
