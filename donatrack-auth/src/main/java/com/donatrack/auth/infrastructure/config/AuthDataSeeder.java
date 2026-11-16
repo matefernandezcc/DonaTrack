@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -19,14 +21,27 @@ public class AuthDataSeeder implements CommandLineRunner {
 
   private final UsuarioRepository usuarioRepository;
   private final PasswordEncoder passwordEncoder;
+  private final Environment environment;
 
   public AuthDataSeeder(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    this(usuarioRepository, passwordEncoder, null);
+  }
+
+  public AuthDataSeeder(
+      UsuarioRepository usuarioRepository,
+      PasswordEncoder passwordEncoder,
+      Environment environment) {
     this.usuarioRepository = usuarioRepository;
     this.passwordEncoder = passwordEncoder;
+    this.environment = environment;
   }
 
   @Override
   public void run(String... args) {
+    if (environment != null && environment.acceptsProfiles(Profiles.of("prod"))) {
+      log.warn("AuthDataSeeder omitido por seguridad en entorno productivo.");
+      return;
+    }
     seedUsuario(
         "admin",
         "admin",

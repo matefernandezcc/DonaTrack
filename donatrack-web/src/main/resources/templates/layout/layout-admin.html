@@ -18,10 +18,12 @@
 
   <script>
     (function () {
-      var dtTheme = localStorage.getItem("dt-theme");
-      if (dtTheme === "dark" || (!dtTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-        document.documentElement.setAttribute("data-theme", "dark");
-      }
+      try {
+        var dtTheme = localStorage.getItem("dt-theme");
+        if (dtTheme === "dark" || (!dtTheme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
     })();
   </script>
 
@@ -1146,7 +1148,9 @@
           var isDark = docEl.getAttribute("data-theme") === "dark";
           var newTheme = isDark ? "light" : "dark";
           docEl.setAttribute("data-theme", newTheme);
-          localStorage.setItem("dt-theme", newTheme);
+          try {
+            localStorage.setItem("dt-theme", newTheme);
+          } catch (e) {}
           themeBtn.setAttribute("aria-pressed", String(!isDark));
         });
       }
