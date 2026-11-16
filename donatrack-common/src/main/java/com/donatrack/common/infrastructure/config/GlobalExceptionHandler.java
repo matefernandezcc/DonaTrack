@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @ControllerAdvice
 @Slf4j
@@ -139,6 +140,13 @@ public class GlobalExceptionHandler {
     String mensaje =
         ex.getMessage() != null ? ex.getMessage() : "El recurso solicitado no fue encontrado.";
     return buildResponse(HttpStatus.NOT_FOUND, mensaje, request);
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ErrorResponse> handleNoResourceFound(
+      NoResourceFoundException ex, HttpServletRequest request) {
+    return buildResponse(
+        HttpStatus.NOT_FOUND, "Recurso no encontrado: " + ex.getResourcePath(), request);
   }
 
   // --- 405 Method Not Allowed ---

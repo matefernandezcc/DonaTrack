@@ -42,13 +42,24 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,metrics
   endpoint:
+    prometheus:
+      access: unrestricted
     health:
-      show-details: always
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
   health:
     rabbit:
       enabled: false
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
 
 ---
 spring:

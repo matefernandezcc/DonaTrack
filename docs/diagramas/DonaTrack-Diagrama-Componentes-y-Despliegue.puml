@@ -1,4 +1,4 @@
-@startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue_Entrega5
+@startuml DonaTrack_Diagrama_De_Componentes_Y_Despliegue_Entrega7
 left to right direction
 skinparam componentStyle uml2
 skinparam nodesep 25
@@ -23,34 +23,53 @@ skinparam rectangle {
     FontStyle bold
 }
 
-node "Servidor Frontend" as N_Frontend {
-    component "Frontend SPA\n(Cliente Web/Móvil)" as Frontend
+' ========================================================
+' CLIENTE Y CAPA WEB (SSR)
+' ========================================================
+node "Cliente de Usuario" as N_Client {
+    component "Navegador Web\n(HTML5 / Alpine.js)" as WebBrowser
 }
 
-rectangle "API Gateway" #line.dashed {
-    node "Servidor API" as N_API {
-        component "API REST (HTTPS)" as ModuloAPI
+rectangle "Capa Web & Presentación" #line.dashed {
+    node "Servidor Web (SSR)\n:8080" as N_Web {
+        component "donatrack-web\n(Thymeleaf SSR)" as ModWeb
+        component "Rate Limiting\n(Bucket4j + Caffeine)" as RateLimiter
+        component "Trace Originator\n(Micrometer / Brave)" as WebTracer
+
+        ModWeb ..> RateLimiter : aplica
+        ModWeb ..> WebTracer : genera traceId
     }
 }
 
-' ----- BACKEND MultiServicio (MicroServidores) -----
-rectangle "Dominio (DonaTrack Backend)" #line.dashed {
+' ========================================================
+' BACKEND MICROSERVICIOS (Core de Dominio)
+' ========================================================
+rectangle "Dominio (DonaTrack Microservicios)" #line.dashed {
+    node "Servidor de Auth\n:8004" as N_Auth {
+        component "Servicio de Autenticación\n(donatrack-auth)" as ModAuth
+        component "Generador JWT & Passwords\n(Argon2id / HS256)" as ModAuthSecurity
+        ModAuth ..> ModAuthSecurity : usa
+    }
+
     node "Servidor de Donaciones\n:8000" as N_Donaciones {
-        component "Servicio de Donaciones" as ModDonaciones
+        component "Servicio de Donaciones\n(donatrack-donaciones)" as ModDonaciones
+        component "GraphQL Engine\n(/graphql)" as GraphQLEngine
         component "Broker de Logística\n(LogisticaBrokerAdapter)" as BrokerLogistica
         
+        ModDonaciones ..> GraphQLEngine : expone
         ModDonaciones ..> BrokerLogistica : usa
     }
+
     node "Servidor de Incentivos\n:8001" as N_Incentivos {
-        component "Servicio de Incentivos" as ModIncentivos
+        component "Servicio de Incentivos\n(donatrack-incentivos)" as ModIncentivos
     }
     
     node "Servidor de Logística (Local - Fallback)\n:8002" as N_Logistica_Local {
-        component "Servicio de Logística" as ModLogisticaLocal
+        component "Servicio de Logística\n(donatrack-logistica)" as ModLogisticaLocal
     }
     
     node "Servidor de Notificaciones\n:8003" as N_Notificaciones {
-        component "Servicio de Notificaciones" as ModNotificaciones
+        component "Servicio de Notificaciones\n(donatrack-notificaciones)" as ModNotificaciones
     }
 }
 
@@ -65,7 +84,28 @@ rectangle "Despliegue en la Nube (Render)" #line.dashed {
 }
 
 ' ========================================================
-' PERFILES DE PERSISTENCIA Y MENSAJERÍA (Verticales)
+' CLUSTER DE OBSERVABILIDAD & AUTO-RECUPERACIÓN
+' ========================================================
+rectangle "Cluster de Observabilidad & Resiliencia" #line.dashed {
+    node "Prometheus Server\n:9090" as N_Prometheus {
+        component "Prometheus v3.3.0\n(Scrape /actuator/prometheus)" as ModPrometheus
+    }
+
+    node "Grafana Server\n:3000" as N_Grafana {
+        component "Grafana v12.0.0\n(Dashboards Provisionados)" as ModGrafana
+    }
+
+    node "Zipkin Server\n:9411" as N_Zipkin {
+        component "Zipkin v3.4\n(Distributed Tracing / Spans)" as ModZipkin
+    }
+
+    node "Supervisor Docker Autoheal" as N_Autoheal {
+        component "willfarrell/autoheal\n(Auto-restart contenedores unhealth)" as ModAutoheal
+    }
+}
+
+' ========================================================
+' PERFILES DE PERSISTENCIA Y MENSAJERÍA
 ' ========================================================
 rectangle "Profile: local" as ProfileLocal #line.dashed {
     () "Mongo :27017" as Port_Mongo_Local
@@ -76,21 +116,19 @@ rectangle "Profile: local" as ProfileLocal #line.dashed {
         component "MongoDB Local\n(donatrack_logistica)" as Mongo_Local
     }
     node "Docker RabbitMQ\n:5672/:15672" as N_BrokerMQ_Local {
-        component "RabbitMQ Local" as RabbitMQ_Local
+        component "RabbitMQ Local\n(Observation Tracing Enabled)" as RabbitMQ_Local
     }
     node "Docker PostgreSQL\n:5432" as N_DB_Local {
-        component "PostgreSQL Local\n(schemas: donaciones, incentivos, notif)" as DB_Local
+        component "PostgreSQL Local\n(schemas: auth, donaciones, incentivos, notif)" as DB_Local
     }
     
     Port_Mongo_Local ----(0---- Mongo_Local
     Port_AMQP_Local ----(0---- RabbitMQ_Local
     Port_JPA_Local ----(0---- DB_Local
     
-    ' Alineación vertical de puertos (Mongo arriba, AMQP medio, JPA abajo)
     Port_Mongo_Local -[hidden]left-> Port_AMQP_Local
     Port_AMQP_Local -[hidden]left-> Port_JPA_Local
 
-    ' Alineación vertical de servidores (Mongo arriba, RabbitMQ medio, PostgreSQL abajo)
     N_Mongo_Local -[hidden]left-> N_BrokerMQ_Local
     N_BrokerMQ_Local -[hidden]left-> N_DB_Local
 }
@@ -107,24 +145,23 @@ rectangle "Profile: prod" as ProfileProd #line.dashed {
         component "CloudAMQP (RabbitMQ)" as RabbitMQ_Cloud
     }
     node "Supabase PostgreSQL\n(AWS us-east-1)" as N_DB_Cloud {
-        component "PostgreSQL Supabase\n(schemas: donaciones, incentivos, notif)" as DB_Cloud
+        component "PostgreSQL Supabase\n(schemas: auth, donaciones, incentivos, notif)" as DB_Cloud
     }
     
     Port_Mongo_Cloud ----(0---- Mongo_Cloud
     Port_AMQP_Cloud ----(0---- RabbitMQ_Cloud
     Port_JPA_Cloud ----(0---- DB_Cloud
     
-    ' Alineación vertical de puertos (Mongo arriba, AMQP medio, JPA abajo)
     Port_Mongo_Cloud -[hidden]left-> Port_AMQP_Cloud
     Port_AMQP_Cloud -[hidden]left-> Port_JPA_Cloud
 
-    ' Alineación vertical de servidores (Mongo arriba, CloudAMQP medio, Supabase abajo)
     N_Mongo_Cloud -[hidden]left-> N_BrokerMQ_Cloud
     N_BrokerMQ_Cloud -[hidden]left-> N_DB_Cloud
 }
 
 ProfileLocal -[hidden]left-> ProfileProd
 
+' Servicios Externos
 node "Servidor de n8n" as N_n8n {
     component "Servidor n8n\n(Automatización)" as n8n
 }
@@ -137,20 +174,46 @@ node "Servidor de Planificación Externo" as N_Planificador {
     component "Motor de Rutas (Simulado)" as PlanificadorExterno
 }
 
-' ==========================================
+' ========================================================
 ' CONEXIONES (Ball-and-Socket: ----(0----)
-' ==========================================
+' ========================================================
 
-' 0. Conexiones Frontend y API Gateway
-Frontend ----(0---- ModuloAPI : "HTTPS (Consume)"
-ModuloAPI ----(0---- ModDonaciones : "HTTP / API REST"
-ModuloAPI ----(0---- ModIncentivos : "HTTP / API REST"
-ModuloAPI ----(0---- ModLogisticaLocal : "HTTP / API REST"
-ModuloAPI ----(0---- ModLogisticaNube1 : "HTTP / API REST"
-ModuloAPI ----(0---- ModLogisticaNube2 : "HTTP / API REST"
-ModuloAPI ----(0---- ModNotificaciones : "HTTP / API REST"
+' 0. Cliente Web a Servidor Web SSR
+WebBrowser ----(0---- ModWeb : "HTTPS (HTML/Render)"
 
-' 1. Conexiones Profile: local unificadas en puertos
+' 1. Web SSR a Microservicios Backend (REST / JWT / Internal API Key)
+ModWeb ----(0---- ModAuth : "HTTP REST (Login/Registro/JWT)"
+ModWeb ----(0---- ModDonaciones : "HTTP REST / GraphQL"
+ModWeb ----(0---- ModIncentivos : "HTTP REST (Rankings)"
+ModWeb ----(0---- ModLogisticaLocal : "HTTP REST (Rutas)"
+ModWeb ----(0---- ModNotificaciones : "HTTP REST (Alertas)"
+
+' 2. Observabilidad: Prometheus Scrapes Actuators
+ModPrometheus ----(0---- ModWeb : "GET /actuator/prometheus"
+ModPrometheus ----(0---- ModAuth : "GET /actuator/prometheus"
+ModPrometheus ----(0---- ModDonaciones : "GET /actuator/prometheus"
+ModPrometheus ----(0---- ModIncentivos : "GET /actuator/prometheus"
+ModPrometheus ----(0---- ModLogisticaLocal : "GET /actuator/prometheus"
+ModPrometheus ----(0---- ModNotificaciones : "GET /actuator/prometheus"
+
+' 3. Observabilidad: Grafana Datasource
+ModGrafana ----(0---- ModPrometheus : "PromQL Queries"
+
+' 4. Observabilidad: Trazas Distribuidas a Zipkin (HTTP Reporter)
+ModWeb ....> ModZipkin : "POST /api/v2/spans (Zipkin Brave)"
+ModAuth ....> ModZipkin : "POST /api/v2/spans"
+ModDonaciones ....> ModZipkin : "POST /api/v2/spans"
+ModIncentivos ....> ModZipkin : "POST /api/v2/spans"
+ModLogisticaLocal ....> ModZipkin : "POST /api/v2/spans"
+ModNotificaciones ....> ModZipkin : "POST /api/v2/spans"
+
+' 5. Supervisor Autoheal monitorea Docker Healthchecks
+ModAutoheal ....> ModWeb : "/var/run/docker.sock (wget healthcheck)"
+ModAutoheal ....> ModDonaciones : "docker restart si unhealth"
+ModAutoheal ....> ModLogisticaLocal : "docker restart si unhealth"
+
+' 6. Conexiones Profile: local unificadas en puertos
+ModAuth ----(0---- Port_JPA_Local
 ModDonaciones ----(0---- Port_JPA_Local
 ModIncentivos ----(0---- Port_JPA_Local
 ModNotificaciones ----(0---- Port_JPA_Local
@@ -162,7 +225,8 @@ ModLogisticaLocal ----(0---- Port_AMQP_Local
 
 ModLogisticaLocal ----(0---- Port_Mongo_Local
 
-' 2. Conexiones Profile: prod unificadas en puertos
+' 7. Conexiones Profile: prod unificadas en puertos
+ModAuth ----(0---- Port_JPA_Cloud
 ModDonaciones ----(0---- Port_JPA_Cloud
 ModIncentivos ----(0---- Port_JPA_Cloud
 ModNotificaciones ----(0---- Port_JPA_Cloud
@@ -178,21 +242,21 @@ ModLogisticaLocal ----(0---- Port_Mongo_Cloud
 ModLogisticaNube1 ----(0---- Port_Mongo_Cloud
 ModLogisticaNube2 ----(0---- Port_Mongo_Cloud
 
-' 3. Broker de Logística (Feign Clients)
+' 8. Broker de Logística (Feign Clients)
 BrokerLogistica ----(0---- ModLogisticaNube1 : "HTTP POST (Prioridad 1)"
 BrokerLogistica ----(0---- ModLogisticaNube2 : "HTTP POST (Prioridad 2)"
 BrokerLogistica ----(0---- ModLogisticaLocal : "HTTP POST (Fallback Local)"
 
-' 4. Planificador Externo (Callback)
+' 9. Planificador Externo (Callback)
 ModLogisticaNube1 ----(0---- PlanificadorExterno : "HTTP POST (Solicitud)"
 ModLogisticaNube2 ----(0---- PlanificadorExterno : "HTTP POST (Solicitud)"
-PlanificadorExterno ----(0---- ModuloAPI : "HTTP POST (Callback)"
+PlanificadorExterno ----(0---- ModWeb : "HTTP POST (Callback)"
 ModLogisticaLocal ----(0---- PlanificadorExterno : "HTTP POST (Solicitud)"
 
-' 5. Integraciones n8n y Redes
+' 10. Integraciones n8n y Redes
 ModIncentivos ----(0---- n8n : "POST Webhook"
 ModNotificaciones ----(0---- n8n : "POST Webhook (Notificación)"
-n8n ----(0---- ModuloAPI : "PATCH / PUT"
+n8n ----(0---- ModWeb : "PATCH / PUT"
 n8n ----(0---- SaaSNotif : "Despacha SMS/WA/Email"
 
 @enduml
