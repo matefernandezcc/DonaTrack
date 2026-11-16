@@ -70,10 +70,19 @@ public class AuthDataSeeder implements CommandLineRunner {
       log.info("Usuario seed creado: {} (Rol: {})", username, rol);
     } else {
       Usuario usuario = usuarioOpt.get();
+      boolean modificado = false;
       if (usuario.getRol() != rol) {
         usuario.setRol(rol);
-        usuarioRepository.save(usuario);
+        modificado = true;
         log.info("Usuario seed restaurado a rol canónico: {} (Rol: {})", username, rol);
+      }
+      if (!passwordEncoder.matches(rawPassword, usuario.getPassword())) {
+        usuario.setPassword(passwordEncoder.encode(rawPassword));
+        modificado = true;
+        log.info("Contraseña de usuario seed restaurada a canónica: {}", username);
+      }
+      if (modificado) {
+        usuarioRepository.save(usuario);
       }
     }
   }

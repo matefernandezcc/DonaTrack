@@ -16,6 +16,15 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
+  <script>
+    (function () {
+      var dtTheme = localStorage.getItem("dt-theme");
+      if (dtTheme === "dark" || (!dtTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+
   <style>
     /* Respaldo y garantía de visualización para navegación vertical SLDS */
     @media (min-width: 768px) {
@@ -268,6 +277,234 @@
       background-color: #fef2f2 !important;
       outline: none;
     }
+
+    /* ========================================================
+       MODO OSCURO / MODO NOCHE PARA BACKOFFICE (DATA-THEME="DARK")
+       ======================================================== */
+    [data-theme="dark"] body {
+      background-color: #0b0f19 !important;
+      color: #f9fafb !important;
+    }
+
+    /* Header Global */
+    [data-theme="dark"] .slds-global-header_container,
+    [data-theme="dark"] .slds-global-header {
+      background-color: #111827 !important;
+      border-bottom: 1px solid #1f2937 !important;
+      color: #f9fafb !important;
+    }
+
+    [data-theme="dark"] .slds-global-header a span[style*="color: #014486"] {
+      color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .slds-global-header span[style*="color: #444"] {
+      color: #e5e7eb !important;
+    }
+
+    /* Navegación Vertical */
+    [data-theme="dark"] #admin-nav {
+      background-color: #111827 !important;
+      border-right: 1px solid #1f2937 !important;
+      color: #e5e7eb !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-nav-vertical__title {
+      color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-nav-vertical__action {
+      color: #e5e7eb !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-nav-vertical__action:hover,
+    [data-theme="dark"] #admin-nav .slds-is-active .slds-nav-vertical__action {
+      background-color: #1f2937 !important;
+      color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-icon-text-default {
+      fill: #9ca3af !important;
+    }
+
+    /* Contenido Principal y Encabezados */
+    [data-theme="dark"] .slds-page-header {
+      background-color: #111827 !important;
+      border: 1px solid #1f2937 !important;
+      color: #f9fafb !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    [data-theme="dark"] .slds-page-header__title,
+    [data-theme="dark"] h1,
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h3,
+    [data-theme="dark"] h4,
+    [data-theme="dark"] .slds-text-heading_small,
+    [data-theme="dark"] .slds-text-heading_medium {
+      color: #f9fafb !important;
+    }
+
+    [data-theme="dark"] .slds-page-header__name-meta,
+    [data-theme="dark"] .slds-text-color_weak {
+      color: #9ca3af !important;
+    }
+
+    /* Tarjetas y Contenedores */
+    [data-theme="dark"] .slds-card,
+    [data-theme="dark"] .slds-box {
+      background-color: #111827 !important;
+      border: 1px solid #1f2937 !important;
+      color: #f9fafb !important;
+    }
+
+    [data-theme="dark"] .slds-card__header {
+      border-bottom: 1px solid #1f2937 !important;
+    }
+
+    /* Tablas */
+    [data-theme="dark"] .slds-table {
+      background-color: #111827 !important;
+      color: #e5e7eb !important;
+    }
+
+    [data-theme="dark"] .slds-table th {
+      background-color: #1f2937 !important;
+      color: #9ca3af !important;
+      border-bottom: 1px solid #374151 !important;
+    }
+
+    [data-theme="dark"] .slds-table td {
+      border-bottom: 1px solid #1f2937 !important;
+      color: #e5e7eb !important;
+    }
+
+    [data-theme="dark"] .slds-table tbody tr:hover > td,
+    [data-theme="dark"] .slds-table tbody tr:hover > th {
+      background-color: #1f2937 !important;
+    }
+
+    /* Modales y Popovers */
+    [data-theme="dark"] .slds-popover,
+    [data-theme="dark"] .slds-modal__container,
+    [data-theme="dark"] .slds-modal__header,
+    [data-theme="dark"] .slds-modal__content,
+    [data-theme="dark"] .slds-modal__footer {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
+      color: #f9fafb !important;
+    }
+
+    [data-theme="dark"] #popover-notificaciones {
+      background-color: #111827 !important;
+      border: 1px solid #1f2937 !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+    }
+
+    [data-theme="dark"] #popover-notificaciones header {
+      background-color: #1f2937 !important;
+      border-bottom: 1px solid #374151 !important;
+    }
+
+    [data-theme="dark"] #popover-notificaciones h2 {
+      color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .dt-notif-item {
+      border-bottom-color: #1f2937 !important;
+    }
+
+    [data-theme="dark"] .dt-notif-item p {
+      color: #f9fafb !important;
+    }
+
+    /* Formularios e Inputs */
+    [data-theme="dark"] .slds-input,
+    [data-theme="dark"] .slds-select,
+    [data-theme="dark"] .slds-textarea,
+    [data-theme="dark"] input:not([type="submit"]):not([type="button"]),
+    [data-theme="dark"] select,
+    [data-theme="dark"] textarea {
+      background-color: #1f2937 !important;
+      border-color: #374151 !important;
+      color: #f9fafb !important;
+    }
+
+    /* Botones neutros e iconos */
+    [data-theme="dark"] .slds-button_neutral,
+    [data-theme="dark"] .slds-button_icon-border,
+    [data-theme="dark"] .slds-button_icon-border-filled {
+      background-color: #1f2937 !important;
+      border-color: #374151 !important;
+      color: #e5e7eb !important;
+    }
+
+    [data-theme="dark"] .slds-button_neutral:hover,
+    [data-theme="dark"] .slds-button_icon-border:hover,
+    [data-theme="dark"] .slds-button_icon-border-filled:hover {
+      background-color: #374151 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .slds-button__icon {
+      fill: #e5e7eb !important;
+    }
+
+    /* Estilo del Botón Theme Toggle */
+    .theme-toggle-admin {
+      background: transparent;
+      border: 1px solid #c9c7c5;
+      color: #0b4a8f;
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      min-height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      padding: 0;
+      margin: 0;
+    }
+
+    .theme-toggle-admin:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      transform: scale(1.05);
+    }
+
+    .theme-toggle-admin svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .theme-toggle-admin .sun-icon {
+      display: none;
+    }
+
+    .theme-toggle-admin .moon-icon {
+      display: block;
+    }
+
+    [data-theme="dark"] .theme-toggle-admin {
+      border-color: #374151;
+      color: #fbbf24;
+    }
+
+    [data-theme="dark"] .theme-toggle-admin:hover {
+      background: #1f2937;
+      border-color: #4b5563;
+    }
+
+    [data-theme="dark"] .theme-toggle-admin .sun-icon {
+      display: block;
+    }
+
+    [data-theme="dark"] .theme-toggle-admin .moon-icon {
+      display: none;
+    }
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
@@ -323,6 +560,28 @@
 
       <!-- User Profile, Notificaciones & Actions con Blobatar Avatar -->
       <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
+        <!-- Botón Modo Noche / Modo Día -->
+        <button id="theme-toggle" class="theme-toggle-admin slds-m-right_small dt-touch-target"
+          type="button" aria-label="Cambiar tema claro u oscuro" aria-pressed="false"
+          title="Cambiar entre modo día y noche">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
         <!-- Centro de Notificaciones SLDS (UX-08 / UX-13) -->
         <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-m-right_small" style="position: relative;">
           <button type="button" id="btn-notificaciones-toggle"
@@ -874,6 +1133,21 @@
               matched = true;
             }
           }
+        });
+      }
+
+      // Alternador de Modo Claro / Modo Oscuro (Sincronizado con landing page)
+      var themeBtn = document.getElementById("theme-toggle");
+      if (themeBtn) {
+        var isDarkInit = document.documentElement.getAttribute("data-theme") === "dark";
+        themeBtn.setAttribute("aria-pressed", String(isDarkInit));
+        themeBtn.addEventListener("click", function () {
+          var docEl = document.documentElement;
+          var isDark = docEl.getAttribute("data-theme") === "dark";
+          var newTheme = isDark ? "light" : "dark";
+          docEl.setAttribute("data-theme", newTheme);
+          localStorage.setItem("dt-theme", newTheme);
+          themeBtn.setAttribute("aria-pressed", String(!isDark));
         });
       }
     });
