@@ -4,16 +4,17 @@
 
 .DEFAULT_GOAL := help
 SERVER_MODULE=donatrack-web
+MVN := $(shell command -v mvn 2>/dev/null || echo ./mvnw)
 
 # =========================
 # BUILD
 # =========================
 
 build:
-	mvn clean install
+	$(MVN) clean install
 
 package:
-	mvn clean package -DskipTests
+	$(MVN) clean package -DskipTests
 	docker compose --profile local up --build -d
 
 # =========================
@@ -21,36 +22,36 @@ package:
 # =========================
 
 test:
-	mvn test
+	$(MVN) test
 
 test-donaciones:
-	mvn test -pl donatrack-donaciones
+	$(MVN) test -pl donatrack-donaciones
 
 test-incentivos:
-	mvn test -pl donatrack-incentivos
+	$(MVN) test -pl donatrack-incentivos
 
 test-logistica:
-	mvn test -pl donatrack-logistica
+	$(MVN) test -pl donatrack-logistica
 
 test-notificaciones:
-	mvn test -pl donatrack-notificaciones
+	$(MVN) test -pl donatrack-notificaciones
 
 test-auth:
-	mvn test -pl donatrack-auth
+	$(MVN) test -pl donatrack-auth
 
 test-web:
-	mvn test -pl donatrack-web
+	$(MVN) test -pl donatrack-web
 
 # =========================
 # QUALITY / FORMAT
 # =========================
 
 format:
-	mvn fmt:format
+	$(MVN) fmt:format
 
 quality:
-	mvn fmt:format
-	mvn test
+	$(MVN) fmt:format
+	$(MVN) test
 
 git-clean:
 	git fetch --prune
@@ -63,25 +64,25 @@ PROFILE ?= local
 # =========================
 
 run:
-	mvn install -pl $(SERVER_MODULE) -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl $(SERVER_MODULE)
+	$(MVN) install -pl $(SERVER_MODULE) -am && SPRING_PROFILES_ACTIVE=$(PROFILE) $(MVN) spring-boot:run -pl $(SERVER_MODULE)
 
 donaciones:
-	mvn install -pl donatrack-donaciones -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-donaciones
+	$(MVN) install -pl donatrack-donaciones -am && SPRING_PROFILES_ACTIVE=$(PROFILE) $(MVN) spring-boot:run -pl donatrack-donaciones
 
 incentivos:
-	mvn install -pl donatrack-incentivos -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-incentivos
+	$(MVN) install -pl donatrack-incentivos -am && SPRING_PROFILES_ACTIVE=$(PROFILE) $(MVN) spring-boot:run -pl donatrack-incentivos
 
 logistica:
-	mvn install -pl donatrack-logistica -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-logistica
+	$(MVN) install -pl donatrack-logistica -am && SPRING_PROFILES_ACTIVE=$(PROFILE) $(MVN) spring-boot:run -pl donatrack-logistica
 
 notificaciones:
-	mvn install -pl donatrack-notificaciones -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-notificaciones
+	$(MVN) install -pl donatrack-notificaciones -am && SPRING_PROFILES_ACTIVE=$(PROFILE) $(MVN) spring-boot:run -pl donatrack-notificaciones
 
 auth:
-	mvn install -pl donatrack-auth -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-auth
+	$(MVN) install -pl donatrack-auth -am && SPRING_PROFILES_ACTIVE=$(PROFILE) $(MVN) spring-boot:run -pl donatrack-auth
 
 web:
-	mvn install -pl donatrack-web -am && SPRING_PROFILES_ACTIVE=$(PROFILE) mvn spring-boot:run -pl donatrack-web
+	$(MVN) install -pl donatrack-web -am && SPRING_PROFILES_ACTIVE=$(PROFILE) $(MVN) spring-boot:run -pl donatrack-web
 
 server: web
 
@@ -89,14 +90,14 @@ ngrok:
 	ngrok http --url=exclude-stoplight-registrar.ngrok-free.dev 8080
 
 run-clean:
-	mvn clean install && mvn spring-boot:run -pl $(SERVER_MODULE)
+	$(MVN) clean install && $(MVN) spring-boot:run -pl $(SERVER_MODULE)
 
 # =========================
 # CLEAN
 # =========================
 
 clean:
-	mvn clean
+	$(MVN) clean
 
 deep-clean:
 	find . -type d -name target -exec rm -rf {} +
@@ -106,7 +107,7 @@ deep-clean:
 # =========================
 
 ci:
-	mvn clean verify
+	$(MVN) clean verify
 
 # =========================
 # N8N
