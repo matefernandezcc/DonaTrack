@@ -1,0 +1,33 @@
+info:
+  name: GraphQL - Consultar Donaciones y Estadisticas
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{donacionesUrl}}/graphql"
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query ConsultarDonaciones($estado: EstadoDonacion, $pagina: Int, $tamanio: Int, $idDonante: ID!) { donaciones(estado: $estado, pagina: $pagina, tamanio: $tamanio) { totalElementos totalPaginas paginaActual contenido { id descripcion estado fechaCreacion items { id nombre cantidad categoria } } } estadisticasDonante(idDonante: $idDonante) { idDonante totalDonaciones donacionesEntregadas } }",
+        "variables": {
+          "estado": "EN_DEPOSITO",
+          "pagina": 0,
+          "tamanio": 5,
+          "idDonante": "a1111111-1111-4111-8111-111111111111"
+        }
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

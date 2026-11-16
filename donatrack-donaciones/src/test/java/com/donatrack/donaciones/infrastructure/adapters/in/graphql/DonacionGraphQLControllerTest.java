@@ -387,4 +387,67 @@ class DonacionGraphQLControllerTest {
     // Debe invocar el repositorio con el callerId forzado
     verify(donacionJpaRepository).buscarConFiltrosPaginados(eq("EN_DEPOSITO"), eq(callerId), any(), any());
   }
+
+  @Test
+  @DisplayName("GraphQL Anti-IDOR: Donante no puede consultar por ID una donación de otro usuario")
+  void testAntiIdorDonacionPorIdRechazaOtroUsuario() throws Exception {
+    String secret = "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!";
+    UUID callerId = UUID.randomUUID();
+    UUID otroId = UUID.randomUUID();
+    UUID donacionId = UUID.randomUUID();
+    String token = crearJwt(callerId, "DONANTE", secret);
+
+    DonacionEntity donacionOtro =
+        crearDonacionMock(donacionId, "EN_DEPOSITO", "Donación ajena", "Ropa de abrigo");
+    var donanteOtro =
+        new com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities
+            .DonanteEntity();
+    donanteOtro.setId(otroId);
+    donacionOtro.getDonacionOriginal().setDonante(donanteOtro);
+
+    when(donacionJpaRepository.buscarPorIdConBienes(donacionId))
+        .thenReturn(Optional.of(donacionOtro));
+
+    org.springframework.mock.web.MockHttpServletRequest mockRequest =
+        new org.springframework.mock.web.MockHttpServletRequest();
+    mockRequest.addHeader("Authorization", "Bearer " + token);
+
+    DonacionGraphQLController controller =
+        new DonacionGraphQLController(donacionJpaRepository, mockRequest, secret, "key-interna-segura");
+
+    org.junit.jupiter.api.Assertions.assertThrows(
+        org.springframework.security.access.AccessDeniedException.class,
+        () -> controller.donacion(donacionId.toString()));
+  }
+
+  @Test
+  @DisplayName("GraphQL Anti-IDOR: Donante propietario puede consultar su donación por ID")
+  void testAntiIdorDonacionPorIdPermitePropietario() throws Exception {
+    String secret = "SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!";
+    UUID callerId = UUID.randomUUID();
+    UUID donacionId = UUID.randomUUID();
+    String token = crearJwt(callerId, "DONANTE", secret);
+
+    DonacionEntity donacionPropia =
+        crearDonacionMock(donacionId, "ASIGNADA", "Donación propia", "Leche larga vida");
+    var donantePropio =
+        new com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities
+            .DonanteEntity();
+    donantePropio.setId(callerId);
+    donacionPropia.getDonacionOriginal().setDonante(donantePropio);
+
+    when(donacionJpaRepository.buscarPorIdConBienes(donacionId))
+        .thenReturn(Optional.of(donacionPropia));
+
+    org.springframework.mock.web.MockHttpServletRequest mockRequest =
+        new org.springframework.mock.web.MockHttpServletRequest();
+    mockRequest.addHeader("Authorization", "Bearer " + token);
+
+    DonacionGraphQLController controller =
+        new DonacionGraphQLController(donacionJpaRepository, mockRequest, secret, "key-interna-segura");
+
+    var result = controller.donacion(donacionId.toString());
+    org.junit.jupiter.api.Assertions.assertNotNull(result);
+    assertEquals(donacionId, result.id());
+  }
 }
