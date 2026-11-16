@@ -337,6 +337,7 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
     }
 
+    /* Tipografía Semántica de Alto Contraste */
     [data-theme="dark"] .slds-page-header__title,
     [data-theme="dark"] h1,
     [data-theme="dark"] h2,
@@ -344,51 +345,33 @@
     [data-theme="dark"] h4,
     [data-theme="dark"] strong,
     [data-theme="dark"] .dt-profile-name,
+    [data-theme="dark"] .dt-org-name,
     [data-theme="dark"] .slds-text-heading_large,
     [data-theme="dark"] .slds-text-heading_medium,
-    [data-theme="dark"] .slds-text-heading_small,
-    [data-theme="dark"] [style*="color: #080707"],
-    [data-theme="dark"] [style*="color:#080707"],
-    [data-theme="dark"] [style*="color: #0f172a"],
-    [data-theme="dark"] [style*="color:#0f172a"],
-    [data-theme="dark"] [style*="color: #1e293b"],
-    [data-theme="dark"] [style*="color:#1e293b"] {
+    [data-theme="dark"] .slds-text-heading_small {
       color: #f9fafb !important;
     }
 
-    [data-theme="dark"] [style*="color: #014486"],
-    [data-theme="dark"] [style*="color:#014486"] {
-      color: #93c5fd !important;
-    }
+    /* Clases de Métricas con Contraste WCAG AAA en Ambos Modos */
+    .dt-stat-green { color: #166534; }
+    .dt-stat-blue { color: #014486; }
+    .dt-stat-orange { color: #c2410c; }
+    .dt-stat-indigo { color: #4338ca; }
 
-    [data-theme="dark"] [style*="color: #166534"],
-    [data-theme="dark"] [style*="color:#166534"] {
-      color: #86efac !important;
-    }
-
-    [data-theme="dark"] [style*="color: #c2410c"],
-    [data-theme="dark"] [style*="color:#c2410c"] {
-      color: #fdba74 !important;
-    }
+    [data-theme="dark"] .dt-stat-green { color: #86efac !important; }
+    [data-theme="dark"] .dt-stat-blue { color: #93c5fd !important; }
+    [data-theme="dark"] .dt-stat-orange { color: #fdba74 !important; }
+    [data-theme="dark"] .dt-stat-indigo { color: #a5b4fc !important; }
 
     [data-theme="dark"] p,
     [data-theme="dark"] .dt-profile-points,
     [data-theme="dark"] .dt-profile-motto,
-    [data-theme="dark"] [style*="color: #2e3440"],
-    [data-theme="dark"] [style*="color:#2e3440"],
-    [data-theme="dark"] [style*="color: #475569"],
-    [data-theme="dark"] [style*="color:#475569"],
-    [data-theme="dark"] [style*="color: #4b5563"],
-    [data-theme="dark"] [style*="color:#4b5563"],
-    [data-theme="dark"] [style*="color: #555"],
-    [data-theme="dark"] [style*="color:#555"] {
+    [data-theme="dark"] .dt-org-meta {
       color: #d1d5db !important;
     }
 
     [data-theme="dark"] .slds-page-header__name-meta,
-    [data-theme="dark"] .slds-text-color_weak,
-    [data-theme="dark"] [style*="color: #64748b"],
-    [data-theme="dark"] [style*="color:#64748b"] {
+    [data-theme="dark"] .slds-text-color_weak {
       color: #9ca3af !important;
     }
 
@@ -410,31 +393,25 @@
     }
 
     [data-theme="dark"] .slds-card__header {
+      background-color: #111827 !important;
       border-bottom: 1px solid #1f2937 !important;
     }
 
-    /* Anulación universal de fondos blancos inline */
-    [data-theme="dark"] [style*="background: #ffffff"],
-    [data-theme="dark"] [style*="background:#ffffff"],
-    [data-theme="dark"] [style*="background: white"],
-    [data-theme="dark"] [style*="background-color: #ffffff"],
-    [data-theme="dark"] [style*="background-color:#ffffff"],
-    [data-theme="dark"] [style*="background-color: white"] {
-      background-color: #111827 !important;
-      background: #111827 !important;
-      border-color: #1f2937 !important;
-      color: #f9fafb !important;
+    /* Cajas internas, listas, badges de trazabilidad y empty states */
+    .dt-trazabilidad-box,
+    .dt-impact-metric-card,
+    .dt-empty-state-box,
+    .dt-mision-item-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
     }
 
-    /* Cajas internas, listas, badges de trazabilidad y empty states */
-    [data-theme="dark"] [style*="background: #f8fafc"],
-    [data-theme="dark"] [style*="background:#f8fafc"],
-    [data-theme="dark"] [style*="background: #f1f5f9"],
-    [data-theme="dark"] [style*="background:#f1f5f9"],
-    [data-theme="dark"] [style*="background-color: #f8fafc"],
-    [data-theme="dark"] [style*="background-color:#f8fafc"],
-    [data-theme="dark"] [style*="background-color: #f1f5f9"],
-    [data-theme="dark"] [style*="background-color:#f1f5f9"],
+    .dt-empty-state-box {
+      border: 1px dashed #cbd5e1;
+      border-style: dashed;
+    }
+
     [data-theme="dark"] .dt-trazabilidad-box,
     [data-theme="dark"] .dt-impact-metric-card,
     [data-theme="dark"] .dt-empty-state-box,
@@ -444,6 +421,41 @@
       border-color: #334155 !important;
       color: #f3f4f6 !important;
     }
+
+    [data-theme="dark"] .dt-empty-state-box {
+      border: 1px dashed #334155 !important;
+      border-style: dashed !important;
+      border-color: #334155 !important;
+    }
+
+    /* Reconocimiento lateral Trailblazer */
+    .dt-recognition-box {
+      background: #fdf8e2;
+      border: 1px solid #fde047;
+      border-radius: 8px;
+    }
+    [data-theme="dark"] .dt-recognition-box {
+      background-color: rgba(245, 158, 11, 0.12) !important;
+      background: rgba(245, 158, 11, 0.12) !important;
+      border: 1px solid #78350f !important;
+    }
+    [data-theme="dark"] .dt-recognition-title {
+      color: #fef08a !important;
+    }
+    [data-theme="dark"] .dt-recognition-text {
+      color: #fde047 !important;
+    }
+
+    /* Badges de Notificaciones Desacopladas de JS */
+    .dt-notif-badge_success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .dt-notif-badge_error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .dt-notif-badge_system { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .dt-notif-badge_backend { background: #f1f5f9; color: #475569; }
+
+    [data-theme="dark"] .dt-notif-badge_success { background: rgba(22, 101, 52, 0.25) !important; color: #86efac !important; border-color: #166534 !important; }
+    [data-theme="dark"] .dt-notif-badge_error { background: rgba(185, 28, 28, 0.25) !important; color: #fca5a5 !important; border-color: #991b1b !important; }
+    [data-theme="dark"] .dt-notif-badge_system { background: rgba(3, 105, 161, 0.25) !important; color: #93c5fd !important; border-color: #0369a1 !important; }
+    [data-theme="dark"] .dt-notif-badge_backend { background: #1e293b !important; color: #cbd5e1 !important; border: 1px solid #334155 !important; }
 
     /* Pestañas y navegación en modo oscuro */
     [data-theme="dark"] .slds-tabs_default,

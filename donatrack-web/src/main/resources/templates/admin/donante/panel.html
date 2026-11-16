@@ -67,10 +67,10 @@
           <!-- Información del Usuario (Texto oscuro nítido con contraste óptimo) -->
           <div class="slds-col slds-p-left_medium slds-m-top_xx-small" style="min-width: 280px; flex: 1;">
             <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
-              <h1 class="slds-text-heading_medium dt-profile-name" style="font-weight: 800; margin-right: 12px;"
+              <h2 class="slds-text-heading_medium dt-profile-name" style="font-weight: 800; margin-right: 12px;"
                   th:text="${nombreCompleto != null ? nombreCompleto : nombreUsuario}">
                 María González
-              </h1>
+              </h2>
               <span class="slds-badge slds-badge_lightest" style="color: #014486; font-weight: 700; font-size: 0.74rem;"
                     th:text="${rangoNombre}">
                 Donante Inicial
@@ -181,7 +181,7 @@
       <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
 
         <!-- ==================== PESTAÑA 1: RESUMEN & IMPACTO ==================== -->
-        <div id="tab-panel-resumen" th:style="${tabActiva == null || tabActiva == 'resumen'} ? 'display: block;' : 'display: none;'">
+        <div id="tab-panel-resumen" role="tabpanel" aria-labelledby="tab-btn-resumen" th:style="${tabActiva == null || tabActiva == 'resumen'} ? 'display: block;' : 'display: none;'">
         
         <!-- ==================== HERO DE IMPACTO SOCIAL TANGIBLE ==================== -->
         <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04); overflow: hidden;">
@@ -212,7 +212,7 @@
               
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
                 <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div style="font-weight: 800; color: #014486; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                  <div class="dt-stat-blue" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
                        th:text="${#numbers.formatInteger(platosComida, 0, 'POINT')} + ' raciones'">
                     0 raciones
                   </div>
@@ -224,7 +224,7 @@
 
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
                 <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div style="font-weight: 800; color: #166534; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                  <div class="dt-stat-green" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
                        th:text="${#numbers.formatInteger(kilosTotales, 0, 'POINT')} + ' kg'">
                     0 kg
                   </div>
@@ -236,7 +236,7 @@
 
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
                 <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div style="font-weight: 800; color: #c2410c; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                  <div class="dt-stat-orange" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
                        th:text="${comedoresAsistidos} + ' comedores'">
                     0 comedores
                   </div>
@@ -248,7 +248,7 @@
 
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
                 <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div style="font-weight: 800; color: #4338ca; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                  <div class="dt-stat-indigo" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
                        th:text="${entregasCompletadas} + ' entregas'">
                     0 entregas
                   </div>
@@ -450,10 +450,10 @@
         <!-- FIN PESTAÑA 1: RESUMEN -->
 
         <!-- ==================== PESTAÑA 2: SEGUIMIENTO DE MIS DONACIONES ==================== -->
-        <div id="tab-panel-seguimiento" th:style="${tabActiva == 'seguimiento'} ? 'display: block;' : 'display: none;'">
+        <div id="tab-panel-seguimiento" role="tabpanel" aria-labelledby="tab-btn-seguimiento" th:style="${tabActiva == 'seguimiento'} ? 'display: block;' : 'display: none;'">
 
           <!-- ==================== MAPA DE CAMIONES EN RUTA (UX-09) ==================== -->
-          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; background: #ffffff;">
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden;">
             <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
               <header class="slds-media slds-media_center slds-has-flexi-truncate">
                 <div class="slds-media__figure">
@@ -675,8 +675,8 @@
         <!-- FIN PESTAÑA 2: SEGUIMIENTO -->
 
         <!-- ==================== PESTAÑA 3: BUSCADOR DE CAUSAS & NECESIDADES ONG ==================== -->
-        <div id="tab-panel-causas" th:style="${tabActiva == 'causas'} ? 'display: block;' : 'display: none;'">
-          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+        <div id="tab-panel-causas" role="tabpanel" aria-labelledby="tab-btn-causas" th:style="${tabActiva == 'causas'} ? 'display: block;' : 'display: none;'">
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
             <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
               <header class="slds-media slds-media_center slds-has-flexi-truncate">
                 <div class="slds-media__figure">
@@ -756,8 +756,8 @@
         <!-- FIN PESTAÑA 3: CAUSAS -->
 
         <!-- ==================== PESTAÑA 4: DIRECTORIO DE ORGANIZACIONES Y COMEDORES (UX-06) ==================== -->
-        <div id="tab-panel-directorio" th:style="${tabActiva == 'directorio'} ? 'display: block;' : 'display: none;'">
-          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+        <div id="tab-panel-directorio" role="tabpanel" aria-labelledby="tab-btn-directorio" th:style="${tabActiva == 'directorio'} ? 'display: block;' : 'display: none;'">
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
             <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
               <header class="slds-media slds-media_center slds-has-flexi-truncate">
                 <div class="slds-media__figure">
@@ -875,7 +875,7 @@
               </div>
             </div>
 
-            <div th:unless="${isNuevoUsuario}" style="background: #fdf8e2; border: 1px solid #fde047; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; text-align: left;">
+            <div th:unless="${isNuevoUsuario}" class="dt-recognition-box" style="background: #fdf8e2; border: 1px solid #fde047; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; text-align: left;">
               <!-- Medalla Dorada -->
               <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #fef08a 0%, #ca8a04 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(202, 138, 4, 0.4); flex-shrink: 0; border: 2px solid #eab308;">
                 <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #78350f;">
@@ -883,8 +883,8 @@
                 </svg>
               </div>
               <div>
-                <strong style="display: block; font-size: 0.85rem; color: #854d0e;">DonaTrack Solidario</strong>
-                <span style="font-size: 0.72rem; color: #a16207;">Reconocimiento por entregas y remitos auditados en destino.</span>
+                <strong class="dt-recognition-title" style="display: block; font-size: 0.85rem; color: #854d0e;">DonaTrack Solidario</strong>
+                <span class="dt-recognition-text" style="font-size: 0.72rem; color: #a16207;">Reconocimiento por entregas y remitos auditados en destino.</span>
               </div>
             </div>
 

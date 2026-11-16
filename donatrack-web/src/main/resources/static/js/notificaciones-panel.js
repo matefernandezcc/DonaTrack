@@ -191,17 +191,17 @@
       if (a.id) li.setAttribute('data-notif-id', a.id);
 
       var medio;
-      var badgeStyle = 'background: #f1f5f9; color: #475569;';
+      var badgeClass = 'dt-notif-badge dt-notif-badge_backend';
       if (a.isLocal) {
         if (a.tipo === 'success') {
           medio = 'ÉXITO';
-          badgeStyle = 'background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;';
+          badgeClass = 'dt-notif-badge dt-notif-badge_success';
         } else if (a.tipo === 'error') {
           medio = 'ALERTA';
-          badgeStyle = 'background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;';
+          badgeClass = 'dt-notif-badge dt-notif-badge_error';
         } else {
           medio = 'SISTEMA';
-          badgeStyle = 'background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;';
+          badgeClass = 'dt-notif-badge dt-notif-badge_system';
         }
       } else {
         medio = escapeHtml((a.medio || 'EMAIL').toString().toUpperCase());
@@ -222,7 +222,7 @@
             '</span>' +
           '</div>' +
           '<div class="slds-grid slds-grid_vertical-align-center" style="gap: 6px; flex-shrink: 0;">' +
-            '<span class="slds-badge" style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ' + badgeStyle + '">' +
+            '<span class="slds-badge ' + badgeClass + '" style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">' +
               medio +
             '</span>' +
             '<button type="button" class="dt-notif-delete-btn" aria-label="Eliminar notificación" title="Eliminar notificación">' +
