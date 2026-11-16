@@ -177,7 +177,7 @@
     alertas.forEach(function (a) {
       var li = document.createElement('li');
       li.className = isPanelCard
-        ? 'slds-p-around_small slds-card'
+        ? 'slds-p-around_small slds-card dt-notif-panel-item'
         : 'slds-item slds-p-vertical_x-small slds-p-horizontal_small dt-notif-item';
 
       if (!isPanelCard) {
@@ -214,10 +214,10 @@
       li.innerHTML =
         '<div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start" style="gap: 8px;">' +
           '<div style="min-width: 0; flex: 1;">' +
-            '<p class="slds-text-body_regular" style="color: #0f172a; font-weight: 600; font-size: 0.85rem; line-height: 1.35; margin: 0; word-break: break-word;">' +
+            '<p class="slds-text-body_regular dt-notif-msg" style="font-weight: 600; font-size: 0.85rem; line-height: 1.35; margin: 0; word-break: break-word;">' +
               mensaje +
             '</p>' +
-            '<span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.74rem;">' +
+            '<span class="slds-text-body_small slds-text-color_weak dt-notif-time" style="font-size: 0.74rem;">' +
               fecha + (completada ? ' · Recibida' : ' · En proceso') +
             '</span>' +
           '</div>' +
