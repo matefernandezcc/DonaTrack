@@ -6,6 +6,7 @@ import com.donatrack.auth.infrastructure.adapters.out.persistence.UsuarioReposit
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
@@ -27,10 +28,11 @@ public class AuthDataSeeder implements CommandLineRunner {
     this(usuarioRepository, passwordEncoder, null);
   }
 
+  @Autowired
   public AuthDataSeeder(
       UsuarioRepository usuarioRepository,
       PasswordEncoder passwordEncoder,
-      Environment environment) {
+      @Autowired(required = false) Environment environment) {
     this.usuarioRepository = usuarioRepository;
     this.passwordEncoder = passwordEncoder;
     this.environment = environment;
