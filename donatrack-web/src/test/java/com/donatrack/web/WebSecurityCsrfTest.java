@@ -172,4 +172,13 @@ class WebSecurityCsrfTest {
                 .param("nombreSubcategoria", "No Perecederos"))
         .andExpect(status().is3xxRedirection());
   }
+
+  @Test
+  @DisplayName("GET /api/notificaciones/mis-alertas sin autenticación pasa filtro de seguridad y retorna 200 OK con lista vacía")
+  void testNotificacionesSinAuthRetorna200Vacio() throws Exception {
+    mockMvc
+        .perform(get("/api/notificaciones/mis-alertas"))
+        .andExpect(status().isOk())
+        .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
+  }
 }

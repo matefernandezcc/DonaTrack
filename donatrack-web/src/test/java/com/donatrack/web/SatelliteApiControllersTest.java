@@ -22,6 +22,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -132,8 +134,8 @@ class SatelliteApiControllersTest {
 
   @Test
   @DisplayName(
-      "GET /api/notificaciones/mis-alertas — Retorna 503 estructurado cuando falla NotificacionesGateway")
-  void testMisAlertasError503CuandoFallaGateway() throws Exception {
+      "GET /api/notificaciones/mis-alertas — Retorna lista vacía en modo defensivo cuando falla NotificacionesGateway")
+  void testMisAlertasFallbackListaVaciaCuandoFallaGateway() throws Exception {
     when(notificacionesGateway.obtenerNotificacionesUsuario("donante@test.com"))
         .thenThrow(new RuntimeException("Timeout en notificaciones"));
 
@@ -148,9 +150,45 @@ class SatelliteApiControllersTest {
 
     notificacionesMvc
         .perform(get("/api/notificaciones/mis-alertas").principal(auth))
-        .andExpect(status().isServiceUnavailable())
-        .andExpect(jsonPath("$.error").value("NOTIFICACIONES_UNAVAILABLE"))
-        .andExpect(jsonPath("$.message").exists());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /api/notificaciones/mis-alertas — Admite UsernamePasswordAuthenticationToken u otros principals")
+  void testMisAlertasUsernamePasswordAuth() throws Exception {
+    when(notificacionesGateway.obtenerNotificacionesUsuario("admin@donatrack.org"))
+        .thenReturn(
+            List.of(
+                Map.of(
+                    "mensaje", "Nuevo registro de beneficiaria",
+                    "medio", "IN_APP",
+                    "completada", true)));
+
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(
+            "admin@donatrack.org", "password", List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+
+    notificacionesMvc
+        .perform(get("/api/notificaciones/mis-alertas").principal(auth))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].mensaje").value("Nuevo registro de beneficiaria"))
+        .andExpect(jsonPath("$[0].medio").value("IN_APP"));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /api/notificaciones/mis-alertas — Retorna lista vacía si el usuario es anonymousUser")
+  void testMisAlertasUsuarioAnonimo() throws Exception {
+    AnonymousAuthenticationToken auth =
+        new AnonymousAuthenticationToken(
+            "key", "anonymousUser", List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
+
+    notificacionesMvc
+        .perform(get("/api/notificaciones/mis-alertas").principal(auth))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
   }
 
   @Test

@@ -122,6 +122,25 @@
       outline: 2px solid #0176d3 !important;
       outline-offset: 2px !important;
     }
+
+    /* Animación suave de Toast para desvanecimiento */
+    .donatrack-toast-fade {
+      transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.35s ease, margin 0.35s ease;
+      opacity: 1;
+      max-height: 200px;
+    }
+
+    .donatrack-toast-fade.dt-toast-hidden {
+      opacity: 0;
+      transform: translateY(-8px);
+      max-height: 0;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      overflow: hidden;
+      pointer-events: none;
+    }
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
@@ -465,9 +484,12 @@
         </div>
       </div>
 
-      <!-- SLDS BLUEPRINT: TOAST NOTIFICATIONS -->
-      <div class="slds-notify_container slds-is-relative slds-m-bottom_medium" th:if="${flashOk != null}">
-        <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
+      <!-- SLDS BLUEPRINT: TOAST NOTIFICATIONS (Única fuente de verdad de mensajes flash) -->
+      <div id="toast-notification"
+           class="slds-notify_container slds-is-relative slds-m-bottom_medium donatrack-toast-fade"
+           th:if="${flashOk != null or flashError != null}"
+           th:attr="data-mensaje=${flashOk != null ? flashOk : flashError}, data-tipo=${flashOk != null ? 'success' : 'error'}">
+        <div th:if="${flashOk != null}" class="slds-notify slds-notify_toast slds-theme_success" role="status">
           <span class="slds-assistive-text">Éxito</span>
           <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top"
             title="Éxito">
@@ -479,8 +501,8 @@
             <h2 class="slds-text-heading_small" th:text="${flashOk}">Operación completada con éxito.</h2>
           </div>
           <div class="slds-notify__close">
-            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar"
-              onclick="this.closest('.slds-notify_container').remove()">
+            <button type="button" class="slds-button slds-button_icon slds-button_icon-inverse dt-toast-close" title="Cerrar"
+              aria-label="Cerrar notificación">
               <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
               </svg>
@@ -488,10 +510,8 @@
             </button>
           </div>
         </div>
-      </div>
 
-      <div class="slds-notify_container slds-is-relative slds-m-bottom_medium" th:if="${flashError != null}">
-        <div class="slds-notify slds-notify_toast slds-theme_error" role="alert">
+        <div th:if="${flashError != null and flashOk == null}" class="slds-notify slds-notify_toast slds-theme_error" role="alert">
           <span class="slds-assistive-text">Error</span>
           <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top"
             title="Error">
@@ -503,8 +523,8 @@
             <h2 class="slds-text-heading_small" th:text="${flashError}">Ocurrió un error.</h2>
           </div>
           <div class="slds-notify__close">
-            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar"
-              onclick="this.closest('.slds-notify_container').remove()">
+            <button type="button" class="slds-button slds-button_icon slds-button_icon-inverse dt-toast-close" title="Cerrar"
+              aria-label="Cerrar notificación">
               <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
               </svg>

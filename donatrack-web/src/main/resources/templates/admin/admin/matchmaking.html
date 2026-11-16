@@ -10,22 +10,6 @@
 
   <div id="main-content-slot">
 
-    <!-- Mensajes Flash de Notificación -->
-    <div th:if="${flashOk != null}" class="slds-notify slds-notify_alert slds-theme_success slds-m-bottom_medium" role="alert" style="border-radius: 6px; font-weight: 700;">
-      <span class="slds-assistive-text">Éxito</span>
-      <svg class="slds-icon slds-icon_x-small slds-m-right_x-small" aria-hidden="true" style="fill: #ffffff;">
-        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
-      </svg>
-      <h2 th:text="${flashOk}">Operación completada con éxito.</h2>
-    </div>
-
-    <div th:if="${flashError != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px; font-weight: 700;">
-      <span class="slds-assistive-text">Error</span>
-      <svg class="slds-icon slds-icon_x-small slds-m-right_x-small" aria-hidden="true" style="fill: #ffffff;">
-        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#ban}"></use>
-      </svg>
-      <h2 th:text="${flashError}">Ocurrió un error al procesar la donación.</h2>
-    </div>
 
     <!-- ==================== ARQUITECTURA DE LOS 2 ALGORITMOS + EJECUCIÓN MANUAL / BATCH ==================== -->
     <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1;">
