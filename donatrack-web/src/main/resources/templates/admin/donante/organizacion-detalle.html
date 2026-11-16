@@ -208,6 +208,11 @@
                       <span class="slds-badge slds-theme_success" style="font-weight: 700; font-size: 0.72rem;" th:text="${h['estado']}">ENTREGADA</span>
                     </td>
                   </tr>
+                  <tr th:if="${#lists.isEmpty(org['historialDonaciones'])}">
+                    <td colspan="4" class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                      Esta organización aún no registra entregas auditadas en el historial.
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>

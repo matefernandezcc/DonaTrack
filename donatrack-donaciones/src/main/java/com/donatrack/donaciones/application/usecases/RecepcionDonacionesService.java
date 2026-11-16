@@ -49,14 +49,21 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
             .buscarPorId(idDonante)
             .orElseGet(
                 () -> {
+                  boolean esAnonimo =
+                      "a0000000-0000-4000-8000-000000000000"
+                          .equalsIgnoreCase(idDonante.toString());
                   com.donatrack.donaciones.domain.entities.persona.PersonaHumana nueva =
                       new com.donatrack.donaciones.domain.entities.persona.PersonaHumana(
-                          "donante-" + idDonante.toString().substring(0, 8) + "@donatrack.org",
+                          esAnonimo
+                              ? "anonimo@donatrack.org"
+                              : "donante-"
+                                  + idDonante.toString().substring(0, 8)
+                                  + "@donatrack.org",
                           null,
                           null,
                           null,
                           "Donante",
-                          "Solidario",
+                          esAnonimo ? "Anónimo" : "Solidario",
                           30);
                   nueva.setId(idDonante);
                   Donante rolDonante = new Donante();

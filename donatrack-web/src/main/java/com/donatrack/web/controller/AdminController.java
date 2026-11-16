@@ -40,6 +40,8 @@ public class AdminController {
 
   private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
+  private static final UUID ANONIMO_DONANTE_ID =
+      UUID.fromString("a0000000-0000-4000-8000-000000000000");
   private static final UUID DEFAULT_DONANTE_ID =
       UUID.fromString("a1111111-1111-4111-8111-111111111111");
   private static final UUID DEFAULT_ADMIN_ID =
@@ -582,6 +584,9 @@ public class AdminController {
       }
     }
 
+    if (ANONIMO_DONANTE_ID.toString().equalsIgnoreCase(clean)) {
+      return "Donante Anónimo";
+    }
     if ("a1111111-1111-4111-8111-111111111111".equalsIgnoreCase(clean)) {
       return "María González";
     }
@@ -1016,12 +1021,22 @@ public class AdminController {
         sugerenciasEnriquecidas.add(enrich);
       }
 
-      // Si el motor no arrojó match estricto pero hay beneficiarios, mostrar los disponibles como
-      // candidatos secundarios por equidad para que el admin siempre pueda asignar
-      if (sugerenciasEnriquecidas.isEmpty() && !beneficiariosEnriquecidos.isEmpty()) {
+      // Completar candidatos con el resto de las organizaciones verificadas que aún no figuren
+      // para que el administrador siempre pueda asignar a cualquier entidad habilitada
+      if (!beneficiariosEnriquecidos.isEmpty()) {
+        java.util.Set<String> sugeridosIds = new java.util.HashSet<>();
+        for (Map<String, Object> sug : sugerenciasEnriquecidas) {
+          if (sug.get("id") != null) {
+            sugeridosIds.add(sug.get("id").toString().toLowerCase());
+          }
+        }
         for (Map<String, Object> bInfo : beneficiariosEnriquecidos) {
+          String bIdStr = bInfo.get("id") != null ? bInfo.get("id").toString() : "";
+          if (bIdStr.isBlank() || sugeridosIds.contains(bIdStr.toLowerCase())) {
+            continue;
+          }
           Map<String, Object> fallbackMatch = new HashMap<>();
-          fallbackMatch.put("id", bInfo.get("id"));
+          fallbackMatch.put("id", bIdStr);
           fallbackMatch.put("nombreOrganizacion", bInfo.get("nombreOrganizacion"));
           fallbackMatch.put("nombreLegible", bInfo.get("nombreLegible"));
           fallbackMatch.put("correoRepresentante", bInfo.get("correoRepresentante"));
@@ -1031,6 +1046,7 @@ public class AdminController {
               "motivoMatch",
               "Candidato por Prioridad a Sub-Atendidos (Recepción General Habilitada)");
           sugerenciasEnriquecidas.add(fallbackMatch);
+          sugeridosIds.add(bIdStr.toLowerCase());
         }
       }
 
@@ -1188,9 +1204,7 @@ public class AdminController {
     }
 
     String tipoUpper = request.tipo().trim().toUpperCase();
-    if ("HUMANA".equals(tipoUpper)
-        && ((request.nombre() == null || request.nombre().isBlank())
-            || (request.apellido() == null || request.apellido().isBlank()))) {
+    if ("HUMANA".equals(tipoUpper) && (request.nombre() == null || request.nombre().isBlank())) {
       redirectAttributes.addFlashAttribute(
           "flashError", "Para persona humana, el nombre y el apellido son obligatorios.");
       return "redirect:/app/admin/donaciones/recepcion";
@@ -1207,10 +1221,16 @@ public class AdminController {
       payload.put("tipo", tipoUpper);
       payload.put("email", request.email().trim());
 
-      Map<String, Object> documento = new HashMap<>();
-      documento.put("tipo", request.docTipo().trim().toUpperCase());
-      documento.put("numero", request.docNumero().trim());
-      payload.put("documento", documento);
+      if (request.docNumero() != null && !request.docNumero().isBlank()) {
+        Map<String, Object> documento = new HashMap<>();
+        String docTipoNorm =
+            request.docTipo() != null && !request.docTipo().isBlank()
+                ? request.docTipo().trim().toUpperCase()
+                : "DNI";
+        documento.put("tipo", docTipoNorm);
+        documento.put("numero", request.docNumero().trim());
+        payload.put("documento", documento);
+      }
 
       Map<String, Object> contacto = new HashMap<>();
       contacto.put("correoElectronico", request.email().trim());
@@ -1261,7 +1281,11 @@ public class AdminController {
                 : "Comercial / Solidario");
       } else {
         payload.put("nombre", request.nombre().trim());
-        payload.put("apellido", request.apellido().trim());
+        payload.put(
+            "apellido",
+            request.apellido() != null && !request.apellido().isBlank()
+                ? request.apellido().trim()
+                : "");
         payload.put("edad", request.edad() != null && request.edad() > 0 ? request.edad() : 30);
       }
 
@@ -1779,15 +1803,18 @@ public class AdminController {
     // Insignias de hito comunitario verificadas cuando el servicio aún no asignó insignias al perfil
     List<Map<String, Object>> insigniasEnriquecidas = new ArrayList<>(insignias);
     if (insigniasEnriquecidas.isEmpty() && (donaciones > 0 || !misDonaciones.isEmpty())) {
+      String fechaHoy = java.time.LocalDate.now().toString();
       insigniasEnriquecidas.add(
           Map.of(
               "nombre", "Primer Aporte",
-              "descripcion", "Registraste tu primera donación solidaria verificada en DonaTrack."));
+              "descripcion", "Registraste tu primera donación solidaria verificada en DonaTrack.",
+              "fechaObtencion", fechaHoy));
       if (donacionesExitosas > 0 || entregasRealmenteCompletadas > 0) {
         insigniasEnriquecidas.add(
             Map.of(
                 "nombre", "Entrega Certificada",
-                "descripcion", "Tu aporte fue entregado en destino con remito digital firmado."));
+                "descripcion", "Tu aporte fue entregado en destino con remito digital firmado.",
+                "fechaObtencion", fechaHoy));
       }
     }
 
@@ -2515,6 +2542,7 @@ public class AdminController {
     Map<String, Object> org = new LinkedHashMap<>();
     org.put("id", id);
 
+    boolean esNuevaOngAprobada = false;
     if (matchedBenef != null
         && !"b2222222-2222-4222-8222-222222222222".equalsIgnoreCase(String.valueOf(matchedBenef.get("id")))
         && !lookupKey.contains("faro")
@@ -2522,6 +2550,7 @@ public class AdminController {
         && !lookupKey.contains("raices")
         && !lookupKey.contains("posta")
         && !lookupKey.contains("esperanza")) {
+      esNuevaOngAprobada = true;
       String resolvedName =
           String.valueOf(
               matchedBenef.getOrDefault(
@@ -2784,7 +2813,7 @@ public class AdminController {
       }
     } catch (Exception ignored) {
     }
-    if (historial.isEmpty()) {
+    if (historial.isEmpty() && !esNuevaOngAprobada) {
       historial =
           List.of(
               Map.of(

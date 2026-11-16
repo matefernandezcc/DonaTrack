@@ -71,7 +71,13 @@
         
         <!-- Estado Vacío -->
         <div th:if="${#lists.isEmpty(entregasEnCamino)}" class="slds-box slds-text-align_center slds-p-around_large" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
-          <div style="font-size: 2.2rem; margin-bottom: 8px;">✅</div>
+          <div style="margin-bottom: 10px;">
+            <span class="slds-icon_container slds-icon-utility-success" style="background: #dcfce7; border-radius: 50%; padding: 10px; display: inline-flex;">
+              <svg class="slds-icon slds-icon_medium" aria-hidden="true" style="fill: #166534;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#success}"></use>
+              </svg>
+            </span>
+          </div>
           <h4 style="font-weight: 700; color: #1e293b; font-size: 1.05rem;">No hay entregas pendientes de arribo en este momento</h4>
           <p class="slds-text-body_small slds-text-color_weak" style="max-width: 480px; margin: 4px auto 0;">
             Todos los despachos asignados a tu comedor ya han sido certificados y recibidos con su respectivo remito.
@@ -83,10 +89,13 @@
              style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           
           <div style="display: flex; gap: 10px; align-items: center; flex-grow: 1; max-width: 600px;">
-            <div style="position: relative; width: 100%;">
+            <div class="slds-input-has-icon slds-input-has-icon_left" style="position: relative; width: 100%;">
+              <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
+              </svg>
               <input type="text" id="busqueda-entregas" class="slds-input"
-                     placeholder="🔍 Buscar por código (#DT-XXXX), patente, chofer o destino..."
-                     oninput="filtrarEntregas()" onkeyup="filtrarEntregas()" style="padding-left: 14px; border-radius: 6px;" />
+                     placeholder="Buscar por código (#DT-XXXX), patente, chofer o destino..."
+                     oninput="filtrarEntregas()" onkeyup="filtrarEntregas()" style="border-radius: 6px;" />
             </div>
             
             <select id="filtro-estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 175px; border-radius: 6px;">
@@ -251,8 +260,10 @@
                             th:attr="data-url=${foto},data-cod=${r.codigoCorto},data-sub=${'Patente ' + r.patente + ' · ' + (r.fechaHoraRecepcion != null ? r.fechaHoraRecepcion : r.fechaOperativa)}"
                             onclick="abrirVisorRemito(this.getAttribute('data-url'), this.getAttribute('data-cod'), this.getAttribute('data-sub'))"
                             class="slds-button slds-button_icon slds-button_icon-border" title="Inspeccionar Comprobante"
-                            style="cursor: pointer; border-radius: 6px; font-size: 0.95rem; background: #f8fafc; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
-                      📷
+                            style="cursor: pointer; border-radius: 6px; background: #f8fafc; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
+                      <svg class="slds-button__icon" aria-hidden="true" style="fill: #014486;">
+                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#photo}"></use>
+                      </svg>
                     </button>
                     <span class="slds-badge slds-theme_success" style="font-size: 0.7rem; font-weight: 700;">Firmado</span>
                   </div>
@@ -283,7 +294,11 @@
               <span aria-hidden="true">✕</span>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
-            <div style="font-size: 2rem; margin-bottom: 4px;">✍️</div>
+            <div style="margin-bottom: 6px;">
+              <svg class="slds-icon slds-icon_medium" aria-hidden="true" style="fill: #ffffff;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#signature}"></use>
+              </svg>
+            </div>
             <h2 class="slds-modal__title slds-hyphenate" style="color: #ffffff; font-weight: 800; font-size: 1.35rem;">
               Certificar Recepción de Entrega
             </h2>
@@ -315,14 +330,20 @@
 
               <!-- Selector de Foto / Cámara Móvil -->
               <div class="slds-form-element slds-m-bottom_medium">
-                <label class="slds-form-element__label" style="font-weight: 700; color: #0f172a;">
-                  📸 Foto del Remito o Descarga al Pie del Camión
+                <label class="slds-form-element__label" style="font-weight: 700; color: #0f172a; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#photo}"></use>
+                  </svg>
+                  Foto del Remito o Descarga al Pie del Camión
                 </label>
                 <div class="slds-form-element__control">
                   <div style="border: 2px dashed #94a3b8; border-radius: 8px; padding: 16px; text-align: center; background: #f8fafc;">
                     <input type="file" id="cameraFile" name="fotoArchivo" accept="image/*" capture="environment" onchange="manejarCapturaCamara(this)" style="display: none;" />
-                    <button type="button" class="slds-button slds-button_neutral" onclick="document.getElementById('cameraFile').click()" style="font-weight: 700; border-radius: 6px; min-height: 36px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center;">
-                      📷 Abrir Cámara del Teléfono o Elegir Foto
+                    <button type="button" class="slds-button slds-button_neutral" onclick="document.getElementById('cameraFile').click()" style="font-weight: 700; border-radius: 6px; min-height: 36px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                      <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#photo}"></use>
+                      </svg>
+                      Abrir Cámara del Teléfono o Elegir Foto
                     </button>
                     <img id="camera-preview" src="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" alt="Vista previa de foto"
                          style="display: none; max-width: 180px; max-height: 140px; margin: 10px auto 4px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
@@ -367,7 +388,9 @@
           <div class="slds-modal__content slds-p-around_none" style="border-radius: 12px; overflow: hidden; background: #0f172a; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; color: #ffffff;">
               <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.3rem;">📄</span>
+                <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #38bdf8;">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#file}"></use>
+                </svg>
                 <div>
                   <h3 id="visor-codigo" style="font-weight: 800; font-size: 1.1rem; margin: 0; color: #38bdf8;">Comprobante de Entrega</h3>
                   <p id="visor-subtitulo" style="font-size: 0.78rem; margin: 0; color: #cbd5e1;">Comprobante Digital Certificado en Destino</p>
@@ -387,8 +410,11 @@
               <img id="visor-img" src="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" alt="Comprobante de Recepción"
                    style="max-width: 100%; max-height: 70vh; border-radius: 8px; object-fit: contain; box-shadow: 0 4px 20px rgba(0,0,0,0.7); transition: transform 0.25s ease; cursor: zoom-in;"
                    onclick="toggleZoomVisor(this)" />
-              <p style="margin-top: 10px; font-size: 0.75rem; color: #cbd5e1;">
-                💡 Hacé clic sobre la imagen para alternar zoom · Presioná <kbd style="background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #cbd5e1;">Esc</kbd> para cerrar
+              <p style="margin-top: 10px; font-size: 0.75rem; color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+                <svg class="slds-icon slds-icon_xx-small" aria-hidden="true" style="fill: #cbd5e1;">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#info}"></use>
+                </svg>
+                Hacé clic sobre la imagen para alternar zoom · Presioná <kbd style="background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #cbd5e1;">Esc</kbd> para cerrar
               </p>
             </div>
           </div>
@@ -624,7 +650,7 @@
           var file = input.files[0];
           var info = document.getElementById('camera-filename');
           if (info) {
-            info.innerHTML = '✅ Foto lista para adjuntar al comprobante: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
+            info.innerHTML = 'Foto lista para adjuntar al comprobante: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
             info.style.color = '#166534';
           }
           var preview = document.getElementById('camera-preview');
@@ -688,7 +714,7 @@
               btn.disabled = true;
               btn.style.opacity = '0.75';
               btn.style.cursor = 'not-allowed';
-              txt.innerHTML = '⏳ Subiendo y certificando...';
+              txt.innerHTML = 'Subiendo y certificando...';
             }
           });
         }
