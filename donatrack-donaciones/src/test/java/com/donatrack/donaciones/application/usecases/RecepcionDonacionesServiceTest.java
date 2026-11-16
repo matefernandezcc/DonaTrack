@@ -216,19 +216,26 @@ class RecepcionDonacionesServiceTest {
   }
 
   @Test
-  @DisplayName("Donante inexistente ni en ID ni en default arroja IllegalArgumentException")
-  void recibir_donanteInexistente_lanzaIllegalArgumentException() {
+  @DisplayName(
+      "Donante nuevo inexistente se auto-registra como PersonaHumana con rol Donante y persiste recepción")
+  void recibir_donanteInexistente_autoRegistraPersonaYGuardaRecepcion() {
     // Arrange
-    UUID idInexistente = UUID.randomUUID();
+    UUID idNuevo = UUID.randomUUID();
     when(personaRepository.buscarPorId(any())).thenReturn(Optional.empty());
+    Donacion donacionSegmentada = new Donacion(new Subcategoria("Abrigo", "Camperas"));
+    when(procesadorCargaInicial.procesar(any())).thenReturn(List.of(donacionSegmentada));
 
+    BienDTO bienDTO = new BienDTO("Campera de abrigo", 1.0, "UNIDADES", false, null, "Abrigo");
     CargaBienesRequestDTO request =
-        new CargaBienesRequestDTO(idInexistente, UUID.randomUUID(), List.of());
+        new CargaBienesRequestDTO(idNuevo, UUID.randomUUID(), List.of(bienDTO));
 
-    // Act & Assert
-    IllegalArgumentException ex =
-        assertThrows(IllegalArgumentException.class, () -> service.recibir(request));
-    assertEquals("Donante no encontrado", ex.getMessage());
-    verify(recepcionDonacionRepository, never()).guardar(any());
+    // Act
+    DonacionOriginal resultado = service.recibir(request);
+
+    // Assert
+    assertNotNull(resultado);
+    verify(personaRepository, times(1)).guardar(any(PersonaHumana.class));
+    verify(recepcionDonacionRepository, times(1)).guardar(resultado);
+    assertEquals(1, resultado.getDonacionesSegmentadas().size());
   }
 }

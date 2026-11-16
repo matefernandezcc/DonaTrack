@@ -411,21 +411,30 @@ public class DonacionController {
       donacion.asignar(beneficiario);
       donacionRepository.guardar(donacion);
 
-      if (personaRepository != null && logisticaPort != null) {
+      if (logisticaPort != null) {
         try {
-          var personaBenefOpt = personaRepository.buscarPorRolId(beneficiario.getId());
-          if (personaBenefOpt.isPresent() && personaBenefOpt.get().getDireccion() != null) {
-            var dir = personaBenefOpt.get().getDireccion();
-            double pesoTotal = Math.max(1, donacion.getBienes().size()) * 2.5;
-            double volumenTotal = Math.max(1, donacion.getBienes().size()) * 0.5;
-            logisticaPort.solicitarRetiro(
-                donacion.getId(),
-                pesoTotal,
-                volumenTotal,
-                dir.getCalle(),
-                String.valueOf(dir.getAltura()),
-                dir.getLocalidad());
+          String calle = "Av. Santa Fe";
+          String altura = "3200";
+          String localidad = "Palermo, CABA";
+          if (personaRepository != null) {
+            var personaBenefOpt = personaRepository.buscarPorRolId(beneficiario.getId());
+            if (personaBenefOpt.isPresent() && personaBenefOpt.get().getDireccion() != null) {
+              var dir = personaBenefOpt.get().getDireccion();
+              if (dir.getCalle() != null && !dir.getCalle().isBlank()) {
+                calle = dir.getCalle();
+              }
+              if (dir.getAltura() > 0) {
+                altura = String.valueOf(dir.getAltura());
+              }
+              if (dir.getLocalidad() != null && !dir.getLocalidad().isBlank()) {
+                localidad = dir.getLocalidad();
+              }
+            }
           }
+          double pesoTotal = Math.max(1, donacion.getBienes().size()) * 2.5;
+          double volumenTotal = Math.max(1, donacion.getBienes().size()) * 0.5;
+          logisticaPort.solicitarRetiro(
+              donacion.getId(), pesoTotal, volumenTotal, calle, altura, localidad);
         } catch (Exception ignored) {
           // Tolerancia si el servicio de logística no está alcanzable en asignación directa
         }

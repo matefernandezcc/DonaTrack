@@ -72,8 +72,11 @@ public class DonacionMapper {
     }
 
     if (entity.getNecesidad() != null && entity.getNecesidad().getBeneficiario() != null) {
-      domain.setEntidadAsignada(
-          (Beneficiario) RolMapper.toDomain(entity.getNecesidad().getBeneficiario()));
+      Beneficiario benef = (Beneficiario) RolMapper.toDomain(entity.getNecesidad().getBeneficiario());
+      if (benef != null) {
+        benef.getDonacionesAsignadas().add(domain);
+        domain.setEntidadAsignada(benef);
+      }
     }
 
     if (entity.getSubcategoriaAsignada() != null) {

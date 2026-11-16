@@ -78,7 +78,12 @@ public class ConfirmarRecepcionYNotificarUseCase {
         java.util.UUID idDonante = null;
         var recepcionOpt = recepcionRepository.buscarPorIdDonacion(donacion.getId());
         if (recepcionOpt.isPresent() && recepcionOpt.get().getDonante() != null) {
-          idDonante = recepcionOpt.get().getDonante().getId();
+          java.util.UUID rolDonanteId = recepcionOpt.get().getDonante().getId();
+          idDonante =
+              personaRepository
+                  .buscarPorRolId(rolDonanteId)
+                  .map(Persona::getId)
+                  .orElse(rolDonanteId);
         }
         if (idDonante != null) {
           int cantidadBienes = donacion.getBienes() != null ? donacion.getBienes().size() : 1;
