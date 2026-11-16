@@ -229,11 +229,12 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
       - AUTH_URL=http://auth:8004
+      - AUTH_PUBLIC_URL=${AUTH_PUBLIC_URL:-http://localhost:8004}
       - DONACIONES_URL=http://donaciones:8000
       - INCENTIVOS_URL=http://incentivos:8001
       - LOGISTICA_URL=http://logistica:8002
       - NOTIFICACIONES_URL=http://notificaciones:8003
-      - N8N_URL=${N8N_URL:-http://n8n:5678}
+      - N8N_URL=http://n8n:5678
 
 volumes:
   postgres_data:

@@ -150,6 +150,28 @@ public class LogisticaController {
               example = "AA123BB")
           @PathVariable
           String patente) {
+    List<RutaDeReparto> rutasAsignadas =
+        rutaRepository.obtenerTodas().stream()
+            .filter(
+                r ->
+                    r.getCamion() != null
+                        && r.getCamion().getPatente() != null
+                        && patente.equalsIgnoreCase(r.getCamion().getPatente()))
+            .toList();
+
+    if (!rutasAsignadas.isEmpty()) {
+      Camion sustituto =
+          camionRepository.obtenerTodos().stream()
+              .filter(c -> c.getPatente() != null && !patente.equalsIgnoreCase(c.getPatente()))
+              .findFirst()
+              .orElse(null);
+
+      for (RutaDeReparto r : rutasAsignadas) {
+        r.setCamion(sustituto);
+        rutaRepository.guardar(r);
+      }
+    }
+
     camionRepository.eliminar(patente);
     return ResponseEntity.ok().build();
   }
@@ -198,6 +220,28 @@ public class LogisticaController {
               example = "CH-001")
           @PathVariable
           String legajo) {
+    List<RutaDeReparto> rutasAsignadas =
+        rutaRepository.obtenerTodas().stream()
+            .filter(
+                r ->
+                    r.getChofer() != null
+                        && r.getChofer().getLegajo() != null
+                        && legajo.equalsIgnoreCase(r.getChofer().getLegajo()))
+            .toList();
+
+    if (!rutasAsignadas.isEmpty()) {
+      Chofer sustituto =
+          choferRepository.obtenerTodos().stream()
+              .filter(ch -> ch.getLegajo() != null && !legajo.equalsIgnoreCase(ch.getLegajo()))
+              .findFirst()
+              .orElse(null);
+
+      for (RutaDeReparto r : rutasAsignadas) {
+        r.setChofer(sustituto);
+        rutaRepository.guardar(r);
+      }
+    }
+
     choferRepository.eliminar(legajo);
     return ResponseEntity.ok().build();
   }

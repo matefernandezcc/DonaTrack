@@ -126,6 +126,9 @@ class IncentivoControllerTest {
           .andExpect(jsonPath("$", hasSize(1)))
           .andExpect(jsonPath("$[0].id").value(rankingId.toString()))
           .andExpect(jsonPath("$[0].mes").value("NOVIEMBRE"))
+          .andExpect(jsonPath("$[0].mesNumero").value(11))
+          .andExpect(jsonPath("$[0].mesNombre").value("Noviembre"))
+          .andExpect(jsonPath("$[0].periodoKey").value("2026-11"))
           .andExpect(jsonPath("$[0].anio").value(2026))
           .andExpect(jsonPath("$[0].posiciones", hasSize(2)))
           .andExpect(jsonPath("$[0].posiciones[0].posicion").value(1))
@@ -252,7 +255,8 @@ class IncentivoControllerTest {
   class MisionesInsigniasTests {
 
     @Test
-    @DisplayName("GET /api/donantes/{id}/misiones retorna lista de misiones activas")
+    @DisplayName(
+        "GET /api/donantes/{id}/misiones retorna progreso completo de misiones (actuales y próximas)")
     void testObtenerMisiones() throws Exception {
       UUID donanteId = UUID.randomUUID();
       PerfilDonante perfil = new PerfilDonante(donanteId);
@@ -261,7 +265,15 @@ class IncentivoControllerTest {
       mockMvc
           .perform(get("/api/donantes/{id}/misiones", donanteId))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$").isArray());
+          .andExpect(jsonPath("$").isArray())
+          .andExpect(jsonPath("$", hasSize(greaterThan(0))))
+          .andExpect(jsonPath("$[0].nombre").exists())
+          .andExpect(jsonPath("$[0].valorActual").isNumber())
+          .andExpect(jsonPath("$[0].objetivo").isNumber())
+          .andExpect(jsonPath("$[0].porcentaje").isNumber())
+          .andExpect(jsonPath("$[0].faltante").isNumber())
+          .andExpect(jsonPath("$[0].tipoMetrica").exists())
+          .andExpect(jsonPath("$[0].unidadLabel").exists());
     }
 
     @Test

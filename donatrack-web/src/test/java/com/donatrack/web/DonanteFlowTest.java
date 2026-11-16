@@ -376,7 +376,7 @@ class DonanteFlowTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/donante?tab=seguimiento"))
           .andExpect(flash().attributeExists("flashOk"))
-          .andExpect(flash().attribute("flashOk", containsString("Sumaste +10 puntos")));
+          .andExpect(flash().attribute("flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!"));
 
       verify(donacionesGateway, times(1)).crearRecepcion(any());
       verify(incentivosGateway, times(1)).registrarActividad(eq(donantePersonaId), any());
@@ -405,7 +405,7 @@ class DonanteFlowTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString("El microservicio de donaciones está iniciando en la nube.")));
+                      "No se pudo registrar la donación. Por favor, intentá nuevamente más tarde."));
     }
 
     @Test
@@ -430,7 +430,7 @@ class DonanteFlowTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString("El microservicio de donaciones tardó en responder.")));
+                      "No se pudo registrar la donación. Por favor, intentá nuevamente más tarde."));
     }
 
     @Test
@@ -451,7 +451,52 @@ class DonanteFlowTest {
                   .param("nombreSubcategoria", "Educación"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/donante?tab=seguimiento"))
-          .andExpect(flash().attribute("flashOk", containsString("#DT-REC-")));
+          .andExpect(flash().attribute("flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!"));
+    }
+
+    @Test
+    @DisplayName(
+        "GET /app/donante?tab=seguimiento normaliza subcategoriaGrupo y misiones enriquecidas")
+    void testPanelNormalizaSubcategoriaYMisiones() throws Exception {
+      when(incentivosGateway.obtenerMetricas(donantePersonaId)).thenReturn(Collections.emptyMap());
+      when(incentivosGateway.obtenerInsignias(donantePersonaId))
+          .thenReturn(Collections.emptyList());
+      when(incentivosGateway.obtenerMisiones(donantePersonaId))
+          .thenReturn(
+              List.of(
+                  Map.of(
+                      "nombre", "Primer Impacto",
+                      "tipoMetrica", "DONACIONES_EXITOSAS",
+                      "objetivo", 1,
+                      "valorActual", 1,
+                      "porcentaje", 100,
+                      "faltante", 0,
+                      "completada", true)));
+      when(donacionesGateway.listarDonaciones(null, donantePersonaId))
+          .thenReturn(
+              List.of(
+                  Map.of(
+                      "id",
+                      UUID.randomUUID().toString(),
+                      "descripcion",
+                      "Frazadas de invierno",
+                      "cantidad",
+                      4,
+                      "unidad",
+                      "UNIDADES",
+                      "subcategoria",
+                      Map.of("nombre", "Ropa de Abrigo"),
+                      "estado",
+                      "EN_DEPOSITO")));
+
+      mockMvc
+          .perform(get("/app/donante").param("tab", "seguimiento").principal(donanteAuth))
+          .andExpect(status().isOk())
+          .andExpect(
+              model().attribute("misDonaciones", hasItem(hasEntry("subcategoriaGrupo", "ABRIGO"))))
+          .andExpect(model().attribute("misiones", hasItem(hasEntry("unidadLabel", "aportes"))))
+          .andExpect(model().attribute("misiones", hasItem(hasEntry("porcentaje", 100))))
+          .andExpect(model().attribute("misiones", hasItem(hasEntry("completada", true))));
     }
   }
 }

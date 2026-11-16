@@ -37,11 +37,26 @@
     log.scrollTop = log.scrollHeight;
   };
 
+  const getCsrfHeaders = () => {
+    const headers = { "Content-Type": "application/json" };
+    const tokenMeta = document.querySelector('meta[name="_csrf"]');
+    const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+    if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+      headers[headerMeta.content] = tokenMeta.content;
+    } else {
+      const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+      if (match) {
+        headers["X-XSRF-TOKEN"] = decodeURIComponent(match[1]);
+      }
+    }
+    return headers;
+  };
+
   const respond = (q) => {
     // Le pegamos al endpoint proxy de DonaTrack Web (evita llamadas directas y fallas CORS/host)
     fetch("/api/public/chatbot", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getCsrfHeaders(),
       body: JSON.stringify({ mensaje: q })
     })
       .then((res) => res.json())

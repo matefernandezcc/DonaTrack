@@ -21,26 +21,42 @@ public class NotificacionesGateway {
   }
 
   public List<Map<String, Object>> obtenerNotificacionesUsuario(String destinatario) {
+    return obtenerNotificacionesUsuario(
+        destinatario != null && !destinatario.isBlank()
+            ? List.of(destinatario)
+            : Collections.emptyList());
+  }
+
+  public List<Map<String, Object>> obtenerNotificacionesUsuario(List<String> destinatarios) {
+    if (destinatarios == null || destinatarios.isEmpty()) {
+      return Collections.emptyList();
+    }
+    StringBuilder uri = new StringBuilder("/api/mensajes");
+    boolean first = true;
+    for (String dest : destinatarios) {
+      if (dest == null || dest.isBlank()) continue;
+      uri.append(first ? "?" : "&")
+          .append("destinatario=")
+          .append(java.net.URLEncoder.encode(dest.trim(), java.nio.charset.StandardCharsets.UTF_8));
+      first = false;
+    }
+    if (first) {
+      return Collections.emptyList();
+    }
     try {
-      String uri = "/api/mensajes";
-      if (destinatario != null && !destinatario.isBlank()) {
-        uri +=
-            "?destinatario="
-                + java.net.URLEncoder.encode(destinatario, java.nio.charset.StandardCharsets.UTF_8);
-      }
       List<Map<String, Object>> result =
           notificacionesClient
               .get()
-              .uri(uri)
+              .uri(uri.toString())
               .retrieve()
               .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
       return result != null ? result : Collections.emptyList();
     } catch (Exception e) {
       log.warn(
           "No se pudieron consultar notificaciones para {}: {}",
-          enmascararDestinatario(destinatario),
+          enmascararDestinatario(destinatarios.get(0)),
           e.getMessage());
-      return Collections.emptyList();
+      throw new RuntimeException("Servicio de notificaciones no disponible", e);
     }
   }
 

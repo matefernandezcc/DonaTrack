@@ -4,6 +4,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+  <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}" />
   <title>DonaTrack · Registro de Donante u Organización</title>
   <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}" />
 
@@ -379,6 +381,8 @@
         if (avisoOng) avisoOng.style.display = 'block';
         if (btnSubmit) btnSubmit.textContent = 'Enviar Solicitud Institucional';
         if (labelNombre) labelNombre.textContent = 'Razón Social / Nombre de la Organización';
+        var radioOng = cardOng ? cardOng.querySelector('input[type="radio"]') : null;
+        if (radioOng) radioOng.checked = true;
       } else {
         if (cardOng) cardOng.classList.remove('is-selected');
         if (cardDonante) cardDonante.classList.add('is-selected');
@@ -386,8 +390,19 @@
         if (avisoOng) avisoOng.style.display = 'none';
         if (btnSubmit) btnSubmit.textContent = 'Registrarme como Donante';
         if (labelNombre) labelNombre.textContent = 'Nombre Completo';
+        var radioDon = cardDonante ? cardDonante.querySelector('input[type="radio"]') : null;
+        if (radioDon) radioDon.checked = true;
       }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var rolParam = new URLSearchParams(window.location.search).get('rol');
+      if (rolParam && (rolParam.toUpperCase() === 'BENEFICIARIA' || rolParam.toUpperCase() === 'ONG')) {
+        seleccionarRol('BENEFICIARIA');
+      } else if (rolParam && rolParam.toUpperCase() === 'DONANTE') {
+        seleccionarRol('DONANTE');
+      }
+    });
   </script>
 
 </body>

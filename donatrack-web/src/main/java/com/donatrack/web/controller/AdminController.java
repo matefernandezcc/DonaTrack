@@ -6,6 +6,7 @@ import com.donatrack.web.gateway.IncentivosGateway;
 import com.donatrack.web.gateway.LogisticaGateway;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +29,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -80,9 +83,13 @@ public class AdminController {
     this.solicitudOngService = solicitudOngService;
   }
 
+  @InitBinder
+  public void initBinder(WebDataBinder binder) {
+    binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+  }
+
   @ModelAttribute
-  public void populateUserAttributes(
-      Model model, Authentication auth, HttpSession session) {
+  public void populateUserAttributes(Model model, Authentication auth, HttpSession session) {
     if (auth != null) {
       String nombreCompleto = auth.getName();
       String username = auth.getName();
@@ -139,32 +146,79 @@ public class AdminController {
 
   @PostMapping("/perfil/actualizar")
   public String actualizarPerfil(
-      @RequestParam("descripcion") String descripcion,
-      @RequestParam("ubicacion") String ubicacion,
+      @RequestParam(value = "descripcion", required = false) String descripcion,
+      @RequestParam(value = "ubicacion", required = false) String ubicacion,
       Authentication auth,
       HttpServletRequest request,
       HttpSession session,
       RedirectAttributes redirectAttributes) {
     try {
-      if (auth instanceof JwtAuthenticationToken jwt && authGateway != null) {
-        UUID usuarioId = UUID.fromString(jwt.getToken().getSubject());
-        authGateway.actualizarPerfil(usuarioId, descripcion, ubicacion);
-        if (session != null) {
-          session.setAttribute("perfil_descripcion", descripcion);
-          session.setAttribute("perfil_ubicacion", ubicacion);
+      String descNorm = descripcion != null ? descripcion.trim() : "";
+      String ubicNorm = ubicacion != null ? ubicacion.trim() : "";
+
+      UUID usuarioId = null;
+      if (auth instanceof JwtAuthenticationToken jwt) {
+        String sub = jwt.getToken().getSubject();
+        if (sub != null && !sub.isBlank()) {
+          try {
+            usuarioId = UUID.fromString(sub);
+          } catch (IllegalArgumentException ignored) {
+          }
         }
-        redirectAttributes.addFlashAttribute("flashOk", "Perfil actualizado con éxito.");
+        if (usuarioId == null) {
+          String personaId = jwt.getToken().getClaimAsString("personaId");
+          if (personaId != null && !personaId.isBlank()) {
+            try {
+              usuarioId = UUID.fromString(personaId);
+            } catch (IllegalArgumentException ignored) {
+            }
+          }
+        }
+      } else if (auth != null && auth.getName() != null) {
+        try {
+          usuarioId = UUID.fromString(auth.getName());
+        } catch (IllegalArgumentException ignored) {
+        }
       }
+
+      if (authGateway != null && usuarioId != null) {
+        authGateway.actualizarPerfil(usuarioId, descNorm, ubicNorm);
+      } else if (authGateway != null) {
+        log.warn("No se pudo resolver UUID de usuario para sincronizar perfil en AuthGateway; se actualiza localmente.");
+      }
+
+      if (session != null) {
+        session.setAttribute("perfil_descripcion", descNorm);
+        session.setAttribute("perfil_ubicacion", ubicNorm);
+      }
+      redirectAttributes.addFlashAttribute("flashOk", "Perfil actualizado con éxito.");
     } catch (Exception e) {
       log.error("Error al actualizar perfil: {}", e.getMessage(), e);
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al actualizar perfil: " + e.getMessage());
+          "flashError", "No se pudo actualizar el perfil. Por favor, intentá nuevamente más tarde.");
     }
-    String referer = request.getHeader("Referer");
+
+    String referer = request != null ? request.getHeader("Referer") : null;
     String target = "/app/donante";
-    if (referer != null && referer.startsWith("/") && !referer.startsWith("//") && referer.startsWith("/app/")) {
-      target = referer;
+    if (referer != null) {
+      if (referer.startsWith("/") && !referer.startsWith("//") && referer.startsWith("/app/")) {
+        target = referer;
+      } else if (referer.startsWith("http://") || referer.startsWith("https://")) {
+        try {
+          URI uri = URI.create(referer);
+          String host = uri.getHost();
+          if (request == null || host == null || host.equalsIgnoreCase(request.getServerName())) {
+            String path = uri.getPath();
+            if (path != null && path.startsWith("/app/") && !path.startsWith("//")) {
+              String query = uri.getRawQuery();
+              target = (query != null && !query.isBlank()) ? path + "?" + query : path;
+            }
+          }
+        } catch (Exception ignored) {
+        }
+      }
     }
+    target = target.replace("\r", "").replace("\n", "");
     return "redirect:" + target;
   }
 
@@ -294,7 +348,7 @@ public class AdminController {
           "flashOk", "Camión " + nuevoCamion.patente() + " registrado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al crear camión: " + e.getMessage());
+          "flashError", "No se pudo registrar el camión. Verificá los datos e intentá nuevamente.");
     }
     return "redirect:/app/admin/camiones";
   }
@@ -305,10 +359,10 @@ public class AdminController {
       @PathVariable("patente") String patente, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarCamion(patente);
-      redirectAttributes.addFlashAttribute("flashOk", "Camión " + patente + " eliminado.");
+      redirectAttributes.addFlashAttribute("flashOk", "Camión " + patente + " eliminado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo eliminar el camión: " + e.getMessage());
+          "flashError", "No se pudo eliminar el camión. Verificá que no tenga tareas asociadas e intentá nuevamente.");
     }
     return "redirect:/app/admin/camiones";
   }
@@ -336,7 +390,7 @@ public class AdminController {
           "flashOk", "Chofer " + nomCompleto.trim() + " registrado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al registrar chofer: " + e.getMessage());
+          "flashError", "No se pudo registrar el chofer. Verificá los datos ingresados e intentá nuevamente.");
     }
     return "redirect:/app/admin/choferes";
   }
@@ -348,10 +402,10 @@ public class AdminController {
     try {
       logisticaGateway.eliminarChofer(legajo);
       redirectAttributes.addFlashAttribute(
-          "flashOk", "Chofer con legajo " + legajo + " eliminado.");
+          "flashOk", "Chofer con legajo " + legajo + " eliminado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo eliminar el chofer: " + e.getMessage());
+          "flashError", "No se pudo eliminar el chofer. Verificá que no tenga viajes asignados e intentá nuevamente.");
     }
     return "redirect:/app/admin/choferes";
   }
@@ -463,10 +517,109 @@ public class AdminController {
       pos++;
     }
     model.addAttribute("ranking", ranking);
-    List<Map<String, Object>> historialRankings = incentivosGateway.obtenerHistorialRankings();
+    java.time.YearMonth mesActual = java.time.YearMonth.now();
     model.addAttribute(
-        "historial", historialRankings != null ? historialRankings : Collections.emptyList());
+        "periodoActualLabel", nombreMesEs(mesActual.getMonthValue()) + " " + mesActual.getYear());
+
+    List<Map<String, Object>> historialRaw = incentivosGateway.obtenerHistorialRankings();
+    List<Map<String, Object>> historialEnriquecido = new ArrayList<>();
+    if (historialRaw != null) {
+      for (Map<String, Object> h : historialRaw) {
+        if (h == null) continue;
+        Map<String, Object> copy = new HashMap<>(h);
+        int anioVal = h.get("anio") instanceof Number n ? n.intValue() : mesActual.getYear();
+        int mesNumero =
+            h.get("mesNumero") instanceof Number n && n.intValue() > 0
+                ? n.intValue()
+                : resolverMesNumero(h.get("mes") != null ? h.get("mes").toString() : null);
+        String mesNombre =
+            h.get("mesNombre") != null && !h.get("mesNombre").toString().isBlank()
+                ? h.get("mesNombre").toString()
+                : (mesNumero > 0 ? nombreMesEs(mesNumero) : String.valueOf(h.get("mes")));
+        String periodoKey =
+            h.get("periodoKey") != null && !h.get("periodoKey").toString().isBlank()
+                ? h.get("periodoKey").toString()
+                : (mesNumero > 0 ? anioVal + "-" + mesNumero : anioVal + "-" + h.get("mes"));
+
+        copy.put("mesNumero", mesNumero);
+        copy.put("mesNombre", mesNombre);
+        copy.put("periodoKey", periodoKey);
+
+        if (h.get("posiciones") instanceof List<?> posList) {
+          List<Map<String, Object>> posEnriquecidas = new ArrayList<>();
+          int idxPos = 1;
+          for (Object pObj : posList) {
+            if (!(pObj instanceof Map<?, ?> pMap)) continue;
+            Map<String, Object> pCopy = new HashMap<>();
+            pMap.forEach((k, v) -> pCopy.put(String.valueOf(k), v));
+            String rawUser = pCopy.get("user") != null ? pCopy.get("user").toString() : null;
+            String dId = pCopy.get("donanteId") != null ? pCopy.get("donanteId").toString() : null;
+            String candidato =
+                (rawUser == null || rawUser.startsWith("Donante ")) && dId != null ? dId : rawUser;
+            String nombrePos =
+                resolverNombreLegible(candidato, idxPos++, usuariosAuth, personasDonaciones);
+            if (rawUser != null
+                && !rawUser.isBlank()
+                && !rawUser.startsWith("Donante ")
+                && !rawUser.matches(
+                    "(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+              nombrePos = rawUser;
+            }
+            pCopy.put("user", nombrePos);
+            posEnriquecidas.add(pCopy);
+          }
+          copy.put("posiciones", posEnriquecidas);
+        }
+        historialEnriquecido.add(copy);
+      }
+    }
+    model.addAttribute("historial", historialEnriquecido);
     return "admin/admin/ranking";
+  }
+
+  private int resolverMesNumero(String rawMes) {
+    if (rawMes == null || rawMes.isBlank()) {
+      return 0;
+    }
+    String clean = rawMes.trim().toUpperCase();
+    try {
+      int num = Integer.parseInt(clean);
+      return (num >= 1 && num <= 12) ? num : 0;
+    } catch (NumberFormatException ignored) {
+    }
+    return switch (clean) {
+      case "JANUARY", "ENERO" -> 1;
+      case "FEBRUARY", "FEBRERO" -> 2;
+      case "MARCH", "MARZO" -> 3;
+      case "APRIL", "ABRIL" -> 4;
+      case "MAY", "MAYO" -> 5;
+      case "JUNE", "JUNIO" -> 6;
+      case "JULY", "JULIO" -> 7;
+      case "AUGUST", "AGOSTO" -> 8;
+      case "SEPTEMBER", "SEPTIEMBRE", "SETIEMBRE" -> 9;
+      case "OCTOBER", "OCTUBRE" -> 10;
+      case "NOVEMBER", "NOVIEMBRE" -> 11;
+      case "DECEMBER", "DICIEMBRE" -> 12;
+      default -> 0;
+    };
+  }
+
+  private String nombreMesEs(int mesNumero) {
+    return switch (mesNumero) {
+      case 1 -> "Enero";
+      case 2 -> "Febrero";
+      case 3 -> "Marzo";
+      case 4 -> "Abril";
+      case 5 -> "Mayo";
+      case 6 -> "Junio";
+      case 7 -> "Julio";
+      case 8 -> "Agosto";
+      case 9 -> "Septiembre";
+      case 10 -> "Octubre";
+      case 11 -> "Noviembre";
+      case 12 -> "Diciembre";
+      default -> "Mes " + mesNumero;
+    };
   }
 
   @GetMapping("/admin/matchmaking")
@@ -649,7 +802,7 @@ public class AdminController {
               + " asignada exitosamente a la organización beneficiaria y enviada a planificación logística.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo asignar la donación: " + e.getMessage());
+          "flashError", "No se pudo realizar la asignación de la donación. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/matchmaking";
   }
@@ -660,20 +813,135 @@ public class AdminController {
     try {
       donacionesGateway.ejecutarMatchmakingBatch();
       redirectAttributes.addFlashAttribute(
-          "flashOk",
-          "Matchmaking automático por lotes ejecutado sobre todas las donaciones en depósito.");
+          "flashOk", "Asignación automática completada exitosamente.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al ejecutar asignación automática: " + e.getMessage());
+          "flashError", "No se pudo completar la asignación automática. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/matchmaking";
   }
 
   @GetMapping("/admin/donaciones/recepcion")
   @PreAuthorize("hasRole('ADMIN')")
-  public String recepcionDonacionForm(Model model) {
+  public String recepcionDonacionForm(
+      @RequestParam(name = "personaCreadaId", required = false) String personaCreadaId,
+      Model model) {
     model.addAttribute("personas", donacionesGateway.obtenerPersonas());
+    if (personaCreadaId != null && !personaCreadaId.isBlank()) {
+      model.addAttribute("personaCreadaId", personaCreadaId);
+    }
     return "admin/admin/recepcion-donacion";
+  }
+
+  @PostMapping("/admin/personas")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String registrarPersonaDonanteAdmin(
+      @jakarta.validation.Valid @ModelAttribute
+          com.donatrack.web.dto.CrearPersonaDonanteRequest request,
+      org.springframework.validation.BindingResult bindingResult,
+      RedirectAttributes redirectAttributes) {
+    if (bindingResult.hasErrors()) {
+      String errMsg =
+          bindingResult.getFieldErrors().stream()
+              .map(f -> f.getDefaultMessage())
+              .findFirst()
+              .orElse("Revise los datos obligatorios de la persona donante.");
+      redirectAttributes.addFlashAttribute("flashError", errMsg);
+      return "redirect:/app/admin/donaciones/recepcion";
+    }
+
+    String tipoUpper = request.tipo().trim().toUpperCase();
+    if ("HUMANA".equals(tipoUpper)
+        && ((request.nombre() == null || request.nombre().isBlank())
+            || (request.apellido() == null || request.apellido().isBlank()))) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Para persona humana, el nombre y el apellido son obligatorios.");
+      return "redirect:/app/admin/donaciones/recepcion";
+    }
+    if ("JURIDICA".equals(tipoUpper)
+        && (request.razonSocial() == null || request.razonSocial().isBlank())) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Para persona jurídica, la razón social es obligatoria.");
+      return "redirect:/app/admin/donaciones/recepcion";
+    }
+
+    try {
+      Map<String, Object> payload = new HashMap<>();
+      payload.put("tipo", tipoUpper);
+      payload.put("email", request.email().trim());
+
+      Map<String, Object> documento = new HashMap<>();
+      documento.put("tipo", request.docTipo().trim().toUpperCase());
+      documento.put("numero", request.docNumero().trim());
+      payload.put("documento", documento);
+
+      Map<String, Object> contacto = new HashMap<>();
+      contacto.put("correoElectronico", request.email().trim());
+      if (request.telefono() != null && !request.telefono().isBlank()) {
+        contacto.put("telefono", request.telefono().trim());
+      }
+      if (request.whatsapp() != null && !request.whatsapp().isBlank()) {
+        contacto.put("whatsapp", request.whatsapp().trim());
+      }
+      String medio =
+          request.medioPredeterminado() != null && !request.medioPredeterminado().isBlank()
+              ? request.medioPredeterminado().trim().toUpperCase()
+              : "CORREO";
+      if ("EMAIL".equals(medio)) {
+        medio = "CORREO";
+      }
+      contacto.put("medioPredeterminado", medio);
+      payload.put("contacto", contacto);
+
+      if (request.calle() != null && !request.calle().isBlank()) {
+        Map<String, Object> direccion = new HashMap<>();
+        direccion.put("calle", request.calle().trim());
+        direccion.put("altura", request.altura() != null ? request.altura() : 0.0);
+        direccion.put(
+            "localidad",
+            request.localidad() != null && !request.localidad().isBlank()
+                ? request.localidad().trim()
+                : "CABA");
+        direccion.put(
+            "codigoPostal",
+            request.codigoPostal() != null && !request.codigoPostal().isBlank()
+                ? request.codigoPostal().trim()
+                : "1000");
+        payload.put("direccion", direccion);
+      }
+
+      if ("JURIDICA".equals(tipoUpper)) {
+        payload.put("razonSocial", request.razonSocial().trim());
+        payload.put(
+            "tipoJuridica",
+            request.tipoJuridica() != null && !request.tipoJuridica().isBlank()
+                ? request.tipoJuridica().trim().toUpperCase()
+                : "EMPRESA");
+        payload.put(
+            "rubro",
+            request.rubro() != null && !request.rubro().isBlank()
+                ? request.rubro().trim()
+                : "Comercial / Solidario");
+      } else {
+        payload.put("nombre", request.nombre().trim());
+        payload.put("apellido", request.apellido().trim());
+        payload.put("edad", request.edad() != null && request.edad() > 0 ? request.edad() : 30);
+      }
+
+      Map<String, Object> creada = donacionesGateway.crearPersona(payload);
+      String creadaId =
+          creada != null && creada.get("id") != null ? creada.get("id").toString() : "";
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Persona donante registrada con éxito.");
+      if (!creadaId.isBlank()) {
+        return "redirect:/app/admin/donaciones/recepcion?personaCreadaId=" + creadaId;
+      }
+    } catch (Exception e) {
+      log.error("Error al registrar persona donante en backoffice: {}", e.getMessage());
+      redirectAttributes.addFlashAttribute(
+          "flashError", "No se pudo registrar la persona donante. Verificá los datos ingresados e intentá nuevamente.");
+    }
+    return "redirect:/app/admin/donaciones/recepcion";
   }
 
   @PostMapping("/admin/donaciones/recepcion")
@@ -715,7 +983,7 @@ public class AdminController {
     } catch (Exception e) {
       log.error("Error al registrar recepcion en deposito: {}", e.getMessage());
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al registrar la donación en depósito: " + e.getMessage());
+          "flashError", "No se pudo registrar el ingreso de la donación en depósito. Verificá los datos e intentá nuevamente.");
       return "redirect:/app/admin/donaciones/recepcion";
     }
   }
@@ -731,7 +999,7 @@ public class AdminController {
     } catch (Exception e) {
       log.error("Error al marcar donacion como vencida: {}", e.getMessage());
       redirectAttributes.addFlashAttribute(
-          "flashError", "No se pudo marcar la donación como vencida: " + e.getMessage());
+          "flashError", "No se pudo actualizar el estado de la donación. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/matchmaking";
   }
@@ -742,11 +1010,11 @@ public class AdminController {
     try {
       donacionesGateway.auditarVencidos();
       redirectAttributes.addFlashAttribute(
-          "flashOk", "Auditoría de vencimientos ejecutada exitosamente sobre el depósito.");
+          "flashOk", "Auditoría de vencimientos ejecutada con éxito.");
     } catch (Exception e) {
       log.error("Error al auditar vencimientos: {}", e.getMessage());
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al ejecutar la auditoría de vencimientos: " + e.getMessage());
+          "flashError", "No se pudo completar la auditoría de vencimientos. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/matchmaking";
   }
@@ -763,11 +1031,11 @@ public class AdminController {
   public String importarCsv(
       @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
     try {
-      String resultado = donacionesGateway.importarCsv(file);
-      redirectAttributes.addFlashAttribute("flashOk", "Importación completada: " + resultado);
+      donacionesGateway.importarCsv(file);
+      redirectAttributes.addFlashAttribute("flashOk", "Archivo CSV procesado e importado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al importar CSV: " + e.getMessage());
+          "flashError", "No se pudo procesar el archivo CSV. Verificá el formato e intentá nuevamente.");
     }
     return "redirect:/app/admin/csv";
   }
@@ -797,11 +1065,11 @@ public class AdminController {
       if (authGateway != null) {
         authGateway.cambiarRol(usuarioId, rol);
         redirectAttributes.addFlashAttribute(
-            "flashOk", "Rol actualizado exitosamente a " + rol.toUpperCase());
+            "flashOk", "Rol del usuario actualizado exitosamente.");
       }
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al actualizar rol: " + e.getMessage());
+          "flashError", "No se pudo actualizar el rol del usuario. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/usuarios";
   }
@@ -815,14 +1083,12 @@ public class AdminController {
     try {
       if (authGateway != null) {
         authGateway.resetearPassword(usuarioId);
-        String label = (email != null && !email.isBlank()) ? email : usuarioId.toString();
         redirectAttributes.addFlashAttribute(
-            "flashOk",
-            "Contraseña del usuario " + label + " restablecida con éxito a 'password123'.");
+            "flashOk", "Contraseña restablecida con éxito.");
       }
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al restablecer contraseña: " + e.getMessage());
+          "flashError", "No se pudo restablecer la contraseña. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/usuarios";
   }
@@ -849,10 +1115,10 @@ public class AdminController {
         }
       }
       redirectAttributes.addFlashAttribute(
-          "flashOk", "Solicitud de ONG #" + solicitudId + " verificada y aprobada con éxito.");
+          "flashOk", "Solicitud de organización aprobada con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al aprobar solicitud: " + e.getMessage());
+          "flashError", "No se pudo aprobar la solicitud. Por favor, intentá nuevamente.");
     }
     return "redirect:/app/admin/usuarios";
   }
@@ -942,19 +1208,23 @@ public class AdminController {
     if (metricas == null) {
       metricas = Collections.emptyMap();
     }
-    List<Map<String, Object>> insignias = fInsignias.getNow(Collections.<Map<String, Object>>emptyList());
+    List<Map<String, Object>> insignias =
+        fInsignias.getNow(Collections.<Map<String, Object>>emptyList());
     if (insignias == null) {
       insignias = Collections.emptyList();
     }
-    List<Map<String, Object>> misiones = fMisiones.getNow(Collections.<Map<String, Object>>emptyList());
+    List<Map<String, Object>> misiones =
+        fMisiones.getNow(Collections.<Map<String, Object>>emptyList());
     if (misiones == null) {
       misiones = Collections.emptyList();
     }
-    List<Map<String, Object>> rawDonaciones = fDonaciones.getNow(Collections.<Map<String, Object>>emptyList());
+    List<Map<String, Object>> rawDonaciones =
+        fDonaciones.getNow(Collections.<Map<String, Object>>emptyList());
     if (rawDonaciones == null) {
       rawDonaciones = Collections.emptyList();
     }
-    List<Map<String, Object>> beneficiarios = fBeneficiarios.getNow(Collections.<Map<String, Object>>emptyList());
+    List<Map<String, Object>> beneficiarios =
+        fBeneficiarios.getNow(Collections.<Map<String, Object>>emptyList());
     if (beneficiarios == null) {
       beneficiarios = Collections.emptyList();
     }
@@ -1044,6 +1314,9 @@ public class AdminController {
       row.put("estadoLegible", estadoLabel);
       row.put("destinoLegible", destinoLabel);
       row.put("ongAsignada", destinoLabel);
+      String subcatRaw =
+          d.get("subcategoria") != null ? d.get("subcategoria").toString() : "Alimentos";
+      row.put("subcategoriaGrupo", normalizarGrupoSubcategoria(subcatRaw));
       misDonaciones.add(row);
     }
 
@@ -1170,6 +1443,9 @@ public class AdminController {
             "cantidad", 25,
             "urgencia", "Alta"));
 
+    List<Map<String, Object>> misionesNormalizadas =
+        normalizarMisiones(misiones, misDonaciones.size());
+
     model.addAttribute("tabActiva", tab != null ? tab.toLowerCase() : "resumen");
     model.addAttribute("misDonaciones", misDonaciones);
     model.addAttribute("beneficiarios", beneficiariosEnriquecidos);
@@ -1177,7 +1453,7 @@ public class AdminController {
     model.addAttribute("metricas", metricas != null ? metricas : Collections.emptyMap());
     model.addAttribute("insignias", insignias);
     model.addAttribute("totalInsignias", insignias.size());
-    model.addAttribute("misiones", misiones);
+    model.addAttribute("misiones", misionesNormalizadas);
     model.addAttribute("puntosReales", puntosReales);
     model.addAttribute("rangoNombre", rangoNombre);
     model.addAttribute("rangoNivel", rangoNivel);
@@ -1270,24 +1546,12 @@ public class AdminController {
       }
 
       redirectAttributes.addFlashAttribute(
-          "flashOk",
-          "Donación "
-              + codigoCorto
-              + " registrada en depósito con éxito. Sumaste +10 puntos y podés seguir su estado de asignación en la pestaña 'Mis Donaciones'.");
+          "flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!");
       return "redirect:/app/donante?tab=seguimiento";
     } catch (Exception e) {
-      String msg = e.getMessage() != null ? e.getMessage() : "Error en el servicio";
-      if (msg.contains("502") || msg.contains("Bad Gateway") || msg.contains("<!DOCTYPE html>")) {
-        msg =
-            "El microservicio de donaciones está iniciando en la nube. Por favor, reintentá tu donación en unos segundos.";
-      } else if (msg.contains("503")
-          || msg.contains("504")
-          || msg.contains("Timeout")
-          || msg.contains("timed out")) {
-        msg =
-            "El microservicio de donaciones tardó en responder. Por favor, reintentá en un instante.";
-      }
-      redirectAttributes.addFlashAttribute("flashError", "Error al registrar donación: " + msg);
+      log.error("Error al registrar donación: {}", e.getMessage(), e);
+      redirectAttributes.addFlashAttribute(
+          "flashError", "No se pudo registrar la donación. Por favor, intentá nuevamente más tarde.");
     }
     return "redirect:/app/donante";
   }
@@ -1410,11 +1674,18 @@ public class AdminController {
                 item.put("fechaOperativa", fecha);
                 item.put("lat", lat);
                 item.put("lng", lng);
+                String ultimaActualizacion =
+                    Boolean.TRUE.equals(iniciada)
+                        ? ("En ruta · " + fecha)
+                        : ("Planificada · " + fecha);
 
                 @SuppressWarnings("unchecked")
                 Map<String, Object> comp = (Map<String, Object>) e.get("comprobanteRecepcion");
                 if (comp != null) {
                   item.put("fechaHoraRecepcion", comp.get("fechaHora"));
+                  if (comp.get("fechaHora") != null) {
+                    ultimaActualizacion = String.valueOf(comp.get("fechaHora"));
+                  }
                   List<String> sanitizedFotos = new ArrayList<>();
                   if (comp.get("fotos") instanceof List<?> fList) {
                     for (Object f : fList) {
@@ -1440,6 +1711,7 @@ public class AdminController {
                 } else if ("ENTREGADA".equalsIgnoreCase(estado)) {
                   item.put("fotos", List.of(defaultRemito));
                 }
+                item.put("ultimaActualizacion", ultimaActualizacion);
 
                 if ("ENTREGADA".equalsIgnoreCase(estado)) {
                   recibidasMap.put(idEntrega, item);
@@ -1574,7 +1846,7 @@ public class AdminController {
       redirectAttributes.addFlashAttribute("flashOk", "Necesidad declarada con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al registrar necesidad: " + e.getMessage());
+          "flashError", "No se pudo registrar la necesidad. Verificá los datos e intentá nuevamente.");
     }
     return "redirect:/app/beneficiaria/necesidades";
   }
@@ -1620,14 +1892,92 @@ public class AdminController {
       }
       logisticaGateway.confirmarEntrega(idDonacion, fotos, patenteCamion);
       redirectAttributes.addFlashAttribute(
-          "flashOk",
-          "Recepción de entrega "
-              + idDonacion
-              + " confirmada con éxito. Comprobante alojado en Supabase S3.");
+          "flashOk", "Entrega confirmada con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
-          "flashError", "Error al confirmar entrega: " + e.getMessage());
+          "flashError", "No se pudo confirmar la recepción de la entrega. Verificá los datos e intentá nuevamente.");
     }
     return "redirect:/app/beneficiaria/entregas";
+  }
+
+  private String normalizarGrupoSubcategoria(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return "ALIMENTOS";
+    }
+    String lower = raw.trim().toLowerCase();
+    if (lower.contains("alimento")
+        || lower.contains("pereceder")
+        || lower.contains("lacte")
+        || lower.contains("lácte")
+        || lower.contains("arroz")
+        || lower.contains("fideo")) {
+      return "ALIMENTOS";
+    }
+    if (lower.contains("abrigo")
+        || lower.contains("ropa")
+        || lower.contains("vestimenta")
+        || lower.contains("calzado")
+        || lower.contains("frazada")) {
+      return "ABRIGO";
+    }
+    if (lower.contains("higiene") || lower.contains("limpieza")) {
+      return "HIGIENE";
+    }
+    if (lower.contains("mobiliario")
+        || lower.contains("mueble")
+        || lower.contains("escolar")
+        || lower.contains("util")
+        || lower.contains("útil")
+        || lower.contains("equipamiento")) {
+      return "MOBILIARIO";
+    }
+    if (lower.contains("medicamento") || lower.contains("salud") || lower.contains("auxilio")) {
+      return "MEDICAMENTOS";
+    }
+    if (lower.contains("juguete") || lower.contains("recreac")) {
+      return "JUGUETES";
+    }
+    return "OTROS";
+  }
+
+  private List<Map<String, Object>> normalizarMisiones(
+      List<Map<String, Object>> misionesRaw, int totalDonacionesFallback) {
+    if (misionesRaw == null || misionesRaw.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<Map<String, Object>> out = new ArrayList<>();
+    for (Map<String, Object> m : misionesRaw) {
+      if (m == null) continue;
+      Map<String, Object> copy = new HashMap<>(m);
+      int objetivo =
+          copy.get("objetivo") instanceof Number n && n.intValue() > 0 ? n.intValue() : 1;
+      int valorActual =
+          copy.get("valorActual") instanceof Number n ? n.intValue() : totalDonacionesFallback;
+      int porcentaje =
+          copy.get("porcentaje") instanceof Number n
+              ? n.intValue()
+              : Math.min(100, (valorActual * 100) / objetivo);
+      int faltante =
+          copy.get("faltante") instanceof Number n
+              ? n.intValue()
+              : Math.max(0, objetivo - valorActual);
+      boolean completada =
+          copy.get("completada") instanceof Boolean b ? b : valorActual >= objetivo;
+      boolean bloqueada = copy.get("bloqueada") instanceof Boolean b && b;
+      String unidadLabel =
+          copy.get("unidadLabel") != null && !copy.get("unidadLabel").toString().isBlank()
+              ? copy.get("unidadLabel").toString()
+              : "aportes";
+
+      copy.put("objetivo", objetivo);
+      copy.put("valorActual", valorActual);
+      copy.put("porcentaje", porcentaje);
+      copy.put("faltante", faltante);
+      copy.put("completada", completada);
+      copy.put("bloqueada", bloqueada);
+      copy.put("unidadLabel", unidadLabel);
+      out.add(copy);
+    }
+    return out;
   }
 }

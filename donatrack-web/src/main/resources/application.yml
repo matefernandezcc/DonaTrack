@@ -13,6 +13,8 @@ spring:
 donatrack:
   jwt-secret: ${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
   n8n-url: ${N8N_URL:http://localhost:5678}
+  auth:
+    public-url: ${AUTH_PUBLIC_URL:http://localhost:8004}
   api:
     auth-url: ${AUTH_URL:http://localhost:8004}
     donaciones-url: ${DONACIONES_URL:http://localhost:8000}

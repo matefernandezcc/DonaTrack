@@ -22,9 +22,7 @@ public class ApiClientsConfig {
 
   @Bean
   public java.net.http.HttpClient sharedHttpClient() {
-    return java.net.http.HttpClient.newBuilder()
-        .connectTimeout(Duration.ofMillis(2000))
-        .build();
+    return java.net.http.HttpClient.newBuilder().connectTimeout(Duration.ofMillis(2000)).build();
   }
 
   @Bean(name = "securityTaskExecutor")
@@ -34,7 +32,8 @@ public class ApiClientsConfig {
     executor.setMaxPoolSize(16);
     executor.setQueueCapacity(100);
     executor.setThreadNamePrefix("dt-security-io-");
-    executor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
+    executor.setRejectedExecutionHandler(
+        new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
     executor.initialize();
     return new DelegatingSecurityContextAsyncTaskExecutor(executor);
   }

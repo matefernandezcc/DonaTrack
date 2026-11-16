@@ -165,11 +165,52 @@
       .replace(/'/g, "&#39;");
   };
 
+  function renderizarSidebar(puntos) {
+    const countEl = document.getElementById("map-sidebar-count");
+    const listEl = document.getElementById("map-sidebar-list") || document.querySelector(".map-sec__list");
+    if (countEl) {
+      countEl.textContent = `Ubicaciones Activas (${puntos.length})`;
+    }
+    if (!listEl) return;
+
+    listEl.textContent = "";
+    puntos.forEach((p, idx) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "map-sec__item" + (idx === 0 ? " is-active" : "");
+      btn.setAttribute("data-coord-index", String(idx));
+
+      const dot = document.createElement("span");
+      const dotClass =
+        p.type === "blue" ? "dot dot--blue" : (p.type === "green" ? "dot dot--green" : "dot dot--orange");
+      dot.className = dotClass;
+      dot.setAttribute("aria-hidden", "true");
+
+      const body = document.createElement("div");
+      body.className = "map-sec__item-body";
+
+      const title = document.createElement("strong");
+      title.textContent = p.title || "Ubicación";
+
+      const sub = document.createElement("span");
+      sub.textContent = `${p.org || "DonaTrack"} · ${p.kind || p.status || "Auditado"}`;
+
+      body.appendChild(title);
+      body.appendChild(sub);
+      btn.appendChild(dot);
+      btn.appendChild(body);
+      li.appendChild(btn);
+      listEl.appendChild(li);
+    });
+  }
+
   function renderizarMarcadores(puntos) {
     // Limpiar marcadores previos
     markers.forEach((m) => map.removeLayer(m));
     markers = [];
     currentPoints = puntos;
+    renderizarSidebar(puntos);
 
     puntos.forEach((p, idx) => {
       const icon = L.divIcon({
@@ -185,7 +226,7 @@
           <p style="margin: 8px 0; color: #334155;">${escapeHtml(p.desc)}</p>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 10px; gap: 8px;">
             <span style="display:inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${p.type === 'blue' ? '#e0f2fe; color: #0369a1' : p.type === 'green' ? '#dcfce7; color: #15803d' : '#ffedd5; color: #c2410c'};">${escapeHtml(p.status)}</span>
-            <button type="button" class="dt-popup-modal-btn" data-point-idx="${idx}" style="background:#0b4a8f; color:#ffffff; border:none; border-radius:4px; font-size:11px; font-weight:600; padding:4px 8px; cursor:pointer;">Ver foto & acta</button>
+            <button type="button" class="dt-popup-modal-btn" data-point-idx="${idx}" style="background:#0b4a8f; color:#ffffff; border:none; border-radius:4px; font-size:11px; font-weight:600; padding:6px 10px; min-height:36px; cursor:pointer;">Ver foto & acta</button>
           </div>
         </div>
       `;
@@ -217,19 +258,22 @@
     }
   });
 
-  // Coordinar interacción con la lista lateral de ubicaciones
-  document.querySelectorAll("[data-coord-index]").forEach((btn) => {
-    btn.addEventListener("click", () => {
+  // Delegación de eventos para lista lateral dinámica (soporta ítems actualizados por API)
+  const sidebarListEl = document.getElementById("map-sidebar-list") || document.querySelector(".map-sec__list");
+  if (sidebarListEl) {
+    sidebarListEl.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-coord-index]");
+      if (!btn) return;
       const idx = parseInt(btn.getAttribute("data-coord-index"), 10);
       const p = currentPoints[idx];
       if (p && markers[idx]) {
         map.flyTo(p.coords, 14, { duration: 0.8 });
         markers[idx].openPopup();
-        document.querySelectorAll("[data-coord-index]").forEach(b => b.classList.remove("is-active"));
+        sidebarListEl.querySelectorAll("[data-coord-index]").forEach(b => b.classList.remove("is-active"));
         btn.classList.add("is-active");
       }
     });
-  });
+  }
 
   // Hidratación Asíncrona: consultar /api/public/mapa-entregas con AbortController defensivo (2000 ms)
   const controller = typeof AbortController !== "undefined" ? new AbortController() : null;

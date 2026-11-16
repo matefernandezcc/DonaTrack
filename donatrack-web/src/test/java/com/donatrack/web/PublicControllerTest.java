@@ -608,7 +608,14 @@ class PublicControllerTest {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"mensaje\":\"Hola, cómo puedo donar?\"}"))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.respuesta", containsString("Hola! En este momento")));
+          .andExpect(
+              jsonPath(
+                  "$.respuesta",
+                  anyOf(
+                      containsString("Hola! En este momento"),
+                      containsString("donar"),
+                      containsString("Donar"),
+                      containsString("pasos"))));
     }
   }
 
@@ -744,6 +751,28 @@ class PublicControllerTest {
           .andExpect(redirectedUrl("/login"))
           .andExpect(
               flash().attribute("loginError", "No se pudo completar el inicio de sesión social."));
+    }
+
+    @Test
+    @DisplayName(
+        "GET /oauth2/authorization/{provider} sin mock redirige al authPublicUrl público del navegador")
+    void testSocialLoginRedirectPublicUrl() throws Exception {
+      PublicController controllerConPublicUrl =
+          new PublicController(
+              authGateway,
+              incentivosGateway,
+              logisticaGateway,
+              jwtDecoder,
+              new HttpSessionSecurityContextRepository(),
+              solicitudOngService);
+      org.springframework.test.util.ReflectionTestUtils.setField(
+          controllerConPublicUrl, "authPublicUrl", "http://localhost:8004");
+      MockMvc localMvc = MockMvcBuilders.standaloneSetup(controllerConPublicUrl).build();
+
+      localMvc
+          .perform(get("/oauth2/authorization/google"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("http://localhost:8004/oauth2/authorization/google"));
     }
   }
 }

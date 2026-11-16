@@ -13,5 +13,9 @@ public interface PersonaClient {
   PersonaDTO obtenerPersona(@PathVariable("id") UUID id);
 
   @JsonIgnoreProperties(ignoreUnknown = true)
-  record PersonaDTO(String nombre, String apellido, String razonSocial, String tipo) {}
+  record PersonaDTO(String nombre, String apellido, String razonSocial, String tipo, String email) {
+    public PersonaDTO(String nombre, String apellido, String razonSocial, String tipo) {
+      this(nombre, apellido, razonSocial, tipo, null);
+    }
+  }
 }

@@ -2,7 +2,7 @@
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
 COPY . .
-RUN mvn clean package -DskipTests -pl donatrack-donaciones -am
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests -pl donatrack-donaciones -am
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app

@@ -27,8 +27,19 @@ public class IncentivosDomainConfig {
   public RegistrarActividadDonacionUseCase registrarActividadDonacionUseCase(
       IncentivosNotificacionPort notificacionPort,
       ApplicationEventPublisher eventPublisher,
-      PerfilDonanteRepository perfilDonanteRepository) {
+      PerfilDonanteRepository perfilDonanteRepository,
+      @org.springframework.beans.factory.annotation.Autowired(required = false)
+          com.donatrack.incentivos.infrastructure.adapters.out.client.PersonaClient personaClient) {
     return new RegistrarActividadDonacionUseCase(
-        notificacionPort, eventPublisher, perfilDonanteRepository);
+        notificacionPort,
+        eventPublisher,
+        perfilDonanteRepository,
+        donanteId -> {
+          if (personaClient == null) {
+            return null;
+          }
+          var persona = personaClient.obtenerPersona(donanteId);
+          return persona != null ? persona.email() : null;
+        });
   }
 }

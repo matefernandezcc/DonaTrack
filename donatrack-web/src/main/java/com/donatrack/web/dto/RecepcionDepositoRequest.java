@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.UUID;
+import org.springframework.format.annotation.DateTimeFormat;
 
 public record RecepcionDepositoRequest(
     @NotNull(message = "El donante es obligatorio") UUID idDonante,
@@ -13,4 +14,4 @@ public record RecepcionDepositoRequest(
     @NotBlank String unidadMedicion,
     @NotBlank String nombreSubcategoria,
     boolean esUsado,
-    LocalDate fechaVencimiento) {}
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaVencimiento) {}

@@ -156,6 +156,30 @@ public class DonacionesGateway {
     }
   }
 
+  public Map<String, Object> obtenerPersona(UUID personaId) {
+    try {
+      Map<String, Object> result =
+          donacionesClient
+              .get()
+              .uri("/api/personas/{id}", personaId)
+              .retrieve()
+              .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+      return result != null ? result : Collections.emptyMap();
+    } catch (Exception e) {
+      log.warn("No se pudo obtener persona {}: {}", personaId, e.getMessage());
+      return Collections.emptyMap();
+    }
+  }
+
+  public Map<String, Object> crearPersona(Map<String, Object> payload) {
+    return donacionesClient
+        .post()
+        .uri("/api/personas")
+        .body(payload)
+        .retrieve()
+        .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+  }
+
   public String importarCsv(MultipartFile file) {
     try {
       MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();

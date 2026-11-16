@@ -36,8 +36,16 @@ public class PersonaDtoMapper {
               h.getApellido(),
               h.getEdad());
     } else if (dto instanceof PersonaJuridicaDTO j) {
+      String rawTipoJur =
+          j.getTipoJuridica() != null && !j.getTipoJuridica().isBlank()
+              ? j.getTipoJuridica()
+              : (j.getTipo() != null && !"JURIDICA".equalsIgnoreCase(j.getTipo())
+                  ? j.getTipo()
+                  : null);
       TipoPersonaJuridica tipoJur =
-          j.getTipo() != null ? TipoPersonaJuridica.valueOf(j.getTipo()) : null;
+          rawTipoJur != null
+              ? TipoPersonaJuridica.valueOf(rawTipoJur.trim().toUpperCase())
+              : TipoPersonaJuridica.EMPRESA;
       persona =
           new PersonaJuridica(
               dto.getEmail(),
@@ -70,7 +78,9 @@ public class PersonaDtoMapper {
     } else if (persona instanceof PersonaJuridica j) {
       PersonaJuridicaDTO jdto = new PersonaJuridicaDTO();
       jdto.setRazonSocial(j.getRazonSocial());
-      jdto.setTipo(j.getTipo() != null ? j.getTipo().name() : null);
+      String tipoJurStr = j.getTipo() != null ? j.getTipo().name() : null;
+      jdto.setTipo(tipoJurStr);
+      jdto.setTipoJuridica(tipoJurStr);
       jdto.setRubro(j.getRubro());
       dto = jdto;
     } else {

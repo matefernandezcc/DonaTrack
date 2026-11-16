@@ -1,6 +1,7 @@
 package com.donatrack.web;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -27,9 +28,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -191,7 +192,102 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString("Error al actualizar perfil: Servicio no disponible")));
+                      "No se pudo actualizar el perfil. Por favor, intentá nuevamente más tarde."));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con espacios vacíos o nulos normaliza sin NPE")
+    void actualizarPerfil_conValoresEspaciosONull_normalizaSinNPE() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .param("descripcion", "   ")
+                  .param("ubicacion", "  "))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+
+      verify(authGateway, times(1)).actualizarPerfil(any(UUID.class), eq(""), eq(""));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar sin parámetros obligatorios normaliza a vacío sin NPE")
+    void actualizarPerfil_sinParametros_normalizaSinNPE() throws Exception {
+      mockMvc
+          .perform(post("/app/perfil/actualizar").principal(adminAuth))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+
+      verify(authGateway, times(1)).actualizarPerfil(any(UUID.class), eq(""), eq(""));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con usuario mock o anónimo maneja con elegancia y preserva sesión")
+    void actualizarPerfil_conUsuarioMockOAnonimo_manejaConElegancia() throws Exception {
+      MockHttpSession session = new MockHttpSession();
+      UsernamePasswordAuthenticationToken mockAuth =
+          new UsernamePasswordAuthenticationToken(
+              "usuario-mock-sin-uuid", "password", List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
+
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(mockAuth)
+                  .session(session)
+                  .param("descripcion", "Descripción Donante Mock")
+                  .param("ubicacion", "Mendoza, Argentina"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+
+      assertEquals("Descripción Donante Mock", session.getAttribute("perfil_descripcion"));
+      assertEquals("Mendoza, Argentina", session.getAttribute("perfil_ubicacion"));
+      verifyNoInteractions(authGateway);
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con referer absoluto válido preserva query string")
+    void actualizarPerfil_conRefererAbsolutoValido_preservaQueryString() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .header("Referer", "http://localhost/app/donante?tab=mis-donaciones")
+                  .param("descripcion", "Desc")
+                  .param("ubicacion", "Ubi"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante?tab=mis-donaciones"))
+          .andExpect(flash().attribute("flashOk", "Perfil actualizado con éxito."));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con referer externo o malicioso redirige a fallback seguro")
+    void actualizarPerfil_conRefererExterno_fallbackADonante() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .header("Referer", "https://sitio-malicioso.com/app/phishing")
+                  .param("descripcion", "Desc")
+                  .param("ubicacion", "Ubi"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"));
+    }
+
+    @Test
+    @DisplayName("POST /app/perfil/actualizar con referer de protocolo relativo redirige a fallback seguro")
+    void actualizarPerfil_conRefererProtocolRelative_fallbackADonante() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/perfil/actualizar")
+                  .principal(adminAuth)
+                  .header("Referer", "//sitio-malicioso.com/app/admin")
+                  .param("descripcion", "Desc")
+                  .param("ubicacion", "Ubi"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante"));
     }
 
     @Test
@@ -212,8 +308,7 @@ class AdminControllerTest {
               .expiresAt(Instant.now().plusSeconds(3600))
               .build();
       JwtAuthenticationToken customAuth =
-          new JwtAuthenticationToken(
-              jwtCustom, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+          new JwtAuthenticationToken(jwtCustom, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
       when(logisticaGateway.listarCamiones()).thenReturn(Collections.emptyList());
       when(logisticaGateway.listarChoferes()).thenReturn(Collections.emptyList());
@@ -348,7 +443,7 @@ class AdminControllerTest {
                   .param("capacidadCarga", "4000.0"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
-          .andExpect(flash().attribute("flashError", containsString("Patente ya existente")));
+          .andExpect(flash().attribute("flashError", "No se pudo registrar el camión. Verificá los datos e intentá nuevamente."));
     }
 
     @Test
@@ -358,7 +453,7 @@ class AdminControllerTest {
           .perform(post("/app/admin/camiones/AE789XY/eliminar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
-          .andExpect(flash().attribute("flashOk", "Camión AE789XY eliminado."));
+          .andExpect(flash().attribute("flashOk", "Camión AE789XY eliminado con éxito."));
 
       verify(logisticaGateway, times(1)).eliminarCamion("AE789XY");
     }
@@ -375,7 +470,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
           .andExpect(
-              flash().attribute("flashError", containsString("Camión asignado a una ruta activa")));
+              flash().attribute("flashError", "No se pudo eliminar el camión. Verificá que no tenga tareas asociadas e intentá nuevamente."));
     }
   }
 
@@ -435,7 +530,7 @@ class AdminControllerTest {
                   .param("telefono", "+54 11 9988-7766"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/choferes"))
-          .andExpect(flash().attribute("flashError", containsString("Legajo duplicado")));
+          .andExpect(flash().attribute("flashError", "No se pudo registrar el chofer. Verificá los datos ingresados e intentá nuevamente."));
     }
 
     @Test
@@ -445,7 +540,7 @@ class AdminControllerTest {
           .perform(post("/app/admin/choferes/CH-505/eliminar").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/choferes"))
-          .andExpect(flash().attribute("flashOk", "Chofer con legajo CH-505 eliminado."));
+          .andExpect(flash().attribute("flashOk", "Chofer con legajo CH-505 eliminado con éxito."));
 
       verify(logisticaGateway, times(1)).eliminarChofer("CH-505");
     }
@@ -462,7 +557,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/choferes"))
           .andExpect(
-              flash().attribute("flashError", containsString("Chofer con ruta en ejecución")));
+              flash().attribute("flashError", "No se pudo eliminar el chofer. Verificá que no tenga viajes asignados e intentá nuevamente."));
     }
   }
 
@@ -638,7 +733,7 @@ class AdminControllerTest {
                   .param("beneficiarioId", benefId.toString()))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
-          .andExpect(flash().attribute("flashError", containsString("Donación ya fue asignada")));
+          .andExpect(flash().attribute("flashError", "No se pudo realizar la asignación de la donación. Por favor, intentá nuevamente."));
     }
 
     @Test
@@ -649,7 +744,7 @@ class AdminControllerTest {
           .perform(post("/app/admin/matchmaking/batch").principal(adminAuth))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
-          .andExpect(flash().attributeExists("flashOk"));
+          .andExpect(flash().attribute("flashOk", "Asignación automática completada exitosamente."));
 
       verify(donacionesGateway, times(1)).ejecutarMatchmakingBatch();
     }
@@ -666,7 +761,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/matchmaking"))
           .andExpect(
-              flash().attribute("flashError", containsString("Fallo en optimizador genético")));
+              flash().attribute("flashError", "No se pudo completar la asignación automática. Por favor, intentá nuevamente."));
     }
   }
 
@@ -708,7 +803,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/csv"))
           .andExpect(
-              flash().attribute("flashOk", "Importación completada: 1 registros procesados"));
+              flash().attribute("flashOk", "Archivo CSV procesado e importado con éxito."));
 
       verify(donacionesGateway, times(1)).importarCsv(any());
     }
@@ -728,7 +823,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/csv"))
           .andExpect(
-              flash().attribute("flashError", containsString("Formato de columnas inválido")));
+              flash().attribute("flashError", "No se pudo procesar el archivo CSV. Verificá el formato e intentá nuevamente."));
     }
   }
 
@@ -787,7 +882,7 @@ class AdminControllerTest {
                   .param("rol", "BENEFICIARIA"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/usuarios"))
-          .andExpect(flash().attribute("flashOk", "Rol actualizado exitosamente a BENEFICIARIA"));
+          .andExpect(flash().attribute("flashOk", "Rol del usuario actualizado exitosamente."));
 
       verify(authGateway, times(1)).cambiarRol(usuarioId, "BENEFICIARIA");
     }
@@ -807,7 +902,7 @@ class AdminControllerTest {
                   .param("rol", "ADMIN"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/usuarios"))
-          .andExpect(flash().attribute("flashError", containsString("Usuario no encontrado")));
+          .andExpect(flash().attribute("flashError", "No se pudo actualizar el rol del usuario. Por favor, intentá nuevamente."));
     }
 
     @Test
@@ -826,7 +921,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashOk",
-                      "Contraseña del usuario usuario@mail.com restablecida con éxito a 'password123'."));
+                      "Contraseña restablecida con éxito."));
 
       verify(authGateway, times(1)).resetearPassword(usuarioId);
     }
@@ -858,7 +953,7 @@ class AdminControllerTest {
           .thenReturn(
               List.of(
                   Map.of(
-                      "id", userId.toString(),
+                       "id", userId.toString(),
                       "email", "contacto@losninos.org",
                       "rol", "DONANTE")));
 
@@ -871,7 +966,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashOk",
-                      "Solicitud de ONG #" + solId + " verificada y aprobada con éxito."));
+                      "Solicitud de organización aprobada con éxito."));
 
       verify(solicitudOngService, times(1)).actualizarEstado(solId, "APROBADA");
       verify(authGateway, times(1)).cambiarRol(userId, "BENEFICIARIA");
@@ -906,7 +1001,7 @@ class AdminControllerTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/usuarios"))
           .andExpect(
-              flash().attribute("flashOk", containsString("verificada y aprobada con éxito.")));
+              flash().attribute("flashOk", "Solicitud de organización aprobada con éxito."));
 
       verify(solicitudOngService, times(1)).actualizarEstado(solId, "APROBADA");
       verify(authGateway, never()).cambiarRol(any(), any());
@@ -976,6 +1071,47 @@ class AdminControllerTest {
 
     @Test
     @DisplayName(
+        "POST /app/admin/donaciones/recepcion con fechaVencimiento vacía convierte a null vía StringTrimmerEditor y procesa exitosamente")
+    void testRegistrarRecepcionDonacionConFechaVencimientoVacia_convierteANullYProcesaExitosamente()
+        throws Exception {
+      UUID donanteId = UUID.randomUUID();
+
+      mockMvc
+          .perform(
+              post("/app/admin/donaciones/recepcion")
+                  .principal(adminAuth)
+                  .param("idDonante", donanteId.toString())
+                  .param("descripcion", "Harina de trigo 000")
+                  .param("cantidad", "20.0")
+                  .param("unidadMedicion", "KG")
+                  .param("nombreSubcategoria", "Alimentos Secos")
+                  .param("esUsado", "false")
+                  .param("fechaVencimiento", ""))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/matchmaking"))
+          .andExpect(
+              flash()
+                  .attribute("flashOk", "Donación recibida e ingresada a depósito correctamente."));
+
+      verify(donacionesGateway, times(1))
+          .crearRecepcion(
+              argThat(
+                  payload -> {
+                    if (!donanteId.toString().equals(payload.get("idDonante"))) {
+                      return false;
+                    }
+                    if (!(payload.get("bienesBrutos") instanceof List<?> list) || list.isEmpty()) {
+                      return false;
+                    }
+                    if (list.get(0) instanceof Map<?, ?> bien) {
+                      return !bien.containsKey("fechaVencimiento") || bien.get("fechaVencimiento") == null;
+                    }
+                    return false;
+                  }));
+    }
+
+    @Test
+    @DisplayName(
         "POST /app/admin/donaciones/recepcion con campos inválidos retorna formulario con error")
     void testRegistrarRecepcionDonacionInvalido() throws Exception {
       when(donacionesGateway.obtenerPersonas()).thenReturn(Collections.emptyList());
@@ -1022,8 +1158,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString(
-                          "Error al registrar la donación en depósito: Error en base de datos")));
+                      "No se pudo registrar el ingreso de la donación en depósito. Verificá los datos e intentá nuevamente."));
     }
 
     @Test
@@ -1061,8 +1196,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString(
-                          "No se pudo marcar la donación como vencida: Donación no encontrada")));
+                      "No se pudo actualizar el estado de la donación. Por favor, intentá nuevamente."));
     }
 
     @Test
@@ -1077,7 +1211,7 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashOk",
-                      "Auditoría de vencimientos ejecutada exitosamente sobre el depósito."));
+                      "Auditoría de vencimientos ejecutada con éxito."));
 
       verify(donacionesGateway, times(1)).auditarVencidos();
     }
@@ -1098,8 +1232,123 @@ class AdminControllerTest {
               flash()
                   .attribute(
                       "flashError",
-                      containsString(
-                          "Error al ejecutar la auditoría de vencimientos: Fallo en servicio de inventario")));
+                      "No se pudo completar la auditoría de vencimientos. Por favor, intentá nuevamente."));
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/personas registra persona HUMANA y redirige con personaCreadaId")
+    void testRegistrarPersonaHumanaExitoso() throws Exception {
+      UUID nuevaId = UUID.randomUUID();
+      when(donacionesGateway.crearPersona(any())).thenReturn(Map.of("id", nuevaId.toString()));
+
+      mockMvc
+          .perform(
+              post("/app/admin/personas")
+                  .principal(adminAuth)
+                  .param("tipo", "HUMANA")
+                  .param("email", "lucia@ejemplo.org")
+                  .param("docTipo", "DNI")
+                  .param("docNumero", "33444555")
+                  .param("nombre", "Lucía")
+                  .param("apellido", "Gómez")
+                  .param("edad", "28"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/donaciones/recepcion?personaCreadaId=" + nuevaId))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk", "Persona donante registrada con éxito."));
+
+      verify(donacionesGateway, times(1))
+          .crearPersona(
+              org.mockito.ArgumentMatchers.argThat(
+                  m ->
+                      "HUMANA".equals(m.get("tipo"))
+                          && "Lucía".equals(m.get("nombre"))
+                          && "Gómez".equals(m.get("apellido"))));
+    }
+
+    @Test
+    @DisplayName(
+        "POST /app/admin/personas registra persona JURIDICA usando tipoJuridica sin colisión")
+    void testRegistrarPersonaJuridicaExitoso() throws Exception {
+      UUID nuevaId = UUID.randomUUID();
+      when(donacionesGateway.crearPersona(any())).thenReturn(Map.of("id", nuevaId.toString()));
+
+      mockMvc
+          .perform(
+              post("/app/admin/personas")
+                  .principal(adminAuth)
+                  .param("tipo", "JURIDICA")
+                  .param("email", "contacto@empresasur.org")
+                  .param("docTipo", "CUIT")
+                  .param("docNumero", "30711223349")
+                  .param("razonSocial", "Empresa Sur SRL")
+                  .param("tipoJuridica", "EMPRESA")
+                  .param("rubro", "Alimentos"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/donaciones/recepcion?personaCreadaId=" + nuevaId));
+
+      verify(donacionesGateway, times(1))
+          .crearPersona(
+              org.mockito.ArgumentMatchers.argThat(
+                  m ->
+                      "JURIDICA".equals(m.get("tipo"))
+                          && "EMPRESA".equals(m.get("tipoJuridica"))
+                          && "Empresa Sur SRL".equals(m.get("razonSocial"))));
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/personas rechaza HUMANA sin nombre/apellido mostrando flashError")
+    void testRegistrarPersonaHumanaSinNombre() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/admin/personas")
+                  .principal(adminAuth)
+                  .param("tipo", "HUMANA")
+                  .param("email", "incompleto@ejemplo.org")
+                  .param("docTipo", "DNI")
+                  .param("docNumero", "12345678"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/donaciones/recepcion"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashError", containsString("el nombre y el apellido son obligatorios")));
+
+      verify(donacionesGateway, never()).crearPersona(any());
+    }
+
+    @Test
+    @DisplayName("GET /app/admin/ranking enriquece período actual e historial ordenado")
+    void testAdminRankingHistorialNormalizado() throws Exception {
+      when(incentivosGateway.obtenerTop3()).thenReturn(Collections.emptyList());
+      when(incentivosGateway.obtenerHistorialRankings())
+          .thenReturn(
+              List.of(
+                  Map.of(
+                      "id",
+                      UUID.randomUUID().toString(),
+                      "mes",
+                      "OCTUBRE",
+                      "anio",
+                      2026,
+                      "posiciones",
+                      List.of(
+                          Map.of(
+                              "posicion", 1,
+                              "user", "María",
+                              "misionesCompletadasMes", 4)))));
+      when(donacionesGateway.obtenerPersonas()).thenReturn(Collections.emptyList());
+      when(authGateway.listarUsuarios()).thenReturn(Collections.emptyList());
+
+      mockMvc
+          .perform(get("/app/admin/ranking").principal(adminAuth))
+          .andExpect(status().isOk())
+          .andExpect(view().name("admin/admin/ranking"))
+          .andExpect(model().attributeExists("periodoActualLabel"))
+          .andExpect(model().attribute("historial", hasItem(hasEntry("periodoKey", "2026-10"))))
+          .andExpect(model().attribute("historial", hasItem(hasEntry("mesNombre", "Octubre"))));
     }
   }
 }
