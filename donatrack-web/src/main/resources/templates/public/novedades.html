@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout-public :: layout(~{::title}, ~{::main}, ~{::scripts})}">
+<head>
+  <title>DonaTrack · Novedades y Comunidad</title>
+</head>
+<body>
+  <main id="contenido">
+    <section class="novedades-sec" style="padding: 72px 0 96px;">
+      <div class="container">
+        <div class="section-head section-head--row" style="margin-bottom: 36px;">
+          <div>
+            <span class="eyebrow eyebrow--green">Actualidad de la Red</span>
+            <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 10px;">Novedades</h1>
+            <p class="section-head__lead" style="margin-bottom: 0;">
+              Jornadas solidarias, campañas activas, nuevas organizaciones verificadas e historias de impacto en todo el país.
+            </p>
+          </div>
+          <a th:href="@{/login}" class="btn btn--primary btn--sm">Donar aquí</a>
+        </div>
+
+        <!-- Buscador y filtro por categoría (estilo editorial) -->
+        <form th:action="@{/novedades}" method="get"
+              style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--bg-soft); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 32px;">
+          <label for="nov-search-input" class="sr-only">Buscar novedades</label>
+          <input type="search" id="nov-search-input" name="q" th:value="${busqueda}"
+                 placeholder="Buscar artículos, campañas, jornadas..."
+                 style="flex: 1; min-width: 220px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit;" />
+          <label for="nov-cat-select" class="sr-only">Filtrar por categoría</label>
+          <select id="nov-cat-select" name="categoria"
+                  style="min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit;">
+            <option value="">Todas las categorías</option>
+            <option value="Comunidad" th:selected="${categoriaSeleccionada == 'Comunidad'}">Comunidad</option>
+            <option value="Campañas" th:selected="${categoriaSeleccionada == 'Campañas'}">Campañas</option>
+            <option value="Logística" th:selected="${categoriaSeleccionada == 'Logística'}">Logística</option>
+            <option value="Institucional" th:selected="${categoriaSeleccionada == 'Institucional'}">Institucional</option>
+            <option value="Educación" th:selected="${categoriaSeleccionada == 'Educación'}">Educación</option>
+          </select>
+          <button type="submit" class="btn btn--outline" style="--h: 44px; padding: 0 18px; border-radius: 10px;">Buscar</button>
+          <a th:if="${(busqueda != null and !busqueda.isBlank()) or (categoriaSeleccionada != null and !categoriaSeleccionada.isBlank())}"
+             th:href="@{/novedades}" class="btn btn--ghost" style="--h: 44px; padding: 0 14px;">Limpiar</a>
+        </form>
+
+        <!-- Grilla de Novedades -->
+        <div class="novedades-grid" th:if="${novedades != null and not #lists.isEmpty(novedades)}">
+          <article class="novedad-card" th:each="n : ${novedades}">
+            <div>
+              <div class="novedad-card__meta" style="margin-bottom: 10px;">
+                <span class="pill pill--blue" th:text="${n['categoria']}">Comunidad</span>
+                <time class="novedad-card__date" th:text="${n['fecha']}">noviembre 15, 2026</time>
+              </div>
+              <h2 class="novedad-card__title" th:text="${n['titulo']}" style="font-size: 1.18rem; margin-bottom: 10px;">
+                Título de novedad
+              </h2>
+              <p class="novedad-card__excerpt" th:text="${n['resumen']}">
+                Resumen editorial del artículo solidario...
+              </p>
+            </div>
+            <button type="button" class="novedad-card__more"
+                    th:attr="data-titulo=${n['titulo']},data-fecha=${n['fecha']},data-cat=${n['categoria']},data-contenido=${n['contenido']}"
+                    onclick="abrirNovedadModal(this)">
+              Leer más →
+            </button>
+          </article>
+        </div>
+
+        <!-- Estado vacío -->
+        <div th:if="${novedades == null or #lists.isEmpty(novedades)}"
+             style="text-align: center; padding: 48px 24px; background: var(--bg-soft); border: 1px dashed var(--line); border-radius: var(--radius-lg);">
+          <h3>No encontramos artículos con esos criterios</h3>
+          <p>Probá con otro término o explorá todas las novedades de la red solidaria.</p>
+          <a th:href="@{/novedades}" class="btn btn--primary btn--sm">Ver todas las novedades</a>
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Paginación de novedades" th:if="${totalPaginas > 1}"
+             style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; flex-wrap: wrap;">
+          <a th:if="${paginaActual > 1}"
+             th:href="@{/novedades(page=${paginaActual - 1}, q=${busqueda}, categoria=${categoriaSeleccionada})}"
+             class="btn btn--ghost" style="--h: 40px; padding: 0 14px; font-size: 0.88rem;">« Anterior</a>
+
+          <a th:each="p : ${#numbers.sequence(1, totalPaginas)}"
+             th:href="@{/novedades(page=${p}, q=${busqueda}, categoria=${categoriaSeleccionada})}"
+             th:text="${p}"
+             th:class="${p == paginaActual} ? 'btn btn--primary' : 'btn btn--ghost'"
+             style="--h: 40px; min-width: 40px; padding: 0 12px; font-size: 0.88rem;">1</a>
+
+          <a th:if="${paginaActual < totalPaginas}"
+             th:href="@{/novedades(page=${paginaActual + 1}, q=${busqueda}, categoria=${categoriaSeleccionada})}"
+             class="btn btn--ghost" style="--h: 40px; padding: 0 14px; font-size: 0.88rem;">Siguiente »</a>
+        </nav>
+      </div>
+    </section>
+
+    <!-- Modal Lectura Completa de Novedad -->
+    <dialog class="modal" id="modal-novedad" aria-modal="true" aria-labelledby="modal-nov-title" hidden>
+      <div class="modal__backdrop" onclick="cerrarNovedadModal()"></div>
+      <div class="modal__panel" style="max-width: 620px; width: 92%; background: var(--bg); color: var(--ink); border: 1px solid var(--line-2);">
+        <button type="button" class="modal__close" aria-label="Cerrar" onclick="cerrarNovedadModal()">&times;</button>
+        <div class="modal__body" style="padding: 28px;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+            <span class="pill pill--blue" id="modal-nov-cat">Comunidad</span>
+            <span id="modal-nov-fecha" style="font-size: 0.82rem; font-weight: 600; color: var(--muted);">noviembre 15, 2026</span>
+          </div>
+          <h3 id="modal-nov-title" style="font-size: 1.45rem; line-height: 1.25; margin: 0 0 14px;">Título de novedad</h3>
+          <p id="modal-nov-body" style="font-size: 0.98rem; line-height: 1.65; color: var(--muted); margin-bottom: 22px;"></p>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--line-2); padding-top: 16px;">
+            <button type="button" class="btn btn--ghost" style="--h: 42px; padding: 0 16px;" onclick="cerrarNovedadModal()">Cerrar</button>
+            <a th:href="@{/login}" class="btn btn--primary" style="--h: 42px; padding: 0 18px;">Donar aquí</a>
+          </div>
+        </div>
+      </div>
+    </dialog>
+  </main>
+
+  <th:block th:fragment="scripts">
+    <script>
+      function abrirNovedadModal(btn) {
+        const modal = document.getElementById("modal-novedad");
+        if (!modal || !btn) return;
+        document.getElementById("modal-nov-cat").textContent = btn.getAttribute("data-cat") || "Novedad";
+        document.getElementById("modal-nov-fecha").textContent = btn.getAttribute("data-fecha") || "";
+        document.getElementById("modal-nov-title").textContent = btn.getAttribute("data-titulo") || "";
+        document.getElementById("modal-nov-body").textContent = btn.getAttribute("data-contenido") || "";
+        modal.removeAttribute("hidden");
+        modal.showModal();
+        document.body.style.overflow = "hidden";
+      }
+
+      function cerrarNovedadModal() {
+        const modal = document.getElementById("modal-novedad");
+        if (modal) {
+          modal.close();
+          modal.setAttribute("hidden", "true");
+          document.body.style.overflow = "";
+        }
+      }
+    </script>
+  </th:block>
+</body>
+</html>

@@ -38,6 +38,10 @@ public class WebSecurityConfig {
             auth ->
                 auth.requestMatchers(
                         "/",
+                        "/novedades",
+                        "/novedades/**",
+                        "/privacidad",
+                        "/terminos",
                         "/login",
                         "/registro",
                         "/auth/**",

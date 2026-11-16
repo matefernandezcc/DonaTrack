@@ -198,6 +198,25 @@ class PublicControllerTest {
     }
 
     @Test
+    @DisplayName("GET /novedades debe responder 200 OK, filtrar por búsqueda y paginar resultados")
+    void testNovedadesPage() throws Exception {
+      mockMvc
+          .perform(get("/novedades"))
+          .andExpect(status().isOk())
+          .andExpect(view().name("public/novedades"))
+          .andExpect(model().attributeExists("novedades"))
+          .andExpect(model().attribute("novedades", hasSize(6)))
+          .andExpect(model().attribute("paginaActual", 1))
+          .andExpect(model().attribute("totalPaginas", 2));
+
+      mockMvc
+          .perform(get("/novedades").param("q", "Jornada Mundial"))
+          .andExpect(status().isOk())
+          .andExpect(view().name("public/novedades"))
+          .andExpect(model().attribute("novedades", hasSize(1)));
+    }
+
+    @Test
     @DisplayName("GET /healthcheck debe retornar estado UP en formato JSON")
     void testHealthcheck() throws Exception {
       mockMvc

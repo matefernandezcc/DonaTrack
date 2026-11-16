@@ -91,7 +91,7 @@
           <!-- Tarjeta dinámica de la etapa activa -->
           <div class="story-card" id="story-active-card">
             <div class="story-card__header">
-              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 05</span>
+              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 04</span>
               <span class="story-card__status" id="story-stage-status">Trazabilidad Iniciada</span>
             </div>
             <h3 class="story-card__title" id="story-stage-title">Donación Realizada</h3>
@@ -118,9 +118,6 @@
               </button>
               <button type="button" class="story-pill" data-step="4" role="tab" aria-selected="false" onclick="selectCircleStep(4)">
                 <span>04</span> En Sede
-              </button>
-              <button type="button" class="story-pill" data-step="5" role="tab" aria-selected="false" onclick="selectCircleStep(5)">
-                <span>05</span> Círculo Cerrado
               </button>
             </div>
             <div class="story-actions">
@@ -174,7 +171,7 @@
               </div>
             </div>
 
-            <!-- 5 Nodos / Hitos Alrededor de la Circunferencia -->
+            <!-- 4 Nodos / Hitos Alrededor de la Circunferencia -->
             <!-- 01: Top 0° (12hs) -->
             <div class="dial-node is-active" data-node="1" style="--angle: 0deg;" onclick="selectCircleStep(1)" role="button" tabindex="0" aria-label="Etapa 1: Donación">
               <div class="dial-node__dot">01</div>
@@ -184,39 +181,30 @@
               </div>
             </div>
 
-            <!-- 02: Top-Right 72° -->
-            <div class="dial-node" data-node="2" style="--angle: 72deg;" onclick="selectCircleStep(2)" role="button" tabindex="0" aria-label="Etapa 2: Acopio">
+            <!-- 02: Right 90° (3hs) -->
+            <div class="dial-node" data-node="2" style="--angle: 90deg;" onclick="selectCircleStep(2)" role="button" tabindex="0" aria-label="Etapa 2: Acopio">
               <div class="dial-node__dot">02</div>
-              <div class="dial-node__label dial-node__label--right-top">
+              <div class="dial-node__label dial-node__label--right">
                 <strong>Acopio</strong>
                 <span>Pesaje y control</span>
               </div>
             </div>
 
-            <!-- 03: Bottom-Right 144° -->
-            <div class="dial-node" data-node="3" style="--angle: 144deg;" onclick="selectCircleStep(3)" role="button" tabindex="0" aria-label="Etapa 3: Transporte">
+            <!-- 03: Bottom 180° (6hs) -->
+            <div class="dial-node" data-node="3" style="--angle: 180deg;" onclick="selectCircleStep(3)" role="button" tabindex="0" aria-label="Etapa 3: Transporte">
               <div class="dial-node__dot">03</div>
-              <div class="dial-node__label dial-node__label--right-bottom">
+              <div class="dial-node__label dial-node__label--bottom">
                 <strong>Transporte</strong>
                 <span>Logística en ruta</span>
               </div>
             </div>
 
-            <!-- 04: Bottom-Left 216° -->
-            <div class="dial-node" data-node="4" style="--angle: 216deg;" onclick="selectCircleStep(4)" role="button" tabindex="0" aria-label="Etapa 4: ONG Receptora">
+            <!-- 04: Left 270° (9hs) -->
+            <div class="dial-node" data-node="4" style="--angle: 270deg;" onclick="selectCircleStep(4)" role="button" tabindex="0" aria-label="Etapa 4: ONG Receptora">
               <div class="dial-node__dot">04</div>
-              <div class="dial-node__label dial-node__label--left-bottom">
+              <div class="dial-node__label dial-node__label--left">
                 <strong>ONG Receptora</strong>
-                <span>Arribo a sede</span>
-              </div>
-            </div>
-
-            <!-- 05: Top-Left 288° -->
-            <div class="dial-node" data-node="5" style="--angle: 288deg;" onclick="selectCircleStep(5)" role="button" tabindex="0" aria-label="Etapa 5: Círculo Cerrado">
-              <div class="dial-node__dot">05</div>
-              <div class="dial-node__label dial-node__label--left-top">
-                <strong>Círculo Cerrado</strong>
-                <span>Remito y foto de entrega</span>
+                <span>Entrega y remito</span>
               </div>
             </div>
 
@@ -310,7 +298,7 @@
     <section class="metrics" id="impacto" aria-labelledby="metrics-title">
       <div class="container">
         <div class="section-head section-head--center">
-          <span class="eyebrow eyebrow--light">Impacto</span>
+          <span class="eyebrow eyebrow--light">Nuestro Aporte</span>
           <h2 id="metrics-title">Números que cuentan historias</h2>
         </div>
         <div class="metrics__grid">
@@ -347,11 +335,16 @@
 
         <div class="ranking-pub__grid" th:if="${ranking != null and not #lists.isEmpty(ranking)}">
           <article class="ranking-pub__card" th:each="item, iter : ${ranking}">
-            <span class="ranking-pub__pos" th:text="'#' + ${iter.count}">#1</span>
-            <div class="ranking-pub__info">
+            <img class="avatar"
+                 th:src="@{https://blobatar.dev/avatar/{seed}(seed=${item['user'] != null ? item['user'] : ('donante-' + iter.index)}, size=48, background='circle')}"
+                 th:alt="'Avatar de ' + ${item['user'] != null ? item['user'] : 'Donante Solidario'}"
+                 width="48" height="48" loading="lazy"
+                 style="border-radius: 50%; object-fit: cover; flex-shrink: 0;" />
+            <div class="ranking-pub__info" style="flex: 1;">
               <strong class="ranking-pub__name" th:text="${item['user'] != null ? item['user'] : 'Donante Solidario'}">María González</strong>
               <span class="ranking-pub__stats" th:text="${(item['donations'] != null ? item['donations'] : 0)} + ' aportes verificados este mes'">5 aportes verificados este mes</span>
             </div>
+            <span class="ranking-pub__pos" th:text="'#' + ${iter.count}">#1</span>
           </article>
         </div>
 
@@ -570,6 +563,33 @@
               </div>
               <a th:href="@{/login(campana='escolar')}" class="btn btn--primary btn--sm">Donar a esta campaña</a>
             </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ NOVEDADES ============ -->
+    <section class="novedades-sec" id="novedades" aria-labelledby="novedades-title">
+      <div class="container">
+        <div class="section-head section-head--row">
+          <div>
+            <span class="eyebrow eyebrow--green">Actualidad comunitaria</span>
+            <h2 id="novedades-title">Novedades</h2>
+          </div>
+          <a th:href="@{/novedades}" class="link-arrow">Ver todas las novedades →</a>
+        </div>
+
+        <div class="novedades-grid" th:if="${novedadesDestacadas != null and not #lists.isEmpty(novedadesDestacadas)}">
+          <article class="novedad-card" th:each="nov : ${novedadesDestacadas}">
+            <div>
+              <div class="novedad-card__meta" style="margin-bottom: 10px;">
+                <span class="pill pill--blue" th:text="${nov['categoria']}">Comunidad</span>
+                <time class="novedad-card__date" th:text="${nov['fecha']}">noviembre 15, 2026</time>
+              </div>
+              <h3 class="novedad-card__title" th:text="${nov['titulo']}">Título novedad</h3>
+              <p class="novedad-card__excerpt" th:text="${nov['resumen']}">Resumen de novedad...</p>
+            </div>
+            <a th:href="@{/novedades}" class="novedad-card__more">Leer más →</a>
           </article>
         </div>
       </div>

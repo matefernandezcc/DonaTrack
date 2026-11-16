@@ -178,6 +178,8 @@
     position: relative;
     padding: 96px 0 120px;
     /* White space: dar aire jerárquico a la sección principal */
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--line-2);
     overflow: hidden;
     isolation: isolate;
 }
@@ -422,7 +424,7 @@
    ========================================================= */
 .story-circle {
     padding: 80px 0 96px;
-    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+    background: var(--bg);
     position: relative;
     overflow: hidden;
 }
@@ -772,34 +774,31 @@
     color: #16a34a;
 }
 
-/* Posicionamiento de las etiquetas alrededor del círculo */
+/* Posicionamiento de las 4 etiquetas alrededor del círculo */
 .dial-node__label--top {
-    bottom: 46px;
+    bottom: 54px;
     left: 50%;
     transform: translateX(-50%);
 }
 
-.dial-node__label--right-top {
-    left: 48px;
-    top: -4px;
+.dial-node__label--right {
+    left: 56px;
+    top: 50%;
+    transform: translateY(-50%);
     text-align: left;
 }
 
-.dial-node__label--right-bottom {
-    left: 48px;
-    top: 6px;
-    text-align: left;
+.dial-node__label--bottom {
+    top: 54px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
 }
 
-.dial-node__label--left-bottom {
-    right: 48px;
-    top: 6px;
-    text-align: right;
-}
-
-.dial-node__label--left-top {
-    right: 48px;
-    top: -4px;
+.dial-node__label--left {
+    right: 56px;
+    top: 50%;
+    transform: translateY(-50%);
     text-align: right;
 }
 
@@ -844,6 +843,9 @@
    ========================================================= */
 .how {
     padding: 120px 0;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--line-2);
+    border-bottom: 1px solid var(--line-2);
 }
 
 .how__grid {
@@ -2079,9 +2081,10 @@
 }
 
 .ranking-pub__grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
   margin-top: 28px;
 }
 
@@ -2089,6 +2092,9 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  flex: 0 1 340px;
+  max-width: 360px;
+  width: 100%;
   padding: 20px;
   background: var(--bg);
   border: 1px solid var(--line-2);
@@ -2097,8 +2103,8 @@
 }
 
 .ranking-pub__pos {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--blue-50);
   color: var(--blue);
@@ -2106,7 +2112,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   flex-shrink: 0;
 }
 
@@ -2137,8 +2143,88 @@
   color: var(--muted);
 }
 
+/* =========================================================
+   Novedades (Estilo Editorial Cáritas / Comunidad)
+   ========================================================= */
+.novedades-sec {
+  padding: 96px 0;
+  background: var(--bg);
+  border-top: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--line-2);
+}
+
+.novedades-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.novedad-card {
+  background: var(--bg-soft);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.novedad-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+.novedad-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.novedad-card__date {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.novedad-card__title {
+  font-size: 1.12rem;
+  line-height: 1.3;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+}
+
+.novedad-card__excerpt {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0;
+  flex: 1;
+}
+
+.novedad-card__more {
+  align-self: flex-start;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--orange);
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.novedad-card__more:hover {
+  color: var(--orange-600);
+  text-decoration: underline;
+}
+
 @media (max-width: 900px) {
-  .ranking-pub__grid {
+  .novedades-grid {
     grid-template-columns: 1fr;
   }
 }

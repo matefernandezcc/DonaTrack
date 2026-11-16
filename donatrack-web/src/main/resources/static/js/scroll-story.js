@@ -12,49 +12,38 @@
       status: "Trazabilidad Iniciada",
       origin: "Recepción en depósito",
       points: "+10 Puntos de Impacto",
-      progress: 0.15
+      progress: 0.25
     },
     {
       num: "02",
-      angle: 72,
+      angle: 90,
       title: "Centro de Acopio",
       short: "Acopio",
       desc: "La mercadería es recibida en el centro logístico más cercano. Personal capacitado realiza el pesaje, control bromatológico y clasificación en pallets.",
       status: "Lote Auditado",
       origin: "Depósito Central DonaTrack",
       points: "Control de Calidad 100%",
-      progress: 0.38
+      progress: 0.50
     },
     {
       num: "03",
-      angle: 144,
+      angle: 180,
       title: "Transporte en Ruta",
       short: "En Ruta",
       desc: "El despacho se asigna a un camión de la red con chofer profesional. Seguimiento satelital y hoja de ruta optimizada en tiempo real.",
       status: "Móvil Despachado",
       origin: "Ruta Activa con Chofer",
       points: "Monitoreo Satelital",
-      progress: 0.62
+      progress: 0.75
     },
     {
       num: "04",
-      angle: 216,
-      title: "Arribo a Sede Comunitaria",
+      angle: 270,
+      title: "Entrega en ONG Receptora",
       short: "En Sede",
-      desc: "El camión arriba a la ONG o comedor beneficiario asignado. El referente de la sede inspecciona la mercadería al pie del vehículo.",
-      status: "Arribo Confirmado",
-      origin: "Comedor Verificado",
-      points: "Asignación Comunitaria",
-      progress: 0.82
-    },
-    {
-      num: "05",
-      angle: 288,
-      title: "Entrega Completada y Certificada",
-      short: "Círculo Cerrado",
-      desc: "Recepción confirmada con firma digital y foto del remito certificada en destino. Recibís la notificación y el impacto tangible. ¡El círculo se cierra!",
-      status: "Ciclo 100% Completado",
-      origin: "Remito Digital Certificado",
+      desc: "El camión arriba al comedor beneficiario y la recepción se certifica al pie del vehículo con firma digital y foto del remito en destino.",
+      status: "Entrega Certificada",
+      origin: "Comedor Verificado + Remito",
       points: "+25 Puntos de Entrega (35 pts totales)",
       progress: 1.0
     }
@@ -104,7 +93,7 @@
 
     let svgHtml = "";
     for (let deg = 0; deg < 360; deg += 10) {
-      const isMajor = deg % 72 === 0; // Hitos principales
+      const isMajor = deg % 90 === 0; // Hitos principales (4 etapas)
       const rInner = isMajor ? rInnerMajor : rInnerMinor;
       const rad = ((deg - 90) * Math.PI) / 180;
 
@@ -124,7 +113,7 @@
 
   // 2. Actualizar la vista al paso seleccionado
   window.selectCircleStep = function (stepNum, manualClick = true) {
-    if (stepNum < 1 || stepNum > 5) return;
+    if (stepNum < 1 || stepNum > 4) return;
     currentStep = stepNum;
     const data = STEPS[stepNum - 1];
 
@@ -133,7 +122,7 @@
       card.style.opacity = "0.4";
       card.style.transform = "translateY(4px)";
       setTimeout(() => {
-        if (stagePill) stagePill.textContent = `ETAPA ${data.num} / 05`;
+        if (stagePill) stagePill.textContent = `ETAPA ${data.num} / 04`;
         if (stageStatus) stageStatus.textContent = data.status;
         if (stageTitle) stageTitle.textContent = data.title;
         if (stageDesc) stageDesc.textContent = data.desc;
@@ -147,7 +136,7 @@
     // Actualizar Texto del Hub Central
     if (hubStage) {
       hubStage.textContent = data.short;
-      hubStage.style.color = stepNum === 5 ? "#16a34a" : "var(--fg)";
+      hubStage.style.color = stepNum === 4 ? "#16a34a" : "var(--fg)";
     }
 
     // Actualizar Progreso del Círculo (stroke-dashoffset)
@@ -155,13 +144,12 @@
     progressCircle.style.strokeDashoffset = targetOffset.toFixed(1);
 
     // Mover el Camión sobre la Circunferencia
-    // Para el paso 5 ("El círculo se cierra"), movemos el camión a 360° para completar el giro
-    const truckAngle = stepNum === 5 ? 360 : data.angle;
+    const truckAngle = stepNum === 4 ? 360 : data.angle;
     truck.style.transform = `translate(-50%, -50%) rotate(${truckAngle}deg) translateY(calc(-1 * var(--radius, 190px)))`;
 
-    // Cambiar imagen de camión en llegada (paso 5)
+    // Cambiar imagen de camión en llegada (paso 4)
     if (truckImg) {
-      if (stepNum === 5) {
+      if (stepNum === 4) {
         truckImg.src = "/img/delivery-truck-end.svg";
       } else {
         truckImg.src = "/img/delivery-truck-start.svg";
@@ -186,7 +174,7 @@
       node.classList.remove("is-active", "is-passed", "is-closing");
       if (nodeStep === stepNum) {
         node.classList.add("is-active");
-        if (stepNum === 5) node.classList.add("is-closing");
+        if (stepNum === 4) node.classList.add("is-closing");
       } else if (nodeStep < stepNum) {
         node.classList.add("is-passed");
       }
@@ -201,7 +189,7 @@
   // 3. Control de Autoplay
   function stepForward() {
     let next = currentStep + 1;
-    if (next > 5) next = 1;
+    if (next > 4) next = 1;
     selectCircleStep(next, false);
   }
 

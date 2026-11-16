@@ -382,7 +382,115 @@ public class PublicController {
       }
     }
     model.addAttribute("ranking", ranking);
+    List<Map<String, Object>> todasNovedades = obtenerNovedades();
+    model.addAttribute(
+        "novedadesDestacadas", todasNovedades.subList(0, Math.min(3, todasNovedades.size())));
     return "public/index";
+  }
+
+  @GetMapping("/novedades")
+  public String novedades(
+      @RequestParam(value = "q", required = false) String busqueda,
+      @RequestParam(value = "categoria", required = false) String categoria,
+      @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+      Model model) {
+    List<Map<String, Object>> todas = obtenerNovedades();
+    List<Map<String, Object>> filtradas = new ArrayList<>();
+    String qLower = busqueda != null ? busqueda.trim().toLowerCase() : "";
+    String catLower = categoria != null ? categoria.trim().toLowerCase() : "";
+
+    for (Map<String, Object> item : todas) {
+      String titulo = String.valueOf(item.getOrDefault("titulo", "")).toLowerCase();
+      String resumen = String.valueOf(item.getOrDefault("resumen", "")).toLowerCase();
+      String cat = String.valueOf(item.getOrDefault("categoria", "")).toLowerCase();
+      boolean matchQ = qLower.isBlank() || titulo.contains(qLower) || resumen.contains(qLower);
+      boolean matchC = catLower.isBlank() || cat.equals(catLower);
+      if (matchQ && matchC) {
+        filtradas.add(item);
+      }
+    }
+
+    int pageSize = 6;
+    int totalItems = filtradas.size();
+    int totalPaginas = Math.max(1, (int) Math.ceil((double) totalItems / pageSize));
+    int paginaActual = Math.max(1, Math.min(page, totalPaginas));
+    int fromIndex = Math.min((paginaActual - 1) * pageSize, totalItems);
+    int toIndex = Math.min(fromIndex + pageSize, totalItems);
+
+    model.addAttribute("novedades", filtradas.subList(fromIndex, toIndex));
+    model.addAttribute("totalResultados", totalItems);
+    model.addAttribute("paginaActual", paginaActual);
+    model.addAttribute("totalPaginas", totalPaginas);
+    model.addAttribute("busqueda", busqueda != null ? busqueda : "");
+    model.addAttribute("categoriaSeleccionada", categoria != null ? categoria : "");
+    return "public/novedades";
+  }
+
+  private List<Map<String, Object>> obtenerNovedades() {
+    return List.of(
+        Map.of(
+            "id", "nov-1",
+            "titulo", "X Jornada Mundial de los Pobres: una invitación a ser refugio y construir comunidad",
+            "fecha", "noviembre 15, 2026",
+            "categoria", "Comunidad",
+            "resumen", "El domingo 15 de noviembre, las redes solidarias acompañan la décima edición de la Jornada Mundial fortaleciendo comedores y centros comunitarios con logística trazable...",
+            "contenido", "El domingo 15 de noviembre, la red de organizaciones comunitarias y voluntarios de DonaTrack se suma a la X Jornada Mundial de los Pobres bajo el lema de ser refugio y construir comunidad. A través de nuestra plataforma se coordinaron más de 180 despachos de alimentos no perecederos, kits de abrigo y elementos escolares hacia 42 comedores del AMBA, Córdoba y Mendoza, con remitos digitales verificados al pie del camión."),
+        Map.of(
+            "id", "nov-2",
+            "titulo", "Campaña de Acopio Invernal 2026: más de 4.500 frazadas y camperas entregadas",
+            "fecha", "noviembre 11, 2026",
+            "categoria", "Campañas",
+            "resumen", "La movilización solidaria de donantes particulares y empresas textiles tuvo un impacto muy profundo en los 18 hogares de niñez alcanzados por la red...",
+            "contenido", "Gracias al aporte coordinado entre donantes individuales, empresas textiles y flotas voluntarias, la Campaña de Acopio Invernal alcanzó un récord de 4.500 prendas clasificadas por talle. Cada bulto fue escaneado en los centros de acopio y entregado con fotografía certificada en los hogares de niñez de La Matanza, Quilmes y Gran Córdoba."),
+        Map.of(
+            "id", "nov-3",
+            "titulo", "Nuevo Convenio con Flotas Logísticas Regionales para Acelerar Repartos",
+            "fecha", "noviembre 8, 2026",
+            "categoria", "Logística",
+            "resumen", "Estamos ampliando la capacidad operativa de traslado solidario para reducir a menos de 48 horas la entrega desde el depósito hacia cada organización beneficiaria...",
+            "contenido", "DonaTrack firmó un nuevo acuerdo de colaboración con transportistas regionales certificados para cubrir rutas troncales hacia comedores y escuelas rurales del interior. Los vehículos incorporan confirmación digital de descarga y trazabilidad de cada parada en tiempo real."),
+        Map.of(
+            "id", "nov-4",
+            "titulo", "Red Federal de Comedores: 128 organizaciones auditadas en todo el país",
+            "fecha", "octubre 29, 2026",
+            "categoria", "Institucional",
+            "resumen", "Desde la coordinación nacional celebramos la incorporación de 24 nuevos merenderos y centros barriales tras superar el proceso de verificación institucional...",
+            "contenido", "Con la incorporación de 24 nuevas entidades durante octubre, la red DonaTrack supera las 128 organizaciones beneficiarias con personería verificada. El proceso garantiza a cada donante que su aporte llega directamente a espacios comunitarios activos y con necesidades declaradas."),
+        Map.of(
+            "id", "nov-5",
+            "titulo", "Encuentro Anual de Coordinadores y Voluntarios Logísticos en CABA y La Plata",
+            "fecha", "octubre 22, 2026",
+            "categoria", "Comunidad",
+            "resumen", "Referentes de más de 50 organizaciones sociales compartieron buenas prácticas de clasificación bromatológica, seguridad alimentaria y recepción en sede...",
+            "contenido", "Durante dos jornadas de capacitación en los hubs de Centro y La Plata, más de 140 referentes y voluntarios repasaron protocolos de control bromatológico, estiba de mercadería seca y registro digital de remitos mediante la aplicación móvil de DonaTrack."),
+        Map.of(
+            "id", "nov-6",
+            "titulo", "Programa Escuelas Rurales: equipamiento de pupitres y kits didácticos en Mendoza",
+            "fecha", "octubre 21, 2026",
+            "categoria", "Educación",
+            "resumen", "Se completaron 36 entregas de mobiliario escolar recuperado y mochilas completas para establecimientos rurales de Lavalle y San Rafael...",
+            "contenido", "En articulación con equipos técnicos universitarios y transportistas solidarios, logramos equipar cuatro escuelas rurales de Mendoza con bancos, pizarrones restaurados y útiles completos para el ciclo lectivo."),
+        Map.of(
+            "id", "nov-7",
+            "titulo", "Donaciones Corporativas Trazables: guía para empresas con excedentes responsables",
+            "fecha", "septiembre 11, 2026",
+            "categoria", "Institucional",
+            "resumen", "Cada vez más pymes y compañías eligen canalizar sus excedentes inventariados mediante reportes auditados y certificados de entrega en destino...",
+            "contenido", "El nuevo módulo de carga masiva y certificación digital permite a comercios, distribuidoras e industrias donar lotes no perecederos antes de su vencimiento y recibir un historial consolidado con cada remito firmado por las organizaciones receptoras."),
+        Map.of(
+            "id", "nov-8",
+            "titulo", "DonaTrack en la Semana Social 2026: construyendo puentes hacia el bien común",
+            "fecha", "septiembre 10, 2026",
+            "categoria", "Comunidad",
+            "resumen", "Con un fuerte compromiso territorial, participamos de las mesas de innovación social mostrando el modelo de trazabilidad 100% abierta para donaciones...",
+            "contenido", "Durante la Semana Social 2026 presentamos los indicadores abiertos de transparencia y el algoritmo dual de matchmaking que prioriza la urgencia alimentaria y la equidad distributiva entre comedores sub-atendidos."),
+        Map.of(
+            "id", "nov-9",
+            "titulo", "Reconocimiento a la Transparencia Cívica en Plataformas de Ayuda Directa",
+            "fecha", "septiembre 1, 2026",
+            "categoria", "Institucional",
+            "resumen", "El sistema de seguimiento público por código de remito #DT-XXXX y comprobante fotográfico recibió una distinción por su impacto en la confianza donante...",
+            "contenido", "La arquitectura abierta de DonaTrack, que vincula el registro físico en depósito, el ruteo optimizado y la confirmación fotográfica al pie del camión, fue destacada como referente en trazabilidad comunitaria sin intermediarios."));
   }
 
   private String resolverNombrePublico(

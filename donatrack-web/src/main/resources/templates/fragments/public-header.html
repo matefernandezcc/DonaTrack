@@ -9,10 +9,11 @@
 
     <nav class="nav__links" aria-label="Navegación principal">
       <a th:href="@{/#recorrido}">Recorrido</a>
-      <a th:href="@{/#que-donar}">Qué donar</a>
-      <a th:href="@{/#impacto}">Impacto</a>
+      <a th:href="@{/#que-donar}">Cómo participar</a>
+      <a th:href="@{/#impacto}">Nuestro Aporte</a>
       <a th:href="@{/#mapa}">Mapa solidario</a>
       <a th:href="@{/#campanas}">Campañas</a>
+      <a th:href="@{/novedades}">Novedades</a>
     </nav>
 
     <div class="nav__cta">
@@ -34,8 +35,7 @@
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
       </button>
-      <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
-      <a th:href="@{/login}" class="btn btn--primary btn--sm">Comenzar</a>
+      <a th:href="@{/login}" class="btn btn--primary btn--sm">Donar</a>
       <button class="nav__burger" id="nav-burger" aria-label="Abrir menú" aria-expanded="false"
         aria-controls="nav-drawer">
         <span></span><span></span><span></span>
@@ -45,14 +45,15 @@
 
   <div class="nav__drawer" id="nav-drawer" hidden>
     <a th:href="@{/#recorrido}">Recorrido</a>
-    <a th:href="@{/#que-donar}">Qué donar</a>
-    <a th:href="@{/#impacto}">Impacto</a>
+    <a th:href="@{/#que-donar}">Cómo participar</a>
+    <a th:href="@{/#impacto}">Nuestro Aporte</a>
     <a th:href="@{/#mapa}">Mapa solidario</a>
     <a th:href="@{/#campanas}">Campañas</a>
+    <a th:href="@{/novedades}">Novedades</a>
     <a th:href="@{/#historias}">Historias reales</a>
     <a th:href="@{/#faq}">Preguntas frecuentes</a>
     <a th:href="@{/#registro}">Sumate</a>
-    <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
+    <a th:href="@{/login}" class="btn btn--primary">Donar</a>
   </div>
 </header>
 </html>
