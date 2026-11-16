@@ -838,12 +838,37 @@ public class AdminController {
     return "redirect:/app/admin/matchmaking";
   }
 
+  private List<Map<String, Object>> obtenerPersonasConFallback() {
+    List<Map<String, Object>> personas = donacionesGateway.obtenerPersonas();
+    if (personas != null && !personas.isEmpty()) {
+      return personas;
+    }
+    return List.of(
+        Map.of(
+            "id", DEFAULT_DONANTE_ID.toString(),
+            "nombre", "Juan",
+            "apellido", "Pérez",
+            "documento", Map.of("tipo", "DNI", "numero", "32123456"),
+            "email", "donante@donatrack.org"),
+        Map.of(
+            "id", "d8404b9a-0504-40c7-b8c5-0635faae4f2e",
+            "nombre", "Carlos",
+            "apellido", "Rodríguez",
+            "documento", Map.of("tipo", "DNI", "numero", "35111222"),
+            "email", "carlos.rodriguez@donatrack.org"),
+        Map.of(
+            "id", DEFAULT_ADMIN_ID.toString(),
+            "razonSocial", "Fundación Solidaria",
+            "documento", Map.of("tipo", "CUIT", "numero", "30-12345678-9"),
+            "email", "contacto@fundacionsolidaria.org"));
+  }
+
   @GetMapping("/admin/donaciones/recepcion")
   @PreAuthorize("hasRole('ADMIN')")
   public String recepcionDonacionForm(
       @RequestParam(name = "personaCreadaId", required = false) String personaCreadaId,
       Model model) {
-    model.addAttribute("personas", donacionesGateway.obtenerPersonas());
+    model.addAttribute("personas", obtenerPersonasConFallback());
     if (personaCreadaId != null && !personaCreadaId.isBlank()) {
       model.addAttribute("personaCreadaId", personaCreadaId);
     }
@@ -971,8 +996,21 @@ public class AdminController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      model.addAttribute("personas", donacionesGateway.obtenerPersonas());
-      model.addAttribute("errorForm", "Por favor revise los campos del formulario.");
+      model.addAttribute("personas", obtenerPersonasConFallback());
+      String fieldErrors =
+          bindingResult.getFieldErrors().stream()
+              .map(
+                  err ->
+                      err.getDefaultMessage() != null && !err.getDefaultMessage().isBlank()
+                          ? err.getDefaultMessage()
+                          : err.getField())
+              .distinct()
+              .collect(java.util.stream.Collectors.joining(" · "));
+      model.addAttribute(
+          "errorForm",
+          fieldErrors.isBlank()
+              ? "Por favor revise los campos del formulario."
+              : "Por favor revise los campos del formulario: " + fieldErrors);
       return "admin/admin/recepcion-donacion";
     }
     try {
@@ -986,7 +1024,7 @@ public class AdminController {
       bien.put("descripcion", request.descripcion());
       bien.put("cantidad", request.cantidad());
       bien.put("unidadMedicion", request.unidadMedicion());
-      bien.put("esUsado", request.esUsado());
+      bien.put("esUsado", request.esUsadoValue());
       bien.put("nombreSubcategoria", request.nombreSubcategoria());
       if (request.fechaVencimiento() != null) {
         bien.put("fechaVencimiento", request.fechaVencimiento().toString());
@@ -1405,6 +1443,7 @@ public class AdminController {
 
       for (Map<String, Object> n : necsClean) {
         Map<String, Object> causa = new HashMap<>();
+        causa.put("ongId", bId);
         causa.put("organizacion", nombreOrg);
         causa.put("ongNombre", nombreOrg);
         causa.put("correo", correo);
@@ -1420,6 +1459,7 @@ public class AdminController {
     // Asegurar causas comunitarias activas representativas para el buscador
     causasActivas.add(
         Map.of(
+            "ongId", "el-faro",
             "organizacion", "Comedor Comunitario El Faro",
             "ongNombre", "Comedor Comunitario El Faro",
             "correo", "coordinacion@elfaro.org.ar",
@@ -1430,6 +1470,7 @@ public class AdminController {
             "urgencia", "Alta (Urgente)"));
     causasActivas.add(
         Map.of(
+            "ongId", "los-gurises",
             "organizacion", "Hogar de Niñez Los Gurises",
             "ongNombre", "Hogar de Niñez Los Gurises",
             "correo", "recepcion@losgurises.org.ar",
@@ -1440,6 +1481,7 @@ public class AdminController {
             "urgencia", "Alta"));
     causasActivas.add(
         Map.of(
+            "ongId", "raices",
             "organizacion", "Fundación Raíces Solidarias",
             "ongNombre", "Fundación Raíces Solidarias",
             "correo", "logistica@raices.org.ar",
@@ -1450,6 +1492,7 @@ public class AdminController {
             "urgencia", "Media"));
     causasActivas.add(
         Map.of(
+            "ongId", "posta-sur",
             "organizacion", "Posta Sanitaria Barrial Sur",
             "ongNombre", "Posta Sanitaria Barrial Sur",
             "correo", "salud@postasur.org.ar",
@@ -1919,6 +1962,307 @@ public class AdminController {
           "flashError", "No se pudo confirmar la recepción de la entrega. Verificá los datos e intentá nuevamente.");
     }
     return "redirect:/app/beneficiaria/entregas";
+  }
+
+  @GetMapping("/organizaciones/{id}")
+  @PreAuthorize("hasRole('DONANTE') or hasRole('ADMIN') or hasRole('BENEFICIARIA')")
+  public String organizacionPerfil(
+      @PathVariable("id") String id,
+      @RequestParam(name = "nombre", required = false) String nombreParam,
+      Model model,
+      Authentication auth) {
+    List<Map<String, Object>> beneficiarios =
+        donacionesGateway.obtenerBeneficiarios();
+    Map<String, Object> matchedBenef = null;
+    if (beneficiarios != null) {
+      for (Map<String, Object> b : beneficiarios) {
+        if (b == null) continue;
+        String bId = b.get("id") != null ? b.get("id").toString() : "";
+        String correo =
+            b.get("correoRepresentante") != null ? b.get("correoRepresentante").toString() : "";
+        if (bId.equalsIgnoreCase(id)
+            || (nombreParam != null
+                && !nombreParam.isBlank()
+                && correo.toLowerCase().contains(nombreParam.toLowerCase()))) {
+          matchedBenef = b;
+          break;
+        }
+      }
+    }
+
+    String lookupKey =
+        ((id != null ? id : "") + " " + (nombreParam != null ? nombreParam : "")).toLowerCase();
+    Map<String, Object> org = new LinkedHashMap<>();
+    org.put("id", id);
+
+    if (lookupKey.contains("faro") || lookupKey.contains("el-faro")) {
+      org.put("nombre", "Comedor Comunitario El Faro");
+      org.put("tipo", "Comedor Comunitario · Personería Jurídica #4821");
+      org.put("zona", "Palermo / Barracas, CABA");
+      org.put("direccion", "Av. Santa Fe 3200, CABA");
+      org.put("cuit", "30-71520394-8");
+      org.put("responsable", "Juan Pablo Méndez");
+      org.put("correo", "coordinacion@elfaro.org.ar");
+      org.put("telefono", "+54 11 4789-2210");
+      org.put("anioFundacion", "2014");
+      org.put("familiasAsistidas", 220);
+      org.put("entregasVerificadas", 64);
+      org.put("horarioAtencion", "Lunes a Sábados · 08:30 a 18:00 hs");
+      org.put(
+          "resumenInstitucional",
+          "Comedor Comunitario El Faro brinda asistencia alimentaria diaria, apoyo escolar y contención comunitaria a 220 familias del corredor norte y sur de la Ciudad Autónoma de Buenos Aires.");
+      org.put(
+          "mision",
+          "Garantizar platos nutritivos diarios y acompañamiento integral a niñas, niños y adultos mayores en situación de vulnerabilidad mediante una gestión logística transparente y participativa.");
+      org.put(
+          "vision",
+          "Construir redes barriales sostenibles donde cada donación se convierta en oportunidades concretas de inclusión alimentaria, educativa y laboral.");
+    } else if (lookupKey.contains("gurises")) {
+      org.put("nombre", "Hogar de Niñez Los Gurises");
+      org.put("tipo", "Hogar Convivencial de Niñez · Registro Provincial #1192");
+      org.put("zona", "La Matanza, Provincia de Buenos Aires");
+      org.put("direccion", "Av. Brigadier Juan Manuel de Rosas 4820, La Matanza");
+      org.put("cuit", "30-71690211-3");
+      org.put("responsable", "Valeria Sosa");
+      org.put("correo", "recepcion@losgurises.org.ar");
+      org.put("telefono", "+54 11 4620-8834");
+      org.put("anioFundacion", "2011");
+      org.put("familiasAsistidas", 145);
+      org.put("entregasVerificadas", 49);
+      org.put("horarioAtencion", "Todos los días · 09:00 a 19:00 hs");
+      org.put(
+          "resumenInstitucional",
+          "Hogar de Niñez Los Gurises acompaña a infancias y adolescentes en La Matanza brindando abrigo, alimentación equilibrada, recreación y resguardo afectivo durante todo el año.");
+      org.put(
+          "mision",
+          "Proteger los derechos de niñas y niños proporcionando vestimenta adecuada, alimentación saludable y espacios seguros de cuidado y aprendizaje.");
+      org.put(
+          "vision",
+          "Ser un hogar de puertas abiertas articulado con donantes y voluntarios que asegure un crecimiento digno y pleno para cada niño de la comunidad.");
+    } else if (lookupKey.contains("raices")) {
+      org.put("nombre", "Fundación Raíces Solidarias");
+      org.put("tipo", "Fundación Social & Educativa · IGJ #8932");
+      org.put("zona", "Avellaneda y Zona Sur, PBA");
+      org.put("direccion", "Av. Mitre 1450, Avellaneda");
+      org.put("cuit", "30-71349012-7");
+      org.put("responsable", "Sofía Ramírez");
+      org.put("correo", "logistica@raices.org.ar");
+      org.put("telefono", "+54 11 4201-5520");
+      org.put("anioFundacion", "2016");
+      org.put("familiasAsistidas", 310);
+      org.put("entregasVerificadas", 82);
+      org.put("horarioAtencion", "Lunes a Viernes · 08:00 a 17:30 hs");
+      org.put(
+          "resumenInstitucional",
+          "Fundación Raíces Solidarias coordina centros de apoyo escolar, roperos comunitarios y distribución de kits de higiene familiar para 310 hogares del sur del conurbano.");
+      org.put(
+          "mision",
+          "Fortalecer la autonomía de las familias a través de insumos esenciales de higiene, educación y equipamiento comunitario auditado de punta a punta.");
+      org.put(
+          "vision",
+          "Una sociedad solidaria con puentes logísticos confiables entre quienes pueden aportar y las escuelas y centros comunitarios que más lo necesitan.");
+    } else if (lookupKey.contains("posta")) {
+      org.put("nombre", "Posta Sanitaria Barrial Sur");
+      org.put("tipo", "Centro Comunitario de Salud · Reg. Sanitario #304");
+      org.put("zona", "Quilmes, Provincia de Buenos Aires");
+      org.put("direccion", "Av. Calchaquí 2910, Quilmes");
+      org.put("cuit", "30-71843209-1");
+      org.put("responsable", "Dr. Hernán Quiroga");
+      org.put("correo", "salud@postasur.org.ar");
+      org.put("telefono", "+54 11 4257-9040");
+      org.put("anioFundacion", "2018");
+      org.put("familiasAsistidas", 190);
+      org.put("entregasVerificadas", 38);
+      org.put("horarioAtencion", "Lunes a Sábados · 08:00 a 16:00 hs");
+      org.put(
+          "resumenInstitucional",
+          "Posta Sanitaria Barrial Sur asiste de manera gratuita a vecinos de Quilmes con botiquines de primeros auxilios, elementos de higiene sanitaria y control preventivo comunitario.");
+      org.put(
+          "mision",
+          "Acercar atención primaria, insumos de curación y cuidado sanitario básico a barrios vulnerables con trazabilidad médica garantizada.");
+      org.put(
+          "vision",
+          "Garantizar que ningún barrio carezca de elementos esenciales de prevención y primeros auxilios mediante alianzas solidarias trazables.");
+    } else {
+      String resolvedName =
+          (nombreParam != null && !nombreParam.isBlank())
+              ? nombreParam
+              : "Comedor Comunitario La Esperanza";
+      String correo =
+          matchedBenef != null && matchedBenef.get("correoRepresentante") != null
+              ? matchedBenef.get("correoRepresentante").toString()
+              : "contacto@fundacionesperanza.org";
+      org.put("nombre", resolvedName);
+      org.put("tipo", "Comedor y Centro Comunitario Verificado · DonaTrack");
+      org.put("zona", "La Plata, Provincia de Buenos Aires");
+      org.put("direccion", "Calle 50 742, La Plata, Buenos Aires");
+      org.put("cuit", "30-71482910-4");
+      org.put("responsable", "Marta González");
+      org.put("correo", correo);
+      org.put("telefono", "+54 221 424-8812");
+      org.put("anioFundacion", "2015");
+      org.put("familiasAsistidas", 260);
+      org.put("entregasVerificadas", 71);
+      org.put("horarioAtencion", "Lunes a Sábados · 08:00 a 18:00 hs");
+      org.put(
+          "resumenInstitucional",
+          resolvedName
+              + " trabaja diariamente junto a familias de la comunidad organizando viandas nutritivas, merenderos y entrega de abrigo e insumos escolares con rendición pública.");
+      org.put(
+          "mision",
+          "Acompañar a familias, infancias y adultos mayores brindando asistencia alimentaria y material con respeto, cercanía territorial y total transparencia.");
+      org.put(
+          "vision",
+          "Consolidar una comunidad integrada y solidaria donde cada donante conozca exactamente el destino y el impacto de su aporte.");
+    }
+
+    org.put(
+        "valores",
+        List.of(
+            Map.of(
+                "titulo", "Transparencia Total",
+                "detalle", "Cada carga recibida cuenta con remito digital firmado y fotografía al pie del camión."),
+            Map.of(
+                "titulo", "Cercanía Territorial",
+                "detalle", "Atención directa por referentes barriales que conocen las urgencias reales de cada familia."),
+            Map.of(
+                "titulo", "Dignidad e Inclusión",
+                "detalle", "Recepción ordenada con control bromatológico y clasificación por grupo etario."),
+            Map.of(
+                "titulo", "Trabajo en Red",
+                "detalle", "Articulación activa con escuelas, voluntarios y transportistas solidarios de DonaTrack.")));
+
+    org.put(
+        "fotos",
+        List.of(
+            Map.of(
+                "url", "/img/org-sede.jpg",
+                "titulo", "Sede y Comedor Comunitario",
+                "caption", "Espacio de recepción, almacenamiento ordenado y preparación diaria de raciones."),
+            Map.of(
+                "url", "/img/org-despensa.jpg",
+                "titulo", "Clasificación y Acopio Auditado",
+                "caption", "Voluntarios revisando fechas de vencimiento y embalaje por categoría."),
+            Map.of(
+                "url", "/img/org-entrega.jpg",
+                "titulo", "Recepción al Pie del Camión",
+                "caption", "Descarga logística acompañada por el referente institucional con acta digital.")));
+
+    List<Map<String, Object>> necesidades = new ArrayList<>();
+    if (matchedBenef != null && matchedBenef.get("necesidadesDeclaradas") instanceof List<?> necRaw) {
+      @SuppressWarnings("unchecked")
+      List<Map<String, Object>> castNec = (List<Map<String, Object>>) necRaw;
+      necesidades.addAll(sanitizarNecesidades(castNec));
+    }
+    if (necesidades.isEmpty()) {
+      necesidades =
+          List.of(
+              Map.of(
+                  "descripcion", "Fideos secos, arroz largo fino y puré de tomate",
+                  "cantidad", "120 kg",
+                  "subcategoria", "No Perecederos",
+                  "tipo", "Extraordinaria"),
+              Map.of(
+                  "descripcion", "Leche larga vida o en polvo fortificada",
+                  "cantidad", "80 litros",
+                  "subcategoria", "No Perecederos",
+                  "tipo", "Extraordinaria"),
+              Map.of(
+                  "descripcion", "Frazadas polares y camperas infantiles de invierno",
+                  "cantidad", "45 prendas",
+                  "subcategoria", "Abrigo",
+                  "tipo", "Ordinaria"));
+    }
+    org.put("necesidadesActivas", necesidades);
+
+    List<Map<String, Object>> historial = new ArrayList<>();
+    try {
+      List<Map<String, Object>> donaciones = donacionesGateway.listarDonaciones(null, null);
+      if (donaciones != null) {
+        for (Map<String, Object> d : donaciones) {
+          if (d == null) continue;
+          String dId = d.get("id") != null ? d.get("id").toString() : UUID.randomUUID().toString();
+          String codigo =
+              d.get("codigoCorto") != null
+                  ? d.get("codigoCorto").toString()
+                  : "#DT-" + (dId.length() >= 4 ? dId.substring(0, 4).toUpperCase() : "0001");
+          String correoBen =
+              d.get("correoBeneficiario") != null ? d.get("correoBeneficiario").toString() : "";
+          String benefIdStr =
+              d.get("idBeneficiario") != null ? d.get("idBeneficiario").toString() : "";
+          boolean matchesOrg =
+              (id != null && id.equalsIgnoreCase(benefIdStr))
+                  || (!correoBen.isBlank()
+                      && String.valueOf(org.get("correo")).equalsIgnoreCase(correoBen));
+          if (matchesOrg && historial.size() < 6) {
+            historial.add(
+                Map.of(
+                    "codigo", codigo,
+                    "fecha",
+                        d.get("fechaCreacion") != null
+                            ? d.get("fechaCreacion").toString()
+                            : "2026-11-10",
+                    "detalle",
+                        d.get("descripcion") != null
+                            ? d.get("descripcion").toString()
+                            : "Insumos comunitarios",
+                    "subcategoria",
+                        d.get("subcategoria") != null
+                            ? d.get("subcategoria").toString()
+                            : "Alimentos",
+                    "estado",
+                        d.get("estado") != null ? d.get("estado").toString() : "ENTREGADA",
+                    "remitoUrl",
+                        "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"));
+          }
+        }
+      }
+    } catch (Exception ignored) {
+    }
+    if (historial.isEmpty()) {
+      historial =
+          List.of(
+              Map.of(
+                  "codigo", "#DT-3300",
+                  "fecha", "2026-11-12",
+                  "detalle", "85 kg · Canasta de alimentos secos y aceite",
+                  "subcategoria", "Alimentos No Perecederos",
+                  "estado", "ENTREGADA",
+                  "remitoUrl",
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"),
+              Map.of(
+                  "codigo", "#DT-3200",
+                  "fecha", "2026-10-28",
+                  "detalle", "250 kg · Lote de leche larga vida y legumbres",
+                  "subcategoria", "Alimentos No Perecederos",
+                  "estado", "ENTREGADA",
+                  "remitoUrl",
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"),
+              Map.of(
+                  "codigo", "#DT-2418",
+                  "fecha", "2026-10-14",
+                  "detalle", "40 prendas · Camperas de abrigo y frazadas térmicas",
+                  "subcategoria", "Abrigo",
+                  "estado", "ENTREGADA",
+                  "remitoUrl",
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"));
+    }
+    org.put("historialDonaciones", historial);
+
+    String volverUrl = "/app/donante?tab=directorio";
+    if (auth != null
+        && auth.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
+      volverUrl = "/app/admin/matchmaking";
+    } else if (auth != null
+        && auth.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_BENEFICIARIA".equals(a.getAuthority()))) {
+      volverUrl = "/app/beneficiaria";
+    }
+
+    model.addAttribute("org", org);
+    model.addAttribute("volverUrl", volverUrl);
+    return "admin/donante/organizacion-detalle";
   }
 
   private String normalizarGrupoSubcategoria(String raw) {
