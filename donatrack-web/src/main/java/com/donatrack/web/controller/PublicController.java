@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -197,7 +198,7 @@ public class PublicController {
                 if (compObj instanceof Map<?, ?> compMap) {
                   Map<String, Object> compSanitizado = new HashMap<>();
                   compMap.forEach((k, v) -> compSanitizado.put(String.valueOf(k), v));
-                  String defaultRemito = "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp";
+                  String defaultRemito = "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp";
                   if (compMap.get("fotos") instanceof List<?> fotosList) {
                     List<String> fotosSanitizadas = new ArrayList<>();
                     for (Object f : fotosList) {
@@ -205,6 +206,7 @@ public class PublicController {
                         String fStr = f.toString().trim();
                         if (fStr.contains("storage.donatrack.org")
                             || fStr.endsWith(".pdf")
+                            || fStr.contains("remito-3300")
                             || fStr.contains("remito-3200")
                             || fStr.contains("remito-lp-742")
                             || fStr.contains("remito-verificado-app.jpeg")) {
@@ -533,7 +535,7 @@ public class PublicController {
 
         redirectAttributes.addFlashAttribute(
             "registerSuccess",
-            "Solicitud institucional registrada con éxito. Su cuenta se encuentra en revisión ('BENEFICIARIA_PENDIENTE') para verificación de personería jurídica. Le notificaremos por correo electrónico una vez habilitada.");
+            "Solicitud institucional registrada con éxito. Su cuenta se encuentra en revisión para verificación de personería jurídica. Le notificaremos por correo electrónico una vez habilitada.");
         return "redirect:/login";
       }
 
@@ -551,8 +553,12 @@ public class PublicController {
       return "redirect:/app/" + rol.toLowerCase();
     } catch (Exception e) {
       log.warn("Fallo al registrar usuario {}: {}", username, e.getMessage());
-      redirectAttributes.addFlashAttribute(
-          "registerError", "No se pudo crear la cuenta: " + e.getMessage());
+      String rawMsg = e.getMessage();
+      String friendlyMsg =
+          esMensajeTecnico(rawMsg)
+              ? "Algo ha salido mal, intentalo de nuevo en unos minutos..."
+              : "No se pudo crear la cuenta: " + rawMsg;
+      redirectAttributes.addFlashAttribute("registerError", friendlyMsg);
       return "redirect:/registro";
     }
   }
@@ -562,6 +568,37 @@ public class PublicController {
   public ResponseEntity<?> registrarSolicitudOng(@RequestBody Map<String, String> body) {
     try {
       var solicitud = solicitudOngService.registrarSolicitud(body);
+      if (donacionesGateway != null) {
+        try {
+          donacionesGateway.registrarSolicitudOng(body);
+        } catch (Exception ignored) {
+        }
+      }
+      if (authGateway != null) {
+        String email = body.getOrDefault("email", "").trim();
+        String nombre =
+            body.getOrDefault("nombreOng", body.getOrDefault("nombreOrganizacion", "Organización"))
+                .trim();
+        if (!email.isEmpty()) {
+          String username =
+              body.getOrDefault("username", email.split("@")[0].replaceAll("[^a-zA-Z0-9_.-]", ""))
+                  .trim();
+          String password = body.get("password");
+          if (password == null || password.isBlank()) {
+            password = "DonaTrack!" + UUID.randomUUID().toString().substring(0, 8);
+          }
+          try {
+            authGateway.registrar(
+                Map.of(
+                    "nombre", nombre.isEmpty() ? "Organización" : nombre,
+                    "username", username.isEmpty() ? email : username,
+                    "email", email,
+                    "password", password,
+                    "rol", "BENEFICIARIA_PENDIENTE"));
+          } catch (Exception ignored) {
+          }
+        }
+      }
       return ResponseEntity.ok(
           Map.of(
               "ok",
@@ -571,8 +608,29 @@ public class PublicController {
               "id",
               solicitud.id()));
     } catch (Exception e) {
-      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+      String rawMsg = e.getMessage();
+      String errorMsg =
+          esMensajeTecnico(rawMsg)
+              ? "Algo ha salido mal, intentalo de nuevo en unos minutos..."
+              : rawMsg;
+      return ResponseEntity.badRequest().body(Map.of("error", errorMsg));
     }
+  }
+
+  private boolean esMensajeTecnico(String msg) {
+    if (msg == null || msg.isBlank()) {
+      return true;
+    }
+    String lower = msg.toLowerCase();
+    return lower.contains("http://")
+        || lower.contains("https://")
+        || lower.contains("500")
+        || lower.contains("exception")
+        || lower.contains("connection")
+        || lower.contains("timeout")
+        || lower.contains("restclient")
+        || lower.contains("sql")
+        || lower.contains("{");
   }
 
   @GetMapping("/oauth2/authorization/{provider}")

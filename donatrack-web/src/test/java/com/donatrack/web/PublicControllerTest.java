@@ -439,7 +439,7 @@ class PublicControllerTest {
           .andExpect(
               jsonPath("$.comprobante.fotos[0]")
                   .value(
-                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp"));
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"));
     }
 
     @Test

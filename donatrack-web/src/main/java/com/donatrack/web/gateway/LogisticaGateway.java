@@ -88,6 +88,14 @@ public class LogisticaGateway {
     }
   }
 
+  public void ejecutarPlanificacion() {
+    try {
+      logisticaClient.post().uri("/api/planificacion/ejecutar").retrieve().toBodilessEntity();
+    } catch (Exception e) {
+      log.warn("No se pudo ejecutar la planificación inmediata en logística: {}", e.getMessage());
+    }
+  }
+
   public void confirmarEntrega(UUID idDonacion, List<String> fotos, String patenteCamion) {
     Map<String, Object> body =
         Map.of(

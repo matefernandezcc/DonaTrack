@@ -57,6 +57,9 @@ public class AdminController {
   private final com.donatrack.web.gateway.AuthGateway authGateway;
   private final com.donatrack.web.service.SolicitudOngService solicitudOngService;
 
+  @Autowired(required = false)
+  private com.donatrack.web.service.CacheResilienteService cacheResilienteService;
+
   public AdminController(
       LogisticaGateway logisticaGateway,
       IncentivosGateway incentivosGateway,
@@ -794,6 +797,13 @@ public class AdminController {
       RedirectAttributes redirectAttributes) {
     try {
       donacionesGateway.asignarDonacion(donacionId, beneficiarioId);
+      try {
+        logisticaGateway.ejecutarPlanificacion();
+      } catch (Exception ignored) {
+      }
+      if (cacheResilienteService != null) {
+        cacheResilienteService.invalidarCache();
+      }
       String shortCode = "#DT-" + donacionId.toString().substring(0, 4).toUpperCase();
       redirectAttributes.addFlashAttribute(
           "flashOk",
@@ -812,6 +822,13 @@ public class AdminController {
   public String ejecutarBatchMatchmaking(RedirectAttributes redirectAttributes) {
     try {
       donacionesGateway.ejecutarMatchmakingBatch();
+      try {
+        logisticaGateway.ejecutarPlanificacion();
+      } catch (Exception ignored) {
+      }
+      if (cacheResilienteService != null) {
+        cacheResilienteService.invalidarCache();
+      }
       redirectAttributes.addFlashAttribute(
           "flashOk", "Asignación automática completada exitosamente.");
     } catch (Exception e) {
@@ -1599,7 +1616,7 @@ public class AdminController {
     Map<String, Map<String, Object>> enCaminoMap = new LinkedHashMap<>();
     Map<String, Map<String, Object>> recibidasMap = new LinkedHashMap<>();
     String defaultRemito =
-        "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp";
+        "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp";
 
     if (rutas != null) {
       for (Map<String, Object> r : rutas) {
@@ -1693,6 +1710,7 @@ public class AdminController {
                         String fStr = f.toString().trim();
                         if (fStr.contains("storage.donatrack.org")
                             || fStr.endsWith(".pdf")
+                            || fStr.contains("remito-3300")
                             || fStr.contains("remito-3200")
                             || fStr.contains("remito-lp-742")
                             || fStr.contains("remito-verificado-app.jpeg")) {
@@ -1888,9 +1906,12 @@ public class AdminController {
       }
       if (fotos.isEmpty()) {
         fotos.add(
-            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp");
+            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp");
       }
       logisticaGateway.confirmarEntrega(idDonacion, fotos, patenteCamion);
+      if (cacheResilienteService != null) {
+        cacheResilienteService.invalidarCache();
+      }
       redirectAttributes.addFlashAttribute(
           "flashOk", "Entrega confirmada con éxito.");
     } catch (Exception e) {
