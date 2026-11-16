@@ -19,29 +19,6 @@
           <a th:href="@{/login}" class="btn btn--primary btn--sm">Donar aquí</a>
         </div>
 
-        <!-- Buscador y filtro por categoría (estilo editorial) -->
-        <form th:action="@{/novedades}" method="get"
-              style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--bg-soft); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 32px;">
-          <label for="nov-search-input" class="sr-only">Buscar novedades</label>
-          <input type="search" id="nov-search-input" name="q" th:value="${busqueda}"
-                 placeholder="Buscar artículos, campañas, jornadas..."
-                 style="flex: 1; min-width: 220px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit;" />
-          <label for="nov-cat-select" class="sr-only">Filtrar por categoría</label>
-          <select id="nov-cat-select" name="categoria"
-                  style="min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit;">
-            <option value="">Todas las categorías</option>
-            <option value="Comunidad" th:selected="${categoriaSeleccionada == 'Comunidad'}">Comunidad</option>
-            <option value="Campañas" th:selected="${categoriaSeleccionada == 'Campañas'}">Campañas</option>
-            <option value="Logística" th:selected="${categoriaSeleccionada == 'Logística'}">Logística</option>
-            <option value="Institucional" th:selected="${categoriaSeleccionada == 'Institucional'}">Institucional</option>
-            <option value="Educación" th:selected="${categoriaSeleccionada == 'Educación'}">Educación</option>
-            <option value="Emergencias" th:selected="${categoriaSeleccionada == 'Emergencias'}">Emergencias</option>
-          </select>
-          <button type="submit" class="btn btn--outline" style="--h: 44px; padding: 0 18px; border-radius: 10px;">Buscar</button>
-          <a th:if="${(busqueda != null and !busqueda.isBlank()) or (categoriaSeleccionada != null and !categoriaSeleccionada.isBlank())}"
-             th:href="@{/novedades}" class="btn btn--ghost" style="--h: 44px; padding: 0 14px;">Limpiar</a>
-        </form>
-
         <!-- Grilla de Novedades -->
         <div class="novedades-grid" th:if="${novedades != null and not #lists.isEmpty(novedades)}">
           <article class="novedad-card" th:each="n : ${novedades}">

@@ -124,9 +124,9 @@
             <svg class="dial-svg" viewBox="0 0 540 540" id="dial-svg" aria-hidden="true">
               <defs>
                 <linearGradient id="circleTrackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#0b4a8f" />
-                  <stop offset="50%" stop-color="#0284c7" />
-                  <stop offset="100%" stop-color="#16a34a" />
+                  <stop offset="0%" stop-color="#157a4f" />
+                  <stop offset="50%" stop-color="#16a34a" />
+                  <stop offset="100%" stop-color="#22c55e" />
                 </linearGradient>
               </defs>
 
@@ -141,8 +141,8 @@
               <!-- Track de Progreso Activo -->
               <circle id="dial-progress-circle" cx="270" cy="270" r="190" fill="none"
                       stroke="url(#circleTrackGrad)" stroke-width="6" stroke-linecap="round"
-                      stroke-dasharray="1194" stroke-dashoffset="1194"
-                      transform="rotate(-90 270 270)" style="transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);" />
+                      stroke-dasharray="1193.8" stroke-dashoffset="1193.8"
+                      transform="rotate(-90 270 270)" />
             </svg>
 
             <!-- Hub Central del Dial -->
@@ -648,7 +648,7 @@
               impacto medible.
             </p>
             <div class="access__ctas">
-              <a th:href="@{/registro(rol='DONANTE')}" class="btn btn--primary">Crear cuenta donante</a>
+              <a th:href="@{/registro(rol='DONANTE')}" class="btn btn--primary">Comenzar a donar</a>
               <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
@@ -667,7 +667,6 @@
             <div class="access__ctas">
               <a th:href="@{/registro(rol='BENEFICIARIA')}" class="btn btn--primary">Registrar organización</a>
               <button type="button" onclick="abrirModalSolicitudOng(event)" class="btn btn--ghost" style="cursor: pointer;">Solicitud rápida ONG</button>
-              <a th:href="@{/login}" class="btn btn--ghost">Iniciar sesión</a>
             </div>
           </article>
         </div>

@@ -12,7 +12,7 @@
       status: "Trazabilidad Iniciada",
       origin: "Recepción en depósito",
       points: "+10 Puntos de Impacto",
-      progress: 0.25
+      progress: 0
     },
     {
       num: "02",
@@ -23,7 +23,7 @@
       status: "Lote Auditado",
       origin: "Depósito Central DonaTrack",
       points: "Control de Calidad 100%",
-      progress: 0.50
+      progress: 0.25
     },
     {
       num: "03",
@@ -34,7 +34,7 @@
       status: "Móvil Despachado",
       origin: "Ruta Activa con Chofer",
       points: "Monitoreo Satelital",
-      progress: 0.75
+      progress: 0.50
     },
     {
       num: "04",
@@ -45,14 +45,18 @@
       status: "Entrega Certificada",
       origin: "Comedor Verificado + Remito",
       points: "+25 Puntos de Entrega (35 pts totales)",
-      progress: 1.0
+      progress: 0.75
     }
   ];
 
   let currentStep = 1;
+  let currentAngle = 0;
+  let animFrameId = null;
+  let closingTimeoutId = null;
   let isPlaying = true;
   let autoplayTimer = null;
   const AUTOPLAY_INTERVAL = 3800; // ms
+  const ANIM_DURATION = 700; // ms
 
   const CIRCUMFERENCE = 2 * Math.PI * 190; // ~1193.8
 
@@ -111,7 +115,54 @@
     ticksGroup.innerHTML = svgHtml;
   }
 
-  // 2. Actualizar la vista al paso seleccionado
+  // 2. Sincronizar posición del camión y trazado verde en el dial
+  function applyDialAngle(deg) {
+    currentAngle = deg;
+    truck.style.transform = `translate(-50%, -50%) rotate(${deg.toFixed(2)}deg) translateY(calc(-1 * var(--radius, 190px)))`;
+    // El trazo verde queda unos grados detrás del centro del camión para que éste lo vaya pintando al avanzar
+    const trailDeg = deg <= 0 ? 0 : deg >= 359.5 ? 360 : Math.max(0, deg - 5);
+    const targetOffset = CIRCUMFERENCE * (1 - trailDeg / 360);
+    progressCircle.style.strokeDashoffset = targetOffset.toFixed(1);
+  }
+
+  function cancelDialAnimation() {
+    if (animFrameId !== null) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+    if (closingTimeoutId !== null) {
+      clearTimeout(closingTimeoutId);
+      closingTimeoutId = null;
+    }
+  }
+
+  function animateDialTo(targetAngle, onDone) {
+    cancelDialAnimation();
+    const startAngle = currentAngle;
+    if (prefersReducedMotion || Math.abs(targetAngle - startAngle) < 0.5) {
+      applyDialAngle(targetAngle);
+      if (onDone) onDone();
+      return;
+    }
+
+    const startTime = performance.now();
+    function frame(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(1, elapsed / ANIM_DURATION);
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      applyDialAngle(startAngle + (targetAngle - startAngle) * eased);
+      if (t < 1) {
+        animFrameId = requestAnimationFrame(frame);
+      } else {
+        animFrameId = null;
+        applyDialAngle(targetAngle);
+        if (onDone) onDone();
+      }
+    }
+    animFrameId = requestAnimationFrame(frame);
+  }
+
+  // 3. Actualizar la vista al paso seleccionado
   window.selectCircleStep = function (stepNum, manualClick = true) {
     if (stepNum < 1 || stepNum > 4) return;
     currentStep = stepNum;
@@ -139,21 +190,21 @@
       hubStage.style.color = stepNum === 4 ? "#16a34a" : "var(--fg)";
     }
 
-    // Actualizar Progreso del Círculo (stroke-dashoffset)
-    const targetOffset = CIRCUMFERENCE * (1 - data.progress);
-    progressCircle.style.strokeDashoffset = targetOffset.toFixed(1);
+    // Cambiar imagen del camión antes de moverlo
+    if (truckImg && stepNum < 4) {
+      truckImg.src = "/img/delivery-truck-start.svg";
+    }
 
-    // Mover el Camión sobre la Circunferencia
-    const truckAngle = stepNum === 4 ? 360 : data.angle;
-    truck.style.transform = `translate(-50%, -50%) rotate(${truckAngle}deg) translateY(calc(-1 * var(--radius, 190px)))`;
-
-    // Cambiar imagen de camión en llegada (paso 4)
-    if (truckImg) {
-      if (stepNum === 4) {
-        truckImg.src = "/img/delivery-truck-end.svg";
-      } else {
-        truckImg.src = "/img/delivery-truck-start.svg";
-      }
+    // Mover camión y pintar trazo verde sincronizado frame a frame
+    if (stepNum === 1 && currentAngle >= 270) {
+      cancelDialAnimation();
+      applyDialAngle(0);
+    } else {
+      animateDialTo(data.angle, () => {
+        if (truckImg && stepNum === 4) {
+          truckImg.src = "/img/delivery-truck-end.svg";
+        }
+      });
     }
 
     // Actualizar Pills de Control
@@ -186,11 +237,19 @@
     }
   };
 
-  // 3. Control de Autoplay
+  // 4. Control de Autoplay
   function stepForward() {
-    let next = currentStep + 1;
-    if (next > 4) next = 1;
-    selectCircleStep(next, false);
+    if (currentStep === 4) {
+      if (truckImg) truckImg.src = "/img/delivery-truck-start.svg";
+      animateDialTo(360, () => {
+        closingTimeoutId = setTimeout(() => {
+          applyDialAngle(0);
+          selectCircleStep(1, false);
+        }, 350);
+      });
+      return;
+    }
+    selectCircleStep(currentStep + 1, false);
   }
 
   function startAutoplay() {
