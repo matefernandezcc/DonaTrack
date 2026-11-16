@@ -582,15 +582,25 @@
 
         <div class="novedades-grid" th:if="${novedadesDestacadas != null and not #lists.isEmpty(novedadesDestacadas)}">
           <article class="novedad-card" th:each="nov : ${novedadesDestacadas}">
-            <div>
-              <div class="novedad-card__meta" style="margin-bottom: 10px;">
-                <span class="pill pill--blue" th:text="${nov['categoria']}">Comunidad</span>
+            <a class="novedad-card__media" th:href="@{/novedades/{id}(id=${nov['id']})}">
+              <img class="novedad-card__img" th:src="@{${nov['imagen']}}" th:alt="${nov['titulo']}" loading="lazy" />
+            </a>
+            <div class="novedad-card__body">
+              <h3 class="novedad-card__title">
+                <a th:href="@{/novedades/{id}(id=${nov['id']})}" th:text="${nov['titulo']}">Título novedad</a>
+              </h3>
+              <div class="novedad-card__date-row">
+                <svg class="novedad-card__date-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
                 <time class="novedad-card__date" th:text="${nov['fecha']}">noviembre 15, 2026</time>
               </div>
-              <h3 class="novedad-card__title" th:text="${nov['titulo']}">Título novedad</h3>
               <p class="novedad-card__excerpt" th:text="${nov['resumen']}">Resumen de novedad...</p>
+              <div class="novedad-card__actions">
+                <a th:href="@{/novedades/{id}(id=${nov['id']})}" class="novedad-card__btn">Leer más</a>
+              </div>
             </div>
-            <a th:href="@{/novedades}" class="novedad-card__more">Leer más →</a>
           </article>
         </div>
       </div>
