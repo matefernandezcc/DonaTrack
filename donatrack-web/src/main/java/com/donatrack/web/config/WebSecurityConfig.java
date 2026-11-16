@@ -43,7 +43,7 @@ public class WebSecurityConfig {
                         "/auth/**",
                         "/oauth2/**",
                         "/api/public/**",
-                        "/api/notificaciones/**",
+                        "/api/notificaciones/mis-alertas",
                         "/css/**",
                         "/js/**",
                         "/img/**",

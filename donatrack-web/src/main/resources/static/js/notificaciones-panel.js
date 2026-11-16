@@ -8,6 +8,7 @@
   'use strict';
 
   var STORAGE_KEY = 'donatrack_user_notifications';
+  var DISMISSED_KEY = 'donatrack_dismissed_ids';
   var ultimaListaBackend = [];
 
   function escapeHtml(str) {
@@ -63,6 +64,30 @@
     }
   }
 
+  function getDismissedIds() {
+    try {
+      var raw = localStorage.getItem(DISMISSED_KEY);
+      var parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function agregarDismissedId(id) {
+    if (!id) return;
+    try {
+      var ids = getDismissedIds();
+      if (ids.indexOf(id) === -1) {
+        ids.push(id);
+        if (ids.length > 200) ids = ids.slice(-200);
+        localStorage.setItem(DISMISSED_KEY, JSON.stringify(ids));
+      }
+    } catch (e) {
+      console.warn('[DonaTrack] Error guardando id descartado', e);
+    }
+  }
+
   function eliminarNotificacionLocal(id) {
     if (!id) return;
     var lista = getNotificacionesLocales();
@@ -73,21 +98,33 @@
   }
 
   function combinarAlertas(locales, backend) {
-    var backendFormateadas = (backend || []).map(function (b) {
-      return {
-        id: b.id != null ? 'backend-' + b.id : ('backend-' + Math.random()),
-        mensaje: b.mensaje,
-        tipo: b.tipo || 'info',
-        medio: b.medio || 'EMAIL',
-        fechaEnvio: b.fechaEnvio,
-        completada: b.completada !== false,
-        isLocal: false
-      };
-    });
+    var dismissed = getDismissedIds();
 
-    var todas = (locales || []).map(function (loc) {
-      return Object.assign({}, loc, { isLocal: true });
-    }).concat(backendFormateadas);
+    var backendFormateadas = (backend || [])
+      .map(function (b) {
+        var bId = b.id != null ? 'backend-' + b.id : ('backend-' + Math.random());
+        return {
+          id: bId,
+          mensaje: b.mensaje,
+          tipo: b.tipo || 'info',
+          medio: b.medio || 'EMAIL',
+          fechaEnvio: b.fechaEnvio,
+          completada: b.completada !== false,
+          isLocal: false
+        };
+      })
+      .filter(function (b) {
+        return dismissed.indexOf(b.id) === -1;
+      });
+
+    var todas = (locales || [])
+      .filter(function (loc) {
+        return dismissed.indexOf(loc.id) === -1;
+      })
+      .map(function (loc) {
+        return Object.assign({}, loc, { isLocal: true });
+      })
+      .concat(backendFormateadas);
 
     todas.sort(function (a, b) {
       var tA = a.fechaEnvio ? new Date(a.fechaEnvio).getTime() : 0;
@@ -188,10 +225,7 @@
             '<span class="slds-badge" style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ' + badgeStyle + '">' +
               medio +
             '</span>' +
-            '<button type="button" class="dt-notif-delete-btn" aria-label="Eliminar notificación" title="Eliminar notificación" ' +
-                    'style="background: transparent; border: none; cursor: pointer; color: #94a3b8; font-size: 1.25rem; line-height: 1; padding: 2px 4px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; transition: color 0.15s ease, background 0.15s ease;" ' +
-                    'onmouseover="this.style.color=\'#dc2626\'; this.style.background=\'#fef2f2\';" ' +
-                    'onmouseout="this.style.color=\'#94a3b8\'; this.style.background=\'transparent\';">' +
+            '<button type="button" class="dt-notif-delete-btn" aria-label="Eliminar notificación" title="Eliminar notificación">' +
               '&times;' +
               '<span class="slds-assistive-text">Eliminar notificación</span>' +
             '</button>' +
@@ -203,6 +237,10 @@
         deleteBtn.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
+
+          if (a.id) {
+            agregarDismissedId(a.id);
+          }
 
           if (a.isLocal || (a.id && String(a.id).startsWith('notif-'))) {
             eliminarNotificacionLocal(a.id);
@@ -394,14 +432,19 @@
     var toast = document.getElementById('toast-notification');
     if (!toast) return;
 
-    var yaTransferido = false;
+    // Registrar de inmediato en la campanita para no perderla si el usuario navega antes de los 3s
+    transferirToastANotificaciones(toast);
+
+    var cerrado = false;
+    var timerId = null;
 
     function cerrarToast() {
-      if (yaTransferido) return;
-      yaTransferido = true;
-
-      // Transferir automáticamente a la pestaña de notificaciones
-      transferirToastANotificaciones(toast);
+      if (cerrado) return;
+      cerrado = true;
+      if (timerId) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
 
       // Desvanecimiento suave
       toast.classList.add('dt-toast-hidden');
@@ -423,7 +466,7 @@
     });
 
     // Temporizador de 3 segundos (3000 ms)
-    setTimeout(function () {
+    timerId = setTimeout(function () {
       cerrarToast();
     }, 3000);
   }

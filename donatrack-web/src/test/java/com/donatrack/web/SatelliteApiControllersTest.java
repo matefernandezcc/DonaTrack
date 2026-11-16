@@ -134,7 +134,7 @@ class SatelliteApiControllersTest {
 
   @Test
   @DisplayName(
-      "GET /api/notificaciones/mis-alertas — Retorna lista vacía en modo defensivo cuando falla NotificacionesGateway")
+      "GET /api/notificaciones/mis-alertas — Retorna 503 SERVICE_UNAVAILABLE estructurado cuando falla NotificacionesGateway")
   void testMisAlertasFallbackListaVaciaCuandoFallaGateway() throws Exception {
     when(notificacionesGateway.obtenerNotificacionesUsuario("donante@test.com"))
         .thenThrow(new RuntimeException("Timeout en notificaciones"));
@@ -150,8 +150,9 @@ class SatelliteApiControllersTest {
 
     notificacionesMvc
         .perform(get("/api/notificaciones/mis-alertas").principal(auth))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.error").value("NOTIFICACIONES_UNAVAILABLE"))
+        .andExpect(jsonPath("$.message").value("No se pudieron obtener tus alertas en este momento."));
   }
 
   @Test
