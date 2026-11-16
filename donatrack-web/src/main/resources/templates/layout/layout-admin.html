@@ -720,11 +720,11 @@
         window.addEventListener('resize', sincronizarAriaExpanded, { passive: true });
       }
 
-      // FASE 2: Intercepción de navegación client-side en menú lateral Donante
+      // FASE 2: Intercepción de navegación client-side en menú lateral Donante y navegación directa
       document.querySelectorAll('#admin-nav a.slds-nav-vertical__action').forEach(function (link) {
         link.addEventListener('click', function (e) {
           var href = link.getAttribute('href');
-          if (!href) return;
+          if (!href || href === '#') return;
           if (window.location.pathname === '/app/donante' && href.startsWith('/app/donante') && href.indexOf('/app/donante/donaciones') === -1) {
             if (typeof window.cambiarTabDonante === 'function') {
               var targetUrl = new URL(href, window.location.origin);
@@ -732,7 +732,12 @@
               e.preventDefault();
               window.cambiarTabDonante(targetTab, true);
               sincronizarSidebarDonante(targetTab);
+              return;
             }
+          }
+          if (!e.defaultPrevented && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+            e.preventDefault();
+            window.location.href = href;
           }
         });
       });

@@ -73,8 +73,12 @@ public class AsignacionBatchJob {
             }
           }
         }
-        // Valores mockeados para peso/volumen para simplificar, en un caso real se calcularían
-        double pesoTotal = Math.max(1, donacion.getBienes().size()) * 2.5;
+        double sumaCantidad =
+            donacion.getBienes() != null
+                ? donacion.getBienes().stream().mapToDouble(b -> b.getCantidad()).sum()
+                : 0.0;
+        double pesoTotal =
+            sumaCantidad > 0 ? sumaCantidad : Math.max(1, donacion.getBienes().size()) * 2.5;
         double volumenTotal = Math.max(1, donacion.getBienes().size()) * 0.5;
 
         try {

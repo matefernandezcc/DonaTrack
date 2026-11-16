@@ -50,7 +50,7 @@
 
         <!-- Acciones Rápidas -->
         <div class="slds-col slds-no-flex" style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <a th:href="@{/app/organizaciones/esperanza(nombre=${nombreOrganizacion})}" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center;">
+          <a th:href="@{/app/organizaciones/{id}(id=${beneficiarioId != null ? beneficiarioId : 'esperanza'}, nombre=${nombreOrganizacion})}" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center;">
             Ver Mi Página Pública
           </a>
           <a th:href="@{/app/beneficiaria/necesidades}" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center;">

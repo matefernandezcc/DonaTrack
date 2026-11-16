@@ -656,6 +656,31 @@ public class PublicController {
                   "email", email,
                   "password", password,
                   "rol", "DONANTE"));
+      if (donacionesGateway != null && tokenResponse != null && tokenResponse.user() != null) {
+        try {
+          UUID pId =
+              tokenResponse.user().personaId() != null
+                  ? tokenResponse.user().personaId()
+                  : tokenResponse.user().id();
+          String full = nombre != null ? nombre.trim() : "Donante Web";
+          int sp = full.indexOf(' ');
+          String firstName = sp > 0 ? full.substring(0, sp).trim() : full;
+          String lastName = sp > 0 ? full.substring(sp + 1).trim() : "";
+          String mailClean = email != null ? email.trim() : "";
+          Map<String, Object> personaPayload = new HashMap<>();
+          personaPayload.put("id", pId.toString());
+          personaPayload.put("tipo", "HUMANA");
+          personaPayload.put("nombre", firstName);
+          personaPayload.put("apellido", lastName);
+          personaPayload.put("edad", 30);
+          personaPayload.put("email", mailClean);
+          personaPayload.put(
+              "contacto",
+              Map.of("correoElectronico", mailClean, "medioPredeterminado", "CORREO"));
+          donacionesGateway.crearPersona(personaPayload);
+        } catch (Exception ignored) {
+        }
+      }
       establecerSesionSegura(tokenResponse.accessToken(), request, response);
       String rol = tokenResponse.user().rol();
       return "redirect:/app/" + rol.toLowerCase();

@@ -86,7 +86,7 @@
             <div style="position: relative; width: 100%;">
               <input type="text" id="busqueda-entregas" class="slds-input"
                      placeholder="🔍 Buscar por código (#DT-XXXX), patente, chofer o destino..."
-                     onkeyup="filtrarEntregas()" style="padding-left: 14px; border-radius: 6px;" />
+                     oninput="filtrarEntregas()" onkeyup="filtrarEntregas()" style="padding-left: 14px; border-radius: 6px;" />
             </div>
             
             <select id="filtro-estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 175px; border-radius: 6px;">
@@ -510,12 +510,20 @@
         }
 
         // 2. Inicializar Filtros y Paginación de Entregas
+        var inputBusqueda = document.getElementById('busqueda-entregas');
+        if (inputBusqueda) {
+          inputBusqueda.addEventListener('input', filtrarEntregas);
+        }
+        var selectEstado = document.getElementById('filtro-estado');
+        if (selectEstado) {
+          selectEstado.addEventListener('change', filtrarEntregas);
+        }
         filtrarEntregas();
       });
 
       // Paginación y Filtrado Dinámico de Entregas
       var paginaActual = 1;
-      var tarjetasPorPagina = 6;
+      var tarjetasPorPagina = 9;
       var tarjetasFiltradas = [];
 
       window.filtrarEntregas = function () {
@@ -625,6 +633,10 @@
             reader.onload = function(e) {
               preview.src = e.target.result;
               preview.style.display = 'block';
+              var hiddenUrl = document.getElementById('fotoUrl');
+              if (hiddenUrl) {
+                hiddenUrl.value = e.target.result;
+              }
             };
             reader.readAsDataURL(file);
           }
