@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+  <title>DonaTrack · Ocurrió un inconveniente</title>
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}" />
+  <link rel="stylesheet" th:href="@{/css/variables.css}" />
+  <link rel="stylesheet" th:href="@{/css/base.css}" />
+  <link rel="stylesheet" th:href="@{/css/components.css}" />
+  <style>
+    .error-shell {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .error-panel {
+      width: 100%;
+      max-width: 520px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 36px 32px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+    .error-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #0b4a8f;
+      font-weight: 800;
+      font-size: 1.2rem;
+      margin-bottom: 24px;
+    }
+    .error-title {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+      line-height: 1.25;
+    }
+    .error-text {
+      font-size: 1rem;
+      color: #334155;
+      line-height: 1.55;
+      margin: 0 0 28px 0;
+    }
+    .error-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .error-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 8px;
+      background: #014486;
+      color: #ffffff;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .error-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 8px;
+      border: 1px solid #94a3b8;
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <main class="error-shell">
+    <section class="error-panel" aria-labelledby="error-heading">
+      <a th:href="@{/}" class="error-brand">
+        <img th:src="@{/img/package.svg}" src="/img/package.svg" alt="DonaTrack" width="32" height="32" />
+        <span>DonaTrack</span>
+      </a>
+      <h1 id="error-heading" class="error-title"
+          th:text="${errorTitle != null ? errorTitle : 'Tuvimos un inconveniente inesperado'}">
+        Tuvimos un inconveniente inesperado
+      </h1>
+      <p class="error-text"
+         th:text="${errorMessage != null ? errorMessage : 'Algo ha salido mal, intentalo de nuevo en unos minutos...'}">
+        Algo ha salido mal, intentalo de nuevo en unos minutos...
+      </p>
+      <div class="error-actions">
+        <a th:href="@{/}" class="error-btn-primary">Volver al inicio</a>
+        <a th:href="@{/app/donante}" class="error-btn-secondary">Ir a mi panel</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

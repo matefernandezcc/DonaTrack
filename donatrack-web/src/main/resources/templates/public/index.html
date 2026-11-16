@@ -49,8 +49,8 @@
             <!-- Buscador Interactivo de Remitos -->
             <form id="hero-tracker-form" onsubmit="buscarRemitoHero(event)" style="margin: 12px 0 10px; display: flex; gap: 6px;">
               <input type="text" id="hero-tracker-input" aria-label="Código de remito digital a rastrear" placeholder="Ej: #DT-3300, #DT-3200..." value="#DT-3300"
-                     style="flex: 1; padding: 7px 10px; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.82rem; background: var(--bg); color: var(--fg);" />
-              <button type="submit" style="padding: 7px 12px; background: #0176d3; color: #fff; border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer;">Rastrear</button>
+                     style="flex: 1; min-height: 48px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.88rem; background: var(--bg); color: var(--fg);" />
+              <button type="submit" style="min-height: 48px; min-width: 48px; padding: 10px 16px; background: var(--btn-blue-bg, #0b4a8f); color: #fff; border: none; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">Rastrear</button>
             </form>
 
             <div id="hero-tracker-details" style="font-size: 0.78rem; line-height: 1.5; color: var(--muted); margin-bottom: 10px;">
@@ -66,7 +66,7 @@
             </div>
 
             <button id="hero-tracker-proof-btn" onclick="verComprobanteHero()" type="button"
-                    style="width: 100%; padding: 8px 12px; background: var(--blue-50); color: var(--blue); border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background 0.15s ease;">
+                    style="width: 100%; min-height: 48px; padding: 10px 14px; background: var(--blue-50); color: var(--blue); border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: background 0.15s ease;">
               Ver comprobante auditado (#DT-3300)
             </button>
           </div>
@@ -96,7 +96,7 @@
             </div>
             <h3 class="story-card__title" id="story-stage-title">Donación Realizada</h3>
             <p class="story-card__desc" id="story-stage-desc">
-              Registrás tu donación en segundos indicando tipo de bien, peso aproximado y punto de retiro o entrega. Se genera el remito digital con hash criptográfico único.
+              Registrás tu donación en segundos indicando tipo de bien, peso aproximado y punto de retiro o entrega. Se genera el remito digital con código de seguimiento único.
             </p>
             <div class="story-card__meta" id="story-stage-meta">
               <span class="story-meta-badge" id="story-meta-origin">Recepción en depósito</span>
@@ -125,7 +125,7 @@
             </div>
             <div class="story-actions">
               <button type="button" id="story-autoplay-toggle" class="btn btn--sm btn--ghost" onclick="toggleCircleAutoplay()" aria-label="Pausar ciclo automático">
-                <span id="story-autoplay-icon">⏸</span> <span id="story-autoplay-text">Pausar ciclo automático</span>
+                <span id="story-autoplay-icon" aria-hidden="true">⏸</span> <span id="story-autoplay-text">Pausar ciclo automático</span>
               </button>
             </div>
           </div>
@@ -216,7 +216,7 @@
               <div class="dial-node__dot">05</div>
               <div class="dial-node__label dial-node__label--left-top">
                 <strong>Círculo Cerrado</strong>
-                <span>Remito y fotos S3</span>
+                <span>Remito y foto de entrega</span>
               </div>
             </div>
 
@@ -294,7 +294,7 @@
                 <strong id="calc-impact-sec" style="font-size: 1.05rem; color: var(--fg); font-weight: 700;">6 familias en Comedor El Faro</strong>
               </div>
               <div>
-                <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Puntos cívicos (Trailblazer):</span>
+                <span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 2px;">Puntos de impacto solidario:</span>
                 <strong id="calc-puntos" style="font-size: 1rem; color: var(--orange); font-weight: 700;">+150 puntos</strong>
               </div>
               <div style="display: flex; align-items: flex-end;">
@@ -821,8 +821,8 @@
             <div id="modal-ong-alert" style="display: none; padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem;"></div>
 
             <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-              <button type="button" onclick="cerrarModalSolicitudOng()" class="btn btn--ghost" style="padding: 0.55rem 1.1rem;">Cancelar</button>
-              <button type="submit" id="btn-submit-ong" class="btn btn--primary" style="padding: 0.55rem 1.4rem; background: #0176d3; color: white;">Enviar Solicitud</button>
+              <button type="button" onclick="cerrarModalSolicitudOng()" class="btn btn--ghost" style="min-height: 48px; padding: 0.6rem 1.2rem;">Cancelar</button>
+              <button type="submit" id="btn-submit-ong" class="btn btn--primary" style="min-height: 48px; padding: 0.6rem 1.4rem; background: var(--btn-blue-bg, #0b4a8f); color: white;">Enviar Solicitud</button>
             </div>
           </form>
         </div>
@@ -845,7 +845,7 @@
         fecha: "28 Oct 2026",
         comprobante: {
           fotos: [
-            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp",
+            "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp",
             "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/caja-alimentos-1.jpeg"
           ]
         }

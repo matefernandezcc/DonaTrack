@@ -139,7 +139,7 @@
         if (timeoutId) clearTimeout(timeoutId);
         if (!res.ok) {
           return res.json().catch(function () { return {}; }).then(function (errBody) {
-            throw new Error(errBody.message || ('Error HTTP ' + res.status));
+            throw new Error(errBody.message || 'No se pudieron cargar las notificaciones en este momento.');
           });
         }
         return res.json();
@@ -153,7 +153,7 @@
       })
       .catch(function (err) {
         if (timeoutId) clearTimeout(timeoutId);
-        actualizarUI('error', [], err && err.message ? err.message : 'No se pudieron cargar las notificaciones.');
+        actualizarUI('error', [], 'No se pudieron cargar las notificaciones en este momento.');
       });
   }
 

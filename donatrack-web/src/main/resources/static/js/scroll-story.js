@@ -8,7 +8,7 @@
       angle: 0,
       title: "Donación Realizada",
       short: "Registro",
-      desc: "Registrás tu donación en segundos indicando tipo de bien, peso aproximado y punto de retiro o entrega. Se genera el remito digital con hash criptográfico único.",
+      desc: "Registrás tu donación en segundos indicando tipo de bien, peso aproximado y punto de retiro o entrega. Se genera el remito digital único.",
       status: "Trazabilidad Iniciada",
       origin: "Recepción en depósito",
       points: "+10 Puntos de Impacto",
@@ -44,7 +44,7 @@
       desc: "El camión arriba a la ONG o comedor beneficiario asignado. El referente de la sede inspecciona la mercadería al pie del vehículo.",
       status: "Arribo Confirmado",
       origin: "Comedor Verificado",
-      points: "Matchmaking Comunitario",
+      points: "Asignación Comunitaria",
       progress: 0.82
     },
     {
@@ -52,9 +52,9 @@
       angle: 288,
       title: "Entrega Completada y Certificada",
       short: "Círculo Cerrado",
-      desc: "Recepción confirmada con firma digital y foto del remito subida a Supabase S3. Recibís la notificación y el impacto tangible. ¡El círculo se cierra!",
+      desc: "Recepción confirmada con firma digital y foto del remito certificada en destino. Recibís la notificación y el impacto tangible. ¡El círculo se cierra!",
       status: "Ciclo 100% Completado",
-      origin: "Remito Digital en S3",
+      origin: "Remito Digital Certificado",
       points: "+25 Puntos de Entrega (35 pts totales)",
       progress: 1.0
     }

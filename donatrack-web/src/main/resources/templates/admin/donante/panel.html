@@ -2,11 +2,11 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
 <head>
-  <title>DonaTrack · Perfil Trailblazer del Donante</title>
+  <title>DonaTrack · Perfil Solidario del Donante</title>
 </head>
 <body>
 
-  <span id="page-header-title">Perfil del Donante · Trailblazer Solidario</span>
+  <span id="page-header-title">Perfil del Donante · Compromiso Solidario</span>
 
   <div id="main-content-slot">
 
@@ -141,7 +141,7 @@
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
             </svg>
             Seguimiento de Mis Donaciones
-            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.7rem;"
+            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.78rem;"
                   th:text="${misDonaciones != null ? misDonaciones.size() : 0}">0</span>
           </a>
         </li>
@@ -154,7 +154,7 @@
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
             </svg>
             Buscador de ONGs &amp; Necesidades Activas
-            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.7rem;"
+            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.78rem;"
                   th:text="${causasActivas != null ? causasActivas.size() : 0}">0</span>
           </a>
         </li>
@@ -167,7 +167,7 @@
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
             </svg>
             Organizaciones y Comedores
-            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.7rem;"
+            <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.78rem;"
                   th:text="${beneficiarios != null ? beneficiarios.size() : 0}">0</span>
           </a>
         </li>
@@ -216,7 +216,7 @@
                        th:text="${#numbers.formatInteger(platosComida, 0, 'POINT')} + ' raciones'">
                     0 raciones
                   </div>
-                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
+                  <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
                     PLATOS DE COMIDA
                   </span>
                 </div>
@@ -228,7 +228,7 @@
                        th:text="${#numbers.formatInteger(kilosTotales, 0, 'POINT')} + ' kg'">
                     0 kg
                   </div>
-                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
+                  <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
                     ALIMENTOS DONADOS
                   </span>
                 </div>
@@ -240,7 +240,7 @@
                        th:text="${comedoresAsistidos} + ' comedores'">
                     0 comedores
                   </div>
-                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
+                  <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
                     CENTROS ASISTIDOS
                   </span>
                 </div>
@@ -252,7 +252,7 @@
                        th:text="${entregasCompletadas} + ' entregas'">
                     0 entregas
                   </div>
-                  <span style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
+                  <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
                     LOGÍSTICA AUDITADA
                   </span>
                 </div>
@@ -366,7 +366,7 @@
               </div>
               <div class="slds-media__body">
                 <h2 class="slds-card__header-title">
-                  <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Misiones en Curso &amp; Desafíos Trailblazer</span>
+                  <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Misiones en Curso &amp; Desafíos Solidarios</span>
                 </h2>
                 <p class="slds-text-body_small slds-text-color_weak">
                   Cumplí metas solidarias para desbloquear nuevas insignias oficiales en tu perfil público.
@@ -404,11 +404,11 @@
                     </div>
                     <div>
                       <strong style="color: #0f172a; font-size: 0.95rem;" th:text="${mision.nombre}">Nombre de Misión</strong>
-                      <span class="slds-badge slds-badge_lightest slds-m-left_x-small" style="font-size: 0.72rem; font-weight: 700;"
+                      <span class="slds-badge slds-badge_lightest slds-m-left_x-small" style="font-size: 0.78rem; font-weight: 700;"
                             th:text="'Meta: ' + ${mision.objetivo} + ' ' + ${mision.unidadLabel != null ? mision.unidadLabel : 'aportes'}">Meta: 5 aportes</span>
-                      <span th:if="${mision.completada == true}" class="slds-badge slds-m-left_xx-small" style="background: #dcfce7; color: #166534; font-size: 0.7rem; font-weight: 700;">Completada</span>
-                      <span th:if="${mision.completada != true && mision.bloqueada == true}" class="slds-badge slds-m-left_xx-small" style="background: #f1f5f9; color: #475569; font-size: 0.7rem; font-weight: 700;">Próxima</span>
-                      <span th:if="${mision.completada != true && mision.bloqueada != true}" class="slds-badge slds-m-left_xx-small" style="background: #dbeafe; color: #1e40af; font-size: 0.7rem; font-weight: 700;">En Curso</span>
+                      <span th:if="${mision.completada == true}" class="slds-badge slds-m-left_xx-small" style="background: #dcfce7; color: #166534; font-size: 0.78rem; font-weight: 700;">Completada</span>
+                      <span th:if="${mision.completada != true && mision.bloqueada == true}" class="slds-badge slds-m-left_xx-small" style="background: #f1f5f9; color: #475569; font-size: 0.78rem; font-weight: 700;">Próxima</span>
+                      <span th:if="${mision.completada != true && mision.bloqueada != true}" class="slds-badge slds-m-left_xx-small" style="background: #dbeafe; color: #1e40af; font-size: 0.78rem; font-weight: 700;">En Curso</span>
                     </div>
                   </div>
                   <div>
@@ -433,7 +433,7 @@
                   <span style="color: #475569;">
                     Avance actual: <strong th:text="${valAct} + ' / ' + ${metaVal} + ' ' + ${unidadTxt} + ' (' + ${pctVal} + '%)'">0 / 5 aportes (0%)</strong>
                   </span>
-                  <span th:if="${mision.completada != true && faltanVal > 0}" style="font-weight: 700; color: #0176d3;"
+                  <span th:if="${mision.completada != true && faltanVal > 0}" style="font-weight: 700; color: #014486;"
                         th:text="'Faltan ' + ${faltanVal} + ' ' + ${unidadTxt} + ' para desbloquear la insignia'">
                     Faltan aportes
                   </span>
@@ -504,7 +504,7 @@
               <div id="mapa-donante-error" style="display: none; padding: 24px; text-align: center; background: #fff5f5;">
                 <div class="slds-notify slds-notify_alert slds-alert_error" role="alert" style="border-radius: 6px;">
                   <span class="slds-assistive-text">error</span>
-                  <h2>No se pudo conectar con el microservicio de logística. Puede que la instancia esté iniciando.</h2>
+                  <h3>Algo ha salido mal al cargar el mapa en vivo. Intentá de nuevo en unos minutos.</h3>
                 </div>
               </div>
 
@@ -616,11 +616,10 @@
                         <span class="slds-badge" style="background: #014486; color: #ffffff; font-weight: 800; font-family: monospace; font-size: 0.78rem;"
                               th:text="${don.codigoCorto}">#DT-0001</span>
                         <strong style="font-size: 1rem; color: #0f172a; font-weight: 800;" th:text="${don.descripcion}">Alimentos no perecederos</strong>
-                        <span class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700;" th:text="${don.subcategoria}">No Perecederos</span>
+                        <span class="slds-badge slds-badge_lightest" style="font-size: 0.78rem; font-weight: 700;" th:text="${don.subcategoria}">No Perecederos</span>
                       </div>
                       <p class="slds-text-body_small slds-text-color_weak" style="margin-top: 4px;">
-                        Fecha de registro: <strong th:text="${don.fechaCreacion}">2026-11-06</strong> ·
-                        ID de auditoría: <code style="font-size: 0.72rem; background: #f1f5f9; padding: 1px 6px; border-radius: 4px;" th:text="${don.id}">uuid</code>
+                        Fecha de registro: <strong th:text="${don.fechaCreacion}">2026-11-06</strong>
                       </p>
                     </div>
                     <div>
@@ -638,7 +637,7 @@
                         <span style="width: 24px; height: 24px; border-radius: 50%; background: #166534; color: #fff; font-weight: 800; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">✓</span>
                         <div>
                           <strong style="display: block; font-size: 0.78rem; color: #0f172a;">1. Recepción en Depósito</strong>
-                          <span style="font-size: 0.7rem; color: #166534; font-weight: 600;">Verificado e inventariado</span>
+                          <span style="font-size: 0.78rem; color: #166534; font-weight: 600;">Verificado e inventariado</span>
                         </div>
                       </div>
                       <!-- Etapa 2 -->
@@ -647,7 +646,7 @@
                               th:text="${don.pasoActual >= 2 ? '✓' : '2'}">2</span>
                         <div>
                           <strong style="display: block; font-size: 0.78rem; color: #0f172a;">2. Matchmaking &amp; ONG</strong>
-                          <span style="font-size: 0.7rem; color: #475569;" th:text="${don.ongAsignada}">En evaluación</span>
+                          <span style="font-size: 0.78rem; color: #475569;" th:text="${don.ongAsignada}">En evaluación</span>
                         </div>
                       </div>
                       <!-- Etapa 3 -->
@@ -656,7 +655,7 @@
                               th:text="${don.pasoActual >= 3 ? '✓' : '3'}">3</span>
                         <div>
                           <strong style="display: block; font-size: 0.78rem; color: #0f172a;">3. Entrega Auditada</strong>
-                          <span style="font-size: 0.7rem; color: #475569;" th:text="${don.pasoActual >= 3 ? 'Remito firmado en destino' : 'Pendiente de descarga en comedor'}">Pendiente</span>
+                          <span style="font-size: 0.78rem; color: #475569;" th:text="${don.pasoActual >= 3 ? 'Remito firmado en destino' : 'Pendiente de descarga en comedor'}">Pendiente</span>
                         </div>
                       </div>
                     </div>
@@ -726,7 +725,7 @@
                   <div style="flex: 1; min-width: 240px;">
                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                       <strong style="font-size: 0.98rem; color: #014486; font-weight: 800;" th:text="${causa.ongNombre}">Comedor Los Pekes</strong>
-                      <span class="slds-badge slds-badge_lightest" style="font-size: 0.7rem; font-weight: 700;" th:text="${causa.categoria}">No Perecederos</span>
+                      <span class="slds-badge slds-badge_lightest" style="font-size: 0.78rem; font-weight: 700;" th:text="${causa.categoria}">No Perecederos</span>
                       <span th:if="${#strings.contains(causa.urgencia, 'Alta')}" class="slds-badge" style="background: #fee2e2; color: #991b1b; font-size: 0.75rem; font-weight: 800;" th:text="'Prioridad ' + ${causa.urgencia}">Prioridad Alta</span>
                       <span th:unless="${#strings.contains(causa.urgencia, 'Alta')}" class="slds-badge" style="background: #fef3c7; color: #92400e; font-size: 0.75rem; font-weight: 700;" th:text="'Prioridad ' + ${causa.urgencia}">Prioridad Media</span>
                     </div>
@@ -798,7 +797,7 @@
                   <div style="flex: 1; min-width: 250px;">
                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                       <strong style="font-size: 1.05rem; color: #014486; font-weight: 800;" th:text="${orgNombre}">Comedor La Esperanza</strong>
-                      <span class="slds-badge" style="background: #dcfce7; color: #166534; font-weight: 700; font-size: 0.72rem;">✓ Verificada en Red</span>
+                      <span class="slds-badge" style="background: #dcfce7; color: #166534; font-weight: 700; font-size: 0.78rem;">✓ Verificada en Red</span>
                     </div>
                     <p class="slds-text-body_small slds-text-color_weak" style="margin-top: 4px;">
                       Contacto institucional: <strong th:text="${correo}">contacto@comedor.org</strong> ·
@@ -848,17 +847,17 @@
               <div class="slds-col slds-size_1-of-3">
                 <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
                         th:text="${insignias != null ? insignias.size() : 0}">0</strong>
-                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.72rem; text-transform: uppercase;">Badges</span>
+                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.78rem; text-transform: uppercase;">Badges</span>
               </div>
               <div class="slds-col slds-size_1-of-3">
                 <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
                         th:text="${#numbers.formatInteger(puntosReales, 0, 'POINT')}">0</strong>
-                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.72rem; text-transform: uppercase;">Puntos</span>
+                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.78rem; text-transform: uppercase;">Puntos</span>
               </div>
               <div class="slds-col slds-size_1-of-3">
                 <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
                         th:text="${metricas != null && metricas.totalOrganizacionesAyudadas != null ? metricas.totalOrganizacionesAyudadas : (metricas != null && metricas.totalDonacionesHistoricas != null ? metricas.totalDonacionesHistoricas : 0)}">0</strong>
-                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.72rem; text-transform: uppercase;">Campañas</span>
+                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.78rem; text-transform: uppercase;">Campañas</span>
               </div>
             </div>
 
@@ -871,7 +870,7 @@
               </div>
               <div>
                 <strong style="display: block; font-size: 0.85rem; color: #334155;">Perfil Inicial Creado</strong>
-                <span style="font-size: 0.72rem; color: #64748b;">Hacé tu primera donación para activar reconocimientos de la red.</span>
+                <span style="font-size: 0.78rem; color: #475569;">Hacé tu primera donación para activar reconocimientos de la red.</span>
               </div>
             </div>
 
@@ -884,7 +883,7 @@
               </div>
               <div>
                 <strong style="display: block; font-size: 0.85rem; color: #854d0e;">DonaTrack Solidario</strong>
-                <span style="font-size: 0.72rem; color: #a16207;">Reconocimiento por entregas y remitos auditados en destino.</span>
+                <span style="font-size: 0.78rem; color: #a16207;">Reconocimiento por entregas y remitos auditados en destino.</span>
               </div>
             </div>
 
@@ -942,7 +941,7 @@
                     <span class="slds-badge slds-badge_lightest" style="font-size: 0.75rem; font-weight: 700; padding: 2px 6px;">OFICIAL</span>
                   </div>
                   <p style="font-size: 0.75rem; color: #64748b; line-height: 1.3; margin-top: 2px;" th:text="${insignia.descripcion}">Descripción</p>
-                  <span style="font-size: 0.7rem; color: #166534; font-weight: 600; display: block; margin-top: 2px;" th:text="'✓ Obtenida ' + (${insignia.fechaObtencion != null ? insignia.fechaObtencion : 'Recientemente'})">2026-11-05</span>
+                  <span style="font-size: 0.78rem; color: #166534; font-weight: 600; display: block; margin-top: 2px;" th:text="'✓ Obtenida ' + (${insignia.fechaObtencion != null ? insignia.fechaObtencion : 'Recientemente'})">2026-11-05</span>
                 </div>
               </div>
 
@@ -1100,7 +1099,7 @@
             <h2 class="slds-modal__title slds-hyphenate" style="color: #ffffff; font-weight: 800; font-size: 1.35rem;">
               ¡Bienvenido a DonaTrack, <span th:text="${nombreCompleto != null ? nombreCompleto : nombreUsuario}">Donante</span>!
             </h2>
-            <p style="color: #e0f2fe; font-size: 0.88rem; margin-top: 4px;">
+            <p style="color: #ffffff; font-size: 0.88rem; margin-top: 4px;">
               Tu camino hacia una logística solidaria 100% transparente y auditada comienza hoy.
             </p>
           </header>
@@ -1129,7 +1128,7 @@
                 <div>
                   <strong style="display: block; color: #0f172a; font-size: 0.92rem;">Asignación logística y remito digital</strong>
                   <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">
-                    El microservicio de logística calcula peso y volumen, asignando un camión real con patente y chofer identificado.
+                    Nuestro sistema logístico calcula peso y volumen, asignando un camión real con patente y chofer identificado.
                   </span>
                 </div>
               </div>
@@ -1543,7 +1542,6 @@
       } else {
         initPanelDonante();
       }
-    </script>
     </script>
   </th:block>
 

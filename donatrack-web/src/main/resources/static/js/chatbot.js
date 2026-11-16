@@ -31,7 +31,7 @@
   const addMsg = (text, who) => {
     const div = document.createElement("div");
     div.className = "msg msg--" + who;
-    div.innerHTML = text; // Permite renderizar links HTML
+    div.textContent = text;
     div.style.whiteSpace = "pre-wrap"; // Permite los saltos de línea \n
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
@@ -61,7 +61,7 @@
     })
       .then((res) => res.json())
       .then((data) => {
-        addMsg(data.respuesta || "Mensaje procesado por n8n (sin respuesta)", "bot");
+        addMsg(data.respuesta || "Recibimos tu consulta. En breve te responderemos.", "bot");
       })
       .catch((e) => {
         console.warn("Error al conectar con chatbot proxy:", e);
