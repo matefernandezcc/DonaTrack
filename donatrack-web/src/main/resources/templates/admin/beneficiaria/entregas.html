@@ -141,10 +141,10 @@
 
               <!-- Botón Accionable Directo -->
               <div>
-                <button type="button" class="slds-button slds-button_brand slds-button_stretch dt-touch-target"
+                <button type="button" class="slds-button slds-button_brand slds-button_stretch"
                         th:attr="data-id=${e.idEntrega},data-patente=${e.patente},data-codigo=${e.codigoCorto},data-chofer=${e.choferNombre},data-peso=${e.peso},data-dir=${e.direccion}"
                         onclick="abrirModalConfirmacionDesdeBoton(this)"
-                        style="border-radius: 6px; font-weight: 700; min-height: 48px;">
+                        style="border-radius: 6px; font-weight: 700; min-height: 38px;">
                   Recepcionar
                 </button>
               </div>
@@ -156,13 +156,13 @@
         <!-- Paginador de Entregas -->
         <div id="paginacion-entregas" th:unless="${#lists.isEmpty(entregasEnCamino)}"
              style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
-          <button type="button" id="btn-pag-prev" onclick="cambiarPagina(-1)" class="slds-button slds-button_neutral dt-touch-target" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 48px; min-width: 48px;">
+          <button type="button" id="btn-pag-prev" onclick="cambiarPagina(-1)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 36px; padding: 0 12px;">
             ← Anterior
           </button>
           <span id="texto-paginacion" style="font-size: 0.86rem; font-weight: 700; color: #475569;">
             Página 1 de 1
           </span>
-          <button type="button" id="btn-pag-next" onclick="cambiarPagina(1)" class="slds-button slds-button_neutral dt-touch-target" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 48px; min-width: 48px;">
+          <button type="button" id="btn-pag-next" onclick="cambiarPagina(1)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 36px; padding: 0 12px;">
             Siguiente →
           </button>
         </div>
@@ -250,8 +250,8 @@
                     <button type="button" th:each="foto : ${r.fotos}"
                             th:attr="data-url=${foto},data-cod=${r.codigoCorto},data-sub=${'Patente ' + r.patente + ' · ' + (r.fechaHoraRecepcion != null ? r.fechaHoraRecepcion : r.fechaOperativa)}"
                             onclick="abrirVisorRemito(this.getAttribute('data-url'), this.getAttribute('data-cod'), this.getAttribute('data-sub'))"
-                            class="slds-button slds-button_icon slds-button_icon-border dt-touch-target" title="Inspeccionar Comprobante"
-                            style="cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 1rem; background: #f8fafc; min-width: 48px; min-height: 48px;">
+                            class="slds-button slds-button_icon slds-button_icon-border" title="Inspeccionar Comprobante"
+                            style="cursor: pointer; border-radius: 6px; font-size: 0.95rem; background: #f8fafc; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
                       📷
                     </button>
                     <span class="slds-badge slds-theme_success" style="font-size: 0.7rem; font-weight: 700;">Firmado</span>
@@ -321,7 +321,7 @@
                 <div class="slds-form-element__control">
                   <div style="border: 2px dashed #94a3b8; border-radius: 8px; padding: 16px; text-align: center; background: #f8fafc;">
                     <input type="file" id="cameraFile" name="fotoArchivo" accept="image/*" capture="environment" onchange="manejarCapturaCamara(this)" style="display: none;" />
-                    <button type="button" class="slds-button slds-button_neutral" onclick="document.getElementById('cameraFile').click()" style="font-weight: 700; border-radius: 6px; min-height: 48px; min-width: 48px; display: inline-flex; align-items: center; justify-content: center;">
+                    <button type="button" class="slds-button slds-button_neutral" onclick="document.getElementById('cameraFile').click()" style="font-weight: 700; border-radius: 6px; min-height: 36px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center;">
                       📷 Abrir Cámara del Teléfono o Elegir Foto
                     </button>
                     <img id="camera-preview" src="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" alt="Vista previa de foto"
@@ -344,10 +344,10 @@
 
               <!-- Botones Modal -->
               <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-                <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalConfirmacion()" style="min-height: 48px; min-width: 48px; display: inline-flex; align-items: center; justify-content: center;">
+                <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalConfirmacion()" style="min-height: 36px; padding: 0 14px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
                   Cancelar
                 </button>
-                <button type="submit" id="btn-submit-confirmar" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; color: #ffffff !important; font-weight: 700; padding: 0 20px; min-width: 130px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center;">
+                <button type="submit" id="btn-submit-confirmar" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; color: #ffffff !important; font-weight: 700; padding: 0 18px; min-width: 120px; min-height: 38px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;">
                   <span id="btn-confirmar-text">Confirmar</span>
                 </button>
               </div>
@@ -374,7 +374,7 @@
                 </div>
               </div>
               <div style="display: flex; gap: 8px; align-items: center;">
-                <a id="visor-link-externo" href="#" target="_blank" class="slds-button slds-button_neutral slds-button_small" style="font-size: 0.78rem; font-weight: 700; border-radius: 4px; min-height: 48px; min-width: 48px; display: inline-flex; align-items: center; padding: 0 14px;">
+                <a id="visor-link-externo" href="#" target="_blank" class="slds-button slds-button_neutral slds-button_small" style="font-size: 0.78rem; font-weight: 700; border-radius: 6px; min-height: 36px; display: inline-flex; align-items: center; padding: 0 12px;">
                   Abrir Original ↗
                 </a>
                 <button type="button" class="slds-button dt-modal-close-btn" onclick="cerrarVisorRemito()" title="Cerrar (Esc)" aria-label="Cerrar" style="position: static !important;">
