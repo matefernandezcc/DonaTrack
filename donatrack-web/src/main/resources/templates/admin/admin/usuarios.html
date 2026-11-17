@@ -49,30 +49,30 @@
         <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped"
           style="width: 100%; min-width: 780px;">
           <thead>
-            <tr class="slds-line-height_reset" style="background: #f1f5f9;">
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Usuario
+            <tr class="slds-line-height_reset">
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Usuario
               </th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Nombre
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Nombre
                 Completo</th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Correo
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Correo
                 Electrónico</th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">
                 Proveedor</th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Rol
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Rol
                 Actual</th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap; min-width: 260px;">Acción
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap; min-width: 260px;">Acción
                 de Asignación & Seguridad</th>
             </tr>
           </thead>
           <tbody>
             <tr th:each="u : ${usuarios}" class="slds-hint-parent">
-              <td style="font-weight: 600; color: #0f172a; padding: 10px 14px; white-space: nowrap;">
+              <td style="font-weight: 600; padding: 10px 14px; white-space: nowrap;">
                 <span th:text="${u['username']}">donante</span>
               </td>
-              <td style="color: #334155; padding: 10px 14px; white-space: nowrap;" th:text="${u['nombre']}">María
+              <td style="padding: 10px 14px; white-space: nowrap;" th:text="${u['nombre']}">María
                 González</td>
               <td
-                style="color: #475569; font-family: monospace; font-size: 0.82rem; padding: 10px 14px; white-space: nowrap;"
+                style="font-family: monospace; font-size: 0.82rem; padding: 10px 14px; white-space: nowrap;"
                 th:text="${u['email']}">maria@donatrack.org</td>
               <td style="padding: 10px 14px; white-space: nowrap;">
                 <span th:if="${u['proveedorOAuth'] == 'GOOGLE'}" class="slds-badge"
@@ -116,7 +116,7 @@
                     <input type="hidden" name="email" th:value="${u['email']}" />
                     <button type="submit" class="slds-button slds-button_neutral"
                       title="Resetear contraseña a 'password123'"
-                      style="height: 30px; border-radius: 4px; font-size: 0.75rem; padding: 0 12px; font-weight: 700; color: #92400e; border-color: #fcd34d; background: #fef9c3; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
+                      style="height: 30px; border-radius: 4px; font-size: 0.75rem; padding: 0 12px; font-weight: 700; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
                       🔑 Resetear Clave
                     </button>
                   </form>
@@ -132,8 +132,7 @@
     <article class="slds-card"
       style="border-radius: 8px; border: 1px solid #dddbda; box-shadow: 0 2px 8px rgba(0,0,0,0.06); width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box;">
 
-      <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium"
-        style="border-bottom: 1px solid #e5e5e5; background: #fdfaf6;">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium slds-border_bottom">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
           <div class="slds-media__figure">
             <span class="slds-icon_container slds-icon-standard-household"
@@ -163,36 +162,36 @@
       <div class="slds-card__body slds-p-around_none slds-scrollable_x">
         <table class="slds-table slds-table_cell-buffer slds-table_bordered" style="width: 100%; min-width: 820px;">
           <thead>
-            <tr class="slds-line-height_reset" style="background: #f8fafc;">
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">
+            <tr class="slds-line-height_reset">
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">
                 Organización & CUIT</th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">
                 Contacto & Responsable</th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Sede
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Sede
                 Física</th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Tipo &
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Tipo &
                 Necesidades</th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Estado
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Estado
               </th>
-              <th scope="col" style="font-weight: 700; color: #475569; padding: 10px 14px; white-space: nowrap;">Acción
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Acción
               </th>
             </tr>
           </thead>
           <tbody>
             <tr th:each="s : ${solicitudes}" class="slds-hint-parent">
               <td style="padding: 10px 14px; white-space: nowrap;">
-                <strong style="color: #014486; display: block;" th:text="${s.nombreOng()}">Comedor Los Bajitos</strong>
-                <span style="font-family: monospace; font-size: 0.78rem; color: #64748b;"
+                <strong class="dt-highlight-code" style="display: block;" th:text="${s.nombreOng()}">Comedor Los Bajitos</strong>
+                <span style="font-family: monospace; font-size: 0.78rem;"
                   th:text="'CUIT: ' + ${s.cuit()}">CUIT: 30-71458921-4</span>
               </td>
               <td style="padding: 10px 14px; white-space: nowrap;">
-                <span style="display: block; font-weight: 600; color: #334155;" th:text="${s.responsable()}">Marta
+                <span style="display: block; font-weight: 600;" th:text="${s.responsable()}">Marta
                   Gómez</span>
-                <span style="display: block; font-size: 0.8rem; color: #475569;"
+                <span style="display: block; font-size: 0.8rem;"
                   th:text="${s.email()}">comedor@gmail.com</span>
-                <span style="font-size: 0.78rem; color: #64748b;" th:text="${s.telefono()}">+54 11 4253-9988</span>
+                <span style="font-size: 0.78rem;" th:text="${s.telefono()}">+54 11 4253-9988</span>
               </td>
-              <td style="padding: 10px 14px; color: #334155; font-size: 0.82rem; white-space: nowrap;"
+              <td style="padding: 10px 14px; font-size: 0.82rem; white-space: nowrap;"
                 th:text="${s.direccion()}">
                 Av. Calchaquí 1820, Quilmes
               </td>
@@ -200,7 +199,7 @@
                 <span class="slds-badge slds-badge_lightest"
                   style="font-weight: 600; margin-bottom: 4px; font-size: 0.75rem;"
                   th:text="${s.tipoEntidad()}">Comedor</span>
-                <p style="font-size: 0.78rem; color: #64748b; line-height: 1.3; margin: 0; word-break: break-word;"
+                <p style="font-size: 0.78rem; line-height: 1.3; margin: 0; word-break: break-word;"
                   th:text="${s.necesidades()}">Alimentos secos</p>
               </td>
               <td style="padding: 10px 14px; white-space: nowrap;">
