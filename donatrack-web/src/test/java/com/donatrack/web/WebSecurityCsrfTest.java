@@ -174,11 +174,28 @@ class WebSecurityCsrfTest {
   }
 
   @Test
-  @DisplayName("GET /api/notificaciones/mis-alertas sin autenticación pasa filtro de seguridad y retorna 200 OK con lista vacía")
+  @DisplayName(
+      "GET /api/notificaciones/mis-alertas sin autenticación pasa filtro de seguridad y retorna 200 OK con lista vacía")
   void testNotificacionesSinAuthRetorna200Vacio() throws Exception {
     mockMvc
         .perform(get("/api/notificaciones/mis-alertas"))
         .andExpect(status().isOk())
-        .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
+        .andExpect(
+            org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
+                "$", org.hamcrest.Matchers.hasSize(0)));
+  }
+
+  @Test
+  @DisplayName(
+      "GET en ruta protegida /app/admin/dashboard sin autenticación es bloqueada con 403 Forbidden")
+  void testRutaAppSinAutenticacionRetorna403() throws Exception {
+    mockMvc.perform(get("/app/admin/dashboard")).andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName(
+      "GET en ruta no declarada /api/ruta-inexistente-no-declarada sin autenticación es bloqueada con 403 por política Default Deny")
+  void testRutaNoDeclaradaSinAutenticacionRetorna403PorDefaultDeny() throws Exception {
+    mockMvc.perform(get("/api/ruta-inexistente-no-declarada")).andExpect(status().isForbidden());
   }
 }
