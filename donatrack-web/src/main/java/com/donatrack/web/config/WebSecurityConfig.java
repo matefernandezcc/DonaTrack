@@ -43,7 +43,6 @@ public class WebSecurityConfig {
                         "/auth/**",
                         "/oauth2/**",
                         "/api/public/**",
-                        "/api/notificaciones/**",
                         "/css/**",
                         "/js/**",
                         "/img/**",
@@ -54,6 +53,8 @@ public class WebSecurityConfig {
                         "/healthcheck",
                         "/actuator/**",
                         "/error")
+                    .permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/notificaciones/mis-alertas")
                     .permitAll()
                     .requestMatchers("/app/**")
                     .authenticated()
