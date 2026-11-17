@@ -40,6 +40,8 @@ public class WebSecurityConfig {
                         "/",
                         "/login",
                         "/registro",
+                        "/privacidad",
+                        "/terminos",
                         "/auth/**",
                         "/oauth2/**",
                         "/api/public/**",
@@ -56,10 +58,10 @@ public class WebSecurityConfig {
                     .permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/notificaciones/mis-alertas")
                     .permitAll()
-                    .requestMatchers("/app/**")
+                    .requestMatchers("/app/**", "/api/donante/**")
                     .authenticated()
                     .anyRequest()
-                    .permitAll())
+                    .authenticated())
         .formLogin(AbstractHttpConfigurer::disable)
         .logout(
             logout ->
