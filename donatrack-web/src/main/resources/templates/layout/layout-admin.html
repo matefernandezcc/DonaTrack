@@ -387,14 +387,67 @@
     [data-theme="dark"] .slds-card__body,
     [data-theme="dark"] .slds-card__body_inner,
     [data-theme="dark"] .dt-profile-header-body {
-      background-color: transparent !important;
-      background: transparent !important;
+      background-color: #111827 !important;
+      background: #111827 !important;
       color: inherit !important;
     }
 
     [data-theme="dark"] .slds-card__header {
       background-color: #111827 !important;
       border-bottom: 1px solid #1f2937 !important;
+    }
+
+    /* Tarjetas Específicas de Donante, Beneficiaria y Logística */
+    [data-theme="dark"] .donacion-item-card,
+    [data-theme="dark"] .causa-ong-card,
+    [data-theme="dark"] .directorio-ong-card,
+    [data-theme="dark"] .donante-badge-item,
+    [data-theme="dark"] .entrega-card-col .slds-box {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] .donacion-item-card strong,
+    [data-theme="dark"] .causa-ong-card strong,
+    [data-theme="dark"] .directorio-ong-card strong,
+    [data-theme="dark"] .donante-badge-item strong {
+      color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .donacion-item-card p,
+    [data-theme="dark"] .causa-ong-card p,
+    [data-theme="dark"] .directorio-ong-card p,
+    [data-theme="dark"] .donante-badge-item p {
+      color: #d1d5db !important;
+    }
+
+    /* Anulación universal de fondos claros inline en modo oscuro */
+    [data-theme="dark"] [style*="background: #ffffff"],
+    [data-theme="dark"] [style*="background:#ffffff"],
+    [data-theme="dark"] [style*="background: white"],
+    [data-theme="dark"] [style*="background:#fff"],
+    [data-theme="dark"] [style*="background: #fff"],
+    [data-theme="dark"] [style*="background-color: #ffffff"],
+    [data-theme="dark"] [style*="background-color:#ffffff"],
+    [data-theme="dark"] [style*="background-color: white"],
+    [data-theme="dark"] [style*="background: #f8fafc"],
+    [data-theme="dark"] [style*="background:#f8fafc"],
+    [data-theme="dark"] [style*="background-color: #f8fafc"],
+    [data-theme="dark"] [style*="background-color:#f8fafc"],
+    [data-theme="dark"] [style*="background: #f1f5f9"],
+    [data-theme="dark"] [style*="background:#f1f5f9"],
+    [data-theme="dark"] [style*="background-color: #f1f5f9"],
+    [data-theme="dark"] [style*="background-color:#f1f5f9"],
+    [data-theme="dark"] [style*="background: #fafaf9"],
+    [data-theme="dark"] [style*="background:#fafaf9"],
+    [data-theme="dark"] [style*="background-color: #fafaf9"],
+    [data-theme="dark"] [style*="background-color:#fafaf9"] {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f3f4f6 !important;
     }
 
     /* Cajas internas, listas, badges de trazabilidad y empty states */
@@ -460,7 +513,9 @@
     /* Pestañas y navegación en modo oscuro */
     [data-theme="dark"] .slds-tabs_default,
     [data-theme="dark"] .slds-tabs_scoped,
-    [data-theme="dark"] .dt-portal-tabs {
+    [data-theme="dark"] .dt-portal-tabs,
+    [data-theme="dark"] .slds-tabs_default__nav,
+    [data-theme="dark"] .slds-tabs_scoped__nav {
       background-color: #111827 !important;
       background: #111827 !important;
       border-color: #1f2937 !important;
@@ -481,26 +536,66 @@
       color: #e5e7eb !important;
     }
 
-    /* Tablas */
-    [data-theme="dark"] .slds-table {
+    /* Tablas completas y filas alternadas (Striped) en Modo Oscuro */
+    [data-theme="dark"] .slds-table,
+    [data-theme="dark"] table.slds-table {
       background-color: #111827 !important;
-      color: #e5e7eb !important;
+      background: #111827 !important;
+      color: #f9fafb !important;
+      border-color: #1f2937 !important;
     }
 
-    [data-theme="dark"] .slds-table th {
+    [data-theme="dark"] .slds-table thead th,
+    [data-theme="dark"] .slds-table thead tr,
+    [data-theme="dark"] table.slds-table thead tr,
+    [data-theme="dark"] table.slds-table thead th {
       background-color: #1f2937 !important;
-      color: #9ca3af !important;
-      border-bottom: 1px solid #374151 !important;
+      background: #1f2937 !important;
+      color: #93c5fd !important;
+      border-bottom: 2px solid #374151 !important;
     }
 
-    [data-theme="dark"] .slds-table td {
+    [data-theme="dark"] .slds-table tbody tr,
+    [data-theme="dark"] .slds-table tbody tr td,
+    [data-theme="dark"] .slds-table tr.slds-hint-parent,
+    [data-theme="dark"] .slds-table tr.slds-hint-parent td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd),
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) td {
+      background-color: #111827 !important;
+      background: #111827 !important;
+      color: #f9fafb !important;
       border-bottom: 1px solid #1f2937 !important;
-      color: #e5e7eb !important;
+      border-top-color: #1f2937 !important;
     }
 
-    [data-theme="dark"] .slds-table tbody tr:hover > td,
-    [data-theme="dark"] .slds-table tbody tr:hover > th {
-      background-color: #1f2937 !important;
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even),
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) td {
+      background-color: #182234 !important;
+      background: #182234 !important;
+      color: #f9fafb !important;
+      border-bottom: 1px solid #1f2937 !important;
+      border-top-color: #1f2937 !important;
+    }
+
+    [data-theme="dark"] .slds-table tbody tr:hover,
+    [data-theme="dark"] .slds-table tbody tr:hover td,
+    [data-theme="dark"] .slds-table tbody tr:hover th,
+    [data-theme="dark"] .slds-table tbody tr.slds-is-hovered,
+    [data-theme="dark"] .slds-table tbody tr.slds-is-hovered td {
+      background-color: #243044 !important;
+      background: #243044 !important;
+    }
+
+    [data-theme="dark"] .slds-table td,
+    [data-theme="dark"] .slds-table th {
+      color: #e5e7eb !important;
+      border-color: #1f2937 !important;
+    }
+
+    [data-theme="dark"] .slds-table td strong,
+    [data-theme="dark"] .slds-table td a,
+    [data-theme="dark"] .slds-table td span {
+      color: #f9fafb !important;
     }
 
     /* Modales y Popovers */
@@ -577,24 +672,55 @@
       color: #f9fafb !important;
     }
 
-    /* Botones neutros e iconos */
+    /* Botones neutros e iconos en modo oscuro */
     [data-theme="dark"] .slds-button_neutral,
+    [data-theme="dark"] button.slds-button_neutral,
+    [data-theme="dark"] a.slds-button_neutral,
     [data-theme="dark"] .slds-button_icon-border,
     [data-theme="dark"] .slds-button_icon-border-filled {
-      background-color: #1f2937 !important;
-      border-color: #334155 !important;
-      color: #e5e7eb !important;
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      border: 1px solid #475569 !important;
+      color: #f8fafc !important;
     }
 
     [data-theme="dark"] .slds-button_neutral:hover,
+    [data-theme="dark"] button.slds-button_neutral:hover,
+    [data-theme="dark"] a.slds-button_neutral:hover,
+    [data-theme="dark"] .slds-button_neutral:focus,
+    [data-theme="dark"] button.slds-button_neutral:focus,
+    [data-theme="dark"] a.slds-button_neutral:focus,
     [data-theme="dark"] .slds-button_icon-border:hover,
     [data-theme="dark"] .slds-button_icon-border-filled:hover {
-      background-color: #374151 !important;
+      background-color: #334155 !important;
+      background: #334155 !important;
+      border-color: #64748b !important;
       color: #ffffff !important;
     }
 
     [data-theme="dark"] .slds-button__icon {
       fill: #e5e7eb !important;
+    }
+
+    /* Botones destructivos de tabla en modo oscuro */
+    [data-theme="dark"] .slds-button_text-destructive,
+    [data-theme="dark"] button.slds-button_text-destructive {
+      background-color: transparent !important;
+      background: transparent !important;
+      color: #f87171 !important;
+      border: 1px solid #7f1d1d !important;
+      border-radius: 4px !important;
+      padding: 4px 12px !important;
+      cursor: pointer !important;
+      transition: all 0.15s ease !important;
+    }
+
+    [data-theme="dark"] .slds-button_text-destructive:hover,
+    [data-theme="dark"] button.slds-button_text-destructive:hover {
+      background-color: rgba(239, 68, 68, 0.2) !important;
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: #ef4444 !important;
+      color: #fca5a5 !important;
     }
 
     /* Badges adaptadas */
