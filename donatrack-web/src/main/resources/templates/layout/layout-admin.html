@@ -539,63 +539,85 @@
     /* Tablas completas y filas alternadas (Striped) en Modo Oscuro */
     [data-theme="dark"] .slds-table,
     [data-theme="dark"] table.slds-table {
-      background-color: #111827 !important;
-      background: #111827 !important;
-      color: #f9fafb !important;
-      border-color: #1f2937 !important;
+      background-color: #0f172a !important;
+      background: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #1e293b !important;
     }
 
     [data-theme="dark"] .slds-table thead th,
     [data-theme="dark"] .slds-table thead tr,
     [data-theme="dark"] table.slds-table thead tr,
     [data-theme="dark"] table.slds-table thead th {
-      background-color: #1f2937 !important;
-      background: #1f2937 !important;
+      background-color: #1e293b !important;
+      background: #1e293b !important;
       color: #93c5fd !important;
-      border-bottom: 2px solid #374151 !important;
+      border-bottom: 2px solid #334155 !important;
     }
 
+    /* Filas impares (odd) */
     [data-theme="dark"] .slds-table tbody tr,
+    [data-theme="dark"] .slds-table tbody tr > td,
+    [data-theme="dark"] .slds-table tbody tr > th,
     [data-theme="dark"] .slds-table tbody tr td,
+    [data-theme="dark"] .slds-table tbody tr th,
     [data-theme="dark"] .slds-table tr.slds-hint-parent,
-    [data-theme="dark"] .slds-table tr.slds-hint-parent td,
+    [data-theme="dark"] .slds-table tr.slds-hint-parent > td,
+    [data-theme="dark"] .slds-table tr.slds-hint-parent > th,
     [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd),
-    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) td {
-      background-color: #111827 !important;
-      background: #111827 !important;
-      color: #f9fafb !important;
-      border-bottom: 1px solid #1f2937 !important;
-      border-top-color: #1f2937 !important;
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) > td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) > th,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) th {
+      background-color: #0f172a !important;
+      background: #0f172a !important;
+      color: #f8fafc !important;
+      border-bottom: 1px solid #1e293b !important;
+      border-top-color: #1e293b !important;
     }
 
+    /* Filas pares (even) - Zebra striping oscuro de alta especificidad */
     [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even),
-    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) td {
-      background-color: #182234 !important;
-      background: #182234 !important;
-      color: #f9fafb !important;
-      border-bottom: 1px solid #1f2937 !important;
-      border-top-color: #1f2937 !important;
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) > td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) > th,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) th {
+      background-color: #162238 !important;
+      background: #162238 !important;
+      color: #f8fafc !important;
+      border-bottom: 1px solid #1e293b !important;
+      border-top-color: #1e293b !important;
     }
 
     [data-theme="dark"] .slds-table tbody tr:hover,
-    [data-theme="dark"] .slds-table tbody tr:hover td,
-    [data-theme="dark"] .slds-table tbody tr:hover th,
+    [data-theme="dark"] .slds-table tbody tr:hover > td,
+    [data-theme="dark"] .slds-table tbody tr:hover > th,
     [data-theme="dark"] .slds-table tbody tr.slds-is-hovered,
-    [data-theme="dark"] .slds-table tbody tr.slds-is-hovered td {
-      background-color: #243044 !important;
-      background: #243044 !important;
+    [data-theme="dark"] .slds-table tbody tr.slds-is-hovered > td,
+    [data-theme="dark"] .slds-table tbody tr.slds-is-hovered > th {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
     }
 
     [data-theme="dark"] .slds-table td,
-    [data-theme="dark"] .slds-table th {
-      color: #e5e7eb !important;
-      border-color: #1f2937 !important;
+    [data-theme="dark"] .slds-table th,
+    [data-theme="dark"] .slds-table td div,
+    [data-theme="dark"] .slds-table th div {
+      color: #e2e8f0 !important;
+      border-color: #1e293b !important;
     }
 
     [data-theme="dark"] .slds-table td strong,
+    [data-theme="dark"] .slds-table th strong,
+    [data-theme="dark"] .slds-table strong[style],
+    [data-theme="dark"] .slds-table strong,
+    [data-theme="dark"] .dt-highlight-code {
+      color: #60a5fa !important;
+    }
+
     [data-theme="dark"] .slds-table td a,
-    [data-theme="dark"] .slds-table td span {
-      color: #f9fafb !important;
+    [data-theme="dark"] .slds-table th a {
+      color: #93c5fd !important;
     }
 
     /* Modales y Popovers */
