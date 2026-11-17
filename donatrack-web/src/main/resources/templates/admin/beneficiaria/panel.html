@@ -26,7 +26,7 @@
             <h2 class="slds-text-heading_medium dt-org-name" style="font-weight: 800; font-size: 1.4rem;" th:text="${nombreOrganizacion}">
               Fundación Esperanza
             </h2>
-            <span class="slds-badge slds-theme_success" style="font-size: 0.76rem; font-weight: 700; padding: 3px 10px; border-radius: 12px;">
+            <span class="slds-badge" style="background: #166534; color: #ffffff; font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 12px;">
               ONG Verificada y Auditada
             </span>
           </div>
@@ -50,10 +50,13 @@
 
         <!-- Acciones Rápidas -->
         <div class="slds-col slds-no-flex" style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <a th:href="@{/app/beneficiaria/necesidades}" class="slds-button slds-button_neutral" style="font-weight: 600;">
+          <a th:href="@{/app/organizaciones/{id}(id=${beneficiarioId != null ? beneficiarioId : 'esperanza'}, nombre=${nombreOrganizacion})}" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center;">
+            Ver Mi Página Pública
+          </a>
+          <a th:href="@{/app/beneficiaria/necesidades}" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center;">
             Nueva Necesidad
           </a>
-          <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; font-weight: 700;">
+          <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; color: #ffffff; font-weight: 700; min-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center;">
             Recepcionar
           </a>
         </div>
@@ -71,7 +74,7 @@
                th:text="${#numbers.formatInteger(kilosRecibidos, 0, 'POINT')} + ' kg'">
             0 kg
           </div>
-          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.8rem; color: #64748b; font-weight: 700;">
             Mercadería Recepcionada
           </div>
         </div>
@@ -84,7 +87,7 @@
                th:text="${totalEnCamino} + ' pendientes'">
             0 pendientes
           </div>
-          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.8rem; color: #64748b; font-weight: 700;">
             Entregas en Camino
           </div>
         </div>
@@ -97,7 +100,7 @@
                th:text="${totalRecibidas} + ' recibidas'">
             0 recibidas
           </div>
-          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.8rem; color: #64748b; font-weight: 700;">
             Remitos Digitales Conformes
           </div>
         </div>
@@ -110,7 +113,7 @@
                th:text="${totalNecesidades} + ' pedidos'">
             0 pedidos
           </div>
-          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+          <div class="slds-text-title_caps slds-m-top_xx-small" style="font-size: 0.8rem; color: #64748b; font-weight: 700;">
             Necesidades Declaradas
           </div>
         </div>
@@ -165,7 +168,7 @@
 
                 <div>
                   <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand"
-                     style="background: #166534; border-color: #166534; font-weight: 700; font-size: 0.82rem; padding: 0 14px;">
+                     style="background: #166534; border-color: #166534; color: #ffffff; font-weight: 700; font-size: 0.82rem; padding: 0 14px; min-height: 36px; border-radius: 6px; display: inline-flex; align-items: center;">
                     Recepcionar
                   </a>
                 </div>
@@ -250,7 +253,7 @@
             </div>
           </header>
           <div class="slds-no-flex">
-            <button type="button" id="panel-notif-refresh" class="slds-button slds-button_neutral dt-touch-target" style="min-height: 48px;">
+            <button type="button" id="panel-notif-refresh" class="slds-button slds-button_neutral" style="min-height: 34px; padding: 0 12px; border-radius: 6px; font-weight: 600;">
               Actualizar
             </button>
           </div>
@@ -259,7 +262,7 @@
           <div id="panel-notif-loading" class="slds-text-body_small" style="color: #475569;">Cargando alertas...</div>
           <div id="panel-notif-error" role="alert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 12px;">
             <p id="panel-notif-error-msg" class="slds-text-body_small" style="color: #991b1b; font-weight: 600; margin-bottom: 6px;">No pudimos cargar las alertas.</p>
-            <button type="button" id="panel-notif-retry" class="slds-button slds-button_destructive dt-touch-target" style="min-height: 48px;">Reintentar</button>
+            <button type="button" id="panel-notif-retry" class="slds-button slds-button_destructive" style="min-height: 36px; padding: 0 14px; border-radius: 6px; font-weight: 600;">Reintentar</button>
           </div>
           <div id="panel-notif-empty" class="slds-text-body_small" style="display: none; color: #64748b;">No tenés notificaciones recientes.</div>
           <ul id="panel-notif-lista" style="display: none; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;"></ul>

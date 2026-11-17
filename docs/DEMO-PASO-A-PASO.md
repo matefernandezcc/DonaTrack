@@ -421,8 +421,19 @@ curl -s http://localhost:8001/api/donantes/a1111111-1111-4111-8111-111111111111/
 ### Paso 4.3 — Calcular y Persistir el Ranking Mensual Top 3 (`GET /api/ranking/top3`)
 *(Equivalente en Bruno: `Incentivos/Obtener Ranking`)*
 
+Consulta idempotente de solo lectura utilizada por la página web sin efectos secundarios:
+
 ```bash
 curl -s http://localhost:8001/api/ranking/top3 | jq .
+```
+
+### Paso 4.4 — Publicar y Difundir el Ranking a Discord vía n8n (`POST /api/ranking/publicar`)
+*(Equivalente en Bruno: `Incentivos/Publicar Ranking Podio`)*
+
+Dispara la difusión oficial del podio mensual hacia n8n y el webhook de Discord:
+
+```bash
+curl -i -s -X POST http://localhost:8001/api/ranking/publicar | jq .
 ```
 
 ### 🔍 Verificación de Persistencia en PostgreSQL (`schema: incentivos`)

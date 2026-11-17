@@ -8,8 +8,8 @@ public record CrearPersonaDonanteRequest(
     @NotBlank(message = "El correo electrónico es obligatorio")
         @Email(message = "Formato de correo inválido")
         String email,
-    @NotBlank(message = "El tipo de documento es obligatorio") String docTipo,
-    @NotBlank(message = "El número de documento es obligatorio") String docNumero,
+    String docTipo,
+    String docNumero,
     String nombre,
     String apellido,
     Integer edad,

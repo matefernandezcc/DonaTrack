@@ -213,6 +213,46 @@
           "legendFormat": "{{application}}"
         }
       ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 102,
+      "title": "Logs Centralizados en Tiempo Real (Loki & Promtail)",
+      "type": "row"
+    },
+    {
+      "datasource": "Loki",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 5,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "title": "Stream Unificado de Logs (Docker Microservicios)",
+      "type": "logs",
+      "targets": [
+        {
+          "datasource": "Loki",
+          "expr": "{container=~\".+\"}"
+        }
+      ]
     }
   ],
   "refresh": "5s",

@@ -365,7 +365,9 @@
       .then(function (res) {
         if (timeoutId) clearTimeout(timeoutId);
         if (!res.ok) {
-          throw new Error('HTTP ' + res.status);
+          return res.json().catch(function () { return {}; }).then(function (errBody) {
+            throw new Error(errBody.message || ('HTTP ' + res.status));
+          });
         }
         return res.json();
       })

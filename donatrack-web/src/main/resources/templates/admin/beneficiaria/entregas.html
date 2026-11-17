@@ -10,7 +10,6 @@
 
   <div id="main-content-slot">
 
-
     <!-- Banner Informativo y Contadores Operativos -->
     <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
       <div class="slds-card__body slds-p-around_large">
@@ -50,7 +49,7 @@
           <div class="slds-media__figure">
             <span class="slds-icon_container slds-icon-standard-delivery" style="background: #c2410c; border-radius: 6px; padding: 6px;">
               <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
-                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#delivery}"></use>
+                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#shipment}"></use>
               </svg>
             </span>
           </div>
@@ -72,7 +71,13 @@
         
         <!-- Estado Vacío -->
         <div th:if="${#lists.isEmpty(entregasEnCamino)}" class="slds-box slds-text-align_center slds-p-around_large" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
-          <div style="font-size: 2.2rem; margin-bottom: 8px;">✅</div>
+          <div style="margin-bottom: 10px;">
+            <span class="slds-icon_container slds-icon-utility-success" style="background: #dcfce7; border-radius: 50%; padding: 10px; display: inline-flex;">
+              <svg class="slds-icon slds-icon_medium" aria-hidden="true" style="fill: #166534;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#success}"></use>
+              </svg>
+            </span>
+          </div>
           <h4 style="font-weight: 700; color: #1e293b; font-size: 1.05rem;">No hay entregas pendientes de arribo en este momento</h4>
           <p class="slds-text-body_small slds-text-color_weak" style="max-width: 480px; margin: 4px auto 0;">
             Todos los despachos asignados a tu comedor ya han sido certificados y recibidos con su respectivo remito.
@@ -84,10 +89,13 @@
              style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           
           <div style="display: flex; gap: 10px; align-items: center; flex-grow: 1; max-width: 600px;">
-            <div style="position: relative; width: 100%;">
+            <div class="slds-input-has-icon slds-input-has-icon_left" style="position: relative; width: 100%;">
+              <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
+              </svg>
               <input type="text" id="busqueda-entregas" class="slds-input"
-                     placeholder="🔍 Buscar por código (#DT-XXXX), patente, chofer o destino..."
-                     onkeyup="filtrarEntregas()" style="padding-left: 14px; border-radius: 6px;" />
+                     placeholder="Buscar por código (#DT-XXXX), patente, chofer o destino..."
+                     oninput="filtrarEntregas()" onkeyup="filtrarEntregas()" style="border-radius: 6px;" />
             </div>
             
             <select id="filtro-estado" aria-label="Filtrar entregas por estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 175px; border-radius: 6px;">
@@ -138,18 +146,14 @@
                   </div>
                 </div>
 
-                <!-- UUID Secundario en tipografía mono discreta con contraste WCAG AA -->
-                <div style="font-family: monospace; font-size: 0.78rem; color: #475569; margin-bottom: 14px;" class="slds-truncate" th:text="'UUID: ' + ${e.idEntrega}">
-                  UUID: 33008064-071a-4d7a...
-                </div>
               </div>
 
               <!-- Botón Accionable Directo -->
               <div>
-                <button type="button" class="slds-button slds-button_brand slds-button_stretch dt-touch-target"
+                <button type="button" class="slds-button slds-button_brand slds-button_stretch"
                         th:attr="data-id=${e.idEntrega},data-patente=${e.patente},data-codigo=${e.codigoCorto},data-chofer=${e.choferNombre},data-peso=${e.peso},data-dir=${e.direccion}"
                         onclick="abrirModalConfirmacionDesdeBoton(this)"
-                        style="border-radius: 6px; font-weight: 700; min-height: 48px;">
+                        style="border-radius: 6px; font-weight: 700; min-height: 38px;">
                   Recepcionar
                 </button>
               </div>
@@ -161,13 +165,13 @@
         <!-- Paginador de Entregas -->
         <div id="paginacion-entregas" th:unless="${#lists.isEmpty(entregasEnCamino)}"
              style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
-          <button type="button" id="btn-pag-prev" onclick="cambiarPagina(-1)" class="slds-button slds-button_neutral dt-touch-target" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 48px; min-width: 48px;">
+          <button type="button" id="btn-pag-prev" onclick="cambiarPagina(-1)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 36px; padding: 0 12px;">
             ← Anterior
           </button>
           <span id="texto-paginacion" style="font-size: 0.86rem; font-weight: 700; color: #475569;">
             Página 1 de 1
           </span>
-          <button type="button" id="btn-pag-next" onclick="cambiarPagina(1)" class="slds-button slds-button_neutral dt-touch-target" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 48px; min-width: 48px;">
+          <button type="button" id="btn-pag-next" onclick="cambiarPagina(1)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600; font-size: 0.82rem; min-height: 36px; padding: 0 12px;">
             Siguiente →
           </button>
         </div>
@@ -255,9 +259,11 @@
                     <button type="button" th:each="foto : ${r.fotos}"
                             th:attr="data-url=${foto},data-cod=${r.codigoCorto},data-sub=${'Patente ' + r.patente + ' · ' + (r.fechaHoraRecepcion != null ? r.fechaHoraRecepcion : r.fechaOperativa)}"
                             onclick="abrirVisorRemito(this.getAttribute('data-url'), this.getAttribute('data-cod'), this.getAttribute('data-sub'))"
-                            class="slds-button slds-button_icon slds-button_icon-border dt-touch-target" title="Inspeccionar Comprobante"
-                            style="cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 1rem; background: #f8fafc; min-width: 48px; min-height: 48px;">
-                      📷
+                            class="slds-button slds-button_icon slds-button_icon-border" title="Inspeccionar Comprobante"
+                            style="cursor: pointer; border-radius: 6px; background: #f8fafc; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
+                      <svg class="slds-button__icon" aria-hidden="true" style="fill: #014486;">
+                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#photo}"></use>
+                      </svg>
                     </button>
                     <span class="slds-badge slds-theme_success" style="font-size: 0.7rem; font-weight: 700;">Firmado</span>
                   </div>
@@ -288,7 +294,11 @@
               <span aria-hidden="true">✕</span>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
-            <div style="font-size: 2rem; margin-bottom: 4px;">✍️</div>
+            <div style="margin-bottom: 6px;">
+              <svg class="slds-icon slds-icon_medium" aria-hidden="true" style="fill: #ffffff;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#signature}"></use>
+              </svg>
+            </div>
             <h2 class="slds-modal__title slds-hyphenate" style="color: #ffffff; font-weight: 800; font-size: 1.35rem;">
               Certificar Recepción de Entrega
             </h2>
@@ -320,16 +330,23 @@
 
               <!-- Selector de Foto / Cámara Móvil -->
               <div class="slds-form-element slds-m-bottom_medium">
-                <label class="slds-form-element__label" style="font-weight: 700; color: #0f172a;">
-                  📸 Foto del Remito o Descarga al Pie del Camión
+                <label class="slds-form-element__label" style="font-weight: 700; color: #0f172a; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#photo}"></use>
+                  </svg>
+                  Foto del Remito o Descarga al Pie del Camión
                 </label>
                 <div class="slds-form-element__control">
                   <div style="border: 2px dashed #94a3b8; border-radius: 8px; padding: 16px; text-align: center; background: #f8fafc;">
                     <input type="file" id="cameraFile" name="fotoArchivo" aria-label="Foto o comprobante de entrega" accept="image/*" capture="environment" onchange="manejarCapturaCamara(this)" style="display: none;" />
-                    <button type="button" class="slds-button slds-button_neutral" onclick="document.getElementById('cameraFile').click()" style="font-weight: 700; border-radius: 6px;">
-                      📷 Abrir Cámara del Teléfono o Elegir Foto
+                    <button type="button" class="slds-button slds-button_neutral" onclick="document.getElementById('cameraFile').click()" style="font-weight: 700; border-radius: 6px; min-height: 36px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                      <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#photo}"></use>
+                      </svg>
+                      Abrir Cámara del Teléfono o Elegir Foto
                     </button>
-                    <img id="camera-preview" src="" alt="Vista previa de foto"
+                    </button>
+                    <img id="camera-preview" src="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" alt="Vista previa de foto"
                          style="display: none; max-width: 180px; max-height: 140px; margin: 10px auto 4px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
                     <p id="camera-filename" style="margin-top: 8px; font-size: 0.78rem; color: #64748b;">
                       Tomá una fotografía con la cámara de tu teléfono para adjuntar como remito de entrega.
@@ -338,21 +355,21 @@
                 </div>
               </div>
 
-              <!-- Comprobante Digital (Gestionado Automáticamente en Supabase S3) -->
+              <!-- Comprobante Digital Automático -->
               <input type="hidden" id="fotoUrl" name="fotoUrl"
-                     value="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-verificado-app.jpeg" />
+                     value="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" />
               <div class="slds-box slds-box_x-small slds-m-bottom_medium" style="background: #f8fafc; border-color: #e2e8f0; border-radius: 8px;">
                 <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
-                  <strong>Almacenamiento Seguro S3:</strong> El comprobante se procesa y vincula automáticamente con nombre auditado (<code>remito-{timestamp}</code>). No necesitás ingresar URLs manualmente.
+                  <strong>Resguardo Digital Automático:</strong> La foto del comprobante se guarda y vincula automáticamente a esta entrega para su consulta.
                 </p>
               </div>
 
               <!-- Botones Modal -->
               <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-                <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalConfirmacion()">
+                <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalConfirmacion()" style="min-height: 36px; padding: 0 14px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
                   Cancelar
                 </button>
-                <button type="submit" id="btn-submit-confirmar" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; color: #ffffff !important; font-weight: 700; padding: 0 20px; min-width: 130px;">
+                <button type="submit" id="btn-submit-confirmar" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; color: #ffffff !important; font-weight: 700; padding: 0 18px; min-width: 120px; min-height: 38px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;">
                   <span id="btn-confirmar-text">Confirmar</span>
                 </button>
               </div>
@@ -372,14 +389,16 @@
           <div class="slds-modal__content slds-p-around_none" style="border-radius: 12px; overflow: hidden; background: #0f172a; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; color: #ffffff;">
               <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.3rem;">📄</span>
+                <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #38bdf8;">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#file}"></use>
+                </svg>
                 <div>
                   <h3 id="visor-codigo" style="font-weight: 800; font-size: 1.1rem; margin: 0; color: #38bdf8;">Comprobante de Entrega</h3>
-                  <p id="visor-subtitulo" style="font-size: 0.78rem; margin: 0; color: #94a3b8;">Remito Digital Auditado en Supabase S3</p>
+                  <p id="visor-subtitulo" style="font-size: 0.78rem; margin: 0; color: #cbd5e1;">Comprobante Digital Certificado en Destino</p>
                 </div>
               </div>
               <div style="display: flex; gap: 8px; align-items: center;">
-                <a id="visor-link-externo" href="#" target="_blank" class="slds-button slds-button_neutral slds-button_small" style="font-size: 0.76rem; font-weight: 700; border-radius: 4px;">
+                <a id="visor-link-externo" href="#" target="_blank" class="slds-button slds-button_neutral slds-button_small" style="font-size: 0.78rem; font-weight: 700; border-radius: 6px; min-height: 36px; display: inline-flex; align-items: center; padding: 0 12px;">
                   Abrir Original ↗
                 </a>
                 <button type="button" class="slds-button dt-modal-close-btn" onclick="cerrarVisorRemito()" title="Cerrar (Esc)" aria-label="Cerrar" style="position: static !important;">
@@ -389,11 +408,14 @@
               </div>
             </div>
             <div style="text-align: center; padding: 20px; background: #020617; min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-              <img id="visor-img" src="" alt="Comprobante de Recepción"
+              <img id="visor-img" src="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" alt="Comprobante de Recepción"
                    style="max-width: 100%; max-height: 70vh; border-radius: 8px; object-fit: contain; box-shadow: 0 4px 20px rgba(0,0,0,0.7); transition: transform 0.25s ease; cursor: zoom-in;"
                    onclick="toggleZoomVisor(this)" />
-              <p style="margin-top: 10px; font-size: 0.75rem; color: #64748b;">
-                💡 Hacé clic sobre la imagen para alternar zoom · Presioná <kbd style="background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #cbd5e1;">Esc</kbd> para cerrar
+              <p style="margin-top: 10px; font-size: 0.75rem; color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+                <svg class="slds-icon slds-icon_xx-small" aria-hidden="true" style="fill: #cbd5e1;">
+                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#info}"></use>
+                </svg>
+                Hacé clic sobre la imagen para alternar zoom · Presioná <kbd style="background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #cbd5e1;">Esc</kbd> para cerrar
               </p>
             </div>
           </div>
@@ -515,12 +537,20 @@
         }
 
         // 2. Inicializar Filtros y Paginación de Entregas
+        var inputBusqueda = document.getElementById('busqueda-entregas');
+        if (inputBusqueda) {
+          inputBusqueda.addEventListener('input', filtrarEntregas);
+        }
+        var selectEstado = document.getElementById('filtro-estado');
+        if (selectEstado) {
+          selectEstado.addEventListener('change', filtrarEntregas);
+        }
         filtrarEntregas();
       });
 
       // Paginación y Filtrado Dinámico de Entregas
       var paginaActual = 1;
-      var tarjetasPorPagina = 6;
+      var tarjetasPorPagina = 9;
       var tarjetasFiltradas = [];
 
       window.filtrarEntregas = function () {
@@ -621,7 +651,7 @@
           var file = input.files[0];
           var info = document.getElementById('camera-filename');
           if (info) {
-            info.innerHTML = '✅ Foto lista para subir a Supabase S3: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
+            info.innerHTML = 'Foto lista para adjuntar al comprobante: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
             info.style.color = '#166534';
           }
           var preview = document.getElementById('camera-preview');
@@ -630,6 +660,10 @@
             reader.onload = function(e) {
               preview.src = e.target.result;
               preview.style.display = 'block';
+              var hiddenUrl = document.getElementById('fotoUrl');
+              if (hiddenUrl) {
+                hiddenUrl.value = e.target.result;
+              }
             };
             reader.readAsDataURL(file);
           }
@@ -645,7 +679,7 @@
         var link = document.getElementById('visor-link-externo');
         if (!modal || !img) return;
 
-        img.src = url || 'https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp';
+        img.src = url || 'https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp';
         if (tit) tit.textContent = codigo ? ('Comprobante ' + codigo) : 'Comprobante de Entrega';
         if (sub) sub.textContent = subtitulo || 'Remito de descarga certificado en sede';
         if (link) link.href = url || '#';
@@ -681,7 +715,7 @@
               btn.disabled = true;
               btn.style.opacity = '0.75';
               btn.style.cursor = 'not-allowed';
-              txt.innerHTML = '⏳ Subiendo y certificando...';
+              txt.innerHTML = 'Subiendo y certificando...';
             }
           });
         }

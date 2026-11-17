@@ -245,9 +245,9 @@ class DonanteFlowTest {
 
     @Test
     @DisplayName(
-        "Donante sin donaciones personales debe utilizar fallback histórico de DEFAULT_DONANTE_ID")
-    void testPanelDonanteFallbackDefaultDonante() throws Exception {
-      // Arrange: donantePersonaId custom no tiene donaciones, pero DEFAULT_DONANTE_ID sí
+        "Donante nuevo sin donaciones personales ve su panel limpio con 0 donaciones e isNuevoUsuario en true")
+    void testPanelDonanteNuevoSinDonaciones() throws Exception {
+      // Arrange: donantePersonaId custom no tiene donaciones aún
       UUID customDonante = UUID.randomUUID();
       Jwt jwtCustom =
           Jwt.withTokenValue("mock-custom-donante")
@@ -262,18 +262,8 @@ class DonanteFlowTest {
           new JwtAuthenticationToken(
               jwtCustom, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")), "Nuevo Usuario");
 
-      UUID defaultDonanteId = UUID.fromString("a1111111-1111-4111-8111-111111111111");
-
       when(donacionesGateway.listarDonaciones(null, customDonante))
           .thenReturn(Collections.emptyList());
-      when(donacionesGateway.listarDonaciones(null, defaultDonanteId))
-          .thenReturn(
-              List.of(
-                  Map.of(
-                      "id", UUID.randomUUID(),
-                      "estado", "EN_DEPOSITO",
-                      "descripcion", "Donación comunitaria de respaldo")));
-
       when(incentivosGateway.obtenerMetricas(customDonante)).thenReturn(Collections.emptyMap());
       when(donacionesGateway.obtenerBeneficiarios()).thenReturn(Collections.emptyList());
 
@@ -281,11 +271,10 @@ class DonanteFlowTest {
       mockMvc
           .perform(get("/app/donante").principal(customAuth))
           .andExpect(status().isOk())
-          .andExpect(model().attribute("misDonaciones", hasSize(1)))
-          .andExpect(model().attribute("isNuevoUsuario", false));
+          .andExpect(model().attribute("misDonaciones", hasSize(0)))
+          .andExpect(model().attribute("isNuevoUsuario", true));
 
       verify(donacionesGateway, times(1)).listarDonaciones(null, customDonante);
-      verify(donacionesGateway, times(1)).listarDonaciones(null, defaultDonanteId);
     }
 
     @Test

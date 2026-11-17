@@ -70,6 +70,8 @@ class ServiceSecurityFilterTest {
   @ParameterizedTest
   @ValueSource(
       strings = {
+        "/",
+        "/index.html",
         "/actuator/health",
         "/v3/api-docs",
         "/swagger-ui/index.html",

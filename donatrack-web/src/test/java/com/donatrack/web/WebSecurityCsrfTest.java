@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.donatrack.web.gateway.DonacionesGateway;
+import com.donatrack.web.gateway.IncentivosGateway;
+import com.donatrack.web.gateway.LogisticaGateway;
 import com.donatrack.web.service.SolicitudOngService;
 import jakarta.servlet.http.Cookie;
 import java.time.Instant;
@@ -45,6 +47,10 @@ class WebSecurityCsrfTest {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private DonacionesGateway donacionesGateway;
+
+  @MockitoBean private IncentivosGateway incentivosGateway;
+
+  @MockitoBean private LogisticaGateway logisticaGateway;
 
   @MockitoBean private SolicitudOngService solicitudOngService;
 
@@ -197,5 +203,61 @@ class WebSecurityCsrfTest {
       "GET en ruta no declarada /api/ruta-inexistente-no-declarada sin autenticación es bloqueada con 403 por política Default Deny")
   void testRutaNoDeclaradaSinAutenticacionRetorna403PorDefaultDeny() throws Exception {
     mockMvc.perform(get("/api/ruta-inexistente-no-declarada")).andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName("Renderizado real de Thymeleaf sin errores para Home, Novedades, Organizaciones y Paneles")
+  void testRealThymeleafTemplatesRenderCleanly() throws Exception {
+    when(incentivosGateway.obtenerTop3())
+        .thenReturn(
+            List.of(
+                Map.of("user", "María González", "donations", 12),
+                Map.of("user", "Carlos Rodríguez", "donations", 8)));
+    when(donacionesGateway.obtenerBeneficiarios()).thenReturn(List.of());
+    when(donacionesGateway.obtenerPersonas()).thenReturn(List.of());
+    when(donacionesGateway.listarDonaciones(any(), any())).thenReturn(List.of());
+    when(logisticaGateway.listarRutas()).thenReturn(List.of());
+
+    mockMvc.perform(get("/")).andExpect(status().isOk());
+    mockMvc.perform(get("/novedades")).andExpect(status().isOk());
+
+    Jwt jwtDonante =
+        Jwt.withTokenValue("mock-jwt-render")
+            .header("alg", "none")
+            .subject(UUID.randomUUID().toString())
+            .claim("username", "cdonante")
+            .claim("roles", List.of("DONANTE"))
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(3600))
+            .build();
+    MockHttpSession sessionDon = new MockHttpSession();
+    sessionDon.setAttribute(
+        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+        new SecurityContextImpl(
+            new JwtAuthenticationToken(
+                jwtDonante, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")))));
+
+    mockMvc.perform(get("/app/organizaciones/esperanza").session(sessionDon)).andExpect(status().isOk());
+    mockMvc.perform(get("/app/donante").session(sessionDon)).andExpect(status().isOk());
+
+    Jwt jwtAdmin =
+        Jwt.withTokenValue("mock-jwt-admin-render")
+            .header("alg", "none")
+            .subject(UUID.randomUUID().toString())
+            .claim("username", "admin")
+            .claim("roles", List.of("ADMIN"))
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(3600))
+            .build();
+    MockHttpSession sessionAdmin = new MockHttpSession();
+    sessionAdmin.setAttribute(
+        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+        new SecurityContextImpl(
+            new JwtAuthenticationToken(
+                jwtAdmin, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))));
+
+    mockMvc.perform(get("/app/admin/donaciones/recepcion").session(sessionAdmin)).andExpect(status().isOk());
+    mockMvc.perform(get("/app/admin/matchmaking").session(sessionAdmin)).andExpect(status().isOk());
+    mockMvc.perform(get("/app/beneficiaria").session(sessionAdmin)).andExpect(status().isOk());
   }
 }

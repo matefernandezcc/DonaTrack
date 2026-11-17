@@ -84,7 +84,7 @@ p {
     position: absolute;
     left: -9999px;
     top: 12px;
-    background: var(--blue);
+    background: var(--btn-blue-bg, #0b4a8f);
     color: #fff;
     padding: 10px 14px;
     border-radius: 8px;

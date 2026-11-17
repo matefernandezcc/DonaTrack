@@ -3,15 +3,14 @@
   th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
 
 <head>
-  <title>DonaTrack · Panel Maestro de Usuarios & Roles</title>
+  <title>DonaTrack · Gestión de Usuarios & Roles</title>
 </head>
 
 <body>
 
-  <span id="page-header-title">Panel Maestro de Control · Gestión de Usuarios & Roles</span>
+  <span id="page-header-title">Panel de Control · Gestión de Usuarios & Roles</span>
 
   <div id="main-content-slot">
-
 
     <!-- ==================== TARJETA 1: TABLA DE USUARIOS Y ROLES (MASTER) ==================== -->
     <article class="slds-card slds-m-bottom_x-large"
@@ -34,8 +33,7 @@
                 DonaTrack</span>
             </h2>
             <p class="slds-text-body_small slds-text-color_weak">
-              Control centralizado de identidades, roles de acceso y proveedores de autenticación (PostgreSQL <code
-                style="font-family: monospace;">auth.usuarios</code>).
+              Control centralizado de identidades, permisos de acceso y métodos de inicio de sesión.
             </p>
           </div>
         </header>
@@ -98,25 +96,25 @@
                   <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/rol'}" method="post"
                     style="display: flex; gap: 6px; align-items: center; margin: 0;">
                     <select name="rol" class="slds-select" aria-label="Seleccionar nuevo rol"
-                      style="font-size: 0.78rem; padding: 3px 6px; height: 30px; border-radius: 4px; width: 125px;">
+                      style="font-size: 0.78rem; padding: 4px 8px; height: 34px; border-radius: 6px; width: 125px;">
                       <option value="DONANTE" th:selected="${u['rol'] == 'DONANTE'}">DONANTE</option>
                       <option value="BENEFICIARIA" th:selected="${u['rol'] == 'BENEFICIARIA'}">BENEFICIARIA</option>
                       <option value="ADMIN" th:selected="${u['rol'] == 'ADMIN'}">ADMIN</option>
                     </select>
                     <button type="submit" class="slds-button slds-button_brand slds-button_sm"
-                      style="height: 30px; border-radius: 4px; font-size: 0.75rem; padding: 0 10px; white-space: nowrap;">
+                      style="min-height: 34px; border-radius: 6px; font-size: 0.78rem; padding: 0 12px; white-space: nowrap;">
                       Cambiar
                     </button>
                   </form>
 
-                  <!-- Botón para resetear contraseña a temporal 'password123' -->
+                  <!-- Botón para restablecer contraseña temporal -->
                   <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/reset-password'}" method="post"
                     style="margin: 0;"
-                    onsubmit="return confirm('¿Restablecer la contraseña de este usuario a \'password123\'?');">
+                    onsubmit="return confirm('¿Restablecer la contraseña de este usuario a una clave temporal segura?');">
                     <input type="hidden" name="email" th:value="${u['email']}" />
                     <button type="submit" class="slds-button slds-button_neutral"
-                      title="Resetear contraseña a 'password123'"
-                      style="height: 30px; border-radius: 4px; font-size: 0.75rem; padding: 0 12px; font-weight: 700; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
+                      title="Restablecer a contraseña temporal"
+                      style="min-height: 34px; border-radius: 6px; font-size: 0.78rem; padding: 0 12px; font-weight: 700; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
                       🔑 Resetear Clave
                     </button>
                   </form>
@@ -145,7 +143,7 @@
           <div class="slds-media__body">
             <h2 class="slds-card__header-title">
               <span class="slds-text-heading_small" style="font-weight: 800; color: #166534;">Solicitudes de
-                Verificación de ONGs (Landing Page)</span>
+                Verificación de ONGs</span>
             </h2>
             <p class="slds-text-body_small slds-text-color_weak">
               Entidades comunitarias y comedores que solicitaron el alta institucional desde el formulario público. Al
@@ -213,7 +211,7 @@
                   th:action="@{'/app/admin/solicitudes-ong/' + ${s.id()} + '/aprobar'}" method="post"
                   style="margin: 0;">
                   <button type="submit" class="slds-button slds-button_success slds-button_sm"
-                    style="font-weight: 700; border-radius: 4px; font-size: 0.75rem; padding: 0 10px; height: 30px;">
+                    style="font-weight: 700; border-radius: 6px; font-size: 0.78rem; padding: 0 14px; min-height: 36px; display: inline-flex; align-items: center;">
                     Aprobar
                   </button>
                 </form>

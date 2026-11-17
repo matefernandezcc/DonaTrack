@@ -78,10 +78,23 @@ public class ConfirmarRecepcionYNotificarUseCase {
         java.util.UUID idDonante = null;
         var recepcionOpt = recepcionRepository.buscarPorIdDonacion(donacion.getId());
         if (recepcionOpt.isPresent() && recepcionOpt.get().getDonante() != null) {
-          idDonante = recepcionOpt.get().getDonante().getId();
+          java.util.UUID rolDonanteId = recepcionOpt.get().getDonante().getId();
+          idDonante =
+              personaRepository
+                  .buscarPorRolId(rolDonanteId)
+                  .map(Persona::getId)
+                  .orElse(rolDonanteId);
         }
         if (idDonante != null) {
-          int cantidadBienes = donacion.getBienes() != null ? donacion.getBienes().size() : 1;
+          int cantidadBienes = 1;
+          if (donacion.getBienes() != null && !donacion.getBienes().isEmpty()) {
+            double sumaBienes =
+                donacion.getBienes().stream().mapToDouble(b -> b.getCantidad()).sum();
+            cantidadBienes =
+                sumaBienes > 0
+                    ? (int) Math.max(1, Math.round(sumaBienes))
+                    : donacion.getBienes().size();
+          }
           List<String> categorias = donacion.getCategoriasString();
           if (categorias == null || categorias.isEmpty()) {
             categorias = List.of("Alimentos");

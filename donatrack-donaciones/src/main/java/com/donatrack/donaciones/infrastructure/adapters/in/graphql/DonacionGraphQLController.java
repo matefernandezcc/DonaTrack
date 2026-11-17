@@ -131,12 +131,56 @@ public class DonacionGraphQLController {
     }
     try {
       UUID uuid = UUID.fromString(id);
-      return donacionJpaRepository
-          .buscarPorIdConBienes(uuid)
-          .map(this::mapToGraphQLDTO)
-          .orElse(null);
+      Optional<DonacionEntity> opt = donacionJpaRepository.buscarPorIdConBienes(uuid);
+      if (opt.isEmpty()) {
+        return null;
+      }
+
+      DonacionEntity entity = opt.get();
+      validarTitularidadDonacion(entity);
+      return mapToGraphQLDTO(entity);
     } catch (IllegalArgumentException e) {
       return null;
+    }
+  }
+
+  private void validarTitularidadDonacion(DonacionEntity entity) {
+    HttpServletRequest req = resolveRequest();
+    if (req == null
+        || JwtClaimsExtractor.esAdminOInternalService(req, internalApiKey, jwtSecret)) {
+      return;
+    }
+
+    Optional<UUID> callerUserIdOpt = JwtClaimsExtractor.extraerUserId(req, jwtSecret);
+    if (callerUserIdOpt.isEmpty()) {
+      return;
+    }
+
+    UUID callerUserId = callerUserIdOpt.get();
+    UUID callerPersonaId = JwtClaimsExtractor.extraerPersonaId(req, jwtSecret).orElse(callerUserId);
+
+    var orig = entity.getDonacionOriginal();
+    UUID donanteRolId =
+        (orig != null && orig.getDonante() != null) ? orig.getDonante().getId() : null;
+    UUID donantePersonaId =
+        (orig != null && orig.getDonante() != null && orig.getDonante().getPersona() != null)
+            ? orig.getDonante().getPersona().getId()
+            : null;
+    String usuarioIdStr = orig != null ? orig.getUsuarioId() : null;
+
+    boolean coincideDonante =
+        (donanteRolId != null
+                && (donanteRolId.equals(callerUserId) || donanteRolId.equals(callerPersonaId)))
+            || (donantePersonaId != null
+                && (donantePersonaId.equals(callerUserId)
+                    || donantePersonaId.equals(callerPersonaId)))
+            || (usuarioIdStr != null
+                && (usuarioIdStr.equalsIgnoreCase(callerUserId.toString())
+                    || usuarioIdStr.equalsIgnoreCase(callerPersonaId.toString())));
+
+    if (!coincideDonante) {
+      throw new AccessDeniedException(
+          "Acceso denegado: no posee permisos para consultar una donación de otro donante");
     }
   }
 

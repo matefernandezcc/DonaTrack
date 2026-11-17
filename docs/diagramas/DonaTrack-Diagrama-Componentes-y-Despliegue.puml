@@ -92,7 +92,15 @@ rectangle "Cluster de Observabilidad & Resiliencia" #line.dashed {
     }
 
     node "Grafana Server\n:3000" as N_Grafana {
-        component "Grafana v12.0.0\n(Dashboards Provisionados)" as ModGrafana
+        component "Grafana v12.0.0\n(Métricas + Logs + Trazas)" as ModGrafana
+    }
+
+    node "Loki Server\n:3100" as N_Loki {
+        component "Loki v2.9.8\n(Agregación de Logs JSON)" as ModLoki
+    }
+
+    node "Promtail Collector" as N_Promtail {
+        component "Promtail v2.9.8\n(Docker Stdout Scraper)" as ModPromtail
     }
 
     node "Zipkin Server\n:9411" as N_Zipkin {
@@ -196,8 +204,11 @@ ModPrometheus ----(0---- ModIncentivos : "GET /actuator/prometheus"
 ModPrometheus ----(0---- ModLogisticaLocal : "GET /actuator/prometheus"
 ModPrometheus ----(0---- ModNotificaciones : "GET /actuator/prometheus"
 
-' 3. Observabilidad: Grafana Datasource
+' 3. Observabilidad: Grafana Datasources (Métricas, Logs y Trazas)
 ModGrafana ----(0---- ModPrometheus : "PromQL Queries"
+ModGrafana ----(0---- ModLoki : "LogQL Queries"
+ModGrafana ----(0---- ModZipkin : "Traces Lookup"
+ModPromtail ....> ModLoki : "Push Docker Stdout Logs (:3100)"
 
 ' 4. Observabilidad: Trazas Distribuidas a Zipkin (HTTP Reporter)
 ModWeb ....> ModZipkin : "POST /api/v2/spans (Zipkin Brave)"

@@ -10,7 +10,6 @@
 
   <div id="main-content-slot">
 
-
     <div th:if="${errorForm != null}" class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert" style="border-radius: 6px; font-weight: 700;">
       <span class="slds-assistive-text">Error en formulario</span>
       <svg class="slds-icon slds-icon_x-small slds-m-right_x-small" aria-hidden="true" style="fill: #ffffff;">
@@ -21,7 +20,7 @@
 
     <!-- Blueprint SLDS: Tarjeta de Formulario de Recepción Física -->
     <article class="slds-card" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-width: 860px; margin: 0 auto;">
-      <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-around_medium" style="background: #f8fafc;">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-border_bottom" style="background: #f8fafc; padding: 14px 18px;">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
           <div class="slds-media__figure">
             <span class="slds-icon_container slds-icon-standard-inbox" style="background: #014486; border-radius: 6px; padding: 6px;">
@@ -39,8 +38,8 @@
             </p>
           </div>
         </header>
-        <div>
-          <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral dt-touch-target" style="font-weight: 600; min-height: 48px; display: inline-flex; align-items: center;">
+        <div class="slds-no-flex">
+          <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
             ← Ir a Matchmaking
           </a>
         </div>
@@ -55,15 +54,28 @@
               <label class="slds-form-element__label" for="idDonante" style="font-weight: 700; color: #1e293b; margin-bottom: 0;">
                 <abbr class="slds-required" title="obligatorio">*</abbr> Persona Donante Registrada
               </label>
-              <button type="button" id="btn-abrir-modal-persona" onclick="abrirModalNuevaPersona()" class="slds-button slds-button_neutral dt-touch-target" style="min-height: 48px; font-weight: 700;">
-                + Registrar Nueva Persona Donante
-              </button>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" id="btn-donante-anonimo" onclick="seleccionarDonanteAnonimo()" class="slds-button slds-button_neutral" style="min-height: 36px; padding: 0 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#identity}"></use>
+                  </svg>
+                  Donación Anónima
+                </button>
+                <button type="button" id="btn-abrir-modal-persona" onclick="abrirModalNuevaPersona()" class="slds-button slds-button_neutral" style="min-height: 36px; padding: 0 14px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
+                  </svg>
+                  Registrar Nueva Persona Donante
+                </button>
+              </div>
             </div>
             <div class="slds-form-element__control">
               <div class="slds-select_container">
                 <select class="slds-select" id="idDonante" name="idDonante" required>
                   <option value="" disabled th:selected="${personaCreadaId == null || personaCreadaId == ''}">-- Seleccioná a nombre de quién ingresa la donación --</option>
+                  <option value="a0000000-0000-4000-8000-000000000000">Donante Anónimo (Ingreso sin datos personales)</option>
                   <option th:each="p : ${personas}"
+                          th:if="${p['id'] == null or p['id'].toString() != 'a0000000-0000-4000-8000-000000000000'}"
                           th:value="${p['id']}"
                           th:selected="${personaCreadaId != null && p['id'] != null && personaCreadaId == p['id'].toString()}"
                           th:text="${((p['razonSocial'] != null && !#strings.isEmpty(p['razonSocial'])) ? p['razonSocial'] : ((p['nombre'] != null ? p['nombre'] : '') + ' ' + (p['apellido'] != null ? p['apellido'] : ''))) + ' · ' + (p['documento'] != null ? (p['documento'] instanceof T(java.util.Map) ? ((p['documento']['tipo'] != null ? p['documento']['tipo'] + ': ' : '') + (p['documento']['numero'] != null ? p['documento']['numero'] : 'S/N')) : p['documento']) : (p['email'] != null ? p['email'] : 'Donante'))}">
@@ -164,6 +176,7 @@
                 <label class="slds-checkbox_toggle slds-grid">
                   <span class="slds-form-element__label slds-m-bottom_none" style="font-weight: 700; color: #1e293b; margin-right: 12px;">¿Es artículo usado o de segunda mano?</span>
                   <input type="checkbox" name="esUsado" id="esUsado" value="true" aria-describedby="esUsado-desc" />
+                  <input type="hidden" name="_esUsado" value="on" />
                   <span id="esUsado-desc" class="slds-checkbox_faux_container" aria-live="assertive">
                     <span class="slds-checkbox_faux"></span>
                     <span class="slds-checkbox_on">Sí (Usado)</span>
@@ -180,10 +193,10 @@
               Se generará un código único de seguimiento (<code>#DT-XXXX</code>) al confirmar la recepción.
             </span>
             <div style="display: flex; gap: 10px;">
-              <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral" style="min-height: 48px; min-width: 48px;">
+              <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral" style="min-height: 36px; padding: 0 14px; font-size: 0.84rem; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center;">
                 Cancelar
               </a>
-              <button type="submit" id="btn-submit-recepcion" class="slds-button slds-button_brand" style="font-weight: 800; min-height: 48px; min-width: 160px;">
+              <button type="submit" id="btn-submit-recepcion" class="slds-button slds-button_brand" style="font-weight: 700; min-height: 38px; padding: 0 18px; font-size: 0.85rem; border-radius: 6px; display: inline-flex; align-items: center;">
                 <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
                   <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
                 </svg>
@@ -207,7 +220,10 @@
               </svg>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
-            <h2 id="modal-persona-heading" class="slds-modal__title slds-hyphenate" style="font-weight: 800; color: #014486;">
+            <h2 id="modal-persona-heading" class="slds-modal__title slds-hyphenate" style="font-weight: 800; color: #014486; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+              <svg class="slds-icon slds-icon_small slds-icon-text-default" aria-hidden="true" style="fill: #014486;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
+              </svg>
               Registrar Nueva Persona Donante
             </h2>
           </header>
@@ -222,17 +238,18 @@
                   </select>
                 </div>
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-docTipo" style="font-weight: 700;">Tipo Doc.</label>
-                  <select class="slds-select" id="np-docTipo" name="docTipo" required>
+                  <label class="slds-form-element__label" for="np-docTipo" style="font-weight: 700;">Tipo Doc. (Opcional)</label>
+                  <select class="slds-select" id="np-docTipo" name="docTipo">
                     <option value="DNI" selected>DNI</option>
+                    <option value="PASAPORTE">Pasaporte / Extranjero</option>
                     <option value="CUIT">CUIT</option>
                     <option value="CUIL">CUIL</option>
-                    <option value="PASAPORTE">Pasaporte</option>
+                    <option value="">Sin documento (Solo email/contacto)</option>
                   </select>
                 </div>
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-docNumero" style="font-weight: 700;">Nro. Documento</label>
-                  <input type="text" class="slds-input" id="np-docNumero" name="docNumero" required placeholder="Ej: 30123456" />
+                  <label class="slds-form-element__label" for="np-docNumero" style="font-weight: 700;">Nro. Documento (Opcional)</label>
+                  <input type="text" class="slds-input" id="np-docNumero" name="docNumero" placeholder="Ej: 30123456 o dejar vacío" />
                 </div>
 
                 <!-- Campos Persona Humana -->
@@ -242,8 +259,8 @@
                     <input type="text" class="slds-input" id="np-nombre" name="nombre" required placeholder="Ej: Lucía" />
                   </div>
                   <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
-                    <label class="slds-form-element__label" for="np-apellido" style="font-weight: 700;">Apellido</label>
-                    <input type="text" class="slds-input" id="np-apellido" name="apellido" required placeholder="Ej: Gómez" />
+                    <label class="slds-form-element__label" for="np-apellido" style="font-weight: 700;">Apellido (Opcional)</label>
+                    <input type="text" class="slds-input" id="np-apellido" name="apellido" placeholder="Ej: Gómez" />
                   </div>
                   <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
                     <label class="slds-form-element__label" for="np-edad" style="font-weight: 700;">Edad</label>
@@ -314,10 +331,10 @@
               </div>
             </div>
             <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 10px;">
-              <button type="button" class="slds-button slds-button_neutral dt-touch-target" onclick="cerrarModalNuevaPersona()" style="min-height: 48px;">
+              <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalNuevaPersona()" style="min-height: 36px; padding: 0 14px; border-radius: 6px; font-weight: 600;">
                 Cancelar
               </button>
-              <button type="submit" id="btn-submit-nueva-persona" class="slds-button slds-button_brand dt-touch-target" style="min-height: 48px; font-weight: 700;">
+              <button type="submit" id="btn-submit-nueva-persona" class="slds-button slds-button_brand" style="min-height: 38px; padding: 0 18px; border-radius: 6px; font-weight: 700;">
                 Guardar Persona Donante
               </button>
             </footer>
@@ -331,6 +348,14 @@
 
   <th:block id="page-scripts">
     <script>
+      function seleccionarDonanteAnonimo() {
+        var select = document.getElementById('idDonante');
+        if (select) {
+          select.value = 'a0000000-0000-4000-8000-000000000000';
+          select.dispatchEvent(new Event('change'));
+        }
+      }
+
       function abrirModalNuevaPersona() {
         var modal = document.getElementById('modal-nueva-persona-donante');
         if (modal) modal.style.display = 'block';
@@ -355,7 +380,7 @@
         if (grupoHumana) grupoHumana.style.display = esJuridica ? 'none' : 'flex';
         if (grupoJuridica) grupoJuridica.style.display = esJuridica ? 'flex' : 'none';
         if (nombreEl) nombreEl.required = !esJuridica;
-        if (apellidoEl) apellidoEl.required = !esJuridica;
+        if (apellidoEl) apellidoEl.required = false;
         if (razonEl) razonEl.required = esJuridica;
       }
 

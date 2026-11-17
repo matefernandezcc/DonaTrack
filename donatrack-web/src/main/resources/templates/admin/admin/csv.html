@@ -22,7 +22,7 @@
       </div>
       <div class="slds-card__body slds-card__body_inner">
         <p class="slds-m-bottom_medium">
-          Seleccioná un archivo CSV con el formato estándar (Nombre, Apellido, DNI/CUIT, Email, TipoPersona) para dar de alta masivamente a los donantes y sincronizarlos con la base de datos relacional.
+          Seleccioná un archivo CSV con el formato estándar (Nombre, Apellido, DNI/CUIT, Email, TipoPersona) para dar de alta masivamente a los donantes y registrarlos en el padrón de la plataforma.
         </p>
 
         <form th:action="@{/app/admin/csv}" method="post" enctype="multipart/form-data">
@@ -70,7 +70,7 @@
         <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Personas registradas">
           <thead>
             <tr class="slds-line-height_reset">
-              <th scope="col"><div class="slds-truncate" title="ID">UUID</div></th>
+              <th scope="col"><div class="slds-truncate" title="Código">Código</div></th>
               <th scope="col"><div class="slds-truncate" title="Nombre">Nombre / Razón Social</div></th>
               <th scope="col"><div class="slds-truncate" title="Identificación">Doc / CUIT</div></th>
               <th scope="col"><div class="slds-truncate" title="Email">Email de Contacto</div></th>
@@ -78,7 +78,7 @@
           </thead>
           <tbody>
             <tr class="slds-hint-parent" th:each="p : ${personas}">
-              <th scope="row"><div class="slds-truncate" th:text="${p['id']}">a1111111-1111-4111-8111-111111111111</div></th>
+              <th scope="row"><div class="slds-truncate" th:text="${p['codigoCorto'] != null ? p['codigoCorto'] : (p['id'] != null ? '#DT-' + (#strings.length(p['id'].toString()) >= 4 ? #strings.toUpperCase(#strings.substring(p['id'].toString(), 0, 4)) : #strings.toUpperCase(p['id'].toString())) : '#DT-0000')}">#DT-A111</div></th>
               <td><div class="slds-truncate" th:text="${p['nombre'] != null ? (p['nombre'] + ' ' + (p['apellido'] != null ? p['apellido'] : '')) : (p['razonSocial'] != null ? p['razonSocial'] : 'N/A')}">María González</div></td>
               <td><div class="slds-truncate" th:text="${p['documento'] != null ? (p['documento']['tipo'] + ' ' + p['documento']['numero']) : '-'}">DNI 32111222</div></td>
               <td><div class="slds-truncate" th:text="${p['email']}">donante@donatrack.org</div></td>

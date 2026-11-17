@@ -418,7 +418,7 @@ class BeneficiariaFlowTest {
               eq(donacionId),
               eq(
                   List.of(
-                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-verificado-app.jpeg")),
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp")),
               eq("AE999ZZ"));
     }
 

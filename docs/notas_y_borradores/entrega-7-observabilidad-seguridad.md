@@ -25,8 +25,8 @@ La Entrega 7 de DonaTrack consolida la madurez operativa del ecosistema distribu
        +-------------------+--------------------+-------------------+
        |                   |                    |                   |
        v                   v                    v                   v
-[ Prometheus :9090 ] [ Grafana :3000 ]    [ Zipkin :9411 ]     [ Autoheal Docker ]
-  (Scrapes Actuators)  (Dashboards)        (Spans & Traces)     (Socket Supervisor)
+[ Prometheus :9090 ] [ Grafana :3000 ]    [ Loki :3100 ]       [ Autoheal Docker ]
+  (Scrapes Actuators)  (Métricas+Logs)     (Promtail + Zipkin)  (Socket Supervisor)
 ```
 
 ---
@@ -129,7 +129,8 @@ public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(...) 
 ### 4.3 Logs Estructurados en JSON para Entornos de Producción
 En `donatrack-common/src/main/resources/logback-spring.xml` se configuró una estrategia dual por perfiles:
 - **Perfil local / test:** Salida por consola formateada y coloreada, facilitando la legibilidad en desarrollo.
-- **Perfil prod / docker:** Salida en JSON estándar mediante `LogstashEncoder` (`net.logstash.logback:logstash-logback-encoder:8.0`). Cada registro incluye automáticamente `traceId` y `spanId` del contexto MDC de Brave, permitiendo correlación directa de logs y trazas en plataformas como ElasticSearch, Loki o CloudWatch.
+- **Perfil prod / docker:** Salida en JSON estándar mediante `LogstashEncoder` (`net.logstash.logback:logstash-logback-encoder:8.0`). Cada registro incluye automáticamente `traceId` y `spanId` del contexto MDC de Brave, permitiendo correlación directa de logs y trazas.
+- **Agregación Visual con Loki y Promtail:** En `compose.yaml`, `promtail` recolecta automáticamente el `stdout` de los contenedores Docker etiquetados con el servicio/contenedor (`monitoring/promtail/promtail-config.yml`) y los indexa en `loki` (`:3100`, `monitoring/loki/loki-config.yml`). Grafana incorpora ambos datasources (`Loki` y `Zipkin` junto a `Prometheus`) y un panel unificado de logs en tiempo real en `donatrack-overview.json`.
 
 ```xml
 <springProfile name="prod,docker">
@@ -202,6 +203,7 @@ Para evitar la advertencia de Hibernate `HHH000104: firstResult/maxResults speci
 - **Protección de Red:** El endpoint `/graphql` está protegido por el filtro global `ServiceSecurityFilter`, exigiendo cabecera `Authorization: Bearer <JWT>` o `X-Service-Key`.
 - **Anti-IDOR en Resolvers:**
   - En `estadisticasDonante(idDonante)`: si el llamador no es `ADMIN` ni `INTERNAL_SERVICE`, se valida que `idDonante` coincida con su propio `userId` o `personaId` (arrojando `AccessDeniedException` si intenta consultar métricas ajenas).
+  - En `donacion(id)`: si el llamador autenticado no es `ADMIN` ni `INTERNAL_SERVICE`, se valida que el `donante.id`, `donante.persona.id` o `usuarioId` de la donación original coincida con su `userId` o `personaId` (arrojando `AccessDeniedException` ante acceso a una donación ajena).
   - En `donaciones(...)`: para usuarios no administradores, se fuerza que el filtro de consulta aplique sobre su propio `callerUserId`.
 - **Paginación Defensiva:** Se acota el parámetro `tamanio` mediante `Math.min(tamanio, 50)` para mitigar ataques de denegación de servicio por consultas masivas.
 - **Deshabilitación de GraphiQL en Producción:** En `application-prod.properties` se configuró `spring.graphql.graphiql.enabled=false`.

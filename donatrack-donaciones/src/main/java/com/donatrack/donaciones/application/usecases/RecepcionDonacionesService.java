@@ -47,8 +47,31 @@ public class RecepcionDonacionesService implements RecepcionDonacionesUseCase {
     Persona donantePersona =
         personaRepository
             .buscarPorId(idDonante)
-            .or(() -> personaRepository.buscarPorId(DEFAULT_DONANTE_UUID))
-            .orElseThrow(() -> new IllegalArgumentException("Donante no encontrado"));
+            .orElseGet(
+                () -> {
+                  boolean esAnonimo =
+                      "a0000000-0000-4000-8000-000000000000"
+                          .equalsIgnoreCase(idDonante.toString());
+                  com.donatrack.donaciones.domain.entities.persona.PersonaHumana nueva =
+                      new com.donatrack.donaciones.domain.entities.persona.PersonaHumana(
+                          esAnonimo
+                              ? "anonimo@donatrack.org"
+                              : "donante-"
+                                  + idDonante.toString().substring(0, 8)
+                                  + "@donatrack.org",
+                          null,
+                          null,
+                          null,
+                          "Donante",
+                          esAnonimo ? "Anónimo" : "Solidario",
+                          30);
+                  nueva.setId(idDonante);
+                  Donante rolDonante = new Donante();
+                  rolDonante.setId(idDonante);
+                  nueva.agregarRol(rolDonante);
+                  personaRepository.guardar(nueva);
+                  return nueva;
+                });
 
     java.util.UUID idAdmin =
         requestDTO.idAdministrador() != null ? requestDTO.idAdministrador() : DEFAULT_ADMIN_UUID;

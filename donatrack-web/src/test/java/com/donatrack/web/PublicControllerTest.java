@@ -198,6 +198,41 @@ class PublicControllerTest {
     }
 
     @Test
+    @DisplayName("GET /novedades debe responder 200 OK, filtrar por búsqueda y paginar resultados")
+    void testNovedadesPage() throws Exception {
+      mockMvc
+          .perform(get("/novedades"))
+          .andExpect(status().isOk())
+          .andExpect(view().name("public/novedades"))
+          .andExpect(model().attributeExists("novedades"))
+          .andExpect(model().attribute("novedades", hasSize(6)))
+          .andExpect(model().attribute("paginaActual", 1))
+          .andExpect(model().attribute("totalPaginas", 2));
+
+      mockMvc
+          .perform(get("/novedades").param("q", "Jornada Mundial"))
+          .andExpect(status().isOk())
+          .andExpect(view().name("public/novedades"))
+          .andExpect(model().attribute("novedades", hasSize(1)));
+    }
+
+    @Test
+    @DisplayName("GET /novedades/{id} debe mostrar el detalle mini-blog y 3 últimas novedades")
+    void testNovedadDetallePage() throws Exception {
+      mockMvc
+          .perform(get("/novedades/x-jornada-mundial-de-los-pobres"))
+          .andExpect(status().isOk())
+          .andExpect(view().name("public/novedad-detalle"))
+          .andExpect(model().attributeExists("novedad"))
+          .andExpect(model().attribute("ultimasNovedades", hasSize(3)));
+
+      mockMvc
+          .perform(get("/novedades/articulo-inexistente"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/novedades"));
+    }
+
+    @Test
     @DisplayName("GET /healthcheck debe retornar estado UP en formato JSON")
     void testHealthcheck() throws Exception {
       mockMvc
@@ -439,7 +474,7 @@ class PublicControllerTest {
           .andExpect(
               jsonPath("$.comprobante.fotos[0]")
                   .value(
-                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-3300.webp"));
+                      "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp"));
     }
 
     @Test

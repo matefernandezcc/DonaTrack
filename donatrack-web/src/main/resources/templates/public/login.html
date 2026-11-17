@@ -132,7 +132,8 @@
 
     .btn-salesforce {
       width: 100%;
-      padding: 11px 16px;
+      min-height: 48px;
+      padding: 12px 16px;
       background-color: #0176d3;
       border: 1px solid #0176d3;
       border-radius: 4px;
@@ -186,7 +187,8 @@
       justify-content: center;
       gap: 10px;
       width: 100%;
-      padding: 9px 14px;
+      min-height: 48px;
+      padding: 10px 14px;
       background: #ffffff;
       border: 1px solid #c9c7c5;
       border-radius: 4px;
@@ -200,43 +202,6 @@
     .btn-sso:hover {
       background-color: #f4f6f9;
       border-color: #b0adab;
-    }
-
-    .demo-badges {
-      margin-top: 24px;
-      padding: 12px;
-      background: #eaf5fe;
-      border: 1px solid #cbe5fb;
-      border-radius: 6px;
-      text-align: left;
-      font-size: 0.775rem;
-      color: #032d60;
-      line-height: 1.5;
-    }
-
-    .demo-badges strong {
-      display: block;
-      margin-bottom: 4px;
-      color: #014486;
-    }
-
-    .demo-chip {
-      display: inline-block;
-      background: #ffffff;
-      border: 1px solid #b8daf8;
-      border-radius: 4px;
-      padding: 2px 7px;
-      margin: 2px 2px 2px 0;
-      cursor: pointer;
-      font-family: monospace;
-      font-size: 0.75rem;
-      transition: background-color 0.1s ease;
-    }
-
-    .demo-chip:hover {
-      background: #0176d3;
-      color: #ffffff;
-      border-color: #0176d3;
     }
 
     .login-footer {
@@ -574,6 +539,11 @@
           <span th:text="${logoutMessage}">Sesión cerrada exitosamente.</span>
         </div>
 
+        <div th:if="${registerSuccess != null}"
+          style="background-color: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8125rem; text-align: left;">
+          <span th:text="${registerSuccess}">Solicitud registrada con éxito.</span>
+        </div>
+
         <!-- Formulario de Acceso -->
         <form th:action="@{/login}" method="post" id="loginForm">
           <div class="form-group">
@@ -620,7 +590,7 @@
               <path fill="#EA4335"
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.62l4 3.09c.95-2.85 3.6-4.96 6.73-4.96z" />
             </svg>
-            Google Workspace
+            Continuar con Google
           </a>
 
           <a th:href="@{/oauth2/authorization/github}" class="btn-sso">
@@ -628,23 +598,16 @@
               <path
                 d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
-            GitHub Enterprise
+            Continuar con GitHub
           </a>
         </div>
 
-        <!-- Credenciales Demo Interactivas -->
-        <div class="demo-badges">
-          <strong>Acceso Rápido para Evaluación:</strong>
-          <span class="demo-chip" onclick="fillCreds('admin', 'admin')">🔑 Admin</span>
-          <span class="demo-chip" onclick="fillCreds('donante', 'donante')">🎁 Donante</span>
-          <span class="demo-chip" onclick="fillCreds('beneficiaria', 'beneficiaria')">🏢 Beneficiaria</span>
-        </div>
 
         <!-- Acceso a Registro -->
         <div
           style="margin-top: 18px; font-size: 0.85rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 14px;">
           ¿No tenés una cuenta?
-          <a th:href="@{/registro}" style="color: #0176d3; font-weight: 700; text-decoration: none;">Registrate
+          <a th:href="@{/registro}" style="color: #014486; font-weight: 700; text-decoration: none;">Registrate
             gratis</a>
         </div>
 
@@ -686,15 +649,15 @@
             <div class="insight-label">Flota activa con cálculo de cubicaje</div>
           </div>
           <div class="insight-card">
-            <div class="insight-number">4 ONGs</div>
+            <div class="insight-number">+128 ONGs</div>
             <div class="insight-label">Comedores y fundaciones asistidas</div>
           </div>
         </div>
       </div>
 
       <div class="banner-footer">
-        <span>DonaTrack v2.0 · Entrega 6</span>
-        <span>Salesforce Lightning Design System Inspired</span>
+        <span>DonaTrack · Logística Solidaria</span>
+        <span>Transparencia y Trazabilidad Comunitaria</span>
       </div>
     </div>
 

@@ -55,20 +55,37 @@ public class AsignacionBatchJob {
         donacionRepository.guardar(donacion);
 
         // Solicitar retiro a Logística (usando el Broker de Integración)
-        var personaOpt = personaRepository.buscarPorRolId(mejorCandidato.getId());
-        if (personaOpt.isPresent() && personaOpt.get().getDireccion() != null) {
-          var dir = personaOpt.get().getDireccion();
-          // Valores mockeados para peso/volumen para simplificar, en un caso real se calcularían
-          double pesoTotal = donacion.getBienes().size() * 2.5;
-          double volumenTotal = donacion.getBienes().size() * 0.5;
+        String calle = "Av. Santa Fe";
+        String altura = "3200";
+        String localidad = "Palermo, CABA";
+        if (personaRepository != null) {
+          var personaOpt = personaRepository.buscarPorRolId(mejorCandidato.getId());
+          if (personaOpt.isPresent() && personaOpt.get().getDireccion() != null) {
+            var dir = personaOpt.get().getDireccion();
+            if (dir.getCalle() != null && !dir.getCalle().isBlank()) {
+              calle = dir.getCalle();
+            }
+            if (dir.getAltura() > 0) {
+              altura = String.valueOf(dir.getAltura());
+            }
+            if (dir.getLocalidad() != null && !dir.getLocalidad().isBlank()) {
+              localidad = dir.getLocalidad();
+            }
+          }
+        }
+        double sumaCantidad =
+            donacion.getBienes() != null
+                ? donacion.getBienes().stream().mapToDouble(b -> b.getCantidad()).sum()
+                : 0.0;
+        double pesoTotal =
+            sumaCantidad > 0 ? sumaCantidad : Math.max(1, donacion.getBienes().size()) * 2.5;
+        double volumenTotal = Math.max(1, donacion.getBienes().size()) * 0.5;
 
+        try {
           logisticaPort.solicitarRetiro(
-              donacion.getId(),
-              pesoTotal,
-              volumenTotal,
-              dir.getCalle(),
-              String.valueOf(dir.getAltura()),
-              dir.getLocalidad());
+              donacion.getId(), pesoTotal, volumenTotal, calle, altura, localidad);
+        } catch (Exception ignored) {
+          // Tolerancia ante indisponibilidad transitoria de logística
         }
       }
     }

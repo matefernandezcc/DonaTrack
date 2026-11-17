@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -197,25 +198,26 @@ public class PublicController {
                 if (compObj instanceof Map<?, ?> compMap) {
                   Map<String, Object> compSanitizado = new HashMap<>();
                   compMap.forEach((k, v) -> compSanitizado.put(String.valueOf(k), v));
+                  String defaultRemito = "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp";
                   if (compMap.get("fotos") instanceof List<?> fotosList) {
                     List<String> fotosSanitizadas = new ArrayList<>();
                     for (Object f : fotosList) {
                       if (f != null) {
-                        String fStr = f.toString();
-                        if (fStr.contains("storage.donatrack.org")) {
-                          String filename = fStr.substring(fStr.lastIndexOf("/") + 1);
-                          if ("remito-3300.jpg".equalsIgnoreCase(filename)) {
-                            filename = "remito-3300.webp";
-                          } else if ("remito-3200.jpg".equalsIgnoreCase(filename)) {
-                            filename = "remito-3200.webp";
-                          }
-                          fotosSanitizadas.add(
-                              "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/"
-                                  + filename);
+                        String fStr = f.toString().trim();
+                        if (fStr.contains("storage.donatrack.org")
+                            || fStr.endsWith(".pdf")
+                            || fStr.contains("remito-3300")
+                            || fStr.contains("remito-3200")
+                            || fStr.contains("remito-lp-742")
+                            || fStr.contains("remito-verificado-app.jpeg")) {
+                          fotosSanitizadas.add(defaultRemito);
                         } else {
                           fotosSanitizadas.add(fStr);
                         }
                       }
+                    }
+                    if (fotosSanitizadas.isEmpty()) {
+                      fotosSanitizadas.add(defaultRemito);
                     }
                     compSanitizado.put("fotos", fotosSanitizadas);
                   }
@@ -238,7 +240,7 @@ public class PublicController {
                 "error",
                 "No se encontró el remito "
                     + codigo
-                    + ". Probá con códigos de prueba: #DT-3300, #DT-3200 o patente AF456CD."));
+                    + ". Verificá que el código o la patente ingresada sean correctos."));
   }
 
   @GetMapping(
@@ -380,7 +382,237 @@ public class PublicController {
       }
     }
     model.addAttribute("ranking", ranking);
+    List<Map<String, Object>> todasNovedades = obtenerNovedades();
+    model.addAttribute(
+        "novedadesDestacadas", todasNovedades.subList(0, Math.min(3, todasNovedades.size())));
     return "public/index";
+  }
+
+  @GetMapping("/novedades")
+  public String novedades(
+      @RequestParam(value = "q", required = false) String busqueda,
+      @RequestParam(value = "categoria", required = false) String categoria,
+      @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+      Model model) {
+    List<Map<String, Object>> todas = obtenerNovedades();
+    List<Map<String, Object>> filtradas = new ArrayList<>();
+    String qLower = busqueda != null ? busqueda.trim().toLowerCase() : "";
+    String catLower = categoria != null ? categoria.trim().toLowerCase() : "";
+
+    for (Map<String, Object> item : todas) {
+      String titulo = String.valueOf(item.getOrDefault("titulo", "")).toLowerCase();
+      String resumen = String.valueOf(item.getOrDefault("resumen", "")).toLowerCase();
+      String cat = String.valueOf(item.getOrDefault("categoria", "")).toLowerCase();
+      boolean matchQ = qLower.isBlank() || titulo.contains(qLower) || resumen.contains(qLower);
+      boolean matchC = catLower.isBlank() || cat.equals(catLower);
+      if (matchQ && matchC) {
+        filtradas.add(item);
+      }
+    }
+
+    int pageSize = 6;
+    int totalItems = filtradas.size();
+    int totalPaginas = Math.max(1, (int) Math.ceil((double) totalItems / pageSize));
+    int paginaActual = Math.max(1, Math.min(page, totalPaginas));
+    int fromIndex = Math.min((paginaActual - 1) * pageSize, totalItems);
+    int toIndex = Math.min(fromIndex + pageSize, totalItems);
+
+    model.addAttribute("novedades", filtradas.subList(fromIndex, toIndex));
+    model.addAttribute("totalResultados", totalItems);
+    model.addAttribute("paginaActual", paginaActual);
+    model.addAttribute("totalPaginas", totalPaginas);
+    model.addAttribute("busqueda", busqueda != null ? busqueda : "");
+    model.addAttribute("categoriaSeleccionada", categoria != null ? categoria : "");
+    return "public/novedades";
+  }
+
+  @GetMapping("/novedades/{id}")
+  public String novedadDetalle(@PathVariable("id") String id, Model model) {
+    List<Map<String, Object>> todas = obtenerNovedades();
+    Map<String, Object> encontrada = null;
+    List<Map<String, Object>> ultimas = new ArrayList<>();
+
+    for (Map<String, Object> item : todas) {
+      if (id.equals(item.get("id"))) {
+        encontrada = item;
+      } else if (ultimas.size() < 3) {
+        ultimas.add(item);
+      }
+    }
+
+    if (encontrada == null) {
+      return "redirect:/novedades";
+    }
+
+    model.addAttribute("novedad", encontrada);
+    model.addAttribute("ultimasNovedades", ultimas);
+    return "public/novedad-detalle";
+  }
+
+  private List<Map<String, Object>> obtenerNovedades() {
+    return List.of(
+        Map.of(
+            "id", "x-jornada-mundial-de-los-pobres",
+            "titulo", "X Jornada Mundial de los Pobres: una invitación a ser refugio y construir comunidad",
+            "fecha", "noviembre 15, 2026",
+            "fechaCorta", "11/15/2026",
+            "categoria", "Comunidad",
+            "imagen", "/img/nov-jornada-pobres.jpg",
+            "resumen", "El domingo 15 de noviembre se celebra la décima edición de la Jornada Mundial con acciones concretas en comedores y centros comunitarios...",
+            "parrafosIntro", List.of(
+                "El domingo 15 de noviembre se celebra la décima edición de la Jornada Mundial de los Pobres bajo el lema «El Señor es el refugio de los pobres». La convocatoria renueva el llamado a vivir una solidaridad concreta, que se traduzca en cercanía y compromiso en cada barrio.",
+                "¿Qué significa ser refugio para quienes más lo necesitan? No se trata solamente de responder a una necesidad urgente, sino de construir comunidades capaces de recibir, escuchar y acompañar; espacios donde cada persona sea reconocida en su dignidad y encuentre oportunidades para desarrollar sus proyectos de vida.",
+                "La Jornada invita a mirar de cerca las distintas formas que adopta la vulnerabilidad. A la falta de recursos materiales se suman, muchas veces, la soledad, la exclusión y las dificultades para acceder a derechos y oportunidades. Por eso, también interpela a revisar los vínculos que construimos en nuestras redes locales.",
+                "Desde su primera edición, esta fecha convoca a instituciones educativas, organizaciones barriales, voluntarios y donantes particulares a poner a las personas en situación de pobreza en el centro de la acción comunitaria."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Una solidaridad que se hace compromiso",
+                    "parrafos", List.of(
+                        "Este llamado adquiere un significado particular a partir de las redes solidarias que articulan en todo el país entre centros de recepción, flotas voluntarias y comedores comunitarios.",
+                        "Cada aporte registrado —desde alimentos no perecederos hasta indumentaria y kits educativos— refleja la convicción de que nadie debe quedar afuera y de que compartir los recursos disponibles multiplica las oportunidades de quienes atraviesan momentos difíciles.",
+                        "El protagonismo de jóvenes y familias que se suman al voluntariado logístico fortalece una cultura del encuentro frente al individualismo.")),
+                Map.of(
+                    "subtitulo", "Redes federales y promoción humana",
+                    "parrafos", List.of(
+                        "A lo largo de todo el país, miles de personas y organizaciones sostienen una labor compartida especialmente en los territorios donde la vulnerabilidad requiere respuestas colectivas.",
+                        "Con herramientas digitales abiertas y seguimiento por remito en destino, DonaTrack acompaña a espacios comunitarios de distintas provincias para ampliar su alcance y fortalecer capacidades.",
+                        "En sintonía con la X Jornada Mundial de los Pobres, renovamos la invitación a toda la sociedad a ser parte activa de este camino, porque la esperanza se alienta con hechos concretos.")))),
+        Map.of(
+            "id", "compromiso-solidario-y-esperanza-en-comunidad",
+            "titulo", "Compromiso solidario: la cercanía que transforma la asistencia en encuentro",
+            "fecha", "noviembre 11, 2026",
+            "fechaCorta", "11/11/2026",
+            "categoria", "Comunidad",
+            "imagen", "/img/nov-visita-pastoral.jpg",
+            "resumen", "El trabajo articulado entre donantes, equipos territoriales y centros comunitarios dejó una huella profunda en cientos de familias asistidas...",
+            "parrafosIntro", List.of(
+                "Las jornadas recientes de movilización social mostraron cómo la solidaridad organizada puede dar respuestas rápidas sin perder la calidez humana en cada entrega.",
+                "Más allá de los bienes materiales trasladados, referentes barriales y donantes destacaron el valor de generar lazos estables entre quienes ofrecen ayuda y quienes sostienen los comedores día a día."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Del aporte puntual al acompañamiento sostenido",
+                    "parrafos", List.of(
+                        "A través de campañas segmentadas por necesidad real, las entidades beneficiarias reciben exactamente aquello que precisan para sus familias: alimentos secos, abrigo por talles y útiles escolares.",
+                        "Cada entrega confirmada fotográficamente refuerza la confianza de los donantes y consolida una red solidaria previsible durante todo el año.")))),
+        Map.of(
+            "id", "voluntariado-juvenil-y-nuevos-espacios-de-ayuda",
+            "titulo", "Convocatoria abierta al voluntariado y a nuevos espacios de ayuda en todo el país",
+            "fecha", "octubre 29, 2026",
+            "fechaCorta", "10/29/2026",
+            "categoria", "Campañas",
+            "imagen", "/img/nov-bienvenida-comunidad.jpg",
+            "resumen", "Convocamos a nuevas organizaciones barriales, merenderos y voluntarios logísticos a sumarse a la red de trazabilidad abierta...",
+            "parrafosIntro", List.of(
+                "Con el crecimiento sostenido de campañas en AMBA, Córdoba, Mendoza y el Litoral, abrimos una nueva etapa de inscripción para organizaciones comunitarias y voluntarios de transporte.",
+                "El objetivo es acercar centros de acopio a cada barrio y reducir los tiempos entre la recepción de donaciones y su llegada efectiva a destino."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Cómo participar desde tu ciudad",
+                    "parrafos", List.of(
+                        "Las instituciones con personería verificable pueden postularse desde el portal público especificando sus necesidades prioritarias, días de recepción y capacidad de almacenamiento.",
+                        "Quienes deseen colaborar con traslados o clasificación pueden sumarse a los equipos regionales coordinados en cada nodo.")))),
+        Map.of(
+            "id", "semana-social-construyendo-puentes-hacia-el-bien-comun",
+            "titulo", "Semana Social 2026: construyendo puentes hacia el bien común",
+            "fecha", "septiembre 11, 2026",
+            "fechaCorta", "09/11/2026",
+            "categoria", "Institucional",
+            "imagen", "/img/nov-semana-social.jpg",
+            "resumen", "Con el espíritu de fortalecer el diálogo multisectorial, compartimos experiencias sobre innovación social, trazabilidad y equidad alimentaria...",
+            "parrafosIntro", List.of(
+                "Durante las jornadas de la Semana Social 2026, referentes de organizaciones civiles, universidades y municipios analizaron estrategias para mejorar la distribución de recursos esenciales.",
+                "En ese espacio se presentó el modelo de matchmaking equilibrado que evita la concentración de envíos en unos pocos centros y prioriza zonas con mayores carencias declaradas."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Tecnología cívica al servicio de las comunidades",
+                    "parrafos", List.of(
+                        "La digitalización de remitos y la verificación en tiempo real permiten detectar cuellos de botella logísticos y optimizar rutas urbanas y rurales.",
+                        "El encuentro concluyó con el compromiso conjunto de impulsar estándares abiertos de rendición de cuentas en toda la economía social.")))),
+        Map.of(
+            "id", "rutas-solidarias-flotas-colaborativas-para-llegar-mas-lejos",
+            "titulo", "Rutas solidarias: articulación logística para llegar a más comunidades",
+            "fecha", "julio 24, 2026",
+            "fechaCorta", "07/24/2026",
+            "categoria", "Logística",
+            "imagen", "/img/nov-rutas-solidaridad.jpg",
+            "resumen", "Nuevos acuerdos de movilidad colaborativa amplían la cobertura de repartos solidarios hacia localidades alejadas de los grandes centros urbanos...",
+            "parrafosIntro", List.of(
+                "El transporte suele ser uno de los mayores desafíos para que las donaciones acumuladas en centros urbanos lleguen a barrios periféricos y localidades del interior.",
+                "Mediante convenios con flotas colaborativas y vehículos habilitados, se incorporaron corredores periódicos con hoja de ruta digital y confirmación en sede."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Trazabilidad completa en cada kilómetro",
+                    "parrafos", List.of(
+                        "Cada despacho asignado genera un código de seguimiento público que permite a los donantes y organizaciones visualizar las etapas de preparación, tránsito y recepción.",
+                        "De este modo, se agilizan las descargas y se garantiza que cada bulto llegue intacto a quienes lo necesitan.")))),
+        Map.of(
+            "id", "rendicion-anual-y-transparencia-trazable-en-cada-entrega",
+            "titulo", "Rendición y transparencia: cómo verificamos cada aporte de principio a fin",
+            "fecha", "mayo 19, 2026",
+            "fechaCorta", "05/19/2026",
+            "categoria", "Institucional",
+            "imagen", "/img/nov-rendicion-donaciones.jpg",
+            "resumen", "Publicamos los lineamientos actualizados de auditoría abierta, control bromatológico y confirmación fotográfica al pie del camión...",
+            "parrafosIntro", List.of(
+                "La confianza de quienes donan se sostiene con información clara, verificable y accesible en cualquier momento.",
+                "Nuestro protocolo de auditoría abierta conecta el registro inicial en el centro de recepción con la firma y foto de entrega cargada por la entidad beneficiaria."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Indicadores abiertos para toda la comunidad",
+                    "parrafos", List.of(
+                        "El tablero público permite consultar remitos validados, volúmenes distribuidos por categoría y tiempos promedio de llegada a destino.",
+                        "Esta trazabilidad sin intermediarios fortalece tanto a las donaciones individuales como a las alianzas responsables con pymes y universidades.")))),
+        Map.of(
+            "id", "mesas-de-dialogo-sobre-alimentacion-y-habitat-comunitario",
+            "titulo", "Mesas de diálogo sobre alimentación, educación y hábitat comunitario",
+            "fecha", "mayo 8, 2026",
+            "fechaCorta", "05/08/2026",
+            "categoria", "Educación",
+            "imagen", "/img/nov-dialogo-habitat.jpg",
+            "resumen", "Equipos técnicos, docentes y coordinadores de centros educativos compartieron diagnósticos y propuestas para sostener trayectorias barriales...",
+            "parrafosIntro", List.of(
+                "Representantes de centros de apoyo escolar, comedores e institutos de formación mantuvieron una serie de encuentros regionales para alinear prioridades de cara al segundo semestre.",
+                "El eje central estuvo puesto en combinar la asistencia alimentaria urgente con equipamiento educativo y mejora de los espacios físicos donde estudian niños y adolescentes."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Prioridades relevadas en territorio",
+                    "parrafos", List.of(
+                        "Entre las demandas más urgentes surgieron kits escolares completos, mobiliario restaurado, estanterías para despensas comunitarias e insumos de higiene.",
+                        "A partir de estos relevamientos, la plataforma actualiza periódicamente las campañas activas para orientar mejor cada aporte.")))),
+        Map.of(
+            "id", "asistencia-coordinada-frente-a-emergencias-climaticas",
+            "titulo", "Asistencia coordinada para familias afectadas por temporales y emergencias climáticas",
+            "fecha", "enero 30, 2026",
+            "fechaCorta", "01/30/2026",
+            "categoria", "Emergencias",
+            "imagen", "/img/nov-emergencia-zonda.jpg",
+            "resumen", "Equipos locales desplegaron operativos urgentes de agua potable, alimentos secos y kits de emergencia ante eventos climáticos severos...",
+            "parrafosIntro", List.of(
+                "Frente a temporales severos y cortes prolongados de servicios, la coordinación rápida entre municipios, bomberos voluntarios y organizaciones sociales resulta decisiva.",
+                "A través de alertas prioritarias de campaña, cientos de donantes canalizaron en pocas horas bidones de agua, frazadas, calzado impermeable y alimentos listos para consumir."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Respuesta inmediata en los primeros días críticos",
+                    "parrafos", List.of(
+                        "La clasificación previa por prioridad de emergencia permitió priorizar los despachos hacia los centros de evacuados con mayor demanda.",
+                        "Mantener stock preventivo y canales digitales ágiles marca la diferencia cuando cada hora cuenta.")))),
+        Map.of(
+            "id", "red-de-apoyo-solidario-en-patagonia-acompanamiento-terreno",
+            "titulo", "Red de apoyo solidario en la Patagonia: envío urgente de insumos y acompañamiento en terreno",
+            "fecha", "enero 14, 2026",
+            "fechaCorta", "01/14/2026",
+            "categoria", "Emergencias",
+            "imagen", "/img/nov-emergencia-chubut.jpg",
+            "resumen", "Organizaciones cordilleranas y transportistas voluntarios articularon el traslado de equipamiento e insumos esenciales para comunidades afectadas...",
+            "parrafosIntro", List.of(
+                "Ante las emergencias rurales y forestales registradas en la región andina patagónica, brigadistas comunitarios y parroquias locales solicitaron insumos de primera necesidad y elementos de protección.",
+                "Desde distintos puntos del país se organizaron colectas trazables que viajaron en unidades consolidadas directamente hacia los depósitos regionales del sur."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "Solidaridad federal sin fronteras regionales",
+                    "parrafos", List.of(
+                        "Cada paleta consolidada incluyó inventario detallado de agua mineral, alimentos no perecederos, ropa de trabajo e insumos sanitarios.",
+                        "La red permanece activa acompañando la etapa de reconstrucción junto a referentes y vecinos de la comarca.")))));
   }
 
   private String resolverNombrePublico(
@@ -428,7 +660,11 @@ public class PublicController {
       @RequestParam(value = "logout", required = false) String logout,
       Model model) {
     if (error != null) {
-      model.addAttribute("loginError", "Usuario o contraseña inválidos.");
+      if ("oauth_cancelled".equalsIgnoreCase(error)) {
+        model.addAttribute("loginError", "Inicio de sesión social cancelado por el usuario.");
+      } else {
+        model.addAttribute("loginError", "Usuario o contraseña inválidos.");
+      }
     }
     if (logout != null) {
       model.addAttribute("logoutMessage", "Sesión cerrada correctamente.");
@@ -529,7 +765,7 @@ public class PublicController {
 
         redirectAttributes.addFlashAttribute(
             "registerSuccess",
-            "Solicitud institucional registrada con éxito. Su cuenta se encuentra en revisión ('BENEFICIARIA_PENDIENTE') para verificación de personería jurídica. Le notificaremos por correo electrónico una vez habilitada.");
+            "Solicitud institucional registrada con éxito. Su cuenta se encuentra en revisión para verificación de personería jurídica. Le notificaremos por correo electrónico una vez habilitada.");
         return "redirect:/login";
       }
 
@@ -542,13 +778,42 @@ public class PublicController {
                   "email", email,
                   "password", password,
                   "rol", "DONANTE"));
+      if (donacionesGateway != null && tokenResponse != null && tokenResponse.user() != null) {
+        try {
+          UUID pId =
+              tokenResponse.user().personaId() != null
+                  ? tokenResponse.user().personaId()
+                  : tokenResponse.user().id();
+          String full = nombre != null ? nombre.trim() : "Donante Web";
+          int sp = full.indexOf(' ');
+          String firstName = sp > 0 ? full.substring(0, sp).trim() : full;
+          String lastName = sp > 0 ? full.substring(sp + 1).trim() : "";
+          String mailClean = email != null ? email.trim() : "";
+          Map<String, Object> personaPayload = new HashMap<>();
+          personaPayload.put("id", pId.toString());
+          personaPayload.put("tipo", "HUMANA");
+          personaPayload.put("nombre", firstName);
+          personaPayload.put("apellido", lastName);
+          personaPayload.put("edad", 30);
+          personaPayload.put("email", mailClean);
+          personaPayload.put(
+              "contacto",
+              Map.of("correoElectronico", mailClean, "medioPredeterminado", "CORREO"));
+          donacionesGateway.crearPersona(personaPayload);
+        } catch (Exception ignored) {
+        }
+      }
       establecerSesionSegura(tokenResponse.accessToken(), request, response);
       String rol = tokenResponse.user().rol();
       return "redirect:/app/" + rol.toLowerCase();
     } catch (Exception e) {
       log.warn("Fallo al registrar usuario {}: {}", username, e.getMessage());
-      redirectAttributes.addFlashAttribute(
-          "registerError", "No se pudo crear la cuenta: " + e.getMessage());
+      String rawMsg = e.getMessage();
+      String friendlyMsg =
+          esMensajeTecnico(rawMsg)
+              ? "Algo ha salido mal, intentalo de nuevo en unos minutos..."
+              : "No se pudo crear la cuenta: " + rawMsg;
+      redirectAttributes.addFlashAttribute("registerError", friendlyMsg);
       return "redirect:/registro";
     }
   }
@@ -558,6 +823,37 @@ public class PublicController {
   public ResponseEntity<?> registrarSolicitudOng(@RequestBody Map<String, String> body) {
     try {
       var solicitud = solicitudOngService.registrarSolicitud(body);
+      if (donacionesGateway != null) {
+        try {
+          donacionesGateway.registrarSolicitudOng(body);
+        } catch (Exception ignored) {
+        }
+      }
+      if (authGateway != null) {
+        String email = body.getOrDefault("email", "").trim();
+        String nombre =
+            body.getOrDefault("nombreOng", body.getOrDefault("nombreOrganizacion", "Organización"))
+                .trim();
+        if (!email.isEmpty()) {
+          String username =
+              body.getOrDefault("username", email.split("@")[0].replaceAll("[^a-zA-Z0-9_.-]", ""))
+                  .trim();
+          String password = body.get("password");
+          if (password == null || password.isBlank()) {
+            password = "DonaTrack!" + UUID.randomUUID().toString().substring(0, 8);
+          }
+          try {
+            authGateway.registrar(
+                Map.of(
+                    "nombre", nombre.isEmpty() ? "Organización" : nombre,
+                    "username", username.isEmpty() ? email : username,
+                    "email", email,
+                    "password", password,
+                    "rol", "BENEFICIARIA_PENDIENTE"));
+          } catch (Exception ignored) {
+          }
+        }
+      }
       return ResponseEntity.ok(
           Map.of(
               "ok",
@@ -567,8 +863,29 @@ public class PublicController {
               "id",
               solicitud.id()));
     } catch (Exception e) {
-      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+      String rawMsg = e.getMessage();
+      String errorMsg =
+          esMensajeTecnico(rawMsg)
+              ? "Algo ha salido mal, intentalo de nuevo en unos minutos..."
+              : rawMsg;
+      return ResponseEntity.badRequest().body(Map.of("error", errorMsg));
     }
+  }
+
+  private boolean esMensajeTecnico(String msg) {
+    if (msg == null || msg.isBlank()) {
+      return true;
+    }
+    String lower = msg.toLowerCase();
+    return lower.contains("http://")
+        || lower.contains("https://")
+        || lower.contains("500")
+        || lower.contains("exception")
+        || lower.contains("connection")
+        || lower.contains("timeout")
+        || lower.contains("restclient")
+        || lower.contains("sql")
+        || lower.contains("{");
   }
 
   @GetMapping("/oauth2/authorization/{provider}")

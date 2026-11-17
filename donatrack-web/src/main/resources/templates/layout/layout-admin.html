@@ -61,43 +61,105 @@
     }
 
     /* ========================================================
-       BOTONES DE CIERRE (X) EN MODALES Y TARGETS TÁCTILES WCAG (>= 48x48px)
+       PROPORCIÓN VISUAL DE BOTONES, CABECERAS Y MODALES EN BACKOFFICE
        ======================================================== */
+    h1.slds-page-header__title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+    }
+
+    .slds-card__header {
+      padding: 14px 18px !important;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slds-card__header .slds-button {
+      min-height: 34px;
+      padding: 0 12px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
     .slds-modal__close,
     button.slds-modal__close,
     .dt-modal-close-btn {
       position: absolute !important;
-      top: 8px !important;
-      right: 8px !important;
-      width: 48px !important;
-      height: 48px !important;
-      min-width: 48px !important;
-      min-height: 48px !important;
+      top: 10px !important;
+      right: 10px !important;
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      min-height: 36px !important;
       padding: 0 !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
-      border-radius: 6px !important;
+      border-radius: 8px !important;
       cursor: pointer !important;
-      border: 1px solid rgba(0, 0, 0, 0.15) !important;
+      border: 1px solid rgba(15, 23, 42, 0.14) !important;
       background: #ffffff !important;
       color: #0f172a !important;
-      font-size: 1.2rem !important;
+      font-size: 1rem !important;
       font-weight: 800 !important;
       line-height: 1 !important;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12) !important;
       transition: all 0.15s ease-in-out !important;
       z-index: 10002 !important;
       text-decoration: none !important;
     }
 
-    .dt-touch-target,
-    #admin-menu-toggle {
+    .dt-touch-target {
       min-width: 48px !important;
       min-height: 48px !important;
+    }
+
+    #admin-menu-toggle,
+    #btn-notificaciones-toggle,
+    #btn-notificaciones-refresh,
+    #btn-notificaciones-close,
+    .slds-notify__close .slds-button {
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      min-height: 36px !important;
+      padding: 0 !important;
+      border-radius: 8px !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
+      line-height: 1 !important;
+    }
+
+    #admin-menu-toggle svg,
+    #btn-notificaciones-toggle svg,
+    #btn-notificaciones-refresh svg,
+    #btn-notificaciones-close svg {
+      width: 16px !important;
+      height: 16px !important;
+      margin: 0 !important;
+    }
+
+    .dt-touch-target {
+      min-height: 36px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      line-height: 1.2;
     }
 
     .slds-modal__close span[aria-hidden="true"],
@@ -1025,12 +1087,12 @@
             </svg>
             <span class="slds-assistive-text">Notificaciones</span>
             <span id="notif-badge-count" class="slds-badge slds-theme_error"
-              style="display: none; position: absolute; top: 2px; right: 2px; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; line-height: 1.2;">0</span>
+              style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; line-height: 1.2;">0</span>
           </button>
 
           <section id="popover-notificaciones" aria-label="Notificaciones recientes"
             class="slds-popover slds-popover_large slds-nubbin_top-right" role="dialog"
-            style="display: none; position: absolute; right: 0; top: 54px; width: 360px; max-width: 92vw; z-index: 9999; background: #ffffff;">
+            style="display: none; position: absolute; right: 0; top: 44px; width: 360px; max-width: 92vw; z-index: 9999; background: #ffffff;">
             <header class="slds-popover__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
               <h2 class="slds-text-heading_small" style="font-weight: 800; color: #014486; margin: 0;">Notificaciones</h2>
               <div class="slds-grid" style="gap: 4px;">
@@ -1088,9 +1150,11 @@
               th:text="${nombreCompleto != null ? nombreCompleto : #authentication.name}">Usuario</strong>
           </span>
         </div>
-        <a th:href="@{/}" class="slds-button slds-button_neutral slds-m-right_small">Ir a Web Pública</a>
+        <a th:href="@{/}" class="slds-button slds-button_neutral slds-m-right_small"
+          style="min-height: 36px; padding: 0 12px; font-size: 0.8125rem; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center;">Ir a Web Pública</a>
         <form th:action="@{/logout}" method="post" style="display: inline;">
-          <button class="slds-button slds-button_destructive" type="submit">Cerrar sesión</button>
+          <button class="slds-button slds-button_destructive" type="submit"
+            style="min-height: 36px; padding: 0 12px; font-size: 0.8125rem; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center;">Cerrar sesión</button>
         </form>
       </div>
 
@@ -1185,7 +1249,7 @@
               <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
               </svg>
-              <span class="slds-truncate" style="font-weight: 700; color: #014486;">Usuarios & Roles (Master)</span>
+              <span class="slds-truncate" style="font-weight: 700; color: #014486;">Usuarios & Roles</span>
             </a>
           </li>
         </ul>
@@ -1294,7 +1358,7 @@
                     <h1 class="slds-page-header__title slds-truncate" th:insert="${pageTitle}">Panel de Control</h1>
                   </div>
                 </div>
-                <p class="slds-page-header__name-meta">Gestión en tiempo real vinculada a microservicios DonaTrack</p>
+                <p class="slds-page-header__name-meta">Gestión operativa en tiempo real en DonaTrack</p>
               </div>
             </div>
           </div>
@@ -1499,11 +1563,11 @@
         window.addEventListener('resize', sincronizarAriaExpanded, { passive: true });
       }
 
-      // FASE 2: Intercepción de navegación client-side en menú lateral Donante
+      // FASE 2: Intercepción de navegación client-side en menú lateral Donante y navegación directa
       document.querySelectorAll('#admin-nav a.slds-nav-vertical__action').forEach(function (link) {
         link.addEventListener('click', function (e) {
           var href = link.getAttribute('href');
-          if (!href) return;
+          if (!href || href === '#') return;
           if (window.location.pathname === '/app/donante' && href.startsWith('/app/donante') && href.indexOf('/app/donante/donaciones') === -1) {
             if (typeof window.cambiarTabDonante === 'function') {
               var targetUrl = new URL(href, window.location.origin);
@@ -1511,7 +1575,12 @@
               e.preventDefault();
               window.cambiarTabDonante(targetTab, true);
               sincronizarSidebarDonante(targetTab);
+              return;
             }
+          }
+          if (!e.defaultPrevented && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+            e.preventDefault();
+            window.location.href = href;
           }
         });
       });

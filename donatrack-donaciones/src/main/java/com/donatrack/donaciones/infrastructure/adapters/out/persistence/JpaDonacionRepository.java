@@ -92,6 +92,30 @@ public class JpaDonacionRepository implements DonacionRepository {
                       necesidadElegida = benefEntity.getNecesidadesDeclaradas().get(0);
                     }
                   }
+                  if (necesidadElegida == null) {
+                    com.donatrack.donaciones.infrastructure.adapters.out.persistence.entities
+                            .NecesidadExtraordinariaEntity
+                        nuevaNec =
+                            new com.donatrack.donaciones.infrastructure.adapters.out.persistence
+                                .entities.NecesidadExtraordinariaEntity();
+                    nuevaNec.setId(UUID.randomUUID());
+                    nuevaNec.setBeneficiario(benefEntity);
+                    nuevaNec.setSubcategoriaRequerida(entity.getSubcategoriaAsignada());
+                    nuevaNec.setDescripcion("Recepción solidaria general");
+                    nuevaNec.setFechaSolicitud(LocalDateTime.now());
+                    nuevaNec.setEstado("PENDIENTE");
+                    nuevaNec.setCantidadRequerida(100.0);
+                    if (benefEntity.getNecesidadesDeclaradas() == null) {
+                      benefEntity.setNecesidadesDeclaradas(new java.util.ArrayList<>());
+                    }
+                    benefEntity.getNecesidadesDeclaradas().add(nuevaNec);
+                    benefEntity = beneficiarioJpaRepository.saveAndFlush(benefEntity);
+                    necesidadElegida =
+                        benefEntity.getNecesidadesDeclaradas().stream()
+                            .filter(n -> nuevaNec.getId().equals(n.getId()))
+                            .findFirst()
+                            .orElse(nuevaNec);
+                  }
                   if (necesidadElegida != null) {
                     entity.setNecesidad(necesidadElegida);
                   }

@@ -10,10 +10,9 @@
 
   <div id="main-content-slot">
 
-
     <!-- ==================== ARQUITECTURA DE LOS 2 ALGORITMOS + EJECUCIÓN MANUAL / BATCH ==================== -->
     <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1;">
-      <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-around_medium">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-border_bottom" style="padding: 14px 18px;">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
           <div class="slds-media__figure">
             <span class="slds-icon_container slds-icon-standard-Einstein-Replies" style="background: #014486; border-radius: 6px; padding: 6px;">
@@ -32,22 +31,22 @@
           </div>
         </header>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-          <a th:href="@{/app/admin/donaciones/recepcion}" class="slds-button slds-button_brand dt-touch-target" style="font-weight: 700; min-height: 44px; display: inline-flex; align-items: center;">
+          <a th:href="@{/app/admin/donaciones/recepcion}" class="slds-button slds-button_brand" style="font-weight: 700; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;">
             <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
             </svg>
             Nueva Recepción en Depósito
           </a>
           <form th:action="@{/app/admin/donaciones/auditoria-vencidos}" method="post" style="display: inline;">
-            <button type="submit" class="slds-button slds-button_neutral dt-touch-target" style="font-weight: 700; min-height: 44px; display: inline-flex; align-items: center;"
+            <button type="submit" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;"
                     onclick="return confirm('¿Desea ejecutar la auditoría de vencimientos sobre todas las donaciones en depósito?');"
                     title="Ejecutar barrido sanitario de lotes vencidos">
               Ejecutar Auditoría de Vencimientos
             </button>
           </form>
           <form th:action="@{/app/admin/matchmaking/batch}" method="post" style="display: inline;">
-            <button type="submit" class="slds-button slds-button_outline-brand dt-touch-target" style="font-weight: 700; min-height: 44px; display: inline-flex; align-items: center;">
-              Ejecutar Asignación Automática Batch
+            <button type="submit" class="slds-button slds-button_outline-brand" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;">
+              Ejecutar Asignación Automática
             </button>
           </form>
         </div>
@@ -67,18 +66,18 @@
           </div>
           <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_x-small">
             <div class="slds-form-element">
-              <label class="slds-form-element__label" for="algoritmoSelect" style="font-weight: 700;">Tipo de Matchmaking</label>
+              <label class="slds-form-element__label" for="algoritmoSelect" style="font-weight: 700;">Criterio de Asignación</label>
               <div class="slds-form-element__control">
                 <select class="slds-select" id="algoritmoSelect" name="algoritmo">
-                  <option value="HIBRIDO" th:selected="${algoritmoActivo == null || algoritmoActivo == 'HIBRIDO'}">Híbrido (Algoritmo 1 Semántico ∩ Algoritmo 2 Sub-Atendidos)</option>
-                  <option value="SEMANTICO" th:selected="${algoritmoActivo == 'SEMANTICO'}">Algoritmo 1 · Solo Compatibilidad Semántica (Subcategoría exacta)</option>
-                  <option value="SUBATENDIDOS" th:selected="${algoritmoActivo == 'SUBATENDIDOS'}">Algoritmo 2 · Solo Prioridad a Entidades Sub-Atendidas (Equidad)</option>
+                  <option value="HIBRIDO" th:selected="${algoritmoActivo == null || algoritmoActivo == 'HIBRIDO'}">Combinado (Compatibilidad de Insumos + Prioridad Social)</option>
+                  <option value="SEMANTICO" th:selected="${algoritmoActivo == 'SEMANTICO'}">Compatibilidad Exacta por Categoría de Insumo</option>
+                  <option value="SUBATENDIDOS" th:selected="${algoritmoActivo == 'SUBATENDIDOS'}">Prioridad a Entidades con Mayor Urgencia</option>
                 </select>
               </div>
             </div>
           </div>
           <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_x-small">
-            <button class="slds-button slds-button_brand" type="submit" style="width: 100%; font-weight: 700;">Evaluar</button>
+            <button class="slds-button slds-button_brand" type="submit" style="width: 100%; min-height: 36px; border-radius: 6px; font-weight: 700;">Evaluar</button>
           </div>
         </form>
 
@@ -86,7 +85,7 @@
         <div class="slds-grid slds-gutters_small slds-wrap">
           <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_x-small">
             <div class="dt-algorithm-card">
-              <strong style="display: block; font-size: 0.85rem; color: #014486;">Algoritmo 1 · Compatibilidad Semántica</strong>
+              <strong style="display: block; font-size: 0.85rem; color: #014486;">Compatibilidad de Insumos</strong>
               <span style="font-size: 0.78rem; line-height: 1.4; display: block; margin-top: 4px;">
                 Cruza la subcategoría de los bienes donados (<code>No Perecederos</code>, <code>Abrigo</code>, <code>Higiene</code>) contra las necesidades materiales declaradas por cada ONG.
               </span>
@@ -94,7 +93,7 @@
           </div>
           <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_x-small">
             <div class="dt-algorithm-card">
-              <strong style="display: block; font-size: 0.85rem; color: #92400e;">Algoritmo 2 · Prioridad Sub-Atendidos</strong>
+              <strong style="display: block; font-size: 0.85rem; color: #92400e;">Prioridad a Entidades Sub-Atendidas</strong>
               <span style="font-size: 0.78rem; line-height: 1.4; display: block; margin-top: 4px;">
                 Prioriza por equidad distributiva a las organizaciones con necesidades activas en espera según su orden de alta y urgencia comunitaria.
               </span>
@@ -102,9 +101,9 @@
           </div>
           <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_x-small">
             <div class="dt-algorithm-card dt-algorithm-card_hybrid">
-              <strong style="display: block; font-size: 0.85rem; color: #166534;">Modo Híbrido (Por Defecto en Backend)</strong>
+              <strong style="display: block; font-size: 0.85rem; color: #166534;">Modo Combinado (Recomendado)</strong>
               <span style="font-size: 0.78rem; line-height: 1.4; display: block; margin-top: 4px;">
-                Ejecuta ambos motores en paralelo y devuelve la <strong>intersección</strong> (coincidencia exacta + equidad); si es vacía, retorna la unión priorizada.
+                Evalúa ambos criterios en conjunto para priorizar coincidencia exacta y equidad distributiva en cada entrega.
               </span>
             </div>
           </div>
@@ -214,7 +213,6 @@
                 <th scope="row">
                   <span class="slds-badge" style="background: #014486; color: #fff; font-family: monospace; font-weight: 700;"
                         th:text="${d.codigoCorto}">#DT-0001</span>
-                  <div style="font-size: 0.75rem; color: #64748b; font-family: monospace; margin-top: 2px;" th:text="${d.id}">uuid</div>
                 </th>
                 <td>
                   <strong style="color: #0f172a; font-weight: 700;" th:text="${d.descripcion}">Alimentos secos</strong>
@@ -310,13 +308,13 @@
                 <th scope="col"><div class="slds-truncate" title="Correo">Correo Representante</div></th>
                 <th scope="col"><div class="slds-truncate" title="Fecha Alta">Fecha Alta</div></th>
                 <th scope="col"><div class="slds-truncate" title="Necesidades">Necesidades Declaradas</div></th>
+                <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Perfil">Perfil</div></th>
               </tr>
             </thead>
             <tbody>
               <tr class="slds-hint-parent" th:each="b : ${beneficiarios}">
                 <th scope="row">
                   <div style="font-weight: 700; color: #0f172a;" th:text="${b['nombreLegible'] != null ? b['nombreLegible'] : b['correoRepresentante']}">Comedor</div>
-                  <div style="font-size: 0.7rem; color: #64748b; font-family: monospace;" th:text="${b['id']}">uuid</div>
                 </th>
                 <td><div class="slds-truncate" th:text="${b['correoRepresentante']}">representante@ong.org</div></td>
                 <td><div class="slds-truncate" th:text="${b['fechaAlta']}">2026-10-30</div></td>
@@ -324,9 +322,15 @@
                   <div class="slds-truncate" style="max-width: 340px; font-size: 0.82rem; color: #334155;"
                        th:text="${b['necesidadesTexto'] != null ? b['necesidadesTexto'] : (b['necesidadesDeclaradas'] != null ? (#lists.size(b['necesidadesDeclaradas']) + ' necesidades') : '0 necesidades')}">1 necesidad</div>
                 </td>
+                <td class="slds-text-align_right">
+                  <a th:href="@{/app/organizaciones/{id}(id=${b['id'] != null ? b['id'] : 'esperanza'}, nombre=${b['nombreLegible'] != null ? b['nombreLegible'] : b['correoRepresentante']})}"
+                     class="slds-button slds-button_neutral" style="min-height: 32px; padding: 0 10px; font-size: 0.78rem; border-radius: 6px; font-weight: 600;">
+                    Ver Perfil →
+                  </a>
+                </td>
               </tr>
               <tr th:if="${#lists.isEmpty(beneficiarios)}">
-                <td colspan="4" class="slds-text-color_weak slds-p-around_medium">No hay beneficiarios registrados en el sistema de donaciones.</td>
+                <td colspan="5" class="slds-text-color_weak slds-p-around_medium">No hay beneficiarios registrados en el sistema de donaciones.</td>
               </tr>
             </tbody>
           </table>
@@ -354,17 +358,17 @@
             <p id="vencer-detalle" class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
               Detalle del lote
             </p>
-            <p class="slds-text-body_small slds-m-top_small" style="color: #64748b; background: #fef2f2; border: 1px solid #fee2e2; padding: 10px; border-radius: 6px;">
+            <p class="slds-text-body_small slds-m-top_small" style="color: #475569; background: #fef2f2; border: 1px solid #fee2e2; padding: 10px; border-radius: 6px;">
               ⚠️ Esta acción retirará inmediatamente los bienes de la bandeja de matchmaking y los registrará en auditoría de descarte sanitario.
             </p>
           </div>
           <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalVencer()" style="min-height: 48px;">
+            <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalVencer()" style="min-height: 36px; padding: 0 14px; border-radius: 6px; font-weight: 600;">
               Cancelar
             </button>
             <form id="form-vencer-donacion" method="post" action="">
               <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-              <button type="submit" class="slds-button slds-button_destructive" style="font-weight: 800; min-height: 48px;">
+              <button type="submit" class="slds-button slds-button_destructive" style="font-weight: 700; min-height: 36px; padding: 0 14px; border-radius: 6px;">
                 Sí, marcar como Vencida
               </button>
             </form>
