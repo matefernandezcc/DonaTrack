@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-donatrack}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${LOCAL_BIND_IP:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -23,7 +23,7 @@ services:
     profiles: ["local"]
     restart: always
     ports:
-      - "${MONGO_PORT:-27017}:27017"
+      - "${LOCAL_BIND_IP:-127.0.0.1}:${MONGO_PORT:-27017}:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-donatrack}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-donatrack}
@@ -35,14 +35,16 @@ services:
   n8n:
     image: docker.n8n.io/n8nio/n8n:2.39.7
     container_name: n8n_donatrack
-    profiles: ["local"]
-    restart: always
+    restart: unless-stopped
     ports:
-      - "5678:5678"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:5678:5678"
     environment:
       - GENERIC_TIMEZONE=America/Argentina/Buenos_Aires
       - TZ=America/Argentina/Buenos_Aires
       - N8N_CORS_ALLOWED_ORIGINS=*
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-donatrack-n8n-encryption-key-2026}
+      - WEBHOOK_URL=${N8N_PUBLIC_URL:-http://n8n:5678/}
+      - N8N_SECURE_COOKIE=false
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN_BASE64=${TWILIO_AUTH_TOKEN_BASE64}
@@ -59,8 +61,8 @@ services:
     profiles: ["local"]
     restart: always
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${LOCAL_BIND_IP:-127.0.0.1}:5672:5672"
+      - "${LOCAL_BIND_IP:-127.0.0.1}:15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_LOCAL_USERNAME:-donatrack}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_LOCAL_PASSWORD:-donatrack}
@@ -72,7 +74,7 @@ services:
     container_name: zipkin_donatrack
     restart: unless-stopped
     ports:
-      - "9411:9411"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:9411:9411"
     environment:
       - STORAGE_TYPE=mem
 
@@ -81,7 +83,7 @@ services:
     container_name: prometheus_donatrack
     restart: unless-stopped
     ports:
-      - "9090:9090"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:9090:9090"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -95,7 +97,7 @@ services:
     container_name: grafana_donatrack
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
@@ -112,7 +114,7 @@ services:
     container_name: loki_donatrack
     restart: unless-stopped
     ports:
-      - "3100:3100"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:3100:3100"
     volumes:
       - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
@@ -134,7 +136,6 @@ services:
     image: willfarrell/autoheal:latest
     container_name: autoheal_donatrack
     restart: unless-stopped
-    profiles: ["local"]
     environment:
       - AUTOHEAL_CONTAINER_LABEL=autoheal
       - AUTOHEAL_INTERVAL=10
@@ -151,7 +152,7 @@ services:
     labels:
       - "autoheal=true"
     ports:
-      - "8000:8000"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:8000:8000"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8000/actuator/health || exit 1"]
       interval: 30s
@@ -171,18 +172,21 @@ services:
     env_file:
       - .env
     environment:
+      - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:--XX:+UseContainerSupport -Xms128m -Xmx512m}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
-      - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_SSL_ENABLED=false
-      - RABBITMQ_VIRTUAL_HOST=/
-      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
-      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres-donatrack}
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
+      - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
-      - LOGISTICA_URL_REMOTA=${LOGISTICA_URL_REMOTA:-https://dona-logistica.onrender.com}
-      - LOGISTICA_URL_REMOTA1=${LOGISTICA_URL_REMOTA1:-https://dona-logistica.onrender.com}
-      - LOGISTICA_URL_REMOTA2=${LOGISTICA_URL_REMOTA2:-https://dona-logistica.onrender.com}
+      - LOGISTICA_URL_REMOTA=${LOGISTICA_URL_REMOTA:-http://logistica:8002}
+      - LOGISTICA_URL_REMOTA1=${LOGISTICA_URL_REMOTA1:-http://logistica:8002}
+      - LOGISTICA_URL_REMOTA2=${LOGISTICA_URL_REMOTA2:-http://logistica:8002}
       - FEIGN_CLIENT_CONFIG_INCENTIVOS_URL=http://incentivos:8001/api
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
 
@@ -195,7 +199,7 @@ services:
     labels:
       - "autoheal=true"
     ports:
-      - "8001:8001"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:8001:8001"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8001/actuator/health || exit 1"]
       interval: 30s
@@ -215,14 +219,17 @@ services:
     env_file:
       - .env
     environment:
+      - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:--XX:+UseContainerSupport -Xms128m -Xmx512m}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
-      - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_SSL_ENABLED=false
-      - RABBITMQ_VIRTUAL_HOST=/
-      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
-      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres-donatrack}
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
+      - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
       - PERSONAS_API_URL=http://donaciones:8000
       - N8N_WEBHOOK_URL=http://n8n:5678/webhook/donatrack/badge-earned
@@ -238,7 +245,7 @@ services:
     labels:
       - "autoheal=true"
     ports:
-      - "8002:8002"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:8002:8002"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8002/actuator/health || exit 1"]
       interval: 30s
@@ -258,14 +265,17 @@ services:
     env_file:
       - .env
     environment:
+      - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:--XX:+UseContainerSupport -Xms128m -Xmx512m}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
-      - MONGO_HOST=mongo-donatrack
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_SSL_ENABLED=false
-      - RABBITMQ_VIRTUAL_HOST=/
-      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
-      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
+      - MONGO_HOST=${MONGO_HOST:-mongo-donatrack}
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
+      - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
 
@@ -278,7 +288,7 @@ services:
     labels:
       - "autoheal=true"
     ports:
-      - "8003:8003"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:8003:8003"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8003/actuator/health || exit 1"]
       interval: 30s
@@ -298,14 +308,17 @@ services:
     env_file:
       - .env
     environment:
+      - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:--XX:+UseContainerSupport -Xms128m -Xmx512m}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
-      - POSTGRES_HOST=postgres-donatrack
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_SSL_ENABLED=false
-      - RABBITMQ_VIRTUAL_HOST=/
-      - RABBITMQ_USERNAME=${RABBITMQ_LOCAL_USERNAME:-donatrack}
-      - RABBITMQ_PASSWORD=${RABBITMQ_LOCAL_PASSWORD:-donatrack}
+      - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres-donatrack}
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
+      - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-donatrack}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
 
@@ -318,7 +331,7 @@ services:
     labels:
       - "autoheal=true"
     ports:
-      - "8004:8004"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:8004:8004"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8004/actuator/health || exit 1"]
       interval: 30s
@@ -335,9 +348,11 @@ services:
     env_file:
       - .env
     environment:
+      - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:--XX:+UseContainerSupport -Xms128m -Xmx512m}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
-      - POSTGRES_HOST=postgres-donatrack
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres-donatrack}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
       - WEB_URL=${WEB_URL:-http://localhost:8080}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
@@ -354,7 +369,7 @@ services:
     labels:
       - "autoheal=true"
     ports:
-      - "8080:8080"
+      - "${ADMIN_BIND_IP:-127.0.0.1}:8080:8080"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
       interval: 30s
@@ -370,8 +385,10 @@ services:
     env_file:
       - .env
     environment:
+      - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:--XX:+UseContainerSupport -Xms128m -Xmx512m}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
       - AUTH_URL=http://auth:8004
       - AUTH_PUBLIC_URL=${AUTH_PUBLIC_URL:-http://localhost:8004}
       - DONACIONES_URL=http://donaciones:8000
@@ -381,6 +398,23 @@ services:
       - N8N_URL=http://n8n:5678
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: donatrack-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - PUBLIC_DOMAIN=${PUBLIC_DOMAIN:-163.176.254.178.nip.io}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - auth
+
 volumes:
   postgres_data:
   mongo_data:
@@ -389,3 +423,5 @@ volumes:
   prometheus_data:
   grafana_data:
   loki_data:
+  caddy_data:
+  caddy_config:
