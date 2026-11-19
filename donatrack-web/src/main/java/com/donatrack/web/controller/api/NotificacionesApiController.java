@@ -58,6 +58,9 @@ public class NotificacionesApiController {
       String personaIdStr = jwt.getToken().getClaimAsString("personaId");
       if (personaIdStr != null && !personaIdStr.isBlank()) {
         destinatarios.add("donante" + personaIdStr + "@test.com");
+        if (personaIdStr.length() >= 8) {
+          destinatarios.add("donante-" + personaIdStr.substring(0, 8) + "@donatrack.org");
+        }
         if (donacionesGateway != null) {
           try {
             UUID personaId = UUID.fromString(personaIdStr);
@@ -81,8 +84,14 @@ public class NotificacionesApiController {
       }
     }
 
-    if (auth.getName() != null && !auth.getName().isBlank() && destinatarios.isEmpty()) {
+    if (auth.getName() != null && !auth.getName().isBlank()) {
       destinatarios.add(auth.getName().trim());
+    }
+    if (auth.getAuthorities() != null
+        && auth.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equalsIgnoreCase(a.getAuthority()))) {
+      destinatarios.add("admin@donatrack.org");
+      destinatarios.add("admin");
     }
 
     if (destinatarios.isEmpty()) {
