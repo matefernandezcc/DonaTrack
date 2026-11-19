@@ -49,6 +49,10 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
     }
 
     String path = request.getRequestURI();
+    String contextPath = request.getContextPath();
+    if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
+      path = path.substring(contextPath.length());
+    }
 
     // 1. Rutas públicas de infraestructura y documentación
     if (isPublicPath(path)) {
@@ -99,6 +103,7 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
         || path.startsWith("/oauth2/")
         || path.startsWith("/login/")
         || path.startsWith("/healthcheck")
+        || path.startsWith("/graphiql")
         || path.startsWith("/api/public")
         || path.startsWith("/favicon.ico")
         || path.startsWith("/error");

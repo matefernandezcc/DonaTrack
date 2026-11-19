@@ -10,41 +10,29 @@
 	}
 }
 
-(microservices_gateway) {
-	handle_path /donaciones/* {
-		reverse_proxy donaciones:8000 {
-			header_up X-Forwarded-Prefix /donaciones
-		}
-	}
-	handle_path /incentivos/* {
-		reverse_proxy incentivos:8001 {
-			header_up X-Forwarded-Prefix /incentivos
-		}
-	}
-	handle_path /logistica/* {
-		reverse_proxy logistica:8002 {
-			header_up X-Forwarded-Prefix /logistica
-		}
-	}
-	handle_path /notificaciones/* {
-		reverse_proxy notificaciones:8003 {
-			header_up X-Forwarded-Prefix /notificaciones
-		}
-	}
-	handle_path /auth/* {
-		@auth_docs path /v3/api-docs* /swagger-ui*
-		handle @auth_docs {
-			reverse_proxy auth:8004 {
-				header_up X-Forwarded-Prefix /auth
+(service_proxy) {
+	handle_path {args[1]}/* {
+		@public_docs path /v3/api-docs* /swagger-ui* /actuator/health /actuator/info /graphiql*
+		handle @public_docs {
+			reverse_proxy {args[0]} {
+				header_up X-Forwarded-Prefix {args[1]}
 				header_up X-Service-Key {$INTERNAL_API_KEY}
 			}
 		}
 		handle {
-			reverse_proxy auth:8004 {
-				header_up X-Forwarded-Prefix /auth
+			reverse_proxy {args[0]} {
+				header_up X-Forwarded-Prefix {args[1]}
 			}
 		}
 	}
+}
+
+(microservices_gateway) {
+	import service_proxy donaciones:8000 /donaciones
+	import service_proxy incentivos:8001 /incentivos
+	import service_proxy logistica:8002 /logistica
+	import service_proxy notificaciones:8003 /notificaciones
+	import service_proxy auth:8004 /auth
 }
 
 http://163.176.254.178 {
