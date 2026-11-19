@@ -9,7 +9,7 @@ Este directorio contiene la colección completa de endpoints REST de DonaTrack p
 - `bruno-collection/`: Colección ejecutable con carpetas organizadas por Bounded Context (`Auth`, `Donaciones`, `Incentivos`, `Logistica`, `Notificaciones`).
   - Entornos preconfigurados en `bruno-collection/environments/`:
     - `dev.bru`: Apunta al entorno distribuido local en Docker (`localhost:8000`, `localhost:8001`, `localhost:8002`, `localhost:8003`, `localhost:8004`, `localhost:8080`).
-    - `prod.bru`: Apunta a los microservicios desplegados en Render y servicios SaaS.
+    - `prod.yml`: Apunta al API Gateway en Oracle Cloud (`https://api.donatrack.social/{servicio}`) y servicios SaaS.
 
 ---
 

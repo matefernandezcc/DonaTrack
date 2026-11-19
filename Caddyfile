@@ -10,6 +10,43 @@
 	}
 }
 
+(microservices_gateway) {
+	handle_path /donaciones/* {
+		reverse_proxy donaciones:8000 {
+			header_up X-Forwarded-Prefix /donaciones
+		}
+	}
+	handle_path /incentivos/* {
+		reverse_proxy incentivos:8001 {
+			header_up X-Forwarded-Prefix /incentivos
+		}
+	}
+	handle_path /logistica/* {
+		reverse_proxy logistica:8002 {
+			header_up X-Forwarded-Prefix /logistica
+		}
+	}
+	handle_path /notificaciones/* {
+		reverse_proxy notificaciones:8003 {
+			header_up X-Forwarded-Prefix /notificaciones
+		}
+	}
+	handle_path /auth/* {
+		@auth_docs path /v3/api-docs* /swagger-ui*
+		handle @auth_docs {
+			reverse_proxy auth:8004 {
+				header_up X-Forwarded-Prefix /auth
+				header_up X-Service-Key {$INTERNAL_API_KEY}
+			}
+		}
+		handle {
+			reverse_proxy auth:8004 {
+				header_up X-Forwarded-Prefix /auth
+			}
+		}
+	}
+}
+
 http://163.176.254.178 {
 	import donatrack_routes
 }
@@ -24,4 +61,46 @@ www.{$PUBLIC_DOMAIN:donatrack.social} {
 
 {$PUBLIC_DOMAIN:donatrack.social} {
 	import donatrack_routes
+}
+
+dev.{$PUBLIC_DOMAIN:donatrack.social} {
+	redir /donaciones /donaciones/swagger-ui/index.html
+	redir /incentivos /incentivos/swagger-ui/index.html
+	redir /logistica /logistica/swagger-ui/index.html
+	redir /notificaciones /notificaciones/swagger-ui/index.html
+	redir /auth /auth/swagger-ui/index.html
+
+	import microservices_gateway
+
+	handle {
+		root * /srv/dev-portal
+		file_server
+	}
+}
+
+api.{$PUBLIC_DOMAIN:donatrack.social} {
+	@cors_preflight method OPTIONS
+	handle @cors_preflight {
+		header Access-Control-Allow-Origin "*"
+		header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "Authorization, Content-Type, X-Service-Key"
+		respond "" 204
+	}
+
+	header Access-Control-Allow-Origin "*"
+	header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+	header Access-Control-Allow-Headers "Authorization, Content-Type, X-Service-Key"
+
+	@root path /
+	handle @root {
+		header Content-Type "application/json; charset=utf-8"
+		respond `{"service":"DonaTrack API Gateway","status":"UP","docs":"https://dev.{$PUBLIC_DOMAIN:donatrack.social}","services":{"donaciones":"/donaciones","incentivos":"/incentivos","logistica":"/logistica","notificaciones":"/notificaciones","auth":"/auth"}}` 200
+	}
+
+	import microservices_gateway
+
+	handle {
+		header Content-Type "application/json; charset=utf-8"
+		respond `{"status":404,"error":"Not Found","docs":"https://dev.{$PUBLIC_DOMAIN:donatrack.social}"}` 404
+	}
 }

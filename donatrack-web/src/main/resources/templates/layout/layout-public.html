@@ -104,6 +104,7 @@
       // Salesforce activo en dominios autorizados de producción o túneles de demo
       const isSalesforceDomain = hostname.endsWith('onrender.com') ||
         hostname === 'exclude-stoplight-registrar.ngrok-free.dev' ||
+        hostname.endsWith('donatrack.social') ||
         hostname.includes('donatrack.org');
 
       function loadLocalChatbot() {

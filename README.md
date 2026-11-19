@@ -13,7 +13,8 @@
 [![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?logo=swagger&logoColor=black)](https://swagger.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
-[![Render](https://img.shields.io/badge/Render-Deploy%20Live-46E3B7?logo=render&logoColor=black)](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html)
+[![Web Live](https://img.shields.io/badge/Web_Live-donatrack.social-2E8540?logo=googlechrome&logoColor=white)](https://donatrack.social)
+[![Dev & API Docs](https://img.shields.io/badge/Dev_Portal-dev.donatrack.social-85EA2D?logo=swagger&logoColor=black)](https://dev.donatrack.social)
 
 </div>
 
@@ -29,11 +30,12 @@ La plataforma resuelve los desafíos de gestión y trazabilidad que enfrenta la 
 
 ## 🌐 Despliegue en la Nube
 
-Los microservicios se encuentran preparados y desplegados de forma distribuida en Render, vinculados a infraestructura gestionada:
+La plataforma se encuentra desplegada con Docker Compose en **Oracle Cloud Infrastructure (OCI ARM64)** detrás de **Caddy 2 (Reverse Proxy, API Gateway y Auto-HTTPS con Let's Encrypt)** bajo un esquema de subdominios parametrizado por `PUBLIC_DOMAIN` (`donatrack.social`):
 
-- 🚀 **Logística Swagger UI:** [`https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html)
-- 📡 **Health Check:** [`https://donatrack-logistica-50xn.onrender.com/actuator/health`](https://donatrack-logistica-50xn.onrender.com/actuator/health)
-- 🗄️ **Persistencia Cloud:** PostgreSQL en Supabase (schemas `donaciones`, `incentivos`, `notificaciones`, `auth`), MongoDB Atlas (`donatrack_logistica`) y Supabase S3 Storage para remitos.
+- 🌍 **Portal Web SSR & Backoffice (`{PUBLIC_DOMAIN}`):** [`https://donatrack.social`](https://donatrack.social)
+- 📚 **Developer Portal & Swagger Hub Unificado (`dev.{PUBLIC_DOMAIN}`):** [`https://dev.donatrack.social`](https://dev.donatrack.social) (incluye Swagger UI interactivo, OpenAPI JSON, GraphiQL en `/donaciones/graphiql` y healthchecks por servicio: `/donaciones`, `/logistica`, `/incentivos`, `/notificaciones`, `/auth`)
+- 🔌 **API Gateway REST (`api.{PUBLIC_DOMAIN}`):** [`https://api.donatrack.social`](https://api.donatrack.social) (endpoints bajo `/donaciones/*`, `/logistica/*`, `/incentivos/*`, `/notificaciones/*` y `/auth/*`)
+- 🗄️ **Persistencia & Mensajería Cloud Managed:** PostgreSQL en Supabase (schemas `donaciones`, `incentivos`, `notificaciones`, `public`), MongoDB Atlas (`donatrack_logistica`), CloudAMQP (RabbitMQ sobre TLS `5671`) y Supabase S3 Storage para remitos.
 
 ---
 
@@ -79,8 +81,8 @@ El sistema está diseñado como una **arquitectura distribuida de microservicios
 | **Base de Datos NoSQL** | MongoDB 7.0 / Mongo Atlas | Persistencia documental para Logística (`donatrack_logistica`) |
 | **Almacenamiento de Archivos** | Supabase S3 Storage | Almacenamiento de remitos de entrega y comprobantes |
 | **Mensajería** | RabbitMQ | Topic Exchanges y colas asíncronas (`donaciones.exchange`, `logistica.exchange`) |
-| **Contenedores** | Docker + Docker Compose | Builds multi-stage optimizados para local y Render |
-| **Despliegue** | Render | Docker Web Services en la nube con perfiles independientes |
+| **Contenedores** | Docker + Docker Compose | Builds multi-stage ARM64/AMD64 optimizados para perfiles `local` y `prod` |
+| **Despliegue & Proxy** | Oracle Cloud (OCI) + Caddy 2 | VM ARM64 Always-On con Reverse Proxy, API Gateway y HTTPS automático (Let's Encrypt) |
 | **Automatización** | n8n | Flujos low-code para difusión en Discord y WhatsApp / Twilio |
 | **Frontend SSR** | Thymeleaf + SLDS 2.30 | Salesforce Lightning Design System con layouts dinámicos (Público y Backoffice) |
 | **Testing** | JUnit 5 + Mockito + H2 | Tests unitarios y de integración |
@@ -231,7 +233,7 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
 3. **Justificaciones de Diseño y Documento de Arquitectura**: [`docs/notas_y_borradores/arquitectura.md`](docs/notas_y_borradores/arquitectura.md) (justificación de arquitectura SOA, hexagonal, capas y patrones).
 4. **Diagrama de Componentes y Despliegue**: [`DonaTrack-Diagrama-Componentes-y-Despliegue.puml`](docs/diagramas/DonaTrack-Diagrama-Componentes-y-Despliegue.puml).
 5. **Implementación de requerimientos de integración**: Mensajería con RabbitMQ y Broker de logística con fallback.
-6. **Despliegue del Servicio de Logística**: Operativo y accesible vía Swagger en [`https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html`](https://donatrack-logistica-50xn.onrender.com/swagger-ui/index.html).
+6. **Despliegue inicial del Servicio de Logística (E4)**: Originalmente publicado en Render (lo que motivó el patrón `LogisticaBrokerAdapter` con tolerancia a cold-starts), luego consolidado junto al resto del stack en Oracle Cloud ([`https://dev.donatrack.social/logistica/swagger-ui/index.html`](https://dev.donatrack.social/logistica/swagger-ui/index.html)).
 
 </details>
 
@@ -280,7 +282,7 @@ El trabajo práctico se construye de manera evolutiva e incremental a lo largo d
   - **Portal Donante (`/app/donante`)**: Gamificación con insignias y progreso de misiones, cálculo de impacto ecológico/social, historial y alta de donaciones.
   - **Portal Beneficiaria (`/app/beneficiaria`)**: Declaración de necesidades materiales (recurrentes y extraordinarias), seguimiento de camiones en mapa y confirmación de recepción con fotos.
   - **Backoffice Administrador (`/app/admin`)**: Gestión de camiones y choferes con SLDS Data Table, confirmación de matchmaking y asignación de donaciones, auditoría de vencimientos en depósito, ranking mensual e importación batch de donantes por CSV (+10.000 filas).
-- **Despliegue Distribuido Multi-Cuenta (Render + SaaS)**:
+- **Despliegue Distribuido Multi-Cuenta (Render + SaaS — E6 inicial)** *(evolucionado en la fase final a **Oracle Cloud ARM64 + Caddy Auto-HTTPS**)*:
   - Cuenta 1: Core de datos (`donatrack-donaciones`, `donatrack-incentivos`, `donatrack-notificaciones`).
   - Cuenta 2: Capa de interacción y logística (`donatrack-web`, `donatrack-auth`, `donatrack-logistica`).
 - **Accesibilidad y Usabilidad**: Cumplimiento de heurísticas de Nielsen y pautas de accesibilidad **WCAG 2.1 AA** (soporte ARIA, navegación por teclado, contraste y responsive design).

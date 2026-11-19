@@ -495,6 +495,28 @@ public class PublicController {
                         "A través de campañas segmentadas por necesidad real, las entidades beneficiarias reciben exactamente aquello que precisan para sus familias: alimentos secos, abrigo por talles y útiles escolares.",
                         "Cada entrega confirmada fotográficamente refuerza la confianza de los donantes y consolida una red solidaria previsible durante todo el año.")))),
         Map.of(
+            "id", "furor-gta-vi-campana-solidaria-consolas-y-videojuegos",
+            "titulo", "Furor por el estreno de GTA VI: habilitamos la recepción solidaria de consolas, periféricos y videojuegos",
+            "fecha", "noviembre 19, 2026",
+            "fechaCorta", "11/19/2026",
+            "categoria", "Campañas",
+            "imagen", "/img/nov-campana-gamer-gta6.svg",
+            "resumen", "Con el lanzamiento más esperado de la década y el recambio masivo de hardware en la comunidad gamer, abrimos una campaña especial para donar consolas de generaciones anteriores, joysticks y juegos físicos destinados a hogares convivenciales y centros juveniles...",
+            "parrafosIntro", List.of(
+                "El estreno mundial de Grand Theft Auto VI revolucionó hoy las redes sociales y disparó una ola histórica de actualización de consolas, placas de video y pantallas en todo el país. Frente a ese entusiasmo colectivo, desde DonaTrack lanzamos una campaña semanal especial para transformar ese recambio tecnológico en inclusión recreativa.",
+                "Bajo la categoría de Juguetes y Recreación, durante esta semana recibimos consolas de generaciones anteriores (PS4, Xbox One, Nintendo Switch), joysticks funcionales, auriculares, monitores y videojuegos físicos para equipar salas de encuentro en centros juveniles, hogares convivenciales y puntos digitales barriales."),
+            "secciones", List.of(
+                Map.of(
+                    "subtitulo", "De tu setup anterior a un espacio juvenil",
+                    "parrafos", List.of(
+                        "Cada equipo que queda guardado tras dar el salto a la nueva generación rumbo a Vice City puede convertirse en una herramienta real de integración y juego compartido para adolescentes que asisten a centros comunitarios después del horario escolar.",
+                        "Nuestro equipo de recepción verifica el estado básico de cables y mandos antes de asignarlos mediante matchmaking a organizaciones con talleres juveniles o espacios lúdicos declarados en su perfil de necesidades.")),
+                Map.of(
+                    "subtitulo", "Criterios de asignación responsables",
+                    "parrafos", List.of(
+                        "Para los hogares de niños y espacios infantiles priorizamos la entrega de títulos deportivos, cooperativos, de aventuras y clasificación ATP, mientras que las consolas y monitores se distribuyen con acta digital y remito trazable igual que cualquier otro bien material.",
+                        "Si esta semana renovaste tu equipo por el estreno más esperado del año, podés registrar tu donación desde el Portal Donante y seguir su recorrido hasta la entidad receptora.")))),
+        Map.of(
             "id", "voluntariado-juvenil-y-nuevos-espacios-de-ayuda",
             "titulo", "Convocatoria abierta al voluntariado y a nuevos espacios de ayuda en todo el país",
             "fecha", "octubre 29, 2026",

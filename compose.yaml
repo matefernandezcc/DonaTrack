@@ -189,6 +189,7 @@ services:
       - LOGISTICA_URL_REMOTA2=${LOGISTICA_URL_REMOTA2:-http://logistica:8002}
       - FEIGN_CLIENT_CONFIG_INCENTIVOS_URL=http://incentivos:8001/api
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - SERVER_FORWARD_HEADERS_STRATEGY=framework
 
   incentivos:
     build:
@@ -235,6 +236,7 @@ services:
       - N8N_WEBHOOK_URL=http://n8n:5678/webhook/donatrack/badge-earned
       - N8N_WEBHOOK_RANKING_URL=http://n8n:5678/webhook/donatrack/ranking
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - SERVER_FORWARD_HEADERS_STRATEGY=framework
 
   logistica:
     build:
@@ -278,6 +280,7 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - SERVER_FORWARD_HEADERS_STRATEGY=framework
 
   notificaciones:
     build:
@@ -321,6 +324,7 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-donatrack}
       - LOGISTICA_URL_LOCAL=${LOGISTICA_URL_LOCAL:-http://logistica:8002}
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - SERVER_FORWARD_HEADERS_STRATEGY=framework
 
   auth:
     build:
@@ -407,8 +411,10 @@ services:
       - "443:443"
     environment:
       - PUBLIC_DOMAIN=${PUBLIC_DOMAIN:-donatrack.social}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./docs/dev-portal:/srv/dev-portal:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

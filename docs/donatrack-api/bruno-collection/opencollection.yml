@@ -25,8 +25,9 @@ request:
           
           if (!bru.getVar("yaResolvioLogistica")) {
             
-            // Solo testeamos los servidores reales en la nube
+            // Priorizamos el API Gateway en Oracle Cloud y mantenemos Render como fallback histórico
             const urls = [
+              "https://api.donatrack.social/logistica",
               "https://donatrack-logistica-50xn.onrender.com", 
               "https://dona-logistica.onrender.com"
             ];
@@ -35,8 +36,8 @@ request:
             
             for (const url of urls) {
               try {
-                // Le pegamos a /api/camiones porque el actuator/health da 503 si falta RabbitMQ
-                await axios.get(`${url}/api/camiones`, { 
+                // Verificamos respuesta HTTP del microservicio sin bloquear por checks de Swagger/Actuator
+                await axios.get(`${url}/actuator/health`, { 
                   timeout: 2000,
                   validateStatus: function (status) {
                     return status < 500; // Solo falla si hay timeout o explota el server
@@ -51,7 +52,7 @@ request:
 
             // 2. Si ninguno de la nube respondió, fallamos el test intencionalmente
             if (!urlActiva) {
-              throw new Error("❌ CRÍTICO: Ninguno de los servidores de Logística en Render está respondiendo.");
+              throw new Error("❌ CRÍTICO: Ninguno de los servidores de Logística en la nube está respondiendo.");
             }
 
             // Si alguno funcionó, lo seteamos y guardamos la variable
