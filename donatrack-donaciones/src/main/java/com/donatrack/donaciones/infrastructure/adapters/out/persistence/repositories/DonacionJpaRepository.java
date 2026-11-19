@@ -17,6 +17,29 @@ public interface DonacionJpaRepository extends JpaRepository<DonacionEntity, UUI
   List<DonacionEntity> findByEstado(String estado);
 
   @Query(
+      "SELECT DISTINCT d FROM DonacionEntity d "
+          + "LEFT JOIN FETCH d.donacionOriginal "
+          + "LEFT JOIN FETCH d.subcategoriaAsignada s "
+          + "LEFT JOIN FETCH s.categoria "
+          + "LEFT JOIN FETCH d.necesidad n "
+          + "LEFT JOIN FETCH n.beneficiario "
+          + "LEFT JOIN FETCH n.subcategoriaRequerida "
+          + "LEFT JOIN FETCH d.periodo")
+  List<DonacionEntity> findAllWithJoins();
+
+  @Query(
+      "SELECT DISTINCT d FROM DonacionEntity d "
+          + "LEFT JOIN FETCH d.donacionOriginal "
+          + "LEFT JOIN FETCH d.subcategoriaAsignada s "
+          + "LEFT JOIN FETCH s.categoria "
+          + "LEFT JOIN FETCH d.necesidad n "
+          + "LEFT JOIN FETCH n.beneficiario "
+          + "LEFT JOIN FETCH n.subcategoriaRequerida "
+          + "LEFT JOIN FETCH d.periodo "
+          + "WHERE d.estado = :estado")
+  List<DonacionEntity> findByEstadoWithJoins(@Param("estado") String estado);
+
+  @Query(
       value =
           "SELECT d FROM DonacionEntity d WHERE "
               + "(:estado IS NULL OR d.estado = :estado) AND "
