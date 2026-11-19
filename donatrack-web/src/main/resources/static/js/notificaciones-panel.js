@@ -1,10 +1,18 @@
 /**
- * DonaTrack — Panel y Popover de Notificaciones SLDS (UX-08 / UX-13)
- * Consulta GET /api/notificaciones/mis-alertas de forma asíncrona sin bloquear el SSR.
- * Maneja los 3 estados obligatorios: Carga, Error con recuperación y Estado Vacío.
+ * DonaTrack — Centro de Notificaciones SLDS en Header (UX-08 / UX-13)
+ * Acumula notificaciones del backend (GET /api/notificaciones/mis-alertas) y
+ * alertas operativas (flashOk / flashError) en un feed por usuario.
  */
 (function () {
   'use strict';
+
+  var MAX_NOTIFS = 30;
+
+  function getStorageKey() {
+    var btn = document.getElementById('btn-notificaciones-toggle');
+    var user = (btn && btn.getAttribute('data-user')) ? btn.getAttribute('data-user').trim() : 'anon';
+    return 'donatrack_notif_feed_' + (user || 'anon').toLowerCase();
+  }
 
   function escapeHtml(str) {
     if (str == null) return '';
@@ -25,6 +33,99 @@
     return str;
   }
 
+  function loadStoredFeed() {
+    try {
+      var raw = localStorage.getItem(getStorageKey());
+      var parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveStoredFeed(feed) {
+    try {
+      localStorage.setItem(getStorageKey(), JSON.stringify(feed.slice(0, MAX_NOTIFS)));
+    } catch (e) {}
+  }
+
+  function normalizeItem(raw) {
+    var msg = (raw && raw.mensaje) ? String(raw.mensaje).trim() : 'Notificación del sistema';
+    var fecha = (raw && raw.fechaEnvio) ? String(raw.fechaEnvio) : new Date().toISOString();
+    var medio = (raw && raw.medio) ? String(raw.medio).toUpperCase() : 'SISTEMA';
+    var key = (raw && raw.id) ? String(raw.id) : (medio + '|' + msg);
+    return {
+      id: key,
+      mensaje: msg,
+      medio: medio,
+      fechaEnvio: fecha,
+      completada: raw && raw.completada === false ? false : true,
+      esError: Boolean(raw && raw.esError),
+      leida: Boolean(raw && raw.leida)
+    };
+  }
+
+  function mergeIntoFeed(incomingList) {
+    var current = loadStoredFeed();
+    var byKey = {};
+    current.forEach(function (item) {
+      if (item && item.id) byKey[item.id] = item;
+    });
+
+    (incomingList || []).forEach(function (raw) {
+      var item = normalizeItem(raw);
+      if (!byKey[item.id]) {
+        current.unshift(item);
+        byKey[item.id] = item;
+      }
+    });
+
+    current.sort(function (a, b) {
+      return String(b.fechaEnvio || '').localeCompare(String(a.fechaEnvio || ''));
+    });
+
+    var trimmed = current.slice(0, MAX_NOTIFS);
+    saveStoredFeed(trimmed);
+    return trimmed;
+  }
+
+  function captureFlashToasts() {
+    var captured = [];
+    var okToast = document.getElementById('dt-flash-ok-toast');
+    if (okToast) {
+      var okMsg = okToast.getAttribute('data-flash-msg');
+      if (okMsg && okMsg.trim()) {
+        captured.push({
+          id: 'flash-ok|' + okMsg.trim(),
+          mensaje: okMsg.trim(),
+          medio: 'SISTEMA',
+          fechaEnvio: new Date().toISOString(),
+          completada: true,
+          esError: false,
+          leida: false
+        });
+      }
+    }
+    var errToast = document.getElementById('dt-flash-error-toast');
+    if (errToast) {
+      var errMsg = errToast.getAttribute('data-flash-msg');
+      if (errMsg && errMsg.trim()) {
+        captured.push({
+          id: 'flash-err|' + errMsg.trim(),
+          mensaje: errMsg.trim(),
+          medio: 'ALERTA',
+          fechaEnvio: new Date().toISOString(),
+          completada: true,
+          esError: true,
+          leida: false
+        });
+      }
+    }
+    if (captured.length > 0) {
+      mergeIntoFeed(captured);
+    }
+  }
+
   function renderListaEnContenedor(container, alertas) {
     if (!container) return;
     container.innerHTML = '';
@@ -32,30 +133,50 @@
     alertas.forEach(function (a) {
       var li = document.createElement('li');
       li.className = 'slds-item slds-p-vertical_x-small slds-p-horizontal_small';
-      li.style.borderBottom = '1px solid #e2e8f0';
+      li.style.borderBottom = '1px solid #e5e7eb';
+      li.style.backgroundColor = a.leida ? '#ffffff' : '#f0f7ff';
 
-      var medio = escapeHtml((a.medio || 'EMAIL').toString().toUpperCase());
+      var medio = escapeHtml((a.medio || 'SISTEMA').toString().toUpperCase());
       var mensaje = escapeHtml(a.mensaje || 'Notificación del sistema');
       var fecha = escapeHtml(formatearFecha(a.fechaEnvio));
-      var completada = a.completada === true;
+      var badgeBg = a.esError ? '#fee2e2' : '#e0f2fe';
+      var badgeColor = a.esError ? '#991b1b' : '#014486';
+      var dotHtml = a.leida
+        ? ''
+        : '<span title="No leída" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0176d3;margin-right:6px;flex-shrink:0;"></span>';
 
       li.innerHTML =
-        '<div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start" style="gap: 8px;">' +
-          '<div style="min-width: 0; flex: 1;">' +
-            '<p class="slds-text-body_regular" style="color: #0f172a; font-weight: 600; font-size: 0.85rem; line-height: 1.35; margin: 0;">' +
-              mensaje +
-            '</p>' +
-            '<span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.74rem;">' +
-              fecha + (completada ? ' · Enviada' : ' · En proceso') +
+        '<div class="slds-media slds-media_small slds-grid_align-spread" style="gap: 8px; align-items: flex-start;">' +
+          '<div class="slds-media__body" style="min-width: 0; flex: 1;">' +
+            '<div style="display: flex; align-items: center; gap: 4px;">' +
+              dotHtml +
+              '<p class="slds-text-body_regular" style="color: #0f172a; font-weight: ' + (a.leida ? '500' : '700') + '; font-size: 0.84rem; line-height: 1.35; margin: 0;">' +
+                mensaje +
+              '</p>' +
+            '</div>' +
+            '<span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.72rem; display: block; margin-top: 2px;">' +
+              fecha +
             '</span>' +
           '</div>' +
-          '<span class="slds-badge slds-badge_lightest" style="font-size: 0.68rem; font-weight: 700; flex-shrink: 0;">' +
+          '<span class="slds-badge" style="background:' + badgeBg + '; color:' + badgeColor + '; font-size: 0.66rem; font-weight: 700; flex-shrink: 0;">' +
             medio +
           '</span>' +
         '</div>';
 
       container.appendChild(li);
     });
+  }
+
+  function actualizarBadge(feed) {
+    var badgeEl = document.getElementById('notif-badge-count');
+    if (!badgeEl) return;
+    var unread = 0;
+    (feed || []).forEach(function (x) {
+      if (!x.leida) unread++;
+    });
+    var displayCount = unread > 0 ? unread : 0;
+    badgeEl.textContent = String(displayCount);
+    badgeEl.style.display = displayCount > 0 ? 'inline-block' : 'none';
   }
 
   function actualizarContenedor(ids, state, data, errorMsg) {
@@ -80,20 +201,9 @@
   }
 
   function actualizarUI(state, data, errorMsg) {
-    var badgeEl = document.getElementById('notif-badge-count');
-    var panelBadgeEl = document.getElementById('panel-notif-badge');
-
     if (state === 'ok' || state === 'empty') {
-      var count = Array.isArray(data) ? data.length : 0;
-      if (badgeEl) {
-        badgeEl.textContent = String(count);
-        badgeEl.style.display = count > 0 ? 'inline-block' : 'none';
-      }
-      if (panelBadgeEl) {
-        panelBadgeEl.textContent = count + (count === 1 ? ' alerta' : ' alertas');
-      }
+      actualizarBadge(data);
     }
-
     actualizarContenedor(
       {
         loading: 'notif-state-loading',
@@ -106,30 +216,35 @@
       data,
       errorMsg
     );
+  }
 
-    actualizarContenedor(
-      {
-        loading: 'panel-notif-loading',
-        error: 'panel-notif-error',
-        errorText: 'panel-notif-error-msg',
-        empty: 'panel-notif-empty',
-        list: 'panel-notif-lista'
-      },
-      state,
-      data,
-      errorMsg
-    );
+  function marcarTodasComoLeidas() {
+    var feed = loadStoredFeed().map(function (item) {
+      item.leida = true;
+      return item;
+    });
+    saveStoredFeed(feed);
+    actualizarBadge(feed);
+  }
+
+  function limpiarNotificaciones() {
+    saveStoredFeed([]);
+    actualizarUI('empty', []);
   }
 
   function cargarAlertas() {
     var hasHeaderWidget = document.getElementById('btn-notificaciones-toggle');
-    var hasPanelCard = document.getElementById('panel-notificaciones-card');
-    if (!hasHeaderWidget && !hasPanelCard) return;
+    if (!hasHeaderWidget) return;
 
-    actualizarUI('loading', []);
+    var cached = loadStoredFeed();
+    if (cached.length > 0) {
+      actualizarUI('ok', cached);
+    } else {
+      actualizarUI('loading', []);
+    }
 
     var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 5000) : null;
+    var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 6000) : null;
 
     fetch('/api/notificaciones/mis-alertas', {
       headers: { 'Accept': 'application/json' },
@@ -138,29 +253,36 @@
       .then(function (res) {
         if (timeoutId) clearTimeout(timeoutId);
         if (!res.ok) {
-          return res.json().catch(function () { return {}; }).then(function (errBody) {
-            throw new Error(errBody.message || 'No se pudieron cargar las notificaciones en este momento.');
-          });
+          throw new Error('No se pudieron cargar las notificaciones en este momento.');
         }
         return res.json();
       })
       .then(function (data) {
-        if (!Array.isArray(data) || data.length === 0) {
+        var merged = mergeIntoFeed(Array.isArray(data) ? data : []);
+        if (merged.length === 0) {
           actualizarUI('empty', []);
         } else {
-          actualizarUI('ok', data);
+          actualizarUI('ok', merged);
         }
       })
-      .catch(function (err) {
+      .catch(function () {
         if (timeoutId) clearTimeout(timeoutId);
-        actualizarUI('error', [], 'No se pudieron cargar las notificaciones en este momento.');
+        var fallbackFeed = loadStoredFeed();
+        if (fallbackFeed.length > 0) {
+          actualizarUI('ok', fallbackFeed);
+        } else {
+          actualizarUI('error', [], 'No se pudieron cargar las notificaciones en este momento.');
+        }
       });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    captureFlashToasts();
+
     var toggleBtn = document.getElementById('btn-notificaciones-toggle');
     var popover = document.getElementById('popover-notificaciones');
     var closeBtn = document.getElementById('btn-notificaciones-close');
+    var clearBtn = document.getElementById('btn-notificaciones-clear');
 
     function setPopoverOpen(open) {
       if (!popover || !toggleBtn) return;
@@ -175,6 +297,7 @@
         setPopoverOpen(!isOpen);
         if (!isOpen) {
           cargarAlertas();
+          setTimeout(marcarTodasComoLeidas, 800);
         }
       });
 
@@ -198,7 +321,11 @@
       });
     }
 
-    ['btn-notificaciones-refresh', 'notif-retry-btn', 'panel-notif-refresh', 'panel-notif-retry'].forEach(function (id) {
+    if (clearBtn) {
+      clearBtn.addEventListener('click', limpiarNotificaciones);
+    }
+
+    ['btn-notificaciones-refresh', 'notif-retry-btn'].forEach(function (id) {
       var btn = document.getElementById(id);
       if (btn) {
         btn.addEventListener('click', cargarAlertas);
@@ -216,4 +343,3 @@
 
   window.recargarNotificacionesDonaTrack = cargarAlertas;
 })();
-
