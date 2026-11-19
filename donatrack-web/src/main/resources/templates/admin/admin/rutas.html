@@ -69,46 +69,47 @@
               <tr class="slds-hint-parent" th:each="ruta : ${rutas}">
                 <th scope="row" data-label="Código">
                   <div class="slds-truncate">
-                    <strong style="color: #0176d3;" th:text="${ruta.id != null ? (ruta.id.toString().length() >= 8 ? #strings.substring(ruta.id.toString(), 0, 8) : ruta.id) : 'Ruta'}">R-001</strong>
+                    <strong style="color: #0176d3;" th:text="${ruta['id'] != null ? (ruta['id'].toString().length() >= 8 ? #strings.substring(ruta['id'].toString(), 0, 8) : ruta['id']) : 'Ruta'}">R-001</strong>
                   </div>
                 </th>
                 <td data-label="Fecha Operativa">
-                  <div class="slds-truncate" th:text="${ruta.fechaOperativa != null ? ruta.fechaOperativa : 'Hoy'}">2026-11-06</div>
+                  <div class="slds-truncate" th:text="${ruta['fechaOperativa'] != null ? ruta['fechaOperativa'] : 'Hoy'}">2026-11-06</div>
                 </td>
                 <td data-label="Móvil & Conductor">
                   <div>
-                    <span class="slds-badge slds-badge_lightest" th:text="${ruta.camion != null ? ruta.camion.patente : 'Sin móvil'}">AB123CD</span>
+                    <span class="slds-badge slds-badge_lightest" th:text="${ruta['camion'] != null and ruta['camion']['patente'] != null ? ruta['camion']['patente'] : 'Sin móvil'}">AB123CD</span>
                     <div class="slds-text-body_small slds-m-top_xx-small"
-                         th:text="${ruta.chofer != null and ruta.chofer['nombre'] != null ? (ruta.chofer['nombre'] + (ruta.chofer['apellido'] != null ? ' ' + ruta.chofer['apellido'] : '')) : 'Chofer no asignado'}">
+                         th:text="${ruta['chofer'] != null and ruta['chofer']['nombre'] != null ? (ruta['chofer']['nombre'] + (ruta['chofer']['apellido'] != null ? ' ' + ruta['chofer']['apellido'] : '')) : 'Chofer no asignado'}">
                       Juan Pérez
                     </div>
                   </div>
                 </td>
                 <td data-label="Paradas">
-                  <div th:if="${ruta.paradas != null and not #lists.isEmpty(ruta.paradas)}">
-                    <span class="slds-text-body_small" th:text="${#lists.size(ruta.paradas)} + ' paradas programadas'">2 paradas</span>
+                  <div th:if="${ruta['paradas'] != null and not #lists.isEmpty(ruta['paradas'])}">
+                    <span class="slds-text-body_small" th:text="${#lists.size(ruta['paradas'])} + ' paradas programadas'">2 paradas</span>
                     <ul class="slds-list_dotted slds-text-body_small slds-m-top_xx-small" style="max-height: 80px; overflow-y: auto;">
-                      <li th:each="parada : ${ruta.paradas}">
-                        <span th:if="${parada.direccion != null}"
-                              th:text="${parada.direccion.calle + ' ' + (parada.direccion.altura != null ? (#strings.endsWith(parada.direccion.altura.toString(), '.0') ? #strings.substring(parada.direccion.altura.toString(), 0, parada.direccion.altura.toString().length() - 2) : parada.direccion.altura) : '') + ', ' + parada.direccion.localidad}">
+                      <li th:each="parada : ${ruta['paradas']}">
+                        <span th:if="${parada['direccion'] != null}"
+                              th:text="${(parada['direccion']['calle'] != null ? parada['direccion']['calle'] : '') + (parada['direccion']['altura'] != null ? ' ' + (#strings.endsWith(parada['direccion']['altura'].toString(), '.0') ? #strings.substring(parada['direccion']['altura'].toString(), 0, parada['direccion']['altura'].toString().length() - 2) : parada['direccion']['altura']) : '') + (parada['direccion']['localidad'] != null ? ', ' + parada['direccion']['localidad'] : '')}">
                           Av. Corrientes 1234, CABA
                         </span>
-                        <span th:if="${parada.direccion == null}">Parada operativa</span>
+                        <span th:if="${parada['direccion'] == null}">Parada operativa</span>
                       </li>
                     </ul>
                   </div>
-                  <div th:if="${ruta.paradas == null or #lists.isEmpty(ruta.paradas)}" class="slds-text-color_weak slds-text-body_small">
+                  <div th:if="${ruta['paradas'] == null or #lists.isEmpty(ruta['paradas'])}" class="slds-text-color_weak slds-text-body_small">
                     Sin paradas asignadas
                   </div>
                 </td>
-                <td data-label="Estado">
-                  <span th:if="${ruta.estado == 'FINALIZADA' or ruta.estado == 'COMPLETADA'}" class="slds-badge slds-badge_success" th:text="${ruta.estado}">FINALIZADA</span>
-                  <span th:if="${ruta.estado == 'INICIADA' or ruta.estado == 'EN_TRANSITO'}" class="slds-badge slds-badge_inverse" th:text="${ruta.estado}">EN TRÁNSITO</span>
-                  <span th:if="${ruta.estado == 'PLANIFICADA' or ruta.estado == null or (ruta.estado != 'FINALIZADA' and ruta.estado != 'COMPLETADA' and ruta.estado != 'INICIADA' and ruta.estado != 'EN_TRANSITO')}"
-                        class="slds-badge slds-badge_lightest" th:text="${ruta.estado != null ? ruta.estado : 'PLANIFICADA'}">PLANIFICADA</span>
+                <td data-label="Estado"
+                    th:with="est=${ruta['estado'] != null ? ruta['estado'] : (ruta['iniciada'] == true ? 'EN_TRANSITO' : 'PLANIFICADA')}">
+                  <span th:if="${est == 'FINALIZADA' or est == 'COMPLETADA'}" class="slds-badge slds-badge_success" th:text="${est}">FINALIZADA</span>
+                  <span th:if="${est == 'INICIADA' or est == 'EN_TRANSITO'}" class="slds-badge slds-badge_inverse" th:text="${est}">EN TRÁNSITO</span>
+                  <span th:if="${est != 'FINALIZADA' and est != 'COMPLETADA' and est != 'INICIADA' and est != 'EN_TRANSITO'}"
+                        class="slds-badge slds-badge_lightest" th:text="${est}">PLANIFICADA</span>
                 </td>
                 <td style="text-align: right;">
-                  <span class="slds-text-body_small slds-text-color_weak" th:text="${ruta.distanciaTotalKm != null ? (ruta.distanciaTotalKm + ' km') : ''}"></span>
+                  <span class="slds-text-body_small slds-text-color_weak" th:text="${ruta['distanciaTotalKm'] != null ? (ruta['distanciaTotalKm'] + ' km') : ''}"></span>
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(rutas)}">
