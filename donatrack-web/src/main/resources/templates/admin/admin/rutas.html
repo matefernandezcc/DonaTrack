@@ -78,7 +78,8 @@
                 <td data-label="Móvil & Conductor">
                   <div>
                     <span class="slds-badge slds-badge_lightest" th:text="${ruta.camion != null ? ruta.camion.patente : 'Sin móvil'}">AB123CD</span>
-                    <div class="slds-text-body_small slds-m-top_xx-small" th:text="${ruta.chofer != null ? (ruta.chofer.nombre + ' ' + ruta.chofer.apellido) : 'Chofer no asignado'}">
+                    <div class="slds-text-body_small slds-m-top_xx-small"
+                         th:text="${ruta.chofer != null and ruta.chofer['nombre'] != null ? (ruta.chofer['nombre'] + (ruta.chofer['apellido'] != null ? ' ' + ruta.chofer['apellido'] : '')) : 'Chofer no asignado'}">
                       Juan Pérez
                     </div>
                   </div>
@@ -89,7 +90,7 @@
                     <ul class="slds-list_dotted slds-text-body_small slds-m-top_xx-small" style="max-height: 80px; overflow-y: auto;">
                       <li th:each="parada : ${ruta.paradas}">
                         <span th:if="${parada.direccion != null}"
-                              th:text="${parada.direccion.calle + ' ' + parada.direccion.altura + ', ' + parada.direccion.localidad}">
+                              th:text="${parada.direccion.calle + ' ' + (parada.direccion.altura != null ? (#strings.endsWith(parada.direccion.altura.toString(), '.0') ? #strings.substring(parada.direccion.altura.toString(), 0, parada.direccion.altura.toString().length() - 2) : parada.direccion.altura) : '') + ', ' + parada.direccion.localidad}">
                           Av. Corrientes 1234, CABA
                         </span>
                         <span th:if="${parada.direccion == null}">Parada operativa</span>

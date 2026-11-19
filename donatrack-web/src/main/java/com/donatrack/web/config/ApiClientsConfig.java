@@ -62,7 +62,7 @@ public class ApiClientsConfig {
       ApiProperties props,
       ClientHttpRequestInterceptor interceptor,
       java.net.http.HttpClient sharedHttpClient) {
-    long timeoutSec = props.timeoutSeconds() > 0 ? props.timeoutSeconds() : 3;
+    long timeoutSec = props.timeoutSeconds() > 0 ? props.timeoutSeconds() : 12;
     JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(sharedHttpClient);
     requestFactory.setReadTimeout(Duration.ofSeconds(timeoutSec));
 

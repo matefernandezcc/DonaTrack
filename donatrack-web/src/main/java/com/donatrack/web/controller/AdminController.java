@@ -2406,17 +2406,40 @@ public class AdminController {
       RedirectAttributes redirectAttributes) {
     try {
       UUID beneficiarioId = resolverBeneficiarioId(auth);
-      Map<String, Object> req =
+      Map<String, Object> subcategoriaReq =
           Map.of(
-              "tipo", tipo,
-              "descripcion", descripcion,
-              "cantidadRequerida", cantidadRequerida,
-              "subcategoriaRequerida",
-                  Map.of(
-                      "nombre",
-                      nombreSubcategoria,
-                      "descripcion",
-                      "Categoría " + nombreSubcategoria));
+              "nombre",
+              nombreSubcategoria,
+              "descripcion",
+              "Categoría " + nombreSubcategoria);
+      Map<String, Object> req;
+      if ("ordinaria".equalsIgnoreCase(tipo) || "recurrente".equalsIgnoreCase(tipo)) {
+        req =
+            Map.of(
+                "tipo",
+                "recurrente",
+                "descripcion",
+                descripcion,
+                "cantidadObjetivo",
+                cantidadRequerida,
+                "tipoPeriodo",
+                "MENSUAL",
+                "activa",
+                true,
+                "subcategoriaRequerida",
+                subcategoriaReq);
+      } else {
+        req =
+            Map.of(
+                "tipo",
+                tipo,
+                "descripcion",
+                descripcion,
+                "cantidadRequerida",
+                cantidadRequerida,
+                "subcategoriaRequerida",
+                subcategoriaReq);
+      }
       donacionesGateway.agregarNecesidad(beneficiarioId, req);
       redirectAttributes.addFlashAttribute("flashOk", "Necesidad declarada con éxito.");
     } catch (Exception e) {

@@ -92,3 +92,7 @@ api.{$PUBLIC_DOMAIN:donatrack.social} {
 		respond `{"status":404,"error":"Not Found","docs":"https://dev.{$PUBLIC_DOMAIN:donatrack.social}"}` 404
 	}
 }
+
+grafana.{$PUBLIC_DOMAIN:donatrack.social} {
+	reverse_proxy grafana:3000
+}

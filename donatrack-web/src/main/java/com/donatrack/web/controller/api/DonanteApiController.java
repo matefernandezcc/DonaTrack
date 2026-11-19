@@ -81,11 +81,12 @@ public class DonanteApiController {
             Object calle = dir.get("calle");
             Object altura = dir.get("altura");
             Object localidad = dir.get("localidad");
+            String alturaClean = altura != null ? altura.toString().replaceAll("\\.0$", "") : "S/N";
             destinoComedor =
                 String.format(
                     "%s %s, %s",
                     calle != null ? calle : "Destino",
-                    altura != null ? altura : "S/N",
+                    !alturaClean.isBlank() ? alturaClean : "S/N",
                     localidad != null ? localidad : "CABA");
           }
 

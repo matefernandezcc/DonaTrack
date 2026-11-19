@@ -64,12 +64,9 @@ public class JpaPersonaRepository implements PersonaRepository {
 
   @Override
   public Optional<Persona> buscarPorRolId(UUID rolId) {
-    return jpaRepository.findAll().stream()
-        .filter(
-            p ->
-                p.getRoles() != null
-                    && p.getRoles().stream().anyMatch(r -> r.getId().equals(rolId)))
-        .findFirst()
-        .map(PersonaMapper::toDomain);
+    if (rolId == null) {
+      return Optional.empty();
+    }
+    return jpaRepository.findByRolId(rolId).map(PersonaMapper::toDomain);
   }
 }

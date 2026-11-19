@@ -51,10 +51,10 @@ public class JpaDonacionOriginalRepository implements DonacionOriginalRepository
 
   @Override
   public Optional<DonacionOriginal> buscarPorIdDonacion(UUID idDonacion) {
-    return jpaRepository.findAll().stream()
-        .filter(d -> d.getDonaciones().stream().anyMatch(seg -> seg.getId().equals(idDonacion)))
-        .map(DonacionOriginalMapper::toDomain)
-        .findFirst();
+    if (idDonacion == null) {
+      return Optional.empty();
+    }
+    return jpaRepository.findByDonacionId(idDonacion).map(DonacionOriginalMapper::toDomain);
   }
 
   @Override

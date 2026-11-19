@@ -55,7 +55,7 @@
       date: "12 May 2026",
       status: "Entregado",
       emoji: "📍",
-      image: "url('https://tn.com.ar/resizer/v2/las-bufandas-algunas-de-las-ropas-de-abrigo-que-pueden-donarse-foto-adobe-stock-XXU6MIVU5VCQLMFZ7DF4TGIMSM.jpeg?auth=9fd575f77a87e748a4edceda4f2642d469d8c74460b9261a4449eadfca9b432d&width=1440')",
+      image: "url('https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp')",
     },
     {
       type: "green",
@@ -78,7 +78,7 @@
       date: "08 May 2026",
       status: "Entregado",
       emoji: "🛋️",
-      image: "url('https://diariomovil.info/download/multimedia.miniatura.89b66ec132aa87f2.bWluaWF0dXJhLndlYnA%3D.webp')",
+      image: "url('https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp')",
     },
     {
       type: "blue",
