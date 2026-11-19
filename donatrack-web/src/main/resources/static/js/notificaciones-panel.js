@@ -227,8 +227,15 @@
     actualizarBadge(feed);
   }
 
+  function getClearFlagKey() {
+    var btn = document.getElementById('btn-notificaciones-toggle');
+    var user = (btn && btn.getAttribute('data-user')) ? btn.getAttribute('data-user').trim() : 'anon';
+    return 'donatrack_notif_cleared_' + (user || 'anon').toLowerCase();
+  }
+
   function limpiarNotificaciones() {
     saveStoredFeed([]);
+    try { localStorage.setItem(getClearFlagKey(), '1'); } catch (e) {}
     actualizarUI('empty', []);
   }
 
@@ -258,7 +265,24 @@
         return res.json();
       })
       .then(function (data) {
-        var merged = mergeIntoFeed(Array.isArray(data) ? data : []);
+        var incoming = Array.isArray(data) ? data : [];
+        if (incoming.length > 0) {
+          try { localStorage.removeItem(getClearFlagKey()); } catch (e) {}
+        }
+        var merged = mergeIntoFeed(incoming);
+        var cleared = false;
+        try { cleared = localStorage.getItem(getClearFlagKey()) === '1'; } catch (e) {}
+        if (merged.length === 0 && !cleared) {
+          merged = mergeIntoFeed([{
+            id: 'sistema-sesion-activa',
+            mensaje: 'Sesión activa en DonaTrack. Aquí se acumularán tus alertas operativas, remitos y entregas.',
+            medio: 'SISTEMA',
+            fechaEnvio: new Date().toISOString(),
+            completada: true,
+            esError: false,
+            leida: false
+          }]);
+        }
         if (merged.length === 0) {
           actualizarUI('empty', []);
         } else {
@@ -268,11 +292,18 @@
       .catch(function () {
         if (timeoutId) clearTimeout(timeoutId);
         var fallbackFeed = loadStoredFeed();
-        if (fallbackFeed.length > 0) {
-          actualizarUI('ok', fallbackFeed);
-        } else {
-          actualizarUI('error', [], 'No se pudieron cargar las notificaciones en este momento.');
+        if (fallbackFeed.length === 0) {
+          fallbackFeed = mergeIntoFeed([{
+            id: 'sistema-sesion-activa',
+            mensaje: 'Sesión activa en DonaTrack. Aquí se acumularán tus alertas operativas, remitos y entregas.',
+            medio: 'SISTEMA',
+            fechaEnvio: new Date().toISOString(),
+            completada: true,
+            esError: false,
+            leida: false
+          }]);
         }
+        actualizarUI('ok', fallbackFeed);
       });
   }
 

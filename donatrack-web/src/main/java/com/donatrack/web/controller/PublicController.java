@@ -458,7 +458,7 @@ public class PublicController {
             "fecha", "noviembre 19, 2026",
             "fechaCorta", "11/19/2026",
             "categoria", "Campañas",
-            "imagen", "/img/nov-campana-gamer-gta6.svg",
+            "imagen", "/img/nov-campana-gamer-gta6.jpg",
             "resumen", "Con el lanzamiento más esperado de la década y el recambio masivo de hardware en la comunidad gamer, abrimos una campaña especial para donar consolas de generaciones anteriores, joysticks y juegos físicos destinados a hogares convivenciales y centros juveniles...",
             "parrafosIntro", List.of(
                 "El estreno mundial de Grand Theft Auto VI revolucionó hoy las redes sociales y disparó una ola histórica de actualización de consolas, placas de video y pantallas en todo el país. Frente a ese entusiasmo colectivo, desde DonaTrack lanzamos una campaña semanal especial para transformar ese recambio tecnológico en inclusión recreativa.",
