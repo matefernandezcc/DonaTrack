@@ -406,7 +406,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - PUBLIC_DOMAIN=${PUBLIC_DOMAIN:-163.176.254.178.nip.io}
+      - PUBLIC_DOMAIN=${PUBLIC_DOMAIN:-donatrack.social}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

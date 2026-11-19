@@ -1,19 +1,27 @@
 (donatrack_routes) {
-    handle /oauth2/* {
-        reverse_proxy auth:8004
-    }
-    handle /login/oauth2/* {
-        reverse_proxy auth:8004
-    }
-    handle {
-        reverse_proxy web:8080
-    }
+	handle /oauth2/* {
+		reverse_proxy auth:8004
+	}
+	handle /login/oauth2/* {
+		reverse_proxy auth:8004
+	}
+	handle {
+		reverse_proxy web:8080
+	}
 }
 
-:80 {
-    import donatrack_routes
+http://163.176.254.178 {
+	import donatrack_routes
 }
 
-{$PUBLIC_DOMAIN:163.176.254.178.nip.io} {
-    import donatrack_routes
+163.176.254.178.nip.io {
+	import donatrack_routes
+}
+
+www.{$PUBLIC_DOMAIN:donatrack.social} {
+	redir https://{$PUBLIC_DOMAIN:donatrack.social}{uri} permanent
+}
+
+{$PUBLIC_DOMAIN:donatrack.social} {
+	import donatrack_routes
 }
