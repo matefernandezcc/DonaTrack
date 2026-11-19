@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -33,6 +34,20 @@ class ServiceSecurityFilterTest {
   }
 
   private String generateJwt(long expEpochSeconds, String secret) throws Exception {
+    String payloadJson = "{\"sub\":\"test-user\",\"exp\":" + expEpochSeconds + "}";
+    return signJwt(payloadJson, secret);
+  }
+
+  private String generateJwtWithRole(long expEpochSeconds, String secret, String role)
+      throws Exception {
+    String payloadJson =
+        String.format(
+            "{\"sub\":\"11111111-1111-1111-1111-111111111111\",\"roles\":[\"%s\"],\"exp\":%d}",
+            role, expEpochSeconds);
+    return signJwt(payloadJson, secret);
+  }
+
+  private String signJwt(String payloadJson, String secret) throws Exception {
     String header =
         Base64.getUrlEncoder()
             .withoutPadding()
@@ -40,9 +55,7 @@ class ServiceSecurityFilterTest {
     String payload =
         Base64.getUrlEncoder()
             .withoutPadding()
-            .encodeToString(
-                ("{\"sub\":\"test-user\",\"exp\":" + expEpochSeconds + "}")
-                    .getBytes(StandardCharsets.UTF_8));
+            .encodeToString(payloadJson.getBytes(StandardCharsets.UTF_8));
     String data = header + "." + payload;
 
     Mac mac = Mac.getInstance("HmacSHA256");
@@ -183,6 +196,81 @@ class ServiceSecurityFilterTest {
 
     assertEquals(401, response.getStatus());
     assertNull(filterChain.getRequest());
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "DELETE, /api/camiones/AA123BB",
+    "DELETE, /api/donaciones/123",
+    "POST, /api/camiones",
+    "POST, /api/choferes",
+    "POST, /api/personas/importar-csv",
+    "PUT, /api/solicitudes-ong/1/estado",
+    "POST, /api/donaciones/matchmaking/batch",
+    "POST, /api/donaciones/auditoria/vencidos",
+    "PUT, /api/donaciones/123/estado/asignar"
+  })
+  @DisplayName(
+      "En perfil prod, operaciones críticas con JWT sin rol ADMIN deben rechazarse con 403 Forbidden")
+  void testCriticalOperationsRejectedWith403ForNonAdminJwt(String method, String path)
+      throws Exception {
+    String donanteToken =
+        generateJwtWithRole(Instant.now().getEpochSecond() + 3600, TEST_JWT_SECRET, "DONANTE");
+
+    MockHttpServletRequest request = new MockHttpServletRequest(method, path);
+    request.addHeader("Authorization", "Bearer " + donanteToken);
+    MockHttpServletResponse response = new MockHttpServletResponse();
+    MockFilterChain filterChain = new MockFilterChain();
+
+    filterProd.doFilter(request, response, filterChain);
+
+    assertEquals(403, response.getStatus(), method + " " + path + " debe exigir rol ADMIN");
+    assertTrue(response.getContentAsString().contains("requiere rol ADMIN"));
+    assertNull(filterChain.getRequest(), "La cadena no debió avanzar para un usuario no ADMIN");
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "DELETE, /api/camiones/AA123BB",
+    "DELETE, /api/donaciones/123",
+    "POST, /api/camiones",
+    "POST, /api/choferes",
+    "POST, /api/personas/importar-csv",
+    "PUT, /api/solicitudes-ong/1/estado",
+    "POST, /api/donaciones/matchmaking/batch",
+    "POST, /api/donaciones/auditoria/vencidos",
+    "PUT, /api/donaciones/123/estado/asignar"
+  })
+  @DisplayName("En perfil prod, operaciones críticas con JWT rol ADMIN tienen acceso permitido")
+  void testCriticalOperationsAllowedForAdminJwt(String method, String path) throws Exception {
+    String adminToken =
+        generateJwtWithRole(Instant.now().getEpochSecond() + 3600, TEST_JWT_SECRET, "ADMIN");
+
+    MockHttpServletRequest request = new MockHttpServletRequest(method, path);
+    request.addHeader("Authorization", "Bearer " + adminToken);
+    MockHttpServletResponse response = new MockHttpServletResponse();
+    MockFilterChain filterChain = new MockFilterChain();
+
+    filterProd.doFilter(request, response, filterChain);
+
+    assertEquals(200, response.getStatus(), method + " " + path + " debe permitir rol ADMIN");
+    assertNotNull(filterChain.getRequest());
+  }
+
+  @Test
+  @DisplayName(
+      "En perfil prod, rutas públicas con contextPath de X-Forwarded-Prefix pasan sin credenciales")
+  void testPublicPathsWithForwardedPrefixPassInProd() throws ServletException, IOException {
+    MockHttpServletRequest request =
+        new MockHttpServletRequest("GET", "/logistica/v3/api-docs");
+    request.setContextPath("/logistica");
+    MockHttpServletResponse response = new MockHttpServletResponse();
+    MockFilterChain filterChain = new MockFilterChain();
+
+    filterProd.doFilter(request, response, filterChain);
+
+    assertEquals(200, response.getStatus());
+    assertNotNull(filterChain.getRequest());
   }
 
   @Test
