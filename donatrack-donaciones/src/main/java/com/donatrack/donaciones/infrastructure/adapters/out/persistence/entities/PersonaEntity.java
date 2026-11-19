@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "personas", schema = "donaciones")
@@ -56,5 +57,6 @@ public abstract class PersonaEntity {
   private String nacionalidad;
 
   @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+  @BatchSize(size = 50)
   private List<RolEntity> roles = new ArrayList<>();
 }

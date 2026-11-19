@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "bienes", schema = "donaciones")
@@ -48,5 +49,6 @@ public class BienEntity {
   private LocalDate fechaVencimiento;
 
   @OneToMany(mappedBy = "bien", cascade = CascadeType.ALL, orphanRemoval = true)
+  @BatchSize(size = 50)
   private List<FotoEntity> fotos = new ArrayList<>();
 }

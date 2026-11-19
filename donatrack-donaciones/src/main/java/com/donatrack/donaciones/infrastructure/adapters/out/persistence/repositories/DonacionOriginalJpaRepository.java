@@ -14,4 +14,9 @@ public interface DonacionOriginalJpaRepository
 
   @Query("SELECT DISTINCT d FROM DonacionOriginalEntity d JOIN d.donaciones seg WHERE seg.id = :idDonacion")
   Optional<DonacionOriginalEntity> findByDonacionId(@Param("idDonacion") UUID idDonacion);
+
+  @Query(
+      "SELECT seg.id, p.id, p.email, p.contactoCorreo "
+          + "FROM DonacionOriginalEntity o JOIN o.donaciones seg JOIN o.donante don JOIN don.persona p")
+  java.util.List<Object[]> findAllDonanteResumenPorDonacion();
 }

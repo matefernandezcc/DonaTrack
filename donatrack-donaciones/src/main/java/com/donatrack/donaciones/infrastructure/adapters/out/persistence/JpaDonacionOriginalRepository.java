@@ -58,6 +58,27 @@ public class JpaDonacionOriginalRepository implements DonacionOriginalRepository
   }
 
   @Override
+  public java.util.Map<UUID, String[]> obtenerMapaDonantesPorDonacion() {
+    java.util.List<Object[]> rows = jpaRepository.findAllDonanteResumenPorDonacion();
+    java.util.Map<UUID, String[]> mapa = new java.util.HashMap<>();
+    if (rows != null) {
+      for (Object[] row : rows) {
+        if (row == null || row.length < 2 || row[0] == null || row[1] == null) continue;
+        UUID donacionId = (UUID) row[0];
+        String personaId = row[1].toString();
+        String email =
+            row.length > 2 && row[2] != null && !row[2].toString().isBlank()
+                ? row[2].toString()
+                : (row.length > 3 && row[3] != null && !row[3].toString().isBlank()
+                    ? row[3].toString()
+                    : "donante@test.com");
+        mapa.put(donacionId, new String[] {personaId, email});
+      }
+    }
+    return mapa;
+  }
+
+  @Override
   @Transactional
   public void guardar(DonacionOriginal donacionOriginal) {
     DonacionOriginalEntity entity = DonacionOriginalMapper.toEntity(donacionOriginal);
