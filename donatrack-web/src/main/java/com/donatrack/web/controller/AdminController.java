@@ -483,6 +483,7 @@ public class AdminController {
       @ModelAttribute("nuevoCamion") CamionDto nuevoCamion, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.crearCamion(nuevoCamion);
+      registrarNotificacionSistema(null, "Camión " + nuevoCamion.patente() + " registrado en la flota.");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Camión " + nuevoCamion.patente() + " registrado con éxito.");
     } catch (Exception e) {
@@ -498,6 +499,7 @@ public class AdminController {
       @PathVariable("patente") String patente, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarCamion(patente);
+      registrarNotificacionSistema(null, "Camión " + patente + " dado de baja de la flota.");
       redirectAttributes.addFlashAttribute("flashOk", "Camión " + patente + " eliminado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
@@ -525,6 +527,7 @@ public class AdminController {
       String nomCompleto =
           nuevoChofer.nombre()
               + (nuevoChofer.apellido() != null ? " " + nuevoChofer.apellido() : "");
+      registrarNotificacionSistema(null, "Chofer " + nomCompleto.trim() + " registrado en logística.");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Chofer " + nomCompleto.trim() + " registrado con éxito.");
     } catch (Exception e) {
@@ -540,6 +543,7 @@ public class AdminController {
       @PathVariable("legajo") String legajo, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarChofer(legajo);
+      registrarNotificacionSistema(null, "Chofer con legajo " + legajo + " eliminado.");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Chofer con legajo " + legajo + " eliminado con éxito.");
     } catch (Exception e) {
@@ -1098,6 +1102,8 @@ public class AdminController {
         cacheResilienteService.invalidarCache();
       }
       String shortCode = "#DT-" + donacionId.toString().substring(0, 4).toUpperCase();
+      registrarNotificacionSistema(
+          null, "Matchmaking ejecutado: donación " + shortCode + " asignada y planificada.");
       redirectAttributes.addFlashAttribute(
           "flashOk",
           "Donación "

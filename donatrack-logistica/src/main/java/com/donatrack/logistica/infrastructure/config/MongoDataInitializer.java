@@ -35,6 +35,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Profile({"local", "dev"})
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+    name = "donatrack.mongo.seed-enabled",
+    havingValue = "true",
+    matchIfMissing = false)
 public class MongoDataInitializer implements CommandLineRunner {
 
   private static final Logger log = LoggerFactory.getLogger(MongoDataInitializer.class);
