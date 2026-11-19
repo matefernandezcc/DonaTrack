@@ -190,10 +190,19 @@ public class DonacionController {
       }
     }
 
+    java.util.Map<UUID, String[]> mapaDonantes =
+        donacionOriginalRepository != null
+            ? donacionOriginalRepository.obtenerMapaDonantesPorDonacion()
+            : java.util.Collections.emptyMap();
+
     List<java.util.Map<String, Object>> resultado = new java.util.ArrayList<>();
     for (Donacion d : base) {
       if (d == null || d.getId() == null) continue;
-      UUID donanteRealId = resolverPersonaDonanteId(d.getId());
+      String[] infoDonante = mapaDonantes != null ? mapaDonantes.get(d.getId()) : null;
+      UUID donanteRealId =
+          (infoDonante != null && infoDonante.length >= 1 && infoDonante[0] != null)
+              ? UUID.fromString(infoDonante[0])
+              : resolverPersonaDonanteId(d.getId());
       if (idDonante != null && !idDonante.equals(donanteRealId)) {
         continue;
       }
@@ -234,8 +243,12 @@ public class DonacionController {
       }
       item.put("descripcion", String.join(" · ", descripciones));
       item.put("cantidadTotal", cantTotal);
+      String correoDonante =
+          (infoDonante != null && infoDonante.length >= 2 && infoDonante[1] != null)
+              ? infoDonante[1]
+              : resolverCorreoDonante(d.getId());
       item.put("idDonante", donanteRealId.toString());
-      item.put("correoDonante", resolverCorreoDonante(d.getId()));
+      item.put("correoDonante", correoDonante);
 
       if (d.getEntidadAsignada() != null && d.getEntidadAsignada().getId() != null) {
         item.put("idBeneficiario", d.getEntidadAsignada().getId().toString());

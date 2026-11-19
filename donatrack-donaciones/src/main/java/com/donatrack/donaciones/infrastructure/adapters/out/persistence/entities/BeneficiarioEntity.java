@@ -6,6 +6,7 @@ import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "roles_beneficiario", schema = "donaciones")
@@ -22,5 +23,6 @@ public class BeneficiarioEntity extends RolEntity {
       cascade = jakarta.persistence.CascadeType.ALL,
       orphanRemoval = true,
       fetch = jakarta.persistence.FetchType.EAGER)
+  @BatchSize(size = 50)
   private java.util.List<NecesidadEntity> necesidadesDeclaradas = new java.util.ArrayList<>();
 }

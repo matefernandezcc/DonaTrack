@@ -431,7 +431,7 @@ public class AdminController {
                 });
 
     CompletableFuture.allOf(fCamiones, fChoferes, fRutas)
-        .orTimeout(3, TimeUnit.SECONDS)
+        .orTimeout(10, TimeUnit.SECONDS)
         .exceptionally(ex -> null)
         .join();
 
@@ -1631,7 +1631,7 @@ public class AdminController {
                 });
 
     CompletableFuture.allOf(fMetricas, fInsignias, fMisiones, fDonaciones, fBeneficiarios)
-        .orTimeout(3, TimeUnit.SECONDS)
+        .orTimeout(10, TimeUnit.SECONDS)
         .exceptionally(ex -> null)
         .join();
 
@@ -2051,6 +2051,14 @@ public class AdminController {
     return res;
   }
 
+  private static String formatearAltura(Object raw) {
+    if (raw == null) {
+      return "";
+    }
+    String s = raw.toString().trim();
+    return s.endsWith(".0") ? s.substring(0, s.length() - 2) : s;
+  }
+
   private Map<String, List<Map<String, Object>>> extraerEntregas(List<Map<String, Object>> rutas) {
     Map<String, Map<String, Object>> enCaminoMap = new LinkedHashMap<>();
     Map<String, Map<String, Object>> recibidasMap = new LinkedHashMap<>();
@@ -2089,7 +2097,7 @@ public class AdminController {
             String dirStr = "Destino Comunitario";
             if (dir != null) {
               String calle = dir.get("calle") != null ? String.valueOf(dir.get("calle")) : "";
-              String alt = dir.get("altura") != null ? String.valueOf(dir.get("altura")) : "";
+              String alt = formatearAltura(dir.get("altura"));
               String loc = dir.get("localidad") != null ? String.valueOf(dir.get("localidad")) : "";
               dirStr = (calle + " " + alt + ", " + loc).trim();
             }
@@ -2322,7 +2330,7 @@ public class AdminController {
         Object dObj = pMap.get("direccion");
         if (dObj instanceof Map<?, ?> dMap) {
           String c = dMap.get("calle") != null ? dMap.get("calle").toString() : "";
-          String a = dMap.get("altura") != null ? dMap.get("altura").toString() : "";
+          String a = formatearAltura(dMap.get("altura"));
           String l = dMap.get("localidad") != null ? dMap.get("localidad").toString() : "";
           String resDir = (c + " " + a + (l.isBlank() ? "" : ", " + l)).trim();
           if (!resDir.isBlank()) {
@@ -2406,17 +2414,40 @@ public class AdminController {
       RedirectAttributes redirectAttributes) {
     try {
       UUID beneficiarioId = resolverBeneficiarioId(auth);
-      Map<String, Object> req =
+      Map<String, Object> subcategoriaReq =
           Map.of(
-              "tipo", tipo,
-              "descripcion", descripcion,
-              "cantidadRequerida", cantidadRequerida,
-              "subcategoriaRequerida",
-                  Map.of(
-                      "nombre",
-                      nombreSubcategoria,
-                      "descripcion",
-                      "Categoría " + nombreSubcategoria));
+              "nombre",
+              nombreSubcategoria,
+              "descripcion",
+              "Categoría " + nombreSubcategoria);
+      Map<String, Object> req;
+      if ("ordinaria".equalsIgnoreCase(tipo) || "recurrente".equalsIgnoreCase(tipo)) {
+        req =
+            Map.of(
+                "tipo",
+                "recurrente",
+                "descripcion",
+                descripcion,
+                "cantidadObjetivo",
+                cantidadRequerida,
+                "tipoPeriodo",
+                "MENSUAL",
+                "activa",
+                true,
+                "subcategoriaRequerida",
+                subcategoriaReq);
+      } else {
+        req =
+            Map.of(
+                "tipo",
+                tipo,
+                "descripcion",
+                descripcion,
+                "cantidadRequerida",
+                cantidadRequerida,
+                "subcategoriaRequerida",
+                subcategoriaReq);
+      }
       donacionesGateway.agregarNecesidad(beneficiarioId, req);
       redirectAttributes.addFlashAttribute("flashOk", "Necesidad declarada con éxito.");
     } catch (Exception e) {

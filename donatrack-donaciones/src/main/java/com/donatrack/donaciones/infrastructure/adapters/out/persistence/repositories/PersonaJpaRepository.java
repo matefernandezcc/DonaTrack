@@ -13,4 +13,7 @@ public interface PersonaJpaRepository extends JpaRepository<PersonaEntity, UUID>
 
   @Query("SELECT p FROM PersonaEntity p WHERE p.email = :email OR p.contactoCorreo = :email")
   Optional<PersonaEntity> findByEmail(@Param("email") String email);
+
+  @Query("SELECT DISTINCT p FROM PersonaEntity p JOIN p.roles r WHERE r.id = :rolId")
+  Optional<PersonaEntity> findByRolId(@Param("rolId") UUID rolId);
 }

@@ -53,5 +53,6 @@ public class DonacionEntity {
   private List<BienEntity> bienes = new ArrayList<>();
 
   @OneToMany(mappedBy = "donacion", cascade = CascadeType.ALL, orphanRemoval = true)
+  @BatchSize(size = 50)
   private List<HistorialEstadoEntity> historialEstados = new ArrayList<>();
 }
