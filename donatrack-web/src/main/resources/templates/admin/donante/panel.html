@@ -557,12 +557,12 @@
             </div>
 
             <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
-              <!-- Barra de Filtros SLDS Reactivos (UX-05) -->
+              <!-- Barra de Filtros y Ordenamiento SLDS Reactivos (UX-05) -->
               <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_medium slds-p-around_small" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
                   <label class="slds-form-element__label" for="filtro-donacion-estado" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Filtrar por Estado</label>
                   <div class="slds-form-element__control">
-                    <select id="filtro-donacion-estado" class="slds-select" onchange="filtrarMisDonaciones()">
+                    <select id="filtro-donacion-estado" class="slds-select" onchange="ordenarYFiltrarDonaciones()">
                       <option value="">Todos los estados</option>
                       <option value="EN_DEPOSITO">En Depósito</option>
                       <option value="ASIGNADA">Asignada a ONG</option>
@@ -571,10 +571,10 @@
                   </div>
                 </div>
 
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
                   <label class="slds-form-element__label" for="filtro-donacion-subcategoria" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Filtrar por Subcategoría</label>
                   <div class="slds-form-element__control">
-                    <select id="filtro-donacion-subcategoria" class="slds-select" onchange="filtrarMisDonaciones()">
+                    <select id="filtro-donacion-subcategoria" class="slds-select" onchange="ordenarYFiltrarDonaciones()">
                       <option value="">Todas las subcategorías</option>
                       <option value="ALIMENTOS">Alimentos</option>
                       <option value="ABRIGO">Abrigo / Ropa</option>
@@ -586,12 +586,26 @@
                   </div>
                 </div>
 
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
+                  <label class="slds-form-element__label" for="orden-donaciones" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Ordenar por</label>
+                  <div class="slds-form-element__control">
+                    <select id="orden-donaciones" class="slds-select" onchange="ordenarYFiltrarDonaciones()">
+                      <option value="fecha-desc" selected>Fecha: Más reciente</option>
+                      <option value="fecha-asc">Fecha: Más antigua</option>
+                      <option value="producto-asc">Tipo de producto (A - Z)</option>
+                      <option value="producto-desc">Tipo de producto (Z - A)</option>
+                      <option value="descripcion-asc">Descripción (A - Z)</option>
+                      <option value="descripcion-desc">Descripción (Z - A)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
                   <label class="slds-form-element__label" for="filtro-donacion-busqueda" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Búsqueda por Texto</label>
                   <div class="slds-form-element__control">
                     <input type="search" id="filtro-donacion-busqueda" class="slds-input"
                            placeholder="Buscar por código (#DT-XXXX) o descripción..."
-                           oninput="filtrarMisDonaciones()" />
+                           oninput="ordenarYFiltrarDonaciones()" />
                   </div>
                 </div>
               </div>
@@ -608,7 +622,7 @@
               <!-- Tarjetas de Seguimiento Paso a Paso -->
               <div th:unless="${#lists.isEmpty(misDonaciones)}" id="lista-donaciones-container" style="display: flex; flex-direction: column; gap: 14px;">
                 <div th:each="don : ${misDonaciones}" class="donacion-item-card"
-                     th:attr="data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-subcategoria-grupo=${don.subcategoriaGrupo},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
+                     th:attr="data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-subcategoria-grupo=${don.subcategoriaGrupo},data-fecha=${don.fechaCreacion != null ? don.fechaCreacion : ''},data-producto=${don.subcategoria != null ? don.subcategoria : ''},data-descripcion=${don.descripcion != null ? don.descripcion : ''},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
                      style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
                   <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-wrap" style="gap: 10px; margin-bottom: 12px;">
                     <div>
@@ -1277,8 +1291,42 @@
       };
 
       // ========================================================
-      // 3. FILTRADO REACTIVO DE MIS DONACIONES (UX-05)
+      // 3. ORDENAMIENTO Y FILTRADO REACTIVO DE MIS DONACIONES (UX-05)
       // ========================================================
+      window.ordenarDonaciones = function () {
+        const container = document.getElementById('lista-donaciones-container');
+        if (!container) return;
+        const ordenSelect = document.getElementById('orden-donaciones');
+        const criterio = ordenSelect ? ordenSelect.value : 'fecha-desc';
+
+        const cards = Array.from(container.querySelectorAll('.donacion-item-card'));
+        if (cards.length === 0) return;
+
+        cards.sort(function (a, b) {
+          if (criterio === 'fecha-desc' || criterio === 'fecha-asc') {
+            const fechaA = (a.getAttribute('data-fecha') || '').trim();
+            const fechaB = (b.getAttribute('data-fecha') || '').trim();
+            const comp = fechaA.localeCompare(fechaB);
+            return criterio === 'fecha-desc' ? -comp : comp;
+          } else if (criterio === 'producto-asc' || criterio === 'producto-desc') {
+            const prodA = (a.getAttribute('data-producto') || '').trim().toLowerCase();
+            const prodB = (b.getAttribute('data-producto') || '').trim().toLowerCase();
+            const comp = prodA.localeCompare(prodB);
+            return criterio === 'producto-desc' ? -comp : comp;
+          } else if (criterio === 'descripcion-asc' || criterio === 'descripcion-desc') {
+            const descA = (a.getAttribute('data-descripcion') || '').trim().toLowerCase();
+            const descB = (b.getAttribute('data-descripcion') || '').trim().toLowerCase();
+            const comp = descA.localeCompare(descB);
+            return criterio === 'descripcion-desc' ? -comp : comp;
+          }
+          return 0;
+        });
+
+        cards.forEach(function (card) {
+          container.appendChild(card);
+        });
+      };
+
       window.filtrarMisDonaciones = function () {
         const estadoSelect = document.getElementById('filtro-donacion-estado');
         const subcatSelect = document.getElementById('filtro-donacion-subcategoria');
@@ -1313,6 +1361,11 @@
         if (emptyState) {
           emptyState.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
         }
+      };
+
+      window.ordenarYFiltrarDonaciones = function () {
+        window.ordenarDonaciones();
+        window.filtrarMisDonaciones();
       };
 
       // ========================================================
@@ -1547,6 +1600,10 @@
         }
 
         actualizarPaginacionBadges();
+
+        if (typeof window.ordenarDonaciones === 'function') {
+          window.ordenarDonaciones();
+        }
       }
 
       if (document.readyState === 'loading') {
