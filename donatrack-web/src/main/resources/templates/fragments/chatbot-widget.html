@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+  <th:block th:fragment="widget">
+    <button class="chatbot__fab" id="chat-fab" type="button" aria-label="Abrir asistente de DonaTrack"
+      aria-expanded="false" aria-controls="chat-panel">
+      <svg viewBox="0 0 520 520" fill="currentColor" aria-hidden="true">
+        <path
+          d="M260 40C127 40 21 138 21 259c0 38 11 74 29 106 3 5 4 11 2 17l-31 85c-3 8 5 15 13 13l86-33c5-2 11-1 17 2 36 20 79 32 125 32 131-1 238-98 238-220-1-123-108-221-240-221M140 300c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40m120 0c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40m120 0c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40" />
+      </svg>
+    </button>
+
+    <dialog class="chatbot" id="chat-panel" aria-modal="false" aria-labelledby="chat-title" hidden>
+      <header class="chatbot__head">
+        <div class="chatbot__who">
+          <span class="chatbot__avatar" id="chat-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="#1F9D6E" />
+              <path d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                fill="none" />
+              <circle cx="9" cy="10" r="1" fill="#fff" />
+              <circle cx="15" cy="10" r="1" fill="#fff" />
+            </svg>
+          </span>
+          <div>
+            <strong id="chat-title">Asistente DonaTrack</strong>
+            <span class="chatbot__status" id="chat-status"><i></i> En línea</span>
+          </div>
+        </div>
+        <button class="chatbot__close" id="chat-close" type="button" aria-label="Cerrar chat">&times;</button>
+      </header>
+
+      <div class="chatbot__log" id="chat-log" aria-live="polite">
+        <div class="msg msg--bot">¡Hola! Soy el asistente virtual de DonaTrack. ¿En qué te puedo ayudar hoy?</div>
+      </div>
+
+      <div class="chatbot__chips" id="chat-chips">
+        <button class="chip" type="button" data-q="¿Cómo donar?">¿Cómo donar?</button>
+        <button class="chip" type="button" data-q="Rastrear remito">Rastrear remito</button>
+        <button class="chip" type="button" data-q="Verificar ONG">Verificar ONG</button>
+        <button class="chip" type="button" data-q="Quiero hablar con un agente">Hablar con un agente</button>
+      </div>
+
+      <form class="chatbot__form" id="chat-form">
+        <label for="chat-input" class="slds-assistive-text sr-only">Escribí tu mensaje</label>
+        <input id="chat-input" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
+        <button type="submit" id="chat-submit" class="chatbot__send" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 11 21 3l-8 18-2-8-8-2Z" stroke="currentColor" stroke-width="2" fill="none"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+      </form>
+    </dialog>
+
+    <script th:src="@{/js/chatbot.js}" defer></script>
+  </th:block>
+</body>
+</html>

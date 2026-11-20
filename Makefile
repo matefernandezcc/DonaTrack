@@ -164,7 +164,8 @@ n8n-import:
 	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=donatrack-notificador
 	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=donatrack-insignias
 	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=donatrack-ranking
-	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=2zpu451nLHxitRhz
+	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=oyCuNCfUimiQyRsx
+	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=7xLJ5Sw6iwz5gPnM
 	docker exec $(N8N_CONTAINER) n8n publish:workflow --id=donatrack-notificador-real
 	docker restart $(N8N_CONTAINER)
 

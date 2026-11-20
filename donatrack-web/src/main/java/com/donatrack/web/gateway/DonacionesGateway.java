@@ -1,6 +1,7 @@
 package com.donatrack.web.gateway;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -245,10 +246,20 @@ public class DonacionesGateway {
   }
 
   public Map<String, Object> actualizarEstadoSolicitudOng(String id, String estado) {
+    return actualizarEstadoSolicitudOng(id, estado, null);
+  }
+
+  public Map<String, Object> actualizarEstadoSolicitudOng(
+      String id, String estado, UUID beneficiarioId) {
+    Map<String, String> payload = new HashMap<>();
+    payload.put("estado", estado);
+    if (beneficiarioId != null) {
+      payload.put("beneficiarioId", beneficiarioId.toString());
+    }
     return donacionesClient
         .put()
         .uri("/api/solicitudes-ong/{id}/estado", id)
-        .body(Map.of("estado", estado))
+        .body(payload)
         .retrieve()
         .body(new ParameterizedTypeReference<Map<String, Object>>() {});
   }

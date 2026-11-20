@@ -51,6 +51,21 @@ services:
       - TWILIO_CONTENT_SID=${TWILIO_CONTENT_SID}
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_PROXY_HOPS=1
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
+      - X_API_KEY=${X_API_KEY:-}
+      - ORG_URL=${ORG_URL:-}
+      - SF_MY_DOMAIN_URL=${SF_MY_DOMAIN_URL:-${ORG_URL:-}}
+      - CONSUMER_KEY=${CONSUMER_KEY:-}
+      - SF_CLIENT_ID=${SF_CLIENT_ID:-${CONSUMER_KEY:-}}
+      - CONSUMER_SECRET=${CONSUMER_SECRET:-}
+      - SF_CLIENT_SECRET=${SF_CLIENT_SECRET:-${CONSUMER_SECRET:-}}
+      - AGENT_ID=${AGENT_ID:-}
+      - SF_AGENT_ID=${SF_AGENT_ID:-${AGENT_ID:-}}
+      - DONACIONES_URL=http://donaciones:8000
+      - INCENTIVOS_URL=http://incentivos:8001
+      - MONGO_ATLAS_URI=${MONGO_ATLAS_URI:-}
+      - MONGO_ATLAS_DATABASE=${MONGO_ATLAS_DATABASE:-donatrack_logistica}
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/workflows
@@ -176,8 +191,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
-      - POSTGRES_HOCKER_POSTGRES_HOST:-postgres-donatrack}
-      - RABBITMQ_HOCKER_RABBITMQ_HOST:-rabbitmq}
+      - POSTGRES_HOST=${DOCKER_POSTGRES_HOST:-postgres-donatrack}
+      - RABBITMQ_HOST=${DOCKER_RABBITMQ_HOST:-rabbitmq}
       - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
       - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
       - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}

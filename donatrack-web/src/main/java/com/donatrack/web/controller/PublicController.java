@@ -50,6 +50,10 @@ public class PublicController {
   private String n8nUrl = "http://localhost:5678";
 
   @org.springframework.beans.factory.annotation.Value(
+      "${donatrack.internal-api-key:${INTERNAL_API_KEY:donatrack-internal-key-change-in-prod}}")
+  private String internalApiKey = "donatrack-internal-key-change-in-prod";
+
+  @org.springframework.beans.factory.annotation.Value(
       "${donatrack.auth.public-url:${AUTH_PUBLIC_URL:http://localhost:8004}}")
   private String authPublicUrl = "http://localhost:8004";
 
@@ -527,7 +531,7 @@ public class PublicController {
             "resumen", "Convocamos a nuevas organizaciones barriales, merenderos y voluntarios logísticos a sumarse a la red de trazabilidad abierta...",
             "parrafosIntro", List.of(
                 "Con el crecimiento sostenido de campañas en AMBA, Córdoba, Mendoza y el Litoral, abrimos una nueva etapa de inscripción para organizaciones comunitarias y voluntarios de transporte.",
-                "El objetivo es acercar centros de acopio a cada barrio y reducir los tiempos entre la recepción de donaciones y su llegada efectiva a destino."),
+                "El objetivo es acercar centros de recepción a cada barrio y reducir los tiempos entre el ingreso de donaciones y su llegada efectiva a destino."),
             "secciones", List.of(
                 Map.of(
                     "subtitulo", "Cómo participar desde tu ciudad",
@@ -704,9 +708,18 @@ public class PublicController {
       RedirectAttributes redirectAttributes) {
     try {
       TokenResponse tokenResponse = authGateway.login(username, password);
+      String rol =
+          tokenResponse != null && tokenResponse.user() != null && tokenResponse.user().rol() != null
+              ? tokenResponse.user().rol()
+              : "DONANTE";
+      if ("BENEFICIARIA_PENDIENTE".equalsIgnoreCase(rol)) {
+        redirectAttributes.addFlashAttribute(
+            "loginError",
+            "Tu cuenta de organización aún está pendiente de validación por un administrador. Te notificaremos cuando sea aprobada para que puedas ingresar.");
+        return "redirect:/login";
+      }
       establecerSesionSegura(tokenResponse.accessToken(), request, response);
 
-      String rol = tokenResponse.user().rol();
       return "redirect:/app/" + rol.toLowerCase();
     } catch (Exception e) {
       log.warn("Fallo de autenticación para usuario {}: {}", username, e.getMessage());
@@ -747,6 +760,27 @@ public class PublicController {
       RedirectAttributes redirectAttributes) {
     try {
       if ("BENEFICIARIA".equalsIgnoreCase(rolParam) || "ONG".equalsIgnoreCase(rolParam)) {
+        String cuitNorm = "";
+        if (cuit != null && !cuit.isBlank()) {
+          cuitNorm = com.donatrack.web.util.InputFormatUtils.normalizarCuit(cuit);
+          if (!com.donatrack.web.util.InputFormatUtils.esCuitValido(cuitNorm)) {
+            redirectAttributes.addFlashAttribute(
+                "registerError",
+                "El CUIT debe tener 11 dígitos en formato XX-XXXXXXXX-X (ej: 20-44535387-7).");
+            return "redirect:/registro?rol=BENEFICIARIA";
+          }
+        }
+
+        String telNorm = "";
+        if (telefono != null && !telefono.isBlank()) {
+          telNorm = com.donatrack.web.util.InputFormatUtils.normalizarCelularArg(telefono);
+          if (!com.donatrack.web.util.InputFormatUtils.esCelularArgStrictValido(telNorm)) {
+            redirectAttributes.addFlashAttribute(
+                "registerError", "El celular debe tener el formato +54 9 11 XXXX-XXXX.");
+            return "redirect:/registro?rol=BENEFICIARIA";
+          }
+        }
+
         // Registrar usuario en auth con rol seguro BENEFICIARIA_PENDIENTE
         authGateway.registrar(
             Map.of(
@@ -759,19 +793,15 @@ public class PublicController {
         // Registrar solicitud de adhesión en donatrack-donaciones
         Map<String, String> solicitudData = new HashMap<>();
         solicitudData.put("nombreOng", nombre);
-        solicitudData.put("cuit", cuit != null && !cuit.isBlank() ? cuit : "-");
+        solicitudData.put("cuit", !cuitNorm.isBlank() ? cuitNorm : "-");
         solicitudData.put("direccion", direccion != null && !direccion.isBlank() ? direccion : "-");
         solicitudData.put("email", email);
-        solicitudData.put("telefono", telefono != null && !telefono.isBlank() ? telefono : "-");
+        solicitudData.put("telefono", !telNorm.isBlank() ? telNorm : "-");
         solicitudData.put("responsable", nombre);
         solicitudData.put(
             "tipoEntidad",
             tipoEntidad != null && !tipoEntidad.isBlank() ? tipoEntidad : "Comedor Comunitario");
-        solicitudData.put(
-            "necesidades",
-            necesidades != null && !necesidades.isBlank()
-                ? necesidades
-                : "Registro inicial de adhesión institucional");
+        solicitudData.put("necesidades", necesidades != null ? necesidades.trim() : "");
 
         if (donacionesGateway != null) {
           try {
@@ -945,9 +975,18 @@ public class PublicController {
       RedirectAttributes redirectAttributes) {
     try {
       TokenResponse tokenResponse = authGateway.exchangeToken(code);
+      String rol =
+          tokenResponse != null && tokenResponse.user() != null && tokenResponse.user().rol() != null
+              ? tokenResponse.user().rol()
+              : "DONANTE";
+      if ("BENEFICIARIA_PENDIENTE".equalsIgnoreCase(rol)) {
+        redirectAttributes.addFlashAttribute(
+            "loginError",
+            "Tu cuenta de organización aún está pendiente de validación por un administrador. Te notificaremos cuando sea aprobada para que puedas ingresar.");
+        return "redirect:/login";
+      }
       establecerSesionSegura(tokenResponse.accessToken(), request, response);
 
-      String rol = tokenResponse.user().rol();
       return "redirect:/app/" + rol.toLowerCase();
     } catch (Exception e) {
       log.error("Error en intercambio de código SSO: {}", e.getMessage());
@@ -960,67 +999,214 @@ public class PublicController {
   @PostMapping("/api/public/chatbot")
   @ResponseBody
   public ResponseEntity<Map<String, Object>> proxyChatbot(
-      @RequestBody Map<String, Object> payload) {
-    String mensaje = payload != null && payload.get("mensaje") != null
-        ? payload.get("mensaje").toString().trim()
-        : "";
-    String lower = mensaje.toLowerCase();
-
-    // Respuestas directas para intenciones locales claras
-    if (lower.contains("ong") || lower.contains("verificar")) {
-      return ResponseEntity.ok(
-          Map.of(
-              "respuesta",
-              "<h4 style=\"margin-top: 0; color: #0176d3;\">🏢 Verificación de Organizaciones</h4><p>En DonaTrack auditamos a cada comedor u ONG antes de asignarle donaciones.</p><p>Las organizaciones pueden postularse completando el formulario público desde el botón <b>Sumar mi Organización</b> en la barra superior o en el pie de página.</p>"));
+      @RequestBody(required = false) Map<String, Object> payload,
+      org.springframework.security.core.Authentication authentication,
+      HttpServletRequest request) {
+    String mensaje = "";
+    if (payload != null) {
+      Object msgObj = payload.get("message") != null ? payload.get("message") : payload.get("mensaje");
+      if (msgObj != null) {
+        mensaje = msgObj.toString().trim();
+        if (mensaje.length() > 2000) {
+          mensaje = mensaje.substring(0, 2000);
+        }
+      }
     }
 
-    // Normalizar intención para concordar con los disparadores estrictos del Switch de n8n
-    Map<String, Object> payloadNormalizado = new java.util.HashMap<>(payload != null ? payload : Map.of());
-    if (lower.contains("donar") || lower.contains("dono") || lower.contains("donaci")) {
-      payloadNormalizado.put("mensaje", "¿Cómo dono?");
-    } else if (lower.contains("rastre") || lower.contains("remito") || lower.contains("seguimiento")) {
-      payloadNormalizado.put("mensaje", "Seguimiento de mi donación");
-    } else if (lower.contains("campa")) {
-      payloadNormalizado.put("mensaje", "Ver campañas");
-    } else if (lower.contains("registr")) {
-      payloadNormalizado.put("mensaje", "Quiero registrarme");
-    } else if (lower.contains("voluntari")) {
-      payloadNormalizado.put("mensaje", "Quiero ser voluntario");
-    } else if (lower.contains("horario") || lower.contains("sede") || lower.contains("donde")) {
-      payloadNormalizado.put("mensaje", "Horarios y puntos de entrega");
-    } else if (lower.contains("tipo") || lower.contains("que donar") || lower.contains("aceptan")) {
-      payloadNormalizado.put("mensaje", "¿Qué tipo de donaciones aceptan?");
+    String sessionId = resolverSessionIdChat(payload, request);
+    String action = null;
+    if (payload != null && payload.get("action") != null) {
+      String rawAction = payload.get("action").toString().trim();
+      if ("HANDOFF_AGENT".equalsIgnoreCase(rawAction)) {
+        action = "HANDOFF_AGENT";
+      }
     }
+
+    Jwt verifiedJwt = extraerJwtVerificado(authentication, request);
+    String verifiedUserId = null;
+    String verifiedEmail = null;
+    if (verifiedJwt != null) {
+      String personaId = verifiedJwt.getClaimAsString("personaId");
+      verifiedUserId =
+          (personaId != null && !personaId.isBlank()) ? personaId.trim() : verifiedJwt.getSubject();
+      String emailClaim = verifiedJwt.getClaimAsString("email");
+      if (emailClaim != null && !emailClaim.isBlank()) {
+        verifiedEmail = emailClaim.trim();
+      }
+    }
+
+    Map<String, Object> n8nPayload = new HashMap<>();
+    n8nPayload.put("message", mensaje);
+    n8nPayload.put("mensaje", mensaje);
+    n8nPayload.put("sessionId", sessionId);
+    n8nPayload.put("verifiedUserId", verifiedUserId);
+    n8nPayload.put("verifiedEmail", verifiedEmail);
+    n8nPayload.put("action", action);
 
     try {
-      org.springframework.http.client.SimpleClientHttpRequestFactory requestFactory =
-          new org.springframework.http.client.SimpleClientHttpRequestFactory();
-      requestFactory.setConnectTimeout(java.time.Duration.ofSeconds(2));
-      requestFactory.setReadTimeout(java.time.Duration.ofSeconds(4));
-
-      org.springframework.web.client.RestClient restClient =
-          org.springframework.web.client.RestClient.builder()
-              .baseUrl(n8nUrl)
-              .requestFactory(requestFactory)
-              .build();
-      Map<String, Object> resp =
-          restClient
-              .post()
-              .uri("/webhook/chatbot")
-              .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-              .body(payloadNormalizado)
-              .retrieve()
-              .body(
-                  new org.springframework.core.ParameterizedTypeReference<
-                      Map<String, Object>>() {});
-      return ResponseEntity.ok(resp != null ? resp : Map.of("respuesta", "Mensaje procesado."));
+      Map<String, Object> resp = invocarWebhookChatbotN8n(n8nPayload);
+      return ResponseEntity.ok(normalizarRespuestaChatbot(resp));
     } catch (Exception e) {
       log.warn("No se pudo conectar con el servicio de chatbot n8n ({}): {}", n8nUrl, e.getMessage());
-      return ResponseEntity.ok(
-          Map.of(
-              "respuesta",
-              "Hola! En este momento nuestro asistente virtual está descansando. Podés consultar nuestras secciones de ayuda o escribirnos directamente."));
+      String fallback =
+          "¡Hola! En este momento nuestro asistente virtual está descansando. Podés consultar nuestras secciones de ayuda o escribirnos directamente.";
+      Map<String, Object> out = new HashMap<>();
+      out.put("mode", "bot");
+      out.put("chunks", List.of(fallback));
+      out.put("respuesta", fallback);
+      return ResponseEntity.ok(out);
     }
+  }
+
+  protected Map<String, Object> invocarWebhookChatbotN8n(Map<String, Object> n8nPayload) {
+    org.springframework.http.client.SimpleClientHttpRequestFactory requestFactory =
+        new org.springframework.http.client.SimpleClientHttpRequestFactory();
+    requestFactory.setConnectTimeout(java.time.Duration.ofSeconds(3));
+    requestFactory.setReadTimeout(java.time.Duration.ofSeconds(25));
+
+    org.springframework.web.client.RestClient restClient =
+        org.springframework.web.client.RestClient.builder()
+            .baseUrl(n8nUrl)
+            .requestFactory(requestFactory)
+            .build();
+    return restClient
+        .post()
+        .uri("/webhook/chatbot")
+        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+        .header("x-internal-api-key", internalApiKey != null ? internalApiKey : "")
+        .body(n8nPayload)
+        .retrieve()
+        .body(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {});
+  }
+
+  private String resolverSessionIdChat(Map<String, Object> payload, HttpServletRequest request) {
+    if (payload != null && payload.get("sessionId") != null) {
+      String clean = payload.get("sessionId").toString().replaceAll("[^a-zA-Z0-9_-]", "");
+      if (!clean.isBlank()) {
+        return clean.length() > 128 ? clean.substring(0, 128) : clean;
+      }
+    }
+    return request != null ? request.getSession(true).getId() : UUID.randomUUID().toString();
+  }
+
+  private Jwt extraerJwtVerificado(
+      org.springframework.security.core.Authentication auth, HttpServletRequest request) {
+    Jwt jwt = jwtDesdeAuth(auth);
+    if (jwt != null) {
+      return jwt;
+    }
+    if (request != null && request.getUserPrincipal() instanceof org.springframework.security.core.Authentication principalAuth) {
+      jwt = jwtDesdeAuth(principalAuth);
+      if (jwt != null) {
+        return jwt;
+      }
+    }
+    jwt = jwtDesdeAuth(SecurityContextHolder.getContext().getAuthentication());
+    if (jwt != null) {
+      return jwt;
+    }
+    if (request != null && jwtDecoder != null) {
+      String authHeader = request.getHeader("Authorization");
+      if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        String token = authHeader.substring(7).trim();
+        if (!token.isEmpty()) {
+          try {
+            return jwtDecoder.decode(token);
+          } catch (Exception e) {
+            log.debug("Token Bearer inválido en /api/public/chatbot: {}", e.getMessage());
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  private Jwt jwtDesdeAuth(org.springframework.security.core.Authentication auth) {
+    if (auth == null || !auth.isAuthenticated()) {
+      return null;
+    }
+    if (auth instanceof JwtAuthenticationToken jwtAuth) {
+      return jwtAuth.getToken();
+    }
+    if (auth.getPrincipal() instanceof Jwt jwt) {
+      return jwt;
+    }
+    return null;
+  }
+
+  private Map<String, Object> normalizarRespuestaChatbot(Map<String, Object> resp) {
+    Map<String, Object> out = new HashMap<>();
+    if (resp == null) {
+      String msg = "Mensaje procesado.";
+      out.put("mode", "bot");
+      out.put("chunks", List.of(msg));
+      out.put("respuesta", msg);
+      return out;
+    }
+
+    String mode =
+        resp.get("mode") != null && "agent".equalsIgnoreCase(resp.get("mode").toString().trim())
+            ? "agent"
+            : "bot";
+    out.put("mode", mode);
+
+    List<String> chunks = new ArrayList<>();
+    if (resp.get("chunks") instanceof java.util.Collection<?> rawChunks) {
+      for (Object c : rawChunks) {
+        String cleaned = limpiarHtmlCrudo(c != null ? c.toString() : "");
+        if (!cleaned.isBlank()) {
+          chunks.add(cleaned);
+        }
+      }
+    }
+    if (chunks.isEmpty() && resp.get("respuesta") != null) {
+      String cleaned = limpiarHtmlCrudo(resp.get("respuesta").toString());
+      for (String part : cleaned.split("\\n{2,}")) {
+        if (!part.isBlank()) {
+          chunks.add(part.trim());
+        }
+      }
+    }
+    if (chunks.isEmpty()) {
+      chunks.add("Recibimos tu consulta. En breve te responderemos.");
+    }
+
+    out.put("chunks", chunks);
+    out.put("respuesta", String.join("\n\n", chunks));
+
+    if (resp.get("agentName") != null && !resp.get("agentName").toString().isBlank()) {
+      out.put("agentName", limpiarHtmlCrudo(resp.get("agentName").toString()));
+    }
+    if (resp.get("suggestedAction") instanceof Map<?, ?> sa && sa.get("type") != null) {
+      Map<String, String> actionMap = new HashMap<>();
+      actionMap.put("type", sa.get("type").toString().trim());
+      if (sa.get("label") != null) {
+        actionMap.put("label", limpiarHtmlCrudo(sa.get("label").toString()));
+      }
+      out.put("suggestedAction", actionMap);
+    }
+    return out;
+  }
+
+  public static String limpiarHtmlCrudo(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return "";
+    }
+    String s = raw;
+    s = s.replaceAll("(?i)<br\\s*/?>", "\n");
+    s = s.replaceAll("(?i)</(p|div|h[1-6]|li|tr)>", "\n");
+    s = s.replaceAll("(?i)<li[^>]*>", "- ");
+    s = s.replaceAll("<[^>]+>", "");
+    s =
+        s.replace("&nbsp;", " ")
+            .replace("&amp;", "&")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&quot;", "\"")
+            .replace("&#39;", "'");
+    s = s.replaceAll("[ \\t]+\\n", "\n");
+    s = s.replaceAll("\\n{3,}", "\n\n");
+    return s.trim();
   }
 
   private void establecerSesionSegura(

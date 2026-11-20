@@ -45,8 +45,6 @@ public class WebSecurityConfig {
                         "/terminos",
                         "/login",
                         "/registro",
-                        "/privacidad",
-                        "/terminos",
                         "/auth/**",
                         "/oauth2/**",
                         "/api/public/**",

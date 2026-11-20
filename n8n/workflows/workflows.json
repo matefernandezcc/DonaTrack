@@ -138,29 +138,29 @@
     },
     "nodeGroups": [],
     "pinData": {},
-    "versionId": "7a95ae77-80a2-4afb-ae05-6dcd13be60d3",
-    "activeVersionId": "7a95ae77-80a2-4afb-ae05-6dcd13be60d3",
+    "versionId": "94db9b67-f254-48c4-b031-c435822c84d5",
+    "activeVersionId": "94db9b67-f254-48c4-b031-c435822c84d5",
     "versionCounter": 7,
     "triggerCount": 1,
     "sourceWorkflowId": null,
     "tags": [],
     "shared": [
       {
-        "updatedAt": "2026-09-25T13:44:25.104Z",
-        "createdAt": "2026-09-25T13:44:25.104Z",
+        "updatedAt": "2026-11-20T01:45:09.941Z",
+        "createdAt": "2026-11-20T01:45:09.941Z",
         "role": "workflow:owner",
         "workflowId": "donatrack-insignias",
-        "projectId": "XdyxmmRJHDP8lpo0",
+        "projectId": "gR7eTgdeJhB7j84g",
         "project": {
-          "updatedAt": "2026-09-25T13:45:31.247Z",
-          "createdAt": "2026-09-25T13:43:52.692Z",
-          "id": "XdyxmmRJHDP8lpo0",
-          "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+          "updatedAt": "2026-11-20T01:49:59.353Z",
+          "createdAt": "2026-11-20T01:43:00.729Z",
+          "id": "gR7eTgdeJhB7j84g",
+          "name": "Mateo Fernandez <matefernandezc@gmail.com>",
           "type": "personal",
           "icon": null,
           "description": null,
           "customTelemetryTags": [],
-          "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
+          "creatorId": "e35ce793-3fbc-41cd-9cb7-4a626388cc41"
         }
       }
     ],
@@ -433,658 +433,35 @@
     },
     "nodeGroups": [],
     "pinData": {},
-    "versionId": "1346bf5b-af4c-48ea-9a60-3bd1320202af",
-    "activeVersionId": "1346bf5b-af4c-48ea-9a60-3bd1320202af",
+    "versionId": "e17068fa-8789-47fc-9380-ea1842261d42",
+    "activeVersionId": "e17068fa-8789-47fc-9380-ea1842261d42",
     "versionCounter": 16,
-    "triggerCount": 1,
+    "triggerCount": 2,
     "sourceWorkflowId": null,
     "tags": [],
     "shared": [
       {
-        "updatedAt": "2026-09-25T13:44:25.111Z",
-        "createdAt": "2026-09-25T13:44:25.111Z",
+        "updatedAt": "2026-11-20T01:45:10.069Z",
+        "createdAt": "2026-11-20T01:45:10.069Z",
         "role": "workflow:owner",
         "workflowId": "donatrack-ranking",
-        "projectId": "XdyxmmRJHDP8lpo0",
+        "projectId": "gR7eTgdeJhB7j84g",
         "project": {
-          "updatedAt": "2026-09-25T13:45:31.247Z",
-          "createdAt": "2026-09-25T13:43:52.692Z",
-          "id": "XdyxmmRJHDP8lpo0",
-          "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+          "updatedAt": "2026-11-20T01:49:59.353Z",
+          "createdAt": "2026-11-20T01:43:00.729Z",
+          "id": "gR7eTgdeJhB7j84g",
+          "name": "Mateo Fernandez <matefernandezc@gmail.com>",
           "type": "personal",
           "icon": null,
           "description": null,
           "customTelemetryTags": [],
-          "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
+          "creatorId": "e35ce793-3fbc-41cd-9cb7-4a626388cc41"
         }
       }
     ],
     "versionMetadata": {
       "name": "Updated Publish to Discord Webhook",
       "description": "Updated nodes: Publish to Discord Webhook"
-    }
-  },
-  {
-    "updatedAt": "2026-06-07T01:00:28.109Z",
-    "createdAt": "2026-06-07T00:29:50.529Z",
-    "id": "2zpu451nLHxitRhz",
-    "name": "Chatbot",
-    "description": "This workflow is for the chatbot in the frontend UI of the webpage",
-    "active": false,
-    "isArchived": false,
-    "nodes": [
-      {
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "chatbot",
-          "responseMode": "responseNode",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 2.1,
-        "position": [
-          0,
-          0
-        ],
-        "id": "0774c47d-97dd-4cd4-a6c2-494e81c8d4b5",
-        "name": "Webhook",
-        "webhookId": "ce38f0f7-30a2-4e8c-8c55-18901276b0d2"
-      },
-      {
-        "parameters": {
-          "options": {
-            "fallbackOutput": 4
-          },
-          "rules": {
-            "values": [
-              {
-                "conditions": {
-                  "combinator": "and",
-                  "conditions": [
-                    {
-                      "leftValue": "={{ $json.body.mensaje }}",
-                      "operator": {
-                        "operation": "equals",
-                        "type": "string"
-                      },
-                      "rightValue": "¿Cómo dono?"
-                    }
-                  ],
-                  "options": {
-                    "caseSensitive": true,
-                    "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 3
-                  }
-                },
-                "outputKey": "Donar",
-                "renameOutput": true
-              },
-              {
-                "conditions": {
-                  "combinator": "and",
-                  "conditions": [
-                    {
-                      "leftValue": "={{ $json.body.mensaje }}",
-                      "operator": {
-                        "operation": "equals",
-                        "type": "string"
-                      },
-                      "rightValue": "Ver campañas"
-                    }
-                  ],
-                  "options": {
-                    "caseSensitive": true,
-                    "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 3
-                  }
-                },
-                "outputKey": "Ver campañas",
-                "renameOutput": true
-              },
-              {
-                "conditions": {
-                  "combinator": "and",
-                  "conditions": [
-                    {
-                      "leftValue": "={{ $json.body.mensaje }}",
-                      "operator": {
-                        "operation": "equals",
-                        "type": "string"
-                      },
-                      "rightValue": "Quiero registrarme"
-                    }
-                  ],
-                  "options": {
-                    "caseSensitive": true,
-                    "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 3
-                  }
-                },
-                "outputKey": "Registro",
-                "renameOutput": true
-              },
-              {
-                "conditions": {
-                  "combinator": "and",
-                  "conditions": [
-                    {
-                      "leftValue": "={{ $json.body.mensaje }}",
-                      "operator": {
-                        "operation": "equals",
-                        "type": "string"
-                      },
-                      "rightValue": "Seguimiento de mi donación"
-                    }
-                  ],
-                  "options": {
-                    "caseSensitive": true,
-                    "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 3
-                  }
-                },
-                "outputKey": "Seguimiento Donacion",
-                "renameOutput": true
-              },
-              {
-                "conditions": {
-                  "combinator": "and",
-                  "conditions": [
-                    {
-                      "leftValue": "={{ $json.body.mensaje }}",
-                      "operator": {
-                        "operation": "equals",
-                        "type": "string"
-                      },
-                      "rightValue": "Ayuda"
-                    }
-                  ],
-                  "options": {
-                    "caseSensitive": true,
-                    "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 3
-                  }
-                },
-                "outputKey": "Ayuda",
-                "renameOutput": true
-              },
-              {
-                "conditions": {
-                  "combinator": "and",
-                  "conditions": [
-                    {
-                      "leftValue": "={{ $json.body.mensaje }}",
-                      "operator": {
-                        "operation": "equals",
-                        "type": "string"
-                      },
-                      "rightValue": "¿Qué tipo de donaciones aceptan?"
-                    }
-                  ],
-                  "options": {
-                    "caseSensitive": true,
-                    "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 3
-                  }
-                },
-                "outputKey": "Tipos Donaciones",
-                "renameOutput": true
-              },
-              {
-                "conditions": {
-                  "combinator": "and",
-                  "conditions": [
-                    {
-                      "leftValue": "={{ $json.body.mensaje }}",
-                      "operator": {
-                        "operation": "equals",
-                        "type": "string"
-                      },
-                      "rightValue": "Quiero ser voluntario"
-                    }
-                  ],
-                  "options": {
-                    "caseSensitive": true,
-                    "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 3
-                  }
-                },
-                "outputKey": "Voluntario",
-                "renameOutput": true
-              },
-              {
-                "conditions": {
-                  "combinator": "and",
-                  "conditions": [
-                    {
-                      "leftValue": "={{ $json.body.mensaje }}",
-                      "operator": {
-                        "operation": "equals",
-                        "type": "string"
-                      },
-                      "rightValue": "Horarios y puntos de entrega"
-                    }
-                  ],
-                  "options": {
-                    "caseSensitive": true,
-                    "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 3
-                  }
-                },
-                "outputKey": "Horarios",
-                "renameOutput": true
-              }
-            ]
-          }
-        },
-        "type": "n8n-nodes-base.switch",
-        "typeVersion": 3.4,
-        "position": [
-          208,
-          -48
-        ],
-        "id": "dbbad5cc-157f-4217-974c-4a547487586a",
-        "name": "Switch"
-      },
-      {
-        "parameters": {
-          "respondWith": "json",
-          "responseBody": "={{ $json }}",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1.5,
-        "position": [
-          848,
-          0
-        ],
-        "id": "3e8badd0-e9b7-4450-9626-fe942433368b",
-        "name": "Respond to Webhook"
-      },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "name": "respuesta",
-                "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">🌟 ¡Donar es súper fácil!</h4><p>Seguí estos 3 simples pasos:</p><ul style=\"padding-left: 20px; margin-bottom: 0;\"><li><b>1)</b> Registrate en la plataforma.</li><li><b>2)</b> Elegí una campaña activa o hacé una donación libre.</li><li><b>3)</b> Coordiná el punto de entrega o retiro.</li></ul><p style=\"margin-bottom: 0; font-size: 0.9em; color: var(--muted); margin-top: 10px;\"><i>¡Nosotros te vamos avisando cómo avanza tu donación!</i></p>"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          496,
-          -336
-        ],
-        "id": "05727528-e91a-435d-9662-e2d062281e15",
-        "name": "Edit Fields"
-      },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "name": "respuesta",
-                "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">🧑‍💻 Asistencia Humana</h4><p>¡Entendido! Ya le envié un aviso a nuestro equipo.</p><p style=\"margin-bottom: 0;\">Un agente se conectará a este chat en los próximos minutos para ayudarte personalmente. Mientras tanto, ¿te puedo ayudar con algo más?</p>"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          496,
-          352
-        ],
-        "id": "1356ac12-0cc1-4a0e-bbd6-0647f21400f7",
-        "name": "Edit Fields1"
-      },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "name": "respuesta",
-                "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">❤️ Campañas Activas</h4><p>Tenemos varias campañas donde podés ayudar ahora mismo. Cada una muestra su progreso y la ONG verificada a cargo.</p><a href=\"#campanas\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--blue); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">👉 Ver campañas destacadas</a>"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          496,
-          -176
-        ],
-        "id": "2d812ae7-5c0e-4bb6-ba6c-653c34cd1760",
-        "name": "Edit Fields2"
-      },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "name": "respuesta",
-                "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">📝 ¡Sumate a DonaTrack!</h4><p>El registro es <b>100% gratuito</b> y no toma ni un minuto.</p><p style=\"margin-bottom: 0;\">Encontrá los botones de acceso para <b>Donantes</b> o <b>Sedes</b> en la sección superior de la página (Sumate).</p>"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          496,
-          0
-        ],
-        "id": "cceb77b8-6f7c-4f98-85c1-39fff0bc7d34",
-        "name": "Edit Fields3"
-      },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "name": "respuesta",
-                "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">📦 Rastreo en tiempo real</h4><p>Cada donación genera un código de seguimiento único. Con ese ID podés ver si está <b>Recibida</b>, <b>En viaje</b> o <b>Entregada</b>.</p><a href=\"#organizaciones\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--green); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">🔍 Ir a mi panel de tracking</a>"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          496,
-          176
-        ],
-        "id": "f9014368-4ec1-485a-8221-3768a8f43e1f",
-        "name": "Edit Fields4"
-      },
-      {
-        "id": "1208c4e1-b702-4944-871d-1557df6b9028",
-        "name": "Edit Fields5",
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          496,
-          528
-        ],
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "name": "respuesta",
-                "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">🎁 ¿Qué podés donar?</h4><p>Aceptamos principalmente:</p><ul style=\"padding-left: 20px; margin-bottom: 0;\"><li>👕 <b>Ropa y calzado</b> (en buen estado)</li><li>🥫 <b>Alimentos no perecederos</b></li><li>🧸 <b>Juguetes y útiles escolares</b></li></ul><p style=\"margin-bottom: 0; font-size: 0.9em; color: var(--muted); margin-top: 10px;\"><i>Recuerda que todo debe estar limpio y en condiciones de ser usado.</i></p>"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "id": "59bb4688-c1b6-4cf1-ac68-0a49d568f330",
-        "name": "Edit Fields6",
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          496,
-          704
-        ],
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "name": "respuesta",
-                "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">🤝 ¡Hacé la diferencia!</h4><p>Los voluntarios son el corazón de DonaTrack. Podés sumarte como <b>sede de acopio</b> o ayudando en la <b>logística</b>.</p><a href=\"#registro\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--green); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">💪 Unirme como voluntario</a>"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "id": "717478e3-035e-4ad0-9b5a-b7a1d63e2f94",
-        "name": "Edit Fields7",
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          496,
-          880
-        ],
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "name": "respuesta",
-                "type": "string",
-                "value": "<h4 style=\"margin-top: 0; color: var(--orange);\">📍 Dónde y Cuándo</h4><p>Los horarios de entrega se coordinan directamente con la sede que elijas al momento de hacer la donación.</p><a href=\"#mapa\" style=\"display: inline-block; margin-top: 10px; padding: 8px 12px; background-color: var(--blue); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;\">🗺️ Ver mapa de sedes</a>"
-              }
-            ]
-          }
-        }
-      }
-    ],
-    "connections": {
-      "Webhook": {
-        "main": [
-          [
-            {
-              "node": "Switch",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Switch": {
-        "main": [
-          [
-            {
-              "node": "Edit Fields",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Edit Fields2",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Edit Fields3",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Edit Fields4",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Edit Fields1",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Edit Fields5",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Edit Fields6",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Edit Fields7",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Edit Fields": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Edit Fields1": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Edit Fields2": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Edit Fields3": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Edit Fields4": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Edit Fields5": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Edit Fields6": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Edit Fields7": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      }
-    },
-    "settings": {
-      "executionOrder": "v1",
-      "binaryMode": "separate",
-      "availableInMCP": true
-    },
-    "staticData": null,
-    "meta": {
-      "instanceId": "95be60674b7801e60f2cdd7e4e984e3ab744c71d05e6caf079beea406b504282",
-      "aiBuilderA ssisted": true,
-      "builderVariant": "mcp"
-    },
-    "nodeGroups": [],
-    "pinData": {},
-    "versionId": "bfc6a341-4132-44d8-b889-cf5ef6925aa4",
-    "activeVersionId": null,
-    "versionCounter": 4,
-    "triggerCount": 1,
-    "sourceWorkflowId": null,
-    "tags": [],
-    "shared": [
-      {
-        "updatedAt": "2026-09-25T13:44:25.117Z",
-        "createdAt": "2026-09-25T13:44:25.117Z",
-        "role": "workflow:owner",
-        "workflowId": "2zpu451nLHxitRhz",
-        "projectId": "XdyxmmRJHDP8lpo0",
-        "project": {
-          "updatedAt": "2026-09-25T13:45:31.247Z",
-          "createdAt": "2026-09-25T13:43:52.692Z",
-          "id": "XdyxmmRJHDP8lpo0",
-          "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
-          "type": "personal",
-          "icon": null,
-          "description": null,
-          "customTelemetryTags": [],
-          "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
-        }
-      }
-    ],
-    "versionMetadata": {
-      "name": null,
-      "description": null
     }
   },
   {
@@ -1439,29 +816,29 @@
     },
     "nodeGroups": [],
     "pinData": {},
-    "versionId": "51af8d84-15f1-4848-9190-e14eb8f156dc",
-    "activeVersionId": "51af8d84-15f1-4848-9190-e14eb8f156dc",
+    "versionId": "14fd01a4-fe8e-44d4-8f77-8d1430db6b2a",
+    "activeVersionId": "14fd01a4-fe8e-44d4-8f77-8d1430db6b2a",
     "versionCounter": 13,
     "triggerCount": 1,
     "sourceWorkflowId": null,
     "tags": [],
     "shared": [
       {
-        "updatedAt": "2026-09-25T13:44:25.130Z",
-        "createdAt": "2026-09-25T13:44:25.130Z",
+        "updatedAt": "2026-11-20T01:45:10.344Z",
+        "createdAt": "2026-11-20T01:45:10.344Z",
         "role": "workflow:owner",
         "workflowId": "donatrack-notificador",
-        "projectId": "XdyxmmRJHDP8lpo0",
+        "projectId": "gR7eTgdeJhB7j84g",
         "project": {
-          "updatedAt": "2026-09-25T13:45:31.247Z",
-          "createdAt": "2026-09-25T13:43:52.692Z",
-          "id": "XdyxmmRJHDP8lpo0",
-          "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+          "updatedAt": "2026-11-20T01:49:59.353Z",
+          "createdAt": "2026-11-20T01:43:00.729Z",
+          "id": "gR7eTgdeJhB7j84g",
+          "name": "Mateo Fernandez <matefernandezc@gmail.com>",
           "type": "personal",
           "icon": null,
           "description": null,
           "customTelemetryTags": [],
-          "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
+          "creatorId": "e35ce793-3fbc-41cd-9cb7-4a626388cc41"
         }
       }
     ],
@@ -1883,35 +1260,1303 @@
     },
     "nodeGroups": [],
     "pinData": {},
-    "versionId": "54dde52b-c448-45d7-bad5-46436f1a652e",
-    "activeVersionId": "54dde52b-c448-45d7-bad5-46436f1a652e",
+    "versionId": "04e78678-649d-4b5b-956b-a48300912b36",
+    "activeVersionId": "04e78678-649d-4b5b-956b-a48300912b36",
     "versionCounter": 30,
     "triggerCount": 1,
     "sourceWorkflowId": null,
     "tags": [],
     "shared": [
       {
-        "updatedAt": "2026-09-25T14:39:19.095Z",
-        "createdAt": "2026-09-25T14:39:19.095Z",
+        "updatedAt": "2026-11-20T01:45:10.540Z",
+        "createdAt": "2026-11-20T01:45:10.540Z",
         "role": "workflow:owner",
         "workflowId": "donatrack-notificador-real",
-        "projectId": "XdyxmmRJHDP8lpo0",
+        "projectId": "gR7eTgdeJhB7j84g",
         "project": {
-          "updatedAt": "2026-09-25T13:45:31.247Z",
-          "createdAt": "2026-09-25T13:43:52.692Z",
-          "id": "XdyxmmRJHDP8lpo0",
-          "name": "Maximo Hidalgo <maximojmhidalgo@gmail.com>",
+          "updatedAt": "2026-11-20T01:49:59.353Z",
+          "createdAt": "2026-11-20T01:43:00.729Z",
+          "id": "gR7eTgdeJhB7j84g",
+          "name": "Mateo Fernandez <matefernandezc@gmail.com>",
           "type": "personal",
           "icon": null,
           "description": null,
           "customTelemetryTags": [],
-          "creatorId": "bb5c51e6-87eb-4cee-b239-1c7283424966"
+          "creatorId": "e35ce793-3fbc-41cd-9cb7-4a626388cc41"
         }
       }
     ],
     "versionMetadata": {
       "name": "Fix Email format warning",
       "description": "Updated nodes: Enviar Correo Real"
+    }
+  },
+  {
+    "updatedAt": "2026-11-20T02:23:39.812Z",
+    "createdAt": "2026-11-20T02:23:39.812Z",
+    "id": "7xLJ5Sw6iwz5gPnM",
+    "name": "Donatrack - Agentforce Tools",
+    "description": "Agentforce HTTP Callout tools for reading and creating DonaTrack donations",
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "id": "81176562-dba8-44f5-8e6e-c209b62491c6",
+        "name": "Webhook Agentforce Tools",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "agent-tools",
+          "authentication": "headerAuth",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "webhookId": "d69fe3ad-8919-445d-a86b-d26203fb7593",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "donatrack-agent-tools-auth",
+            "name": "DonaTrack Agentforce Tools Auth"
+          }
+        }
+      },
+      {
+        "id": "387549c9-f395-4783-b9d9-822fcbfcbd5f",
+        "name": "Normalizar Tool Request",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const item = $input.first();\nconst body = (item && item.json && item.json.body) ? item.json.body : ((item && item.json) ? item.json : {});\nconst actionType = String(body.actionType || '').trim().toLowerCase();\nconst verifiedUserId = String(body.verifiedUserId || '').trim();\nconst uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;\n\nif (!uuidRegex.test(verifiedUserId)) {\n  return [{ json: { route: 'auth_required', actionType, verifiedUserId } }];\n}\n\nif (actionType === 'get_donations') {\n  return [{ json: { route: 'get_donations', actionType, verifiedUserId } }];\n}\n\nif (actionType === 'create_donation') {\n  let parsedPayload = {};\n  if (typeof body.payload === 'string') {\n    try {\n      parsedPayload = JSON.parse(body.payload);\n    } catch (e) {\n      parsedPayload = { descripcion: body.payload };\n    }\n  } else if (body.payload && typeof body.payload === 'object') {\n    parsedPayload = body.payload;\n  } else {\n    parsedPayload = body;\n  }\n\n  const descripcion = String(parsedPayload.descripcion || parsedPayload.description || parsedPayload.item || 'Donación solidaria').trim();\n  const cantidadNum = Number(parsedPayload.cantidad ?? parsedPayload.quantity ?? 1);\n  const cantidad = Number.isFinite(cantidadNum) && cantidadNum > 0 ? cantidadNum : 1;\n  const unidadMedicion = String(parsedPayload.unidadMedicion || parsedPayload.unit || 'unidades').trim();\n  const esUsado = Boolean(parsedPayload.esUsado ?? parsedPayload.isUsed ?? false);\n  const nombreSubcategoria = String(parsedPayload.nombreSubcategoria || parsedPayload.category || parsedPayload.subcategoria || 'Alimentos').trim();\n  const fechaVenc = parsedPayload.fechaVencimiento ? String(parsedPayload.fechaVencimiento).trim() : '';\n\n  const bien = { descripcion, cantidad, unidadMedicion, esUsado, nombreSubcategoria };\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaVenc)) {\n    bien.fechaVencimiento = fechaVenc;\n  }\n\n  const cargaBienesPayload = {\n    idDonante: verifiedUserId,\n    idAdministrador: 'a2222222-2222-4222-8222-222222222222',\n    bienesBrutos: [bien]\n  };\n  return [{ json: { route: 'create_donation', actionType, verifiedUserId, cargaBienesPayload, resumenBien: `${cantidad} ${unidadMedicion} de ${descripcion} (${nombreSubcategoria})` } }];\n}\n\nreturn [{ json: { route: 'unknown', actionType, verifiedUserId } }];"
+        }
+      },
+      {
+        "id": "7c13bec5-8a2f-46b8-b884-0ce652c37620",
+        "name": "Switch ActionType",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "get_donations",
+                "renameOutput": true,
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.route }}",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "rightValue": "get_donations"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "outputKey": "create_donation",
+                "renameOutput": true,
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.route }}",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "rightValue": "create_donation"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "outputKey": "auth_required",
+                "renameOutput": true,
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.route }}",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "rightValue": "auth_required"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra",
+            "renameFallbackOutput": "unknown"
+          }
+        }
+      },
+      {
+        "id": "dc3c0251-1d73-4b6a-bb37-d657210f423d",
+        "name": "Consultar Donaciones API",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          760,
+          100
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ ($env.DONACIONES_URL || \"http://donaciones:8000\") + \"/api/donaciones?idDonante=\" + encodeURIComponent($json.verifiedUserId) }}",
+          "sendHeaders": true,
+          "specifyHeaders": "keypair",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Service-Key",
+                "value": "={{ $env.INTERNAL_API_KEY }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true
+      },
+      {
+        "id": "c0742b34-3d06-4d0d-8156-52ceea1b07a2",
+        "name": "Resumir Donaciones",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1020,
+          100
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const items = $input.all().map(i => i.json).filter(Boolean);\nlet list = [];\nif (items.length === 1 && Array.isArray(items[0])) {\n  list = items[0];\n} else if (items.length === 1 && items[0].error) {\n  return [{ json: { status: 'ok', result: 'No pude consultar tus donaciones en este momento porque el servicio respondió con error. Intentá nuevamente en unos minutos.' } }];\n} else {\n  list = items.filter(d => d && (d.id || d.codigoCorto));\n}\nif (list.length === 0) {\n  return [{ json: { status: 'ok', result: 'No tenés donaciones registradas todavía en DonaTrack.' } }];\n}\nlist.sort((a, b) => String(b.fechaCreacion || '').localeCompare(String(a.fechaCreacion || '')));\nconst top5 = list.slice(0, 5);\nconst lines = top5.map((d, idx) => {\n  const codigo = d.codigoCorto || ('#DT-' + String(d.id || '').slice(0, 4).toUpperCase());\n  const desc = d.descripcion || d.subcategoria || 'Donación solidaria';\n  const estado = d.estado || 'EN_DEPOSITO';\n  const fecha = d.fechaCreacion ? String(d.fechaCreacion).slice(0, 10) : '';\n  const destino = d.correoBeneficiario ? ` | Destino: ${d.correoBeneficiario}` : '';\n  return `${idx + 1}. ${codigo} - ${desc} | Estado: ${estado} | Fecha: ${fecha}${destino}`;\n});\nconst resultText = `Encontré ${list.length} donación(es). Últimas ${top5.length}:\\n` + lines.join('\\n');\nreturn [{ json: { status: 'ok', result: resultText } }];"
+        },
+        "executeOnce": true
+      },
+      {
+        "id": "ca24e923-30d3-4a09-9c1b-723e6069e079",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          1760,
+          300
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      },
+      {
+        "id": "7fedaa22-d8b2-49c2-8571-25ade27c0fc2",
+        "name": "Crear Recepcion API",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          760,
+          280
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ ($env.DONACIONES_URL || \"http://donaciones:8000\") + \"/api/recepciones\" }}",
+          "sendHeaders": true,
+          "specifyHeaders": "keypair",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Service-Key",
+                "value": "={{ $env.INTERNAL_API_KEY }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.cargaBienesPayload) }}",
+          "options": {}
+        },
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true
+      },
+      {
+        "id": "63474a74-8037-4f79-861a-3abdf5c2e463",
+        "name": "Extraer ID Donacion",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1000,
+          280
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const resp = $input.first()?.json || {};\nconst req = $('Normalizar Tool Request').first()?.json || {};\nif (resp.error) {\n  return [{ json: { ok: false, errorMsg: typeof resp.error === 'string' ? resp.error : JSON.stringify(resp.error), resumenBien: req.resumenBien } }];\n}\nlet donacionId = resp.id || '';\nif (Array.isArray(resp.donacionesSegmentadas) && resp.donacionesSegmentadas.length > 0 && resp.donacionesSegmentadas[0].id) {\n  donacionId = resp.donacionesSegmentadas[0].id;\n}\nconst codigoCorto = donacionId ? ('#DT-' + String(donacionId).slice(0, 4).toUpperCase()) : '#DT-NUEVA';\nreturn [{ json: { ok: Boolean(donacionId), donacionId: String(donacionId || ''), codigoCorto, resumenBien: req.resumenBien } }];"
+        }
+      },
+      {
+        "id": "c89a917e-a0ab-4e42-8748-81dbf496e4fb",
+        "name": "Confirmar En Deposito API",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          1240,
+          280
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "={{ ($env.DONACIONES_URL || \"http://donaciones:8000\") + \"/api/donaciones/\" + $json.donacionId + \"/estado/en_deposito\" }}",
+          "sendHeaders": true,
+          "specifyHeaders": "keypair",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Service-Key",
+                "value": "={{ $env.INTERNAL_API_KEY }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true
+      },
+      {
+        "id": "f1bded5d-558d-484c-aad9-cd36eb9b8786",
+        "name": "Formatear Creacion",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1480,
+          280
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const info = $('Extraer ID Donacion').first()?.json || {};\nif (!info.ok || !info.donacionId) {\n  return [{ json: { status: 'ok', result: 'No se pudo registrar la donación en el sistema. Verificá los datos (descripción, cantidad y subcategoría) e intentá nuevamente.' } }];\n}\nreturn [{ json: { status: 'ok', result: `Donación registrada con éxito bajo el código ${info.codigoCorto} (${info.resumenBien}). Estado actual: EN_DEPOSITO (+10 pts en Incentivos).` } }];"
+        }
+      },
+      {
+        "id": "359034c2-b6aa-452b-813e-8e5fc106f77f",
+        "name": "Responder Auth Requerida",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          760,
+          440
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "return [{ json: { status: 'ok', result: 'El usuario no ha iniciado sesión en DonaTrack. Pedile que inicie sesión en su cuenta para poder consultar o crear donaciones.' } }];"
+        }
+      },
+      {
+        "id": "0edeeca3-85d9-4365-9e54-148d9573999e",
+        "name": "Responder Accion Desconocida",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          760,
+          600
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "return [{ json: { status: 'ok', result: 'Acción no reconocida. Las acciones válidas son get_donations y create_donation.' } }];"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook Agentforce Tools": {
+        "main": [
+          [
+            {
+              "node": "Normalizar Tool Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalizar Tool Request": {
+        "main": [
+          [
+            {
+              "node": "Switch ActionType",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch ActionType": {
+        "main": [
+          [
+            {
+              "node": "Consultar Donaciones API",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Crear Recepcion API",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Responder Auth Requerida",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Responder Accion Desconocida",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Consultar Donaciones API": {
+        "main": [
+          [
+            {
+              "node": "Resumir Donaciones",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Resumir Donaciones": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Crear Recepcion API": {
+        "main": [
+          [
+            {
+              "node": "Extraer ID Donacion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extraer ID Donacion": {
+        "main": [
+          [
+            {
+              "node": "Confirmar En Deposito API",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Confirmar En Deposito API": {
+        "main": [
+          [
+            {
+              "node": "Formatear Creacion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatear Creacion": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Responder Auth Requerida": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Responder Accion Desconocida": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "availableInMCP": true
+    },
+    "staticData": null,
+    "meta": {
+      "aiBuilderAssisted": true,
+      "builderVariant": "mcp"
+    },
+    "nodeGroups": [],
+    "pinData": null,
+    "versionId": "75d01813-8fb0-4052-bf52-5aeb58332c8d",
+    "activeVersionId": "75d01813-8fb0-4052-bf52-5aeb58332c8d",
+    "versionCounter": 1,
+    "triggerCount": 1,
+    "sourceWorkflowId": null,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-11-20T02:23:39.996Z",
+        "createdAt": "2026-11-20T02:23:39.996Z",
+        "role": "workflow:owner",
+        "workflowId": "7xLJ5Sw6iwz5gPnM",
+        "projectId": "gR7eTgdeJhB7j84g",
+        "project": {
+          "updatedAt": "2026-11-20T01:49:59.353Z",
+          "createdAt": "2026-11-20T01:43:00.729Z",
+          "id": "gR7eTgdeJhB7j84g",
+          "name": "Mateo Fernandez <matefernandezc@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "customTelemetryTags": [],
+          "creatorId": "e35ce793-3fbc-41cd-9cb7-4a626388cc41"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": "Initial Agentforce Tools",
+      "description": "Created with 12 nodes: Webhook Agentforce Tools, Normalizar Tool Request, Switch ActionType, Consultar Donaciones API, Resumir Donaciones and 7 more"
+    }
+  },
+  {
+    "updatedAt": "2026-11-20T02:23:45.268Z",
+    "createdAt": "2026-11-20T02:23:45.268Z",
+    "id": "oyCuNCfUimiQyRsx",
+    "name": "DonaTrack - Chatbot Orquestador",
+    "description": "3-level Chatbot Orchestrator: quick FAQ -> handoff button -> Agentforce Sofia",
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "id": "2245a9c9-b007-405b-ad57-1e5ec72b1711",
+        "name": "Webhook Chatbot",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "chatbot",
+          "authentication": "headerAuth",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "webhookId": "4182ef89-4595-43a0-8eb6-4b4755e1646c",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "donatrack-chat-internal-auth",
+            "name": "DonaTrack Chat Internal Auth"
+          }
+        }
+      },
+      {
+        "id": "92b07952-ec9b-4145-894f-b1c431b634d6",
+        "name": "Normalizar Entrada",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const item = $input.first();\nconst body = (item && item.json && item.json.body) ? item.json.body : ((item && item.json) ? item.json : {});\nconst message = String(body.message || body.mensaje || '').trim();\nconst sessionId = String(body.sessionId || ('anon-' + Date.now())).trim();\nconst verifiedUserId = body.verifiedUserId ? String(body.verifiedUserId).trim() : null;\nconst verifiedEmail = body.verifiedEmail ? String(body.verifiedEmail).trim() : null;\nconst action = body.action ? String(body.action).trim().toUpperCase() : null;\nreturn [{ json: { message, sessionId, verifiedUserId, verifiedEmail, action } }];"
+        }
+      },
+      {
+        "id": "0dcfc0ad-6d1e-46f5-b807-5f05bbc7c67b",
+        "name": "Buscar Sesion MongoDB",
+        "type": "n8n-nodes-base.mongoDb",
+        "typeVersion": 1.5,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "resource": "document",
+          "operation": "find",
+          "collection": "agentforce_sessions",
+          "query": "{\"sessionId\": $1}",
+          "queryParameters": "={{ [$json.sessionId] }}",
+          "options": {
+            "limit": 1
+          }
+        },
+        "credentials": {
+          "mongoDb": {
+            "id": "donatrack-mongo-atlas",
+            "name": "DonaTrack MongoDB Atlas"
+          }
+        },
+        "alwaysOutputData": true,
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "ac5b80ad-7a28-4c32-a528-db72d9357abc",
+        "name": "Evaluar Nivel Chat",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const input = $('Normalizar Entrada').first().json;\nconst mongoItem = $input.first()?.json || {};\nconst hasValidMongo = Boolean(mongoItem && !mongoItem.error && mongoItem.sessionId);\nconst hasActiveSfSession = Boolean(hasValidMongo && mongoItem.sfSessionId && mongoItem.active !== false);\n\nif (hasActiveSfSession || input.action === 'HANDOFF_AGENT') {\n  const needsNewSfSession = !hasActiveSfSession;\n  const sfSessionId = needsNewSfSession ? '' : String(mongoItem.sfSessionId);\n  const nextSequenceId = needsNewSfSession ? 1 : ((Number(mongoItem.sequenceId) || 0) + 1);\n  let messageToSend = input.message;\n  if (input.action === 'HANDOFF_AGENT' && !messageToSend) {\n    messageToSend = (hasValidMongo && mongoItem.lastUnansweredMessage) ? String(mongoItem.lastUnansweredMessage) : 'Hola, necesito ayuda de soporte';\n  }\n  if (!messageToSend) {\n    messageToSend = 'Hola, necesito ayuda de soporte';\n  }\n  return [{\n    json: {\n      route: 'agent',\n      sessionId: input.sessionId,\n      verifiedUserId: input.verifiedUserId,\n      verifiedEmail: input.verifiedEmail,\n      needsNewSfSession,\n      sfSessionId,\n      nextSequenceId,\n      messageToSend\n    }\n  }];\n}\n\nconst norm = input.message.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').trim();\nconst requiresAgent = /\\b(mis donaciones|mi donacion|crear donacion|nueva donacion|hacer una donacion|reclamo|problema|error|agente|humano|sofia|soporte|ayuda personal)\\b/.test(norm);\n\nlet faqChunks = null;\nif (!requiresAgent) {\n  if (norm === '¿como dono?' || norm === '¿como donar?' || /\\b(como (?:puedo )?(?:donar|dono)|pasos para donar|quiero donar)\\b/.test(norm)) {\n    faqChunks = [\n      'Donar en DonaTrack es muy simple y sigue 3 pasos:',\n      '- **1) Registrate** gratis como Donante.\\n- **2) Cargá tu donación** detallando artículos, cantidades y estado.\\n- **3) Seguí cada etapa** desde el punto de recepción hasta la entrega auditada con remito en el comedor.'\n    ];\n  } else if (/\\b(verificar ong|sumar mi organizacion|ong|comedor|merendero)\\b/.test(norm)) {\n    faqChunks = [\n      'En **DonaTrack** auditamos cada comedor u organización beneficiaria antes de asignarle donaciones.',\n      'Podés postular tu entidad desde el botón **Sumar mi Organización** ingresando CUIT, dirección real y necesidades prioritarias para validación del equipo.'\n    ];\n  } else if (/\\b(rastrear|rastreo|remito|seguimiento|codigo)\\b/.test(norm)) {\n    faqChunks = [\n      'Cada donación recibe un código único tipo `#DT-XXXX` cuando ingresa a depósito.',\n      'Desde el panel público o tu portal de Donante podés seguir en el mapa el estado **En Depósito → Asignada / En Ruta → Entregada con Remito**.'\n    ];\n  } else if (/\\b(campana|campanas)\\b/.test(norm)) {\n    faqChunks = [\n      'Podés explorar las organizaciones y necesidades activas directamente desde la sección de campañas o en tu portal de Donante.'\n    ];\n  } else if (/\\b(registrar|registro|cuenta nueva)\\b/.test(norm)) {\n    faqChunks = [\n      'El registro en DonaTrack es **100% gratuito** tanto para Donantes como para Organizaciones Beneficiarias desde `/registro`.'\n    ];\n  } else if (/\\b(que tipo|aceptan|que puedo donar|elementos)\\b/.test(norm)) {\n    faqChunks = [\n      'Podés donar:\\n- Alimentos no perecederos\\n- Ropa y calzado en buen estado\\n- Juguetes, útiles escolares y mobiliario comunitario.'\n    ];\n  } else if (/\\b(voluntario|logistica|camion)\\b/.test(norm)) {\n    faqChunks = [\n      'Podés colaborar sumando tu organización como centro de recepción o coordinando entregas logísticas con nuestro equipo administrativo.'\n    ];\n  } else if (/\\b(horario|sede|punto de entrega|punto de recepcion)\\b/.test(norm)) {\n    faqChunks = [\n      'Los horarios y puntos de recepción están disponibles en la sección **Mapa de Impacto** de la página principal y se coordinan según el nodo elegido.'\n    ];\n  } else if (/^(hola|buenas|buen dia|buenas tardes|buenas noches|ayuda|menu|opciones)[!?.]*$/.test(norm)) {\n    faqChunks = [\n      '¡Hola! Soy el asistente rápido de **DonaTrack**. Elegí una de las opciones rápidas o preguntame lo que necesites.'\n    ];\n  }\n}\n\nif (faqChunks) {\n  return [{\n    json: {\n      route: 'bot_faq',\n      responseBody: {\n        mode: 'bot',\n        chunks: faqChunks,\n        respuesta: faqChunks.join('\\n\\n')\n      }\n    }\n  }];\n}\n\nconst fallbackMsg = 'No tengo esa info a mano desde acá, pero puedo pasarte con alguien del equipo.';\nreturn [{\n  json: {\n    route: 'bot_fallback',\n    sessionId: input.sessionId,\n    lastUnansweredMessage: input.message || 'Consulta general de soporte',\n    verifiedUserId: input.verifiedUserId,\n    verifiedEmail: input.verifiedEmail,\n    active: false,\n    updatedAt: new Date().toISOString(),\n    responseBody: {\n      mode: 'bot',\n      chunks: [fallbackMsg],\n      respuesta: fallbackMsg,\n      suggestedAction: {\n        type: 'HANDOFF_AGENT',\n        label: 'Contactar con un agente'\n      }\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "31269725-7e1a-4938-b6bd-cef20108a4cf",
+        "name": "Switch Ruta Chat",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          960,
+          300
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "bot_faq",
+                "renameOutput": true,
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.route }}",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "rightValue": "bot_faq"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "outputKey": "bot_fallback",
+                "renameOutput": true,
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.route }}",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "rightValue": "bot_fallback"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra",
+            "renameFallbackOutput": "agent"
+          }
+        }
+      },
+      {
+        "id": "dc2a7e3f-9b01-4196-b98c-7a3d4ff57fbe",
+        "name": "Responder Bot FAQ",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          1260,
+          100
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json.responseBody }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      },
+      {
+        "id": "5dde0182-50b4-413d-b3fe-8165d2d23bc2",
+        "name": "Guardar Fallback MongoDB",
+        "type": "n8n-nodes-base.mongoDb",
+        "typeVersion": 1.5,
+        "position": [
+          1260,
+          280
+        ],
+        "parameters": {
+          "resource": "document",
+          "operation": "findOneAndUpdate",
+          "collection": "agentforce_sessions",
+          "updateKey": "sessionId",
+          "fields": "sessionId,lastUnansweredMessage,verifiedUserId,verifiedEmail,active,updatedAt",
+          "upsert": true,
+          "options": {}
+        },
+        "credentials": {
+          "mongoDb": {
+            "id": "donatrack-mongo-atlas",
+            "name": "DonaTrack MongoDB Atlas"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "7a70035e-4aee-456a-b2ee-92ae680da4cd",
+        "name": "Responder Fallback Bot",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          1500,
+          280
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $('Evaluar Nivel Chat').first().json.responseBody }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      },
+      {
+        "id": "0f844d2d-dace-4a84-abcb-ea6d986eb2f6",
+        "name": "OAuth Salesforce",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          1260,
+          500
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://\" + ($env.SF_MY_DOMAIN_URL || $env.ORG_URL || \"\").replace(/^https?:\\/\\//i, \"\").replace(/\\/+$/, \"\") + \"/services/oauth2/token\" }}",
+          "sendBody": true,
+          "contentType": "form-urlencoded",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "grant_type",
+                "value": "client_credentials"
+              },
+              {
+                "name": "client_id",
+                "value": "={{ $env.SF_CLIENT_ID || $env.CONSUMER_KEY || \"\" }}"
+              },
+              {
+                "name": "client_secret",
+                "value": "={{ $env.SF_CLIENT_SECRET || $env.CONSUMER_SECRET || \"\" }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "acc600da-bdcf-460a-b4d8-dee272635be6",
+        "name": "Validar Token SF",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1500,
+          500
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.access_token || \"\" }}",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "34898b34-3c82-4159-a143-57933c4fd5b9",
+        "name": "Necesita Sesion SF",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1760,
+          440
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $('Evaluar Nivel Chat').first().json.needsNewSfSession }}",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "d83fe92e-1c9c-48c5-a8cd-b786e3552285",
+        "name": "Preparar Sesion SF",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2000,
+          320
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const ctx = $('Evaluar Nivel Chat').first().json;\nconst tokenData = $('OAuth Salesforce').first().json;\nconst rawOrg = String($env.SF_MY_DOMAIN_URL || $env.ORG_URL || tokenData.instance_url || '').replace(/^https?:\\/\\//i, '').replace(/\\/+$/, '');\nconst sessionBody = {\n  externalSessionKey: ctx.sessionId,\n  instanceConfig: { endpoint: 'https://' + rawOrg },\n  streamingCapabilities: { chunkTypes: ['Text'] },\n  bypassUser: true,\n  variables: [\n    { name: '$Context.EndUserLanguage', type: 'Text', value: 'es_AR' },\n    { name: 'Verified_User_Id', type: 'Text', value: String(ctx.verifiedUserId || '') },\n    { name: 'Verified_User_Email', type: 'Text', value: String(ctx.verifiedEmail || '') }\n  ]\n};\nreturn [{ json: { accessToken: tokenData.access_token, sfSessionBody: sessionBody } }];"
+        }
+      },
+      {
+        "id": "4eb23407-9117-4801-a9e2-b8ad6f43f59d",
+        "name": "Crear Sesion Agentforce",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          2240,
+          320
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://api.salesforce.com/einstein/ai-agent/v1/agents/\" + ($env.SF_AGENT_ID || $env.AGENT_ID || \"\") + \"/sessions\" }}",
+          "sendHeaders": true,
+          "specifyHeaders": "keypair",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ \"Bearer \" + $json.accessToken }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.sfSessionBody) }}",
+          "options": {}
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "752b3f72-5947-4ea2-a723-e12494501431",
+        "name": "Preparar Mensaje Inicial SF",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2480,
+          320
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const resp = $input.first()?.json || {};\nconst ctx = $('Evaluar Nivel Chat').first().json;\nconst tokenData = $('OAuth Salesforce').first().json;\nconst sfSessionId = String(resp.sessionId || '');\nconst sfMessageBody = {\n  message: {\n    sequenceId: 1,\n    type: 'Text',\n    text: ctx.messageToSend\n  },\n  variables: [\n    { name: 'Verified_User_Id', type: 'Text', value: String(ctx.verifiedUserId || '') },\n    { name: 'Verified_User_Email', type: 'Text', value: String(ctx.verifiedEmail || '') }\n  ]\n};\nreturn [{ json: { sfSessionId, sequenceId: 1, accessToken: tokenData.access_token, sfMessageBody, sessionError: resp.error || null } }];"
+        }
+      },
+      {
+        "id": "ceac6396-7d6f-46e6-ba34-0fe3086780bf",
+        "name": "Enviar Mensaje Agentforce",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          2740,
+          440
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://api.salesforce.com/einstein/ai-agent/v1/sessions/\" + $json.sfSessionId + \"/messages\" }}",
+          "sendHeaders": true,
+          "specifyHeaders": "keypair",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ \"Bearer \" + $json.accessToken }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.sfMessageBody) }}",
+          "options": {}
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "fcb762fc-d277-45d1-a673-3842fbac993a",
+        "name": "Preparar Mensaje Siguiente SF",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2240,
+          520
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const ctx = $('Evaluar Nivel Chat').first().json;\nconst tokenData = $('OAuth Salesforce').first().json;\nconst sfMessageBody = {\n  message: {\n    sequenceId: ctx.nextSequenceId,\n    type: 'Text',\n    text: ctx.messageToSend\n  },\n  variables: [\n    { name: 'Verified_User_Id', type: 'Text', value: String(ctx.verifiedUserId || '') },\n    { name: 'Verified_User_Email', type: 'Text', value: String(ctx.verifiedEmail || '') }\n  ]\n};\nreturn [{ json: { sfSessionId: ctx.sfSessionId, sequenceId: ctx.nextSequenceId, accessToken: tokenData.access_token, sfMessageBody } }];"
+        }
+      },
+      {
+        "id": "98a273ff-ced8-4dba-afa0-4b3793745254",
+        "name": "Respuesta Fallback Agente",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1760,
+          680
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const err = $input.first()?.json || {};\nconst detail = err.error_description || err.message || '';\nconst msg = 'Sofía está momentáneamente desconectada para iniciar sesión en Salesforce Agentforce. Intentá nuevamente en unos minutos o consultá las preguntas rápidas.';\nreturn [{ json: { mode: 'agent', agentName: 'Sofía - Soporte Donatrack', chunks: [msg], respuesta: msg, oauthError: detail } }];"
+        }
+      },
+      {
+        "id": "d7308b11-3329-4a9b-986b-ff86e81c9b9a",
+        "name": "Responder Fallback Agente",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          2000,
+          680
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { mode: $json.mode, agentName: $json.agentName, chunks: $json.chunks, respuesta: $json.respuesta } }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      },
+      {
+        "id": "10e3ba6f-732e-47d0-9eb0-58c50cac9afd",
+        "name": "Formatear Respuesta Sofia",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2980,
+          440
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const sfResp = $input.first()?.json || {};\nconst ctx = $('Evaluar Nivel Chat').first().json;\nlet prep = { sfSessionId: ctx.sfSessionId, sequenceId: ctx.nextSequenceId };\ntry {\n  if (ctx.needsNewSfSession) {\n    prep = $('Preparar Mensaje Inicial SF').first().json;\n  } else {\n    prep = $('Preparar Mensaje Siguiente SF').first().json;\n  }\n} catch (e) {}\n\nconst cleanText = (raw) => {\n  if (!raw) return '';\n  return String(raw)\n    .replace(/<br\\s*\\/?>/gi, '\\n')\n    .replace(/<\\/(p|div|h[1-6]|li|tr)>/gi, '\\n')\n    .replace(/<li[^>]*>/gi, '- ')\n    .replace(/<[^>]*>/g, '')\n    .replace(/&nbsp;/gi, ' ')\n    .replace(/&amp;/gi, '&')\n    .replace(/&lt;/gi, '<')\n    .replace(/&gt;/gi, '>')\n    .replace(/&quot;/gi, '\"')\n    .replace(/&#39;/gi, \"'\")\n    .replace(/\\n{3,}/g, '\\n\\n')\n    .trim();\n};\n\nlet rawTexts = [];\nif (Array.isArray(sfResp.messages)) {\n  rawTexts = sfResp.messages.map(m => cleanText(m.message || m.text || '')).filter(Boolean);\n}\nif (rawTexts.length === 0 && sfResp.message) {\n  const single = cleanText(sfResp.message);\n  if (single) rawTexts = [single];\n}\nif (rawTexts.length === 0) {\n  rawTexts = ['No recibí respuesta del agente en este momento. ¿Podés repetir tu consulta?'];\n}\n\nconst chunks = [];\nfor (const txt of rawTexts) {\n  const parts = txt.split(/\\n\\n+|(?<=[.!?])\\s+(?=[A-ZÁÉÍÓÚÑ¿¡\\d])/).map(s => s.trim()).filter(Boolean);\n  for (const p of parts) chunks.push(p);\n}\nif (chunks.length === 0) chunks.push('¿En qué más te puedo ayudar?');\n\nreturn [{\n  json: {\n    sessionId: ctx.sessionId,\n    sfSessionId: prep.sfSessionId || '',\n    sequenceId: prep.sequenceId || 1,\n    verifiedUserId: ctx.verifiedUserId,\n    verifiedEmail: ctx.verifiedEmail,\n    active: Boolean(prep.sfSessionId),\n    updatedAt: new Date().toISOString(),\n    responseBody: {\n      mode: 'agent',\n      agentName: 'Sofía - Soporte Donatrack',\n      chunks,\n      respuesta: chunks.join('\\n\\n')\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "340a254a-1e3b-44b4-9f9d-287da4a46af8",
+        "name": "Guardar Sesion MongoDB",
+        "type": "n8n-nodes-base.mongoDb",
+        "typeVersion": 1.5,
+        "position": [
+          3220,
+          440
+        ],
+        "parameters": {
+          "resource": "document",
+          "operation": "findOneAndUpdate",
+          "collection": "agentforce_sessions",
+          "updateKey": "sessionId",
+          "fields": "sessionId,sfSessionId,sequenceId,verifiedUserId,verifiedEmail,active,updatedAt",
+          "upsert": true,
+          "options": {}
+        },
+        "credentials": {
+          "mongoDb": {
+            "id": "donatrack-mongo-atlas",
+            "name": "DonaTrack MongoDB Atlas"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "56a349b0-62d6-4cd6-98a6-d8a16f74d77d",
+        "name": "Responder Agente",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          3460,
+          440
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $('Formatear Respuesta Sofia').first().json.responseBody }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook Chatbot": {
+        "main": [
+          [
+            {
+              "node": "Normalizar Entrada",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalizar Entrada": {
+        "main": [
+          [
+            {
+              "node": "Buscar Sesion MongoDB",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Sesion MongoDB": {
+        "main": [
+          [
+            {
+              "node": "Evaluar Nivel Chat",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Evaluar Nivel Chat": {
+        "main": [
+          [
+            {
+              "node": "Switch Ruta Chat",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch Ruta Chat": {
+        "main": [
+          [
+            {
+              "node": "Responder Bot FAQ",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Guardar Fallback MongoDB",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "OAuth Salesforce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Guardar Fallback MongoDB": {
+        "main": [
+          [
+            {
+              "node": "Responder Fallback Bot",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OAuth Salesforce": {
+        "main": [
+          [
+            {
+              "node": "Validar Token SF",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Token SF": {
+        "main": [
+          [
+            {
+              "node": "Necesita Sesion SF",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Respuesta Fallback Agente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Necesita Sesion SF": {
+        "main": [
+          [
+            {
+              "node": "Preparar Sesion SF",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Preparar Mensaje Siguiente SF",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Sesion SF": {
+        "main": [
+          [
+            {
+              "node": "Crear Sesion Agentforce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Crear Sesion Agentforce": {
+        "main": [
+          [
+            {
+              "node": "Preparar Mensaje Inicial SF",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Mensaje Inicial SF": {
+        "main": [
+          [
+            {
+              "node": "Enviar Mensaje Agentforce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Mensaje Agentforce": {
+        "main": [
+          [
+            {
+              "node": "Formatear Respuesta Sofia",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Mensaje Siguiente SF": {
+        "main": [
+          [
+            {
+              "node": "Enviar Mensaje Agentforce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Respuesta Fallback Agente": {
+        "main": [
+          [
+            {
+              "node": "Responder Fallback Agente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatear Respuesta Sofia": {
+        "main": [
+          [
+            {
+              "node": "Guardar Sesion MongoDB",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Guardar Sesion MongoDB": {
+        "main": [
+          [
+            {
+              "node": "Responder Agente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "availableInMCP": true
+    },
+    "staticData": null,
+    "meta": {
+      "aiBuilderAssisted": true,
+      "builderVariant": "mcp"
+    },
+    "nodeGroups": [],
+    "pinData": null,
+    "versionId": "b3eef120-dcdc-445a-b461-48ff69eabf43",
+    "activeVersionId": "b3eef120-dcdc-445a-b461-48ff69eabf43",
+    "versionCounter": 1,
+    "triggerCount": 1,
+    "sourceWorkflowId": null,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-11-20T02:23:45.290Z",
+        "createdAt": "2026-11-20T02:23:45.290Z",
+        "role": "workflow:owner",
+        "workflowId": "oyCuNCfUimiQyRsx",
+        "projectId": "gR7eTgdeJhB7j84g",
+        "project": {
+          "updatedAt": "2026-11-20T01:49:59.353Z",
+          "createdAt": "2026-11-20T01:43:00.729Z",
+          "id": "gR7eTgdeJhB7j84g",
+          "name": "Mateo Fernandez <matefernandezc@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "customTelemetryTags": [],
+          "creatorId": "e35ce793-3fbc-41cd-9cb7-4a626388cc41"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": "Initial Chatbot Orchestrator",
+      "description": "Created with 21 nodes: Webhook Chatbot, Normalizar Entrada, Buscar Sesion MongoDB, Evaluar Nivel Chat, Switch Ruta Chat and 16 more"
     }
   }
 ]

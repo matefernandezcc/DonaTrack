@@ -311,6 +311,38 @@ class PublicControllerTest {
 
     @Test
     @DisplayName(
+        "POST /login con BENEFICIARIA_PENDIENTE no crea sesión y redirige a /login con mensaje de validación pendiente")
+    void testLoginBeneficiariaPendienteRedirigeALoginConMensaje() throws Exception {
+      TokenResponse tokenResp =
+          new TokenResponse(
+              "dummy-token-pend",
+              "bearer",
+              3600L,
+              new UserInfoDto(
+                  UUID.randomUUID(),
+                  "utnianos",
+                  "Utnianos",
+                  "utnianos@gmail.com",
+                  "BENEFICIARIA_PENDIENTE",
+                  UUID.randomUUID()));
+
+      when(authGateway.login("utnianos", "clave123")).thenReturn(tokenResp);
+
+      mockMvc
+          .perform(post("/login").param("username", "utnianos").param("password", "clave123"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/login"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "loginError",
+                      containsString("pendiente de validación")));
+
+      verify(jwtDecoder, never()).decode(anyString());
+    }
+
+    @Test
+    @DisplayName(
         "POST /login con credenciales inválidas debe redirigir a /login con flash attribute loginError")
     void testLoginInvalido() throws Exception {
       // Arrange
@@ -380,6 +412,54 @@ class PublicControllerTest {
           .registrar(
               org.mockito.ArgumentMatchers.argThat(
                   m -> "BENEFICIARIA_PENDIENTE".equals(m.get("rol"))));
+    }
+
+    @Test
+    @DisplayName(
+        "POST /registro con BENEFICIARIA normaliza CUIT y celular a formato argentino válido")
+    void testRegistroBeneficiariaNormalizaCuitYCelular() throws Exception {
+      mockMvc
+          .perform(
+              post("/registro")
+                  .param("nombre", "Comedor Normalizado")
+                  .param("username", "comedornorm")
+                  .param("email", "contacto@normalizado.org")
+                  .param("password", "clave123")
+                  .param("rol", "BENEFICIARIA")
+                  .param("cuit", "20445353877")
+                  .param("direccion", "Gascon 123")
+                  .param("telefono", "44556677"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/login"))
+          .andExpect(flash().attributeExists("registerSuccess"));
+
+      verify(solicitudOngService, times(1))
+          .registrarSolicitud(
+              org.mockito.ArgumentMatchers.<Map<String, String>>argThat(
+                  m ->
+                      "20-44535387-7".equals(m.get("cuit"))
+                          && "+54 9 11 4455-6677".equals(m.get("telefono"))));
+    }
+
+    @Test
+    @DisplayName("POST /registro con BENEFICIARIA rechaza CUIT inválido")
+    void testRegistroBeneficiariaRechazaCuitInvalido() throws Exception {
+      mockMvc
+          .perform(
+              post("/registro")
+                  .param("nombre", "Comedor Mal")
+                  .param("username", "comedormal")
+                  .param("email", "mal@comedor.org")
+                  .param("password", "clave123")
+                  .param("rol", "BENEFICIARIA")
+                  .param("cuit", "1234")
+                  .param("direccion", "Gascon 123")
+                  .param("telefono", "+54 9 11 4455-6677"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/registro?rol=BENEFICIARIA"))
+          .andExpect(flash().attributeExists("registerError"));
+
+      verify(authGateway, never()).registrar(anyMap());
     }
 
     @Test
@@ -635,22 +715,133 @@ class PublicControllerTest {
   class ChatbotProxyTests {
 
     @Test
-    @DisplayName("POST /api/public/chatbot con webhook n8n inaccesible responde fallback 200 OK")
+    @DisplayName("POST /api/public/chatbot con webhook n8n inaccesible responde fallback 200 OK sin HTML crudo")
     void testChatbotProxyFallback() throws Exception {
-      mockMvc
+      PublicController offlineController =
+          new PublicController(
+              authGateway,
+              incentivosGateway,
+              logisticaGateway,
+              jwtDecoder,
+              new HttpSessionSecurityContextRepository(),
+              solicitudOngService);
+      org.springframework.test.util.ReflectionTestUtils.setField(
+          offlineController, "n8nUrl", "http://127.0.0.1:1");
+      MockMvc offlineMvc = MockMvcBuilders.standaloneSetup(offlineController).build();
+
+      offlineMvc
           .perform(
               post("/api/public/chatbot")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"mensaje\":\"Hola, cómo puedo donar?\"}"))
           .andExpect(status().isOk())
+          .andExpect(jsonPath("$.mode").value("bot"))
+          .andExpect(jsonPath("$.chunks[0]", containsString("Hola")))
           .andExpect(
               jsonPath(
                   "$.respuesta",
                   anyOf(
-                      containsString("Hola! En este momento"),
-                      containsString("donar"),
-                      containsString("Donar"),
-                      containsString("pasos"))));
+                      containsString("Hola!"),
+                      containsString("asistente virtual"))));
+    }
+
+    @Test
+    @DisplayName("POST /api/public/chatbot extrae verifiedUserId de JWT en servidor, ignora spoof cliente y limpia HTML")
+    void testChatbotProxyJwtYLimpiezaHtml() throws Exception {
+      com.sun.net.httpserver.HttpServer server =
+          com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress(0), 0);
+      final java.util.concurrent.atomic.AtomicReference<String> capturedBody =
+          new java.util.concurrent.atomic.AtomicReference<>();
+      final java.util.concurrent.atomic.AtomicReference<String> capturedApiKey =
+          new java.util.concurrent.atomic.AtomicReference<>();
+      server.createContext(
+          "/webhook/chatbot",
+          exchange -> {
+            capturedApiKey.set(exchange.getRequestHeaders().getFirst("x-internal-api-key"));
+            capturedBody.set(
+                new String(
+                    exchange.getRequestBody().readAllBytes(),
+                    java.nio.charset.StandardCharsets.UTF_8));
+            byte[] respBytes =
+                ("{\"mode\":\"agent\",\"agentName\":\"Sofía - Soporte Donatrack\","
+                        + "\"chunks\":[\"<h4>Hola</h4><p>Tu <b>donación</b> está en camino.</p>\"]}")
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "application/json; charset=utf-8");
+            exchange.sendResponseHeaders(200, respBytes.length);
+            try (var os = exchange.getResponseBody()) {
+              os.write(respBytes);
+            }
+          });
+      server.start();
+
+      try {
+        UUID realPersonaId = UUID.randomUUID();
+        Jwt jwt =
+            Jwt.withTokenValue("valid-jwt")
+                .header("alg", "HS256")
+                .subject(UUID.randomUUID().toString())
+                .claim("personaId", realPersonaId.toString())
+                .claim("email", "donante@real.org")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build();
+        var auth =
+            new org.springframework.security.oauth2.server.resource.authentication
+                .JwtAuthenticationToken(
+                jwt,
+                List.of(
+                    new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                        "ROLE_DONANTE")),
+                "donante");
+
+        PublicController controllerConServer =
+            new PublicController(
+                authGateway,
+                incentivosGateway,
+                logisticaGateway,
+                jwtDecoder,
+                new HttpSessionSecurityContextRepository(),
+                solicitudOngService);
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            controllerConServer,
+            "n8nUrl",
+            "http://127.0.0.1:" + server.getAddress().getPort());
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            controllerConServer, "internalApiKey", "clave-test-interna");
+
+        MockMvc localMvc = MockMvcBuilders.standaloneSetup(controllerConServer).build();
+
+        localMvc
+            .perform(
+                post("/api/public/chatbot")
+                    .principal(auth)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{\"message\":\"Mis donaciones\","
+                            + "\"sessionId\":\"sess_123\","
+                            + "\"verifiedUserId\":\"attacker-spoof-id\","
+                            + "\"verifiedEmail\":\"evil@spoof.com\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.mode").value("agent"))
+            .andExpect(jsonPath("$.agentName").value("Sofía - Soporte Donatrack"))
+            .andExpect(jsonPath("$.chunks[0]", not(containsString("<p>"))))
+            .andExpect(jsonPath("$.chunks[0]", not(containsString("<h4>"))))
+            .andExpect(jsonPath("$.chunks[0]", not(containsString("<b>"))))
+            .andExpect(jsonPath("$.chunks[0]", containsString("Tu donación está en camino.")));
+
+        org.junit.jupiter.api.Assertions.assertEquals(
+            "clave-test-interna", capturedApiKey.get());
+        String sent = capturedBody.get();
+        org.junit.jupiter.api.Assertions.assertTrue(
+            sent.contains(realPersonaId.toString()),
+            "Debe enviar personaId real del JWT: " + sent);
+        org.junit.jupiter.api.Assertions.assertTrue(
+            sent.contains("donante@real.org"), "Debe enviar email real del JWT: " + sent);
+        org.junit.jupiter.api.Assertions.assertFalse(
+            sent.contains("attacker-spoof-id"), "No debe aceptar ID cliente: " + sent);
+      } finally {
+        server.stop(0);
+      }
     }
   }
 

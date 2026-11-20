@@ -121,7 +121,12 @@
                 </label>
                 <div class="slds-form-element__control">
                   <input type="text" id="legajo" th:field="*{legajo}" required
-                         placeholder="Ej: CH-101" class="slds-input" />
+                         maxlength="7" pattern="^CH-\d{3,4}$"
+                         title="Formato requerido: CH-XXX (ej: CH-101)"
+                         placeholder="Ej: CH-101" class="slds-input" style="text-transform: uppercase;" />
+                </div>
+                <div id="legajo-help" class="slds-form-element__help" style="font-size: 0.75rem; color: #64748b;">
+                  Formato requerido: <strong>CH-XXX</strong> (ej: CH-101).
                 </div>
               </div>
 
@@ -151,7 +156,12 @@
                 </label>
                 <div class="slds-form-element__control">
                   <input type="tel" id="telefono" th:field="*{telefono}" required
-                         placeholder="Ej: +54 11 5566-7788" class="slds-input" />
+                         maxlength="18" pattern="^\+54 9 11 \d{4}-\d{4}$"
+                         title="Formato requerido: +54 9 11 XXXX-XXXX"
+                         placeholder="Ej: +54 9 11 5566-7788" class="slds-input" />
+                </div>
+                <div id="telefono-chofer-help" class="slds-form-element__help" style="font-size: 0.75rem; color: #64748b;">
+                  Formato requerido: <strong>+54 9 11 XXXX-XXXX</strong>.
                 </div>
               </div>
 
@@ -186,6 +196,51 @@
       }
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') cerrarModalChofer();
+      });
+
+      function formatLegajo(raw, isDelete) {
+        var trimmed = String(raw || '').toUpperCase().trim();
+        if (!trimmed) return '';
+        if (isDelete && /^CH-?$/.test(trimmed)) return '';
+        var digits = trimmed.replace(/\D/g, '').slice(0, 4);
+        if (!digits) {
+          return trimmed.replace(/[^A-Z0-9-]/g, '').slice(0, 7);
+        }
+        return 'CH-' + digits;
+      }
+
+      function formatPhoneArg(raw, isDelete) {
+        var trimmed = String(raw || '').trim();
+        if (!trimmed) return '';
+        if (isDelete && (/^\+54\s*9?\s*1?$/.test(trimmed) || trimmed.replace(/\D/g, '').length <= 4)) {
+          return trimmed;
+        }
+        var d = trimmed.replace(/\D/g, '');
+        if (d.indexOf('54911') === 0) d = d.slice(5);
+        else if (d.indexOf('5411') === 0) d = d.slice(4);
+        else if (d.indexOf('011') === 0) d = d.slice(3);
+        else if (d.indexOf('11') === 0 && d.length > 2) d = d.slice(2);
+        d = d.slice(0, 8);
+        if (!d) return '';
+        if (d.length <= 4) return '+54 9 11 ' + d;
+        return '+54 9 11 ' + d.slice(0, 4) + '-' + d.slice(4);
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var legajoInput = document.getElementById('legajo');
+        if (legajoInput) {
+          legajoInput.addEventListener('input', function(e) {
+            var isDel = e && e.inputType && e.inputType.indexOf('delete') === 0;
+            legajoInput.value = formatLegajo(legajoInput.value, isDel);
+          });
+        }
+        var telInput = document.getElementById('telefono');
+        if (telInput) {
+          telInput.addEventListener('input', function(e) {
+            var isDel = e && e.inputType && e.inputType.indexOf('delete') === 0;
+            telInput.value = formatPhoneArg(telInput.value, isDel);
+          });
+        }
       });
     </script>
   </div>

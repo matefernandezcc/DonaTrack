@@ -196,6 +196,8 @@ public class PlanificacionRutasUseCase implements ProcesarPlanificacionesPendien
     if (loc.contains("san telmo") || c.contains("defensa")) return new Coordenada(-34.6186, -58.3712);
     if (loc.contains("palermo") || c.contains("santa fe")) return new Coordenada(-34.5863, -58.4103);
     if (loc.contains("vicente l") || c.contains("libertador")) return new Coordenada(-34.5298, -58.4732);
+    if (c.contains("gascon") || c.contains("gascón") || loc.contains("almagro"))
+      return new Coordenada(-34.5985, -58.4235);
     if (c.contains("corrientes")) return new Coordenada(-34.6037, -58.3816);
     if (c.contains("san juan")) return new Coordenada(-34.6241, -58.4038);
 

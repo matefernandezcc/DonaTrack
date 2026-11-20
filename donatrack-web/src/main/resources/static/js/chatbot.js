@@ -1,4 +1,4 @@
-/* DonaTrack — Floating chatbot (UI shell) */
+/* DonaTrack — Asistente Conversacional (Bot rápido -> Handoff -> Sofía Agentforce) */
 (function () {
   "use strict";
 
@@ -8,39 +8,219 @@
   const log = document.getElementById("chat-log");
   const form = document.getElementById("chat-form");
   const input = document.getElementById("chat-input");
-  if (!fab || !panel) return;
+  const submitBtn = document.getElementById("chat-submit");
+  const titleEl = document.getElementById("chat-title");
+  const statusEl = document.getElementById("chat-status");
+  const chipsWrap = document.getElementById("chat-chips");
+  if (!fab || !panel || !log || !form || !input) return;
+
+  const SESSION_KEY = "donatrack_chat_session_id";
+  let agentMode = false;
+  let sendChain = Promise.resolve();
+
+  const getSessionId = () => {
+    try {
+      let existing = sessionStorage.getItem(SESSION_KEY);
+      if (!existing) {
+        existing =
+          window.crypto && typeof window.crypto.randomUUID === "function"
+            ? window.crypto.randomUUID()
+            : "dt-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
+        sessionStorage.setItem(SESSION_KEY, existing);
+      }
+      return existing;
+    } catch (e) {
+      return "dt-anon-" + Date.now();
+    }
+  };
+
+  const sessionId = getSessionId();
 
   const open = () => {
     panel.hidden = false;
     fab.setAttribute("aria-expanded", "true");
     setTimeout(() => input && input.focus(), 50);
   };
+
   const close = () => {
     panel.hidden = true;
     fab.setAttribute("aria-expanded", "false");
     fab.focus();
   };
-  const toggle = () => (panel.hidden ? open() : close());
 
+  const toggle = () => (panel.hidden ? open() : close());
   fab.addEventListener("click", toggle);
   closeBtn.addEventListener("click", close);
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !panel.hidden) close();
   });
 
-  const addMsg = (text, who) => {
+  /** Eliminación defensiva de cualquier etiqueta HTML cruda sin usar innerHTML */
+  const stripHtml = (raw) => {
+    if (raw == null) return "";
+    let s = String(raw);
+    s = s.replace(/<br\s*\/?>/gi, "\n");
+    s = s.replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n");
+    s = s.replace(/<li[^>]*>/gi, "- ");
+    s = s.replace(/<[^>]*>/g, "");
+    s = s
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'");
+    return s.replace(/\n{3,}/g, "\n\n").trim();
+  };
+
+  /** Renderizador Markdown seguro vía DOM nodes (sin innerHTML / dangerouslySetInnerHTML) */
+  const appendInlineFormatted = (target, text) => {
+    const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
+    let lastIndex = 0;
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        target.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+      }
+      const token = match[0];
+      if (token.startsWith("**") && token.endsWith("**")) {
+        const el = document.createElement("strong");
+        el.textContent = token.slice(2, -2);
+        target.appendChild(el);
+      } else if (token.startsWith("*") && token.endsWith("*")) {
+        const el = document.createElement("em");
+        el.textContent = token.slice(1, -1);
+        target.appendChild(el);
+      } else if (token.startsWith("`") && token.endsWith("`")) {
+        const el = document.createElement("code");
+        el.textContent = token.slice(1, -1);
+        target.appendChild(el);
+      }
+      lastIndex = regex.lastIndex;
+    }
+    if (lastIndex < text.length) {
+      target.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+  };
+
+  const renderSafeMarkdown = (container, rawText) => {
+    const clean = stripHtml(rawText);
+    const lines = clean.split(/\r?\n/);
+    let currentList = null;
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        currentList = null;
+        return;
+      }
+      if (/^[-•]\s+/.test(trimmed)) {
+        if (!currentList) {
+          currentList = document.createElement("ul");
+          container.appendChild(currentList);
+        }
+        const li = document.createElement("li");
+        appendInlineFormatted(li, trimmed.replace(/^[-•]\s+/, ""));
+        currentList.appendChild(li);
+      } else {
+        currentList = null;
+        const p = document.createElement("p");
+        appendInlineFormatted(p, trimmed);
+        container.appendChild(p);
+      }
+    });
+
+    if (!container.hasChildNodes()) {
+      container.textContent = clean;
+    }
+  };
+
+  const scrollToBottom = () => {
+    log.scrollTop = log.scrollHeight;
+  };
+
+  const addMessageBubble = (text, who) => {
     const div = document.createElement("div");
     div.className = "msg msg--" + who;
-    if (who === "bot") {
-      // Renderiza respuestas enriquecidas con HTML (encabezados, listas, enlaces y destacados)
-      div.innerHTML = text;
-    } else {
-      // Mensajes del usuario se mantienen como texto plano seguro (anti-XSS)
+    if (who === "user") {
       div.textContent = text;
-      div.style.whiteSpace = "pre-wrap";
+    } else {
+      renderSafeMarkdown(div, text);
     }
     log.appendChild(div);
-    log.scrollTop = log.scrollHeight;
+    scrollToBottom();
+    return div;
+  };
+
+  const addSystemNotice = (text) => {
+    const div = document.createElement("div");
+    div.className = "msg--system";
+    div.textContent = text;
+    log.appendChild(div);
+    scrollToBottom();
+  };
+
+  const showTypingIndicator = (label) => {
+    const wrap = document.createElement("div");
+    wrap.className = "chatbot__typing";
+
+    const dots = document.createElement("span");
+    dots.className = "chatbot__typing-dots";
+    dots.setAttribute("aria-hidden", "true");
+    for (let i = 0; i < 3; i++) {
+      dots.appendChild(document.createElement("span"));
+    }
+
+    const txt = document.createElement("span");
+    txt.textContent = label;
+
+    wrap.appendChild(dots);
+    wrap.appendChild(txt);
+    log.appendChild(wrap);
+    scrollToBottom();
+    return wrap;
+  };
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const switchToAgentHeader = (agentName) => {
+    if (!agentMode) {
+      agentMode = true;
+      panel.classList.add("chatbot--agent");
+      if (chipsWrap) chipsWrap.hidden = true;
+      addSystemNotice("Sofía se unió al chat");
+    }
+    if (titleEl) {
+      titleEl.textContent = agentName || "Sofía - Soporte Donatrack";
+    }
+    if (statusEl) {
+      statusEl.replaceChildren();
+      const dot = document.createElement("i");
+      dot.setAttribute("aria-hidden", "true");
+      statusEl.appendChild(dot);
+      statusEl.appendChild(document.createTextNode(" Agente conectada"));
+    }
+  };
+
+  const addHandoffButton = (label) => {
+    const wrap = document.createElement("div");
+    wrap.className = "chatbot__handoff-wrap";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chatbot__handoff-btn";
+    btn.textContent = label || "Contactar con un agente";
+
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".chatbot__handoff-btn").forEach((b) => {
+        b.disabled = true;
+      });
+      enqueueRequest("", "HANDOFF_AGENT");
+    });
+
+    wrap.appendChild(btn);
+    log.appendChild(wrap);
+    scrollToBottom();
   };
 
   const getCsrfHeaders = () => {
@@ -58,37 +238,95 @@
     return headers;
   };
 
-  const respond = (q) => {
-    // Le pegamos al endpoint proxy de DonaTrack Web (evita llamadas directas y fallas CORS/host)
-    fetch("/api/public/chatbot", {
-      method: "POST",
-      headers: getCsrfHeaders(),
-      body: JSON.stringify({ mensaje: q })
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        addMsg(data.respuesta || "Recibimos tu consulta. En breve te responderemos.", "bot");
-      })
-      .catch((e) => {
-        console.warn("Error al conectar con chatbot proxy:", e);
-        addMsg("Ups, el bot está fuera de servicio en este momento.", "bot");
+  const setInputDisabled = (disabled) => {
+    input.disabled = disabled;
+    if (submitBtn) submitBtn.disabled = disabled;
+  };
+
+  const processChatRequest = async (messageText, action) => {
+    setInputDisabled(true);
+    const waitingLabel =
+      agentMode || action === "HANDOFF_AGENT"
+        ? "Sofía está escribiendo..."
+        : "Consultando asistente...";
+    const typingEl = showTypingIndicator(waitingLabel);
+
+    try {
+      const res = await fetch("/api/public/chatbot", {
+        method: "POST",
+        headers: getCsrfHeaders(),
+        body: JSON.stringify({
+          message: messageText,
+          mensaje: messageText,
+          sessionId: sessionId,
+          action: action || null
+        })
       });
+      const data = await res.json();
+      typingEl.remove();
+
+      const mode = data && data.mode ? String(data.mode).toLowerCase() : "bot";
+      let chunks = [];
+      if (data && Array.isArray(data.chunks) && data.chunks.length > 0) {
+        chunks = data.chunks.map((c) => stripHtml(c)).filter(Boolean);
+      } else if (data && data.respuesta) {
+        chunks = [stripHtml(data.respuesta)].filter(Boolean);
+      }
+      if (chunks.length === 0) {
+        chunks = ["Recibimos tu consulta. En breve te responderemos."];
+      }
+
+      if (mode === "agent") {
+        switchToAgentHeader(data.agentName || "Sofía - Soporte Donatrack");
+        for (let i = 0; i < chunks.length; i++) {
+          const sofiaTyping = showTypingIndicator("Sofía está escribiendo...");
+          await sleep(1200);
+          sofiaTyping.remove();
+          addMessageBubble(chunks[i], "agent");
+        }
+      } else {
+        chunks.forEach((chunk) => addMessageBubble(chunk, "bot"));
+        if (
+          data &&
+          data.suggestedAction &&
+          data.suggestedAction.type === "HANDOFF_AGENT"
+        ) {
+          addHandoffButton(data.suggestedAction.label);
+        }
+      }
+    } catch (err) {
+      typingEl.remove();
+      console.warn("Error al conectar con chatbot proxy:", err);
+      addMessageBubble(
+        "El asistente está momentáneamente ocupado. Intentá nuevamente en unos segundos.",
+        "bot"
+      );
+    } finally {
+      setInputDisabled(false);
+      if (!panel.hidden) input.focus();
+    }
+  };
+
+  const enqueueRequest = (messageText, action) => {
+    sendChain = sendChain.then(() => processChatRequest(messageText, action));
+    return sendChain;
   };
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const v = input.value.trim();
-    if (!v) return;
-    addMsg(v, "user");
+    const val = input.value.trim();
+    if (!val) return;
+    addMessageBubble(val, "user");
     input.value = "";
-    respond(v);
+    enqueueRequest(val, null);
   });
 
-  document.querySelectorAll(".chip").forEach((chip) =>
+  document.querySelectorAll("#chat-chips .chip").forEach((chip) =>
     chip.addEventListener("click", () => {
-      const q = chip.dataset.q || chip.textContent;
-      addMsg(q, "user");
-      respond(q);
+      const q = (chip.dataset.q || chip.textContent || "").trim();
+      if (!q) return;
+      addMessageBubble(q, "user");
+      enqueueRequest(q, null);
     })
   );
 })();

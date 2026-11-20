@@ -236,15 +236,35 @@ class SatelliteApiControllersTest {
   }
 
   @Test
-  @DisplayName("GET /api/donante/mapa-camiones — Retorna seguimiento de entregas del donante")
+  @DisplayName("GET /api/donante/mapa-camiones — Retorna seguimiento de entregas reales del donante")
   void testMapaCamionesDonante() throws Exception {
     UUID donanteId = UUID.randomUUID();
+    String entregaId = "2418a111-0000-4000-8000-000000000001";
     when(donacionesGateway.listarDonaciones(any(), any()))
+        .thenReturn(List.of(Map.of("id", entregaId, "estado", "EN_TRASLADO")));
+    when(logisticaGateway.listarRutas())
         .thenReturn(
             List.of(
                 Map.of(
-                    "id", "2418a111-0000-4000-8000-000000000001",
-                    "estado", "EN_TRASLADO")));
+                    "id",
+                    UUID.randomUUID().toString(),
+                    "iniciada",
+                    true,
+                    "fechaOperativa",
+                    "2026-11-20",
+                    "camion",
+                    Map.of("patente", "AA123BB"),
+                    "chofer",
+                    Map.of("nombre", "Martín", "apellido", "Rossi"),
+                    "paradas",
+                    List.of(
+                        Map.of(
+                            "direccion",
+                            Map.of("calle", "Gascon", "altura", "123", "localidad", "CABA"),
+                            "coordenada",
+                            Map.of("latitud", -34.5985, "longitud", -58.4235),
+                            "entregas",
+                            List.of(Map.of("idEntrega", entregaId, "estado", "PENDIENTE")))))));
 
     Jwt jwt =
         Jwt.withTokenValue("mock-token")
@@ -258,15 +278,39 @@ class SatelliteApiControllersTest {
     donanteMvc
         .perform(get("/api/donante/mapa-camiones").principal(auth))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].patenteCamion").exists())
-        .andExpect(jsonPath("$[0].choferNombre").exists())
+        .andExpect(jsonPath("$[0].patenteCamion").value("AA123BB"))
+        .andExpect(jsonPath("$[0].choferNombre").value("Martín Rossi"))
+        .andExpect(jsonPath("$[0].estado").value("EN_TRASLADO"))
         .andExpect(jsonPath("$[0].lat").exists())
         .andExpect(jsonPath("$[0].lng").exists());
   }
 
   @Test
   @DisplayName(
-      "GET /api/public/mapa-entregas — Retorna centros de acopio, ONGs y entregas públicas")
+      "GET /api/donante/mapa-camiones — Retorna lista vacía cuando no hay donaciones o rutas activas")
+  void testMapaCamionesDonanteSinRutasRetornaVacio() throws Exception {
+    UUID donanteId = UUID.randomUUID();
+    when(donacionesGateway.listarDonaciones(any(), any())).thenReturn(List.of());
+    when(logisticaGateway.listarRutas()).thenReturn(List.of());
+
+    Jwt jwt =
+        Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .claim("sub", donanteId.toString())
+            .claim("personaId", donanteId.toString())
+            .build();
+    JwtAuthenticationToken auth =
+        new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")));
+
+    donanteMvc
+        .perform(get("/api/donante/mapa-camiones").principal(auth))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(0)));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /api/public/mapa-entregas — Retorna centros de recepción, ONGs y entregas públicas")
   void testMapaEntregasPublico() throws Exception {
     when(donacionesGateway.obtenerBeneficiarios()).thenReturn(List.of());
 

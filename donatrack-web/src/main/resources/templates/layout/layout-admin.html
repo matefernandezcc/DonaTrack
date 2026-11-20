@@ -15,6 +15,7 @@
     href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.30.3/assets/styles/salesforce-lightning-design-system.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" th:href="@{/css/chatbot.css}" />
 
   <script>
     (function () {
@@ -240,6 +241,17 @@
     .dt-modal-close-btn:focus {
       outline: 2px solid #0176d3 !important;
       outline-offset: 2px !important;
+    }
+
+    /* Jerarquía de apilamiento: Header y Popover de Notificaciones siempre encima de toasts */
+    .slds-global-header_container {
+      z-index: 9500 !important;
+    }
+    #popover-notificaciones {
+      z-index: 9600 !important;
+    }
+    main#main-content .slds-notify_container.slds-is-relative {
+      z-index: 50 !important;
     }
 
     /* Animación suave de Toast para desvanecimiento */
@@ -1844,6 +1856,9 @@
   </script>
 
   <script th:src="@{/js/notificaciones-panel.js}" defer></script>
+
+  <!-- Asistente Conversacional DonaTrack (n8n + Agentforce Sofía) -->
+  <th:block th:replace="~{fragments/chatbot-widget :: widget}"></th:block>
 
   <!-- Scripts específicos de la vista -->
   <th:block th:replace="${scripts}"></th:block>
