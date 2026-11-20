@@ -71,13 +71,15 @@
             </div>
             <div class="slds-form-element__control">
               <div class="slds-select_container">
-                <select class="slds-select" id="idDonante" name="idDonante" required>
-                  <option value="" disabled th:selected="${personaCreadaId == null || personaCreadaId == ''}">-- Seleccioná a nombre de quién ingresa la donación --</option>
-                  <option value="a0000000-0000-4000-8000-000000000000">Donante Anónimo (Ingreso sin datos personales)</option>
+                <select class="slds-select" id="idDonante" name="idDonante">
+                  <option value="a0000000-0000-4000-8000-000000000000"
+                          th:selected="${personaCreadaId == null || personaCreadaId == '' || (formRequest != null && formRequest.idDonante != null && formRequest.idDonante.toString() == 'a0000000-0000-4000-8000-000000000000')}">
+                    Donante Anónimo (Ingreso directo en depósito sin datos personales)
+                  </option>
                   <option th:each="p : ${personas}"
                           th:if="${p['id'] == null or p['id'].toString() != 'a0000000-0000-4000-8000-000000000000'}"
                           th:value="${p['id']}"
-                          th:selected="${personaCreadaId != null && p['id'] != null && personaCreadaId == p['id'].toString()}"
+                          th:selected="${(personaCreadaId != null && p['id'] != null && personaCreadaId == p['id'].toString()) || (formRequest != null && formRequest.idDonante != null && p['id'] != null && formRequest.idDonante.toString() == p['id'].toString())}"
                           th:text="${((p['razonSocial'] != null && !#strings.isEmpty(p['razonSocial'])) ? p['razonSocial'] : ((p['nombre'] != null ? p['nombre'] : '') + ' ' + (p['apellido'] != null ? p['apellido'] : ''))) + ' · ' + (p['documento'] != null ? (p['documento'] instanceof T(java.util.Map) ? ((p['documento']['tipo'] != null ? p['documento']['tipo'] + ': ' : '') + (p['documento']['numero'] != null ? p['documento']['numero'] : 'S/N')) : p['documento']) : (p['email'] != null ? p['email'] : 'Donante'))}">
                     Juan Pérez (DNI: 12345678)
                   </option>
@@ -96,6 +98,7 @@
             </label>
             <div class="slds-form-element__control">
               <input type="text" id="descripcion" name="descripcion" class="slds-input"
+                     th:value="${formRequest != null ? formRequest.descripcion : ''}"
                      placeholder="Ej: 15 Cajas de fideos secos guiseros y 10 paquetes de lentejas" required />
             </div>
           </div>
@@ -110,6 +113,7 @@
                 </label>
                 <div class="slds-form-element__control">
                   <input type="number" id="cantidad" name="cantidad" class="slds-input"
+                         th:value="${formRequest != null ? formRequest.cantidad : ''}"
                          min="0.1" step="0.1" placeholder="Ej: 25" required />
                 </div>
               </div>

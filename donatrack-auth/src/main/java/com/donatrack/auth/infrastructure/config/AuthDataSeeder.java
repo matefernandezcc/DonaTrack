@@ -6,8 +6,11 @@ import com.donatrack.auth.infrastructure.adapters.out.persistence.UsuarioReposit
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -19,14 +22,28 @@ public class AuthDataSeeder implements CommandLineRunner {
 
   private final UsuarioRepository usuarioRepository;
   private final PasswordEncoder passwordEncoder;
+  private final Environment environment;
 
   public AuthDataSeeder(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    this(usuarioRepository, passwordEncoder, null);
+  }
+
+  @Autowired
+  public AuthDataSeeder(
+      UsuarioRepository usuarioRepository,
+      PasswordEncoder passwordEncoder,
+      @Autowired(required = false) Environment environment) {
     this.usuarioRepository = usuarioRepository;
     this.passwordEncoder = passwordEncoder;
+    this.environment = environment;
   }
 
   @Override
   public void run(String... args) {
+    if (environment != null && environment.acceptsProfiles(Profiles.of("prod"))) {
+      log.warn("AuthDataSeeder omitido por seguridad en entorno productivo.");
+      return;
+    }
     seedUsuario(
         "admin",
         "admin",
@@ -70,10 +87,19 @@ public class AuthDataSeeder implements CommandLineRunner {
       log.info("Usuario seed creado: {} (Rol: {})", username, rol);
     } else {
       Usuario usuario = usuarioOpt.get();
+      boolean modificado = false;
       if (usuario.getRol() != rol) {
         usuario.setRol(rol);
-        usuarioRepository.save(usuario);
+        modificado = true;
         log.info("Usuario seed restaurado a rol canónico: {} (Rol: {})", username, rol);
+      }
+      if (!passwordEncoder.matches(rawPassword, usuario.getPassword())) {
+        usuario.setPassword(passwordEncoder.encode(rawPassword));
+        modificado = true;
+        log.info("Contraseña de usuario seed restaurada a canónica: {}", username);
+      }
+      if (modificado) {
+        usuarioRepository.save(usuario);
       }
     }
   }

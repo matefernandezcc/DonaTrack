@@ -6,6 +6,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -55,13 +56,14 @@ public class WebSecurityConfig {
                         "/assets/**",
                         "/favicon.svg",
                         "/healthcheck",
-                        "/actuator/**",
+                        "/actuator/health",
+                        "/actuator/info",
                         "/error")
                     .permitAll()
-                    .requestMatchers("/app/**")
-                    .authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/notificaciones/mis-alertas")
+                    .permitAll()
                     .anyRequest()
-                    .permitAll())
+                    .authenticated())
         .formLogin(AbstractHttpConfigurer::disable)
         .logout(
             logout ->

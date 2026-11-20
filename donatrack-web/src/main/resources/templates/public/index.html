@@ -90,7 +90,7 @@
           <!-- Tarjeta dinámica de la etapa activa -->
           <div class="story-card" id="story-active-card">
             <div class="story-card__header">
-              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 05</span>
+              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 06</span>
             </div>
             <h3 class="story-card__title" id="story-stage-title">Donación Realizada</h3>
             <p class="story-card__desc" id="story-stage-desc">
@@ -115,6 +115,9 @@
               </button>
               <button type="button" class="story-pill" data-step="5" role="tab" aria-selected="false" onclick="selectCircleStep(5)">
                 <span>05</span> Remito
+              </button>
+              <button type="button" class="story-pill" data-step="6" role="tab" aria-selected="false" onclick="selectCircleStep(6)">
+                <span>06</span> En Sucursal
               </button>
             </div>
           </div>
@@ -202,6 +205,55 @@
               </div>
             </div>
 
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MINIJUEGO: RUTA SOLIDARIA (ESTILO CHROME DINO) ============ -->
+    <section class="truck-game-sec" id="minijuego" aria-labelledby="truck-game-title" style="padding: 3.5rem 0; background: var(--bg-soft); border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2);">
+      <div class="container">
+        <div class="section-head section-head--row" style="margin-bottom: 1.25rem; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <span class="eyebrow">Minijuego Interactivo · Estilo Dino Runner</span>
+            <h2 id="truck-game-title" style="margin-bottom: 0.35rem;">Ruta Solidaria: Esquivá pozos y lomas de burro</h2>
+            <p class="section-head__lead" style="margin: 0;">
+              Ayudá al camión de DonaTrack a llegar a la ONG sin dañar la carga. Saltá los baches y las lomas de burro con <strong>Espacio</strong>, <strong>↑</strong> o haciendo clic.
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <span class="pill pill--blue" id="truck-ui-status">LISTO</span>
+            <div style="font-family: 'Courier New', monospace; font-weight: 800; font-size: 0.95rem; padding: 0.45rem 0.85rem; border-radius: 8px; background: var(--bg); border: 1px solid var(--line-2); color: var(--ink);">
+              HI <span id="truck-ui-hiscore">00000</span> · PTS <span id="truck-ui-score" style="color: var(--green);">00000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="truck-game-card" style="background: var(--bg); border: 2px solid var(--line-2); border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.14);">
+          <div style="position: relative; width: 100%; background: var(--bg);">
+            <canvas id="truck-game-canvas" width="880" height="250"
+                    aria-label="Minijuego del camión DonaTrack esquivando pozos y lomas de burro"
+                    style="display: block; width: 100%; height: auto; max-height: 270px; cursor: pointer; touch-action: manipulation;"></canvas>
+          </div>
+
+          <!-- Barra de controles táctiles / rápidos e instrucciones -->
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; padding: 0.85rem 1.25rem; background: var(--bg-soft); border-top: 1px solid var(--line-2);">
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted);">
+              <span><strong style="color: var(--ink);">[ESPACIO / ↑ / Clic]</strong> Saltar obstáculo</span>
+              <span><strong style="color: var(--ink);">[↓ / S]</strong> Descenso rápido</span>
+              <span><strong style="color: var(--ink);">📦 Caja aérea:</strong> +50 pts extra</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <button type="button" id="truck-btn-jump" class="btn btn--primary btn--sm" style="min-height: 38px; padding: 0.4rem 1rem; cursor: pointer;">
+                ⬆️ Saltar
+              </button>
+              <button type="button" id="truck-btn-duck" class="btn btn--ghost btn--sm" style="min-height: 38px; padding: 0.4rem 0.9rem; cursor: pointer;">
+                ⬇️ Bajar
+              </button>
+              <button type="button" id="truck-btn-restart" class="btn btn--ghost btn--sm" style="min-height: 38px; padding: 0.4rem 0.9rem; cursor: pointer;">
+                🔄 Reiniciar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -775,6 +827,7 @@
 
   <th:block th:fragment="scripts">
     <script th:src="@{/js/scroll-story.js}" defer></script>
+    <script th:src="@{/js/truck-game.js}" defer></script>
     <script th:src="@{/js/map.js}" defer></script>
     <script>
       let lastRemitoData = {

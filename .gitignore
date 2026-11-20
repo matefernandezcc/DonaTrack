@@ -42,3 +42,4 @@ TODO.md
 .agents/
 *skills-lock.json
 .impeccable/
+test-results/

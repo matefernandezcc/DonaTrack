@@ -67,7 +67,7 @@
               <tr class="slds-hint-parent" th:each="camion : ${camiones}">
                 <th scope="row" data-label="Patente">
                   <div class="slds-truncate">
-                    <strong style="color: #0176d3;" th:text="${camion.patente}">AB123CD</strong>
+                    <strong class="dt-highlight-code" th:text="${camion.patente}">AB123CD</strong>
                   </div>
                 </th>
                 <td data-label="Capacidad Volumen">
@@ -89,7 +89,7 @@
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(camiones)}">
-                <td colspan="5" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">
+                <td colspan="5" class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
                   No hay camiones registrados en la base de datos de Logística. Hacé clic en "Registrar Nuevo Camión".
                 </td>
               </tr>

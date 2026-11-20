@@ -51,7 +51,7 @@
       </div>
 
       <!-- Cuerpo del Perfil -->
-      <div class="slds-card__body slds-card__body_inner slds-p-horizontal_large slds-p-bottom_large" style="position: relative; background: #ffffff;">
+      <div class="slds-card__body slds-card__body_inner slds-p-horizontal_large slds-p-bottom_large dt-profile-header-body" style="position: relative;">
         
         <div class="slds-grid slds-grid_vertical-align-start slds-wrap" style="padding-top: 10px;">
           
@@ -61,7 +61,7 @@
               <div style="position: absolute; inset: -4px; border-radius: 50%; border: 3px solid #0176d3; box-shadow: 0 0 0 2px #f59e0b; pointer-events: none; z-index: 3;"></div>
               
               <!-- Contenedor del Avatar SVG interactivo -->
-              <div id="blobatar-interactive" style="width: 116px; height: 116px; border-radius: 50%; background: #ffffff; border: 4px solid #ffffff; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">
+              <div id="blobatar-interactive" class="dt-blobatar-container" style="width: 116px; height: 116px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">
                 <!-- SVG embebido con IDs listos para eye-tracking inmediato en cualquier navegador -->
                 <svg id="blobatar-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" style="display: block;">
                   <path d="M100 50C100 77.61 77.61 100 50 100C22.39 100 0 77.61 0 50C0 22.39 22.39 0 50 0C77.61 0 100 22.39 100 50Z" fill="#fef08a"/>
@@ -87,17 +87,17 @@
           <!-- Información del Usuario (Texto oscuro nítido con contraste óptimo) -->
           <div class="slds-col slds-p-left_medium slds-m-top_xx-small" style="min-width: 280px; flex: 1;">
             <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
-              <h1 class="slds-text-heading_medium" style="font-weight: 800; color: #080707; margin-right: 12px;"
+              <h2 class="slds-text-heading_medium dt-profile-name" style="font-weight: 800; margin-right: 12px;"
                   th:text="${nombreCompleto != null ? nombreCompleto : nombreUsuario}">
                 María González
-              </h1>
+              </h2>
               <span class="slds-badge slds-badge_lightest" style="color: #014486; font-weight: 700; font-size: 0.74rem;"
                     th:text="${rangoNombre}">
                 Donante Inicial
               </span>
             </div>
 
-            <p class="slds-text-body_regular" style="color: #2e3440; font-weight: 600; margin-top: 4px;"
+            <p class="slds-text-body_regular dt-profile-points" style="font-weight: 600; margin-top: 4px;"
                th:text="${rangoNombre} + ' · ' + ${#numbers.formatInteger(puntosReales, 0, 'POINT')} + ' Puntos Solidarios'">
               Donante Inicial · 0 Puntos Solidarios
             </p>
@@ -108,7 +108,7 @@
               <span th:text="${ubicacion != null ? ubicacion : 'Buenos Aires, Argentina'}">Buenos Aires, Argentina</span> · Entregas Auditadas
             </p>
 
-            <p class="slds-m-top_x-small slds-grid slds-grid_vertical-align-center" style="font-style: italic; color: #4b5563; font-size: 0.88rem; flex-wrap: wrap; gap: 6px;">
+            <p class="slds-m-top_x-small dt-profile-motto slds-grid slds-grid_vertical-align-center" style="font-style: italic; font-size: 0.88rem; flex-wrap: wrap; gap: 6px;">
               <span>&ldquo;<span th:text="${descripcion != null ? descripcion : 'Comprometidos con una logística solidaria eficiente y transparente.'}">Comprometidos con una logística solidaria eficiente y transparente.</span>&rdquo;</span>
               <button type="button" onclick="abrirPerfilModal()" class="slds-button slds-button_icon slds-button_icon-border" title="Editar lema y ubicación"
                       style="width: 34px; height: 34px; min-width: 34px; min-height: 34px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; line-height: 1;">
@@ -139,7 +139,7 @@
     </article>
 
     <!-- ==================== NAVEGACIÓN POR PESTAÑAS DEL PORTAL DONANTE ==================== -->
-    <div class="slds-tabs_default slds-m-bottom_large" style="background: #ffffff; border-radius: 8px; border: 1px solid #dddbda; padding: 0 16px; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch;">
+    <div class="slds-tabs_default slds-m-bottom_large dt-portal-tabs" style="border-radius: 8px; padding: 0 16px; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch;">
       <ul class="slds-tabs_default__nav" role="tablist" style="border-bottom: none; display: flex; flex-wrap: nowrap; min-width: max-content;">
         <li class="slds-tabs_default__item" th:classappend="${tabActiva == null || tabActiva == 'resumen'} ? 'slds-is-active' : ''" role="presentation">
           <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab"
@@ -201,17 +201,17 @@
       <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
 
         <!-- ==================== PESTAÑA 1: RESUMEN & IMPACTO ==================== -->
-        <div id="tab-panel-resumen" th:style="${tabActiva == null || tabActiva == 'resumen'} ? 'display: block;' : 'display: none;'">
+        <div id="tab-panel-resumen" role="tabpanel" aria-labelledby="tab-btn-resumen" th:style="${tabActiva == null || tabActiva == 'resumen'} ? 'display: block;' : 'display: none;'">
         
         <!-- ==================== HERO DE IMPACTO SOCIAL TANGIBLE ==================== -->
-        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04); overflow: hidden;">
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04); overflow: hidden;">
           <div class="slds-card__body slds-p-around_large">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
               <div>
                 <span class="slds-badge" style="background: #e8f5e9; color: #166534; font-weight: 700; font-size: 0.78rem; margin-bottom: 6px; padding: 4px 10px; border-radius: 4px;">
                   IMPACTO SOCIAL TANGIBLE
                 </span>
-                <h2 class="slds-text-heading_medium" style="font-weight: 800; color: #0f172a; font-size: 1.45rem;"
+                <h2 class="slds-text-heading_medium" style="font-weight: 800; font-size: 1.45rem;"
                     th:text="'El Impacto de tus Donaciones, ' + (${nombreCompleto != null ? nombreCompleto : nombreUsuario})">
                   El Impacto de tus Donaciones
                 </h2>
@@ -232,8 +232,8 @@
                  th:if="${!isNuevoUsuario and (platosComida > 0 or kilosTotales > 0 or comedoresAsistidos > 0 or entregasCompletadas > 0)}">
               
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div style="font-weight: 800; color: #014486; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div class="dt-stat-blue" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
                        th:text="${#numbers.formatInteger(platosComida, 0, 'POINT')} + ' raciones'">
                     0 raciones
                   </div>
@@ -244,8 +244,8 @@
               </div>
 
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div style="font-weight: 800; color: #166534; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div class="dt-stat-green" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
                        th:text="${#numbers.formatInteger(kilosTotales, 0, 'POINT')} + ' kg'">
                     0 kg
                   </div>
@@ -256,8 +256,8 @@
               </div>
 
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div style="font-weight: 800; color: #c2410c; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div class="dt-stat-orange" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
                        th:text="${comedoresAsistidos} + ' comedores'">
                     0 comedores
                   </div>
@@ -268,8 +268,8 @@
               </div>
 
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div style="font-weight: 800; color: #4338ca; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
+                <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div class="dt-stat-indigo" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
                        th:text="${entregasCompletadas} + ' entregas'">
                     0 entregas
                   </div>
@@ -333,7 +333,7 @@
         </article>
 
         <!-- ==================== MISIONES EN CURSO & DESAFÍOS TRAILBLAZER ==================== -->
-        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff;">
+        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1;">
           <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
             <header class="slds-media slds-media_center slds-has-flexi-truncate">
               <div class="slds-media__figure">
@@ -359,13 +359,13 @@
           </div>
           <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
             <!-- Estado vacío cuando no hay misiones -->
-            <div th:if="${#lists.isEmpty(misiones)}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 24px; text-align: center;">
+            <div th:if="${#lists.isEmpty(misiones)}" class="dt-empty-state-box" style="border-radius: 8px; padding: 24px; text-align: center;">
               <span class="slds-icon_container slds-icon-standard-task slds-m-bottom_x-small" style="background: #166534; border-radius: 50%; padding: 8px; display: inline-flex;">
                 <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
                   <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
                 </svg>
               </span>
-              <h3 style="font-weight: 700; color: #0f172a; font-size: 1rem; margin-top: 6px;">¡Estás al día con todos tus desafíos!</h3>
+              <h3 style="font-weight: 700; font-size: 1rem; margin-top: 6px;">¡Estás al día con todos tus desafíos!</h3>
               <p class="slds-text-body_small slds-text-color_weak" style="max-width: 440px; margin: 4px auto 0;">
                 No tenés misiones pendientes en este ciclo mensual. Tus próximas metas solidarias se activarán automáticamente al registrar nuevos aportes.
               </p>
@@ -373,7 +373,7 @@
 
             <!-- Listado de misiones -->
             <div th:unless="${#lists.isEmpty(misiones)}" style="display: flex; flex-direction: column; gap: 14px;">
-              <div th:each="mision : ${misiones}" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+              <div th:each="mision : ${misiones}" class="dt-mision-item-card" style="border-radius: 8px; padding: 16px;">
                 <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap" style="gap: 8px; margin-bottom: 8px;">
                   <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 38px; height: 38px; border-radius: 50%; background: #014486; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -429,10 +429,10 @@
         <!-- FIN PESTAÑA 1: RESUMEN -->
 
         <!-- ==================== PESTAÑA 2: SEGUIMIENTO DE MIS DONACIONES ==================== -->
-        <div id="tab-panel-seguimiento" th:style="${tabActiva == 'seguimiento'} ? 'display: block;' : 'display: none;'">
+        <div id="tab-panel-seguimiento" role="tabpanel" aria-labelledby="tab-btn-seguimiento" th:style="${tabActiva == 'seguimiento'} ? 'display: block;' : 'display: none;'">
 
           <!-- ==================== MAPA DE CAMIONES EN RUTA (UX-09) ==================== -->
-          <article id="card-mapa-donante" class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; background: #ffffff;">
+          <article id="card-mapa-donante" class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden;">
             <div class="slds-card__header slds-grid slds-grid_align-spread slds-wrap slds-border_bottom slds-p-vertical_small" style="gap: 10px;">
               <header class="slds-media slds-media_center slds-has-flexi-truncate">
                 <div class="slds-media__figure">
@@ -538,12 +538,12 @@
             </div>
 
             <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
-              <!-- Barra de Filtros SLDS Reactivos (UX-05) -->
+              <!-- Barra de Filtros y Ordenamiento SLDS Reactivos (UX-05) -->
               <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_medium slds-p-around_small" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
                   <label class="slds-form-element__label" for="filtro-donacion-estado" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Filtrar por Estado</label>
                   <div class="slds-form-element__control">
-                    <select id="filtro-donacion-estado" class="slds-select" onchange="filtrarMisDonaciones()">
+                    <select id="filtro-donacion-estado" class="slds-select" onchange="ordenarYFiltrarDonaciones()">
                       <option value="">Todos los estados</option>
                       <option value="EN_DEPOSITO">En Depósito</option>
                       <option value="ASIGNADA">Asignada a ONG</option>
@@ -552,10 +552,10 @@
                   </div>
                 </div>
 
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
                   <label class="slds-form-element__label" for="filtro-donacion-subcategoria" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Filtrar por Subcategoría</label>
                   <div class="slds-form-element__control">
-                    <select id="filtro-donacion-subcategoria" class="slds-select" onchange="filtrarMisDonaciones()">
+                    <select id="filtro-donacion-subcategoria" class="slds-select" onchange="ordenarYFiltrarDonaciones()">
                       <option value="">Todas las subcategorías</option>
                       <option value="ALIMENTOS">Alimentos</option>
                       <option value="ABRIGO">Abrigo / Ropa</option>
@@ -567,12 +567,26 @@
                   </div>
                 </div>
 
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_xx-small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
+                  <label class="slds-form-element__label" for="orden-donaciones" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Ordenar por</label>
+                  <div class="slds-form-element__control">
+                    <select id="orden-donaciones" class="slds-select" onchange="ordenarYFiltrarDonaciones()">
+                      <option value="fecha-desc" selected>Fecha: Más reciente</option>
+                      <option value="fecha-asc">Fecha: Más antigua</option>
+                      <option value="producto-asc">Tipo de producto (A - Z)</option>
+                      <option value="producto-desc">Tipo de producto (Z - A)</option>
+                      <option value="descripcion-asc">Descripción (A - Z)</option>
+                      <option value="descripcion-desc">Descripción (Z - A)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
                   <label class="slds-form-element__label" for="filtro-donacion-busqueda" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Búsqueda por Texto</label>
                   <div class="slds-form-element__control">
                     <input type="search" id="filtro-donacion-busqueda" class="slds-input"
                            placeholder="Buscar por código (#DT-XXXX) o descripción..."
-                           oninput="filtrarMisDonaciones()" />
+                           oninput="ordenarYFiltrarDonaciones()" />
                   </div>
                 </div>
               </div>
@@ -589,7 +603,7 @@
               <!-- Tarjetas de Seguimiento Paso a Paso -->
               <div th:unless="${#lists.isEmpty(misDonaciones)}" id="lista-donaciones-container" style="display: flex; flex-direction: column; gap: 14px;">
                 <div th:each="don : ${misDonaciones}" class="donacion-item-card"
-                     th:attr="data-donacion-id=${don.id},data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-subcategoria-grupo=${don.subcategoriaGrupo},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
+                     th:attr="data-donacion-id=${don.id},data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-subcategoria-grupo=${don.subcategoriaGrupo},data-fecha=${don.fechaCreacion != null ? don.fechaCreacion : ''},data-producto=${don.subcategoria != null ? don.subcategoria : ''},data-descripcion=${don.descripcion != null ? don.descripcion : ''},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
                      style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
                   <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-wrap" style="gap: 10px; margin-bottom: 12px;">
                     <div>
@@ -661,8 +675,8 @@
         <!-- FIN PESTAÑA 2: SEGUIMIENTO -->
 
         <!-- ==================== PESTAÑA 3: BUSCADOR DE CAUSAS & NECESIDADES ONG ==================== -->
-        <div id="tab-panel-causas" th:style="${tabActiva == 'causas'} ? 'display: block;' : 'display: none;'">
-          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+        <div id="tab-panel-causas" role="tabpanel" aria-labelledby="tab-btn-causas" th:style="${tabActiva == 'causas'} ? 'display: block;' : 'display: none;'">
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
             <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
               <header class="slds-media slds-media_center slds-has-flexi-truncate">
                 <div class="slds-media__figure">
@@ -753,8 +767,8 @@
         <!-- FIN PESTAÑA 3: CAUSAS -->
 
         <!-- ==================== PESTAÑA 4: DIRECTORIO DE ORGANIZACIONES Y COMEDORES (UX-06) ==================== -->
-        <div id="tab-panel-directorio" th:style="${tabActiva == 'directorio'} ? 'display: block;' : 'display: none;'">
-          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+        <div id="tab-panel-directorio" role="tabpanel" aria-labelledby="tab-btn-directorio" th:style="${tabActiva == 'directorio'} ? 'display: block;' : 'display: none;'">
+          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
             <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
               <header class="slds-media slds-media_center slds-has-flexi-truncate">
                 <div class="slds-media__figure">
@@ -879,7 +893,7 @@
               </div>
             </div>
 
-            <div th:unless="${isNuevoUsuario}" style="background: #fdf8e2; border: 1px solid #fde047; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; text-align: left;">
+            <div th:unless="${isNuevoUsuario}" class="dt-recognition-box" style="background: #fdf8e2; border: 1px solid #fde047; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; text-align: left;">
               <!-- Medalla Dorada -->
               <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #fef08a 0%, #ca8a04 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(202, 138, 4, 0.4); flex-shrink: 0; border: 2px solid #eab308;">
                 <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #78350f;">
@@ -887,8 +901,8 @@
                 </svg>
               </div>
               <div>
-                <strong style="display: block; font-size: 0.85rem; color: #854d0e;">DonaTrack Solidario</strong>
-                <span style="font-size: 0.78rem; color: #a16207;">Reconocimiento por entregas y remitos auditados en destino.</span>
+                <strong class="dt-recognition-title" style="display: block; font-size: 0.85rem; color: #854d0e;">DonaTrack Solidario</strong>
+                <span class="dt-recognition-text" style="font-size: 0.78rem; color: #a16207;">Reconocimiento por entregas y remitos auditados en destino.</span>
               </div>
             </div>
 
@@ -919,8 +933,8 @@
 
           <div class="slds-card__body slds-card__body_inner slds-p-around_medium">
             <!-- Estado Vacío cuando no tiene insignias -->
-            <div th:if="${#lists.isEmpty(insignias)}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 18px 14px; text-align: center;">
-              <h3 style="font-weight: 700; color: #334155; font-size: 0.95rem; margin-bottom: 4px;">Aún no tenés insignias</h3>
+            <div th:if="${#lists.isEmpty(insignias)}" class="dt-empty-state-box" style="border-radius: 8px; padding: 18px 14px; text-align: center;">
+              <h3 style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px;">Aún no tenés insignias</h3>
               <p class="slds-text-body_small slds-text-color_weak" style="font-size: 0.78rem; line-height: 1.4; margin-bottom: 12px;">
                 Tus insignias se desbloquean progresivamente por categoría al registrar donaciones y entregas auditadas.
               </p>
@@ -934,7 +948,7 @@
               <div th:each="insignia, iterStat : ${insignias}"
                    class="donante-badge-item"
                    th:attr="data-index=${iterStat.index}"
-                   th:style="${iterStat.index < 3} ? 'background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);' : 'background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: none; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);'">
+                   th:style="${iterStat.index < 3} ? 'border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);' : 'border-radius: 8px; padding: 10px 12px; display: none; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);'">
                 <div style="width: 44px; height: 44px; border-radius: 50%; background: #014486; border: 2px solid #0176d3; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <svg class="slds-icon slds-icon_x-small" aria-hidden="true" style="fill: #ffffff;">
                     <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#reward}"></use>
@@ -991,12 +1005,11 @@
                 </span>
               </div>
             </div>
-            <p class="slds-text-body_small" style="color: #555; line-height: 1.4;">
+            <p class="slds-text-body_small" style="line-height: 1.4;">
               Cada entrega certificada mensualmente mantiene activo el multiplicador de impacto social.
             </p>
           </div>
         </article>
-
       </div>
 
     </div>
@@ -1298,8 +1311,42 @@
       };
 
       // ========================================================
-      // 3. FILTRADO REACTIVO DE MIS DONACIONES (UX-05)
+      // 3. ORDENAMIENTO Y FILTRADO REACTIVO DE MIS DONACIONES (UX-05)
       // ========================================================
+      window.ordenarDonaciones = function () {
+        const container = document.getElementById('lista-donaciones-container');
+        if (!container) return;
+        const ordenSelect = document.getElementById('orden-donaciones');
+        const criterio = ordenSelect ? ordenSelect.value : 'fecha-desc';
+
+        const cards = Array.from(container.querySelectorAll('.donacion-item-card'));
+        if (cards.length === 0) return;
+
+        cards.sort(function (a, b) {
+          if (criterio === 'fecha-desc' || criterio === 'fecha-asc') {
+            const fechaA = (a.getAttribute('data-fecha') || '').trim();
+            const fechaB = (b.getAttribute('data-fecha') || '').trim();
+            const comp = fechaA.localeCompare(fechaB);
+            return criterio === 'fecha-desc' ? -comp : comp;
+          } else if (criterio === 'producto-asc' || criterio === 'producto-desc') {
+            const prodA = (a.getAttribute('data-producto') || '').trim().toLowerCase();
+            const prodB = (b.getAttribute('data-producto') || '').trim().toLowerCase();
+            const comp = prodA.localeCompare(prodB);
+            return criterio === 'producto-desc' ? -comp : comp;
+          } else if (criterio === 'descripcion-asc' || criterio === 'descripcion-desc') {
+            const descA = (a.getAttribute('data-descripcion') || '').trim().toLowerCase();
+            const descB = (b.getAttribute('data-descripcion') || '').trim().toLowerCase();
+            const comp = descA.localeCompare(descB);
+            return criterio === 'descripcion-desc' ? -comp : comp;
+          }
+          return 0;
+        });
+
+        cards.forEach(function (card) {
+          container.appendChild(card);
+        });
+      };
+
       window.filtrarMisDonaciones = function () {
         const estadoSelect = document.getElementById('filtro-donacion-estado');
         const subcatSelect = document.getElementById('filtro-donacion-subcategoria');
@@ -1334,6 +1381,11 @@
         if (emptyState) {
           emptyState.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
         }
+      };
+
+      window.ordenarYFiltrarDonaciones = function () {
+        window.ordenarDonaciones();
+        window.filtrarMisDonaciones();
       };
 
       // ========================================================
@@ -1567,6 +1619,10 @@
         }
 
         actualizarPaginacionBadges();
+
+        if (typeof window.ordenarDonaciones === 'function') {
+          window.ordenarDonaciones();
+        }
       }
 
       if (document.readyState === 'loading') {
