@@ -55,9 +55,38 @@
 
     <script th:src="@{/js/chatbot.js}" defer></script>
 
-    <!-- Salesforce MIAW (Enhanced Chat v2) en modo híbrido: oculta el botón nativo y se abre al derivar a un agente -->
+    <!-- Salesforce MIAW (Enhanced Chat v2) en modo híbrido + Navigation Bridge -->
+    <style>
+      body:not(.dt-miaw-launched) .embeddedMessagingConversationButton {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: fixed !important;
+        bottom: -200px !important;
+      }
+    </style>
     <script type="text/javascript">
       window.__dtMiawReady = false;
+
+      function dtHandleMiawNavigation(rawUrl, messageKey) {
+        if (!rawUrl) return false;
+        try {
+          var parsed = new URL(rawUrl, window.location.origin);
+          if (parsed.origin !== window.location.origin) return false;
+          if (!parsed.pathname.startsWith("/app/") && parsed.pathname !== "/login" && parsed.pathname !== "/registro") {
+            return false;
+          }
+          var dedupKey = "dt_miaw_nav_" + (messageKey || parsed.href);
+          if (sessionStorage.getItem(dedupKey)) return false;
+          sessionStorage.setItem(dedupKey, "1");
+          var target = parsed.pathname + parsed.search + parsed.hash;
+          if (window.location.pathname + window.location.search !== target) {
+            window.location.assign(target);
+            return true;
+          }
+        } catch (e) {}
+        return false;
+      }
+
       window.addEventListener("onEmbeddedMessagingReady", async function () {
         try {
           const res = await fetch("/api/public/chatbot/context", { credentials: "same-origin" });
@@ -74,30 +103,57 @@
           console.warn("No se pudo enviar contexto Pre-Chat a MIAW:", err);
         }
       });
+
       window.addEventListener("onEmbeddedMessagingButtonCreated", function () {
         window.__dtMiawReady = true;
         if (typeof window.__dtOnMiawReady === "function") {
           window.__dtOnMiawReady();
         }
       });
+
       window.addEventListener("onEmbeddedMessagingWindowMaximized", function () {
+        document.body.classList.add("dt-miaw-launched");
         var chatFab = document.getElementById("chat-fab");
         if (chatFab) chatFab.style.display = "none";
       });
       window.addEventListener("onEmbeddedMessagingWindowMinimized", function () {
+        document.body.classList.add("dt-miaw-launched");
         var chatFab = document.getElementById("chat-fab");
         if (chatFab) chatFab.style.display = "none";
       });
       window.addEventListener("onEmbeddedMessagingWindowClosed", function () {
+        document.body.classList.remove("dt-miaw-launched");
         var chatFab = document.getElementById("chat-fab");
         if (chatFab) chatFab.style.display = "";
+      });
+
+      // Navigation Bridge: links clickeados o intenciones en mensajes del agente
+      window.addEventListener("onEmbeddedMessageLinkClicked", function (event) {
+        try {
+          var detail = event && event.detail ? event.detail : {};
+          var href = detail.linkUrl || detail.url || (detail.link && detail.link.url) || "";
+          if (href && dtHandleMiawNavigation(href, "click-" + href + "-" + Date.now())) {
+            if (typeof event.preventDefault === "function") event.preventDefault();
+          }
+        } catch (e) {}
+      });
+
+      window.addEventListener("onEmbeddedMessageSent", function (event) {
+        try {
+          var entry = event && event.detail && event.detail.conversationEntry ? event.detail.conversationEntry : null;
+          if (!entry || !entry.sender || entry.sender.role === "EndUser") return;
+          var rawPayload = typeof entry.entryPayload === "string" ? entry.entryPayload : JSON.stringify(entry.entryPayload || {});
+          var match = rawPayload.match(/https?:\/\/[^"'\s<>)]+\/app\/[^"'\s<>)]+|\/app\/donante\/donaciones\?[^"'\s<>)]+/i);
+          if (match && match[0]) {
+            dtHandleMiawNavigation(match[0], entry.identifier || entry.transcriptedTimestamp || match[0]);
+          }
+        } catch (e) {}
       });
 
       function initEmbeddedMessaging() {
         try {
           if (typeof embeddedservice_bootstrap === "undefined") return;
           embeddedservice_bootstrap.settings.language = "es";
-          embeddedservice_bootstrap.settings.hideChatButtonOnLoad = true;
           embeddedservice_bootstrap.init(
             "00DKh000001LcL5",
             "Chatbot_DonaTrack",

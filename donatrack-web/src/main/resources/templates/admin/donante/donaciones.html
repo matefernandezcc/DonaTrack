@@ -183,6 +183,61 @@
         var form = document.getElementById('form-donante-donacion');
         var submitBtn = document.getElementById('btn-submit-donacion');
 
+        // Autocompletado desde Navigation Bridge (MIAW / URL query params)
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var descParam = params.get('descripcion') || params.get('desc') || params.get('item');
+          var cantParam = params.get('cantidad') || params.get('qty');
+          var unidParam = (params.get('unidad') || params.get('unidadMedicion') || params.get('unit') || '').trim().toLowerCase();
+          var catParam = (params.get('subcategoria') || params.get('categoria') || params.get('nombreSubcategoria') || '').trim().toLowerCase();
+          var usadoParam = (params.get('esUsado') || params.get('usado') || '').trim().toLowerCase();
+          var prefilled = false;
+
+          if (descParam) {
+            var descEl = document.getElementById('descripcion');
+            if (descEl) { descEl.value = descParam; prefilled = true; }
+          }
+          if (cantParam && !isNaN(Number(cantParam)) && Number(cantParam) > 0) {
+            var cantEl = document.getElementById('cantidad');
+            if (cantEl) { cantEl.value = String(Number(cantParam)); prefilled = true; }
+          }
+          if (unidParam) {
+            var unidEl = document.getElementById('unidadMedicion');
+            if (unidEl) {
+              if (unidParam.includes('paquete') || unidParam.includes('unidad') || unidParam === 'u') unidEl.value = 'UNIDADES';
+              else if (unidParam.includes('litro') || unidParam === 'l') unidEl.value = 'LITROS';
+              else if (unidParam.includes('kilo') || unidParam === 'kg') unidEl.value = 'KILOS';
+              prefilled = true;
+            }
+          }
+          if (catParam) {
+            var catEl = document.getElementById('subcategoria');
+            if (catEl) {
+              if (catParam.includes('alimento') || catParam.includes('pereceder')) catEl.value = 'No Perecederos';
+              else if (catParam.includes('abrigo') || catParam.includes('ropa')) catEl.value = 'Abrigo';
+              else if (catParam.includes('higiene')) catEl.value = 'Higiene';
+              else if (catParam.includes('mobiliario') || catParam.includes('util')) catEl.value = 'Mobiliario';
+              else if (catParam.includes('medicamento')) catEl.value = 'Medicamentos';
+              prefilled = true;
+            }
+          }
+          if (usadoParam) {
+            var usadoEl = document.getElementById('esUsado');
+            if (usadoEl) {
+              usadoEl.value = (usadoParam === 'true' || usadoParam === 'usado' || usadoParam === 'si') ? 'true' : 'false';
+              prefilled = true;
+            }
+          }
+          if (prefilled && form) {
+            var notice = document.createElement('div');
+            notice.className = 'slds-notify slds-notify_alert slds-alert_info slds-m-bottom_medium';
+            notice.setAttribute('role', 'status');
+            notice.textContent = 'Datos precargados desde el asistente. Revisá los campos y presioná Confirmar Donación.';
+            form.parentNode.insertBefore(notice, form);
+            if (submitBtn) submitBtn.focus();
+          }
+        } catch (e) {}
+
         if (window.DonaTrackForms) {
           DonaTrackForms.registrarProteccion(form, submitBtn);
         } else if (form && submitBtn) {

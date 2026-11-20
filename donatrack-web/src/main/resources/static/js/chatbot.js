@@ -224,6 +224,7 @@
 
     if (canLaunch() && window.__dtMiawReady) {
       try {
+        document.body.classList.add("dt-miaw-launched");
         await window.embeddedservice_bootstrap.utilAPI.launchChat();
         panel.hidden = true;
         fab.setAttribute("aria-expanded", "false");
