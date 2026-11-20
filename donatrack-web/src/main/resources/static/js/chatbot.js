@@ -227,6 +227,7 @@
         await window.embeddedservice_bootstrap.utilAPI.launchChat();
         panel.hidden = true;
         fab.setAttribute("aria-expanded", "false");
+        fab.style.display = "none";
         return true;
       } catch (err) {
         console.warn("Error al abrir MIAW launchChat:", err);

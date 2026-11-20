@@ -64,6 +64,18 @@
           window.__dtOnMiawReady();
         }
       });
+      window.addEventListener("onEmbeddedMessagingWindowMaximized", function () {
+        var chatFab = document.getElementById("chat-fab");
+        if (chatFab) chatFab.style.display = "none";
+      });
+      window.addEventListener("onEmbeddedMessagingWindowMinimized", function () {
+        var chatFab = document.getElementById("chat-fab");
+        if (chatFab) chatFab.style.display = "";
+      });
+      window.addEventListener("onEmbeddedMessagingWindowClosed", function () {
+        var chatFab = document.getElementById("chat-fab");
+        if (chatFab) chatFab.style.display = "";
+      });
 
       function initEmbeddedMessaging() {
         try {
