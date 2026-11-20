@@ -64,14 +64,14 @@
               <tr class="slds-hint-parent" th:each="chofer : ${choferes}">
                 <th scope="row" data-label="Legajo">
                   <div class="slds-truncate">
-                    <strong style="color: #0176d3;" th:text="${chofer.legajo}">CH-001</strong>
+                    <strong class="dt-highlight-code" th:text="${chofer.legajo}">CH-001</strong>
                   </div>
                 </th>
                 <td data-label="Nombre y Apellido">
                   <div class="slds-truncate" th:text="${chofer.nombre} + (${chofer.apellido != null ? ' ' + chofer.apellido : ''})">Juan Pérez</div>
                 </td>
                 <td data-label="Teléfono">
-                  <div class="slds-truncate" th:text="${chofer.telefono}">+54 11 4455-6677</div>
+                  <div class="slds-truncate" th:text="${chofer.telefono != null and not #strings.isEmpty(chofer.telefono) ? chofer.telefono : '—'}">+54 11 4455-6677</div>
                 </td>
                 <td style="text-align: right;">
                   <form th:action="@{/app/admin/choferes/{leg}/eliminar(leg=${chofer.legajo})}" method="post" style="display: inline;"
@@ -83,7 +83,7 @@
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(choferes)}">
-                <td colspan="4" class="slds-text-align_center slds-p-around_medium" style="color: #706e6b;">
+                <td colspan="4" class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
                   No hay choferes registrados en el sistema logístico. Hacé clic en "Registrar Nuevo Chofer".
                 </td>
               </tr>

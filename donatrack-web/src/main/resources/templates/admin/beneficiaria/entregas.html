@@ -98,7 +98,7 @@
                      oninput="filtrarEntregas()" onkeyup="filtrarEntregas()" style="border-radius: 6px;" />
             </div>
             
-            <select id="filtro-estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 175px; border-radius: 6px;">
+            <select id="filtro-estado" aria-label="Filtrar entregas por estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 175px; border-radius: 6px;">
               <option value="TODOS">Todos los estados</option>
               <option value="TRANSITO">En Tránsito</option>
               <option value="PLANIFICADA">Planificada</option>
@@ -338,12 +338,13 @@
                 </label>
                 <div class="slds-form-element__control">
                   <div style="border: 2px dashed #94a3b8; border-radius: 8px; padding: 16px; text-align: center; background: #f8fafc;">
-                    <input type="file" id="cameraFile" name="fotoArchivo" accept="image/*" capture="environment" onchange="manejarCapturaCamara(this)" style="display: none;" />
+                    <input type="file" id="cameraFile" name="fotoArchivo" aria-label="Foto o comprobante de entrega" accept="image/*" capture="environment" onchange="manejarCapturaCamara(this)" style="display: none;" />
                     <button type="button" class="slds-button slds-button_neutral" onclick="document.getElementById('cameraFile').click()" style="font-weight: 700; border-radius: 6px; min-height: 36px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
                       <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
                         <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#photo}"></use>
                       </svg>
                       Abrir Cámara del Teléfono o Elegir Foto
+                    </button>
                     </button>
                     <img id="camera-preview" src="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" alt="Vista previa de foto"
                          style="display: none; max-width: 180px; max-height: 140px; margin: 10px auto 4px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />

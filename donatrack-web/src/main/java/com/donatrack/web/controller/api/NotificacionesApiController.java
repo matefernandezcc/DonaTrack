@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/notificaciones")
-@PreAuthorize("isAuthenticated()")
 public class NotificacionesApiController {
 
   private static final Logger log = LoggerFactory.getLogger(NotificacionesApiController.class);
@@ -45,7 +43,7 @@ public class NotificacionesApiController {
 
   @GetMapping("/mis-alertas")
   public ResponseEntity<?> misAlertas(Authentication auth) {
-    if (auth == null) {
+    if (auth == null || !auth.isAuthenticated() || "anonymousUser".equalsIgnoreCase(auth.getName())) {
       return ResponseEntity.ok(Collections.emptyList());
     }
 
@@ -81,14 +79,19 @@ public class NotificacionesApiController {
       }
     }
 
-    if (auth.getName() != null && !auth.getName().isBlank() && destinatarios.isEmpty()) {
-      destinatarios.add(auth.getName().trim());
+    String principalName = auth.getName();
+    if (principalName != null && !principalName.isBlank() && !"anonymousUser".equalsIgnoreCase(principalName.trim())) {
+      if (destinatarios.isEmpty() || principalName.contains("@")) {
+        destinatarios.add(principalName.trim());
+      }
     }
     if (auth.getAuthorities() != null
         && auth.getAuthorities().stream()
             .anyMatch(a -> "ROLE_ADMIN".equalsIgnoreCase(a.getAuthority()))) {
       destinatarios.add("admin@donatrack.org");
-      destinatarios.add("admin");
+      if (principalName == null || !principalName.contains("@")) {
+        destinatarios.add("admin");
+      }
     }
 
     if (destinatarios.isEmpty()) {
@@ -107,14 +110,12 @@ public class NotificacionesApiController {
               : notificacionesGateway.obtenerNotificacionesUsuario(lista);
       return ResponseEntity.ok(alertas != null ? alertas : Collections.emptyList());
     } catch (Exception e) {
-      log.warn("Error al consultar notificaciones para destinatarios {}: {}", destinatarios, e.getMessage());
+      log.warn("Error al consultar notificaciones para {} destinatario(s): {}", destinatarios.size(), e.getMessage());
       return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
           .body(
               Map.of(
-                  "error",
-                  "NOTIFICACIONES_UNAVAILABLE",
-                  "message",
-                  "No se pudieron obtener tus alertas en este momento. Reintentá en unos segundos."));
+                  "error", "NOTIFICACIONES_UNAVAILABLE",
+                  "message", "No se pudieron obtener tus alertas en este momento."));
     }
   }
 }

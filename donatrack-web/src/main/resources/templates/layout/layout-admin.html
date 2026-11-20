@@ -16,6 +16,17 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
+  <script>
+    (function () {
+      try {
+        var dtTheme = localStorage.getItem("dt-theme");
+        if (dtTheme === "dark" || (!dtTheme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <style>
     /* Respaldo y garantía de visualización para navegación vertical SLDS */
     @media (min-width: 768px) {
@@ -105,6 +116,11 @@
       transition: all 0.15s ease-in-out !important;
       z-index: 10002 !important;
       text-decoration: none !important;
+    }
+
+    .dt-touch-target {
+      min-width: 48px !important;
+      min-height: 48px !important;
     }
 
     #admin-menu-toggle,
@@ -225,6 +241,818 @@
       outline: 2px solid #0176d3 !important;
       outline-offset: 2px !important;
     }
+
+    /* Animación suave de Toast para desvanecimiento */
+    .donatrack-toast-fade {
+      transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.35s ease, margin 0.35s ease;
+      opacity: 1;
+      max-height: 200px;
+    }
+
+    .donatrack-toast-fade.dt-toast-hidden {
+      opacity: 0;
+      transform: translateY(-8px);
+      max-height: 0;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* Alineación y centrado vertical milimétrico de Toast y botón de cierre (X) */
+    .slds-notify_toast,
+    .slds-notify--toast {
+      display: inline-flex !important;
+      align-items: center !important;
+      position: relative !important;
+      min-height: 48px !important;
+      padding-top: 0.75rem !important;
+      padding-bottom: 0.75rem !important;
+      padding-left: 1.25rem !important;
+      padding-right: 3.5rem !important;
+      box-sizing: border-box !important;
+    }
+
+    .slds-notify_toast .slds-icon_container,
+    .slds-notify--toast .slds-icon_container {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      align-self: center !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      flex-shrink: 0 !important;
+    }
+
+    .slds-notify_toast .slds-notify__content,
+    .slds-notify--toast .slds-notify__content {
+      display: flex !important;
+      align-items: center !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+    }
+
+    .slds-notify_toast .slds-notify__content h2,
+    .slds-notify--toast .slds-notify__content h2 {
+      margin: 0 !important;
+      line-height: 1.35 !important;
+      font-size: 0.95rem !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+    }
+
+    .slds-notify_toast .slds-notify__close,
+    .slds-notify--toast .slds-notify__close {
+      position: absolute !important;
+      top: 50% !important;
+      right: 0.75rem !important;
+      transform: translateY(-50%) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+      z-index: 2 !important;
+    }
+
+    .slds-notify_toast .dt-toast-close,
+    .slds-notify--toast .dt-toast-close {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      min-height: 36px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 1px solid transparent !important;
+      border-radius: 6px !important;
+      background: transparent !important;
+      color: #ffffff !important;
+      cursor: pointer !important;
+      transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.15s ease !important;
+    }
+
+    .slds-notify_toast .dt-toast-close:hover,
+    .slds-notify--toast .dt-toast-close:hover {
+      background-color: rgba(255, 255, 255, 0.22) !important;
+      color: #ffffff !important;
+    }
+
+    .slds-notify_toast .dt-toast-close:active,
+    .slds-notify--toast .dt-toast-close:active {
+      transform: scale(0.92) !important;
+      background-color: rgba(255, 255, 255, 0.35) !important;
+    }
+
+    .slds-notify_toast .dt-toast-close:focus,
+    .slds-notify--toast .dt-toast-close:focus {
+      outline: 2px solid #ffffff !important;
+      outline-offset: 2px !important;
+    }
+
+    .slds-notify_toast .dt-toast-close svg,
+    .slds-notify_toast .dt-toast-close .slds-button__icon {
+      width: 1.15rem !important;
+      height: 1.15rem !important;
+      display: block !important;
+      margin: 0 auto !important;
+      fill: currentColor !important;
+      color: inherit !important;
+      pointer-events: none !important;
+    }
+
+    /* Botón de eliminación en lista de notificaciones */
+    .dt-notif-delete-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .dt-notif-delete-btn:hover,
+    .dt-notif-delete-btn:focus {
+      color: #dc2626 !important;
+      background-color: #fef2f2 !important;
+      outline: none;
+    }
+
+    /* ========================================================
+       MODO OSCURO / MODO NOCHE PARA BACKOFFICE (DATA-THEME="DARK")
+       ======================================================== */
+    [data-theme="dark"] body {
+      background-color: #0b0f19 !important;
+      color: #f9fafb !important;
+    }
+
+    /* Header Global */
+    [data-theme="dark"] .slds-global-header_container,
+    [data-theme="dark"] .slds-global-header {
+      background-color: #111827 !important;
+      border-bottom: 1px solid #1f2937 !important;
+      color: #f9fafb !important;
+    }
+
+    [data-theme="dark"] .slds-global-header a span[style*="color: #014486"] {
+      color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .slds-global-header span[style*="color: #444"] {
+      color: #e5e7eb !important;
+    }
+
+    /* Navegación Vertical */
+    [data-theme="dark"] #admin-nav {
+      background-color: #111827 !important;
+      border-right: 1px solid #1f2937 !important;
+      color: #e5e7eb !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-nav-vertical__title {
+      color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-nav-vertical__action {
+      color: #e5e7eb !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-nav-vertical__action:hover,
+    [data-theme="dark"] #admin-nav .slds-is-active .slds-nav-vertical__action {
+      background-color: #1f2937 !important;
+      color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-icon-text-default {
+      fill: #9ca3af !important;
+    }
+
+    /* Contenido Principal y Encabezados */
+    [data-theme="dark"] .slds-page-header {
+      background-color: #111827 !important;
+      border: 1px solid #1f2937 !important;
+      color: #f9fafb !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Tipografía Semántica de Alto Contraste */
+    [data-theme="dark"] .slds-page-header__title,
+    [data-theme="dark"] h1,
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h3,
+    [data-theme="dark"] h4,
+    [data-theme="dark"] strong,
+    [data-theme="dark"] .dt-profile-name,
+    [data-theme="dark"] .dt-org-name,
+    [data-theme="dark"] .slds-text-heading_large,
+    [data-theme="dark"] .slds-text-heading_medium,
+    [data-theme="dark"] .slds-text-heading_small {
+      color: #f9fafb !important;
+    }
+
+    /* Clases de Métricas con Contraste WCAG AAA en Ambos Modos */
+    .dt-stat-green { color: #166534; }
+    .dt-stat-blue { color: #014486; }
+    .dt-stat-orange { color: #c2410c; }
+    .dt-stat-indigo { color: #4338ca; }
+
+    [data-theme="dark"] .dt-stat-green { color: #86efac !important; }
+    [data-theme="dark"] .dt-stat-blue { color: #93c5fd !important; }
+    [data-theme="dark"] .dt-stat-orange { color: #fdba74 !important; }
+    [data-theme="dark"] .dt-stat-indigo { color: #a5b4fc !important; }
+
+    [data-theme="dark"] p,
+    [data-theme="dark"] .dt-profile-points,
+    [data-theme="dark"] .dt-profile-motto,
+    [data-theme="dark"] .dt-org-meta {
+      color: #d1d5db !important;
+    }
+
+    [data-theme="dark"] .slds-page-header__name-meta,
+    [data-theme="dark"] .slds-text-color_weak {
+      color: #9ca3af !important;
+    }
+
+    /* Tarjetas y Contenedores */
+    [data-theme="dark"] .slds-card,
+    [data-theme="dark"] .slds-box,
+    [data-theme="dark"] article.slds-card {
+      background-color: #111827 !important;
+      border: 1px solid #1f2937 !important;
+      color: #f9fafb !important;
+    }
+
+    [data-theme="dark"] .slds-card__body,
+    [data-theme="dark"] .slds-card__body_inner,
+    [data-theme="dark"] .dt-profile-header-body {
+      background-color: #111827 !important;
+      background: #111827 !important;
+      color: inherit !important;
+    }
+
+    [data-theme="dark"] .slds-card__header {
+      background-color: #111827 !important;
+      border-bottom: 1px solid #1f2937 !important;
+    }
+
+    /* Tarjetas Específicas de Donante, Beneficiaria y Logística */
+    [data-theme="dark"] .donacion-item-card,
+    [data-theme="dark"] .causa-ong-card,
+    [data-theme="dark"] .directorio-ong-card,
+    [data-theme="dark"] .donante-badge-item,
+    [data-theme="dark"] .entrega-card-col .slds-box {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] .donacion-item-card strong,
+    [data-theme="dark"] .causa-ong-card strong,
+    [data-theme="dark"] .directorio-ong-card strong,
+    [data-theme="dark"] .donante-badge-item strong {
+      color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .donacion-item-card p,
+    [data-theme="dark"] .causa-ong-card p,
+    [data-theme="dark"] .directorio-ong-card p,
+    [data-theme="dark"] .donante-badge-item p {
+      color: #d1d5db !important;
+    }
+
+    /* Anulación universal de fondos claros inline en modo oscuro */
+    [data-theme="dark"] [style*="background: #ffffff"],
+    [data-theme="dark"] [style*="background:#ffffff"],
+    [data-theme="dark"] [style*="background: white"],
+    [data-theme="dark"] [style*="background:#fff"],
+    [data-theme="dark"] [style*="background: #fff"],
+    [data-theme="dark"] [style*="background-color: #ffffff"],
+    [data-theme="dark"] [style*="background-color:#ffffff"],
+    [data-theme="dark"] [style*="background-color: white"],
+    [data-theme="dark"] [style*="background: #f8fafc"],
+    [data-theme="dark"] [style*="background:#f8fafc"],
+    [data-theme="dark"] [style*="background-color: #f8fafc"],
+    [data-theme="dark"] [style*="background-color:#f8fafc"],
+    [data-theme="dark"] [style*="background: #f1f5f9"],
+    [data-theme="dark"] [style*="background:#f1f5f9"],
+    [data-theme="dark"] [style*="background-color: #f1f5f9"],
+    [data-theme="dark"] [style*="background-color:#f1f5f9"],
+    [data-theme="dark"] [style*="background: #fafaf9"],
+    [data-theme="dark"] [style*="background:#fafaf9"],
+    [data-theme="dark"] [style*="background-color: #fafaf9"],
+    [data-theme="dark"] [style*="background-color:#fafaf9"],
+    [data-theme="dark"] [style*="background: #f0fdf4"],
+    [data-theme="dark"] [style*="background:#f0fdf4"],
+    [data-theme="dark"] [style*="background: #fdfaf6"],
+    [data-theme="dark"] [style*="background:#fdfaf6"],
+    [data-theme="dark"] [style*="background: #f0f9ff"],
+    [data-theme="dark"] [style*="background:#f0f9ff"],
+    [data-theme="dark"] [style*="background: #fef9c3"],
+    [data-theme="dark"] [style*="background:#fef9c3"] {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f3f4f6 !important;
+    }
+
+    /* Anulación universal de textos oscuros inline en modo oscuro */
+    [data-theme="dark"] [style*="color: #0f172a"],
+    [data-theme="dark"] [style*="color:#0f172a"],
+    [data-theme="dark"] [style*="color: #1e293b"],
+    [data-theme="dark"] [style*="color:#1e293b"],
+    [data-theme="dark"] [style*="color: #334155"],
+    [data-theme="dark"] [style*="color:#334155"] {
+      color: #f1f5f9 !important;
+    }
+
+    [data-theme="dark"] [style*="color: #475569"],
+    [data-theme="dark"] [style*="color:#475569"],
+    [data-theme="dark"] [style*="color: #64748b"],
+    [data-theme="dark"] [style*="color:#64748b"],
+    [data-theme="dark"] [style*="color: #706e6b"],
+    [data-theme="dark"] [style*="color:#706e6b"] {
+      color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] [style*="color: #014486"],
+    [data-theme="dark"] [style*="color:#014486"],
+    [data-theme="dark"] [style*="color: #0176d3"],
+    [data-theme="dark"] [style*="color:#0176d3"] {
+      color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] [style*="color: #166534"],
+    [data-theme="dark"] [style*="color:#166534"] {
+      color: #86efac !important;
+    }
+
+    [data-theme="dark"] [style*="color: #854d0e"],
+    [data-theme="dark"] [style*="color:#854d0e"],
+    [data-theme="dark"] [style*="color: #92400e"],
+    [data-theme="dark"] [style*="color:#92400e"],
+    [data-theme="dark"] [style*="color: #c2410c"],
+    [data-theme="dark"] [style*="color:#c2410c"] {
+      color: #fde047 !important;
+    }
+
+    /* Labels de formularios y títulos en mayúsculas */
+    [data-theme="dark"] .slds-form-element__label,
+    [data-theme="dark"] label.slds-form-element__label {
+      color: #e2e8f0 !important;
+    }
+
+    [data-theme="dark"] .slds-text-title_caps {
+      color: #94a3b8 !important;
+    }
+
+    /* Tarjetas de Algoritmos (Matchmaking) */
+    .dt-algorithm-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 12px 14px;
+      height: 100%;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .dt-algorithm-card_hybrid {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+    }
+    [data-theme="dark"] .dt-algorithm-card,
+    [data-theme="dark"] .dt-algorithm-card_hybrid {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f3f4f6 !important;
+    }
+
+    /* Badges de Podio y Ranking */
+    .dt-rank-badge { font-weight: 800; border-radius: 4px; padding: 2px 8px; }
+    .dt-rank-badge_gold { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+    .dt-rank-badge_silver { background: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; }
+    .dt-rank-badge_bronze { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+
+    [data-theme="dark"] .dt-rank-badge_gold { background: rgba(234, 179, 8, 0.2) !important; color: #fef08a !important; border-color: #a16207 !important; }
+    [data-theme="dark"] .dt-rank-badge_silver { background: rgba(148, 163, 184, 0.2) !important; color: #e2e8f0 !important; border-color: #475569 !important; }
+    [data-theme="dark"] .dt-rank-badge_bronze { background: rgba(249, 115, 22, 0.2) !important; color: #fdba74 !important; border-color: #c2410c !important; }
+
+    /* Cajas internas, listas, badges de trazabilidad y empty states */
+    .dt-trazabilidad-box,
+    .dt-impact-metric-card,
+    .dt-empty-state-box,
+    .dt-mision-item-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .dt-empty-state-box {
+      border: 1px dashed #cbd5e1;
+      border-style: dashed;
+    }
+
+    [data-theme="dark"] .dt-trazabilidad-box,
+    [data-theme="dark"] .dt-impact-metric-card,
+    [data-theme="dark"] .dt-empty-state-box,
+    [data-theme="dark"] .dt-mision-item-card {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] .dt-empty-state-box {
+      border: 1px dashed #334155 !important;
+      border-style: dashed !important;
+      border-color: #334155 !important;
+    }
+
+    /* Identificadores y códigos destacados en tablas */
+    .dt-highlight-code {
+      color: #0176d3;
+      font-weight: 700;
+    }
+
+    /* Reconocimiento lateral Trailblazer */
+    .dt-recognition-box {
+      background: #fdf8e2;
+      border: 1px solid #fde047;
+      border-radius: 8px;
+    }
+    [data-theme="dark"] .dt-recognition-box {
+      background-color: rgba(245, 158, 11, 0.12) !important;
+      background: rgba(245, 158, 11, 0.12) !important;
+      border: 1px solid #78350f !important;
+    }
+    [data-theme="dark"] .dt-recognition-title {
+      color: #fef08a !important;
+    }
+    [data-theme="dark"] .dt-recognition-text {
+      color: #fde047 !important;
+    }
+
+    /* Badges de Notificaciones Desacopladas de JS */
+    .dt-notif-badge_success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .dt-notif-badge_error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .dt-notif-badge_system { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .dt-notif-badge_backend { background: #f1f5f9; color: #475569; }
+
+    [data-theme="dark"] .dt-notif-badge_success { background: rgba(22, 101, 52, 0.25) !important; color: #86efac !important; border-color: #166534 !important; }
+    [data-theme="dark"] .dt-notif-badge_error { background: rgba(185, 28, 28, 0.25) !important; color: #fca5a5 !important; border-color: #991b1b !important; }
+    [data-theme="dark"] .dt-notif-badge_system { background: rgba(3, 105, 161, 0.25) !important; color: #93c5fd !important; border-color: #0369a1 !important; }
+    [data-theme="dark"] .dt-notif-badge_backend { background: #1e293b !important; color: #cbd5e1 !important; border: 1px solid #334155 !important; }
+
+    /* Pestañas y navegación en modo oscuro */
+    [data-theme="dark"] .slds-tabs_default,
+    [data-theme="dark"] .slds-tabs_scoped,
+    [data-theme="dark"] .dt-portal-tabs,
+    [data-theme="dark"] .slds-tabs_default__nav,
+    [data-theme="dark"] .slds-tabs_scoped__nav {
+      background-color: #111827 !important;
+      background: #111827 !important;
+      border-color: #1f2937 !important;
+    }
+
+    [data-theme="dark"] .slds-tabs_default__link,
+    [data-theme="dark"] .slds-tabs_scoped__link {
+      color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] .slds-tabs_default__item.slds-is-active .slds-tabs_default__link,
+    [data-theme="dark"] .slds-tabs_scoped__item.slds-is-active .slds-tabs_scoped__link {
+      color: #60a5fa !important;
+      border-color: #3b82f6 !important;
+    }
+
+    [data-theme="dark"] .slds-tabs_default__item:not(.slds-is-active) .slds-tabs_default__link:hover {
+      color: #e5e7eb !important;
+    }
+
+    /* Tablas completas y filas alternadas (Striped) en Modo Oscuro */
+    [data-theme="dark"] .slds-table,
+    [data-theme="dark"] table.slds-table {
+      background-color: #0f172a !important;
+      background: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #1e293b !important;
+    }
+
+    [data-theme="dark"] .slds-table thead th,
+    [data-theme="dark"] .slds-table thead tr,
+    [data-theme="dark"] table.slds-table thead tr,
+    [data-theme="dark"] table.slds-table thead th {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      color: #93c5fd !important;
+      border-bottom: 2px solid #334155 !important;
+    }
+
+    /* Filas impares (odd) */
+    [data-theme="dark"] .slds-table tbody tr,
+    [data-theme="dark"] .slds-table tbody tr > td,
+    [data-theme="dark"] .slds-table tbody tr > th,
+    [data-theme="dark"] .slds-table tbody tr td,
+    [data-theme="dark"] .slds-table tbody tr th,
+    [data-theme="dark"] .slds-table tr.slds-hint-parent,
+    [data-theme="dark"] .slds-table tr.slds-hint-parent > td,
+    [data-theme="dark"] .slds-table tr.slds-hint-parent > th,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd),
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) > td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) > th,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(odd) th {
+      background-color: #0f172a !important;
+      background: #0f172a !important;
+      color: #f8fafc !important;
+      border-bottom: 1px solid #1e293b !important;
+      border-top-color: #1e293b !important;
+    }
+
+    /* Filas pares (even) - Zebra striping oscuro de alta especificidad */
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even),
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) > td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) > th,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) td,
+    [data-theme="dark"] .slds-table_striped tbody tr:nth-of-type(even) th {
+      background-color: #162238 !important;
+      background: #162238 !important;
+      color: #f8fafc !important;
+      border-bottom: 1px solid #1e293b !important;
+      border-top-color: #1e293b !important;
+    }
+
+    [data-theme="dark"] .slds-table tbody tr:hover,
+    [data-theme="dark"] .slds-table tbody tr:hover > td,
+    [data-theme="dark"] .slds-table tbody tr:hover > th,
+    [data-theme="dark"] .slds-table tbody tr.slds-is-hovered,
+    [data-theme="dark"] .slds-table tbody tr.slds-is-hovered > td,
+    [data-theme="dark"] .slds-table tbody tr.slds-is-hovered > th {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+    }
+
+    [data-theme="dark"] .slds-table td,
+    [data-theme="dark"] .slds-table th,
+    [data-theme="dark"] .slds-table td div,
+    [data-theme="dark"] .slds-table th div,
+    [data-theme="dark"] .slds-table td span,
+    [data-theme="dark"] .slds-table th span,
+    [data-theme="dark"] .slds-table td p,
+    [data-theme="dark"] .slds-table td ul,
+    [data-theme="dark"] .slds-table td li {
+      color: #e2e8f0 !important;
+      border-color: #1e293b !important;
+    }
+
+    [data-theme="dark"] .slds-table td strong,
+    [data-theme="dark"] .slds-table th strong,
+    [data-theme="dark"] .slds-table strong,
+    [data-theme="dark"] .dt-highlight-code {
+      color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .slds-table td a,
+    [data-theme="dark"] .slds-table th a {
+      color: #93c5fd !important;
+    }
+
+    /* Modales y Popovers */
+    [data-theme="dark"] .slds-popover,
+    [data-theme="dark"] .slds-modal__container,
+    [data-theme="dark"] .slds-modal__header,
+    [data-theme="dark"] .slds-modal__content,
+    [data-theme="dark"] .slds-modal__footer {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
+      color: #f9fafb !important;
+    }
+
+    [data-theme="dark"] #popover-notificaciones {
+      background-color: #111827 !important;
+      border: 1px solid #1f2937 !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+    }
+
+    [data-theme="dark"] #popover-notificaciones header {
+      background-color: #1f2937 !important;
+      border-bottom: 1px solid #374151 !important;
+    }
+
+    [data-theme="dark"] #popover-notificaciones h2 {
+      color: #60a5fa !important;
+    }
+
+    /* Notificaciones */
+    [data-theme="dark"] .dt-notif-msg,
+    [data-theme="dark"] #panel-notif-lista p,
+    [data-theme="dark"] #notif-lista-items p,
+    [data-theme="dark"] .dt-notif-item p {
+      color: #f9fafb !important;
+    }
+
+    [data-theme="dark"] .dt-notif-time,
+    [data-theme="dark"] #panel-notif-lista span.slds-text-color_weak,
+    [data-theme="dark"] #notif-lista-items span.slds-text-color_weak {
+      color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .dt-notif-panel-item,
+    [data-theme="dark"] #panel-notif-lista li {
+      background-color: #1e293b !important;
+      border: 1px solid #334155 !important;
+    }
+
+    .dt-notif-item_unread {
+      background-color: #f0f7ff;
+    }
+
+    [data-theme="dark"] .dt-notif-item {
+      border-bottom-color: #1f2937 !important;
+    }
+
+    [data-theme="dark"] .dt-notif-item_unread {
+      background-color: rgba(59, 130, 246, 0.14) !important;
+    }
+
+    [data-theme="dark"] #panel-notificaciones-card {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
+    }
+
+    /* Avatar e iconos del perfil */
+    [data-theme="dark"] #blobatar-interactive,
+    [data-theme="dark"] .dt-blobatar-container {
+      background: #1e293b !important;
+      border-color: #1e293b !important;
+    }
+
+    /* Formularios e Inputs */
+    [data-theme="dark"] .slds-input,
+    [data-theme="dark"] .slds-select,
+    [data-theme="dark"] .slds-textarea,
+    [data-theme="dark"] input:not([type="submit"]):not([type="button"]),
+    [data-theme="dark"] select,
+    [data-theme="dark"] textarea {
+      background-color: #1f2937 !important;
+      border-color: #334155 !important;
+      color: #f9fafb !important;
+    }
+
+    /* Botones neutros e iconos en modo oscuro */
+    [data-theme="dark"] .slds-button_neutral,
+    [data-theme="dark"] button.slds-button_neutral,
+    [data-theme="dark"] a.slds-button_neutral,
+    [data-theme="dark"] .slds-button_icon-border,
+    [data-theme="dark"] .slds-button_icon-border-filled {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      border: 1px solid #475569 !important;
+      color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .slds-button_neutral:hover,
+    [data-theme="dark"] button.slds-button_neutral:hover,
+    [data-theme="dark"] a.slds-button_neutral:hover,
+    [data-theme="dark"] .slds-button_neutral:focus,
+    [data-theme="dark"] button.slds-button_neutral:focus,
+    [data-theme="dark"] a.slds-button_neutral:focus,
+    [data-theme="dark"] .slds-button_icon-border:hover,
+    [data-theme="dark"] .slds-button_icon-border-filled:hover {
+      background-color: #334155 !important;
+      background: #334155 !important;
+      border-color: #64748b !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .slds-button__icon {
+      fill: #e5e7eb !important;
+    }
+
+    /* Botones destructivos de tabla en modo oscuro */
+    [data-theme="dark"] .slds-button_text-destructive,
+    [data-theme="dark"] button.slds-button_text-destructive {
+      background-color: transparent !important;
+      background: transparent !important;
+      color: #f87171 !important;
+      border: 1px solid #7f1d1d !important;
+      border-radius: 4px !important;
+      padding: 4px 12px !important;
+      cursor: pointer !important;
+      transition: all 0.15s ease !important;
+    }
+
+    [data-theme="dark"] .slds-button_text-destructive:hover,
+    [data-theme="dark"] button.slds-button_text-destructive:hover {
+      background-color: rgba(239, 68, 68, 0.2) !important;
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: #ef4444 !important;
+      color: #fca5a5 !important;
+    }
+
+    /* Botones outline-brand en modo oscuro */
+    [data-theme="dark"] .slds-button_outline-brand,
+    [data-theme="dark"] button.slds-button_outline-brand,
+    [data-theme="dark"] a.slds-button_outline-brand {
+      background-color: transparent !important;
+      background: transparent !important;
+      border: 1px solid #3b82f6 !important;
+      border-color: #3b82f6 !important;
+      color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .slds-button_outline-brand:hover,
+    [data-theme="dark"] button.slds-button_outline-brand:hover,
+    [data-theme="dark"] a.slds-button_outline-brand:hover,
+    [data-theme="dark"] .slds-button_outline-brand:focus,
+    [data-theme="dark"] button.slds-button_outline-brand:focus,
+    [data-theme="dark"] a.slds-button_outline-brand:focus {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      background: rgba(59, 130, 246, 0.15) !important;
+      border-color: #60a5fa !important;
+      color: #93c5fd !important;
+    }
+
+    /* Badges adaptadas */
+    [data-theme="dark"] .slds-badge_lightest {
+      background-color: #1f2937 !important;
+      color: #93c5fd !important;
+      border: 1px solid #374151 !important;
+    }
+
+    [data-theme="dark"] .slds-badge[style*="background: #f1f5f9"],
+    [data-theme="dark"] .slds-badge[style*="background:#f1f5f9"] {
+      background: #1f2937 !important;
+      color: #cbd5e1 !important;
+      border-color: #374151 !important;
+    }
+
+    /* Estilo del Botón Theme Toggle */
+    .theme-toggle-admin {
+      background: transparent;
+      border: 1px solid #c9c7c5;
+      color: #0b4a8f;
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      min-height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      padding: 0;
+      margin: 0;
+    }
+
+    .theme-toggle-admin:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      transform: scale(1.05);
+    }
+
+    .theme-toggle-admin svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .theme-toggle-admin .sun-icon {
+      display: none;
+    }
+
+    .theme-toggle-admin .moon-icon {
+      display: block;
+    }
+
+    [data-theme="dark"] .theme-toggle-admin {
+      border-color: #374151;
+      color: #fbbf24;
+    }
+
+    [data-theme="dark"] .theme-toggle-admin:hover {
+      background: #1f2937;
+      border-color: #4b5563;
+    }
+
+    [data-theme="dark"] .theme-toggle-admin .sun-icon {
+      display: block;
+    }
+
+    [data-theme="dark"] .theme-toggle-admin .moon-icon {
+      display: none;
+    }
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
@@ -280,6 +1108,28 @@
 
       <!-- User Profile, Notificaciones & Actions con Blobatar Avatar -->
       <div class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
+        <!-- Botón Modo Noche / Modo Día -->
+        <button id="theme-toggle" class="theme-toggle-admin slds-m-right_small dt-touch-target"
+          type="button" aria-label="Cambiar tema claro u oscuro" aria-pressed="false"
+          title="Cambiar entre modo día y noche">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
         <!-- Centro de Notificaciones SLDS (UX-08 / UX-13) -->
         <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-m-right_small" style="position: relative;">
           <button type="button" id="btn-notificaciones-toggle"
@@ -629,11 +1479,14 @@
         </div>
       </div>
 
-      <!-- SLDS BLUEPRINT: TOAST NOTIFICATIONS -->
-      <div id="dt-flash-ok-toast" class="slds-notify_container slds-is-relative slds-m-bottom_medium" th:if="${flashOk != null}" th:attr="data-flash-msg=${flashOk}">
-        <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
+      <!-- SLDS BLUEPRINT: TOAST NOTIFICATIONS (Única fuente de verdad de mensajes flash, con auto-cierre 3s y captura al historial) -->
+      <div id="toast-notification"
+           class="slds-notify_container slds-is-relative slds-m-bottom_medium donatrack-toast-fade"
+           th:if="${flashOk != null or flashError != null}"
+           th:attr="data-mensaje=${flashOk != null ? flashOk : flashError}, data-tipo=${flashOk != null ? 'success' : 'error'}">
+        <div th:if="${flashOk != null}" class="slds-notify slds-notify_toast slds-theme_success" role="status">
           <span class="slds-assistive-text">Éxito</span>
-          <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top"
+          <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex"
             title="Éxito">
             <svg class="slds-icon slds-icon_small" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#success}"></use>
@@ -643,8 +1496,8 @@
             <h2 class="slds-text-heading_small" th:text="${flashOk}">Operación completada con éxito.</h2>
           </div>
           <div class="slds-notify__close">
-            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar"
-              onclick="this.closest('.slds-notify_container').remove()">
+            <button type="button" class="slds-button slds-button_icon slds-button_icon-inverse dt-toast-close" title="Cerrar"
+              aria-label="Cerrar notificación">
               <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
               </svg>
@@ -652,12 +1505,10 @@
             </button>
           </div>
         </div>
-      </div>
 
-      <div id="dt-flash-error-toast" class="slds-notify_container slds-is-relative slds-m-bottom_medium" th:if="${flashError != null}" th:attr="data-flash-msg=${flashError}">
-        <div class="slds-notify slds-notify_toast slds-theme_error" role="alert">
+        <div th:if="${flashError != null and flashOk == null}" class="slds-notify slds-notify_toast slds-theme_error" role="alert">
           <span class="slds-assistive-text">Error</span>
-          <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top"
+          <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex"
             title="Error">
             <svg class="slds-icon slds-icon_small" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#error}"></use>
@@ -667,8 +1518,8 @@
             <h2 class="slds-text-heading_small" th:text="${flashError}">Ocurrió un error.</h2>
           </div>
           <div class="slds-notify__close">
-            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar"
-              onclick="this.closest('.slds-notify_container').remove()">
+            <button type="button" class="slds-button slds-button_icon slds-button_icon-inverse dt-toast-close" title="Cerrar"
+              aria-label="Cerrar notificación">
               <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#close}"></use>
               </svg>
@@ -896,6 +1747,23 @@
               matched = true;
             }
           }
+        });
+      }
+
+      // Alternador de Modo Claro / Modo Oscuro (Sincronizado con landing page)
+      var themeBtn = document.getElementById("theme-toggle");
+      if (themeBtn) {
+        var isDarkInit = document.documentElement.getAttribute("data-theme") === "dark";
+        themeBtn.setAttribute("aria-pressed", String(isDarkInit));
+        themeBtn.addEventListener("click", function () {
+          var docEl = document.documentElement;
+          var isDark = docEl.getAttribute("data-theme") === "dark";
+          var newTheme = isDark ? "light" : "dark";
+          docEl.setAttribute("data-theme", newTheme);
+          try {
+            localStorage.setItem("dt-theme", newTheme);
+          } catch (e) {}
+          themeBtn.setAttribute("aria-pressed", String(!isDark));
         });
       }
 

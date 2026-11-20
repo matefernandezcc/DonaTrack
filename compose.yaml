@@ -176,8 +176,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
-      - POSTGRES_HOST=${POSTGRES_HOST:-postgres-donatrack}
-      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - POSTGRES_HOCKER_POSTGRES_HOST:-postgres-donatrack}
+      - RABBITMQ_HOCKER_RABBITMQ_HOST:-rabbitmq}
       - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
       - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
       - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}
@@ -224,8 +224,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
-      - POSTGRES_HOST=${POSTGRES_HOST:-postgres-donatrack}
-      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - POSTGRES_HOST=${DOCKER_POSTGRES_HOST:-postgres-donatrack}
+      - RABBITMQ_HOST=${DOCKER_RABBITMQ_HOST:-rabbitmq}
       - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
       - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
       - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}
@@ -271,8 +271,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
-      - MONGO_HOST=${MONGO_HOST:-mongo-donatrack}
-      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - MONGO_HOST=${DOCKER_MONGO_HOST:-mongo-donatrack}
+      - RABBITMQ_HOST=${DOCKER_RABBITMQ_HOST:-rabbitmq}
       - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
       - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
       - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}
@@ -315,8 +315,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
-      - POSTGRES_HOST=${POSTGRES_HOST:-postgres-donatrack}
-      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - POSTGRES_HOST=${DOCKER_POSTGRES_HOST:-postgres-donatrack}
+      - RABBITMQ_HOST=${DOCKER_RABBITMQ_HOST:-rabbitmq}
       - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
       - RABBITMQ_SSL_ENABLED=${RABBITMQ_SSL_ENABLED:-false}
       - RABBITMQ_VIRTUAL_HOST=${RABBITMQ_VIRTUAL_HOST:-/}
@@ -354,7 +354,7 @@ services:
     environment:
       - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:--XX:+UseContainerSupport -Xms128m -Xmx512m}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
-      - POSTGRES_HOST=${POSTGRES_HOST:-postgres-donatrack}
+      - POSTGRES_HOST=${DOCKER_POSTGRES_HOST:-postgres-donatrack}
       - JWT_SECRET=${JWT_SECRET:-SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY:-donatrack-internal-key-change-in-prod}
       - WEB_URL=${WEB_URL:-http://localhost:8080}
