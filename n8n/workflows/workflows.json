@@ -1452,7 +1452,8 @@
           },
           "options": {}
         },
-        "onError": "continueRegularOutput"
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true
       },
       {
         "id": "c0742b34-3d06-4d0d-8156-52ceea1b07a2",
@@ -1515,7 +1516,8 @@
           "jsonBody": "={{ JSON.stringify($json.cargaBienesPayload) }}",
           "options": {}
         },
-        "onError": "continueRegularOutput"
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true
       },
       {
         "id": "63474a74-8037-4f79-861a-3abdf5c2e463",
@@ -1556,7 +1558,8 @@
           },
           "options": {}
         },
-        "onError": "continueRegularOutput"
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true
       },
       {
         "id": "f1bded5d-558d-484c-aad9-cd36eb9b8786",
