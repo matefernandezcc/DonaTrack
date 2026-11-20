@@ -10,6 +10,26 @@
 
   <div id="main-content-slot">
 
+    <style>
+      @keyframes dtTruckPulse {
+        0%, 100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(1, 118, 211, 0.55);
+        }
+        50% {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 10px rgba(1, 118, 211, 0);
+        }
+      }
+      .dt-truck-pulse {
+        animation: dtTruckPulse 1.6s ease-in-out infinite;
+      }
+      .dt-donacion-selected {
+        border: 2px solid #0176d3 !important;
+        box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.14) !important;
+      }
+    </style>
+
     <!-- ==================== HERO PROFILE BANNER (TRAILHEAD STYLE) ==================== -->
     <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; overflow: hidden; border: 1px solid #dddbda; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
       
@@ -207,8 +227,9 @@
               </a>
             </div>
 
-            <!-- Grilla de 4 Métricas de Impacto Concreto -->
-            <div class="slds-grid slds-gutters_small slds-wrap" style="margin-top: 10px;">
+            <!-- Grilla de 4 Métricas de Impacto Concreto (Visible solo cuando hay datos reales) -->
+            <div class="slds-grid slds-gutters_small slds-wrap" style="margin-top: 10px;"
+                 th:if="${!isNuevoUsuario and (platosComida > 0 or kilosTotales > 0 or comedoresAsistidos > 0 or entregasCompletadas > 0)}">
               
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
@@ -306,48 +327,6 @@
                    th:text="${isNuevoUsuario ? 'Primera Donación' : 'Nueva Donación'}">
                   Primera Donación
                 </a>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- Compromiso Solidario y Trazabilidad -->
-        <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff;">
-          <div class="slds-card__header slds-grid">
-            <header class="slds-media slds-media_center slds-has-flexi-truncate">
-              <div class="slds-media__figure">
-                <span class="slds-icon_container slds-icon-standard-task">
-                  <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                    <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#task}"></use>
-                  </svg>
-                </span>
-              </div>
-              <div class="slds-media__body">
-                <h2 class="slds-card__header-title">
-                  <span class="slds-text-heading_small" style="font-weight: 700; color: #014486;">Compromiso Comunitario & Trazabilidad</span>
-                </h2>
-              </div>
-            </header>
-          </div>
-          <div class="slds-card__body slds-card__body_inner">
-            <p class="slds-text-body_regular" style="color: #475569; line-height: 1.5; margin-bottom: 14px;">
-              Como donante activo de DonaTrack, contás con trazabilidad completa de extremo a extremo: remito digital, control de pesaje y fotografía de recepción al pie del camión.
-            </p>
-            <div class="slds-grid slds-gutters_small slds-wrap">
-              <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 700;">
-                  <span style="color: #166534; font-size: 1.1rem;">✓</span> Donante Verificado en Red
-                </div>
-              </div>
-              <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 700;">
-                  <span style="color: #166534; font-size: 1.1rem;">✓</span> Auditoría Cero Faltantes
-                </div>
-              </div>
-              <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #1e293b; font-weight: 700;">
-                  <span style="color: #166534; font-size: 1.1rem;">✓</span> Remito Digital en Destino
-                </div>
               </div>
             </div>
           </div>
@@ -453,8 +432,8 @@
         <div id="tab-panel-seguimiento" th:style="${tabActiva == 'seguimiento'} ? 'display: block;' : 'display: none;'">
 
           <!-- ==================== MAPA DE CAMIONES EN RUTA (UX-09) ==================== -->
-          <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; background: #ffffff;">
-            <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-vertical_small">
+          <article id="card-mapa-donante" class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; background: #ffffff;">
+            <div class="slds-card__header slds-grid slds-grid_align-spread slds-wrap slds-border_bottom slds-p-vertical_small" style="gap: 10px;">
               <header class="slds-media slds-media_center slds-has-flexi-truncate">
                 <div class="slds-media__figure">
                   <span class="slds-icon_container slds-icon-standard-address" style="background: #0176d3; border-radius: 6px; padding: 6px;">
@@ -468,11 +447,13 @@
                     <span class="slds-text-heading_small" style="font-weight: 800; color: #014486;">Seguimiento en Vivo: Camiones &amp; Logística en Ruta</span>
                   </h3>
                   <p class="slds-text-body_small slds-text-color_weak">
-                    Móviles transportando tus donaciones hacia las sedes de las organizaciones beneficiarias.
+                    Visualizá una donación a la vez con patente, chofer y destino asignado en tiempo real.
                   </p>
                 </div>
               </header>
-              <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <select id="mapa-donante-selector" class="slds-select" aria-label="Seleccionar donación en mapa"
+                        style="display: none; min-width: 220px; max-width: 300px; font-size: 0.82rem; font-weight: 600;"></select>
                 <button type="button" id="mapa-donante-retry" class="slds-button slds-button_neutral" title="Actualizar ubicación de móviles en el mapa"
                         style="border-radius: 6px; font-weight: 700; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; cursor: pointer; color: #0176d3; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.15s ease;">
                   <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true" style="width: 14px; height: 14px; fill: #0176d3; margin-right: 4px;">
@@ -484,10 +465,10 @@
             </div>
 
             <!-- Contenedor del Mapa con los 3 Estados UI -->
-            <div class="slds-card__body slds-p-around_none" style="position: relative; min-height: 350px;">
+            <div class="slds-card__body slds-p-around_none" style="position: relative; min-height: 240px;">
               <!-- Estado de Carga: Blueprint SLDS Box Theme Shade + Spinner -->
               <div id="mapa-donante-loading" class="slds-box slds-theme_shade slds-align_absolute-center"
-                   style="position: absolute; inset: 0; z-index: 500; min-height: 350px; background: rgba(248, 250, 252, 0.85); border: none; border-radius: 0 0 8px 8px;">
+                   style="position: absolute; inset: 0; z-index: 500; min-height: 240px; background: rgba(248, 250, 252, 0.85); border: none; border-radius: 0 0 8px 8px;">
                 <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center">
                   <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand slds-is-relative slds-m-bottom_medium">
                     <span class="slds-assistive-text">Cargando ubicación de móviles...</span>
@@ -515,8 +496,8 @@
                     <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#info}"></use>
                   </svg>
                 </span>
-                <h4 style="font-weight: 700; color: #0f172a; margin-top: 8px; font-size: 0.95rem;">No hay camiones en tránsito para tus donaciones</h4>
-                <p class="slds-text-body_small slds-text-color_weak" style="max-width: 480px; margin: 4px auto 0;">
+                <h4 id="mapa-donante-empty-title" style="font-weight: 700; color: #0f172a; margin-top: 8px; font-size: 0.95rem;">No hay camiones en tránsito para tus donaciones</h4>
+                <p id="mapa-donante-empty-desc" class="slds-text-body_small slds-text-color_weak" style="max-width: 480px; margin: 4px auto 0;">
                   Cuando tus donaciones en depósito sean asignadas y un camión inicie la ruta operativa, vas a poder ver acá la patente, chofer y destino en tiempo real.
                 </p>
               </div>
@@ -608,7 +589,7 @@
               <!-- Tarjetas de Seguimiento Paso a Paso -->
               <div th:unless="${#lists.isEmpty(misDonaciones)}" id="lista-donaciones-container" style="display: flex; flex-direction: column; gap: 14px;">
                 <div th:each="don : ${misDonaciones}" class="donacion-item-card"
-                     th:attr="data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-subcategoria-grupo=${don.subcategoriaGrupo},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
+                     th:attr="data-donacion-id=${don.id},data-estado=${don.pasoActual == 1 ? 'EN_DEPOSITO' : (don.pasoActual == 2 ? 'ASIGNADA' : (don.pasoActual == 3 ? 'ENTREGADA' : don.estado))},data-subcategoria=${don.subcategoria},data-subcategoria-grupo=${don.subcategoriaGrupo},data-busqueda=${#strings.toLowerCase((don.codigoCorto != null ? don.codigoCorto : '') + ' ' + (don.descripcion != null ? don.descripcion : '') + ' ' + (don.subcategoria != null ? don.subcategoria : ''))}"
                      style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
                   <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-wrap" style="gap: 10px; margin-bottom: 12px;">
                     <div>
@@ -622,7 +603,13 @@
                         Fecha de registro: <strong th:text="${don.fechaCreacion}">2026-11-06</strong>
                       </p>
                     </div>
-                    <div>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                      <button type="button" class="slds-button slds-button_neutral slds-button_small"
+                              th:attr="data-donacion-id=${don.id}"
+                              onclick="if (typeof window.seleccionarDonacionEnMapa === 'function') window.seleccionarDonacionEnMapa(this.getAttribute('data-donacion-id'));"
+                              style="font-size: 0.76rem; font-weight: 700; min-height: 28px; padding: 0 10px;">
+                        Ver en mapa
+                      </button>
                       <span th:if="${don.pasoActual == 1}" class="slds-badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-weight: 700;" th:text="${don.estadoLegible}">En Depósito</span>
                       <span th:if="${don.pasoActual == 2}" class="slds-badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 700;" th:text="${don.estadoLegible}">Asignada a ONG</span>
                       <span th:if="${don.pasoActual == 3}" class="slds-badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 700;" th:text="${don.estadoLegible}">Entregada</span>
@@ -749,6 +736,11 @@
                     </a>
                   </div>
                 </div>
+
+                <div th:if="${#lists.isEmpty(causasActivas)}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 24px; text-align: center;">
+                  <strong style="color: #334155;">No hay necesidades declaradas activas en este momento.</strong>
+                  <p class="slds-text-body_small slds-text-color_weak" style="margin-top: 4px;">Cuando las organizaciones verificadas carguen requerimientos puntuales, aparecerán aquí.</p>
+                </div>
               </div>
 
               <div id="causas-sin-resultados" style="display: none; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 20px; text-align: center; margin-top: 8px;">
@@ -854,8 +846,9 @@
 
           <div class="slds-card__body slds-card__body_inner slds-p-around_large">
             
-            <!-- Métricas Clave (3 Columnas con Datos 100% Reales) -->
-            <div class="slds-grid slds-gutters_small slds-m-bottom_medium slds-border_bottom slds-p-bottom_medium">
+            <!-- Métricas Clave (Ocultas cuando el usuario es nuevo y todo está en 0) -->
+            <div class="slds-grid slds-gutters_small slds-m-bottom_medium slds-border_bottom slds-p-bottom_medium"
+                 th:if="${!isNuevoUsuario or puntosReales > 0 or totalInsignias > 0}">
               <div class="slds-col slds-size_1-of-3">
                 <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
                         th:text="${insignias != null ? insignias.size() : 0}">0</strong>
@@ -1099,7 +1092,7 @@
                     </button>
                   </div>
                   <label class="slds-checkbox" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem; color: #1e293b;">
-                    <input type="checkbox" id="welcome-no-mostrar" checked="checked" />
+                    <input type="checkbox" id="welcome-no-mostrar" />
                     <span class="slds-checkbox_faux" style="border-color: #64748b; background: #ffffff;"></span>
                     <span class="slds-form-element__label" style="font-size: 0.8rem; color: #1e293b; padding: 0;">No volver a mostrar</span>
                   </label>
@@ -1211,6 +1204,9 @@
       // ========================================================
       // 1. GESTIÓN DE MODALES (PERFIL & ROADMAP DE BIENVENIDA)
       // ========================================================
+      const donanteWelcomeUser = (/*[[${nombreUsuario}]]*/ 'donante') || 'donante';
+      const welcomeUserKey = 'donatrack_welcome_donante_' + String(donanteWelcomeUser).toLowerCase();
+
       window.abrirPerfilModal = function () {
         const modal = document.getElementById('modal-editar-perfil');
         if (modal) modal.style.display = 'block';
@@ -1223,6 +1219,10 @@
 
       window.abrirWelcomeModal = function () {
         const modal = document.getElementById('welcome-roadmap-modal');
+        const chk = document.getElementById('welcome-no-mostrar');
+        try {
+          if (chk) chk.checked = (localStorage.getItem(welcomeUserKey) === 'true');
+        } catch (e) {}
         if (modal) modal.style.display = 'block';
       };
 
@@ -1230,11 +1230,12 @@
         const modal = document.getElementById('welcome-roadmap-modal');
         if (modal) modal.style.display = 'none';
         try {
+          sessionStorage.setItem(welcomeUserKey, 'true');
           const chk = document.getElementById('welcome-no-mostrar');
-          if (!chk || chk.checked) {
-            localStorage.setItem('donatrack_welcome_seen', 'true');
+          if (chk && chk.checked) {
+            localStorage.setItem(welcomeUserKey, 'true');
           } else {
-            localStorage.removeItem('donatrack_welcome_seen');
+            localStorage.removeItem(welcomeUserKey);
           }
         } catch (e) {}
       };
@@ -1552,9 +1553,8 @@
       function initPanelDonante() {
         const isNuevo = /*[[${isNuevoUsuario}]]*/ false;
         try {
-          if (isNuevo && !localStorage.getItem('donatrack_welcome_seen')) {
-            const modal = document.getElementById('welcome-roadmap-modal');
-            if (modal) modal.style.display = 'block';
+          if (isNuevo && !localStorage.getItem(welcomeUserKey) && !sessionStorage.getItem(welcomeUserKey)) {
+            window.abrirWelcomeModal();
           }
         } catch (e) {}
 

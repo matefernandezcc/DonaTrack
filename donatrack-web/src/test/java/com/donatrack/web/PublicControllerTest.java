@@ -311,6 +311,38 @@ class PublicControllerTest {
 
     @Test
     @DisplayName(
+        "POST /login con BENEFICIARIA_PENDIENTE no crea sesión y redirige a /login con mensaje de validación pendiente")
+    void testLoginBeneficiariaPendienteRedirigeALoginConMensaje() throws Exception {
+      TokenResponse tokenResp =
+          new TokenResponse(
+              "dummy-token-pend",
+              "bearer",
+              3600L,
+              new UserInfoDto(
+                  UUID.randomUUID(),
+                  "utnianos",
+                  "Utnianos",
+                  "utnianos@gmail.com",
+                  "BENEFICIARIA_PENDIENTE",
+                  UUID.randomUUID()));
+
+      when(authGateway.login("utnianos", "clave123")).thenReturn(tokenResp);
+
+      mockMvc
+          .perform(post("/login").param("username", "utnianos").param("password", "clave123"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/login"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "loginError",
+                      containsString("pendiente de validación")));
+
+      verify(jwtDecoder, never()).decode(anyString());
+    }
+
+    @Test
+    @DisplayName(
         "POST /login con credenciales inválidas debe redirigir a /login con flash attribute loginError")
     void testLoginInvalido() throws Exception {
       // Arrange
@@ -380,6 +412,54 @@ class PublicControllerTest {
           .registrar(
               org.mockito.ArgumentMatchers.argThat(
                   m -> "BENEFICIARIA_PENDIENTE".equals(m.get("rol"))));
+    }
+
+    @Test
+    @DisplayName(
+        "POST /registro con BENEFICIARIA normaliza CUIT y celular a formato argentino válido")
+    void testRegistroBeneficiariaNormalizaCuitYCelular() throws Exception {
+      mockMvc
+          .perform(
+              post("/registro")
+                  .param("nombre", "Comedor Normalizado")
+                  .param("username", "comedornorm")
+                  .param("email", "contacto@normalizado.org")
+                  .param("password", "clave123")
+                  .param("rol", "BENEFICIARIA")
+                  .param("cuit", "20445353877")
+                  .param("direccion", "Gascon 123")
+                  .param("telefono", "44556677"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/login"))
+          .andExpect(flash().attributeExists("registerSuccess"));
+
+      verify(solicitudOngService, times(1))
+          .registrarSolicitud(
+              org.mockito.ArgumentMatchers.<Map<String, String>>argThat(
+                  m ->
+                      "20-44535387-7".equals(m.get("cuit"))
+                          && "+54 9 11 4455-6677".equals(m.get("telefono"))));
+    }
+
+    @Test
+    @DisplayName("POST /registro con BENEFICIARIA rechaza CUIT inválido")
+    void testRegistroBeneficiariaRechazaCuitInvalido() throws Exception {
+      mockMvc
+          .perform(
+              post("/registro")
+                  .param("nombre", "Comedor Mal")
+                  .param("username", "comedormal")
+                  .param("email", "mal@comedor.org")
+                  .param("password", "clave123")
+                  .param("rol", "BENEFICIARIA")
+                  .param("cuit", "1234")
+                  .param("direccion", "Gascon 123")
+                  .param("telefono", "+54 9 11 4455-6677"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/registro?rol=BENEFICIARIA"))
+          .andExpect(flash().attributeExists("registerError"));
+
+      verify(authGateway, never()).registrar(anyMap());
     }
 
     @Test

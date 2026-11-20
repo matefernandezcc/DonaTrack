@@ -17,8 +17,8 @@
     {
       num: "02",
       angle: 72,
-      title: "Centro de Acopio",
-      short: "Acopio",
+      title: "Centro de Recepción",
+      short: "Recepción",
       desc: "Pesamos y clasificamos el lote en depósito.",
       status: "Lote Auditado",
       origin: "Depósito Central DonaTrack",
@@ -62,6 +62,7 @@
 
   let currentStep = 1;
   let currentAngle = 0;
+  let completedFullLoop = false;
   let animFrameId = null;
   let closingTimeoutId = null;
   let isPlaying = true;
@@ -130,6 +131,11 @@
   function applyDialAngle(deg) {
     currentAngle = deg;
     truck.style.transform = `translate(-50%, -50%) rotate(${deg.toFixed(2)}deg) translateY(calc(-1 * var(--radius, 190px)))`;
+    // Luego de completar la primera vuelta, el círculo permanece 100% verde
+    if (completedFullLoop) {
+      progressCircle.style.strokeDashoffset = "0";
+      return;
+    }
     // El trazo verde queda unos grados detrás del centro del camión para que éste lo vaya pintando al avanzar
     const trailDeg = deg <= 0 ? 0 : deg >= 359.5 ? 360 : Math.max(0, deg - 5);
     const targetOffset = CIRCUMFERENCE * (1 - trailDeg / 360);
@@ -208,8 +214,11 @@
 
     // Mover camión y pintar trazo verde sincronizado frame a frame
     if (stepNum === 1 && currentAngle >= 280) {
-      cancelDialAnimation();
-      applyDialAngle(0);
+      if (truckImg) truckImg.src = "/img/delivery-truck-start.svg";
+      animateDialTo(360, () => {
+        completedFullLoop = true;
+        applyDialAngle(0);
+      });
     } else {
       animateDialTo(data.angle, () => {
         if (truckImg && stepNum === 5) {
@@ -230,14 +239,14 @@
       }
     });
 
-    // Actualizar Nodos en el Dial
+    // Actualizar Nodos en el Dial (luego de la primera vuelta quedan siempre completados en verde)
     document.querySelectorAll(".dial-node").forEach((node) => {
       const nodeStep = parseInt(node.getAttribute("data-node"), 10);
       node.classList.remove("is-active", "is-passed", "is-closing");
       if (nodeStep === stepNum) {
         node.classList.add("is-active");
         if (stepNum === 5) node.classList.add("is-closing");
-      } else if (nodeStep < stepNum) {
+      } else if (completedFullLoop || nodeStep < stepNum) {
         node.classList.add("is-passed");
       }
     });
@@ -253,6 +262,7 @@
     if (currentStep === 5) {
       if (truckImg) truckImg.src = "/img/delivery-truck-start.svg";
       animateDialTo(360, () => {
+        completedFullLoop = true;
         closingTimeoutId = setTimeout(() => {
           applyDialAngle(0);
           selectCircleStep(1, false);

@@ -115,9 +115,14 @@ public class SolicitudOngService {
   }
 
   public boolean actualizarEstado(String id, String nuevoEstado) {
+    return actualizarEstado(id, nuevoEstado, null);
+  }
+
+  public boolean actualizarEstado(String id, String nuevoEstado, UUID beneficiarioId) {
     if (donacionesGateway != null) {
       try {
-        Map<String, Object> resp = donacionesGateway.actualizarEstadoSolicitudOng(id, nuevoEstado);
+        Map<String, Object> resp =
+            donacionesGateway.actualizarEstadoSolicitudOng(id, nuevoEstado, beneficiarioId);
         if (resp != null) {
           return true;
         }

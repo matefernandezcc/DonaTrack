@@ -225,6 +225,17 @@
       outline: 2px solid #0176d3 !important;
       outline-offset: 2px !important;
     }
+
+    /* Jerarquía de apilamiento: Header y Popover de Notificaciones siempre encima de toasts */
+    .slds-global-header_container {
+      z-index: 9500 !important;
+    }
+    #popover-notificaciones {
+      z-index: 9600 !important;
+    }
+    main#main-content .slds-notify_container.slds-is-relative {
+      z-index: 50 !important;
+    }
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->

@@ -286,8 +286,11 @@
 
             <div class="form-group">
               <label class="form-label" for="cuit">CUIT / Identificación Tributaria</label>
-              <input class="form-input" type="text" id="cuit" name="cuit" placeholder="Ej: 30-71234567-8" />
-              <div class="form-help">Utilizado para verificar la personería jurídica ante el padrón social.</div>
+              <input class="form-input" type="text" id="cuit" name="cuit"
+                     maxlength="13" pattern="^\d{2}-\d{8}-\d$"
+                     title="Formato requerido: XX-XXXXXXXX-X (11 dígitos)"
+                     placeholder="Ej: 20-44535387-7" />
+              <div id="cuit-help" class="form-help">Se formatea automáticamente con guiones (XX-XXXXXXXX-X, 11 dígitos).</div>
             </div>
 
             <div class="form-group">
@@ -308,15 +311,19 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="telefono">Teléfono de Contacto del Responsable</label>
-              <input class="form-input" type="tel" id="telefono" name="telefono" placeholder="Ej: +54 11 4455-6677" />
+              <label class="form-label" for="telefono">Teléfono / Celular del Responsable</label>
+              <input class="form-input" type="tel" id="telefono" name="telefono"
+                     maxlength="18" pattern="^\+54 9 11 \d{4}-\d{4}$"
+                     title="Formato requerido: +54 9 11 XXXX-XXXX"
+                     placeholder="Ej: +54 9 11 4455-6677" />
+              <div id="telefono-help" class="form-help">Formato celular AMBA: <strong>+54 9 11 XXXX-XXXX</strong>.</div>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="necesidades">Necesidades Materiales Urgentes</label>
+              <label class="form-label" for="necesidades">Referencia de Insumos que Suele Recibir (Opcional)</label>
               <textarea class="form-textarea" id="necesidades" name="necesidades" rows="2"
-                        placeholder="Ej: Fideos secos, leche larga vida, frazadas polares para 150 raciones semanales..."></textarea>
-              <div class="form-help">Estas necesidades alimentan el motor de matchmaking automático.</div>
+                        placeholder="Ej: Alimentos secos, leche larga vida o frazadas (luego podrás cargar tus necesidades puntuales en tu portal)"></textarea>
+              <div class="form-help">Campo informativo opcional de referencia inicial; tus necesidades oficiales se cargan luego desde el portal.</div>
             </div>
 
           </div>
@@ -383,6 +390,10 @@
         if (labelNombre) labelNombre.textContent = 'Razón Social / Nombre de la Organización';
         var radioOng = cardOng ? cardOng.querySelector('input[type="radio"]') : null;
         if (radioOng) radioOng.checked = true;
+        ['cuit', 'direccion', 'telefono'].forEach(function (fid) {
+          var f = document.getElementById(fid);
+          if (f) f.setAttribute('required', 'required');
+        });
       } else {
         if (cardOng) cardOng.classList.remove('is-selected');
         if (cardDonante) cardDonante.classList.add('is-selected');
@@ -392,7 +403,35 @@
         if (labelNombre) labelNombre.textContent = 'Nombre Completo';
         var radioDon = cardDonante ? cardDonante.querySelector('input[type="radio"]') : null;
         if (radioDon) radioDon.checked = true;
+        ['cuit', 'direccion', 'telefono'].forEach(function (fid) {
+          var f = document.getElementById(fid);
+          if (f) f.removeAttribute('required');
+        });
       }
+    }
+
+    function formatCuit(raw) {
+      var d = String(raw || '').replace(/\D/g, '').slice(0, 11);
+      if (d.length <= 2) return d;
+      if (d.length <= 10) return d.slice(0, 2) + '-' + d.slice(2);
+      return d.slice(0, 2) + '-' + d.slice(2, 10) + '-' + d.slice(10);
+    }
+
+    function formatPhoneArg(raw, isDelete) {
+      var trimmed = String(raw || '').trim();
+      if (!trimmed) return '';
+      if (isDelete && (/^\+54\s*9?\s*1?$/.test(trimmed) || trimmed.replace(/\D/g, '').length <= 4)) {
+        return trimmed;
+      }
+      var d = trimmed.replace(/\D/g, '');
+      if (d.indexOf('54911') === 0) d = d.slice(5);
+      else if (d.indexOf('5411') === 0) d = d.slice(4);
+      else if (d.indexOf('011') === 0) d = d.slice(3);
+      else if (d.indexOf('11') === 0 && d.length > 2) d = d.slice(2);
+      d = d.slice(0, 8);
+      if (!d) return '';
+      if (d.length <= 4) return '+54 9 11 ' + d;
+      return '+54 9 11 ' + d.slice(0, 4) + '-' + d.slice(4);
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -401,6 +440,74 @@
         seleccionarRol('BENEFICIARIA');
       } else if (rolParam && rolParam.toUpperCase() === 'DONANTE') {
         seleccionarRol('DONANTE');
+      }
+
+      var cuitInput = document.getElementById('cuit');
+      var cuitHelp = document.getElementById('cuit-help');
+      if (cuitInput) {
+        cuitInput.addEventListener('input', function () {
+          cuitInput.value = formatCuit(cuitInput.value);
+          if (cuitHelp) {
+            if (!cuitInput.value) {
+              cuitHelp.textContent = 'Se formatea automáticamente con guiones (XX-XXXXXXXX-X, 11 dígitos).';
+              cuitHelp.style.color = '#64748b';
+            } else if (/^\d{2}-\d{8}-\d$/.test(cuitInput.value)) {
+              cuitHelp.textContent = '✓ Formato CUIT válido (' + cuitInput.value + ').';
+              cuitHelp.style.color = '#166534';
+            } else {
+              cuitHelp.textContent = 'Completá los 11 dígitos del CUIT (XX-XXXXXXXX-X).';
+              cuitHelp.style.color = '#b91c1c';
+            }
+          }
+        });
+      }
+
+      var telInput = document.getElementById('telefono');
+      var telHelp = document.getElementById('telefono-help');
+      if (telInput) {
+        telInput.addEventListener('input', function (e) {
+          var isDel = e && e.inputType && e.inputType.indexOf('delete') === 0;
+          telInput.value = formatPhoneArg(telInput.value, isDel);
+          if (telHelp) {
+            if (!telInput.value) {
+              telHelp.innerHTML = 'Formato celular AMBA: <strong>+54 9 11 XXXX-XXXX</strong>.';
+              telHelp.style.color = '#64748b';
+            } else if (/^\+54 9 11 \d{4}-\d{4}$/.test(telInput.value)) {
+              telHelp.textContent = '✓ Celular válido (' + telInput.value + ').';
+              telHelp.style.color = '#166534';
+            } else {
+              telHelp.innerHTML = 'Completá los 8 dígitos: <strong>+54 9 11 XXXX-XXXX</strong>.';
+              telHelp.style.color = '#b91c1c';
+            }
+          }
+        });
+      }
+
+      var form = document.getElementById('form-registro');
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          var rolEl = document.getElementById('input-rol');
+          if (rolEl && rolEl.value === 'BENEFICIARIA') {
+            if (cuitInput) cuitInput.value = formatCuit(cuitInput.value);
+            if (telInput) telInput.value = formatPhoneArg(telInput.value, false);
+            if (cuitInput && !/^\d{2}-\d{8}-\d$/.test(cuitInput.value)) {
+              cuitInput.setCustomValidity('Ingresá un CUIT válido de 11 dígitos (ej: 20-44535387-7).');
+              cuitInput.reportValidity();
+              e.preventDefault();
+              return;
+            } else if (cuitInput) {
+              cuitInput.setCustomValidity('');
+            }
+            if (telInput && !/^\+54 9 11 \d{4}-\d{4}$/.test(telInput.value)) {
+              telInput.setCustomValidity('Ingresá un celular válido con formato +54 9 11 XXXX-XXXX.');
+              telInput.reportValidity();
+              e.preventDefault();
+              return;
+            } else if (telInput) {
+              telInput.setCustomValidity('');
+            }
+          }
+        });
       }
     });
   </script>
