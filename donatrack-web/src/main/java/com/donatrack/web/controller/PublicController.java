@@ -531,7 +531,7 @@ public class PublicController {
             "resumen", "Convocamos a nuevas organizaciones barriales, merenderos y voluntarios logísticos a sumarse a la red de trazabilidad abierta...",
             "parrafosIntro", List.of(
                 "Con el crecimiento sostenido de campañas en AMBA, Córdoba, Mendoza y el Litoral, abrimos una nueva etapa de inscripción para organizaciones comunitarias y voluntarios de transporte.",
-                "El objetivo es acercar centros de acopio a cada barrio y reducir los tiempos entre la recepción de donaciones y su llegada efectiva a destino."),
+                "El objetivo es acercar centros de recepción a cada barrio y reducir los tiempos entre el ingreso de donaciones y su llegada efectiva a destino."),
             "secciones", List.of(
                 Map.of(
                     "subtitulo", "Cómo participar desde tu ciudad",
@@ -708,9 +708,18 @@ public class PublicController {
       RedirectAttributes redirectAttributes) {
     try {
       TokenResponse tokenResponse = authGateway.login(username, password);
+      String rol =
+          tokenResponse != null && tokenResponse.user() != null && tokenResponse.user().rol() != null
+              ? tokenResponse.user().rol()
+              : "DONANTE";
+      if ("BENEFICIARIA_PENDIENTE".equalsIgnoreCase(rol)) {
+        redirectAttributes.addFlashAttribute(
+            "loginError",
+            "Tu cuenta de organización aún está pendiente de validación por un administrador. Te notificaremos cuando sea aprobada para que puedas ingresar.");
+        return "redirect:/login";
+      }
       establecerSesionSegura(tokenResponse.accessToken(), request, response);
 
-      String rol = tokenResponse.user().rol();
       return "redirect:/app/" + rol.toLowerCase();
     } catch (Exception e) {
       log.warn("Fallo de autenticación para usuario {}: {}", username, e.getMessage());
@@ -751,6 +760,27 @@ public class PublicController {
       RedirectAttributes redirectAttributes) {
     try {
       if ("BENEFICIARIA".equalsIgnoreCase(rolParam) || "ONG".equalsIgnoreCase(rolParam)) {
+        String cuitNorm = "";
+        if (cuit != null && !cuit.isBlank()) {
+          cuitNorm = com.donatrack.web.util.InputFormatUtils.normalizarCuit(cuit);
+          if (!com.donatrack.web.util.InputFormatUtils.esCuitValido(cuitNorm)) {
+            redirectAttributes.addFlashAttribute(
+                "registerError",
+                "El CUIT debe tener 11 dígitos en formato XX-XXXXXXXX-X (ej: 20-44535387-7).");
+            return "redirect:/registro?rol=BENEFICIARIA";
+          }
+        }
+
+        String telNorm = "";
+        if (telefono != null && !telefono.isBlank()) {
+          telNorm = com.donatrack.web.util.InputFormatUtils.normalizarCelularArg(telefono);
+          if (!com.donatrack.web.util.InputFormatUtils.esCelularArgStrictValido(telNorm)) {
+            redirectAttributes.addFlashAttribute(
+                "registerError", "El celular debe tener el formato +54 9 11 XXXX-XXXX.");
+            return "redirect:/registro?rol=BENEFICIARIA";
+          }
+        }
+
         // Registrar usuario en auth con rol seguro BENEFICIARIA_PENDIENTE
         authGateway.registrar(
             Map.of(
@@ -763,19 +793,15 @@ public class PublicController {
         // Registrar solicitud de adhesión en donatrack-donaciones
         Map<String, String> solicitudData = new HashMap<>();
         solicitudData.put("nombreOng", nombre);
-        solicitudData.put("cuit", cuit != null && !cuit.isBlank() ? cuit : "-");
+        solicitudData.put("cuit", !cuitNorm.isBlank() ? cuitNorm : "-");
         solicitudData.put("direccion", direccion != null && !direccion.isBlank() ? direccion : "-");
         solicitudData.put("email", email);
-        solicitudData.put("telefono", telefono != null && !telefono.isBlank() ? telefono : "-");
+        solicitudData.put("telefono", !telNorm.isBlank() ? telNorm : "-");
         solicitudData.put("responsable", nombre);
         solicitudData.put(
             "tipoEntidad",
             tipoEntidad != null && !tipoEntidad.isBlank() ? tipoEntidad : "Comedor Comunitario");
-        solicitudData.put(
-            "necesidades",
-            necesidades != null && !necesidades.isBlank()
-                ? necesidades
-                : "Registro inicial de adhesión institucional");
+        solicitudData.put("necesidades", necesidades != null ? necesidades.trim() : "");
 
         if (donacionesGateway != null) {
           try {
@@ -949,9 +975,18 @@ public class PublicController {
       RedirectAttributes redirectAttributes) {
     try {
       TokenResponse tokenResponse = authGateway.exchangeToken(code);
+      String rol =
+          tokenResponse != null && tokenResponse.user() != null && tokenResponse.user().rol() != null
+              ? tokenResponse.user().rol()
+              : "DONANTE";
+      if ("BENEFICIARIA_PENDIENTE".equalsIgnoreCase(rol)) {
+        redirectAttributes.addFlashAttribute(
+            "loginError",
+            "Tu cuenta de organización aún está pendiente de validación por un administrador. Te notificaremos cuando sea aprobada para que puedas ingresar.");
+        return "redirect:/login";
+      }
       establecerSesionSegura(tokenResponse.accessToken(), request, response);
 
-      String rol = tokenResponse.user().rol();
       return "redirect:/app/" + rol.toLowerCase();
     } catch (Exception e) {
       log.error("Error en intercambio de código SSO: {}", e.getMessage());

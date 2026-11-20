@@ -26,7 +26,7 @@
     {
       type: "blue",
       coords: [-34.603, -58.381],
-      title: "Punto de acopio — Centro",
+      title: "Punto de recepción — Centro",
       desc: "Recepción y clasificación de alimentos no perecederos.",
       org: "DonaTrack Hub Centro",
       kind: "Alimentos · Ropa",
@@ -83,7 +83,7 @@
     {
       type: "blue",
       coords: [-34.59, -58.46],
-      title: "Punto de acopio — Oeste",
+      title: "Punto de recepción — Oeste",
       desc: "Centro logístico para ropa y abrigo.",
       org: "DonaTrack Hub Oeste",
       kind: "Ropa",

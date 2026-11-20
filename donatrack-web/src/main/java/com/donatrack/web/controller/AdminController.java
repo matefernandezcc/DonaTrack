@@ -356,30 +356,6 @@ public class AdminController {
       try {
         donacionesGateway.crearBeneficiario(
             Map.of("id", targetId.toString(), "correoRepresentante", resolvedEmail));
-        for (var s : solicitudOngService.listarTodas()) {
-          if (s.email() != null && s.email().equalsIgnoreCase(resolvedEmail)) {
-            if (s.necesidades() != null
-                && !s.necesidades().isBlank()
-                && !"-".equals(s.necesidades().trim())) {
-              try {
-                donacionesGateway.agregarNecesidad(
-                    targetId,
-                    Map.of(
-                        "tipo", "extraordinaria",
-                        "descripcion", s.necesidades().trim(),
-                        "cantidadRequerida", 50.0,
-                        "subcategoriaRequerida",
-                            Map.of(
-                                "nombre",
-                                "No Perecederos",
-                                "descripcion",
-                                "Categoría No Perecederos")));
-              } catch (Exception ignored) {
-              }
-            }
-            break;
-          }
-        }
       } catch (Exception ignored) {
       }
       return targetId;
@@ -477,15 +453,41 @@ public class AdminController {
     return "admin/admin/camiones";
   }
 
+  private void intentarPlanificacionAutomatica() {
+    try {
+      logisticaGateway.ejecutarPlanificacion();
+    } catch (Exception ignored) {
+    }
+    if (cacheResilienteService != null) {
+      cacheResilienteService.invalidarCache();
+    }
+  }
+
   @PostMapping("/admin/camiones")
   @PreAuthorize("hasRole('ADMIN')")
   public String crearCamion(
       @ModelAttribute("nuevoCamion") CamionDto nuevoCamion, RedirectAttributes redirectAttributes) {
-    try {
-      logisticaGateway.crearCamion(nuevoCamion);
-      registrarNotificacionSistema(null, "Camión " + nuevoCamion.patente() + " registrado en la flota.");
+    String patenteNorm =
+        com.donatrack.web.util.InputFormatUtils.normalizarPatente(
+            nuevoCamion != null ? nuevoCamion.patente() : null);
+    if (!com.donatrack.web.util.InputFormatUtils.esPatenteArgentinaValida(patenteNorm)) {
       redirectAttributes.addFlashAttribute(
-          "flashOk", "Camión " + nuevoCamion.patente() + " registrado con éxito.");
+          "flashError",
+          "Patente inválida. Usá formato argentino AA111AA (Mercosur) o AAA111 (anterior).");
+      return "redirect:/app/admin/camiones";
+    }
+    try {
+      CamionDto normalized =
+          new CamionDto(
+              patenteNorm,
+              nuevoCamion.capacidadVolumen(),
+              nuevoCamion.altura(),
+              nuevoCamion.capacidadCarga());
+      logisticaGateway.crearCamion(normalized);
+      intentarPlanificacionAutomatica();
+      registrarNotificacionSistema(null, "Camión " + patenteNorm + " registrado en la flota.");
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Camión " + patenteNorm + " registrado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
           "flashError", "No se pudo registrar el camión. Verificá los datos e intentá nuevamente.");
@@ -499,6 +501,9 @@ public class AdminController {
       @PathVariable("patente") String patente, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarCamion(patente);
+      if (cacheResilienteService != null) {
+        cacheResilienteService.invalidarCache();
+      }
       registrarNotificacionSistema(null, "Camión " + patente + " dado de baja de la flota.");
       redirectAttributes.addFlashAttribute("flashOk", "Camión " + patente + " eliminado con éxito.");
     } catch (Exception e) {
@@ -522,11 +527,37 @@ public class AdminController {
   public String crearChofer(
       @ModelAttribute("nuevoChofer") com.donatrack.web.dto.ChoferDto nuevoChofer,
       RedirectAttributes redirectAttributes) {
+    String legajoNorm =
+        com.donatrack.web.util.InputFormatUtils.normalizarLegajo(
+            nuevoChofer != null ? nuevoChofer.legajo() : null);
+    if (!com.donatrack.web.util.InputFormatUtils.esLegajoValido(legajoNorm)) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Legajo inválido. Usá el formato CH-XXX (ej: CH-101).");
+      return "redirect:/app/admin/choferes";
+    }
+    String telRaw =
+        nuevoChofer != null && nuevoChofer.telefono() != null ? nuevoChofer.telefono().trim() : "";
+    String telFinal =
+        com.donatrack.web.util.InputFormatUtils.esCelularAdminValido(telRaw)
+            ? telRaw
+            : com.donatrack.web.util.InputFormatUtils.normalizarCelularArg(telRaw);
+    if (!com.donatrack.web.util.InputFormatUtils.esCelularAdminValido(telFinal)) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "Teléfono inválido. Usá el formato +54 9 11 XXXX-XXXX.");
+      return "redirect:/app/admin/choferes";
+    }
     try {
-      logisticaGateway.crearChofer(nuevoChofer);
+      com.donatrack.web.dto.ChoferDto normalized =
+          new com.donatrack.web.dto.ChoferDto(
+              legajoNorm,
+              nuevoChofer.nombre() != null ? nuevoChofer.nombre().trim() : "",
+              nuevoChofer.apellido() != null ? nuevoChofer.apellido().trim() : "",
+              telFinal);
+      logisticaGateway.crearChofer(normalized);
+      intentarPlanificacionAutomatica();
       String nomCompleto =
-          nuevoChofer.nombre()
-              + (nuevoChofer.apellido() != null ? " " + nuevoChofer.apellido() : "");
+          normalized.nombre()
+              + (!normalized.apellido().isEmpty() ? " " + normalized.apellido() : "");
       registrarNotificacionSistema(null, "Chofer " + nomCompleto.trim() + " registrado en logística.");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Chofer " + nomCompleto.trim() + " registrado con éxito.");
@@ -543,6 +574,9 @@ public class AdminController {
       @PathVariable("legajo") String legajo, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarChofer(legajo);
+      if (cacheResilienteService != null) {
+        cacheResilienteService.invalidarCache();
+      }
       registrarNotificacionSistema(null, "Chofer con legajo " + legajo + " eliminado.");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Chofer con legajo " + legajo + " eliminado con éxito.");
@@ -557,8 +591,63 @@ public class AdminController {
   @PreAuthorize("hasRole('ADMIN')")
   public String adminRutas(Model model) {
     List<Map<String, Object>> rutas = logisticaGateway.listarRutas();
-    model.addAttribute("rutas", rutas);
+    List<Map<String, Object>> itemsPendientes = logisticaGateway.listarItemsPendientes();
+    List<CamionDto> camiones = logisticaGateway.listarCamiones();
+    List<com.donatrack.web.dto.ChoferDto> choferes = logisticaGateway.listarChoferes();
+    model.addAttribute("rutas", rutas != null ? rutas : Collections.emptyList());
+    model.addAttribute(
+        "itemsPendientes", itemsPendientes != null ? itemsPendientes : Collections.emptyList());
+    model.addAttribute("totalPendientes", itemsPendientes != null ? itemsPendientes.size() : 0);
+    model.addAttribute("totalCamiones", camiones != null ? camiones.size() : 0);
+    model.addAttribute("totalChoferes", choferes != null ? choferes.size() : 0);
     return "admin/admin/rutas";
+  }
+
+  @PostMapping("/admin/rutas/planificar")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String planificarRutasPendientes(RedirectAttributes redirectAttributes) {
+    List<CamionDto> camiones = logisticaGateway.listarCamiones();
+    List<com.donatrack.web.dto.ChoferDto> choferes = logisticaGateway.listarChoferes();
+    if (camiones == null || camiones.isEmpty() || choferes == null || choferes.isEmpty()) {
+      redirectAttributes.addFlashAttribute(
+          "flashError",
+          "Necesitás registrar al menos 1 camión y 1 chofer antes de planificar rutas.");
+      return "redirect:/app/admin/rutas";
+    }
+    try {
+      logisticaGateway.ejecutarPlanificacion();
+      if (cacheResilienteService != null) {
+        cacheResilienteService.invalidarCache();
+      }
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Planificación de rutas ejecutada correctamente.");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "No se pudo ejecutar la planificación de rutas.");
+    }
+    return "redirect:/app/admin/rutas";
+  }
+
+  @PostMapping("/admin/rutas/{id}/iniciar")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String iniciarRuta(
+      @PathVariable("id") UUID rutaId,
+      @RequestParam("legajoChofer") String legajoChofer,
+      RedirectAttributes redirectAttributes) {
+    try {
+      logisticaGateway.iniciarRuta(rutaId, legajoChofer);
+      if (cacheResilienteService != null) {
+        cacheResilienteService.invalidarCache();
+      }
+      registrarNotificacionSistema(
+          null, "Ruta de reparto #" + rutaId.toString().substring(0, 8) + " iniciada en tránsito.");
+      redirectAttributes.addFlashAttribute(
+          "flashOk", "Ruta iniciada y despachada en tránsito.");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute(
+          "flashError", "No se pudo iniciar la ruta. Verificá que tenga un chofer asignado.");
+    }
+    return "redirect:/app/admin/rutas";
   }
 
   private String resolverNombreLegible(
@@ -794,6 +883,9 @@ public class AdminController {
             b.get("correoRepresentante") != null
                 ? b.get("correoRepresentante").toString().trim()
                 : "contacto@comedor.org";
+        if (correosRegistrados.contains(correo.toLowerCase())) {
+          continue;
+        }
         correosRegistrados.add(correo.toLowerCase());
 
         com.donatrack.web.service.SolicitudOngService.SolicitudOng matchedSolicitud = null;
@@ -859,35 +951,21 @@ public class AdminController {
                 ? (List<Map<String, Object>>) list
                 : Collections.emptyList();
         List<Map<String, Object>> necsClean = sanitizarNecesidades(necsRaw);
-        if (necsClean.isEmpty()
-            && matchedSolicitud != null
-            && matchedSolicitud.necesidades() != null
-            && !matchedSolicitud.necesidades().isBlank()
-            && !"-".equals(matchedSolicitud.necesidades().trim())) {
-          necsClean =
-              List.of(
-                  Map.of(
-                      "descripcion", matchedSolicitud.necesidades().trim(),
-                      "cantidad", 50,
-                      "subcategoria", "No Perecederos",
-                      "tipo", "Extraordinaria",
-                      "fechaSolicitud", matchedSolicitud.fecha()));
-        }
         copy.put("necesidadesDetalle", necsClean);
         String resumenNecs =
             necsClean.isEmpty()
-                ? "Recibe alimentos secos, abrigo e insumos generales"
+                ? "Sin necesidades declaradas todavía"
                 : necsClean.stream()
                     .map(n -> n.get("subcategoria") + " (" + n.get("descripcion") + ")")
                     .reduce((a, c) -> a + " · " + c)
-                    .orElse("Alimentos y Abrigo");
+                    .orElse("Sin necesidades declaradas todavía");
         copy.put("resumenNecesidades", resumenNecs);
         String necsTexto =
             necsClean.stream()
                 .map(n -> String.valueOf(n.getOrDefault("subcategoria", "Alimentos")))
                 .distinct()
                 .collect(java.util.stream.Collectors.joining(", "));
-        copy.put("necesidadesTexto", necsTexto.isBlank() ? "Alimentos No Perecederos y Ropa" : necsTexto);
+        copy.put("necesidadesTexto", necsTexto.isBlank() ? "Sin necesidades declaradas todavía" : necsTexto);
 
         resultado.add(copy);
         bIdx++;
@@ -925,23 +1003,10 @@ public class AdminController {
       copy.put("responsable", s.responsable());
       copy.put("tipoEntidad", s.tipoEntidad());
       copy.put("fechaAlta", s.fecha() != null && !s.fecha().isBlank() ? s.fecha() : "Reciente");
-      List<Map<String, Object>> necsClean =
-          (s.necesidades() != null && !s.necesidades().isBlank() && !"-".equals(s.necesidades().trim()))
-              ? List.of(
-                  Map.of(
-                      "descripcion", s.necesidades().trim(),
-                      "cantidad", 50,
-                      "subcategoria", "No Perecederos",
-                      "tipo", "Extraordinaria",
-                      "fechaSolicitud", s.fecha()))
-              : Collections.emptyList();
+      List<Map<String, Object>> necsClean = Collections.emptyList();
       copy.put("necesidadesDetalle", necsClean);
-      String resumen =
-          necsClean.isEmpty()
-              ? "Alimentos No Perecederos y Ropa"
-              : "No Perecederos (" + s.necesidades().trim() + ")";
-      copy.put("resumenNecesidades", resumen);
-      copy.put("necesidadesTexto", necsClean.isEmpty() ? "Alimentos No Perecederos y Ropa" : "No Perecederos");
+      copy.put("resumenNecesidades", "Sin necesidades declaradas todavía");
+      copy.put("necesidadesTexto", "Sin necesidades declaradas todavía");
       resultado.add(copy);
     }
 
@@ -1094,21 +1159,23 @@ public class AdminController {
       RedirectAttributes redirectAttributes) {
     try {
       donacionesGateway.asignarDonacion(donacionId, beneficiarioId);
-      try {
-        logisticaGateway.ejecutarPlanificacion();
-      } catch (Exception ignored) {
-      }
-      if (cacheResilienteService != null) {
-        cacheResilienteService.invalidarCache();
-      }
+      List<CamionDto> camiones = logisticaGateway.listarCamiones();
+      List<com.donatrack.web.dto.ChoferDto> choferes = logisticaGateway.listarChoferes();
+      boolean hayRecursos =
+          camiones != null && !camiones.isEmpty() && choferes != null && !choferes.isEmpty();
+      intentarPlanificacionAutomatica();
       String shortCode = "#DT-" + donacionId.toString().substring(0, 4).toUpperCase();
       registrarNotificacionSistema(
           null, "Matchmaking ejecutado: donación " + shortCode + " asignada y planificada.");
-      redirectAttributes.addFlashAttribute(
-          "flashOk",
-          "Donación "
-              + shortCode
-              + " asignada exitosamente a la organización beneficiaria y enviada a planificación logística.");
+      String flashMsg =
+          hayRecursos
+              ? "Donación "
+                  + shortCode
+                  + " asignada exitosamente a la organización beneficiaria y planificada en ruta."
+              : "Donación "
+                  + shortCode
+                  + " asignada a la organización. Quedó en cola logística: registrá al menos 1 camión y 1 chofer para generar automáticamente su ruta de reparto.";
+      redirectAttributes.addFlashAttribute("flashOk", flashMsg);
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
           "flashError", "No se pudo realizar la asignación de la donación. Por favor, intentá nuevamente.");
@@ -1121,13 +1188,7 @@ public class AdminController {
   public String ejecutarBatchMatchmaking(RedirectAttributes redirectAttributes) {
     try {
       donacionesGateway.ejecutarMatchmakingBatch();
-      try {
-        logisticaGateway.ejecutarPlanificacion();
-      } catch (Exception ignored) {
-      }
-      if (cacheResilienteService != null) {
-        cacheResilienteService.invalidarCache();
-      }
+      intentarPlanificacionAutomatica();
       redirectAttributes.addFlashAttribute(
           "flashOk", "Asignación automática completada exitosamente.");
     } catch (Exception e) {
@@ -1513,11 +1574,10 @@ public class AdminController {
   public String aprobarSolicitudOng(
       @PathVariable("id") String solicitudId, RedirectAttributes redirectAttributes) {
     try {
-      solicitudOngService.actualizarEstado(solicitudId, "APROBADA");
       var solicitudOpt = solicitudOngService.obtenerPorId(solicitudId);
+      UUID benefUuid = null;
       if (solicitudOpt.isPresent()) {
         var s = solicitudOpt.get();
-        UUID benefUuid = null;
         if (authGateway != null) {
           var usuarios = authGateway.listarUsuarios();
           var userMatch =
@@ -1542,6 +1602,7 @@ public class AdminController {
         if (benefUuid == null) {
           benefUuid = UUID.randomUUID();
         }
+        solicitudOngService.actualizarEstado(solicitudId, "APROBADA", benefUuid);
         try {
           List<Map<String, Object>> existentes = donacionesGateway.obtenerBeneficiarios();
           UUID existenteId = null;
@@ -1560,31 +1621,12 @@ public class AdminController {
                 Map.of(
                     "id", benefUuid.toString(),
                     "correoRepresentante", s.email() != null ? s.email() : "org@donatrack.org"));
-            existenteId = benefUuid;
-          }
-          if (s.necesidades() != null
-              && !s.necesidades().isBlank()
-              && !"-".equals(s.necesidades().trim())) {
-            List<Map<String, Object>> necsActuales =
-                donacionesGateway.obtenerNecesidades(existenteId);
-            if (necsActuales == null || necsActuales.isEmpty()) {
-              donacionesGateway.agregarNecesidad(
-                  existenteId,
-                  Map.of(
-                      "tipo", "extraordinaria",
-                      "descripcion", s.necesidades().trim(),
-                      "cantidadRequerida", 50.0,
-                      "subcategoriaRequerida",
-                          Map.of(
-                              "nombre",
-                              "No Perecederos",
-                              "descripcion",
-                              "Categoría No Perecederos")));
-            }
           }
         } catch (Exception ex) {
           log.warn("No se pudo sincronizar entidad Beneficiario para {}: {}", s.email(), ex.getMessage());
         }
+      } else {
+        solicitudOngService.actualizarEstado(solicitudId, "APROBADA");
       }
       redirectAttributes.addFlashAttribute(
           "flashOk", "Solicitud de organización aprobada con éxito.");
@@ -1756,6 +1798,25 @@ public class AdminController {
     long comedoresAsistidos = donaciones > 0 ? Math.max(1, Math.min(donaciones, 5)) : 0;
     long entregasCompletadas = donaciones;
 
+    // Enriquecer organizaciones antes para resolver nombres reales en seguimiento y buscador
+    List<Map<String, Object>> usuariosAuthDir =
+        authGateway != null ? authGateway.listarUsuarios() : Collections.emptyList();
+    List<Map<String, Object>> beneficiariosEnriquecidos =
+        enriquecerBeneficiariosConSolicitudes(beneficiarios, usuariosAuthDir, Collections.emptyList());
+    Map<String, String> nombreOngPorClave = new HashMap<>();
+    for (Map<String, Object> bMap : beneficiariosEnriquecidos) {
+      if (bMap == null) continue;
+      String nomOrg = bMap.get("nombreLegible") != null ? bMap.get("nombreLegible").toString() : null;
+      if (nomOrg == null || nomOrg.isBlank()) continue;
+      if (bMap.get("id") != null) {
+        nombreOngPorClave.putIfAbsent(bMap.get("id").toString().toLowerCase(), nomOrg);
+      }
+      if (bMap.get("correoRepresentante") != null) {
+        nombreOngPorClave.putIfAbsent(
+            bMap.get("correoRepresentante").toString().trim().toLowerCase(), nomOrg);
+      }
+    }
+
     // 1. Obtener seguimiento de las donaciones del donante y métricas reales
     double sumaKilosReales = 0.0;
     long entregasRealmenteCompletadas = 0L;
@@ -1774,22 +1835,31 @@ public class AdminController {
       int etapa = 1;
       String estadoLabel = "En Depósito · Auditada (+10 pts)";
       String destinoLabel = "Pendiente de Matchmaking con Comedor";
-      if ("ASIGNADA".equals(est) || "EN_ENTREGA".equals(est)) {
-        etapa = 2;
-        estadoLabel = "Asignada a Comedor · En Ruta";
+      if ("ASIGNADA".equals(est) || "EN_ENTREGA".equals(est) || "EN_TRASLADO".equals(est)
+          || "ENTREGADA".equals(est)) {
+        String idBen = d.get("idBeneficiario") != null ? d.get("idBeneficiario").toString() : "";
+        String mailBen =
+            d.get("correoBeneficiario") != null ? d.get("correoBeneficiario").toString().trim() : "";
+        String resuelto =
+            !idBen.isBlank() ? nombreOngPorClave.get(idBen.toLowerCase()) : null;
+        if (resuelto == null && !mailBen.isBlank()) {
+          resuelto = nombreOngPorClave.get(mailBen.toLowerCase());
+        }
         destinoLabel =
-            d.get("correoBeneficiario") != null
-                ? d.get("correoBeneficiario").toString()
-                : "Comedor Comunitario La Esperanza";
-        comedoresConEntrega.add(destinoLabel.toLowerCase());
-      } else if ("ENTREGADA".equals(est)) {
-        etapa = 3;
-        entregasRealmenteCompletadas++;
-        estadoLabel = "Entregada en Destino (+25 pts)";
-        destinoLabel =
-            d.get("correoBeneficiario") != null
-                ? d.get("correoBeneficiario").toString()
-                : "Comedor Comunitario La Esperanza";
+            resuelto != null
+                ? resuelto
+                : (!mailBen.isBlank() ? mailBen : "Organización Asignada");
+        if ("ENTREGADA".equals(est)) {
+          etapa = 3;
+          entregasRealmenteCompletadas++;
+          estadoLabel = "Entregada en Destino (+25 pts)";
+        } else {
+          etapa = 2;
+          estadoLabel =
+              "EN_TRASLADO".equals(est)
+                  ? "En Ruta hacia Comedor"
+                  : "Asignada a Comedor · En Ruta";
+        }
         comedoresConEntrega.add(destinoLabel.toLowerCase());
       }
       row.put("etapaNumero", etapa);
@@ -1859,12 +1929,9 @@ public class AdminController {
       }
     }
 
-    // 2. Obtener buscador de causas activas y necesidades de ONGs (incluyendo nuevas aprobadas)
-    List<Map<String, Object>> usuariosAuthDir =
-        authGateway != null ? authGateway.listarUsuarios() : Collections.emptyList();
-    List<Map<String, Object>> beneficiariosEnriquecidos =
-        enriquecerBeneficiariosConSolicitudes(beneficiarios, usuariosAuthDir, Collections.emptyList());
+    // 2. Obtener buscador de causas activas y necesidades de ONGs (deduplicadas)
     List<Map<String, Object>> causasActivas = new ArrayList<>();
+    java.util.Set<String> causasSeen = new java.util.HashSet<>();
     for (Map<String, Object> bMap : beneficiariosEnriquecidos) {
       String bId = String.valueOf(bMap.get("id"));
       String nombreOrg = String.valueOf(bMap.get("nombreLegible"));
@@ -1879,6 +1946,13 @@ public class AdminController {
               ? (List<Map<String, Object>>) l
               : Collections.emptyList();
       for (Map<String, Object> n : necsClean) {
+        String descStr =
+            String.valueOf(n.getOrDefault("descripcion", "Alimentos secos para raciones diarias"))
+                .trim();
+        String dedupKey = (bId + "|" + descStr.toLowerCase());
+        if (!causasSeen.add(dedupKey)) {
+          continue;
+        }
         Map<String, Object> causa = new HashMap<>();
         causa.put("ongId", bId);
         causa.put("organizacion", nombreOrg);
@@ -1886,8 +1960,7 @@ public class AdminController {
         causa.put("correo", correo);
         causa.put("ubicacion", ubicOrg);
         causa.put("categoria", n.getOrDefault("subcategoria", "No Perecederos"));
-        causa.put(
-            "descripcion", n.getOrDefault("descripcion", "Alimentos secos para raciones diarias"));
+        causa.put("descripcion", descStr);
         causa.put("cantidad", n.getOrDefault("cantidad", 20));
         causa.put("urgencia", "Alta");
         causasActivas.add(causa);
@@ -2024,9 +2097,14 @@ public class AdminController {
     if (rawNecesidades == null) return res;
     for (Map<String, Object> nec : rawNecesidades) {
       if (nec == null) continue;
+      Object rawDesc = nec.get("descripcion");
+      String desc = rawDesc != null ? rawDesc.toString().trim() : "Sin descripción detallada";
+      if ("Registro inicial de adhesión institucional".equalsIgnoreCase(desc)) {
+        continue;
+      }
       Map<String, Object> clean = new HashMap<>();
       clean.put("id", nec.get("id"));
-      clean.put("descripcion", nec.getOrDefault("descripcion", "Sin descripción detallada"));
+      clean.put("descripcion", desc.isBlank() ? "Sin descripción detallada" : desc);
 
       Object cant = nec.get("cantidadRequerida");
       if (cant == null) {
@@ -2084,10 +2162,18 @@ public class AdminController {
 
         @SuppressWarnings("unchecked")
         Map<String, Object> chofer = (Map<String, Object>) r.get("chofer");
-        String choferNombre =
+        String cNom =
             chofer != null && chofer.get("nombre") != null
-                ? String.valueOf(chofer.get("nombre"))
-                : "Chofer DonaTrack";
+                ? String.valueOf(chofer.get("nombre")).trim()
+                : "";
+        String cApe =
+            chofer != null && chofer.get("apellido") != null
+                ? String.valueOf(chofer.get("apellido")).trim()
+                : "";
+        String choferNombre = (cNom + " " + cApe).trim();
+        if (choferNombre.isBlank()) {
+          choferNombre = "Chofer DonaTrack";
+        }
         String choferLegajo =
             chofer != null && chofer.get("legajo") != null
                 ? String.valueOf(chofer.get("legajo"))
@@ -2101,10 +2187,20 @@ public class AdminController {
             Map<String, Object> dir = (Map<String, Object>) p.get("direccion");
             String dirStr = "Destino Comunitario";
             if (dir != null) {
-              String calle = dir.get("calle") != null ? String.valueOf(dir.get("calle")) : "";
+              String calle = dir.get("calle") != null ? String.valueOf(dir.get("calle")).trim() : "";
               String alt = formatearAltura(dir.get("altura"));
-              String loc = dir.get("localidad") != null ? String.valueOf(dir.get("localidad")) : "";
-              dirStr = (calle + " " + alt + ", " + loc).trim();
+              if ("0".equals(alt) || ("3200".equals(alt) && calle.matches(".*\\d+$"))) {
+                alt = "";
+              }
+              String loc = dir.get("localidad") != null ? String.valueOf(dir.get("localidad")).trim() : "";
+              if ("Argentina".equalsIgnoreCase(loc)) {
+                loc = "";
+              }
+              String calleYAlt = (calle + (alt.isBlank() ? "" : " " + alt)).trim();
+              dirStr =
+                  !calleYAlt.isBlank() && !loc.isBlank()
+                      ? calleYAlt + ", " + loc
+                      : (!calleYAlt.isBlank() ? calleYAlt : (!loc.isBlank() ? loc : "Destino Comunitario"));
             }
 
             @SuppressWarnings("unchecked")
@@ -2205,6 +2301,31 @@ public class AdminController {
     return Map.of("enCamino", enCamino, "recibidas", recibidas);
   }
 
+  private List<Map<String, Object>> listarDonacionesDeBeneficiario(
+      UUID beneficiarioId, String emailOrganizacion) {
+    List<Map<String, Object>> todasDonaciones = donacionesGateway.listarDonaciones(null, null);
+    if (todasDonaciones == null || todasDonaciones.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<Map<String, Object>> propias = new ArrayList<>();
+    for (Map<String, Object> d : todasDonaciones) {
+      if (d == null || d.get("id") == null) continue;
+      String dBenefId = d.get("idBeneficiario") != null ? d.get("idBeneficiario").toString() : "";
+      String dBenefEmail =
+          d.get("correoBeneficiario") != null ? d.get("correoBeneficiario").toString() : "";
+      boolean matchId =
+          beneficiarioId != null && beneficiarioId.toString().equalsIgnoreCase(dBenefId);
+      boolean matchEmail =
+          emailOrganizacion != null
+              && !emailOrganizacion.isBlank()
+              && emailOrganizacion.equalsIgnoreCase(dBenefEmail);
+      if (matchId || matchEmail) {
+        propias.add(d);
+      }
+    }
+    return propias;
+  }
+
   private List<Map<String, Object>> filtrarEntregasDeBeneficiario(
       List<Map<String, Object>> entregas,
       UUID beneficiarioId,
@@ -2215,23 +2336,9 @@ public class AdminController {
         || DEFAULT_BENEFICIARIA_ID.equals(beneficiarioId)) {
       return entregas != null ? entregas : Collections.emptyList();
     }
-    List<Map<String, Object>> todasDonaciones = donacionesGateway.listarDonaciones(null, null);
     java.util.Set<String> donacionIdsPropios = new java.util.HashSet<>();
-    if (todasDonaciones != null) {
-      for (Map<String, Object> d : todasDonaciones) {
-        if (d == null || d.get("id") == null) continue;
-        String dBenefId = d.get("idBeneficiario") != null ? d.get("idBeneficiario").toString() : "";
-        String dBenefEmail =
-            d.get("correoBeneficiario") != null ? d.get("correoBeneficiario").toString() : "";
-        boolean matchId = beneficiarioId.toString().equalsIgnoreCase(dBenefId);
-        boolean matchEmail =
-            emailOrganizacion != null
-                && !emailOrganizacion.isBlank()
-                && emailOrganizacion.equalsIgnoreCase(dBenefEmail);
-        if (matchId || matchEmail) {
-          donacionIdsPropios.add(d.get("id").toString().toLowerCase());
-        }
-      }
+    for (Map<String, Object> d : listarDonacionesDeBeneficiario(beneficiarioId, emailOrganizacion)) {
+      donacionIdsPropios.add(d.get("id").toString().toLowerCase());
     }
     return entregas.stream()
         .filter(
@@ -2394,6 +2501,11 @@ public class AdminController {
     model.addAttribute("totalRecibidas", recibidas != null ? recibidas.size() : 0);
     model.addAttribute("kilosRecibidos", Math.round(kilosRecibidos));
     model.addAttribute(
+        "isNuevaBeneficiaria",
+        necesidades.isEmpty()
+            && (enCamino == null || enCamino.isEmpty())
+            && (recibidas == null || recibidas.isEmpty()));
+    model.addAttribute(
         "proximasEntregas", enCamino != null ? enCamino.stream().limit(4).toList() : List.of());
 
     return "admin/beneficiaria/panel";
@@ -2479,9 +2591,32 @@ public class AdminController {
     List<Map<String, Object>> entregasRecibidas =
         filtrarEntregasDeBeneficiario(agrupadas.get("recibidas"), beneficiarioId, emailOrg);
 
+    java.util.Set<String> idsConRuta = new java.util.HashSet<>();
+    for (Map<String, Object> e : entregasEnCamino) {
+      if (e.get("idEntrega") != null) idsConRuta.add(e.get("idEntrega").toString().toLowerCase());
+    }
+    for (Map<String, Object> e : entregasRecibidas) {
+      if (e.get("idEntrega") != null) idsConRuta.add(e.get("idEntrega").toString().toLowerCase());
+    }
+    List<Map<String, Object>> donacionesSinRuta =
+        DEFAULT_BENEFICIARIA_ID.equals(beneficiarioId)
+            ? Collections.emptyList()
+            : listarDonacionesDeBeneficiario(beneficiarioId, emailOrg).stream()
+                .filter(
+                    d -> {
+                      String idStr = d.get("id") != null ? d.get("id").toString().toLowerCase() : "";
+                      String est =
+                          d.get("estado") != null ? d.get("estado").toString().toUpperCase() : "";
+                      return !idStr.isBlank()
+                          && !idsConRuta.contains(idStr)
+                          && ("ASIGNADA".equals(est) || "EN_TRASLADO".equals(est));
+                    })
+                .toList();
+
     model.addAttribute("rutas", rutas);
     model.addAttribute("entregasEnCamino", entregasEnCamino);
     model.addAttribute("entregasRecibidas", entregasRecibidas);
+    model.addAttribute("donacionesSinRuta", donacionesSinRuta);
     model.addAttribute("totalEnCamino", entregasEnCamino != null ? entregasEnCamino.size() : 0);
     model.addAttribute("totalRecibidas", entregasRecibidas != null ? entregasRecibidas.size() : 0);
     return "admin/beneficiaria/entregas";
@@ -2782,7 +2917,7 @@ public class AdminController {
                 "caption", "Espacio de recepción, almacenamiento ordenado y preparación diaria de raciones."),
             Map.of(
                 "url", "/img/org-despensa.jpg",
-                "titulo", "Clasificación y Acopio Auditado",
+                "titulo", "Clasificación y Recepción Auditada",
                 "caption", "Voluntarios revisando fechas de vencimiento y embalaje por categoría."),
             Map.of(
                 "url", "/img/org-entrega.jpg",

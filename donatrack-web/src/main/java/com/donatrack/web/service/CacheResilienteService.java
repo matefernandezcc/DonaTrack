@@ -46,7 +46,7 @@ public class CacheResilienteService {
           CompletableFuture.supplyAsync(logisticaGateway::listarRutas);
       List<Map<String, Object>> freshRutas = future.get(FAST_TIMEOUT_MS, TimeUnit.MILLISECONDS);
 
-      if (freshRutas != null && !freshRutas.isEmpty()) {
+      if (freshRutas != null) {
         cache.put("rutas", freshRutas);
         ultimaActualizacionRutas.set(ahora);
         return freshRutas;

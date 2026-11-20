@@ -437,13 +437,31 @@ class AdminControllerTest {
           .perform(
               post("/app/admin/camiones")
                   .principal(adminAuth)
-                  .param("patente", "DUPLICADA")
+                  .param("patente", "AE789XY")
                   .param("capacidadVolumen", "20.0")
                   .param("altura", "3.0")
                   .param("capacidadCarga", "4000.0"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/admin/camiones"))
           .andExpect(flash().attribute("flashError", "No se pudo registrar el camión. Verificá los datos e intentá nuevamente."));
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/camiones rechaza patente con formato argentino inválido")
+    void testCrearCamionPatenteInvalida() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/admin/camiones")
+                  .principal(adminAuth)
+                  .param("patente", "jekjdss")
+                  .param("capacidadVolumen", "20.0")
+                  .param("altura", "3.0")
+                  .param("capacidadCarga", "4000.0"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/camiones"))
+          .andExpect(flash().attributeExists("flashError"));
+
+      verify(logisticaGateway, never()).crearCamion(any());
     }
 
     @Test
@@ -534,6 +552,42 @@ class AdminControllerTest {
     }
 
     @Test
+    @DisplayName("POST /app/admin/choferes rechaza legajo con formato inválido")
+    void testCrearChoferLegajoInvalido() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/admin/choferes")
+                  .principal(adminAuth)
+                  .param("legajo", "abc")
+                  .param("nombre", "Esteban")
+                  .param("apellido", "Quito")
+                  .param("telefono", "+54 9 11 5566-7788"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/choferes"))
+          .andExpect(flash().attributeExists("flashError"));
+
+      verify(logisticaGateway, never()).crearChofer(any());
+    }
+
+    @Test
+    @DisplayName("POST /app/admin/choferes rechaza teléfono con formato inválido")
+    void testCrearChoferTelefonoInvalido() throws Exception {
+      mockMvc
+          .perform(
+              post("/app/admin/choferes")
+                  .principal(adminAuth)
+                  .param("legajo", "CH-101")
+                  .param("nombre", "Esteban")
+                  .param("apellido", "Quito")
+                  .param("telefono", "321321"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/choferes"))
+          .andExpect(flash().attributeExists("flashError"));
+
+      verify(logisticaGateway, never()).crearChofer(any());
+    }
+
+    @Test
     @DisplayName("POST /app/admin/choferes/{legajo}/eliminar exitoso redirige con flashOk")
     void testEliminarChoferExitoso() throws Exception {
       mockMvc
@@ -543,6 +597,24 @@ class AdminControllerTest {
           .andExpect(flash().attribute("flashOk", "Chofer con legajo CH-505 eliminado con éxito."));
 
       verify(logisticaGateway, times(1)).eliminarChofer("CH-505");
+    }
+
+    @Test
+    @DisplayName(
+        "POST /app/admin/rutas/planificar ejecuta planificación cuando hay camión y chofer")
+    void testPlanificarRutasPendientes() throws Exception {
+      when(logisticaGateway.listarCamiones())
+          .thenReturn(List.of(new CamionDto("AA123BB", 20.0, 3.5, 4000.0)));
+      when(logisticaGateway.listarChoferes())
+          .thenReturn(List.of(new ChoferDto("CH-101", "Martín", "Rossi", "+54 9 11 5566-7788")));
+
+      mockMvc
+          .perform(post("/app/admin/rutas/planificar").principal(adminAuth))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/admin/rutas"))
+          .andExpect(flash().attributeExists("flashOk"));
+
+      verify(logisticaGateway, times(1)).ejecutarPlanificacion();
     }
 
     @Test
@@ -968,7 +1040,8 @@ class AdminControllerTest {
                       "flashOk",
                       "Solicitud de organización aprobada con éxito."));
 
-      verify(solicitudOngService, times(1)).actualizarEstado(solId, "APROBADA");
+      verify(solicitudOngService, times(1))
+          .actualizarEstado(eq(solId), eq("APROBADA"), any(UUID.class));
       verify(authGateway, times(1)).cambiarRol(userId, "BENEFICIARIA");
     }
 
@@ -1003,7 +1076,8 @@ class AdminControllerTest {
           .andExpect(
               flash().attribute("flashOk", "Solicitud de organización aprobada con éxito."));
 
-      verify(solicitudOngService, times(1)).actualizarEstado(solId, "APROBADA");
+      verify(solicitudOngService, times(1))
+          .actualizarEstado(eq(solId), eq("APROBADA"), any(UUID.class));
       verify(authGateway, never()).cambiarRol(any(), any());
     }
   }

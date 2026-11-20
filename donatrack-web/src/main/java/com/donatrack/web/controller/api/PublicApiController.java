@@ -28,13 +28,13 @@ public class PublicApiController {
   public ResponseEntity<List<PuntoMapaPublicoDTO>> obtenerPuntosMapa() {
     List<PuntoMapaPublicoDTO> puntos = new ArrayList<>();
 
-    // 1. Puntos de Acopio Operativos de DonaTrack (Azul)
+    // 1. Puntos de Recepción Operativos de DonaTrack (Azul)
     puntos.add(
         new PuntoMapaPublicoDTO(
             "blue",
             -34.6037,
             -58.3816,
-            "Punto de acopio — Centro",
+            "Punto de recepción — Centro",
             "Recepción y clasificación de alimentos no perecederos.",
             "DonaTrack Hub Centro",
             "Alimentos · Ropa",
@@ -47,7 +47,7 @@ public class PublicApiController {
             "blue",
             -34.5942,
             -58.4623,
-            "Punto de acopio — Oeste",
+            "Punto de recepción — Oeste",
             "Centro logístico para ropa, abrigo y mobiliario clasificado.",
             "DonaTrack Hub Oeste",
             "Ropa · Mobiliario",

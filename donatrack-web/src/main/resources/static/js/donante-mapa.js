@@ -1,7 +1,7 @@
 /**
  * DonaTrack — Mapa de Camiones en Ruta para el Donante
  * Consume GET /api/donante/mapa-camiones asincrónicamente.
- * Cumple con los tres estados obligatorios de UI: Carga activa, Error con recuperación y Estado vacío.
+ * Muestra una donación seleccionada a la vez con marcador pulsante.
  */
 (function () {
   'use strict';
@@ -9,6 +9,8 @@
   var mapInstance = null;
   var markersGroup = null;
   var mapaDonanteInicializado = false;
+  var movilesCargados = [];
+  var selectedDonacionId = null;
 
   function initDonanteMapa() {
     var container = document.getElementById('mapa-donante-camiones');
@@ -17,6 +19,9 @@
     var loadingEl = document.getElementById('mapa-donante-loading');
     var errorEl = document.getElementById('mapa-donante-error');
     var emptyEl = document.getElementById('mapa-donante-empty');
+    var emptyTitleEl = document.getElementById('mapa-donante-empty-title');
+    var emptyDescEl = document.getElementById('mapa-donante-empty-desc');
+    var selectorEl = document.getElementById('mapa-donante-selector');
     var retryBtn = document.getElementById('mapa-donante-retry');
 
     if (retryBtn) {
@@ -25,12 +30,22 @@
       });
     }
 
-    function mostrarEstado(estado) {
+    if (selectorEl) {
+      selectorEl.addEventListener('change', function () {
+        if (selectorEl.value) {
+          window.seleccionarDonacionEnMapa(selectorEl.value, false);
+        }
+      });
+    }
+
+    function mostrarEstado(estado, customTitle, customDesc) {
       if (loadingEl) loadingEl.style.display = (estado === 'loading') ? 'flex' : 'none';
       if (errorEl) errorEl.style.display = (estado === 'error') ? 'block' : 'none';
       if (emptyEl) emptyEl.style.display = (estado === 'empty') ? 'block' : 'none';
+      if (emptyTitleEl && customTitle) emptyTitleEl.textContent = customTitle;
+      if (emptyDescEl && customDesc) emptyDescEl.textContent = customDesc;
       if (container) {
-        // El contenedor del mapa permanece visible salvo si hay error antes de iniciar
+        container.style.display = (estado === 'empty' || estado === 'error') ? 'none' : 'block';
         container.style.opacity = (estado === 'loading') ? '0.35' : '1';
       }
       if (retryBtn) {
@@ -81,11 +96,123 @@
     function crearIconoCamion() {
       return L.divIcon({
         className: 'dt-truck-leaflet-marker',
-        html: '<div style="background: #0176d3; color: #ffffff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(1, 118, 211, 0.45); border: 2px solid #ffffff; font-size: 16px;">🚚</div>',
-        iconSize: [34, 34],
-        iconAnchor: [17, 17],
+        html: '<div class="dt-truck-pulse" style="background: #0176d3; color: #ffffff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #ffffff; font-size: 16px;">🚚</div>',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
         popupAnchor: [0, -18]
       });
+    }
+
+    function resaltarCardDonacion(donId) {
+      var cards = document.querySelectorAll('.donacion-item-card');
+      cards.forEach(function (card) {
+        var cardId = (card.getAttribute('data-donacion-id') || '').toLowerCase();
+        if (donId && cardId === donId.toLowerCase()) {
+          card.classList.add('dt-donacion-selected');
+        } else {
+          card.classList.remove('dt-donacion-selected');
+        }
+      });
+    }
+
+    function renderizarMovilSeleccionado(donId) {
+      if (!movilesCargados || movilesCargados.length === 0) {
+        mostrarEstado(
+          'empty',
+          'No hay camiones en tránsito para tus donaciones',
+          'Cuando tus donaciones sean asignadas y un móvil inicie la ruta logística, vas a ver aquí la patente, chofer y destino real.'
+        );
+        return;
+      }
+
+      var target = null;
+      if (donId) {
+        for (var i = 0; i < movilesCargados.length; i++) {
+          if (String(movilesCargados[i].idDonacion).toLowerCase() === String(donId).toLowerCase()) {
+            target = movilesCargados[i];
+            break;
+          }
+        }
+      }
+
+      if (!target) {
+        if (donId) {
+          mostrarEstado(
+            'empty',
+            'Esta donación aún no tiene un camión asignado en ruta',
+            'Cuando el administrador asigne una unidad de flota y chofer a esta donación, su ubicación aparecerá aquí.'
+          );
+          return;
+        }
+        target = movilesCargados[0];
+      }
+
+      selectedDonacionId = String(target.idDonacion);
+      if (selectorEl) {
+        selectorEl.value = selectedDonacionId;
+      }
+      resaltarCardDonacion(selectedDonacionId);
+
+      mostrarEstado('ok');
+      var map = asegurarMapa();
+      if (!map) return;
+
+      if (markersGroup) {
+        markersGroup.clearLayers();
+      }
+
+      if (typeof target.lat !== 'number' || typeof target.lng !== 'number') {
+        return;
+      }
+
+      var latLng = [target.lat, target.lng];
+      var icono = crearIconoCamion();
+      var badgeBg = target.estado === 'ENTREGADA' ? '#dcfce7' : (target.estado === 'EN_TRASLADO' ? '#ffedd5' : '#e0f2fe');
+      var badgeColor = target.estado === 'ENTREGADA' ? '#166534' : (target.estado === 'EN_TRASLADO' ? '#c2410c' : '#0369a1');
+
+      var popupHtml = '' +
+        '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; font-size: 12px; line-height: 1.4; min-width: 215px; padding: 2px;">' +
+          '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">' +
+            '<strong style="color: #014486; font-size: 13px; font-family: monospace;">' + escapeHtml(target.codigoCorto || '#DT-DON') + '</strong>' +
+            '<span style="background: ' + badgeBg + '; color: ' + badgeColor + '; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">' + escapeHtml(target.estado || 'PLANIFICADA') + '</span>' +
+          '</div>' +
+          '<p style="margin: 3px 0; color: #0f172a;"><strong>Camión:</strong> ' + escapeHtml(target.patenteCamion || 'Sin patente') + '</p>' +
+          '<p style="margin: 3px 0; color: #0f172a;"><strong>Chofer:</strong> ' + escapeHtml(target.choferNombre || 'Chofer por asignar') + '</p>' +
+          '<p style="margin: 3px 0; color: #334155;"><strong>Destino:</strong> ' + escapeHtml(target.destinoComedor || 'Organización Beneficiaria') + '</p>' +
+          '<div style="margin-top: 8px; font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 4px;">' +
+            '<span>⏱</span>' +
+            '<span>Fecha operativa: ' + escapeHtml(target.ultimaActualizacion || 'Programada') + '</span>' +
+          '</div>' +
+        '</div>';
+
+      var marker = L.marker(latLng, { icon: icono }).bindPopup(popupHtml);
+      if (markersGroup) {
+        markersGroup.addLayer(marker);
+      }
+
+      map.setView(latLng, 14);
+      setTimeout(function () {
+        if (mapInstance) {
+          mapInstance.invalidateSize();
+          marker.openPopup();
+        }
+      }, 220);
+    }
+
+    function poblarSelector(data) {
+      if (!selectorEl) return;
+      selectorEl.innerHTML = '';
+      if (!data || data.length === 0) {
+        selectorEl.style.display = 'none';
+        return;
+      }
+      data.forEach(function (m) {
+        var opt = document.createElement('option');
+        opt.value = String(m.idDonacion);
+        opt.textContent = (m.codigoCorto || 'Donación') + ' · ' + (m.patenteCamion || 'Móvil') + ' (' + (m.estado || '') + ')';
+        selectorEl.appendChild(opt);
+      });
+      selectorEl.style.display = 'inline-block';
     }
 
     function cargarCamiones() {
@@ -106,72 +233,42 @@
           return res.json();
         })
         .then(function (data) {
-          if (!data || !Array.isArray(data) || data.length === 0) {
-            mostrarEstado('empty');
+          movilesCargados = Array.isArray(data) ? data : [];
+          poblarSelector(movilesCargados);
+
+          if (movilesCargados.length === 0) {
+            selectedDonacionId = null;
+            renderizarMovilSeleccionado(null);
             return;
           }
 
-          mostrarEstado('ok');
-          var map = asegurarMapa();
-          if (!map) return;
-
-          if (markersGroup) {
-            markersGroup.clearLayers();
-          }
-
-          var bounds = [];
-          var icono = crearIconoCamion();
-
-          data.forEach(function (movil) {
-            if (typeof movil.lat !== 'number' || typeof movil.lng !== 'number') return;
-
-            var latLng = [movil.lat, movil.lng];
-            bounds.push(latLng);
-
-            var popupHtml = '' +
-              '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; font-size: 12px; line-height: 1.4; min-width: 210px; padding: 2px;">' +
-                '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">' +
-                  '<strong style="color: #014486; font-size: 13px; font-family: monospace;">' + escapeHtml(movil.codigoCorto || '#DT-DON') + '</strong>' +
-                  '<span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">' + escapeHtml(movil.estado || 'EN TRASLADO') + '</span>' +
-                '</div>' +
-                '<p style="margin: 3px 0; color: #0f172a;"><strong>Camión:</strong> ' + escapeHtml(movil.patenteCamion || 'En asignación') + '</p>' +
-                '<p style="margin: 3px 0; color: #0f172a;"><strong>Chofer:</strong> ' + escapeHtml(movil.choferNombre || 'Personal Logístico') + '</p>' +
-                '<p style="margin: 3px 0; color: #334155;"><strong>Destino:</strong> ' + escapeHtml(movil.destinoComedor || 'Comedor Comunitario') + '</p>' +
-                '<div style="margin-top: 8px; font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 4px;">' +
-                  '<span>⏱</span>' +
-                  '<span>' + escapeHtml(movil.ultimaActualizacion || 'Actualizado recientemente') + '</span>' +
-                '</div>' +
-              '</div>';
-
-            var marker = L.marker(latLng, { icon: icono })
-              .bindPopup(popupHtml);
-
-            if (markersGroup) {
-              markersGroup.addLayer(marker);
-            }
+          var existeSelected = selectedDonacionId && movilesCargados.some(function (m) {
+            return String(m.idDonacion).toLowerCase() === String(selectedDonacionId).toLowerCase();
           });
-
-          if (bounds.length > 0) {
-            if (bounds.length === 1) {
-              map.setView(bounds[0], 13);
-            } else {
-              map.fitBounds(bounds, { padding: [30, 30] });
-            }
-          }
-
-          // Invalidar tamaño de Leaflet tras render para evitar renderizado parcial
-          setTimeout(function () {
-            if (mapInstance) mapInstance.invalidateSize();
-          }, 250);
+          renderizarMovilSeleccionado(existeSelected ? selectedDonacionId : String(movilesCargados[0].idDonacion));
         })
         .catch(function (err) {
           if (timeoutId) clearTimeout(timeoutId);
           console.error('Error al cargar camiones en vivo del donante:', err);
+          if (selectorEl) selectorEl.style.display = 'none';
           mostrarEstado('error');
         });
     }
 
-    // FASE 2: Lazy Mounting idempotente del Mapa de Camiones
+    window.seleccionarDonacionEnMapa = function (donacionId, scrollAlMapa) {
+      if (scrollAlMapa === undefined) scrollAlMapa = true;
+      selectedDonacionId = donacionId ? String(donacionId) : null;
+      resaltarCardDonacion(selectedDonacionId);
+      renderizarMovilSeleccionado(selectedDonacionId);
+      if (scrollAlMapa) {
+        var cardMapa = document.getElementById('card-mapa-donante');
+        if (cardMapa && typeof cardMapa.scrollIntoView === 'function') {
+          cardMapa.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    };
+
+    // Lazy Mounting idempotente del Mapa de Camiones
     window.inicializarOMostrarMapaDonante = function () {
       var panel = document.getElementById('tab-panel-seguimiento');
       if (!panel || panel.style.display === 'none') {
@@ -188,7 +285,6 @@
       }
     };
 
-    // Reajustar tamaño de Leaflet / compatibilidad hacia atrás
     window.refrescarMapaDonante = window.inicializarOMostrarMapaDonante;
   }
 

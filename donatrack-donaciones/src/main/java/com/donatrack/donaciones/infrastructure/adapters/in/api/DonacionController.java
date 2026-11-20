@@ -26,6 +26,7 @@ import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import com.donatrack.donaciones.domain.services.MatchmakerService;
 import com.donatrack.donaciones.infrastructure.adapters.out.client.IncentivoClient;
+import com.donatrack.donaciones.infrastructure.adapters.out.persistence.repositories.SolicitudOngJpaRepository;
 import com.donatrack.common.infrastructure.security.JwtClaimsExtractor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -64,6 +65,7 @@ public class DonacionController {
   private final DonacionOriginalRepository donacionOriginalRepository;
   private final PersonaRepository personaRepository;
   private final LogisticaPort logisticaPort;
+  private final SolicitudOngJpaRepository solicitudOngRepository;
 
   @Value(
       "${donatrack.jwt-secret:${JWT_SECRET:SuperSecretoDonaTrack2026ParaFirmaHS256DebeTenerAlMenos32Bytes!}}")
@@ -93,6 +95,34 @@ public class DonacionController {
         auditoriaDepositoJob,
         null,
         null,
+        null,
+        null);
+  }
+
+  public DonacionController(
+      MatchmakerService matchmakerService,
+      ServicioNotificaciones servicioNotificaciones,
+      IncentivoClient incentivoClient,
+      DonacionRepository donacionRepository,
+      BeneficiarioRepository beneficiarioRepository,
+      AsignacionBatchJob asignacionBatchJob,
+      RecepcionDonacionesUseCase recepcionDonacionesUseCase,
+      AuditoriaDepositoJob auditoriaDepositoJob,
+      DonacionOriginalRepository donacionOriginalRepository,
+      PersonaRepository personaRepository,
+      LogisticaPort logisticaPort) {
+    this(
+        matchmakerService,
+        servicioNotificaciones,
+        incentivoClient,
+        donacionRepository,
+        beneficiarioRepository,
+        asignacionBatchJob,
+        recepcionDonacionesUseCase,
+        auditoriaDepositoJob,
+        donacionOriginalRepository,
+        personaRepository,
+        logisticaPort,
         null);
   }
 
@@ -108,7 +138,8 @@ public class DonacionController {
       AuditoriaDepositoJob auditoriaDepositoJob,
       DonacionOriginalRepository donacionOriginalRepository,
       PersonaRepository personaRepository,
-      LogisticaPort logisticaPort) {
+      LogisticaPort logisticaPort,
+      @Autowired(required = false) SolicitudOngJpaRepository solicitudOngRepository) {
     this.matchmakerService = matchmakerService;
     this.servicioNotificaciones = servicioNotificaciones;
     this.incentivoClient = incentivoClient;
@@ -120,6 +151,7 @@ public class DonacionController {
     this.donacionOriginalRepository = donacionOriginalRepository;
     this.personaRepository = personaRepository;
     this.logisticaPort = logisticaPort;
+    this.solicitudOngRepository = solicitudOngRepository;
   }
 
   @Operation(
@@ -433,24 +465,9 @@ public class DonacionController {
 
       if (logisticaPort != null) {
         try {
-          String calle = "Av. Santa Fe";
-          String altura = "3200";
-          String localidad = "Palermo, CABA";
-          if (personaRepository != null) {
-            var personaBenefOpt = personaRepository.buscarPorRolId(beneficiario.getId());
-            if (personaBenefOpt.isPresent() && personaBenefOpt.get().getDireccion() != null) {
-              var dir = personaBenefOpt.get().getDireccion();
-              if (dir.getCalle() != null && !dir.getCalle().isBlank()) {
-                calle = dir.getCalle();
-              }
-              if (dir.getAltura() > 0) {
-                altura = String.valueOf(dir.getAltura());
-              }
-              if (dir.getLocalidad() != null && !dir.getLocalidad().isBlank()) {
-                localidad = dir.getLocalidad();
-              }
-            }
-          }
+          String[] destino =
+              com.donatrack.donaciones.application.usecases.AsignacionBatchJob
+                  .resolverDireccionDestino(beneficiario, personaRepository, solicitudOngRepository);
           double sumaCantidad =
               donacion.getBienes() != null
                   ? donacion.getBienes().stream().mapToDouble(b -> b.getCantidad()).sum()
@@ -459,7 +476,7 @@ public class DonacionController {
               sumaCantidad > 0 ? sumaCantidad : Math.max(1, donacion.getBienes().size()) * 2.5;
           double volumenTotal = Math.max(1, donacion.getBienes().size()) * 0.5;
           logisticaPort.solicitarRetiro(
-              donacion.getId(), pesoTotal, volumenTotal, calle, altura, localidad);
+              donacion.getId(), pesoTotal, volumenTotal, destino[0], destino[1], destino[2]);
         } catch (Exception ignored) {
           // Tolerancia si el servicio de logística no está alcanzable en asignación directa
         }

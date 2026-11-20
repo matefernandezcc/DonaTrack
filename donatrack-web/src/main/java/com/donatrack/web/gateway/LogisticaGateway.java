@@ -88,12 +88,36 @@ public class LogisticaGateway {
     }
   }
 
+  public List<Map<String, Object>> listarItemsPendientes() {
+    try {
+      List<Map<String, Object>> result =
+          logisticaClient
+              .get()
+              .uri("/api/planificacion/pendientes")
+              .retrieve()
+              .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+      return result != null ? result : Collections.emptyList();
+    } catch (Exception e) {
+      log.error("Error al consultar ítems pendientes de logística: {}", e.getMessage());
+      return Collections.emptyList();
+    }
+  }
+
   public void ejecutarPlanificacion() {
     try {
       logisticaClient.post().uri("/api/planificacion/ejecutar").retrieve().toBodilessEntity();
     } catch (Exception e) {
       log.warn("No se pudo ejecutar la planificación inmediata en logística: {}", e.getMessage());
     }
+  }
+
+  public void iniciarRuta(UUID rutaId, String legajoChofer) {
+    logisticaClient
+        .post()
+        .uri("/api/rutas/{id}/iniciar", rutaId)
+        .body(Map.of("legajoChofer", legajoChofer != null ? legajoChofer : ""))
+        .retrieve()
+        .toBodilessEntity();
   }
 
   public void confirmarEntrega(UUID idDonacion, List<String> fotos, String patenteCamion) {

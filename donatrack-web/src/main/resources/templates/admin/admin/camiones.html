@@ -128,7 +128,15 @@
                   <abbr class="slds-required" title="requerido">* </abbr>Patente
                 </label>
                 <div class="slds-form-element__control">
-                  <input type="text" id="patente" name="patente" th:field="*{patente}" required class="slds-input" placeholder="Ej: EE555FF" />
+                  <input type="text" id="patente" name="patente" th:field="*{patente}" required
+                         maxlength="7"
+                         pattern="^([A-Za-z]{3}[0-9]{3}|[A-Za-z]{2}[0-9]{3}[A-Za-z]{2})$"
+                         title="Formato argentino válido: AA111AA (Mercosur) o AAA111 (anterior)"
+                         class="slds-input" placeholder="Ej: AA123BB o ABC123"
+                         style="text-transform: uppercase;" />
+                </div>
+                <div id="patente-help" class="slds-form-element__help" style="font-size: 0.76rem; color: #64748b;">
+                  Formato argentino válido: <strong>AA111AA</strong> (Mercosur) o <strong>AAA111</strong> (anterior).
                 </div>
               </div>
 
@@ -189,6 +197,31 @@
       }
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') cerrarModalCamion();
+      });
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var patInput = document.getElementById('patente');
+        var patHelp = document.getElementById('patente-help');
+        if (patInput) {
+          patInput.addEventListener('input', function() {
+            var clean = patInput.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 7);
+            patInput.value = clean;
+            if (!patHelp) return;
+            if (!clean) {
+              patHelp.innerHTML = 'Formato argentino válido: <strong>AA111AA</strong> (Mercosur) o <strong>AAA111</strong> (anterior).';
+              patHelp.style.color = '#64748b';
+            } else if (/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/.test(clean)) {
+              patHelp.innerHTML = '✓ Patente Mercosur válida (' + clean + ').';
+              patHelp.style.color = '#166534';
+            } else if (/^[A-Z]{3}[0-9]{3}$/.test(clean)) {
+              patHelp.innerHTML = '✓ Patente nacional anterior válida (' + clean + ').';
+              patHelp.style.color = '#166534';
+            } else {
+              patHelp.innerHTML = 'Completá un formato válido: <strong>AA111AA</strong> o <strong>AAA111</strong>.';
+              patHelp.style.color = '#b91c1c';
+            }
+          });
+        }
       });
     </script>
   </th:block>

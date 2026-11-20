@@ -3,11 +3,9 @@ package com.donatrack.donaciones.infrastructure.adapters.in.api;
 import com.donatrack.common.dto.ErrorResponse;
 import com.donatrack.donaciones.application.ports.out.BeneficiarioRepository;
 import com.donatrack.donaciones.application.ports.out.PersonaRepository;
-import com.donatrack.donaciones.domain.entities.donacion.Subcategoria;
 import com.donatrack.donaciones.domain.entities.enums.MedioContacto;
 import com.donatrack.donaciones.domain.entities.enums.TipoDocumento;
 import com.donatrack.donaciones.domain.entities.enums.TipoPersonaJuridica;
-import com.donatrack.donaciones.domain.entities.necesidades.NecesidadExtraordinaria;
 import com.donatrack.donaciones.domain.entities.persona.Contacto;
 import com.donatrack.donaciones.domain.entities.persona.DocumentoIdentidad;
 import com.donatrack.donaciones.domain.entities.persona.PersonaJuridica;
@@ -21,7 +19,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -162,9 +159,18 @@ public class SolicitudOngController {
       nuevoEstado = "APROBADA";
     }
 
+    UUID beneficiarioIdOpt = null;
+    if (body != null && body.get("beneficiarioId") != null && !body.get("beneficiarioId").isBlank()) {
+      try {
+        beneficiarioIdOpt = UUID.fromString(body.get("beneficiarioId").trim());
+      } catch (IllegalArgumentException ignored) {
+      }
+    }
+
     try {
       UUID uuid = UUID.fromString(id);
       String finalEstado = nuevoEstado;
+      UUID finalBeneficiarioIdOpt = beneficiarioIdOpt;
       return repository
           .findById(uuid)
           .map(
@@ -172,7 +178,7 @@ public class SolicitudOngController {
                 entity.setEstado(finalEstado);
                 SolicitudOngEntity guardada = repository.save(entity);
                 if ("APROBADA".equalsIgnoreCase(finalEstado)) {
-                  asegurarBeneficiarioCreado(guardada);
+                  asegurarBeneficiarioCreado(guardada, finalBeneficiarioIdOpt);
                 }
                 return ResponseEntity.ok(toDto(guardada));
               })
@@ -182,7 +188,8 @@ public class SolicitudOngController {
     }
   }
 
-  private void asegurarBeneficiarioCreado(SolicitudOngEntity entity) {
+  private void asegurarBeneficiarioCreado(
+      SolicitudOngEntity entity, UUID beneficiarioIdPreferido) {
     if (beneficiarioRepository == null || entity == null) {
       return;
     }
@@ -201,57 +208,73 @@ public class SolicitudOngController {
     }
 
     Beneficiario b = new Beneficiario();
-    b.setId(UUID.randomUUID());
+    b.setId(beneficiarioIdPreferido != null ? beneficiarioIdPreferido : UUID.randomUUID());
     b.setFechaAlta(LocalDate.now());
     b.setCorreoRepresentante(email);
 
-    if (entity.getNecesidades() != null
-        && !entity.getNecesidades().isBlank()
-        && !"-".equals(entity.getNecesidades().trim())) {
-      NecesidadExtraordinaria nec =
-          new NecesidadExtraordinaria(
-              entity.getNecesidades().trim(),
-              new Subcategoria("No Perecederos", "Alimentos No Perecederos"),
-              50.0);
-      b.registrarNecesidad(nec);
-    }
-
-    if (personaRepository != null && personaRepository.buscarPorEmail(email).isEmpty()) {
-      String razonSocial =
-          entity.getNombreOng() != null && !entity.getNombreOng().isBlank()
-              ? entity.getNombreOng().trim()
-              : "Organización Beneficiaria";
-      String direccionStr = entity.getDireccion() != null ? entity.getDireccion().trim() : "";
-      Direccion dir =
-          !direccionStr.isBlank() && !"-".equals(direccionStr)
-              ? new Direccion(direccionStr, 0.0, "Argentina", null, "1000", null)
-              : null;
-      Contacto contacto =
-          new Contacto(
-              email,
-              entity.getTelefono() != null && !"-".equals(entity.getTelefono())
-                  ? entity.getTelefono()
-                  : null,
-              null,
-              MedioContacto.CORREO);
-      DocumentoIdentidad doc =
-          entity.getCuit() != null && !entity.getCuit().isBlank() && !"-".equals(entity.getCuit())
-              ? new DocumentoIdentidad(TipoDocumento.CUIT, entity.getCuit().trim())
-              : null;
-      PersonaJuridica pj =
-          new PersonaJuridica(
-              email,
-              contacto,
-              dir,
-              doc,
-              razonSocial,
-              TipoPersonaJuridica.ONG,
-              entity.getTipoEntidad() != null ? entity.getTipoEntidad() : "Comedor Comunitario");
-      pj.agregarRol(b);
-      personaRepository.guardar(pj);
+    if (personaRepository != null) {
+      var personaExistenteOpt = personaRepository.buscarPorEmail(email);
+      if (personaExistenteOpt.isEmpty()) {
+        String razonSocial =
+            entity.getNombreOng() != null && !entity.getNombreOng().isBlank()
+                ? entity.getNombreOng().trim()
+                : "Organización Beneficiaria";
+        String direccionStr = entity.getDireccion() != null ? entity.getDireccion().trim() : "";
+        Direccion dir = parsearDireccion(direccionStr);
+        Contacto contacto =
+            new Contacto(
+                email,
+                entity.getTelefono() != null && !"-".equals(entity.getTelefono())
+                    ? entity.getTelefono()
+                    : null,
+                null,
+                MedioContacto.CORREO);
+        DocumentoIdentidad doc =
+            entity.getCuit() != null && !entity.getCuit().isBlank() && !"-".equals(entity.getCuit())
+                ? new DocumentoIdentidad(TipoDocumento.CUIT, entity.getCuit().trim())
+                : null;
+        PersonaJuridica pj =
+            new PersonaJuridica(
+                email,
+                contacto,
+                dir,
+                doc,
+                razonSocial,
+                TipoPersonaJuridica.ONG,
+                entity.getTipoEntidad() != null ? entity.getTipoEntidad() : "Comedor Comunitario");
+        pj.agregarRol(b);
+        personaRepository.guardar(pj);
+      } else {
+        var personaExistente = personaExistenteOpt.get();
+        boolean yaTieneRolBeneficiario =
+            personaExistente.getRoles().stream().anyMatch(Beneficiario.class::isInstance);
+        if (!yaTieneRolBeneficiario) {
+          personaExistente.agregarRol(b);
+          personaRepository.guardar(personaExistente);
+        } else {
+          beneficiarioRepository.guardar(b);
+        }
+      }
     } else {
       beneficiarioRepository.guardar(b);
     }
+  }
+
+  private static Direccion parsearDireccion(String direccionStr) {
+    if (direccionStr == null || direccionStr.isBlank() || "-".equals(direccionStr.trim())) {
+      return null;
+    }
+    String[] partes =
+        com.donatrack.donaciones.application.usecases.AsignacionBatchJob
+            .parsearComponentesDireccion(direccionStr, "Buenos Aires");
+    double altura = 0.0;
+    if (!partes[1].isBlank()) {
+      try {
+        altura = Double.parseDouble(partes[1]);
+      } catch (NumberFormatException ignored) {
+      }
+    }
+    return new Direccion(partes[0], altura, partes[2], null, "1000", null);
   }
 
   private SolicitudOngDTO toDto(SolicitudOngEntity entity) {
