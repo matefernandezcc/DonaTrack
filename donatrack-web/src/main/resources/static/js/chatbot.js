@@ -31,8 +31,14 @@
   const addMsg = (text, who) => {
     const div = document.createElement("div");
     div.className = "msg msg--" + who;
-    div.textContent = text;
-    div.style.whiteSpace = "pre-wrap"; // Permite los saltos de línea \n
+    if (who === "bot") {
+      // Renderiza respuestas enriquecidas con HTML (encabezados, listas, enlaces y destacados)
+      div.innerHTML = text;
+    } else {
+      // Mensajes del usuario se mantienen como texto plano seguro (anti-XSS)
+      div.textContent = text;
+      div.style.whiteSpace = "pre-wrap";
+    }
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
   };
