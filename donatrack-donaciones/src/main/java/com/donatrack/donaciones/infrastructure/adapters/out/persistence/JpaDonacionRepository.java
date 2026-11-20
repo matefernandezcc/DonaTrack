@@ -38,14 +38,20 @@ public class JpaDonacionRepository implements DonacionRepository {
 
   @Override
   public List<Donacion> buscarPorEstado(EstadoDonacion estado) {
-    return jpaRepository.findByEstado(estado.name()).stream()
-        .map(DonacionMapper::toDomain)
-        .toList();
+    List<DonacionEntity> entidades = jpaRepository.findByEstadoWithJoins(estado.name());
+    if (entidades == null || entidades.isEmpty()) {
+      entidades = jpaRepository.findByEstado(estado.name());
+    }
+    return entidades.stream().map(DonacionMapper::toDomain).toList();
   }
 
   @Override
   public List<Donacion> buscarTodas() {
-    return jpaRepository.findAll().stream().map(DonacionMapper::toDomain).toList();
+    List<DonacionEntity> entidades = jpaRepository.findAllWithJoins();
+    if (entidades == null || entidades.isEmpty()) {
+      entidades = jpaRepository.findAll();
+    }
+    return entidades.stream().map(DonacionMapper::toDomain).toList();
   }
 
   @Override

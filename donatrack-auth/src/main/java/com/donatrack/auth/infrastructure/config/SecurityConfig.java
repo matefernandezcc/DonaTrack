@@ -133,6 +133,9 @@ public class SecurityConfig {
                         "/api/auth/sso/**",
                         "/healthcheck",
                         "/actuator/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
                         "/oauth2/**",
                         "/login/**",
                         "/error")

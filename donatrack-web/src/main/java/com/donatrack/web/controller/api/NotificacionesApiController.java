@@ -85,6 +85,14 @@ public class NotificacionesApiController {
         destinatarios.add(principalName.trim());
       }
     }
+    if (auth.getAuthorities() != null
+        && auth.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equalsIgnoreCase(a.getAuthority()))) {
+      destinatarios.add("admin@donatrack.org");
+      if (principalName == null || !principalName.contains("@")) {
+        destinatarios.add("admin");
+      }
+    }
 
     if (destinatarios.isEmpty()) {
       return ResponseEntity.ok(Collections.emptyList());

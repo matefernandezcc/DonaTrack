@@ -35,9 +35,11 @@ public class AuthService {
   }
 
   public TokenResponse login(LoginRequest request) {
+    String identificador = request.username().trim().toLowerCase();
     Usuario usuario =
         usuarioRepository
-            .findByUsername(request.username().trim().toLowerCase())
+            .findByUsername(identificador)
+            .or(() -> usuarioRepository.findByEmail(identificador))
             .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
     if (!passwordEncoder.matches(request.password(), usuario.getPassword())) {

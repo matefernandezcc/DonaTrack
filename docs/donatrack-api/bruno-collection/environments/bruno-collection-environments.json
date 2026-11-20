@@ -104,42 +104,49 @@
       "variables": [
         {
           "name": "baseUrl",
-          "value": "http://localhost:8080",
+          "value": "https://donatrack.social",
+          "type": "text",
+          "enabled": true,
+          "secret": false
+        },
+        {
+          "name": "authUrl",
+          "value": "https://api.donatrack.social/auth",
           "type": "text",
           "enabled": true,
           "secret": false
         },
         {
           "name": "donacionesUrl",
-          "value": "http://localhost:8000",
+          "value": "https://api.donatrack.social/donaciones",
           "type": "text",
           "enabled": true,
           "secret": false
         },
         {
           "name": "incentivosUrl",
-          "value": "http://localhost:8001",
+          "value": "https://api.donatrack.social/incentivos",
           "type": "text",
           "enabled": true,
           "secret": false
         },
         {
           "name": "logisticaUrl",
-          "value": "https://dona-logistica.onrender.com",
+          "value": "https://api.donatrack.social/logistica",
           "type": "text",
           "enabled": true,
           "secret": false
         },
         {
           "name": "notificacionesUrl",
-          "value": "http://localhost:8003",
+          "value": "https://api.donatrack.social/notificaciones",
           "type": "text",
           "enabled": true,
           "secret": false
         },
         {
           "name": "n8nUrl",
-          "value": "http://localhost:5678",
+          "value": "http://100.92.119.57:5678",
           "type": "text",
           "enabled": true,
           "secret": false

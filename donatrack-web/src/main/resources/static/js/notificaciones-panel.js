@@ -1,15 +1,33 @@
 /**
- * DonaTrack — Panel y Popover de Notificaciones SLDS (UX-08 / UX-13)
- * Consulta GET /api/notificaciones/mis-alertas con credentials: 'same-origin'.
- * Sincroniza notificaciones locales (LocalStorage: 'donatrack_user_notifications') transferidas desde Toasts.
- * Maneja los estados obligatorios: Carga, Error resiliente y Estado Vacío, con soporte WCAG y SLDS.
+ * DonaTrack — Centro de Notificaciones SLDS en Header (UX-08 / UX-13)
+ * Combina lo mejor de ambas arquitecturas:
+ * - Historial aislado por usuario en LocalStorage (máx. 30 alertas) con estado leída/no leída.
+ * - Captura automática de toasts flash (flashOk / flashError) con auto-cierre suave a los 3s.
+ * - Eliminación individual con botón ×, botón "Vaciar historial" y soporte completo para Modo Oscuro.
  */
 (function () {
   'use strict';
 
-  var STORAGE_KEY = 'donatrack_user_notifications';
-  var DISMISSED_KEY = 'donatrack_dismissed_ids';
-  var ultimaListaBackend = [];
+  var MAX_NOTIFS = 30;
+  var MAX_DISMISSED = 200;
+
+  function getUserKeySuffix() {
+    var btn = document.getElementById('btn-notificaciones-toggle');
+    var user = (btn && btn.getAttribute('data-user')) ? btn.getAttribute('data-user').trim() : 'anon';
+    return (user || 'anon').toLowerCase();
+  }
+
+  function getStorageKey() {
+    return 'donatrack_notif_feed_' + getUserKeySuffix();
+  }
+
+  function getDismissedKey() {
+    return 'donatrack_notif_dismissed_' + getUserKeySuffix();
+  }
+
+  function getClearFlagKey() {
+    return 'donatrack_notif_cleared_' + getUserKeySuffix();
+  }
 
   function escapeHtml(str) {
     if (str == null) return '';
@@ -45,28 +63,25 @@
     return str;
   }
 
-  function getNotificacionesLocales() {
+  function loadStoredFeed() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(getStorageKey());
       var parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
-      console.warn('[DonaTrack] Error leyendo notificaciones de localStorage', e);
       return [];
     }
   }
 
-  function guardarNotificacionesLocales(lista) {
+  function saveStoredFeed(feed) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
-    } catch (e) {
-      console.warn('[DonaTrack] Error guardando notificaciones en localStorage', e);
-    }
+      localStorage.setItem(getStorageKey(), JSON.stringify((feed || []).slice(0, MAX_NOTIFS)));
+    } catch (e) {}
   }
 
   function getDismissedIds() {
     try {
-      var raw = localStorage.getItem(DISMISSED_KEY);
+      var raw = localStorage.getItem(getDismissedKey());
       var parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
@@ -74,100 +89,111 @@
     }
   }
 
-  function agregarDismissedId(id) {
-    if (!id) return;
+  function agregarDismissedIds(idsToAdd) {
+    if (!idsToAdd || !idsToAdd.length) return;
     try {
       var ids = getDismissedIds();
-      if (ids.indexOf(id) === -1) {
-        ids.push(id);
-        if (ids.length > 200) ids = ids.slice(-200);
-        localStorage.setItem(DISMISSED_KEY, JSON.stringify(ids));
-      }
-    } catch (e) {
-      console.warn('[DonaTrack] Error guardando id descartado', e);
-    }
-  }
-
-  function eliminarNotificacionLocal(id) {
-    if (!id) return;
-    var lista = getNotificacionesLocales();
-    var filtrada = lista.filter(function (item) {
-      return item.id !== id;
-    });
-    guardarNotificacionesLocales(filtrada);
-  }
-
-  function combinarAlertas(locales, backend) {
-    var dismissed = getDismissedIds();
-
-    var backendFormateadas = (backend || [])
-      .map(function (b) {
-        var bId = b.id != null ? 'backend-' + b.id : ('backend-' + Math.random());
-        return {
-          id: bId,
-          mensaje: b.mensaje,
-          tipo: b.tipo || 'info',
-          medio: b.medio || 'EMAIL',
-          fechaEnvio: b.fechaEnvio,
-          completada: b.completada !== false,
-          isLocal: false
-        };
-      })
-      .filter(function (b) {
-        return dismissed.indexOf(b.id) === -1;
+      idsToAdd.forEach(function (id) {
+        if (id && ids.indexOf(id) === -1) {
+          ids.push(id);
+        }
       });
+      if (ids.length > MAX_DISMISSED) {
+        ids = ids.slice(-MAX_DISMISSED);
+      }
+      localStorage.setItem(getDismissedKey(), JSON.stringify(ids));
+    } catch (e) {}
+  }
 
-    var todas = (locales || [])
-      .filter(function (loc) {
-        return dismissed.indexOf(loc.id) === -1;
-      })
-      .map(function (loc) {
-        return Object.assign({}, loc, { isLocal: true });
-      })
-      .concat(backendFormateadas);
+  function normalizeItem(raw) {
+    var msg = (raw && raw.mensaje) ? String(raw.mensaje).trim() : 'Notificación del sistema';
+    var fecha = (raw && raw.fechaEnvio) ? String(raw.fechaEnvio) : new Date().toISOString();
+    var medio = (raw && raw.medio) ? String(raw.medio).toUpperCase() : 'SISTEMA';
+    var tipo = (raw && raw.tipo) ? String(raw.tipo).toLowerCase() : (raw && raw.esError ? 'error' : 'info');
+    var key = (raw && raw.id != null) ? String(raw.id) : (medio + '|' + msg);
+    return {
+      id: key,
+      mensaje: msg,
+      medio: medio,
+      tipo: tipo,
+      fechaEnvio: fecha,
+      completada: raw && raw.completada === false ? false : true,
+      esError: Boolean((raw && raw.esError) || tipo === 'error'),
+      isLocal: Boolean(raw && raw.isLocal),
+      leida: Boolean(raw && raw.leida)
+    };
+  }
 
-    todas.sort(function (a, b) {
+  function mergeIntoFeed(incomingList) {
+    var dismissed = getDismissedIds();
+    var current = loadStoredFeed().filter(function (item) {
+      return item && item.id && dismissed.indexOf(item.id) === -1;
+    });
+    var byKey = {};
+    current.forEach(function (item) {
+      byKey[item.id] = item;
+    });
+
+    (incomingList || []).forEach(function (raw) {
+      var item = normalizeItem(raw);
+      if (dismissed.indexOf(item.id) !== -1) return;
+      if (!byKey[item.id]) {
+        current.unshift(item);
+        byKey[item.id] = item;
+      }
+    });
+
+    current.sort(function (a, b) {
       var tA = a.fechaEnvio ? new Date(a.fechaEnvio).getTime() : 0;
       var tB = b.fechaEnvio ? new Date(b.fechaEnvio).getTime() : 0;
       return tB - tA;
     });
 
-    return todas;
+    var trimmed = current.slice(0, MAX_NOTIFS);
+    saveStoredFeed(trimmed);
+    return trimmed;
   }
 
-  function actualizarConteoNotificaciones() {
-    var popoverListEl = document.getElementById('notif-lista-items');
+  function actualizarBadge(feed) {
+    var unread = 0;
+    (feed || []).forEach(function (x) {
+      if (x && !x.leida) unread++;
+    });
+
     var badgeEl = document.getElementById('notif-badge-count');
-    var popoverEmptyEl = document.getElementById('notif-state-empty');
-
-    var panelListEl = document.getElementById('panel-notif-lista');
-    var panelBadgeEl = document.getElementById('panel-notif-badge');
-    var panelEmptyEl = document.getElementById('panel-notif-empty');
-
-    var count = 0;
-    if (popoverListEl) {
-      count = popoverListEl.querySelectorAll('li').length;
-    } else if (panelListEl) {
-      count = panelListEl.querySelectorAll('li').length;
-    }
-
     if (badgeEl) {
-      badgeEl.textContent = String(count);
-      badgeEl.style.display = count > 0 ? 'inline-block' : 'none';
+      badgeEl.textContent = String(unread);
+      badgeEl.style.display = unread > 0 ? 'inline-block' : 'none';
     }
 
+    var panelBadgeEl = document.getElementById('panel-notif-badge');
     if (panelBadgeEl) {
-      panelBadgeEl.textContent = String(count);
-      panelBadgeEl.style.display = count > 0 ? 'inline-block' : 'none';
+      panelBadgeEl.textContent = String(unread);
+      panelBadgeEl.style.display = unread > 0 ? 'inline-block' : 'none';
+    }
+  }
+
+  function eliminarNotificacionIndividual(id, li) {
+    if (id) {
+      agregarDismissedIds([id]);
+    }
+    var feed = loadStoredFeed().filter(function (item) {
+      return item && item.id !== id;
+    });
+    saveStoredFeed(feed);
+
+    if (li) {
+      li.style.opacity = '0';
+      li.style.transform = 'translateX(10px)';
     }
 
-    if (count === 0) {
-      if (popoverListEl) popoverListEl.style.display = 'none';
-      if (popoverEmptyEl) popoverEmptyEl.style.display = 'block';
-
-      if (panelListEl) panelListEl.style.display = 'none';
-      if (panelEmptyEl) panelEmptyEl.style.display = 'block';
-    }
+    setTimeout(function () {
+      if (feed.length === 0) {
+        actualizarUI('empty', []);
+      } else {
+        actualizarUI('ok', feed);
+      }
+    }, 180);
   }
 
   function renderListaEnContenedor(container, alertas, isPanelCard) {
@@ -176,9 +202,10 @@
 
     alertas.forEach(function (a) {
       var li = document.createElement('li');
-      li.className = isPanelCard
+      var unreadClass = a.leida ? '' : ' dt-notif-item_unread';
+      li.className = (isPanelCard
         ? 'slds-p-around_small slds-card dt-notif-panel-item'
-        : 'slds-item slds-p-vertical_x-small slds-p-horizontal_small dt-notif-item';
+        : 'slds-item slds-p-vertical_x-small slds-p-horizontal_small dt-notif-item') + unreadClass;
 
       if (!isPanelCard) {
         li.style.borderBottom = '1px solid #e2e8f0';
@@ -187,38 +214,41 @@
         li.style.borderRadius = '6px';
         li.style.marginBottom = '6px';
       }
-      li.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      li.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
       if (a.id) li.setAttribute('data-notif-id', a.id);
 
       var medio;
       var badgeClass = 'dt-notif-badge dt-notif-badge_backend';
-      if (a.isLocal) {
-        if (a.tipo === 'success') {
-          medio = 'ÉXITO';
-          badgeClass = 'dt-notif-badge dt-notif-badge_success';
-        } else if (a.tipo === 'error') {
-          medio = 'ALERTA';
-          badgeClass = 'dt-notif-badge dt-notif-badge_error';
-        } else {
-          medio = 'SISTEMA';
-          badgeClass = 'dt-notif-badge dt-notif-badge_system';
-        }
+      if (a.esError || a.tipo === 'error') {
+        medio = 'ALERTA';
+        badgeClass = 'dt-notif-badge dt-notif-badge_error';
+      } else if (a.tipo === 'success') {
+        medio = 'ÉXITO';
+        badgeClass = 'dt-notif-badge dt-notif-badge_success';
+      } else if (a.medio === 'SISTEMA' || a.isLocal) {
+        medio = 'SISTEMA';
+        badgeClass = 'dt-notif-badge dt-notif-badge_system';
       } else {
         medio = escapeHtml((a.medio || 'EMAIL').toString().toUpperCase());
       }
 
       var mensaje = escapeHtml(a.mensaje || 'Notificación del sistema');
       var fecha = escapeHtml(formatearFecha(a.fechaEnvio));
-      var completada = a.completada === true;
+      var dotHtml = a.leida
+        ? ''
+        : '<span title="No leída" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#0176d3;margin-right:6px;flex-shrink:0;"></span>';
 
       li.innerHTML =
         '<div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start" style="gap: 8px;">' +
           '<div style="min-width: 0; flex: 1;">' +
-            '<p class="slds-text-body_regular dt-notif-msg" style="font-weight: 600; font-size: 0.85rem; line-height: 1.35; margin: 0; word-break: break-word;">' +
-              mensaje +
-            '</p>' +
-            '<span class="slds-text-body_small slds-text-color_weak dt-notif-time" style="font-size: 0.74rem;">' +
-              fecha + (completada ? ' · Recibida' : ' · En proceso') +
+            '<div style="display: flex; align-items: center;">' +
+              dotHtml +
+              '<p class="slds-text-body_regular dt-notif-msg" style="font-weight: ' + (a.leida ? '500' : '700') + '; font-size: 0.84rem; line-height: 1.35; margin: 0; word-break: break-word;">' +
+                mensaje +
+              '</p>' +
+            '</div>' +
+            '<span class="slds-text-body_small slds-text-color_weak dt-notif-time" style="font-size: 0.72rem; display: block; margin-top: 2px;">' +
+              fecha +
             '</span>' +
           '</div>' +
           '<div class="slds-grid slds-grid_vertical-align-center" style="gap: 6px; flex-shrink: 0;">' +
@@ -237,27 +267,7 @@
         deleteBtn.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
-
-          if (a.id) {
-            agregarDismissedId(a.id);
-          }
-
-          if (a.isLocal || (a.id && String(a.id).startsWith('notif-'))) {
-            eliminarNotificacionLocal(a.id);
-          } else {
-            ultimaListaBackend = ultimaListaBackend.filter(function (b) {
-              return (b.id != null ? 'backend-' + b.id : '') !== a.id;
-            });
-          }
-
-          li.style.opacity = '0';
-          li.style.transform = 'translateX(10px)';
-          setTimeout(function () {
-            if (li.parentNode) {
-              li.parentNode.removeChild(li);
-            }
-            actualizarConteoNotificaciones();
-          }, 200);
+          eliminarNotificacionIndividual(a.id, li);
         });
       }
 
@@ -287,19 +297,8 @@
   }
 
   function actualizarUI(state, data, errorMsg) {
-    var badgeEl = document.getElementById('notif-badge-count');
-    var panelBadgeEl = document.getElementById('panel-notif-badge');
-
     if (state === 'ok' || state === 'empty') {
-      var count = Array.isArray(data) ? data.length : 0;
-      if (badgeEl) {
-        badgeEl.textContent = String(count);
-        badgeEl.style.display = count > 0 ? 'inline-block' : 'none';
-      }
-      if (panelBadgeEl) {
-        panelBadgeEl.textContent = String(count);
-        panelBadgeEl.style.display = count > 0 ? 'inline-block' : 'none';
-      }
+      actualizarBadge(data);
     }
 
     actualizarContenedor(
@@ -331,30 +330,47 @@
     );
   }
 
-  function recargarVistaCombinada() {
-    var locales = getNotificacionesLocales();
-    var combinadas = combinarAlertas(locales, ultimaListaBackend);
-    if (combinadas.length === 0) {
-      actualizarUI('empty', []);
-    } else {
-      actualizarUI('ok', combinadas);
+  function marcarTodasComoLeidas() {
+    var feed = loadStoredFeed();
+    var changed = false;
+    feed = feed.map(function (item) {
+      if (item && !item.leida) {
+        item.leida = true;
+        changed = true;
+      }
+      return item;
+    });
+    if (changed) {
+      saveStoredFeed(feed);
+      actualizarBadge(feed);
+      if (feed.length > 0) {
+        actualizarUI('ok', feed);
+      }
     }
+  }
+
+  function limpiarNotificaciones() {
+    var current = loadStoredFeed();
+    var ids = current.map(function (item) { return item && item.id; }).filter(Boolean);
+    agregarDismissedIds(ids);
+    saveStoredFeed([]);
+    try { localStorage.setItem(getClearFlagKey(), '1'); } catch (e) {}
+    actualizarUI('empty', []);
   }
 
   function cargarAlertas() {
     var hasHeaderWidget = document.getElementById('btn-notificaciones-toggle');
-    var hasPanelCard = document.getElementById('panel-notificaciones-card');
-    if (!hasHeaderWidget && !hasPanelCard) return;
+    if (!hasHeaderWidget) return;
 
-    var locales = getNotificacionesLocales();
-    if (locales.length > 0) {
-      actualizarUI('ok', combinarAlertas(locales, ultimaListaBackend));
-    } else if (ultimaListaBackend.length === 0) {
+    var cached = loadStoredFeed();
+    if (cached.length > 0) {
+      actualizarUI('ok', cached);
+    } else {
       actualizarUI('loading', []);
     }
 
     var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 5000) : null;
+    var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 6000) : null;
 
     fetch('/api/notificaciones/mis-alertas', {
       method: 'GET',
@@ -365,78 +381,77 @@
       .then(function (res) {
         if (timeoutId) clearTimeout(timeoutId);
         if (!res.ok) {
-          return res.json().catch(function () { return {}; }).then(function (errBody) {
-            throw new Error(errBody.message || ('HTTP ' + res.status));
-          });
+          throw new Error('No se pudieron cargar las notificaciones en este momento.');
         }
         return res.json();
       })
       .then(function (data) {
-        ultimaListaBackend = Array.isArray(data) ? data : [];
-        var localesActuales = getNotificacionesLocales();
-        var combinadas = combinarAlertas(localesActuales, ultimaListaBackend);
-        if (combinadas.length === 0) {
+        var incoming = Array.isArray(data) ? data : [];
+        var backendNormalizadas = incoming.map(function (b) {
+          return {
+            id: b.id != null ? 'backend-' + b.id : ('backend|' + (b.mensaje || '')),
+            mensaje: b.mensaje,
+            medio: b.medio || 'EMAIL',
+            tipo: b.tipo || 'info',
+            fechaEnvio: b.fechaEnvio,
+            completada: b.completada !== false,
+            esError: Boolean(b.esError),
+            isLocal: false,
+            leida: false
+          };
+        });
+        if (backendNormalizadas.length > 0) {
+          try { localStorage.removeItem(getClearFlagKey()); } catch (e) {}
+        }
+        var merged = mergeIntoFeed(backendNormalizadas);
+        if (merged.length === 0) {
           actualizarUI('empty', []);
         } else {
-          actualizarUI('ok', combinadas);
+          actualizarUI('ok', merged);
         }
       })
       .catch(function () {
         if (timeoutId) clearTimeout(timeoutId);
-        // Si la respuesta del fetch falla (error 403, 401 o caída de red),
-        // NO mostrar el banner rojo de error si hay notificaciones locales;
-        // renderizar las locales o mostrar estado vacío si no hay ninguna.
-        var localesActuales = getNotificacionesLocales();
-        if (localesActuales.length > 0) {
-          actualizarUI('ok', combinarAlertas(localesActuales, ultimaListaBackend));
+        var fallbackFeed = loadStoredFeed();
+        if (fallbackFeed.length > 0) {
+          actualizarUI('ok', fallbackFeed);
         } else {
           actualizarUI('empty', []);
         }
       });
   }
 
-  function transferirToastANotificaciones(toast) {
-    if (!toast) return;
-    var mensaje = toast.getAttribute('data-mensaje');
-    if (!mensaje) {
-      var h2 = toast.querySelector('h2');
-      if (h2) mensaje = h2.textContent.trim();
-    }
-    if (!mensaje) return;
+  function registrarToastEnFeed(mensaje, tipo) {
+    if (!mensaje || !mensaje.trim()) return;
+    var cleanMsg = mensaje.trim();
+    var current = loadStoredFeed();
+    var yaExisteReciente = current.some(function (item) {
+      return item && item.mensaje === cleanMsg &&
+        (Date.now() - new Date(item.fechaEnvio).getTime() < 4000);
+    });
+    if (yaExisteReciente) return;
 
-    var tipo = toast.getAttribute('data-tipo') || 'success';
-
-    var notif = {
-      id: 'notif-' + Date.now(),
-      mensaje: mensaje,
-      tipo: tipo,
+    var esError = tipo === 'error';
+    try { localStorage.removeItem(getClearFlagKey()); } catch (e) {}
+    var merged = mergeIntoFeed([{
+      id: 'notif-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+      mensaje: cleanMsg,
+      medio: esError ? 'ALERTA' : 'SISTEMA',
+      tipo: esError ? 'error' : 'success',
       fechaEnvio: new Date().toISOString(),
       completada: true,
-      isLocal: true
-    };
+      esError: esError,
+      isLocal: true,
+      leida: false
+    }]);
 
-    var lista = getNotificacionesLocales();
-    // Evitar duplicar exactamente el mismo mensaje si ya se guardó hace menos de 4 segundos
-    var yaExiste = lista.some(function (item) {
-      return item.mensaje === notif.mensaje && (Date.now() - new Date(item.fechaEnvio).getTime() < 4000);
-    });
-
-    if (!yaExiste) {
-      lista.unshift(notif);
-      if (lista.length > 50) lista = lista.slice(0, 50);
-      guardarNotificacionesLocales(lista);
+    if (merged.length > 0) {
+      actualizarUI('ok', merged);
     }
-
-    recargarVistaCombinada();
   }
 
-  function inicializarToast() {
-    var toast = document.getElementById('toast-notification');
+  function configurarAutoCierreToast(toast) {
     if (!toast) return;
-
-    // Registrar de inmediato en la campanita para no perderla si el usuario navega antes de los 3s
-    transferirToastANotificaciones(toast);
-
     var cerrado = false;
     var timerId = null;
 
@@ -447,8 +462,6 @@
         clearTimeout(timerId);
         timerId = null;
       }
-
-      // Desvanecimiento suave
       toast.classList.add('dt-toast-hidden');
       setTimeout(function () {
         if (toast && toast.parentNode) {
@@ -457,7 +470,6 @@
       }, 400);
     }
 
-    // Interceptar botones de cerrar ('x')
     var closeButtons = toast.querySelectorAll('.dt-toast-close, button.slds-button_icon');
     closeButtons.forEach(function (btn) {
       btn.addEventListener('click', function (e) {
@@ -467,20 +479,43 @@
       });
     });
 
-    // Temporizador de 3 segundos (3000 ms)
-    timerId = setTimeout(function () {
-      cerrarToast();
-    }, 3000);
+    // Auto-cierre suave a los 3 segundos (3000 ms)
+    timerId = setTimeout(cerrarToast, 3000);
+  }
+
+  function inicializarToasts() {
+    var mainToast = document.getElementById('toast-notification');
+    if (mainToast) {
+      var msg = mainToast.getAttribute('data-mensaje');
+      if (!msg) {
+        var h2 = mainToast.querySelector('h2');
+        if (h2) msg = h2.textContent.trim();
+      }
+      var tipo = mainToast.getAttribute('data-tipo') || 'success';
+      registrarToastEnFeed(msg, tipo);
+      configurarAutoCierreToast(mainToast);
+    }
+
+    var okToast = document.getElementById('dt-flash-ok-toast');
+    if (okToast) {
+      registrarToastEnFeed(okToast.getAttribute('data-flash-msg'), 'success');
+      configurarAutoCierreToast(okToast);
+    }
+
+    var errToast = document.getElementById('dt-flash-error-toast');
+    if (errToast) {
+      registrarToastEnFeed(errToast.getAttribute('data-flash-msg'), 'error');
+      configurarAutoCierreToast(errToast);
+    }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    // Inicializar temporizador y desvanecimiento de toast flash
-    inicializarToast();
+    inicializarToasts();
 
-    // Toggle popover de la campanita
     var toggleBtn = document.getElementById('btn-notificaciones-toggle');
     var popover = document.getElementById('popover-notificaciones');
     var closeBtn = document.getElementById('btn-notificaciones-close');
+    var clearBtn = document.getElementById('btn-notificaciones-clear');
 
     function setPopoverOpen(open) {
       if (!popover || !toggleBtn) return;
@@ -495,6 +530,7 @@
         setPopoverOpen(!isOpen);
         if (!isOpen) {
           cargarAlertas();
+          setTimeout(marcarTodasComoLeidas, 800);
         }
       });
 
@@ -516,6 +552,10 @@
       closeBtn.addEventListener('click', function () {
         setPopoverOpen(false);
       });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', limpiarNotificaciones);
     }
 
     ['btn-notificaciones-refresh', 'notif-retry-btn', 'panel-notif-refresh', 'panel-notif-retry'].forEach(function (id) {

@@ -62,6 +62,33 @@ public class AdminController {
   @Autowired(required = false)
   private com.donatrack.web.service.CacheResilienteService cacheResilienteService;
 
+  @Autowired(required = false)
+  private com.donatrack.web.gateway.NotificacionesGateway notificacionesGateway;
+
+  private void registrarNotificacionSistema(Authentication auth, String mensaje) {
+    if (notificacionesGateway == null || mensaje == null || mensaje.isBlank()) {
+      return;
+    }
+    try {
+      String destinatario = null;
+      if (auth instanceof JwtAuthenticationToken jwt) {
+        String email = jwt.getToken().getClaimAsString("email");
+        if (email != null && !email.isBlank()) {
+          destinatario = email.trim();
+        }
+      }
+      if ((destinatario == null || destinatario.isBlank()) && auth != null && auth.getName() != null) {
+        destinatario = auth.getName().trim();
+      }
+      if (destinatario == null || destinatario.isBlank()) {
+        destinatario = "admin@donatrack.org";
+      }
+      notificacionesGateway.enviarNotificacion(destinatario, mensaje, "SISTEMA");
+    } catch (Exception e) {
+      log.warn("No se pudo persistir notificación operativa: {}", e.getMessage());
+    }
+  }
+
   public AdminController(
       LogisticaGateway logisticaGateway,
       IncentivosGateway incentivosGateway,
@@ -431,7 +458,7 @@ public class AdminController {
                 });
 
     CompletableFuture.allOf(fCamiones, fChoferes, fRutas)
-        .orTimeout(3, TimeUnit.SECONDS)
+        .orTimeout(10, TimeUnit.SECONDS)
         .exceptionally(ex -> null)
         .join();
 
@@ -456,6 +483,7 @@ public class AdminController {
       @ModelAttribute("nuevoCamion") CamionDto nuevoCamion, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.crearCamion(nuevoCamion);
+      registrarNotificacionSistema(null, "Camión " + nuevoCamion.patente() + " registrado en la flota.");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Camión " + nuevoCamion.patente() + " registrado con éxito.");
     } catch (Exception e) {
@@ -471,6 +499,7 @@ public class AdminController {
       @PathVariable("patente") String patente, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarCamion(patente);
+      registrarNotificacionSistema(null, "Camión " + patente + " dado de baja de la flota.");
       redirectAttributes.addFlashAttribute("flashOk", "Camión " + patente + " eliminado con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
@@ -498,6 +527,7 @@ public class AdminController {
       String nomCompleto =
           nuevoChofer.nombre()
               + (nuevoChofer.apellido() != null ? " " + nuevoChofer.apellido() : "");
+      registrarNotificacionSistema(null, "Chofer " + nomCompleto.trim() + " registrado en logística.");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Chofer " + nomCompleto.trim() + " registrado con éxito.");
     } catch (Exception e) {
@@ -513,6 +543,7 @@ public class AdminController {
       @PathVariable("legajo") String legajo, RedirectAttributes redirectAttributes) {
     try {
       logisticaGateway.eliminarChofer(legajo);
+      registrarNotificacionSistema(null, "Chofer con legajo " + legajo + " eliminado.");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Chofer con legajo " + legajo + " eliminado con éxito.");
     } catch (Exception e) {
@@ -1071,6 +1102,8 @@ public class AdminController {
         cacheResilienteService.invalidarCache();
       }
       String shortCode = "#DT-" + donacionId.toString().substring(0, 4).toUpperCase();
+      registrarNotificacionSistema(
+          null, "Matchmaking ejecutado: donación " + shortCode + " asignada y planificada.");
       redirectAttributes.addFlashAttribute(
           "flashOk",
           "Donación "
@@ -1352,6 +1385,14 @@ public class AdminController {
       payload.put("bienesBrutos", List.of(bien));
 
       donacionesGateway.crearRecepcion(payload);
+      registrarNotificacionSistema(
+          auth,
+          "Recepción en depósito registrada: "
+              + request.cantidad()
+              + " "
+              + request.unidadMedicion()
+              + " de "
+              + request.descripcion());
       redirectAttributes.addFlashAttribute(
           "flashOk", "Donación recibida e ingresada a depósito correctamente.");
       return "redirect:/app/admin/matchmaking";
@@ -1632,7 +1673,7 @@ public class AdminController {
                 });
 
     CompletableFuture.allOf(fMetricas, fInsignias, fMisiones, fDonaciones, fBeneficiarios)
-        .orTimeout(3, TimeUnit.SECONDS)
+        .orTimeout(10, TimeUnit.SECONDS)
         .exceptionally(ex -> null)
         .join();
 
@@ -1853,53 +1894,6 @@ public class AdminController {
         causasActivas.add(causa);
       }
     }
-    // Asegurar causas comunitarias activas representativas para el buscador
-    causasActivas.add(
-        Map.of(
-            "ongId", "el-faro",
-            "organizacion", "Comedor Comunitario El Faro",
-            "ongNombre", "Comedor Comunitario El Faro",
-            "correo", "coordinacion@elfaro.org.ar",
-            "ubicacion", "Palermo / Barracas, CABA",
-            "categoria", "No Perecederos",
-            "descripcion", "Fideos secos, arroz largo fino y lentejas para 220 raciones diarias",
-            "cantidad", 50,
-            "urgencia", "Alta (Urgente)"));
-    causasActivas.add(
-        Map.of(
-            "ongId", "los-gurises",
-            "organizacion", "Hogar de Niñez Los Gurises",
-            "ongNombre", "Hogar de Niñez Los Gurises",
-            "correo", "recepcion@losgurises.org.ar",
-            "ubicacion", "La Matanza, PBA",
-            "categoria", "Abrigo",
-            "descripcion", "Camperas de abrigo, frazadas polares y calzado infantil de invierno",
-            "cantidad", 35,
-            "urgencia", "Alta"));
-    causasActivas.add(
-        Map.of(
-            "ongId", "raices",
-            "organizacion", "Fundación Raíces Solidarias",
-            "ongNombre", "Fundación Raíces Solidarias",
-            "correo", "logistica@raices.org.ar",
-            "ubicacion", "Avellaneda, PBA",
-            "categoria", "Higiene",
-            "descripcion", "Kits de higiene familiar, jabón blanco, alcohol en gel y pañales",
-            "cantidad", 40,
-            "urgencia", "Media"));
-    causasActivas.add(
-        Map.of(
-            "ongId", "posta-sur",
-            "organizacion", "Posta Sanitaria Barrial Sur",
-            "ongNombre", "Posta Sanitaria Barrial Sur",
-            "correo", "salud@postasur.org.ar",
-            "ubicacion", "Quilmes, PBA",
-            "categoria", "Medicamentos",
-            "descripcion",
-                "Botiquines de primeros auxilios, gasas estériles y antitérmicos pediátricos",
-            "cantidad", 25,
-            "urgencia", "Alta"));
-
     List<Map<String, Object>> misionesNormalizadas =
         normalizarMisiones(misiones, misDonaciones.size());
 
@@ -2002,6 +1996,17 @@ public class AdminController {
         log.warn("Error al registrar actividad en incentivos: {}", e.getMessage());
       }
 
+      registrarNotificacionSistema(
+          auth,
+          "Donación "
+              + codigoCorto
+              + " registrada en depósito ("
+              + cantidad
+              + " "
+              + unidadMedicion
+              + " de "
+              + descripcion
+              + ").");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!");
       return "redirect:/app/donante?tab=seguimiento";
@@ -2052,6 +2057,14 @@ public class AdminController {
     return res;
   }
 
+  private static String formatearAltura(Object raw) {
+    if (raw == null) {
+      return "";
+    }
+    String s = raw.toString().trim();
+    return s.endsWith(".0") ? s.substring(0, s.length() - 2) : s;
+  }
+
   private Map<String, List<Map<String, Object>>> extraerEntregas(List<Map<String, Object>> rutas) {
     Map<String, Map<String, Object>> enCaminoMap = new LinkedHashMap<>();
     Map<String, Map<String, Object>> recibidasMap = new LinkedHashMap<>();
@@ -2090,7 +2103,7 @@ public class AdminController {
             String dirStr = "Destino Comunitario";
             if (dir != null) {
               String calle = dir.get("calle") != null ? String.valueOf(dir.get("calle")) : "";
-              String alt = dir.get("altura") != null ? String.valueOf(dir.get("altura")) : "";
+              String alt = formatearAltura(dir.get("altura"));
               String loc = dir.get("localidad") != null ? String.valueOf(dir.get("localidad")) : "";
               dirStr = (calle + " " + alt + ", " + loc).trim();
             }
@@ -2323,7 +2336,7 @@ public class AdminController {
         Object dObj = pMap.get("direccion");
         if (dObj instanceof Map<?, ?> dMap) {
           String c = dMap.get("calle") != null ? dMap.get("calle").toString() : "";
-          String a = dMap.get("altura") != null ? dMap.get("altura").toString() : "";
+          String a = formatearAltura(dMap.get("altura"));
           String l = dMap.get("localidad") != null ? dMap.get("localidad").toString() : "";
           String resDir = (c + " " + a + (l.isBlank() ? "" : ", " + l)).trim();
           if (!resDir.isBlank()) {
@@ -2407,18 +2420,44 @@ public class AdminController {
       RedirectAttributes redirectAttributes) {
     try {
       UUID beneficiarioId = resolverBeneficiarioId(auth);
-      Map<String, Object> req =
+      Map<String, Object> subcategoriaReq =
           Map.of(
-              "tipo", tipo,
-              "descripcion", descripcion,
-              "cantidadRequerida", cantidadRequerida,
-              "subcategoriaRequerida",
-                  Map.of(
-                      "nombre",
-                      nombreSubcategoria,
-                      "descripcion",
-                      "Categoría " + nombreSubcategoria));
+              "nombre",
+              nombreSubcategoria,
+              "descripcion",
+              "Categoría " + nombreSubcategoria);
+      Map<String, Object> req;
+      if ("ordinaria".equalsIgnoreCase(tipo) || "recurrente".equalsIgnoreCase(tipo)) {
+        req =
+            Map.of(
+                "tipo",
+                "recurrente",
+                "descripcion",
+                descripcion,
+                "cantidadObjetivo",
+                cantidadRequerida,
+                "tipoPeriodo",
+                "MENSUAL",
+                "activa",
+                true,
+                "subcategoriaRequerida",
+                subcategoriaReq);
+      } else {
+        req =
+            Map.of(
+                "tipo",
+                tipo,
+                "descripcion",
+                descripcion,
+                "cantidadRequerida",
+                cantidadRequerida,
+                "subcategoriaRequerida",
+                subcategoriaReq);
+      }
       donacionesGateway.agregarNecesidad(beneficiarioId, req);
+      registrarNotificacionSistema(
+          auth,
+          "Necesidad material declarada: " + descripcion + " (" + nombreSubcategoria + ").");
       redirectAttributes.addFlashAttribute("flashOk", "Necesidad declarada con éxito.");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute(
@@ -2456,6 +2495,7 @@ public class AdminController {
       @RequestParam("patenteCamion") String patenteCamion,
       @RequestParam(name = "fotoUrl", required = false) String fotoUrl,
       @RequestParam(name = "fotoArchivo", required = false) MultipartFile fotoArchivo,
+      Authentication auth,
       RedirectAttributes redirectAttributes) {
     try {
       List<String> fotos = new ArrayList<>();
@@ -2497,6 +2537,13 @@ public class AdminController {
       if (cacheResilienteService != null) {
         cacheResilienteService.invalidarCache();
       }
+      registrarNotificacionSistema(
+          auth,
+          "Entrega confirmada con remito para la donación #DT-"
+              + idDonacion.toString().substring(0, 4).toUpperCase()
+              + " (camión "
+              + patenteCamion
+              + ").");
       redirectAttributes.addFlashAttribute(
           "flashOk", "Entrega confirmada con éxito.");
     } catch (Exception e) {

@@ -8,7 +8,7 @@
       angle: 0,
       title: "Donación Realizada",
       short: "Registro",
-      desc: "Registrás los insumos y se emite tu remito digital de seguimiento.",
+      desc: "Registrás los bienes y se inicia el seguimiento.",
       status: "Trazabilidad Iniciada",
       origin: "Recepción en depósito",
       points: "+10 Puntos de Impacto",
@@ -16,39 +16,50 @@
     },
     {
       num: "02",
-      angle: 90,
+      angle: 72,
       title: "Centro de Acopio",
       short: "Acopio",
-      desc: "Recibimos, pesamos y clasificamos los bienes en el depósito.",
+      desc: "Pesamos y clasificamos el lote en depósito.",
       status: "Lote Auditado",
       origin: "Depósito Central DonaTrack",
       points: "Control de Calidad 100%",
-      progress: 0.25
+      progress: 0.2
     },
     {
       num: "03",
-      angle: 180,
+      angle: 144,
       title: "Transporte en Ruta",
       short: "En Ruta",
-      desc: "Asignamos el envío a una unidad en ruta hacia la organización.",
+      desc: "Asignamos camión y chofer hacia la ONG.",
       status: "Móvil Despachado",
       origin: "Ruta Activa con Chofer",
       points: "Monitoreo Satelital",
-      progress: 0.50
+      progress: 0.4
     },
     {
       num: "04",
-      angle: 270,
-      title: "Entrega en ONG Receptora",
+      angle: 216,
+      title: "Entrega en ONG",
       short: "En Sede",
-      desc: "La entidad confirma la recepción con firma y foto en destino.",
-      status: "Entrega Certificada",
-      origin: "Comedor Verificado + Remito",
-      points: "+25 Puntos de Entrega (35 pts totales)",
-      progress: 0.75
+      desc: "El móvil arriba al comedor y descarga los bienes.",
+      status: "En Destino",
+      origin: "Comedor Verificado",
+      points: "Recepción Física",
+      progress: 0.6
     },
     {
       num: "05",
+      angle: 288,
+      title: "Comprobante y Remito",
+      short: "Remito",
+      desc: "Se firma el remito digital con foto verificable.",
+      status: "Entrega Certificada",
+      origin: "Comprobante + Foto S3",
+      points: "+25 Puntos de Entrega",
+      progress: 0.8
+    },
+    {
+      num: "06",
       angle: 360,
       title: "Recorrido Completo",
       short: "En Sucursal",
@@ -66,7 +77,7 @@
   let closingTimeoutId = null;
   let isPlaying = true;
   let autoplayTimer = null;
-  const AUTOPLAY_INTERVAL = 10000; // ms (15 segundos exactos)
+  const AUTOPLAY_INTERVAL = 15000; // ms (15 segundos exactos)
   const ANIM_DURATION = 900; // ms
 
   const CIRCUMFERENCE = 2 * Math.PI * 190; // ~1193.8
@@ -107,8 +118,8 @@
     const rInnerMajor = 180;
 
     let svgHtml = "";
-    for (let deg = 0; deg < 360; deg += 10) {
-      const isMajor = deg % 90 === 0; // Hitos principales (4 etapas)
+    for (let deg = 0; deg < 360; deg += 9) {
+      const isMajor = deg % 72 === 0; // Hitos principales (5 etapas)
       const rInner = isMajor ? rInnerMajor : rInnerMinor;
       const rad = ((deg - 90) * Math.PI) / 180;
 
@@ -179,7 +190,7 @@
 
   // 3. Actualizar la vista al paso seleccionado
   window.selectCircleStep = function (stepNum, manualClick = true) {
-    if (stepNum < 1 || stepNum > 5) return;
+    if (stepNum < 1 || stepNum > 6) return;
     currentStep = stepNum;
     const data = STEPS[stepNum - 1];
 
@@ -188,7 +199,7 @@
       card.style.opacity = "0.4";
       card.style.transform = "translateY(4px)";
       setTimeout(() => {
-        if (stagePill) stagePill.textContent = `ETAPA ${data.num} / 05`;
+        if (stagePill) stagePill.textContent = `ETAPA ${data.num} / 06`;
         if (stageStatus) stageStatus.textContent = data.status;
         if (stageTitle) stageTitle.textContent = data.title;
         if (stageDesc) stageDesc.textContent = data.desc;
@@ -202,12 +213,12 @@
     // Actualizar Texto del Hub Central
     if (hubStage) {
       hubStage.textContent = data.short;
-      hubStage.style.color = stepNum >= 4 ? "#16a34a" : "var(--fg)";
+      hubStage.style.color = stepNum >= 5 ? "#16a34a" : "var(--fg)";
     }
 
     // Cambiar imagen del camión según etapa
     if (truckImg) {
-      truckImg.src = stepNum >= 4 ? "/img/delivery-truck-end.svg" : "/img/delivery-truck-start.svg";
+      truckImg.src = stepNum >= 5 ? "/img/delivery-truck-end.svg" : "/img/delivery-truck-start.svg";
     }
 
     // Mover camión y pintar trazo verde sincronizado frame a frame
@@ -216,7 +227,7 @@
       applyDialAngle(0);
     } else {
       animateDialTo(data.angle, () => {
-        if (truckImg && stepNum >= 4) {
+        if (truckImg && stepNum >= 5) {
           truckImg.src = "/img/delivery-truck-end.svg";
         }
       });
@@ -240,10 +251,11 @@
       node.classList.remove("is-active", "is-passed", "is-closing");
       if (nodeStep === stepNum) {
         node.classList.add("is-active");
+        if (stepNum === 5) node.classList.add("is-closing");
       } else if (nodeStep < stepNum) {
         node.classList.add("is-passed");
       }
-      if (stepNum === 5 && nodeStep === 1) {
+      if (stepNum === 6 && nodeStep === 1) {
         node.classList.add("is-closing");
       }
     });
@@ -257,7 +269,7 @@
   // 4. Control de Autoplay (desplazamiento continuo en ciclo cada 15 segundos)
   function stepForward() {
     let next = currentStep + 1;
-    if (next > 5) {
+    if (next > 6) {
       next = 1;
     }
     selectCircleStep(next, false);

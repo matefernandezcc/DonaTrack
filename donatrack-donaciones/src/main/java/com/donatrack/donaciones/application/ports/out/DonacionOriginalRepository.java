@@ -10,4 +10,8 @@ public interface DonacionOriginalRepository {
   Optional<DonacionOriginal> buscarPorId(UUID id);
 
   Optional<DonacionOriginal> buscarPorIdDonacion(UUID idDonacion);
+
+  default java.util.Map<UUID, String[]> obtenerMapaDonantesPorDonacion() {
+    return java.util.Collections.emptyMap();
+  }
 }

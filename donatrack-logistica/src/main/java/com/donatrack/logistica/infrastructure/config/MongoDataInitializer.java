@@ -29,12 +29,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
- * Precarga de datos enriquecidos en MongoDB (para entorno local y nube cuando la base esté vacía).
- * Asegura la disponibilidad inmediata de entidades en las 6 colecciones. Excluido en perfil de test
- * para no interferir con tests unitarios e integrados.
+ * Precarga de datos enriquecidos en MongoDB (solo para entornos local y dev cuando la base esté
+ * vacía). Excluido en prod y test para no inyectar datos de ejemplo en producción ni interferir con
+ * tests.
  */
 @Component
-@Profile("!test")
+@Profile({"local", "dev"})
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+    name = "donatrack.mongo.seed-enabled",
+    havingValue = "true",
+    matchIfMissing = false)
 public class MongoDataInitializer implements CommandLineRunner {
 
   private static final Logger log = LoggerFactory.getLogger(MongoDataInitializer.class);

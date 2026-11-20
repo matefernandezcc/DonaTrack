@@ -17,6 +17,24 @@ Este documento detalla los puertos, endpoints de documentación interactiva (Swa
 
 ---
 
+## 🌐 Subdominios y Endpoints en Producción (`{PUBLIC_DOMAIN}`)
+
+En producción (Oracle Cloud ARM64 + Caddy Reverse Proxy), los puertos internos de backend quedan protegidos en la red privada y todo el tráfico público ingresa por HTTPS usando el dominio configurado en `PUBLIC_DOMAIN` (`donatrack.social` por defecto):
+
+| Dominio / Prefijo | Servicio | Swagger UI / UI | OpenAPI JSON | Consumo REST / Health |
+|---|---|---|---|---|
+| `https://{PUBLIC_DOMAIN}` | **Cliente Web SSR + SSO** | [`https://donatrack.social`](https://donatrack.social) | N/A | `/healthcheck` |
+| `https://dev.{PUBLIC_DOMAIN}` | **Developer Portal Unificado** | [`https://dev.donatrack.social`](https://dev.donatrack.social) | Selector multi-servicio | Estado en vivo de los 5 servicios |
+| `https://dev.{PUBLIC_DOMAIN}/donaciones` | **Donaciones** (+ GraphiQL) | `/donaciones/swagger-ui/index.html` | `/donaciones/v3/api-docs` | `https://api.{PUBLIC_DOMAIN}/donaciones` |
+| `https://dev.{PUBLIC_DOMAIN}/incentivos` | **Incentivos** | `/incentivos/swagger-ui/index.html` | `/incentivos/v3/api-docs` | `https://api.{PUBLIC_DOMAIN}/incentivos` |
+| `https://dev.{PUBLIC_DOMAIN}/logistica` | **Logística** | `/logistica/swagger-ui/index.html` | `/logistica/v3/api-docs` | `https://api.{PUBLIC_DOMAIN}/logistica` |
+| `https://dev.{PUBLIC_DOMAIN}/notificaciones` | **Notificaciones** | `/notificaciones/swagger-ui/index.html` | `/notificaciones/v3/api-docs` | `https://api.{PUBLIC_DOMAIN}/notificaciones` |
+| `https://dev.{PUBLIC_DOMAIN}/auth` | **Auth & SSO** | `/auth/swagger-ui/index.html` | `/auth/v3/api-docs` | `https://api.{PUBLIC_DOMAIN}/auth` |
+
+> 🔐 En producción (`DONATRACK_SECURITY_ENABLED=true`), `/swagger-ui/**`, `/v3/api-docs/**` y `/actuator/health` son públicos, mientras que los endpoints `/api/**` requieren cabecera `Authorization: Bearer <JWT>` o `X-Service-Key: <INTERNAL_API_KEY>`.
+
+---
+
 ## 🗄️ Servicios de Infraestructura y Soporte
 
 | Servicio | Puerto Local | Detalle / Consola | Credenciales por Defecto |

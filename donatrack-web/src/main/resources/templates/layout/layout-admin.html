@@ -126,6 +126,7 @@
     #admin-menu-toggle,
     #btn-notificaciones-toggle,
     #btn-notificaciones-refresh,
+    #btn-notificaciones-clear,
     #btn-notificaciones-close,
     .slds-notify__close .slds-button {
       width: 36px !important;
@@ -143,10 +144,56 @@
     #admin-menu-toggle svg,
     #btn-notificaciones-toggle svg,
     #btn-notificaciones-refresh svg,
+    #btn-notificaciones-clear svg,
     #btn-notificaciones-close svg {
       width: 16px !important;
       height: 16px !important;
       margin: 0 !important;
+    }
+
+    /* Salesforce Quick Find & Árbol Colapsable en Navegación Vertical */
+    .dt-nav-group-toggle {
+      width: 100%;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px;
+      padding: 6px 8px !important;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #1e293b;
+      border-radius: 4px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .dt-nav-group-toggle:hover {
+      background: #f3f6fa;
+    }
+    .dt-nav-chevron-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .dt-nav-group-toggle[aria-expanded="true"] .dt-nav-chevron-box {
+      border: 1.5px solid #0176d3;
+      background: #eef6ff;
+      color: #0176d3;
+    }
+    .dt-nav-group-toggle[aria-expanded="false"] .dt-nav-chevron-box {
+      border: 1px solid transparent;
+      background: transparent;
+      color: #64748b;
+    }
+    .dt-nav-group-toggle[aria-expanded="true"] .dt-nav-chevron-svg {
+      transform: rotate(90deg);
+    }
+    .dt-nav-sublist {
+      padding-left: 16px;
+      margin-top: 2px;
     }
 
     .dt-touch-target {
@@ -827,8 +874,16 @@
       border: 1px solid #334155 !important;
     }
 
+    .dt-notif-item_unread {
+      background-color: #f0f7ff;
+    }
+
     [data-theme="dark"] .dt-notif-item {
       border-bottom-color: #1f2937 !important;
+    }
+
+    [data-theme="dark"] .dt-notif-item_unread {
+      background-color: rgba(59, 130, 246, 0.14) !important;
     }
 
     [data-theme="dark"] #panel-notificaciones-card {
@@ -1080,6 +1135,7 @@
           <button type="button" id="btn-notificaciones-toggle"
             class="slds-button slds-button_icon slds-button_icon-border-filled dt-touch-target"
             aria-haspopup="dialog" aria-expanded="false" aria-controls="popover-notificaciones"
+            th:attr="data-user=${nombreUsuario != null ? nombreUsuario : #authentication.name}"
             title="Ver notificaciones del sistema"
             style="position: relative; border-radius: 6px;">
             <svg class="slds-button__icon" aria-hidden="true">
@@ -1092,10 +1148,18 @@
 
           <section id="popover-notificaciones" aria-label="Notificaciones recientes"
             class="slds-popover slds-popover_large slds-nubbin_top-right" role="dialog"
-            style="display: none; position: absolute; right: 0; top: 44px; width: 360px; max-width: 92vw; z-index: 9999; background: #ffffff;">
+            style="display: none; position: absolute; right: 0; top: 44px; width: 380px; max-width: 92vw; z-index: 9999; background: #ffffff;">
             <header class="slds-popover__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
               <h2 class="slds-text-heading_small" style="font-weight: 800; color: #014486; margin: 0;">Notificaciones</h2>
-              <div class="slds-grid" style="gap: 4px;">
+              <div class="slds-grid" style="gap: 4px; align-items: center;">
+                <button type="button" id="btn-notificaciones-clear"
+                  class="slds-button slds-button_icon slds-button_icon-border dt-touch-target"
+                  title="Vaciar historial">
+                  <svg class="slds-button__icon" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#delete}"></use>
+                  </svg>
+                  <span class="slds-assistive-text">Vaciar</span>
+                </button>
                 <button type="button" id="btn-notificaciones-refresh"
                   class="slds-button slds-button_icon slds-button_icon-border dt-touch-target"
                   title="Actualizar notificaciones">
@@ -1169,175 +1233,225 @@
       aria-label="Menú de Navegación"
       style="background-color: #ffffff; border-right: 1px solid #dddbda; min-height: calc(100vh - 60px);">
 
+      <!-- SLDS Quick Find -->
+      <div class="slds-form-element slds-m-bottom_small">
+        <label class="slds-form-element__label slds-assistive-text" for="nav-quick-find">Quick Find</label>
+        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+          <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+            <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
+          </svg>
+          <input type="search" id="nav-quick-find" placeholder="Quick Find" class="slds-input" autocomplete="off" />
+        </div>
+      </div>
+
       <!-- Sección Administrador -->
-      <div class="slds-nav-vertical__section" sec:authorize="hasRole('ADMIN')">
+      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('ADMIN')">
         <h2 class="slds-nav-vertical__title slds-text-title_caps">Administración</h2>
-        <ul>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chart}"></use>
+        <div class="slds-nav-vertical__overflow">
+          <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
+            aria-controls="nav-group-admin" aria-expanded="true" data-group="nav-group-admin">
+            <span class="dt-nav-chevron-box">
+              <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
               </svg>
-              <span class="slds-truncate">Resumen Operativo</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/camiones}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#truck}"></use>
-              </svg>
-              <span class="slds-truncate">Flota de Camiones</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/choferes}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
-              </svg>
-              <span class="slds-truncate">Choferes</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/rutas}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
-              </svg>
-              <span class="slds-truncate">Rutas de Reparto</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/ranking}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
-              </svg>
-              <span class="slds-truncate">Ranking & Podio</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/donaciones/recepcion}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#inbox}"></use>
-              </svg>
-              <span class="slds-truncate">Recepción en Depósito</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/matchmaking}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#change_record_type}"></use>
-              </svg>
-              <span class="slds-truncate">Matchmaking</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/csv}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#upload}"></use>
-              </svg>
-              <span class="slds-truncate">Importar CSV</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/admin/usuarios}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
-              </svg>
-              <span class="slds-truncate" style="font-weight: 700; color: #014486;">Usuarios & Roles</span>
-            </a>
-          </li>
-        </ul>
+            </span>
+            <span class="slds-nav-vertical__action-text">Herramientas Admin</span>
+          </button>
+          <div id="nav-group-admin" class="slds-show dt-nav-sublist">
+            <ul>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chart}"></use>
+                  </svg>
+                  <span class="slds-truncate">Resumen Operativo</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/camiones}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#truck}"></use>
+                  </svg>
+                  <span class="slds-truncate">Flota de Camiones</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/choferes}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
+                  </svg>
+                  <span class="slds-truncate">Choferes</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/rutas}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
+                  </svg>
+                  <span class="slds-truncate">Rutas de Reparto</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/ranking}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
+                  </svg>
+                  <span class="slds-truncate">Ranking &amp; Podio</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/donaciones/recepcion}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#inbox}"></use>
+                  </svg>
+                  <span class="slds-truncate">Recepción en Depósito</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/matchmaking}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#change_record_type}"></use>
+                  </svg>
+                  <span class="slds-truncate">Matchmaking</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/csv}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#upload}"></use>
+                  </svg>
+                  <span class="slds-truncate">Importar CSV</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/usuarios}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
+                  </svg>
+                  <span class="slds-truncate" style="font-weight: 700; color: #014486;">Usuarios &amp; Roles</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       <!-- Sección Donante -->
-      <div class="slds-nav-vertical__section" sec:authorize="hasRole('DONANTE') or hasRole('ADMIN')">
+      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('DONANTE') or hasRole('ADMIN')">
         <h2 class="slds-nav-vertical__title slds-text-title_caps">Portal Donante</h2>
-        <ul>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/donante}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#metrics}"></use>
+        <div class="slds-nav-vertical__overflow">
+          <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
+            aria-controls="nav-group-donante" aria-expanded="true" data-group="nav-group-donante">
+            <span class="dt-nav-chevron-box">
+              <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
               </svg>
-              <span class="slds-truncate">Resumen &amp; Impacto</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/donante/donaciones}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#package}"></use>
-              </svg>
-              <span class="slds-truncate">Registrar Donación</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/donante(tab='seguimiento')}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
-              </svg>
-              <span class="slds-truncate">Seguimiento de Mis Donaciones</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/donante(tab='causas')}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
-              </svg>
-              <span class="slds-truncate">Buscador de ONGs &amp; Necesidades Activas</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/donante(tab='directorio')}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
-              </svg>
-              <span class="slds-truncate">Organizaciones y Comedores</span>
-            </a>
-          </li>
-        </ul>
+            </span>
+            <span class="slds-nav-vertical__action-text">Mi Impacto &amp; Aportes</span>
+          </button>
+          <div id="nav-group-donante" class="slds-show dt-nav-sublist">
+            <ul>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/donante}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#metrics}"></use>
+                  </svg>
+                  <span class="slds-truncate">Resumen &amp; Impacto</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/donante/donaciones}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#package}"></use>
+                  </svg>
+                  <span class="slds-truncate">Registrar Donación</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/donante(tab='seguimiento')}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
+                  </svg>
+                  <span class="slds-truncate">Seguimiento de Mis Donaciones</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/donante(tab='causas')}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
+                  </svg>
+                  <span class="slds-truncate">Buscador de ONGs &amp; Necesidades Activas</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/donante(tab='directorio')}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
+                  </svg>
+                  <span class="slds-truncate">Organizaciones y Comedores</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       <!-- Sección Beneficiaria -->
-      <div class="slds-nav-vertical__section" sec:authorize="hasRole('BENEFICIARIA') or hasRole('ADMIN')">
+      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('BENEFICIARIA') or hasRole('ADMIN')">
         <h2 class="slds-nav-vertical__title slds-text-title_caps">Organizaciones</h2>
-        <ul>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/beneficiaria}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
+        <div class="slds-nav-vertical__overflow">
+          <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
+            aria-controls="nav-group-beneficiaria" aria-expanded="true" data-group="nav-group-beneficiaria">
+            <span class="dt-nav-chevron-box">
+              <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
               </svg>
-              <span class="slds-truncate">Mi Organización</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/beneficiaria/necesidades}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#task}"></use>
-              </svg>
-              <span class="slds-truncate">Necesidades Materiales</span>
-            </a>
-          </li>
-          <li class="slds-nav-vertical__item">
-            <a th:href="@{/app/beneficiaria/entregas}"
-              class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-              <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
-              </svg>
-              <span class="slds-truncate">Confirmar Entregas</span>
-            </a>
-          </li>
-        </ul>
+            </span>
+            <span class="slds-nav-vertical__action-text">Gestión de Comedor</span>
+          </button>
+          <div id="nav-group-beneficiaria" class="slds-show dt-nav-sublist">
+            <ul>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/beneficiaria}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
+                  </svg>
+                  <span class="slds-truncate">Mi Organización</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/beneficiaria/necesidades}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#task}"></use>
+                  </svg>
+                  <span class="slds-truncate">Necesidades Materiales</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/beneficiaria/entregas}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
+                  </svg>
+                  <span class="slds-truncate">Confirmar Entregas</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
     </nav>
@@ -1365,7 +1479,7 @@
         </div>
       </div>
 
-      <!-- SLDS BLUEPRINT: TOAST NOTIFICATIONS (Única fuente de verdad de mensajes flash) -->
+      <!-- SLDS BLUEPRINT: TOAST NOTIFICATIONS (Única fuente de verdad de mensajes flash, con auto-cierre 3s y captura al historial) -->
       <div id="toast-notification"
            class="slds-notify_container slds-is-relative slds-m-bottom_medium donatrack-toast-fade"
            th:if="${flashOk != null or flashError != null}"
@@ -1650,6 +1764,80 @@
             localStorage.setItem("dt-theme", newTheme);
           } catch (e) {}
           themeBtn.setAttribute("aria-pressed", String(!isDark));
+        });
+      }
+
+      // 4. Grupos colapsables en menú vertical SLDS (con persistencia y auto-expansión del ítem activo)
+      function setNavGroupExpanded(toggle, expanded, persist) {
+        if (!toggle) return;
+        var ctrlId = toggle.getAttribute('aria-controls');
+        var panel = ctrlId ? document.getElementById(ctrlId) : null;
+        toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        if (panel) {
+          panel.classList.toggle('slds-show', expanded);
+          panel.classList.toggle('slds-hide', !expanded);
+        }
+        if (persist) {
+          try {
+            var stateKey = 'donatrack_nav_group_' + (ctrlId || '');
+            localStorage.setItem(stateKey, expanded ? '1' : '0');
+          } catch (e) {}
+        }
+      }
+
+      document.querySelectorAll('.dt-nav-group-toggle').forEach(function (toggle) {
+        var ctrlId = toggle.getAttribute('aria-controls');
+        var panel = ctrlId ? document.getElementById(ctrlId) : null;
+        var hasActive = panel && panel.querySelector('.slds-is-active') !== null;
+        var saved = null;
+        try {
+          saved = localStorage.getItem('donatrack_nav_group_' + (ctrlId || ''));
+        } catch (e) {}
+        if (!hasActive && saved === '0') {
+          setNavGroupExpanded(toggle, false, false);
+        } else {
+          setNavGroupExpanded(toggle, true, false);
+        }
+
+        toggle.addEventListener('click', function () {
+          var isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+          setNavGroupExpanded(toggle, !isExpanded, true);
+        });
+      });
+
+      // 5. Quick Find: filtrado instantáneo del menú vertical SLDS
+      var quickFindInput = document.getElementById('nav-quick-find');
+      if (quickFindInput) {
+        function normalizarTexto(s) {
+          return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+        quickFindInput.addEventListener('input', function () {
+          var query = normalizarTexto(quickFindInput.value).trim();
+          var sections = document.querySelectorAll('#admin-nav .dt-nav-section');
+          sections.forEach(function (sec) {
+            var items = sec.querySelectorAll('.slds-nav-vertical__item');
+            var visibleCount = 0;
+            items.forEach(function (li) {
+              var txt = normalizarTexto(li.textContent);
+              var show = !query || txt.indexOf(query) !== -1;
+              li.style.display = show ? '' : 'none';
+              if (show) visibleCount++;
+            });
+            sec.style.display = (query && visibleCount === 0) ? 'none' : '';
+            var toggle = sec.querySelector('.dt-nav-group-toggle');
+            if (toggle) {
+              if (query && visibleCount > 0) {
+                setNavGroupExpanded(toggle, true, false);
+              } else if (!query) {
+                var ctrlId = toggle.getAttribute('aria-controls');
+                var panel = ctrlId ? document.getElementById(ctrlId) : null;
+                var hasActive = panel && panel.querySelector('.slds-is-active') !== null;
+                var saved = null;
+                try { saved = localStorage.getItem('donatrack_nav_group_' + (ctrlId || '')); } catch (e) {}
+                setNavGroupExpanded(toggle, hasActive || saved !== '0', false);
+              }
+            }
+          });
         });
       }
     });

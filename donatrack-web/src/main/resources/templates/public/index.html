@@ -90,11 +90,11 @@
           <!-- Tarjeta dinámica de la etapa activa -->
           <div class="story-card" id="story-active-card">
             <div class="story-card__header">
-              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 05</span>
+              <span class="pill pill--blue" id="story-stage-pill">ETAPA 01 / 06</span>
             </div>
             <h3 class="story-card__title" id="story-stage-title">Donación Realizada</h3>
             <p class="story-card__desc" id="story-stage-desc">
-              Registrás los insumos y se emite tu remito digital de seguimiento.
+              Registrás los bienes y se inicia el seguimiento.
             </p>
           </div>
 
@@ -114,13 +114,16 @@
                 <span>04</span> En Sede
               </button>
               <button type="button" class="story-pill" data-step="5" role="tab" aria-selected="false" onclick="selectCircleStep(5)">
-                <span>05</span> En Sucursal
+                <span>05</span> Remito
+              </button>
+              <button type="button" class="story-pill" data-step="6" role="tab" aria-selected="false" onclick="selectCircleStep(6)">
+                <span>06</span> En Sucursal
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Columna Derecha: Dial Circular con Camión y 4 Hitos -->
+        <!-- Columna Derecha: Dial Circular con Camión y 5 Hitos -->
         <div class="story-circle__visual">
           <div class="dial-container" id="dial-container">
             <!-- SVG del Dial con Ticks y Track -->
@@ -161,8 +164,8 @@
               </div>
             </div>
 
-            <!-- 4 Nodos / Hitos Alrededor de la Circunferencia -->
-            <!-- 01: Top 0° (12hs) -->
+            <!-- 5 Nodos / Hitos Alrededor de la Circunferencia -->
+            <!-- 01: 0° -->
             <div class="dial-node is-active" data-node="1" style="--angle: 0deg;" onclick="selectCircleStep(1)" role="button" tabindex="0" aria-label="Etapa 1: Donación">
               <div class="dial-node__dot">01</div>
               <div class="dial-node__label dial-node__label--top">
@@ -170,27 +173,35 @@
               </div>
             </div>
 
-            <!-- 02: Right 90° (3hs) -->
-            <div class="dial-node" data-node="2" style="--angle: 90deg;" onclick="selectCircleStep(2)" role="button" tabindex="0" aria-label="Etapa 2: Acopio">
+            <!-- 02: 72° -->
+            <div class="dial-node" data-node="2" style="--angle: 72deg;" onclick="selectCircleStep(2)" role="button" tabindex="0" aria-label="Etapa 2: Acopio">
               <div class="dial-node__dot">02</div>
               <div class="dial-node__label dial-node__label--right">
                 <strong>Acopio</strong>
               </div>
             </div>
 
-            <!-- 03: Bottom 180° (6hs) -->
-            <div class="dial-node" data-node="3" style="--angle: 180deg;" onclick="selectCircleStep(3)" role="button" tabindex="0" aria-label="Etapa 3: Transporte">
+            <!-- 03: 144° -->
+            <div class="dial-node" data-node="3" style="--angle: 144deg;" onclick="selectCircleStep(3)" role="button" tabindex="0" aria-label="Etapa 3: Transporte">
               <div class="dial-node__dot">03</div>
-              <div class="dial-node__label dial-node__label--bottom">
+              <div class="dial-node__label dial-node__label--right">
                 <strong>Transporte</strong>
               </div>
             </div>
 
-            <!-- 04: Left 270° (9hs) -->
-            <div class="dial-node" data-node="4" style="--angle: 270deg;" onclick="selectCircleStep(4)" role="button" tabindex="0" aria-label="Etapa 4: ONG Receptora">
+            <!-- 04: 216° -->
+            <div class="dial-node" data-node="4" style="--angle: 216deg;" onclick="selectCircleStep(4)" role="button" tabindex="0" aria-label="Etapa 4: Entrega en ONG">
               <div class="dial-node__dot">04</div>
               <div class="dial-node__label dial-node__label--left">
-                <strong>ONG Receptora</strong>
+                <strong>En ONG</strong>
+              </div>
+            </div>
+
+            <!-- 05: 288° -->
+            <div class="dial-node" data-node="5" style="--angle: 288deg;" onclick="selectCircleStep(5)" role="button" tabindex="0" aria-label="Etapa 5: Comprobante y Remito">
+              <div class="dial-node__dot">05</div>
+              <div class="dial-node__label dial-node__label--left">
+                <strong>Comprobante</strong>
               </div>
             </div>
 

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "necesidades", schema = "donaciones")
@@ -61,5 +62,6 @@ public abstract class NecesidadEntity {
   private String tipoPeriodo;
 
   @OneToMany(mappedBy = "necesidad", cascade = CascadeType.ALL, orphanRemoval = true)
+  @BatchSize(size = 50)
   private List<PeriodoNecesidadEntity> periodos = new ArrayList<>();
 }

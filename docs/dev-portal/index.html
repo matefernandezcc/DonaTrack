@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DonaTrack · Developer Portal &amp; API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #263449;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #22c55e;
+      --green-bg: rgba(34, 197, 94, 0.14);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.14);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.14);
+      --accent: #38bdf8;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .dev-header {
+      background: linear-gradient(135deg, #0f172a 0%, #142b23 100%);
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 24px 16px;
+    }
+
+    .dev-header__inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .dev-header__top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .dev-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dev-brand__badge {
+      background: #16a34a;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .dev-brand__title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .dev-brand__sub {
+      margin: 2px 0 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .dev-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .dev-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .dev-btn:hover {
+      background: var(--surface-2);
+      border-color: var(--accent);
+    }
+
+    .dev-btn--primary {
+      background: #16a34a;
+      border-color: #16a34a;
+      color: #fff;
+    }
+
+    .dev-btn--primary:hover {
+      background: #15803d;
+      border-color: #22c55e;
+    }
+
+    .services-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .svc-card {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .svc-card__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .svc-card__name {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    .status-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-pill--checking {
+      color: var(--amber);
+      background: var(--amber-bg);
+    }
+
+    .status-pill--up {
+      color: var(--green);
+      background: var(--green-bg);
+    }
+
+    .status-pill--down {
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    .svc-card__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.78rem;
+    }
+
+    .svc-card__links a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .svc-card__links a:hover {
+      text-decoration: underline;
+    }
+
+    .swagger-wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 12px 48px;
+    }
+
+    .swagger-ui .topbar {
+      background-color: #1e293b;
+      border-radius: 0 0 10px 10px;
+      padding: 10px 16px;
+    }
+  </style>
+</head>
+<body>
+  <header class="dev-header">
+    <div class="dev-header__inner">
+      <div class="dev-header__top">
+        <div class="dev-brand">
+          <span class="dev-brand__badge">Dev Portal</span>
+          <div>
+            <h1 class="dev-brand__title">DonaTrack Developer &amp; API Portal</h1>
+            <p class="dev-brand__sub" id="portal-subtitle">Documentación OpenAPI interactiva, estado en vivo y acceso unificado</p>
+          </div>
+        </div>
+        <nav class="dev-actions" aria-label="Accesos rápidos">
+          <a id="link-web" href="/" class="dev-btn dev-btn--primary">Portal Web</a>
+          <a id="link-api" href="/" class="dev-btn">API Gateway</a>
+          <a href="/donaciones/graphiql" target="_blank" rel="noopener" class="dev-btn">GraphiQL (Donaciones)</a>
+        </nav>
+      </div>
+
+      <div class="services-bar" id="services-bar"></div>
+    </div>
+  </header>
+
+  <main class="swagger-wrap">
+    <div id="swagger-ui"></div>
+  </main>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-standalone-preset.js"></script>
+  <script>
+    (function () {
+      const host = window.location.hostname;
+      const baseDomain = host.replace(/^dev\./, "");
+      const proto = window.location.protocol;
+      const webOrigin = `${proto}//${baseDomain}${window.location.port ? ":" + window.location.port : ""}`;
+      const apiHost = host.startsWith("dev.") ? `api.${baseDomain}` : host;
+      const apiOrigin = `${proto}//${apiHost}${window.location.port && !host.startsWith("dev.") ? ":" + window.location.port : ""}`;
+
+      const linkWeb = document.getElementById("link-web");
+      const linkApi = document.getElementById("link-api");
+      const subtitle = document.getElementById("portal-subtitle");
+      if (linkWeb) linkWeb.href = webOrigin;
+      if (linkApi) {
+        linkApi.href = apiOrigin;
+        linkApi.textContent = `API Gateway (${apiHost})`;
+      }
+      if (subtitle) {
+        subtitle.textContent = `OpenAPI unificado, GraphiQL y estado en vivo · ${host} · Gateway: ${apiHost}`;
+      }
+
+      const SERVICES = [
+        { id: "donaciones", label: "Donaciones", extra: { label: "GraphiQL", href: "/donaciones/graphiql" } },
+        { id: "logistica", label: "Logística" },
+        { id: "incentivos", label: "Incentivos" },
+        { id: "notificaciones", label: "Notificaciones" },
+        { id: "auth", label: "Auth & SSO" }
+      ];
+
+      const bar = document.getElementById("services-bar");
+      SERVICES.forEach((svc) => {
+        const card = document.createElement("div");
+        card.className = "svc-card";
+        card.innerHTML = `
+          <div class="svc-card__head">
+            <span class="svc-card__name">${svc.label}</span>
+            <span class="status-pill status-pill--checking" id="health-${svc.id}">checking</span>
+          </div>
+          <div class="svc-card__links">
+            <a href="/${svc.id}/swagger-ui/index.html" target="_blank" rel="noopener">Swagger UI</a>
+            <a href="/${svc.id}/v3/api-docs" target="_blank" rel="noopener">OpenAPI JSON</a>
+            <a href="/${svc.id}/actuator/health" target="_blank" rel="noopener">Health</a>
+            ${svc.extra ? `<a href="${svc.extra.href}" target="_blank" rel="noopener">${svc.extra.label}</a>` : ""}
+          </div>
+        `;
+        bar.appendChild(card);
+
+        fetch(`/${svc.id}/actuator/health`, { cache: "no-store" })
+          .then((r) => r.json().then((data) => ({ ok: r.ok, data })))
+          .then(({ ok, data }) => {
+            const badge = document.getElementById(`health-${svc.id}`);
+            if (!badge) return;
+            const isUp = ok && data && data.status === "UP";
+            badge.textContent = isUp ? "UP" : (data && data.status ? data.status : "DOWN");
+            badge.className = `status-pill ${isUp ? "status-pill--up" : "status-pill--down"}`;
+          })
+          .catch(() => {
+            const badge = document.getElementById(`health-${svc.id}`);
+            if (!badge) return;
+            badge.textContent = "DOWN";
+            badge.className = "status-pill status-pill--down";
+          });
+      });
+
+      const OPENAPI_RE = /\/(donaciones|logistica|incentivos|notificaciones|auth)\/v3\/api-docs(?:\?.*)?$/;
+
+      window.ui = SwaggerUIBundle({
+        urls: [
+          { url: "/donaciones/v3/api-docs", name: "1. Donaciones, Beneficiarios y Personas" },
+          { url: "/logistica/v3/api-docs", name: "2. Logística y Rutas de Reparto" },
+          { url: "/incentivos/v3/api-docs", name: "3. Incentivos, Gamificación y Ranking" },
+          { url: "/notificaciones/v3/api-docs", name: "4. Notificaciones Multicanal" },
+          { url: "/auth/v3/api-docs", name: "5. Autenticación y SSO (Auth)" }
+        ],
+        "urls.primaryName": "1. Donaciones, Beneficiarios y Personas",
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        persistAuthorization: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        responseInterceptor: function (res) {
+          if (!res || !res.ok || !res.url) return res;
+          const match = res.url.match(OPENAPI_RE);
+          if (!match) return res;
+          const svc = match[1];
+          try {
+            const spec = typeof res.body === "object" && res.body !== null
+              ? res.body
+              : JSON.parse(res.text);
+
+            spec.servers = [
+              {
+                url: `${window.location.origin}/${svc}`,
+                description: `Proxy Dev Portal (${window.location.hostname}/${svc})`
+              },
+              {
+                url: `${apiOrigin}/${svc}`,
+                description: `API Gateway (${apiHost}/${svc})`
+              }
+            ];
+
+            spec.components = spec.components || {};
+            spec.components.securitySchemes = Object.assign({}, spec.components.securitySchemes || {}, {
+              BearerAuth: {
+                type: "http",
+                scheme: "bearer",
+                bearerFormat: "JWT",
+                description: "Token JWT obtenido en POST /auth/auth/login"
+              },
+              ServiceKeyAuth: {
+                type: "apiKey",
+                in: "header",
+                name: "X-Service-Key",
+                description: "Clave M2M (INTERNAL_API_KEY)"
+              }
+            });
+            spec.security = [{ BearerAuth: [] }, { ServiceKeyAuth: [] }];
+
+            const serialized = JSON.stringify(spec);
+            res.text = serialized;
+            res.data = serialized;
+            res.body = spec;
+            res.obj = spec;
+          } catch (e) {
+            console.warn("No se pudo enriquecer OpenAPI spec para", svc, e);
+          }
+          return res;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

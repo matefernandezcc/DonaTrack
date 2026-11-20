@@ -26,7 +26,7 @@ donatrack:
     incentivos-url: ${INCENTIVOS_URL:http://localhost:8001}
     logistica-url: ${LOGISTICA_URL:http://localhost:8002}
     notificaciones-url: ${NOTIFICACIONES_URL:http://localhost:8003}
-    timeout-seconds: ${API_TIMEOUT_SECONDS:3}
+    timeout-seconds: ${API_TIMEOUT_SECONDS:12}
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     requests-per-minute: ${RATE_LIMIT_RPM:60}

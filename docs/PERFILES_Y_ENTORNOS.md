@@ -38,7 +38,7 @@ Este documento especifica de forma unificada la filosofía, configuración técn
   * **Datos Semilla:** `AuthDataSeeder` garantiza la disponibilidad de usuarios estándar (`admin/admin`, `donante/donante`, `beneficiaria/beneficiaria`).
 
 ### 1.2. Perfil `prod` (Producción en la Nube y Blindaje)
-* **Objetivo:** Operar con máxima resiliencia, rendimiento predecible y cumplimiento de políticas de seguridad estricta en entornos distribuidos (Render y servicios SaaS).
+* **Objetivo:** Operar con máxima resiliencia, rendimiento predecible y cumplimiento de políticas de seguridad estricta en entornos productivos (Oracle Cloud OCI + Caddy y servicios SaaS).
 * **Características:**
   * **Infraestructura Cloud Cifrada:** PostgreSQL en Supabase Session Pooler con TLS, MongoDB Atlas NoSQL con TLS, CloudAMQP con puerto SSL `5671` y Supabase S3 Storage para comprobantes.
   * **Integridad Estricta de Esquemas:** `spring.jpa.hibernate.ddl-auto=none`. Hibernate no realiza escaneos de modificación sobre la base productiva, reduciendo tiempos de arranque en frío y previniendo alteraciones accidentales.
@@ -143,8 +143,8 @@ make logistica PROFILE=prod
 SPRING_PROFILES_ACTIVE=prod mvn spring-boot:run -pl donatrack-web
 ```
 
-### Modo 4: Despliegue en Render (Producción)
-En Render, cada servicio se despliega como un servicio web Docker independiente configurando `SPRING_PROFILES_ACTIVE=prod` en las variables de entorno del panel de control. Docker Compose no interviene en Render; los contenedores leen las variables directamente del entorno del sistema operativo.
+### Modo 4: Despliegue en Producción (Oracle Cloud ARM64 + Docker Compose + Caddy)
+El entorno productivo corre en una VM de **Oracle Cloud Infrastructure (ARM64)** mediante `compose.yaml` con `SPRING_PROFILES_ACTIVE=prod`, `COMPOSE_PROFILES=` (vacío, para no instanciar PostgreSQL/Mongo/RabbitMQ locales y conectarse a Supabase, MongoDB Atlas y CloudAMQP) y `PUBLIC_DOMAIN=donatrack.social`. Caddy gestiona los certificados HTTPS automáticos y expone la web en `{PUBLIC_DOMAIN}`, el portal de documentación Swagger/OpenAPI en `dev.{PUBLIC_DOMAIN}` y el API Gateway en `api.{PUBLIC_DOMAIN}`, manteniendo los puertos internos ligados a `ADMIN_BIND_IP` (loopback o Tailscale). *(Históricamente, en las Entregas 4 a 6 iniciales cada servicio se desplegó de manera independiente en Render como Web Services Docker).*
 
 ### 4.1. Resumen de Comandos Rápidos (Makefile & CLI)
 

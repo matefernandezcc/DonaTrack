@@ -153,14 +153,14 @@ public class PublicApiController {
               Object altura = dir.get("altura");
               Object localidad = dir.get("localidad");
               calleStr = calle != null ? calle.toString() : "";
-              alturaStr = altura != null ? altura.toString() : "";
+              alturaStr = altura != null ? altura.toString().replaceAll("\\.0$", "") : "";
               localidadStr = localidad != null ? localidad.toString() : "";
               destinoOrg =
                   String.format(
                       "%s %s, %s",
-                      calle != null ? calle : "Destino",
-                      altura != null ? altura : "S/N",
-                      localidad != null ? localidad : "CABA");
+                      !calleStr.isBlank() ? calleStr : "Destino",
+                      !alturaStr.isBlank() ? alturaStr : "S/N",
+                      !localidadStr.isBlank() ? localidadStr : "CABA");
             }
 
             double[] coordsFinales = resolverCoordenadas(calleStr, alturaStr, localidadStr, lat, lng);
@@ -177,11 +177,20 @@ public class PublicApiController {
 
                 String clean = idEntrega.replace("-", "").toUpperCase();
                 String shortCode = clean.length() >= 4 ? clean.substring(0, 4) : clean;
-                String fotoUrl = null;
+                String s3Placeholder =
+                    "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp";
+                String fotoUrl = s3Placeholder;
 
                 if (entrega.get("comprobanteRecepcion") instanceof Map<?, ?> comp) {
                   if (comp.get("fotos") instanceof List<?> fotos && !fotos.isEmpty()) {
-                    fotoUrl = fotos.get(0).toString();
+                    String rawFoto = fotos.get(0) != null ? fotos.get(0).toString().trim() : "";
+                    if (!rawFoto.isBlank()
+                        && !rawFoto.contains("fotos.donatrack.org")
+                        && !rawFoto.contains("storage.donatrack.org")
+                        && !rawFoto.contains("unsplash.com")
+                        && !rawFoto.toLowerCase().endsWith(".pdf")) {
+                      fotoUrl = rawFoto;
+                    }
                   }
                 }
 
@@ -199,7 +208,9 @@ public class PublicApiController {
                         "Entregado",
                         fotoUrl);
 
-                if (!entregasMap.containsKey(key) || (fotoUrl != null && entregasMap.get(key).fotoUrl() == null)) {
+                if (!entregasMap.containsKey(key)
+                    || (!s3Placeholder.equals(fotoUrl)
+                        && s3Placeholder.equals(entregasMap.get(key).fotoUrl()))) {
                   entregasMap.put(key, dto);
                 }
               }
@@ -212,6 +223,8 @@ public class PublicApiController {
     if (!entregasMap.isEmpty()) {
       puntos.addAll(entregasMap.values());
     } else {
+      String s3Placeholder =
+          "https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp";
       puntos.add(
           new PuntoMapaPublicoDTO(
               "orange",
@@ -223,7 +236,7 @@ public class PublicApiController {
               "Abrigo",
               "12 May 2026",
               "Entregado",
-              "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80"));
+              s3Placeholder));
 
       puntos.add(
           new PuntoMapaPublicoDTO(
@@ -236,7 +249,7 @@ public class PublicApiController {
               "Mobiliario",
               "08 May 2026",
               "Entregado",
-              "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80"));
+              s3Placeholder));
     }
 
     return ResponseEntity.ok(puntos);

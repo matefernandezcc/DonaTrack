@@ -58,7 +58,6 @@ public class SolicitudOngController {
     this.personaRepository = personaRepository;
   }
 
-  @PostConstruct
   public void seedInitialSolicitudes() {
     try {
       if (repository.count() == 0) {

@@ -1,20 +1,20 @@
 name: prod
 variables:
   - name: baseUrl
-    value: https://donatrack-web.onrender.com
+    value: https://donatrack.social
   - name: authUrl
-    value: https://donatrack-auth.onrender.com
+    value: https://api.donatrack.social/auth
   - name: webUrl
-    value: https://donatrack-web.onrender.com
+    value: https://donatrack.social
   - name: donacionesUrl
-    value: https://donatrack-donaciones.onrender.com
+    value: https://api.donatrack.social/donaciones
   - name: incentivosUrl
-    value: https://donatrack-incentivos.onrender.com
+    value: https://api.donatrack.social/incentivos
   - name: logisticaUrl
-    value: https://donatrack-logistica.onrender.com
+    value: https://api.donatrack.social/logistica
   - name: notificacionesUrl
-    value: https://donatrack-notificaciones.onrender.com
+    value: https://api.donatrack.social/notificaciones
   - name: n8nUrl
-    value: https://donatrack-n8n.onrender.com
+    value: http://100.92.119.57:5678
   - name: token
     value: ""

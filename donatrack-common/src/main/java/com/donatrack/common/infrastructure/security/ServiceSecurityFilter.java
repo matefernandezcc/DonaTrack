@@ -49,6 +49,10 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
     }
 
     String path = request.getRequestURI();
+    String contextPath = request.getContextPath();
+    if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
+      path = path.substring(contextPath.length());
+    }
 
     // 1. Rutas públicas de infraestructura y documentación
     if (isPublicPath(path)) {
@@ -71,6 +75,26 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
       String token = authHeader.substring(7).trim();
       if (isTokenValid(token)) {
+        if (isAdminOnlyOperation(request.getMethod(), path)) {
+          boolean isAdmin =
+              JwtClaimsExtractor.extraerClaims(request, jwtSecret)
+                  .map(claims -> claims.hasRole("ADMIN") || claims.hasRole("INTERNAL_SERVICE"))
+                  .orElse(false);
+          if (!isAdmin) {
+            log.warn(
+                "Acceso denegado (403): operación crítica {} {} requiere rol ADMIN",
+                request.getMethod(),
+                path);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response
+                .getWriter()
+                .write(
+                    "{\"status\":403,\"error\":\"Forbidden\",\"message\":\"Acceso denegado: esta operación crítica requiere rol ADMIN\"}");
+            return;
+          }
+        }
         filterChain.doFilter(request, response);
         return;
       }
@@ -87,6 +111,58 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
             "{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Acceso no autorizado: se requiere cabecera X-Service-Key o Bearer JWT valido\"}");
   }
 
+  private boolean isAdminOnlyOperation(String method, String path) {
+    if ("DELETE".equalsIgnoreCase(method)) {
+      return true;
+    }
+    if (path.equals("/admin") || path.startsWith("/admin/")) {
+      return true;
+    }
+
+    boolean isRead = "GET".equalsIgnoreCase(method) || "HEAD".equalsIgnoreCase(method);
+
+    // Flota y planificación en Logística (escrituras)
+    if (!isRead
+        && (path.startsWith("/api/camiones")
+            || path.startsWith("/api/choferes")
+            || path.startsWith("/api/rutas"))) {
+      return true;
+    }
+    if (path.startsWith("/api/planificacion/ejecutar")) {
+      return true;
+    }
+
+    // Importación masiva, matchmaking, auditoría y cambios de estado críticos en Donaciones
+    if (path.startsWith("/api/personas/importar-csv")
+        || path.contains("/matchmaking")
+        || path.endsWith("/estado/asignar")
+        || path.endsWith("/estado/vencer")
+        || path.startsWith("/api/donaciones/auditoria")
+        || path.matches("^/api/donaciones/[^/]+/estado$")) {
+      return true;
+    }
+    if ("PUT".equalsIgnoreCase(method) && path.matches("^/api/donaciones/[^/]+$")) {
+      return true;
+    }
+
+    // Gestión administrativa de solicitudes de ONG (POST /api/solicitudes-ong queda habilitado para postulaciones)
+    if (path.startsWith("/api/solicitudes-ong") && (isRead || !"POST".equalsIgnoreCase(method))) {
+      return true;
+    }
+
+    // Alta/edición directa de beneficiarios (POST .../necesidades queda habilitado para ONGs)
+    if (("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method))
+        && (path.equals("/api/beneficiarios") || path.matches("^/api/beneficiarios/[^/]+$"))) {
+      return true;
+    }
+
+    // Operaciones administrativas de rankings y envío directo de notificaciones
+    return !isRead
+        && (path.startsWith("/api/rankings")
+            || path.startsWith("/api/mensajes")
+            || path.startsWith("/api/notificaciones"));
+  }
+
   private boolean isPublicPath(String path) {
     return path.equals("/")
         || path.equals("/index.html")
@@ -99,6 +175,7 @@ public class ServiceSecurityFilter extends OncePerRequestFilter {
         || path.startsWith("/oauth2/")
         || path.startsWith("/login/")
         || path.startsWith("/healthcheck")
+        || path.startsWith("/graphiql")
         || path.startsWith("/api/public")
         || path.startsWith("/favicon.ico")
         || path.startsWith("/error");

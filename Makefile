@@ -122,6 +122,21 @@ docker-up:
 docker-down:
 	docker compose --profile local down
 
+prod-up:
+	docker compose up -d --build
+
+prod-down:
+	docker compose down
+
+prod-logs:
+	docker compose logs -f --tail=100
+
+prod-deploy:
+	docker compose up -d --build
+	@echo "Esperando a n8n..."
+	sleep 10
+	make n8n-import
+
 db-init:
 	@docker compose --profile local up -d postgres-donatrack mongo-donatrack
 	@echo "Esperando que PostgreSQL esté listo..."
