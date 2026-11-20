@@ -96,3 +96,7 @@ api.{$PUBLIC_DOMAIN:donatrack.social} {
 grafana.{$PUBLIC_DOMAIN:donatrack.social} {
 	reverse_proxy grafana:3000
 }
+
+n8n.{$PUBLIC_DOMAIN:donatrack.social} {
+	reverse_proxy n8n:5678
+}
