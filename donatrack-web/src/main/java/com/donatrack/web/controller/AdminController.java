@@ -1174,7 +1174,7 @@ public class AdminController {
     return resultado;
   }
 
-  @GetMapping("/admin/donaciones/recepcion")
+  @GetMapping(value = {"/admin/donaciones", "/admin/donaciones/recepcion"})
   @PreAuthorize("hasRole('ADMIN')")
   public String recepcionDonacionForm(
       @RequestParam(name = "personaCreadaId", required = false) String personaCreadaId,
@@ -1305,7 +1305,7 @@ public class AdminController {
     return "redirect:/app/admin/donaciones/recepcion";
   }
 
-  @PostMapping("/admin/donaciones/recepcion")
+  @PostMapping(value = {"/admin/donaciones", "/admin/donaciones/recepcion"})
   @PreAuthorize("hasRole('ADMIN')")
   public String registrarRecepcionDonacion(
       @jakarta.validation.Valid @ModelAttribute
@@ -1316,6 +1316,7 @@ public class AdminController {
       Model model) {
     if (bindingResult.hasErrors()) {
       model.addAttribute("personas", obtenerPersonasConFallback());
+      model.addAttribute("formRequest", request);
       String fieldErrors =
           bindingResult.getFieldErrors().stream()
               .map(
@@ -1335,7 +1336,7 @@ public class AdminController {
     try {
       UUID adminId = resolverDonanteId(auth);
       Map<String, Object> payload = new HashMap<>();
-      payload.put("idDonante", request.idDonante().toString());
+      payload.put("idDonante", request.idDonanteResolvido().toString());
       payload.put(
           "idAdministrador", adminId != null ? adminId.toString() : DEFAULT_ADMIN_ID.toString());
 

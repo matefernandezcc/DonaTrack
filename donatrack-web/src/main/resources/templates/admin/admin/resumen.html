@@ -75,9 +75,12 @@
           </div>
           <div class="slds-col slds-size_1-of-2">
             <ul class="slds-has-dividers_bottom-space">
-              <li class="slds-item">
-                <strong>Gestión de Donaciones:</strong>
-                <span class="slds-badge slds-theme_success slds-float_right">Operativo</span>
+              <li class="slds-item slds-grid slds-grid_vertical-align-center slds-grid_align-spread">
+                <div>
+                  <strong>Gestión de Donaciones:</strong>
+                  <a th:href="@{/app/admin/donaciones/recepcion}" class="slds-button slds-button_outline-brand slds-m-left_small" style="font-size: 0.75rem; padding: 0 10px; height: 26px; line-height: 24px;">Ingresar Donación</a>
+                </div>
+                <span class="slds-badge slds-theme_success">Operativo</span>
               </li>
               <li class="slds-item">
                 <strong>Sistema de Reconocimiento:</strong>
