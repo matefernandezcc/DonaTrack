@@ -46,6 +46,17 @@
       origin: "Comedor Verificado + Remito",
       points: "+25 Puntos de Entrega (35 pts totales)",
       progress: 0.75
+    },
+    {
+      num: "05",
+      angle: 360,
+      title: "Recorrido Completo",
+      short: "En Sucursal",
+      desc: "El recorrido está completo y el camión volvió a la sucursal para continuar con otra donación.",
+      status: "Ciclo 100% Completado",
+      origin: "Sucursal Central DonaTrack",
+      points: "100% Trazabilidad Auditada",
+      progress: 1.0
     }
   ];
 
@@ -55,8 +66,8 @@
   let closingTimeoutId = null;
   let isPlaying = true;
   let autoplayTimer = null;
-  const AUTOPLAY_INTERVAL = 3800; // ms
-  const ANIM_DURATION = 700; // ms
+  const AUTOPLAY_INTERVAL = 10000; // ms (15 segundos exactos)
+  const ANIM_DURATION = 900; // ms
 
   const CIRCUMFERENCE = 2 * Math.PI * 190; // ~1193.8
 
@@ -138,7 +149,11 @@
 
   function animateDialTo(targetAngle, onDone) {
     cancelDialAnimation();
-    const startAngle = currentAngle;
+    let startAngle = currentAngle;
+    if (startAngle >= 360 && targetAngle < 360) {
+      startAngle = 0;
+      applyDialAngle(0);
+    }
     if (prefersReducedMotion || Math.abs(targetAngle - startAngle) < 0.5) {
       applyDialAngle(targetAngle);
       if (onDone) onDone();
@@ -164,7 +179,7 @@
 
   // 3. Actualizar la vista al paso seleccionado
   window.selectCircleStep = function (stepNum, manualClick = true) {
-    if (stepNum < 1 || stepNum > 4) return;
+    if (stepNum < 1 || stepNum > 5) return;
     currentStep = stepNum;
     const data = STEPS[stepNum - 1];
 
@@ -173,7 +188,7 @@
       card.style.opacity = "0.4";
       card.style.transform = "translateY(4px)";
       setTimeout(() => {
-        if (stagePill) stagePill.textContent = `ETAPA ${data.num} / 04`;
+        if (stagePill) stagePill.textContent = `ETAPA ${data.num} / 05`;
         if (stageStatus) stageStatus.textContent = data.status;
         if (stageTitle) stageTitle.textContent = data.title;
         if (stageDesc) stageDesc.textContent = data.desc;
@@ -187,21 +202,21 @@
     // Actualizar Texto del Hub Central
     if (hubStage) {
       hubStage.textContent = data.short;
-      hubStage.style.color = stepNum === 4 ? "#16a34a" : "var(--fg)";
+      hubStage.style.color = stepNum >= 4 ? "#16a34a" : "var(--fg)";
     }
 
-    // Cambiar imagen del camión antes de moverlo
-    if (truckImg && stepNum < 4) {
-      truckImg.src = "/img/delivery-truck-start.svg";
+    // Cambiar imagen del camión según etapa
+    if (truckImg) {
+      truckImg.src = stepNum >= 4 ? "/img/delivery-truck-end.svg" : "/img/delivery-truck-start.svg";
     }
 
     // Mover camión y pintar trazo verde sincronizado frame a frame
-    if (stepNum === 1 && currentAngle >= 270) {
+    if (stepNum === 1 && currentAngle >= 350) {
       cancelDialAnimation();
       applyDialAngle(0);
     } else {
       animateDialTo(data.angle, () => {
-        if (truckImg && stepNum === 4) {
+        if (truckImg && stepNum >= 4) {
           truckImg.src = "/img/delivery-truck-end.svg";
         }
       });
@@ -225,9 +240,11 @@
       node.classList.remove("is-active", "is-passed", "is-closing");
       if (nodeStep === stepNum) {
         node.classList.add("is-active");
-        if (stepNum === 4) node.classList.add("is-closing");
       } else if (nodeStep < stepNum) {
         node.classList.add("is-passed");
+      }
+      if (stepNum === 5 && nodeStep === 1) {
+        node.classList.add("is-closing");
       }
     });
 
@@ -237,19 +254,13 @@
     }
   };
 
-  // 4. Control de Autoplay
+  // 4. Control de Autoplay (desplazamiento continuo en ciclo cada 15 segundos)
   function stepForward() {
-    if (currentStep === 4) {
-      if (truckImg) truckImg.src = "/img/delivery-truck-start.svg";
-      animateDialTo(360, () => {
-        closingTimeoutId = setTimeout(() => {
-          applyDialAngle(0);
-          selectCircleStep(1, false);
-        }, 350);
-      });
-      return;
+    let next = currentStep + 1;
+    if (next > 5) {
+      next = 1;
     }
-    selectCircleStep(currentStep + 1, false);
+    selectCircleStep(next, false);
   }
 
   function startAutoplay() {
@@ -287,14 +298,15 @@
     }
   };
 
-  // Pausar en hover para permitir lectura cómoda
-  if (section) {
-    section.addEventListener("mouseenter", () => {
-      if (isPlaying) {
+  // Pausar en hover solo sobre la tarjeta de lectura si el usuario apoya el cursor en ella
+  if (card) {
+    card.addEventListener("mouseenter", () => {
+      if (isPlaying && autoplayTimer) {
         clearInterval(autoplayTimer);
+        autoplayTimer = null;
       }
     });
-    section.addEventListener("mouseleave", () => {
+    card.addEventListener("mouseleave", () => {
       if (isPlaying) {
         resetAutoplayTimer();
       }
