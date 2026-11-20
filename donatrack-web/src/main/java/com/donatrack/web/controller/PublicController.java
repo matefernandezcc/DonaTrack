@@ -996,6 +996,38 @@ public class PublicController {
     }
   }
 
+  private Map<String, String> extraerContextoUsuario(
+      org.springframework.security.core.Authentication authentication, HttpServletRequest request) {
+    Jwt verifiedJwt = extraerJwtVerificado(authentication, request);
+    String verifiedUserId = null;
+    String verifiedEmail = null;
+    if (verifiedJwt != null) {
+      String personaId = verifiedJwt.getClaimAsString("personaId");
+      verifiedUserId =
+          (personaId != null && !personaId.isBlank()) ? personaId.trim() : verifiedJwt.getSubject();
+      String emailClaim = verifiedJwt.getClaimAsString("email");
+      if (emailClaim != null && !emailClaim.isBlank()) {
+        verifiedEmail = emailClaim.trim();
+      }
+    }
+    Map<String, String> ctx = new HashMap<>();
+    ctx.put("verifiedUserId", verifiedUserId);
+    ctx.put("verifiedEmail", verifiedEmail);
+    return ctx;
+  }
+
+  @GetMapping("/api/public/chatbot/context")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> chatbotContext(
+      org.springframework.security.core.Authentication authentication, HttpServletRequest request) {
+    Map<String, String> ctx = extraerContextoUsuario(authentication, request);
+    Map<String, Object> out = new HashMap<>();
+    out.put("verifiedUserId", ctx.get("verifiedUserId") != null ? ctx.get("verifiedUserId") : "");
+    out.put("verifiedEmail", ctx.get("verifiedEmail") != null ? ctx.get("verifiedEmail") : "");
+    out.put("authenticated", ctx.get("verifiedUserId") != null);
+    return ResponseEntity.ok(out);
+  }
+
   @PostMapping("/api/public/chatbot")
   @ResponseBody
   public ResponseEntity<Map<String, Object>> proxyChatbot(
@@ -1022,25 +1054,14 @@ public class PublicController {
       }
     }
 
-    Jwt verifiedJwt = extraerJwtVerificado(authentication, request);
-    String verifiedUserId = null;
-    String verifiedEmail = null;
-    if (verifiedJwt != null) {
-      String personaId = verifiedJwt.getClaimAsString("personaId");
-      verifiedUserId =
-          (personaId != null && !personaId.isBlank()) ? personaId.trim() : verifiedJwt.getSubject();
-      String emailClaim = verifiedJwt.getClaimAsString("email");
-      if (emailClaim != null && !emailClaim.isBlank()) {
-        verifiedEmail = emailClaim.trim();
-      }
-    }
+    Map<String, String> ctx = extraerContextoUsuario(authentication, request);
 
     Map<String, Object> n8nPayload = new HashMap<>();
     n8nPayload.put("message", mensaje);
     n8nPayload.put("mensaje", mensaje);
     n8nPayload.put("sessionId", sessionId);
-    n8nPayload.put("verifiedUserId", verifiedUserId);
-    n8nPayload.put("verifiedEmail", verifiedEmail);
+    n8nPayload.put("verifiedUserId", ctx.get("verifiedUserId"));
+    n8nPayload.put("verifiedEmail", ctx.get("verifiedEmail"));
     n8nPayload.put("action", action);
 
     try {

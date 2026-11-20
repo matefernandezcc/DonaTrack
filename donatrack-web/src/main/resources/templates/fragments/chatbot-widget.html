@@ -58,6 +58,22 @@
     <!-- Salesforce MIAW (Enhanced Chat v2) en modo híbrido: oculta el botón nativo y se abre al derivar a un agente -->
     <script type="text/javascript">
       window.__dtMiawReady = false;
+      window.addEventListener("onEmbeddedMessagingReady", async function () {
+        try {
+          const res = await fetch("/api/public/chatbot/context", { credentials: "same-origin" });
+          if (res.ok && typeof embeddedservice_bootstrap !== "undefined" &&
+              embeddedservice_bootstrap.prechatAPI &&
+              typeof embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields === "function") {
+            const ctx = await res.json();
+            embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({
+              Verified_User_Id: ctx.verifiedUserId || "",
+              Verified_User_Email: ctx.verifiedEmail || ""
+            });
+          }
+        } catch (err) {
+          console.warn("No se pudo enviar contexto Pre-Chat a MIAW:", err);
+        }
+      });
       window.addEventListener("onEmbeddedMessagingButtonCreated", function () {
         window.__dtMiawReady = true;
         if (typeof window.__dtOnMiawReady === "function") {
@@ -70,7 +86,7 @@
       });
       window.addEventListener("onEmbeddedMessagingWindowMinimized", function () {
         var chatFab = document.getElementById("chat-fab");
-        if (chatFab) chatFab.style.display = "";
+        if (chatFab) chatFab.style.display = "none";
       });
       window.addEventListener("onEmbeddedMessagingWindowClosed", function () {
         var chatFab = document.getElementById("chat-fab");

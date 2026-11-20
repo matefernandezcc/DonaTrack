@@ -843,6 +843,51 @@ class PublicControllerTest {
         server.stop(0);
       }
     }
+
+    @Test
+    @DisplayName("GET /api/public/chatbot/context retorna vacío si es anónimo y datos JWT si está logueado")
+    void chatbotContextRetornaUsuarioVerificado() throws Exception {
+      org.springframework.security.core.context.SecurityContextHolder.clearContext();
+      PublicController ctxController =
+          new PublicController(
+              authGateway,
+              incentivosGateway,
+              logisticaGateway,
+              jwtDecoder,
+              new HttpSessionSecurityContextRepository(),
+              solicitudOngService);
+      MockMvc localMvc = MockMvcBuilders.standaloneSetup(ctxController).build();
+
+      localMvc
+          .perform(get("/api/public/chatbot/context"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.authenticated").value(false))
+          .andExpect(jsonPath("$.verifiedUserId").value(""));
+
+      UUID realPersonaId = UUID.randomUUID();
+      Jwt jwt =
+          Jwt.withTokenValue("mock-jwt-ctx")
+              .header("alg", "HS256")
+              .subject(UUID.randomUUID().toString())
+              .claim("personaId", realPersonaId.toString())
+              .claim("email", "donante@real.org")
+              .build();
+      var auth =
+          new org.springframework.security.oauth2.server.resource.authentication
+              .JwtAuthenticationToken(
+              jwt,
+              List.of(
+                  new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                      "ROLE_DONANTE")),
+              "donante");
+
+      localMvc
+          .perform(get("/api/public/chatbot/context").principal(auth))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.authenticated").value(true))
+          .andExpect(jsonPath("$.verifiedUserId").value(realPersonaId.toString()))
+          .andExpect(jsonPath("$.verifiedEmail").value("donante@real.org"));
+    }
   }
 
   // ==========================================
