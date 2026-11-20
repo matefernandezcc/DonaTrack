@@ -225,15 +225,15 @@
 
   const getCsrfHeaders = () => {
     const headers = { "Content-Type": "application/json" };
+    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+    if (match && match[1]) {
+      headers["X-XSRF-TOKEN"] = decodeURIComponent(match[1]);
+      return headers;
+    }
     const tokenMeta = document.querySelector('meta[name="_csrf"]');
     const headerMeta = document.querySelector('meta[name="_csrf_header"]');
     if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
       headers[headerMeta.content] = tokenMeta.content;
-    } else {
-      const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
-      if (match) {
-        headers["X-XSRF-TOKEN"] = decodeURIComponent(match[1]);
-      }
     }
     return headers;
   };
@@ -241,6 +241,29 @@
   const setInputDisabled = (disabled) => {
     input.disabled = disabled;
     if (submitBtn) submitBtn.disabled = disabled;
+  };
+
+  const postChatbotWithCsrfRetry = async (bodyPayload) => {
+    const bodyStr = JSON.stringify(bodyPayload);
+    let res = await fetch("/api/public/chatbot", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: getCsrfHeaders(),
+      body: bodyStr
+    });
+    if (res.status === 403) {
+      await fetch("/", { method: "GET", credentials: "same-origin" });
+      res = await fetch("/api/public/chatbot", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: getCsrfHeaders(),
+        body: bodyStr
+      });
+    }
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
+    return res.json();
   };
 
   const processChatRequest = async (messageText, action) => {
@@ -252,17 +275,12 @@
     const typingEl = showTypingIndicator(waitingLabel);
 
     try {
-      const res = await fetch("/api/public/chatbot", {
-        method: "POST",
-        headers: getCsrfHeaders(),
-        body: JSON.stringify({
-          message: messageText,
-          mensaje: messageText,
-          sessionId: sessionId,
-          action: action || null
-        })
+      const data = await postChatbotWithCsrfRetry({
+        message: messageText,
+        mensaje: messageText,
+        sessionId: sessionId,
+        action: action || null
       });
-      const data = await res.json();
       typingEl.remove();
 
       const mode = data && data.mode ? String(data.mode).toLowerCase() : "bot";
