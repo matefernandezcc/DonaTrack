@@ -58,7 +58,7 @@
     <!-- Salesforce MIAW (Enhanced Chat v2) en modo híbrido: oculta el botón nativo y se abre al derivar a un agente -->
     <script type="text/javascript">
       window.__dtMiawReady = false;
-      window.addEventListener("onEmbeddedMessagingReady", function () {
+      window.addEventListener("onEmbeddedMessagingButtonCreated", function () {
         window.__dtMiawReady = true;
         if (typeof window.__dtOnMiawReady === "function") {
           window.__dtOnMiawReady();
