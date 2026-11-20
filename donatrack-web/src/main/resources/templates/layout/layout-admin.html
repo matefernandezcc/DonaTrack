@@ -1026,7 +1026,127 @@
       cursor: pointer;
       transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
       padding: 0;
-      margin: 0;
+      margin: 0 0.75rem 0 0;
+    }
+
+    /* Welcome Mat (Donante & Beneficiaria) — soporte Claro / Oscuro */
+    .dt-welcome-mat {
+      position: relative;
+      background: #ffffff;
+      border-radius: 6px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+      overflow: visible;
+    }
+    .dt-welcome-mat__close {
+      background: #ffffff !important;
+      border: 1.5px solid #014486 !important;
+      color: #014486 !important;
+    }
+    .dt-welcome-mat__left--donante {
+      background: #d8edff;
+    }
+    .dt-welcome-mat__left--benef {
+      background: #dcfce7;
+    }
+    .dt-welcome-mat__left-title {
+      color: #0b1c36;
+    }
+    .dt-welcome-mat__left-text {
+      color: #1e293b;
+    }
+    .dt-welcome-mat__right {
+      background: #ffffff;
+    }
+    .dt-welcome-mat__tile {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      padding: 13px 16px;
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #dddbda;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      text-decoration: none;
+    }
+    .dt-welcome-mat__icon {
+      background: #f3f2f2;
+      padding: 10px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .dt-welcome-mat__tile-title {
+      display: block;
+      color: #181818;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .dt-welcome-mat__tile-desc {
+      font-size: 0.79rem;
+      color: #444444;
+      line-height: 1.35;
+      display: block;
+      margin-top: 2px;
+    }
+
+    [data-theme="dark"] .dt-welcome-mat {
+      background: #111827 !important;
+      border: 1px solid #374151;
+      box-shadow: 0 24px 56px rgba(0, 0, 0, 0.72);
+    }
+    [data-theme="dark"] .dt-welcome-mat__close {
+      background: #1f2937 !important;
+      border-color: #60a5fa !important;
+      color: #93c5fd !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__left--donante {
+      background: linear-gradient(180deg, #0f2942 0%, #111827 100%) !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__left--benef {
+      background: linear-gradient(180deg, #0b2e1e 0%, #111827 100%) !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__left-title {
+      color: #f8fafc !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__left-text {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__right {
+      background: #111827 !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__tile {
+      background: #1f2937 !important;
+      border-color: #374151 !important;
+      box-shadow: none !important;
+    }
+    [data-theme="dark"] a.dt-welcome-mat__tile:hover {
+      background: #273244 !important;
+      border-color: #4b5563 !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__icon {
+      background: #111827 !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__icon svg {
+      fill: #93c5fd !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__tile-title {
+      color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat__tile-desc {
+      color: #94a3b8 !important;
+    }
+    [data-theme="dark"] .dt-welcome-mat .slds-checkbox_faux {
+      background: #1f2937 !important;
+      border-color: #64748b !important;
+    }
+    [data-theme="dark"] #modal-editar-perfil .slds-modal__content {
+      background: #111827 !important;
+      color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] #modal-editar-perfil .slds-form-element__label {
+      color: #e2e8f0 !important;
+    }
+    [data-theme="dark"] #modal-editar-perfil .slds-form-element__help {
+      color: #94a3b8 !important;
     }
 
     .theme-toggle-admin:hover {

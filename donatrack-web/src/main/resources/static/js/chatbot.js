@@ -325,8 +325,14 @@
     chip.addEventListener("click", () => {
       const q = (chip.dataset.q || chip.textContent || "").trim();
       if (!q) return;
+      const action = chip.dataset.action || null;
+      if (action === "HANDOFF_AGENT") {
+        document.querySelectorAll(".chatbot__handoff-btn").forEach((b) => {
+          b.disabled = true;
+        });
+      }
       addMessageBubble(q, "user");
-      enqueueRequest(q, null);
+      enqueueRequest(q, action);
     })
   );
 })();

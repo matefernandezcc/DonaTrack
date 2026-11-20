@@ -241,25 +241,25 @@
     <div id="welcome-beneficiaria-modal" style="display: none;">
       <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true" style="z-index: 10001;">
         <div class="slds-modal__container" style="max-width: 880px; width: 94vw; padding: 0;">
-          <div style="position: relative; background: #ffffff; border-radius: 6px; box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35); overflow: visible;">
-            <button type="button" class="slds-button slds-modal__close dt-modal-close-btn"
+          <div class="dt-welcome-mat">
+            <button type="button" class="slds-button slds-modal__close dt-modal-close-btn dt-welcome-mat__close"
               onclick="cerrarWelcomeBenefModal()" title="Cerrar" aria-label="Cerrar"
-              style="position: absolute !important; top: -14px !important; right: -14px !important; width: 30px !important; height: 30px !important; min-width: 30px !important; min-height: 30px !important; border-radius: 4px !important; border: 1.5px solid #014486 !important; color: #014486 !important;">
+              style="position: absolute !important; top: -14px !important; right: -14px !important; width: 30px !important; height: 30px !important; min-width: 30px !important; min-height: 30px !important; border-radius: 4px !important;">
               <span aria-hidden="true" style="font-size: 0.95rem !important;">✕</span>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
 
             <div class="slds-grid slds-wrap" style="border-radius: 6px; overflow: hidden;">
-              <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12"
-                style="background: #dcfce7; position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 440px;">
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 dt-welcome-mat__left--benef"
+                style="position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 440px;">
                 <div style="padding: 36px 28px 16px 28px; text-align: center; z-index: 1;">
-                  <h2 style="color: #0b1c36; font-weight: 800; font-size: 1.5rem; line-height: 1.2; margin: 0 0 14px 0;">
+                  <h2 class="dt-welcome-mat__left-title" style="font-weight: 800; font-size: 1.5rem; line-height: 1.2; margin: 0 0 14px 0;">
                     ¡Bienvenidos a DonaTrack, <span th:text="${nombreOrganizacion}">Organización</span>!
                   </h2>
-                  <p style="color: #1e293b; font-size: 0.84rem; line-height: 1.45; margin: 0 0 10px 0; text-align: left;">
+                  <p class="dt-welcome-mat__left-text" style="font-size: 0.84rem; line-height: 1.45; margin: 0 0 10px 0; text-align: left;">
                     Gestioná las donaciones y arribos para tu comedor desde un solo lugar:
                   </p>
-                  <ul class="slds-list_dotted" style="text-align: left; color: #1e293b; font-size: 0.82rem; line-height: 1.45; margin: 0 0 18px 16px;">
+                  <ul class="slds-list_dotted dt-welcome-mat__left-text" style="text-align: left; font-size: 0.82rem; line-height: 1.45; margin: 0 0 18px 16px;">
                     <li>Publicá tus necesidades reales para donantes</li>
                     <li>Seguí en vivo los móviles asignados a tu sede</li>
                     <li>Confirmá recepciones con remito y foto S3</li>
@@ -271,10 +271,10 @@
                       Explorar mi portal
                     </button>
                   </div>
-                  <label class="slds-checkbox" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem; color: #1e293b;">
+                  <label class="slds-checkbox dt-welcome-mat__left-text" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem;">
                     <input type="checkbox" id="welcome-benef-no-mostrar" />
                     <span class="slds-checkbox_faux" style="border-color: #64748b; background: #ffffff;"></span>
-                    <span class="slds-form-element__label" style="font-size: 0.8rem; color: #1e293b; padding: 0;">No volver a mostrar</span>
+                    <span class="slds-form-element__label dt-welcome-mat__left-text" style="font-size: 0.8rem; padding: 0;">No volver a mostrar</span>
                   </label>
                 </div>
 
@@ -288,63 +288,60 @@
                 </div>
               </div>
 
-              <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12"
-                style="background: #ffffff; padding: 26px 28px 20px 28px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12 dt-welcome-mat__right"
+                style="padding: 26px 28px 20px 28px; display: flex; flex-direction: column; justify-content: space-between;">
                 <div style="display: flex; flex-direction: column; gap: 11px;">
-                  <a th:href="@{/app/beneficiaria/necesidades}" onclick="cerrarWelcomeBenefModal()"
-                    style="display: flex; gap: 14px; align-items: center; padding: 13px 16px; background: #ffffff; border-radius: 4px; border: 1px solid #dddbda; box-shadow: 0 1px 2px rgba(0,0,0,0.04); text-decoration: none;">
-                    <span class="slds-icon_container" style="background: #f3f2f2; padding: 10px; border-radius: 6px; flex-shrink: 0;">
+                  <a th:href="@{/app/beneficiaria/necesidades}" onclick="cerrarWelcomeBenefModal()" class="dt-welcome-mat__tile">
+                    <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #166534;" aria-hidden="true">
                         <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#task}"></use>
                       </svg>
                     </span>
                     <div>
-                      <strong style="display: block; color: #181818; font-size: 0.9rem; font-weight: 700;">Declará tus necesidades materiales</strong>
-                      <span style="font-size: 0.79rem; color: #444444; line-height: 1.35; display: block; margin-top: 2px;">
+                      <strong class="dt-welcome-mat__tile-title">Declará tus necesidades materiales</strong>
+                      <span class="dt-welcome-mat__tile-desc">
                         Indicá qué alimentos, abrigo o insumos precisa tu comedor para activar el matchmaking solidario.
                       </span>
                     </div>
                   </a>
 
-                  <a th:href="@{/app/beneficiaria/entregas}" onclick="cerrarWelcomeBenefModal()"
-                    style="display: flex; gap: 14px; align-items: center; padding: 13px 16px; background: #ffffff; border-radius: 4px; border: 1px solid #dddbda; box-shadow: 0 1px 2px rgba(0,0,0,0.04); text-decoration: none;">
-                    <span class="slds-icon_container" style="background: #f3f2f2; padding: 10px; border-radius: 6px; flex-shrink: 0;">
+                  <a th:href="@{/app/beneficiaria/entregas}" onclick="cerrarWelcomeBenefModal()" class="dt-welcome-mat__tile">
+                    <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #0176d3;" aria-hidden="true">
                         <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#truck}"></use>
                       </svg>
                     </span>
                     <div>
-                      <strong style="display: block; color: #181818; font-size: 0.9rem; font-weight: 700;">Seguí los camiones en camino</strong>
-                      <span style="font-size: 0.79rem; color: #444444; line-height: 1.35; display: block; margin-top: 2px;">
+                      <strong class="dt-welcome-mat__tile-title">Seguí los camiones en camino</strong>
+                      <span class="dt-welcome-mat__tile-desc">
                         Consultá patente, chofer y ubicación en el mapa de paradas cuando despachamos una carga hacia tu sede.
                       </span>
                     </div>
                   </a>
 
-                  <div style="display: flex; gap: 14px; align-items: center; padding: 13px 16px; background: #ffffff; border-radius: 4px; border: 1px solid #dddbda; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
-                    <span class="slds-icon_container" style="background: #f3f2f2; padding: 10px; border-radius: 6px; flex-shrink: 0;">
+                  <div class="dt-welcome-mat__tile">
+                    <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #706e6b;" aria-hidden="true">
                         <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
                       </svg>
                     </span>
                     <div>
-                      <strong style="display: block; color: #181818; font-size: 0.9rem; font-weight: 700;">Confirmá recepción con remito y foto</strong>
-                      <span style="font-size: 0.79rem; color: #444444; line-height: 1.35; display: block; margin-top: 2px;">
+                      <strong class="dt-welcome-mat__tile-title">Confirmá recepción con remito y foto</strong>
+                      <span class="dt-welcome-mat__tile-desc">
                         Al recibir el camión en tu puerta, subí el comprobante firmado para certificar la entrega al donante.
                       </span>
                     </div>
                   </div>
 
-                  <a th:href="@{/app/organizaciones/{id}(id=${beneficiarioId != null ? beneficiarioId : 'esperanza'}, nombre=${nombreOrganizacion})}" onclick="cerrarWelcomeBenefModal()"
-                    style="display: flex; gap: 14px; align-items: center; padding: 13px 16px; background: #ffffff; border-radius: 4px; border: 1px solid #dddbda; box-shadow: 0 1px 2px rgba(0,0,0,0.04); text-decoration: none;">
-                    <span class="slds-icon_container" style="background: #f3f2f2; padding: 10px; border-radius: 6px; flex-shrink: 0;">
+                  <a th:href="@{/app/organizaciones/{id}(id=${beneficiarioId != null ? beneficiarioId : 'esperanza'}, nombre=${nombreOrganizacion})}" onclick="cerrarWelcomeBenefModal()" class="dt-welcome-mat__tile">
+                    <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #706e6b;" aria-hidden="true">
                         <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
                       </svg>
                     </span>
                     <div>
-                      <strong style="display: block; color: #181818; font-size: 0.9rem; font-weight: 700;">Tu perfil público transparente</strong>
-                      <span style="font-size: 0.79rem; color: #444444; line-height: 1.35; display: block; margin-top: 2px;">
+                      <strong class="dt-welcome-mat__tile-title">Tu perfil público transparente</strong>
+                      <span class="dt-welcome-mat__tile-desc">
                         Los donantes pueden encontrar tu comedor en el directorio y apoyar tus causas activas directamente.
                       </span>
                     </div>
@@ -386,7 +383,6 @@
           var modal = document.getElementById('welcome-beneficiaria-modal');
           if (modal) modal.style.display = 'none';
           try {
-            sessionStorage.setItem(welcomeBenefKey, 'true');
             var chk = document.getElementById('welcome-benef-no-mostrar');
             if (chk && chk.checked) {
               localStorage.setItem(welcomeBenefKey, 'true');
@@ -398,14 +394,16 @@
 
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' || e.key === 'Esc') {
-            window.cerrarWelcomeBenefModal();
+            var modal = document.getElementById('welcome-beneficiaria-modal');
+            if (modal && modal.style.display !== 'none') {
+              window.cerrarWelcomeBenefModal();
+            }
           }
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-          var isNueva = /*[[${isNuevaBeneficiaria}]]*/ false;
           try {
-            if (isNueva && !localStorage.getItem(welcomeBenefKey) && !sessionStorage.getItem(welcomeBenefKey)) {
+            if (localStorage.getItem(welcomeBenefKey) !== 'true') {
               window.abrirWelcomeBenefModal();
             }
           } catch (e) {}
