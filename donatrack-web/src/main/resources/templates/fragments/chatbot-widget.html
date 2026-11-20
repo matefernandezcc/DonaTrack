@@ -54,6 +54,38 @@
     </dialog>
 
     <script th:src="@{/js/chatbot.js}" defer></script>
+
+    <!-- Salesforce MIAW (Enhanced Chat v2) en modo híbrido: oculta el botón nativo y se abre al derivar a un agente -->
+    <script type="text/javascript">
+      window.__dtMiawReady = false;
+      window.addEventListener("onEmbeddedMessagingReady", function () {
+        window.__dtMiawReady = true;
+        if (typeof window.__dtOnMiawReady === "function") {
+          window.__dtOnMiawReady();
+        }
+      });
+
+      function initEmbeddedMessaging() {
+        try {
+          if (typeof embeddedservice_bootstrap === "undefined") return;
+          embeddedservice_bootstrap.settings.language = "es";
+          embeddedservice_bootstrap.settings.hideChatButtonOnLoad = true;
+          embeddedservice_bootstrap.init(
+            "00DKh000001LcL5",
+            "Chatbot_DonaTrack",
+            "https://be1776887191673.my.site.com/ESWChatbotDonaTrack1780800682238",
+            {
+              scrt2URL: "https://be1776887191673.my.salesforce-scrt.com"
+            }
+          );
+        } catch (err) {
+          console.warn("No se pudo inicializar Salesforce Embedded Messaging:", err);
+        }
+      }
+    </script>
+    <script type="text/javascript"
+      src="https://be1776887191673.my.site.com/ESWChatbotDonaTrack1780800682238/assets/js/bootstrap.min.js"
+      onload="initEmbeddedMessaging()" async defer></script>
   </th:block>
 </body>
 </html>

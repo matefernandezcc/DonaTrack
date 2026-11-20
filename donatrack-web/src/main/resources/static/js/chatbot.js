@@ -202,6 +202,39 @@
     }
   };
 
+  const tryLaunchMiawChat = async () => {
+    const canLaunch = () =>
+      window.embeddedservice_bootstrap &&
+      window.embeddedservice_bootstrap.utilAPI &&
+      typeof window.embeddedservice_bootstrap.utilAPI.launchChat === "function";
+
+    if (!canLaunch() && !window.__dtMiawReady) {
+      await new Promise((resolve) => {
+        let done = false;
+        const finish = () => {
+          if (!done) {
+            done = true;
+            resolve();
+          }
+        };
+        window.__dtOnMiawReady = finish;
+        setTimeout(finish, 2500);
+      });
+    }
+
+    if (canLaunch()) {
+      try {
+        panel.hidden = true;
+        fab.setAttribute("aria-expanded", "false");
+        await window.embeddedservice_bootstrap.utilAPI.launchChat();
+        return true;
+      } catch (err) {
+        console.warn("Error al abrir MIAW launchChat:", err);
+      }
+    }
+    return false;
+  };
+
   const addHandoffButton = (label) => {
     const wrap = document.createElement("div");
     wrap.className = "chatbot__handoff-wrap";
@@ -211,11 +244,14 @@
     btn.className = "chatbot__handoff-btn";
     btn.textContent = label || "Contactar con un agente";
 
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       document.querySelectorAll(".chatbot__handoff-btn").forEach((b) => {
         b.disabled = true;
       });
-      enqueueRequest("", "HANDOFF_AGENT");
+      const launched = await tryLaunchMiawChat();
+      if (!launched) {
+        enqueueRequest("", "HANDOFF_AGENT");
+      }
     });
 
     wrap.appendChild(btn);
@@ -340,16 +376,18 @@
   });
 
   document.querySelectorAll("#chat-chips .chip").forEach((chip) =>
-    chip.addEventListener("click", () => {
+    chip.addEventListener("click", async () => {
       const q = (chip.dataset.q || chip.textContent || "").trim();
       if (!q) return;
       const action = chip.dataset.action || null;
+      addMessageBubble(q, "user");
       if (action === "HANDOFF_AGENT") {
         document.querySelectorAll(".chatbot__handoff-btn").forEach((b) => {
           b.disabled = true;
         });
+        const launched = await tryLaunchMiawChat();
+        if (launched) return;
       }
-      addMessageBubble(q, "user");
       enqueueRequest(q, action);
     })
   );
