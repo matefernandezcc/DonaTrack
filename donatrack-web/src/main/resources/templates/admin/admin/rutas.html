@@ -12,15 +12,22 @@
   <!-- Contenido principal -->
   <div id="main-content-slot">
 
+    <!-- Guía Rápida de Rutas -->
+    <div class="dt-guide-strip slds-m-bottom_medium" style="font-size: 0.84rem;">
+      <strong>Operación logística en 2 pasos:</strong>
+      <strong>1.</strong> Cuando hay donaciones asignadas en cola, presioná <strong>Planificar Rutas Pendientes</strong> para armar el recorrido con camión y chofer.
+      <strong>2.</strong> Presioná <strong>Iniciar Ruta</strong> para activar el seguimiento en vivo en los portales de donantes y organizaciones.
+    </div>
+
     <!-- SLDS BLUEPRINT: CARD CONTAINER -->
     <article class="slds-card">
       
       <div class="slds-card__header slds-grid">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
           <div class="slds-media__figure">
-            <span class="slds-icon_container slds-icon-standard-routing-offline" title="Rutas">
-              <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/standard-sprite/svg/symbols.svg#routing_offline}"></use>
+            <span class="slds-icon_container slds-icon-utility-routing-offline" style="background: #014486; border-radius: 6px; padding: 6px;" title="Rutas">
+              <svg class="slds-icon slds-icon_small" aria-hidden="true" style="fill: #ffffff;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
               </svg>
             </span>
           </div>
@@ -31,7 +38,10 @@
           </div>
           <div class="slds-no-flex" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
             <form th:action="@{/app/admin/rutas/planificar}" method="post" style="display: inline; margin: 0;">
-              <button type="submit" class="slds-button slds-button_brand">
+              <button type="submit"
+                      th:class="${totalPendientes != null and totalPendientes > 0} ? 'slds-button slds-button_brand' : 'slds-button slds-button_neutral'"
+                      th:disabled="${totalPendientes == null or totalPendientes == 0}"
+                      th:title="${totalPendientes != null and totalPendientes > 0} ? 'Generar rutas para las donaciones en cola' : 'No hay donaciones en cola pendientes de ruta'">
                 Planificar Rutas Pendientes
                 <span th:if="${totalPendientes != null and totalPendientes > 0}"
                       class="slds-badge slds-badge_lightest slds-m-left_xx-small"
@@ -41,7 +51,7 @@
             </form>
             <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral">
               <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
-                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#refresh}"></use>
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#list}"></use>
               </svg>Ver Asignaciones
             </a>
           </div>
@@ -133,10 +143,10 @@
                 </td>
                 <td data-label="Estado"
                     th:with="est=${ruta['estado'] != null ? ruta['estado'] : (ruta['iniciada'] == true ? 'EN_TRANSITO' : 'PLANIFICADA')}">
-                  <span th:if="${est == 'FINALIZADA' or est == 'COMPLETADA'}" class="slds-badge slds-badge_success" th:text="${est}">FINALIZADA</span>
-                  <span th:if="${est == 'INICIADA' or est == 'EN_TRANSITO'}" class="slds-badge slds-badge_inverse" th:text="${est}">EN TRÁNSITO</span>
+                  <span th:if="${est == 'FINALIZADA' or est == 'COMPLETADA'}" class="slds-badge slds-badge_success">Finalizada</span>
+                  <span th:if="${est == 'INICIADA' or est == 'EN_TRANSITO'}" class="slds-badge slds-badge_inverse">En camino</span>
                   <span th:if="${est != 'FINALIZADA' and est != 'COMPLETADA' and est != 'INICIADA' and est != 'EN_TRANSITO'}"
-                        class="slds-badge slds-badge_lightest" th:text="${est}">PLANIFICADA</span>
+                        class="slds-badge slds-badge_lightest">Programada</span>
                 </td>
                 <td style="text-align: right;"
                     th:with="est=${ruta['estado'] != null ? ruta['estado'] : (ruta['iniciada'] == true ? 'EN_TRANSITO' : 'PLANIFICADA')}">
@@ -170,7 +180,7 @@
 
   </div>
 
-  <div id="extra-scripts"></div>
+  <th:block id="extra-scripts"></th:block>
 </body>
 </html>
 

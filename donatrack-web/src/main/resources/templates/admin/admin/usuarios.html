@@ -16,8 +16,8 @@
     <article class="slds-card slds-m-bottom_x-large"
       style="border-radius: 8px; border: 1px solid #dddbda; box-shadow: 0 2px 8px rgba(0,0,0,0.06); width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box;">
 
-      <div class="slds-card__header slds-grid slds-grid_align-spread slds-p-around_medium"
-        style="border-bottom: 1px solid #e5e5e5; background: #f8fafc;">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-wrap slds-p-around_medium"
+        style="border-bottom: 1px solid #e5e5e5; background: #f8fafc; gap: 10px;">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
           <div class="slds-media__figure">
             <span class="slds-icon_container slds-icon-standard-user"
@@ -37,7 +37,10 @@
             </p>
           </div>
         </header>
-        <div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label for="buscador-usuarios" class="slds-assistive-text">Buscar usuarios</label>
+          <input type="search" id="buscador-usuarios" class="slds-input" placeholder="Buscar usuario, nombre o correo..."
+                 oninput="filtrarTablaUsuarios()" style="width: 240px; min-height: 34px;" />
           <span class="slds-badge slds-badge_lightest" style="font-weight: 700;"
             th:text="${#lists.size(usuarios)} + ' Usuarios Registrados'">6 Usuarios</span>
         </div>
@@ -63,7 +66,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr th:each="u : ${usuarios}" class="slds-hint-parent">
+            <tr th:each="u : ${usuarios}" class="slds-hint-parent dt-usuario-row"
+                th:attr="data-search=${#strings.toLowerCase((u['username'] != null ? u['username'] : '') + ' ' + (u['nombre'] != null ? u['nombre'] : '') + ' ' + (u['email'] != null ? u['email'] : '') + ' ' + (u['rol'] != null ? u['rol'] : ''))}">
               <td style="font-weight: 600; padding: 10px 14px; white-space: nowrap;">
                 <span th:text="${u['username']}">donante</span>
               </td>
@@ -92,8 +96,10 @@
               </td>
               <td style="padding: 10px 14px; white-space: nowrap;">
                 <div style="display: flex; gap: 8px; align-items: center; white-space: nowrap; min-width: max-content;">
-                  <!-- Formulario para cambiar rol del usuario en vivo -->
+                  <!-- Formulario para cambiar rol del usuario con guardrail si eleva a ADMIN -->
                   <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/rol'}" method="post"
+                    th:attr="data-username=${u['username']},data-current-rol=${u['rol']}"
+                    onsubmit="return confirmarCambioRol(this)"
                     style="display: flex; gap: 6px; align-items: center; margin: 0;">
                     <select name="rol" class="slds-select" aria-label="Seleccionar nuevo rol"
                       style="font-size: 0.78rem; padding: 4px 8px; height: 34px; border-radius: 6px; width: 125px;">
@@ -110,15 +116,21 @@
                   <!-- Botón para restablecer contraseña temporal -->
                   <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/reset-password'}" method="post"
                     style="margin: 0;"
-                    onsubmit="return confirm('¿Restablecer la contraseña de este usuario a una clave temporal segura?');">
+                    th:attr="data-username=${u['username']}"
+                    onsubmit="return confirmarResetClave(this)">
                     <input type="hidden" name="email" th:value="${u['email']}" />
                     <button type="submit" class="slds-button slds-button_neutral"
                       title="Restablecer a contraseña temporal"
                       style="min-height: 34px; border-radius: 6px; font-size: 0.78rem; padding: 0 12px; font-weight: 700; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
-                      🔑 Resetear Clave
+                      Resetear Clave
                     </button>
                   </form>
                 </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(usuarios)}">
+              <td colspan="6" class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                No hay usuarios registrados en este momento.
               </td>
             </tr>
           </tbody>
@@ -205,19 +217,39 @@
                   style="font-weight: 700; font-size: 0.75rem;">PENDIENTE DE AUDITORÍA</span>
                 <span th:if="${s.estado() == 'APROBADA'}" class="slds-badge slds-theme_success"
                   style="font-weight: 700; font-size: 0.75rem;">✓ APROBADA Y VERIFICADA</span>
+                <span th:if="${s.estado() == 'RECHAZADA'}" class="slds-badge slds-theme_error"
+                  style="font-weight: 700; font-size: 0.75rem;">RECHAZADA</span>
               </td>
               <td style="padding: 10px 14px; white-space: nowrap;">
-                <form th:if="${s.estado() == 'PENDIENTE'}"
-                  th:action="@{'/app/admin/solicitudes-ong/' + ${s.id()} + '/aprobar'}" method="post"
-                  style="margin: 0;">
-                  <button type="submit" class="slds-button slds-button_success slds-button_sm"
-                    style="font-weight: 700; border-radius: 6px; font-size: 0.78rem; padding: 0 14px; min-height: 36px; display: inline-flex; align-items: center;">
-                    Aprobar
-                  </button>
-                </form>
+                <div th:if="${s.estado() == 'PENDIENTE'}" style="display: flex; gap: 6px; align-items: center;">
+                  <form th:action="@{'/app/admin/solicitudes-ong/' + ${s.id()} + '/aprobar'}" method="post"
+                    style="margin: 0;">
+                    <button type="submit" class="slds-button slds-button_success slds-button_sm"
+                      style="font-weight: 700; border-radius: 6px; font-size: 0.78rem; padding: 0 14px; min-height: 36px; display: inline-flex; align-items: center;">
+                      Aprobar
+                    </button>
+                  </form>
+                  <form th:action="@{'/app/admin/solicitudes-ong/' + ${s.id()} + '/rechazar'}" method="post"
+                    style="margin: 0;"
+                    th:attr="data-ong=${s.nombreOng()}"
+                    onsubmit="return confirmarRechazoOng(this)">
+                    <button type="submit" class="slds-button slds-button_destructive slds-button_sm"
+                      style="font-weight: 700; border-radius: 6px; font-size: 0.78rem; padding: 0 12px; min-height: 36px; display: inline-flex; align-items: center;">
+                      Rechazar
+                    </button>
+                  </form>
+                </div>
                 <span th:if="${s.estado() == 'APROBADA'}" style="color: #166534; font-size: 0.8rem; font-weight: 600;">
                   Portal habilitado
                 </span>
+                <span th:if="${s.estado() == 'RECHAZADA'}" style="color: #b91c1c; font-size: 0.8rem; font-weight: 600;">
+                  Solicitud rechazada
+                </span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(solicitudes)}">
+              <td colspan="6" class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                No hay solicitudes de verificación de ONGs registradas.
               </td>
             </tr>
           </tbody>
@@ -225,10 +257,107 @@
       </div>
     </article>
 
+    <!-- Modal SLDS de Confirmación de Acción de Seguridad -->
+    <div id="modal-seguridad-usuarios" style="display: none;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true" style="z-index: 10001;">
+        <div class="slds-modal__container" style="max-width: 480px;">
+          <header class="slds-modal__header">
+            <button type="button" class="slds-button slds-modal__close dt-modal-close-btn" onclick="cerrarModalSeguridad()" title="Cerrar" aria-label="Cerrar">
+              <span aria-hidden="true">✕</span>
+            </button>
+            <h2 id="modal-seg-titulo" class="slds-modal__title slds-hyphenate" style="font-weight: 800;">Confirmar acción</h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_large">
+            <p id="modal-seg-mensaje" style="font-size: 0.92rem; line-height: 1.5;"></p>
+          </div>
+          <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalSeguridad()">Cancelar</button>
+            <button type="button" id="modal-seg-confirmar" class="slds-button slds-button_destructive" onclick="ejecutarFormPendienteSeguridad()" style="font-weight: 700;">Confirmar</button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" onclick="cerrarModalSeguridad()" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
+    </div>
+
   </div>
 
   <th:block id="page-scripts">
-    <!-- Scripts específicos de la vista si fueran requeridos -->
+    <script>
+      var formSeguridadPendiente = null;
+
+      window.filtrarTablaUsuarios = function () {
+        var inp = document.getElementById('buscador-usuarios');
+        var q = (inp ? inp.value : '').trim().toLowerCase();
+        document.querySelectorAll('.dt-usuario-row').forEach(function (tr) {
+          var txt = (tr.getAttribute('data-search') || '').toLowerCase();
+          tr.style.display = (!q || txt.indexOf(q) !== -1) ? '' : 'none';
+        });
+      };
+
+      function abrirModalSeguridad(titulo, mensaje, form) {
+        formSeguridadPendiente = form;
+        var m = document.getElementById('modal-seguridad-usuarios');
+        var t = document.getElementById('modal-seg-titulo');
+        var p = document.getElementById('modal-seg-mensaje');
+        if (t) t.textContent = titulo;
+        if (p) p.textContent = mensaje;
+        if (m) m.style.display = 'block';
+        return false;
+      }
+
+      window.cerrarModalSeguridad = function () {
+        var m = document.getElementById('modal-seguridad-usuarios');
+        if (m) m.style.display = 'none';
+        formSeguridadPendiente = null;
+      };
+
+      window.ejecutarFormPendienteSeguridad = function () {
+        if (formSeguridadPendiente) {
+          var f = formSeguridadPendiente;
+          formSeguridadPendiente = null;
+          f.onsubmit = null;
+          f.submit();
+        }
+      };
+
+      window.confirmarCambioRol = function (form) {
+        var sel = form.querySelector('select[name="rol"]');
+        var nuevoRol = sel ? sel.value : '';
+        var actualRol = form.getAttribute('data-current-rol') || '';
+        var user = form.getAttribute('data-username') || 'este usuario';
+        if (nuevoRol === actualRol) return true;
+        if (nuevoRol === 'ADMIN' || actualRol === 'ADMIN') {
+          return abrirModalSeguridad(
+            'Confirmar cambio de privilegios ADMIN',
+            'Vas a cambiar el rol de "' + user + '" de ' + actualRol + ' a ' + nuevoRol + '. Esta operación modifica permisos administrativos sensibles. ¿Confirmás?',
+            form
+          );
+        }
+        return true;
+      };
+
+      window.confirmarResetClave = function (form) {
+        var user = form.getAttribute('data-username') || 'este usuario';
+        return abrirModalSeguridad(
+          'Restablecer contraseña temporal',
+          'Se generará una nueva contraseña temporal para "' + user + '" y se invalidará la clave anterior. ¿Deseás continuar?',
+          form
+        );
+      };
+
+      window.confirmarRechazoOng = function (form) {
+        var ong = form.getAttribute('data-ong') || 'esta organización';
+        return abrirModalSeguridad(
+          'Rechazar solicitud de ONG',
+          'Vas a marcar la solicitud de "' + ong + '" como RECHAZADA y no se habilitará su acceso beneficiario. ¿Confirmás?',
+          form
+        );
+      };
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') cerrarModalSeguridad();
+      });
+    </script>
   </th:block>
 
 </body>

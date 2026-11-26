@@ -192,10 +192,16 @@
           </div>
 
           <!-- Botones de Acción con Prevención de Doble Clic -->
-          <div class="slds-border_top slds-p-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-            <span class="slds-text-body_small slds-text-color_weak">
-              Se generará un código único de seguimiento (<code>#DT-XXXX</code>) al confirmar la recepción.
-            </span>
+          <div class="slds-border_top slds-p-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap" style="gap: 12px;">
+            <div>
+              <span class="slds-text-body_small slds-text-color_weak" style="display: block;">
+                Se generará un código único de seguimiento (<code>#DT-XXXX</code>) al confirmar la recepción.
+              </span>
+              <label style="display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.82rem; cursor: pointer;">
+                <input type="checkbox" name="cargarOtra" value="true" style="accent-color: #0176d3;" />
+                <span>Guardar y permanecer aquí para cargar otra donación</span>
+              </label>
+            </div>
             <div style="display: flex; gap: 10px;">
               <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral" style="min-height: 36px; padding: 0 14px; font-size: 0.84rem; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center;">
                 Cancelar
@@ -233,49 +239,38 @@
           </header>
           <form id="form-nueva-persona" th:action="@{/app/admin/personas}" method="post">
             <div class="slds-modal__content slds-p-around_medium">
+              <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                Solo necesitás los <strong>datos básicos</strong> (tipo, nombre/razón social y correo) para registrar a la persona donante.
+              </p>
               <div class="slds-grid slds-wrap slds-gutters_small">
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-tipo" style="font-weight: 700;">Tipo de Persona</label>
+                  <label class="slds-form-element__label" for="np-tipo" style="font-weight: 700;">Tipo de Persona *</label>
                   <select class="slds-select" id="np-tipo" name="tipo" onchange="toggleTipoPersonaDonante()" required>
                     <option value="HUMANA" selected>Persona Humana</option>
-                    <option value="JURIDICA">Persona Jurídica</option>
+                    <option value="JURIDICA">Persona Jurídica (Empresa/ONG)</option>
                   </select>
                 </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-docTipo" style="font-weight: 700;">Tipo Doc. (Opcional)</label>
-                  <select class="slds-select" id="np-docTipo" name="docTipo">
-                    <option value="DNI" selected>DNI</option>
-                    <option value="PASAPORTE">Pasaporte / Extranjero</option>
-                    <option value="CUIT">CUIT</option>
-                    <option value="CUIL">CUIL</option>
-                    <option value="">Sin documento (Solo email/contacto)</option>
-                  </select>
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-docNumero" style="font-weight: 700;">Nro. Documento (Opcional)</label>
-                  <input type="text" class="slds-input" id="np-docNumero" name="docNumero" placeholder="Ej: 30123456 o dejar vacío" />
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-m-bottom_small">
+                  <label class="slds-form-element__label" for="np-email" style="font-weight: 700;">Correo Electrónico *</label>
+                  <input type="email" class="slds-input" id="np-email" name="email" required autocomplete="email" placeholder="donante@ejemplo.org" />
                 </div>
 
                 <!-- Campos Persona Humana -->
                 <div id="grupo-persona-humana" class="slds-col slds-size_1-of-1 slds-grid slds-wrap slds-gutters_small" style="padding: 0; margin: 0;">
-                  <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
-                    <label class="slds-form-element__label" for="np-nombre" style="font-weight: 700;">Nombre</label>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-nombre" style="font-weight: 700;">Nombre *</label>
                     <input type="text" class="slds-input" id="np-nombre" name="nombre" required placeholder="Ej: Lucía" />
                   </div>
-                  <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
                     <label class="slds-form-element__label" for="np-apellido" style="font-weight: 700;">Apellido (Opcional)</label>
                     <input type="text" class="slds-input" id="np-apellido" name="apellido" placeholder="Ej: Gómez" />
-                  </div>
-                  <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
-                    <label class="slds-form-element__label" for="np-edad" style="font-weight: 700;">Edad</label>
-                    <input type="number" class="slds-input" id="np-edad" name="edad" min="18" max="120" value="30" />
                   </div>
                 </div>
 
                 <!-- Campos Persona Jurídica -->
                 <div id="grupo-persona-juridica" class="slds-col slds-size_1-of-1 slds-grid slds-wrap slds-gutters_small" style="display: none; padding: 0; margin: 0;">
                   <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
-                    <label class="slds-form-element__label" for="np-razonSocial" style="font-weight: 700;">Razón Social</label>
+                    <label class="slds-form-element__label" for="np-razonSocial" style="font-weight: 700;">Razón Social *</label>
                     <input type="text" class="slds-input" id="np-razonSocial" name="razonSocial" placeholder="Ej: Distribuidora Sur SRL" />
                   </div>
                   <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_small">
@@ -292,47 +287,66 @@
                     <input type="text" class="slds-input" id="np-rubro" name="rubro" placeholder="Ej: Alimentación" />
                   </div>
                 </div>
-
-                <!-- Contacto -->
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-email" style="font-weight: 700;">Correo Electrónico</label>
-                  <input type="email" class="slds-input" id="np-email" name="email" required placeholder="donante@ejemplo.org" />
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-medio" style="font-weight: 700;">Medio Preferido</label>
-                  <select class="slds-select" id="np-medio" name="medioPredeterminado">
-                    <option value="CORREO" selected>Correo Electrónico</option>
-                    <option value="TELEFONO">Teléfono</option>
-                    <option value="WHATSAPP">WhatsApp</option>
-                  </select>
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-telefono" style="font-weight: 700;">Teléfono</label>
-                  <input type="text" class="slds-input" id="np-telefono" name="telefono" placeholder="+54 11 5555-0100" />
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-whatsapp" style="font-weight: 700;">WhatsApp</label>
-                  <input type="text" class="slds-input" id="np-whatsapp" name="whatsapp" placeholder="+54 9 11 5555-0100" />
-                </div>
-
-                <!-- Dirección opcional -->
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-calle" style="font-weight: 700;">Calle</label>
-                  <input type="text" class="slds-input" id="np-calle" name="calle" placeholder="Av. Corrientes" />
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-altura" style="font-weight: 700;">Altura</label>
-                  <input type="number" class="slds-input" id="np-altura" name="altura" placeholder="1234" />
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-localidad" style="font-weight: 700;">Localidad</label>
-                  <input type="text" class="slds-input" id="np-localidad" name="localidad" placeholder="CABA" />
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
-                  <label class="slds-form-element__label" for="np-cp" style="font-weight: 700;">CP</label>
-                  <input type="text" class="slds-input" id="np-cp" name="codigoPostal" placeholder="1043" />
-                </div>
               </div>
+
+              <!-- Campos opcionales colapsados para evitar fatiga visual -->
+              <details class="slds-m-top_x-small" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; background: #f8fafc;">
+                <summary style="cursor: pointer; font-weight: 700; font-size: 0.84rem; color: #014486;">
+                  + Datos opcionales (documento, edad, teléfono, WhatsApp y dirección)
+                </summary>
+                <div class="slds-grid slds-wrap slds-gutters_small slds-m-top_small">
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-docTipo" style="font-weight: 700;">Tipo Doc.</label>
+                    <select class="slds-select" id="np-docTipo" name="docTipo">
+                      <option value="DNI" selected>DNI</option>
+                      <option value="PASAPORTE">Pasaporte</option>
+                      <option value="CUIT">CUIT</option>
+                      <option value="CUIL">CUIL</option>
+                      <option value="">Sin documento</option>
+                    </select>
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-docNumero" style="font-weight: 700;">Nro. Documento</label>
+                    <input type="text" class="slds-input" id="np-docNumero" name="docNumero" placeholder="Ej: 30123456" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-edad" style="font-weight: 700;">Edad</label>
+                    <input type="number" class="slds-input" id="np-edad" name="edad" min="18" max="120" value="30" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-medio" style="font-weight: 700;">Medio Preferido</label>
+                    <select class="slds-select" id="np-medio" name="medioPredeterminado">
+                      <option value="CORREO" selected>Correo Electrónico</option>
+                      <option value="TELEFONO">Teléfono</option>
+                      <option value="WHATSAPP">WhatsApp</option>
+                    </select>
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-telefono" style="font-weight: 700;">Teléfono</label>
+                    <input type="tel" class="slds-input" id="np-telefono" name="telefono" placeholder="+54 9 11 5555-0100" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-whatsapp" style="font-weight: 700;">WhatsApp</label>
+                    <input type="tel" class="slds-input" id="np-whatsapp" name="whatsapp" placeholder="+54 9 11 5555-0100" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-calle" style="font-weight: 700;">Calle</label>
+                    <input type="text" class="slds-input" id="np-calle" name="calle" placeholder="Av. Corrientes" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-altura" style="font-weight: 700;">Altura</label>
+                    <input type="number" class="slds-input" id="np-altura" name="altura" placeholder="1234" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-localidad" style="font-weight: 700;">Localidad</label>
+                    <input type="text" class="slds-input" id="np-localidad" name="localidad" placeholder="CABA" />
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small">
+                    <label class="slds-form-element__label" for="np-cp" style="font-weight: 700;">CP</label>
+                    <input type="text" class="slds-input" id="np-cp" name="codigoPostal" placeholder="1043" />
+                  </div>
+                </div>
+              </details>
             </div>
             <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 10px;">
               <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalNuevaPersona()" style="min-height: 36px; padding: 0 14px; border-radius: 6px; font-weight: 600;">
@@ -395,6 +409,10 @@
       });
 
       document.addEventListener('DOMContentLoaded', function () {
+        var fechaVenc = document.getElementById('fechaVencimiento');
+        if (fechaVenc) {
+          fechaVenc.min = new Date().toISOString().split('T')[0];
+        }
         var form = document.getElementById('form-recepcion-deposito');
         var submitBtn = document.getElementById('btn-submit-recepcion');
 

@@ -37,19 +37,26 @@
             </svg>
             Nueva Recepción en Depósito
           </a>
-          <form th:action="@{/app/admin/donaciones/auditoria-vencidos}" method="post" style="display: inline;">
-            <button type="submit" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;"
-                    onclick="return confirm('¿Desea ejecutar la auditoría de vencimientos sobre todas las donaciones en depósito?');"
+          <form id="form-auditoria-vencidos" th:action="@{/app/admin/donaciones/auditoria-vencidos}" method="post" style="display: inline;">
+            <button type="button" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;"
+                    onclick="abrirModalConfirmacionBatch('auditoria')"
                     title="Ejecutar barrido sanitario de lotes vencidos">
               Auditoría de Vencimientos
             </button>
           </form>
-          <form th:action="@{/app/admin/matchmaking/batch}" method="post" style="display: inline;">
-            <button type="submit" class="slds-button slds-button_outline-brand" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;">
+          <form id="form-matchmaking-batch" th:action="@{/app/admin/matchmaking/batch}" method="post" style="display: inline;">
+            <button type="button" class="slds-button slds-button_outline-brand" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;"
+                    onclick="abrirModalConfirmacionBatch('batch')">
               Asignación Automática
             </button>
           </form>
         </div>
+      </div>
+      <div class="slds-p-horizontal_medium slds-p-bottom_small" style="font-size: 0.8rem; color: #475569;">
+        <strong>Cómo funciona el motor de asignación:</strong>
+        <span class="slds-badge slds-badge_lightest slds-m-left_xx-small">Combinado</span> equilibra coincidencia de rubro y urgencia ·
+        <span class="slds-badge slds-badge_lightest">Semántico</span> prioriza coincidencia exacta con necesidades publicadas ·
+        <span class="slds-badge slds-badge_lightest">Sub-Atendidos</span> prioriza comedores que recibieron menos envíos recientes.
       </div>
     </article>
 
@@ -127,7 +134,7 @@
 
     <!-- ==================== BANDEJA DE DONACIONES PENDIENTES DE ASIGNAR (EN_DEPOSITO) ==================== -->
     <article class="slds-card slds-m-bottom_medium" style="border-radius: 8px; border: 1px solid #cbd5e1;">
-      <div class="slds-card__header slds-grid slds-grid_align-spread slds-border_bottom slds-p-around_medium">
+      <div class="slds-card__header slds-grid slds-grid_align-spread slds-wrap slds-border_bottom slds-p-around_medium" style="gap: 10px;">
         <header class="slds-media slds-media_center slds-has-flexi-truncate">
           <div class="slds-media__body">
             <h2 class="slds-card__header-title">
@@ -137,7 +144,10 @@
             </h2>
           </div>
         </header>
-        <div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label for="buscador-pendientes-mm" class="slds-assistive-text">Buscar donaciones pendientes</label>
+          <input type="search" id="buscador-pendientes-mm" class="slds-input" placeholder="Buscar código, bien o donante..."
+                 oninput="filtrarPendientesMatchmaking()" style="width: 240px; min-height: 34px;" />
           <span class="slds-badge" style="background: #fef3c7; color: #92400e; font-weight: 800;"
                 th:text="${donacionesPendientes != null ? donacionesPendientes.size() : 0} + ' pendientes'">0 pendientes</span>
         </div>
@@ -156,7 +166,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="slds-hint-parent" th:each="d : ${donacionesPendientes}"
+              <tr class="slds-hint-parent mm-pendiente-row" th:each="d : ${donacionesPendientes}"
+                  th:attr="data-search=${#strings.toLowerCase((d.codigoCorto != null ? d.codigoCorto : '') + ' ' + (d.descripcion != null ? d.descripcion : '') + ' ' + (d.subcategoria != null ? d.subcategoria : '') + ' ' + (d.donanteLegible != null ? d.donanteLegible : ''))}"
                   th:style="${donacionId != null && donacionId == d.id} ? 'background-color: #eff6ff;' : ''">
                 <th scope="row">
                   <span class="slds-badge" style="background: #014486; color: #fff; font-family: monospace; font-weight: 700;"
@@ -209,6 +220,11 @@
             </h2>
           </div>
         </header>
+        <div>
+          <a th:href="@{/app/admin/rutas}" class="slds-button slds-button_outline-brand" style="font-weight: 700;">
+            Paso siguiente: Planificar Rutas de Reparto →
+          </a>
+        </div>
       </div>
       <div class="slds-card__body">
         <div class="slds-scrollable_x">
@@ -241,7 +257,7 @@
       <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true" style="z-index: 10001;">
         <div class="slds-modal__container" style="max-width: 520px;">
           <header class="slds-modal__header slds-theme_error slds-theme_alert-texture">
-            <button class="slds-button slds-modal__close dt-modal-close-btn" onclick="cerrarModalVencer()" title="Cerrar modal" aria-label="Cerrar">
+            <button type="button" class="slds-button slds-modal__close dt-modal-close-btn" onclick="cerrarModalVencer()" title="Cerrar modal" aria-label="Cerrar">
               <span aria-hidden="true">✕</span>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
@@ -257,7 +273,7 @@
               Detalle del lote
             </p>
             <p class="slds-text-body_small slds-m-top_small" style="color: #475569; background: #fef2f2; border: 1px solid #fee2e2; padding: 10px; border-radius: 6px;">
-              ⚠️ Esta acción retirará inmediatamente los bienes de la bandeja de matchmaking y los registrará en auditoría de descarte sanitario.
+              Esta acción retirará inmediatamente los bienes de la bandeja de matchmaking y los registrará en auditoría de descarte sanitario.
             </p>
           </div>
           <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 8px;">
@@ -273,13 +289,73 @@
           </footer>
         </div>
       </section>
-      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
+      <div class="slds-backdrop slds-backdrop_open" onclick="cerrarModalVencer()" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
+    </div>
+
+    <!-- ==================== MODAL SLDS DE CONFIRMACIÓN: BATCH / AUDITORÍA ==================== -->
+    <div id="modal-confirmar-batch" style="display: none;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true" style="z-index: 10001;">
+        <div class="slds-modal__container" style="max-width: 500px;">
+          <header class="slds-modal__header">
+            <button type="button" class="slds-button slds-modal__close dt-modal-close-btn" onclick="cerrarModalConfirmacionBatch()" title="Cerrar" aria-label="Cerrar">
+              <span aria-hidden="true">✕</span>
+            </button>
+            <h2 id="batch-modal-title" class="slds-modal__title slds-hyphenate" style="font-weight: 800;">Confirmar Acción Masiva</h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_large">
+            <p id="batch-modal-body" style="font-size: 0.92rem; line-height: 1.5;"></p>
+          </div>
+          <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="slds-button slds-button_neutral" onclick="cerrarModalConfirmacionBatch()">Cancelar</button>
+            <button type="button" id="batch-modal-confirm-btn" class="slds-button slds-button_brand" onclick="ejecutarAccionBatchConfirmada()" style="font-weight: 700;">Confirmar y Ejecutar</button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open" onclick="cerrarModalConfirmacionBatch()" style="z-index: 10000; background: rgba(0,0,0,0.5);"></div>
     </div>
 
   </div>
 
   <th:block id="page-scripts">
     <script>
+      var accionBatchPendiente = null;
+
+      window.filtrarPendientesMatchmaking = function () {
+        var input = document.getElementById('buscador-pendientes-mm');
+        var q = (input ? input.value : '').trim().toLowerCase();
+        document.querySelectorAll('.mm-pendiente-row').forEach(function (tr) {
+          var txt = (tr.getAttribute('data-search') || '').toLowerCase();
+          tr.style.display = (!q || txt.indexOf(q) !== -1) ? '' : 'none';
+        });
+      };
+
+      window.abrirModalConfirmacionBatch = function (tipo) {
+        accionBatchPendiente = tipo;
+        var modal = document.getElementById('modal-confirmar-batch');
+        var title = document.getElementById('batch-modal-title');
+        var body = document.getElementById('batch-modal-body');
+        if (tipo === 'batch') {
+          if (title) title.textContent = 'Ejecutar Asignación Automática';
+          if (body) body.textContent = 'Se asignarán automáticamente todas las donaciones pendientes en depósito a las organizaciones beneficiarias más compatibles según el motor híbrido y se intentará planificar sus rutas.';
+        } else {
+          if (title) title.textContent = 'Ejecutar Auditoría de Vencimientos';
+          if (body) body.textContent = 'Se revisarán todas las donaciones en depósito con fecha de vencimiento cumplida para retirarlas sanitariamente de la cola de asignación.';
+        }
+        if (modal) modal.style.display = 'block';
+      };
+
+      window.cerrarModalConfirmacionBatch = function () {
+        var modal = document.getElementById('modal-confirmar-batch');
+        if (modal) modal.style.display = 'none';
+        accionBatchPendiente = null;
+      };
+
+      window.ejecutarAccionBatchConfirmada = function () {
+        var formId = accionBatchPendiente === 'batch' ? 'form-matchmaking-batch' : 'form-auditoria-vencidos';
+        var form = document.getElementById(formId);
+        if (form) form.submit();
+      };
+
       window.abrirModalVencer = function (id, codigo, descripcion) {
         var modal = document.getElementById('modal-confirmar-vencer');
         var form = document.getElementById('form-vencer-donacion');
@@ -301,6 +377,7 @@
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' || e.key === 'Esc') {
           window.cerrarModalVencer();
+          window.cerrarModalConfirmacionBatch();
         }
       });
     </script>
