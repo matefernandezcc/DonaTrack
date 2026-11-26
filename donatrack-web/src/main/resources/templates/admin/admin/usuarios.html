@@ -86,29 +86,29 @@
                   class="slds-badge slds-badge_lightest" style="font-weight: 600; font-size: 0.75rem;">Local /
                   Formulario</span>
               </td>
-              <td style="padding: 10px 14px; white-space: nowrap;">
+              <td style="padding: 8px 10px; white-space: nowrap;">
                 <span th:if="${u['rol'] == 'ADMIN'}" class="slds-badge slds-theme_error"
                   style="font-weight: 700; font-size: 0.75rem;">ADMIN</span>
                 <span th:if="${u['rol'] == 'BENEFICIARIA'}" class="slds-badge slds-theme_success"
                   style="font-weight: 700; font-size: 0.75rem;">BENEFICIARIA</span>
-                <span th:if="${u['rol'] == 'DONANTE'}" class="slds-badge slds-badge_lightest"
-                  style="font-weight: 700; color: #014486; border: 1px solid #b8daf8; font-size: 0.75rem;">DONANTE</span>
+                <span th:if="${u['rol'] == 'DONANTE'}" class="slds-badge"
+                  style="background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; font-weight: 700; font-size: 0.75rem;">DONANTE</span>
               </td>
-              <td style="padding: 10px 14px; white-space: nowrap;">
-                <div style="display: flex; gap: 8px; align-items: center; white-space: nowrap; min-width: max-content;">
+              <td style="padding: 8px 10px; white-space: nowrap;">
+                <div style="display: flex; gap: 6px; align-items: center; white-space: nowrap; min-width: max-content;">
                   <!-- Formulario para cambiar rol del usuario con guardrail si eleva a ADMIN -->
                   <form th:action="@{'/app/admin/usuarios/' + ${u['id']} + '/rol'}" method="post"
                     th:attr="data-username=${u['username']},data-current-rol=${u['rol']}"
                     onsubmit="return confirmarCambioRol(this)"
                     style="display: flex; gap: 6px; align-items: center; margin: 0;">
                     <select name="rol" class="slds-select" aria-label="Seleccionar nuevo rol"
-                      style="font-size: 0.78rem; padding: 4px 8px; height: 34px; border-radius: 6px; width: 125px;">
+                      style="font-size: 0.76rem; padding: 3px 6px; height: 32px; border-radius: 6px; width: 112px;">
                       <option value="DONANTE" th:selected="${u['rol'] == 'DONANTE'}">DONANTE</option>
                       <option value="BENEFICIARIA" th:selected="${u['rol'] == 'BENEFICIARIA'}">BENEFICIARIA</option>
                       <option value="ADMIN" th:selected="${u['rol'] == 'ADMIN'}">ADMIN</option>
                     </select>
                     <button type="submit" class="slds-button slds-button_brand slds-button_sm"
-                      style="min-height: 34px; border-radius: 6px; font-size: 0.78rem; padding: 0 12px; white-space: nowrap;">
+                      style="min-height: 32px; border-radius: 6px; font-size: 0.76rem; padding: 0 10px; white-space: nowrap;">
                       Cambiar
                     </button>
                   </form>
@@ -121,7 +121,7 @@
                     <input type="hidden" name="email" th:value="${u['email']}" />
                     <button type="submit" class="slds-button slds-button_neutral"
                       title="Restablecer a contraseña temporal"
-                      style="min-height: 34px; border-radius: 6px; font-size: 0.78rem; padding: 0 12px; font-weight: 700; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
+                      style="min-height: 32px; border-radius: 6px; font-size: 0.76rem; padding: 0 10px; font-weight: 700; cursor: pointer; white-space: nowrap !important; min-width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; gap: 4px;">
                       Resetear Clave
                     </button>
                   </form>

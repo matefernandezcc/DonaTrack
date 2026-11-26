@@ -629,7 +629,7 @@
       ctx.save();
       ctx.font = "bold 15px 'Courier New', monospace";
       ctx.textAlign = "right";
-      ctx.fillStyle = dark ? "#94a3b8" : "#475569";
+      ctx.fillStyle = dark ? "#e2e8f0" : "#334155";
 
       const hiText = "HI " + formatScore(highScore);
       const scoreText =
@@ -764,11 +764,11 @@
         ctx.restore();
       });
 
-      // HUD Score
-      drawHUD(dark);
-
       // State Overlays
       drawOverlays(dark);
+
+      // HUD Score (dibujado encima para mantener alto contraste también en IDLE)
+      drawHUD(dark);
     }
 
     function loop(timestamp) {

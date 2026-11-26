@@ -52,11 +52,16 @@
           </form>
         </div>
       </div>
-      <div class="slds-p-horizontal_medium slds-p-bottom_small" style="font-size: 0.8rem; color: #475569;">
-        <strong>Cómo funciona el motor de asignación:</strong>
-        <span class="slds-badge slds-badge_lightest slds-m-left_xx-small">Combinado</span> equilibra coincidencia de rubro y urgencia ·
-        <span class="slds-badge slds-badge_lightest">Semántico</span> prioriza coincidencia exacta con necesidades publicadas ·
-        <span class="slds-badge slds-badge_lightest">Sub-Atendidos</span> prioriza comedores que recibieron menos envíos recientes.
+      <div class="slds-p-horizontal_medium slds-p-bottom_small" style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <strong>Cómo funciona el motor de asignación:</strong>
+          <span class="slds-badge slds-badge_lightest slds-m-left_xx-small">Combinado</span> equilibra coincidencia de rubro y urgencia ·
+          <span class="slds-badge slds-badge_lightest">Semántico</span> prioriza coincidencia exacta con necesidades publicadas ·
+          <span class="slds-badge slds-badge_lightest">Sub-Atendidos</span> prioriza comedores que recibieron menos envíos recientes.
+        </div>
+        <a th:href="@{/app/admin/rutas}" class="slds-button slds-button_outline-brand" style="font-weight: 700; min-height: 32px; padding: 0 12px; font-size: 0.78rem; border-radius: 6px;">
+          Paso siguiente: Planificar Rutas de Reparto →
+        </a>
       </div>
     </article>
 

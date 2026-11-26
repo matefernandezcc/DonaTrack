@@ -42,11 +42,12 @@ public class WebSecurityConfig {
                         csp ->
                             csp.policyDirectives(
                                 "default-src 'self'; "
-                                    + "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdn.c360a.salesforce.com; "
-                                    + "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com; "
+                                    + "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdn.c360a.salesforce.com https://*.my.site.com https://*.salesforce.com https://*.salesforce-scrt.com; "
+                                    + "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com https://*.my.site.com https://*.salesforce.com; "
                                     + "img-src 'self' data: blob: https:; "
-                                    + "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; "
-                                    + "connect-src 'self' https://blobatar.dev https://cdn.c360a.salesforce.com https://*.salesforce.com https://*.tile.openstreetmap.org; "
+                                    + "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://*.my.site.com; "
+                                    + "frame-src 'self' https://*.my.site.com https://*.salesforce.com https://*.salesforce-scrt.com; "
+                                    + "connect-src 'self' https://blobatar.dev https://cdn.c360a.salesforce.com https://*.salesforce.com https://*.my.site.com https://*.salesforce-scrt.com https://*.tile.openstreetmap.org; "
                                     + "frame-ancestors 'none';"))
                     .httpStrictTransportSecurity(
                         hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000))

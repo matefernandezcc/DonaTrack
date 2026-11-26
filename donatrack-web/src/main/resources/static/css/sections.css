@@ -1183,7 +1183,7 @@
     min-width: 48px;
     min-height: 48px;
     border-radius: 50%;
-    border: 0;
+    border: 1px solid var(--line-2);
     background: var(--bg-nav-elevated);
     color: var(--ink);
     font-size: 22px;

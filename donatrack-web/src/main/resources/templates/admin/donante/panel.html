@@ -160,7 +160,7 @@
             <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
             </svg>
-            Seguimiento de Mis Donaciones
+            Mis Donaciones
             <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.78rem;"
                   th:text="${misDonaciones != null ? misDonaciones.size() : 0}">0</span>
           </a>
@@ -173,7 +173,7 @@
             <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
             </svg>
-            Buscador de ONGs &amp; Necesidades Activas
+            Necesidades de ONGs
             <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.78rem;"
                   th:text="${causasActivas != null ? causasActivas.size() : 0}">0</span>
           </a>
@@ -186,7 +186,7 @@
             <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
               <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
             </svg>
-            Organizaciones y Comedores
+            Organizaciones
             <span class="slds-badge slds-badge_lightest" style="margin-left: 4px; font-size: 0.78rem;"
                   th:text="${beneficiarios != null ? beneficiarios.size() : 0}">0</span>
           </a>
@@ -1089,13 +1089,13 @@
     </div>
 
     <!-- ==================== MODAL DE BIENVENIDA ESTILO SALESFORCE WELCOME MAT ==================== -->
-    <div id="welcome-roadmap-modal" style="display: none;">
-      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true" style="z-index: 10001;">
-        <div class="slds-modal__container" style="max-width: 880px; width: 94vw; padding: 0;">
-          <div class="dt-welcome-mat">
+    <div id="welcome-roadmap-modal" hidden style="display: none; position: fixed; inset: 0; z-index: 10050;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true" style="z-index: 10052; pointer-events: auto;">
+        <div class="slds-modal__container" style="max-width: 880px; width: 94vw; padding: 0; position: relative; z-index: 10053; pointer-events: auto;">
+          <div class="dt-welcome-mat" style="pointer-events: auto;">
             <button type="button" class="slds-button slds-modal__close dt-modal-close-btn dt-welcome-mat__close"
               onclick="cerrarWelcomeModal()" title="Cerrar" aria-label="Cerrar"
-              style="position: absolute !important; top: -14px !important; right: -14px !important; width: 30px !important; height: 30px !important; min-width: 30px !important; min-height: 30px !important; border-radius: 4px !important;">
+              style="position: absolute !important; top: -14px !important; right: -14px !important; width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; border-radius: 6px !important;">
               <span aria-hidden="true" style="font-size: 0.95rem !important;">✕</span>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
@@ -1219,7 +1219,7 @@
           </div>
         </div>
       </section>
-      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; opacity: 0.6;" onclick="cerrarWelcomeModal()"></div>
+      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10051; opacity: 0.6;" onclick="cerrarWelcomeModal()"></div>
     </div>
 
   </div>
@@ -1248,18 +1248,32 @@
         if (modal) modal.style.display = 'none';
       };
 
-      window.abrirWelcomeModal = function () {
+      function ensureWelcomeModalPortal() {
         const modal = document.getElementById('welcome-roadmap-modal');
+        if (modal && modal.parentNode !== document.body) {
+          document.body.appendChild(modal);
+        }
+        return modal;
+      }
+
+      window.abrirWelcomeModal = function () {
+        const modal = ensureWelcomeModalPortal();
         const chk = document.getElementById('welcome-no-mostrar');
         try {
           if (chk) chk.checked = (localStorage.getItem(welcomeUserKey) === 'true');
         } catch (e) {}
-        if (modal) modal.style.display = 'block';
+        if (modal) {
+          modal.removeAttribute('hidden');
+          modal.style.setProperty('display', 'block', 'important');
+        }
       };
 
       window.cerrarWelcomeModal = function () {
         const modal = document.getElementById('welcome-roadmap-modal');
-        if (modal) modal.style.display = 'none';
+        if (modal) {
+          modal.style.setProperty('display', 'none', 'important');
+          modal.setAttribute('hidden', '');
+        }
         try {
           localStorage.setItem(welcomeUserKey, 'true');
         } catch (e) {}
@@ -1269,7 +1283,7 @@
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' || e.key === 'Esc') {
           const welcomeModal = document.getElementById('welcome-roadmap-modal');
-          if (welcomeModal && welcomeModal.style.display !== 'none' && typeof window.cerrarWelcomeModal === 'function') {
+          if (welcomeModal && !welcomeModal.hasAttribute('hidden') && welcomeModal.style.display !== 'none' && typeof window.cerrarWelcomeModal === 'function') {
             window.cerrarWelcomeModal();
           }
           const perfilModal = document.getElementById('modal-editar-perfil');

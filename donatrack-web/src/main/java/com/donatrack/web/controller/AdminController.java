@@ -529,7 +529,7 @@ public class AdminController {
     if (!com.donatrack.web.util.InputFormatUtils.esPatenteArgentinaValida(patenteNorm)) {
       redirectAttributes.addFlashAttribute(
           "flashError",
-          "Patente inválida. Usá formato argentino AA111AA (Mercosur) o AAA111 (anterior).");
+          "Patente inválida. Formato admitido: AAA123 o AA123BB.");
       return "redirect:/app/admin/camiones";
     }
     try {
