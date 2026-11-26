@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
   <th:block th:fragment="widget">
     <button class="chatbot__fab" id="chat-fab" type="button" aria-label="Abrir asistente de DonaTrack"
@@ -35,10 +35,27 @@
       </div>
 
       <div class="chatbot__chips" id="chat-chips">
-        <button class="chip" type="button" data-q="¿Cómo donar?">¿Cómo donar?</button>
-        <button class="chip" type="button" data-q="Rastrear remito">Rastrear remito</button>
-        <button class="chip" type="button" data-q="Verificar ONG">Verificar ONG</button>
-        <button class="chip" type="button" data-q="Quiero hablar con un agente" data-action="HANDOFF_AGENT">Hablar con un agente</button>
+        <!-- Chips contextuales para Administradores -->
+        <th:block sec:authorize="hasRole('ADMIN')">
+          <button class="chip" type="button" data-q="¿Cómo funciona el matchmaking de donaciones?">¿Cómo asignar (Matchmaking)?</button>
+          <button class="chip" type="button" data-q="¿Cómo planifico rutas de camiones?">Planificar rutas</button>
+          <button class="chip" type="button" data-q="¿Cómo apruebo una ONG pendiente?">Aprobar ONG</button>
+          <button class="chip" type="button" data-q="Quiero hablar con un agente" data-action="HANDOFF_AGENT">Hablar con soporte</button>
+        </th:block>
+        <!-- Chips contextuales para Organizaciones Beneficiarias -->
+        <th:block sec:authorize="hasRole('BENEFICIARIA') and !hasRole('ADMIN')">
+          <button class="chip" type="button" data-q="¿Cómo publico una necesidad urgente para mi comedor?">Publicar necesidad</button>
+          <button class="chip" type="button" data-q="¿Cómo confirmo una entrega con foto?">Confirmar entrega</button>
+          <button class="chip" type="button" data-q="Rastrear remito">Rastrear envío</button>
+          <button class="chip" type="button" data-q="Quiero hablar con un agente" data-action="HANDOFF_AGENT">Hablar con un agente</button>
+        </th:block>
+        <!-- Chips contextuales para Donantes y visitantes públicos -->
+        <th:block sec:authorize="!hasRole('ADMIN') and !hasRole('BENEFICIARIA')">
+          <button class="chip" type="button" data-q="¿Cómo donar?">¿Cómo donar?</button>
+          <button class="chip" type="button" data-q="Rastrear remito">Rastrear remito</button>
+          <button class="chip" type="button" data-q="Verificar ONG">Verificar ONG</button>
+          <button class="chip" type="button" data-q="Quiero hablar con un agente" data-action="HANDOFF_AGENT">Hablar con un agente</button>
+        </th:block>
       </div>
 
       <form class="chatbot__form" id="chat-form">

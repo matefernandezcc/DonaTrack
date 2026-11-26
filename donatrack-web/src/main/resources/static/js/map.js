@@ -107,6 +107,10 @@
 
   const openModal = (p) => {
     if (!modal) return;
+    const orgLabel = document.getElementById("modal-org-label");
+    const typeLabel = document.getElementById("modal-type-label");
+    if (orgLabel) orgLabel.textContent = "Beneficiario";
+    if (typeLabel) typeLabel.textContent = "Tipo";
     if (mTitle) mTitle.textContent = p.title;
     if (mDesc) mDesc.textContent = p.desc;
     if (mOrg) mOrg.textContent = p.org;

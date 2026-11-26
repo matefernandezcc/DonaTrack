@@ -2,8 +2,21 @@
     box-sizing: border-box;
 }
 
+:root {
+    color-scheme: light dark;
+}
+
 html {
     scroll-behavior: smooth;
+}
+
+dialog:modal {
+    overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
 }
 
 body {

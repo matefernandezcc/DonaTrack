@@ -450,10 +450,13 @@
     }
   }
 
-  function configurarAutoCierreToast(toast) {
+  function configurarAutoCierreToast(toast, tipo) {
     if (!toast) return;
     var cerrado = false;
     var timerId = null;
+    var esError = tipo === 'error'
+      || toast.id === 'dt-flash-error-toast'
+      || !!toast.querySelector('.slds-theme_error');
 
     function cerrarToast() {
       if (cerrado) return;
@@ -470,6 +473,20 @@
       }, 400);
     }
 
+    function iniciarTemporizador() {
+      if (esError || cerrado) return;
+      if (timerId) clearTimeout(timerId);
+      // 6.5 segundos para alertas informativas/éxito; pausa al apoyar cursor o enfocar
+      timerId = setTimeout(cerrarToast, 6500);
+    }
+
+    function pausarTemporizador() {
+      if (timerId) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+    }
+
     var closeButtons = toast.querySelectorAll('.dt-toast-close, button.slds-button_icon');
     closeButtons.forEach(function (btn) {
       btn.addEventListener('click', function (e) {
@@ -479,8 +496,14 @@
       });
     });
 
-    // Auto-cierre suave a los 3 segundos (3000 ms)
-    timerId = setTimeout(cerrarToast, 3000);
+    // Los errores NUNCA se auto-ocultan: requieren cierre explícito para que el usuario pueda leerlos y corregir
+    if (!esError) {
+      toast.addEventListener('mouseenter', pausarTemporizador);
+      toast.addEventListener('focusin', pausarTemporizador);
+      toast.addEventListener('mouseleave', iniciarTemporizador);
+      toast.addEventListener('focusout', iniciarTemporizador);
+      iniciarTemporizador();
+    }
   }
 
   function inicializarToasts() {
@@ -493,19 +516,19 @@
       }
       var tipo = mainToast.getAttribute('data-tipo') || 'success';
       registrarToastEnFeed(msg, tipo);
-      configurarAutoCierreToast(mainToast);
+      configurarAutoCierreToast(mainToast, tipo);
     }
 
     var okToast = document.getElementById('dt-flash-ok-toast');
     if (okToast) {
       registrarToastEnFeed(okToast.getAttribute('data-flash-msg'), 'success');
-      configurarAutoCierreToast(okToast);
+      configurarAutoCierreToast(okToast, 'success');
     }
 
     var errToast = document.getElementById('dt-flash-error-toast');
     if (errToast) {
       registrarToastEnFeed(errToast.getAttribute('data-flash-msg'), 'error');
-      configurarAutoCierreToast(errToast);
+      configurarAutoCierreToast(errToast, 'error');
     }
   }
 

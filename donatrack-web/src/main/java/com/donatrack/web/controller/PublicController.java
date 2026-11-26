@@ -460,7 +460,7 @@ public class PublicController {
             "id", "furor-gta-vi-campana-solidaria-consolas-y-videojuegos",
             "titulo", "Furor por el estreno de GTA VI: habilitamos la recepción solidaria de consolas, periféricos y videojuegos",
             "fecha", "noviembre 19, 2026",
-            "fechaCorta", "11/19/2026",
+            "fechaCorta", "19/11/2026",
             "categoria", "Campañas",
             "imagen", "/img/nov-campana-gamer-gta6.jpg",
             "resumen", "Con el lanzamiento más esperado de la década y el recambio masivo de hardware en la comunidad gamer, abrimos una campaña especial para donar consolas de generaciones anteriores, joysticks y juegos físicos destinados a hogares convivenciales y centros juveniles...",
@@ -482,7 +482,7 @@ public class PublicController {
             "id", "x-jornada-mundial-de-los-pobres",
             "titulo", "X Jornada Mundial de los Pobres: una invitación a ser refugio y construir comunidad",
             "fecha", "noviembre 15, 2026",
-            "fechaCorta", "11/15/2026",
+            "fechaCorta", "15/11/2026",
             "categoria", "Comunidad",
             "imagen", "/img/nov-jornada-pobres.jpg",
             "resumen", "El domingo 15 de noviembre se celebra la décima edición de la Jornada Mundial con acciones concretas en comedores y centros comunitarios...",
@@ -525,7 +525,7 @@ public class PublicController {
             "id", "voluntariado-juvenil-y-nuevos-espacios-de-ayuda",
             "titulo", "Convocatoria abierta al voluntariado y a nuevos espacios de ayuda en todo el país",
             "fecha", "octubre 29, 2026",
-            "fechaCorta", "10/29/2026",
+            "fechaCorta", "29/10/2026",
             "categoria", "Campañas",
             "imagen", "/img/nov-bienvenida-comunidad.jpg",
             "resumen", "Convocamos a nuevas organizaciones barriales, merenderos y voluntarios logísticos a sumarse a la red de trazabilidad abierta...",
@@ -542,7 +542,7 @@ public class PublicController {
             "id", "semana-social-construyendo-puentes-hacia-el-bien-comun",
             "titulo", "Semana Social 2026: construyendo puentes hacia el bien común",
             "fecha", "septiembre 11, 2026",
-            "fechaCorta", "09/11/2026",
+            "fechaCorta", "11/09/2026",
             "categoria", "Institucional",
             "imagen", "/img/nov-semana-social.jpg",
             "resumen", "Con el espíritu de fortalecer el diálogo multisectorial, compartimos experiencias sobre innovación social, trazabilidad y equidad alimentaria...",
@@ -559,7 +559,7 @@ public class PublicController {
             "id", "rutas-solidarias-flotas-colaborativas-para-llegar-mas-lejos",
             "titulo", "Rutas solidarias: articulación logística para llegar a más comunidades",
             "fecha", "julio 24, 2026",
-            "fechaCorta", "07/24/2026",
+            "fechaCorta", "24/07/2026",
             "categoria", "Logística",
             "imagen", "/img/nov-rutas-solidaridad.jpg",
             "resumen", "Nuevos acuerdos de movilidad colaborativa amplían la cobertura de repartos solidarios hacia localidades alejadas de los grandes centros urbanos...",
@@ -576,7 +576,7 @@ public class PublicController {
             "id", "rendicion-anual-y-transparencia-trazable-en-cada-entrega",
             "titulo", "Rendición y transparencia: cómo verificamos cada aporte de principio a fin",
             "fecha", "mayo 19, 2026",
-            "fechaCorta", "05/19/2026",
+            "fechaCorta", "19/05/2026",
             "categoria", "Institucional",
             "imagen", "/img/nov-rendicion-donaciones.jpg",
             "resumen", "Publicamos los lineamientos actualizados de auditoría abierta, control bromatológico y confirmación fotográfica al pie del camión...",
@@ -593,7 +593,7 @@ public class PublicController {
             "id", "mesas-de-dialogo-sobre-alimentacion-y-habitat-comunitario",
             "titulo", "Mesas de diálogo sobre alimentación, educación y hábitat comunitario",
             "fecha", "mayo 8, 2026",
-            "fechaCorta", "05/08/2026",
+            "fechaCorta", "08/05/2026",
             "categoria", "Educación",
             "imagen", "/img/nov-dialogo-habitat.jpg",
             "resumen", "Equipos técnicos, docentes y coordinadores de centros educativos compartieron diagnósticos y propuestas para sostener trayectorias barriales...",
@@ -610,7 +610,7 @@ public class PublicController {
             "id", "asistencia-coordinada-frente-a-emergencias-climaticas",
             "titulo", "Asistencia coordinada para familias afectadas por temporales y emergencias climáticas",
             "fecha", "enero 30, 2026",
-            "fechaCorta", "01/30/2026",
+            "fechaCorta", "30/01/2026",
             "categoria", "Emergencias",
             "imagen", "/img/nov-emergencia-zonda.jpg",
             "resumen", "Equipos locales desplegaron operativos urgentes de agua potable, alimentos secos y kits de emergencia ante eventos climáticos severos...",
@@ -627,7 +627,7 @@ public class PublicController {
             "id", "red-de-apoyo-solidario-en-patagonia-acompanamiento-terreno",
             "titulo", "Red de apoyo solidario en la Patagonia: envío urgente de insumos y acompañamiento en terreno",
             "fecha", "enero 14, 2026",
-            "fechaCorta", "01/14/2026",
+            "fechaCorta", "14/01/2026",
             "categoria", "Emergencias",
             "imagen", "/img/nov-emergencia-chubut.jpg",
             "resumen", "Organizaciones cordilleranas y transportistas voluntarios articularon el traslado de equipamiento e insumos esenciales para comunidades afectadas...",
@@ -685,6 +685,8 @@ public class PublicController {
   public String loginPage(
       @RequestParam(value = "error", required = false) String error,
       @RequestParam(value = "logout", required = false) String logout,
+      @RequestParam(value = "campana", required = false) String campana,
+      @RequestParam(value = "section", required = false) String section,
       Model model) {
     if (error != null) {
       if ("oauth_cancelled".equalsIgnoreCase(error)) {
@@ -696,6 +698,12 @@ public class PublicController {
     if (logout != null) {
       model.addAttribute("logoutMessage", "Sesión cerrada correctamente.");
     }
+    if (campana != null && !campana.isBlank()) {
+      model.addAttribute("campana", campana.trim());
+    }
+    if (section != null && !section.isBlank()) {
+      model.addAttribute("section", section.trim());
+    }
     return "public/login";
   }
 
@@ -703,6 +711,8 @@ public class PublicController {
   public String procesarLogin(
       @RequestParam("username") String username,
       @RequestParam("password") String password,
+      @RequestParam(value = "campana", required = false) String campana,
+      @RequestParam(value = "section", required = false) String section,
       HttpServletRequest request,
       HttpServletResponse response,
       RedirectAttributes redirectAttributes) {
@@ -719,6 +729,25 @@ public class PublicController {
         return "redirect:/login";
       }
       establecerSesionSegura(tokenResponse.accessToken(), request, response);
+
+      if ("DONANTE".equalsIgnoreCase(rol)) {
+        if (campana != null && !campana.isBlank()) {
+          String campLower = campana.trim().toLowerCase();
+          String catParam =
+              switch (campLower) {
+                case "alimentos" -> "ALIMENTOS_NO_PERECEDEROS";
+                case "abrigo" -> "ABRIGO_INDUMENTARIA";
+                case "escolar" -> "MOBILIARIO_EQUIPAMIENTO";
+                default -> "";
+              };
+          if (!catParam.isEmpty()) {
+            return "redirect:/app/donante/donaciones?categoria=" + catParam + "&campana=" + campLower;
+          }
+        }
+        if ("campanas".equalsIgnoreCase(section)) {
+          return "redirect:/app/donante?tab=causas";
+        }
+      }
 
       return "redirect:/app/" + rol.toLowerCase();
     } catch (Exception e) {
@@ -776,7 +805,8 @@ public class PublicController {
           telNorm = com.donatrack.web.util.InputFormatUtils.normalizarCelularArg(telefono);
           if (!com.donatrack.web.util.InputFormatUtils.esCelularArgStrictValido(telNorm)) {
             redirectAttributes.addFlashAttribute(
-                "registerError", "El celular debe tener el formato +54 9 11 XXXX-XXXX.");
+                "registerError",
+                "Ingresá un celular argentino válido con código de área (ej: +54 9 11 4455-6677 o +54 9 351 455-6677).");
             return "redirect:/registro?rol=BENEFICIARIA";
           }
         }

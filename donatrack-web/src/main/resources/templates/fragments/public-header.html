@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <header class="nav" id="nav" th:fragment="header">
   <div class="nav__inner container">
     <a th:href="@{/}" class="nav__brand" aria-label="DonaTrack, inicio">
@@ -17,7 +17,7 @@
     </nav>
 
     <div class="nav__cta">
-      <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema claro u oscuro" aria-pressed="false">
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema claro u oscuro" aria-pressed="false">
         <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="5"></circle>
@@ -35,8 +35,9 @@
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
       </button>
-      <a th:href="@{/login}" class="btn btn--primary btn--sm">Donar</a>
-      <button class="nav__burger" id="nav-burger" aria-label="Abrir menú" aria-expanded="false"
+      <a sec:authorize="isAuthenticated()" th:href="@{/app}" class="btn btn--primary btn--sm">Ir a mi panel</a>
+      <a sec:authorize="isAnonymous()" th:href="@{/login}" class="btn btn--primary btn--sm">Donar</a>
+      <button type="button" class="nav__burger" id="nav-burger" aria-label="Abrir menú" aria-expanded="false"
         aria-controls="nav-drawer">
         <span></span><span></span><span></span>
       </button>
@@ -52,7 +53,8 @@
     <a th:href="@{/#historias}">Historias reales</a>
     <a th:href="@{/#faq}">Preguntas frecuentes</a>
     <a th:href="@{/#registro}">Sumate</a>
-    <a th:href="@{/login}" class="btn btn--primary">Donar</a>
+    <a sec:authorize="isAuthenticated()" th:href="@{/app}" class="btn btn--primary">Ir a mi panel</a>
+    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="btn btn--primary">Donar</a>
   </div>
 </header>
 </html>

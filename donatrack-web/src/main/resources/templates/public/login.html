@@ -546,9 +546,13 @@
 
         <!-- Formulario de Acceso -->
         <form th:action="@{/login}" method="post" id="loginForm">
+          <input type="hidden" name="campana" th:if="${campana != null}" th:value="${campana}" />
+          <input type="hidden" name="section" th:if="${section != null}" th:value="${section}" />
+
           <div class="form-group">
             <label class="form-label" for="username">Usuario o Correo Electrónico</label>
             <input class="form-input" type="text" id="username" name="username" required autocomplete="username"
+              autocorrect="off" autocapitalize="none" spellcheck="false"
               placeholder="Usuario o correo electrónico" />
           </div>
 
@@ -560,12 +564,17 @@
 
           <div class="form-checkbox-row">
             <label>
-              <input type="checkbox" name="remember" checked />
+              <input type="checkbox" id="remember-user" name="remember" checked />
               Recordar usuario
             </label>
-            <a href="#" style="color: #0176d3; text-decoration: none;"
-              onclick="alert('Contactá al administrador de DonaTrack para recuperar tu clave.'); return false;">¿Olvidaste
-              tu contraseña?</a>
+            <button type="button" id="btn-forgot-pwd"
+              style="background: none; border: none; padding: 0; color: #0176d3; font: inherit; cursor: pointer; text-decoration: underline;"
+              aria-expanded="false" aria-controls="forgot-pwd-help">¿Olvidaste tu contraseña?</button>
+          </div>
+
+          <div id="forgot-pwd-help" role="status" hidden
+               style="background-color: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 10px 12px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8rem; text-align: left; line-height: 1.45;">
+            Para restablecer tu clave, escribinos a <a href="mailto:hola@donatrack.org" style="color: #014486; font-weight: 700;">hola@donatrack.org</a> o pedí un reseteo temporal a un administrador desde el panel de usuarios.
           </div>
 
           <button type="submit" class="btn-salesforce">
@@ -670,6 +679,40 @@
     }
 
     (function () {
+      var usernameInput = document.getElementById('username');
+      var rememberChk = document.getElementById('remember-user');
+      var loginForm = document.getElementById('loginForm');
+      if (usernameInput && rememberChk) {
+        try {
+          var savedUser = localStorage.getItem('dt-remembered-user');
+          if (savedUser && !usernameInput.value) {
+            usernameInput.value = savedUser;
+            rememberChk.checked = true;
+          }
+        } catch (e) {}
+        if (loginForm) {
+          loginForm.addEventListener('submit', function () {
+            try {
+              if (rememberChk.checked && usernameInput.value.trim()) {
+                localStorage.setItem('dt-remembered-user', usernameInput.value.trim());
+              } else {
+                localStorage.removeItem('dt-remembered-user');
+              }
+            } catch (e) {}
+          });
+        }
+      }
+
+      var forgotBtn = document.getElementById('btn-forgot-pwd');
+      var forgotBox = document.getElementById('forgot-pwd-help');
+      if (forgotBtn && forgotBox) {
+        forgotBtn.addEventListener('click', function () {
+          var open = forgotBox.hidden;
+          forgotBox.hidden = !open;
+          forgotBtn.setAttribute('aria-expanded', String(open));
+        });
+      }
+
       var themeBtn = document.getElementById('theme-toggle');
       if (themeBtn) {
         var isDarkInit = document.documentElement.getAttribute('data-theme') === 'dark';

@@ -262,22 +262,22 @@
 
           <div class="form-group">
             <label class="form-label" for="nombre" id="label-nombre">Nombre Completo o Razón Social</label>
-            <input class="form-input" type="text" id="nombre" name="nombre" required placeholder="Ej: Carlos Benítez o Asociación Civil El Faro" />
+            <input class="form-input" type="text" id="nombre" name="nombre" required autocomplete="name" placeholder="Ej: Carlos Benítez o Asociación Civil El Faro" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="username">Nombre de Usuario</label>
-            <input class="form-input" type="text" id="username" name="username" required placeholder="Ej: cbenitez o comedor_elfaro" />
+            <input class="form-input" type="text" id="username" name="username" required autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Ej: cbenitez o comedor_elfaro" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="email">Correo Electrónico Institucional / Personal</label>
-            <input class="form-input" type="email" id="email" name="email" required placeholder="contacto@ejemplo.com" />
+            <input class="form-input" type="email" id="email" name="email" required autocomplete="email" placeholder="contacto@ejemplo.com" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="password">Contraseña</label>
-            <input class="form-input" type="password" id="password" name="password" required minlength="4"
+            <input class="form-input" type="password" id="password" name="password" required minlength="4" autocomplete="new-password"
               placeholder="Al menos 4 caracteres" />
           </div>
 
@@ -306,17 +306,17 @@
 
             <div class="form-group">
               <label class="form-label" for="direccion">Dirección de la Sede / Comedor</label>
-              <input class="form-input" type="text" id="direccion" name="direccion" placeholder="Ej: Av. San Juan 2845, CABA" />
+              <input class="form-input" type="text" id="direccion" name="direccion" autocomplete="street-address" placeholder="Ej: Av. San Juan 2845, CABA o Bv. San Juan 420, Córdoba" />
               <div class="form-help">Punto geográfico de destino para la descarga de los camiones.</div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="telefono">Teléfono / Celular del Responsable</label>
-              <input class="form-input" type="tel" id="telefono" name="telefono"
-                     maxlength="18" pattern="^\+54 9 11 \d{4}-\d{4}$"
-                     title="Formato requerido: +54 9 11 XXXX-XXXX"
-                     placeholder="Ej: +54 9 11 4455-6677" />
-              <div id="telefono-help" class="form-help">Formato celular AMBA: <strong>+54 9 11 XXXX-XXXX</strong>.</div>
+              <input class="form-input" type="tel" id="telefono" name="telefono" autocomplete="tel"
+                     maxlength="20" pattern="^\+54 9 \d{2,4} \d{2,4}-\d{4}$"
+                     title="Formato celular argentino con código de área (ej: +54 9 11 4455-6677 o +54 9 351 455-6677)"
+                     placeholder="Ej: +54 9 11 4455-6677 o +54 9 351 455-6677" />
+              <div id="telefono-help" class="form-help">Celular de cualquier provincia de Argentina: <strong>+54 9 [cód. área] XXXX-XXXX</strong>.</div>
             </div>
 
             <div class="form-group">
@@ -417,21 +417,31 @@
       return d.slice(0, 2) + '-' + d.slice(2, 10) + '-' + d.slice(10);
     }
 
-    function formatPhoneArg(raw, isDelete) {
+    function esCelularArgValido(val) {
+      if (!/^\+54 9 \d{2,4} \d{2,4}-\d{4}$/.test(val)) return false;
+      var d = val.replace(/\D/g, '');
+      return d.indexOf('549') === 0 && d.length === 13;
+    }
+
+    function formatPhoneArg(raw) {
       var trimmed = String(raw || '').trim();
       if (!trimmed) return '';
-      if (isDelete && (/^\+54\s*9?\s*1?$/.test(trimmed) || trimmed.replace(/\D/g, '').length <= 4)) {
-        return trimmed;
-      }
+      if (esCelularArgValido(trimmed)) return trimmed;
       var d = trimmed.replace(/\D/g, '');
-      if (d.indexOf('54911') === 0) d = d.slice(5);
-      else if (d.indexOf('5411') === 0) d = d.slice(4);
-      else if (d.indexOf('011') === 0) d = d.slice(3);
-      else if (d.indexOf('11') === 0 && d.length > 2) d = d.slice(2);
-      d = d.slice(0, 8);
-      if (!d) return '';
-      if (d.length <= 4) return '+54 9 11 ' + d;
-      return '+54 9 11 ' + d.slice(0, 4) + '-' + d.slice(4);
+      if (d.indexOf('549') === 0 && d.length >= 13) d = d.slice(3, 13);
+      else if (d.indexOf('54') === 0 && d.length >= 12) d = d.slice(2, 12);
+      else if (d.indexOf('0') === 0 && d.length >= 11) d = d.slice(1, 11);
+
+      if (d.length === 8) {
+        return '+54 9 11 ' + d.slice(0, 4) + '-' + d.slice(4);
+      }
+      if (d.length === 10) {
+        if (d.indexOf('11') === 0) {
+          return '+54 9 11 ' + d.slice(2, 6) + '-' + d.slice(6);
+        }
+        return '+54 9 ' + d.slice(0, 3) + ' ' + d.slice(3, 6) + '-' + d.slice(6);
+      }
+      return trimmed;
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -447,17 +457,23 @@
       if (cuitInput) {
         cuitInput.addEventListener('input', function () {
           cuitInput.value = formatCuit(cuitInput.value);
-          if (cuitHelp) {
-            if (!cuitInput.value) {
-              cuitHelp.textContent = 'Se formatea automáticamente con guiones (XX-XXXXXXXX-X, 11 dígitos).';
-              cuitHelp.style.color = '#64748b';
-            } else if (/^\d{2}-\d{8}-\d$/.test(cuitInput.value)) {
-              cuitHelp.textContent = '✓ Formato CUIT válido (' + cuitInput.value + ').';
-              cuitHelp.style.color = '#166534';
-            } else {
-              cuitHelp.textContent = 'Completá los 11 dígitos del CUIT (XX-XXXXXXXX-X).';
-              cuitHelp.style.color = '#b91c1c';
-            }
+          cuitInput.setCustomValidity('');
+          if (cuitHelp && /^\d{2}-\d{8}-\d$/.test(cuitInput.value)) {
+            cuitHelp.textContent = '✓ Formato CUIT válido (' + cuitInput.value + ').';
+            cuitHelp.style.color = '#166534';
+          }
+        });
+        cuitInput.addEventListener('blur', function () {
+          if (!cuitHelp) return;
+          if (!cuitInput.value) {
+            cuitHelp.textContent = 'Se formatea automáticamente con guiones (XX-XXXXXXXX-X, 11 dígitos).';
+            cuitHelp.style.color = '#64748b';
+          } else if (/^\d{2}-\d{8}-\d$/.test(cuitInput.value)) {
+            cuitHelp.textContent = '✓ Formato CUIT válido (' + cuitInput.value + ').';
+            cuitHelp.style.color = '#166534';
+          } else {
+            cuitHelp.textContent = 'Completá los 11 dígitos del CUIT (XX-XXXXXXXX-X).';
+            cuitHelp.style.color = '#b91c1c';
           }
         });
       }
@@ -465,20 +481,25 @@
       var telInput = document.getElementById('telefono');
       var telHelp = document.getElementById('telefono-help');
       if (telInput) {
-        telInput.addEventListener('input', function (e) {
-          var isDel = e && e.inputType && e.inputType.indexOf('delete') === 0;
-          telInput.value = formatPhoneArg(telInput.value, isDel);
-          if (telHelp) {
-            if (!telInput.value) {
-              telHelp.innerHTML = 'Formato celular AMBA: <strong>+54 9 11 XXXX-XXXX</strong>.';
-              telHelp.style.color = '#64748b';
-            } else if (/^\+54 9 11 \d{4}-\d{4}$/.test(telInput.value)) {
-              telHelp.textContent = '✓ Celular válido (' + telInput.value + ').';
-              telHelp.style.color = '#166534';
-            } else {
-              telHelp.innerHTML = 'Completá los 8 dígitos: <strong>+54 9 11 XXXX-XXXX</strong>.';
-              telHelp.style.color = '#b91c1c';
-            }
+        telInput.addEventListener('input', function () {
+          telInput.setCustomValidity('');
+          if (telHelp && esCelularArgValido(telInput.value.trim())) {
+            telHelp.textContent = '✓ Celular válido (' + telInput.value.trim() + ').';
+            telHelp.style.color = '#166534';
+          }
+        });
+        telInput.addEventListener('blur', function () {
+          telInput.value = formatPhoneArg(telInput.value);
+          if (!telHelp) return;
+          if (!telInput.value) {
+            telHelp.innerHTML = 'Celular de cualquier provincia de Argentina: <strong>+54 9 [cód. área] XXXX-XXXX</strong>.';
+            telHelp.style.color = '#64748b';
+          } else if (esCelularArgValido(telInput.value)) {
+            telHelp.textContent = '✓ Celular válido (' + telInput.value + ').';
+            telHelp.style.color = '#166534';
+          } else {
+            telHelp.innerHTML = 'Ingresá 10 dígitos nacionales (ej: <strong>+54 9 11 4455-6677</strong> o <strong>+54 9 351 455-6677</strong>).';
+            telHelp.style.color = '#b91c1c';
           }
         });
       }
@@ -489,7 +510,7 @@
           var rolEl = document.getElementById('input-rol');
           if (rolEl && rolEl.value === 'BENEFICIARIA') {
             if (cuitInput) cuitInput.value = formatCuit(cuitInput.value);
-            if (telInput) telInput.value = formatPhoneArg(telInput.value, false);
+            if (telInput) telInput.value = formatPhoneArg(telInput.value);
             if (cuitInput && !/^\d{2}-\d{8}-\d$/.test(cuitInput.value)) {
               cuitInput.setCustomValidity('Ingresá un CUIT válido de 11 dígitos (ej: 20-44535387-7).');
               cuitInput.reportValidity();
@@ -498,8 +519,8 @@
             } else if (cuitInput) {
               cuitInput.setCustomValidity('');
             }
-            if (telInput && !/^\+54 9 11 \d{4}-\d{4}$/.test(telInput.value)) {
-              telInput.setCustomValidity('Ingresá un celular válido con formato +54 9 11 XXXX-XXXX.');
+            if (telInput && !esCelularArgValido(telInput.value)) {
+              telInput.setCustomValidity('Ingresá un celular argentino válido con código de área (ej: +54 9 11 4455-6677 o +54 9 351 455-6677).');
               telInput.reportValidity();
               e.preventDefault();
               return;
