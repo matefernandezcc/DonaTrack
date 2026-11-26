@@ -11,7 +11,7 @@
 		path_regexp waf_path (?i)(\.\./|/\.(env|git|htaccess)|wp-admin|wp-login|phpinfo)
 	}
 	@waf_sqli_xss {
-		query_regexp waf_query (?i)(union(\+|%20)+select|<script|%3cscript|javascript:|drop(\+|%20)+table)
+		vars_regexp waf_query {query} (?i)(union(\+|%20)+select|<script|%3cscript|javascript:|drop(\+|%20)+table)
 	}
 	handle @waf_blocked {
 		respond `{"status":403,"error":"Forbidden","message":"Solicitud bloqueada por política de seguridad perimetral (WAF)"}` 403
