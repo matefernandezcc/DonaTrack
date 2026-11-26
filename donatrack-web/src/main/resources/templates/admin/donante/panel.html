@@ -203,6 +203,24 @@
         <!-- ==================== PESTAÑA 1: RESUMEN & IMPACTO ==================== -->
         <div id="tab-panel-resumen" role="tabpanel" aria-labelledby="tab-btn-resumen" th:style="${tabActiva == null || tabActiva == 'resumen'} ? 'display: block;' : 'display: none;'">
         
+        <!-- Guía Rápida para Donantes sin aportes aún -->
+        <div th:if="${isNuevoUsuario}" class="dt-guide-strip slds-m-bottom_large">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <strong style="display: block; font-size: 0.92rem; margin-bottom: 4px;">¿Cómo funciona tu portal en 3 pasos?</strong>
+              <span style="font-size: 0.82rem; line-height: 1.45;">
+                <strong>1.</strong> Cargá qué alimentos o bienes querés donar &nbsp;→&nbsp;
+                <strong>2.</strong> Seguí la asignación a una ONG y el camión en vivo &nbsp;→&nbsp;
+                <strong>3.</strong> Recibí la foto de entrega certificada y sumá insignias.
+              </span>
+            </div>
+            <button type="button" onclick="cambiarTabDonante('causas', true)" class="slds-button slds-button_neutral"
+                    style="font-weight: 700; min-height: 36px; padding: 0 14px; border-radius: 6px;">
+              Ver qué necesitan hoy las ONGs
+            </button>
+          </div>
+        </div>
+
         <!-- ==================== HERO DE IMPACTO SOCIAL TANGIBLE ==================== -->
         <article class="slds-card slds-m-bottom_large" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04); overflow: hidden;">
           <div class="slds-card__body slds-p-around_large">
@@ -219,12 +237,9 @@
                   Cada donación entregada se transforma en platos calientes, abrigo y sustento real para familias que asisten a comedores comunitarios.
                 </p>
               </div>
-              <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" style="border-radius: 4px; font-weight: 700;">
-                <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
-                  <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
-                </svg>
-                Donar Alimentos o Bienes
-              </a>
+              <button type="button" onclick="cambiarTabDonante('causas', true)" class="slds-button slds-button_neutral" style="border-radius: 6px; font-weight: 600;">
+                Explorar Necesidades Urgentes
+              </button>
             </div>
 
             <!-- Grilla de 4 Métricas de Impacto Concreto (Visible solo cuando hay datos reales) -->
@@ -234,11 +249,12 @@
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
                 <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
                   <div class="dt-stat-blue" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
-                       th:text="${#numbers.formatInteger(platosComida, 0, 'POINT')} + ' raciones'">
+                       th:text="${platosComida > 0 ? (#numbers.formatInteger(platosComida, 0, 'POINT') + ' raciones') : ((misDonaciones != null ? misDonaciones.size() : 0) + ' aportes')}">
                     0 raciones
                   </div>
-                  <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
-                    PLATOS DE COMIDA
+                  <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;"
+                        th:text="${platosComida > 0 ? 'PLATOS ESTIMADOS' : 'APORTES REGISTRADOS'}">
+                    PLATOS ESTIMADOS
                   </span>
                 </div>
               </div>
@@ -246,11 +262,11 @@
               <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_small" style="min-width: 0;">
                 <div class="dt-impact-metric-card" style="border-radius: 8px; padding: 14px 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
                   <div class="dt-stat-green" style="font-weight: 800; font-size: clamp(1.15rem, 2.5vw, 1.35rem); line-height: 1.2; word-break: break-word;"
-                       th:text="${#numbers.formatInteger(kilosTotales, 0, 'POINT')} + ' kg'">
+                       th:text="${#numbers.formatInteger(kilosTotales, 0, 'POINT')} + (${platosComida > 0 ? ' kg / u' : ' u / kg'})">
                     0 kg
                   </div>
                   <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #64748b; letter-spacing: 0.04em; margin-top: 6px; line-height: 1.2;">
-                    ALIMENTOS DONADOS
+                    BIENES Y ALIMENTOS
                   </span>
                 </div>
               </div>
@@ -323,9 +339,9 @@
                 </div>
               </div>
               <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-text-align_right slds-m-top_small">
-                <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_brand" style="border-radius: 4px;"
-                   th:text="${isNuevoUsuario ? 'Primera Donación' : 'Nueva Donación'}">
-                  Primera Donación
+                <a th:href="@{/app/donante/donaciones}" class="slds-button slds-button_outline-brand" style="border-radius: 6px; font-weight: 700;"
+                   th:text="${isNuevoUsuario ? 'Hacer mi primera donación' : 'Registrar otro aporte'}">
+                  Hacer mi primera donación
                 </a>
               </div>
             </div>
@@ -583,10 +599,12 @@
 
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_xx-small">
                   <label class="slds-form-element__label" for="filtro-donacion-busqueda" style="font-weight: 700; color: #1e293b; font-size: 0.78rem;">Búsqueda por Texto</label>
-                  <div class="slds-form-element__control">
+                  <div class="slds-form-element__control" style="display: flex; gap: 6px;">
                     <input type="search" id="filtro-donacion-busqueda" class="slds-input"
-                           placeholder="Buscar por código (#DT-XXXX) o descripción..."
+                           placeholder="Código (#DT-XXXX) o detalle..."
                            oninput="ordenarYFiltrarDonaciones()" />
+                    <button type="button" class="slds-button slds-button_neutral" onclick="limpiarFiltrosDonaciones()" title="Limpiar filtros"
+                            style="white-space: nowrap; padding: 0 10px; font-size: 0.78rem; font-weight: 600;">Limpiar</button>
                   </div>
                 </div>
               </div>
@@ -637,8 +655,9 @@
                       <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12" style="display: flex; align-items: center; gap: 8px; padding: 4px 0;">
                         <span style="width: 24px; height: 24px; border-radius: 50%; background: #166534; color: #fff; font-weight: 800; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">✓</span>
                         <div>
-                          <strong style="display: block; font-size: 0.78rem; color: #0f172a;">1. Recepción en Depósito</strong>
-                          <span style="font-size: 0.78rem; color: #166534; font-weight: 600;">Verificado e inventariado</span>
+                          <strong style="display: block; font-size: 0.78rem; color: #0f172a;">1. Registrada en Depósito</strong>
+                          <span style="font-size: 0.78rem; color: #166534; font-weight: 600;"
+                                th:text="${don.pasoActual >= 2 ? 'Verificada y despachada' : 'En depósito · Lista para asignar'}">En depósito · Lista para asignar</span>
                         </div>
                       </div>
                       <!-- Etapa 2 -->
@@ -866,7 +885,7 @@
               <div class="slds-col slds-size_1-of-3">
                 <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
                         th:text="${insignias != null ? insignias.size() : 0}">0</strong>
-                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.78rem; text-transform: uppercase;">Badges</span>
+                <span class="slds-text-body_small slds-text-color_weak" style="font-size: 0.78rem; text-transform: uppercase;">Insignias</span>
               </div>
               <div class="slds-col slds-size_1-of-3">
                 <strong class="slds-text-heading_medium" style="display: block; color: #014486; font-weight: 800;"
@@ -927,7 +946,7 @@
               </div>
             </header>
             <div>
-              <span class="slds-badge slds-badge_lightest" style="font-weight: 700;" th:text="${totalInsignias} + ' Badges'">0 Badges</span>
+              <span class="slds-badge slds-badge_lightest" style="font-weight: 700;" th:text="${totalInsignias} + ' Insignias'">0 Insignias</span>
             </div>
           </div>
 
@@ -1144,49 +1163,49 @@
                   </a>
 
                   <!-- Tile 2 -->
-                  <div class="dt-welcome-mat__tile">
+                  <a th:href="@{/app/donante(tab='seguimiento')}" onclick="cerrarWelcomeModal(); cambiarTabDonante('seguimiento', true); return false;" class="dt-welcome-mat__tile">
                     <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #706e6b;" aria-hidden="true">
                         <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#truck}"></use>
                       </svg>
                     </span>
                     <div>
-                      <strong class="dt-welcome-mat__tile-title">Asignación logística y remito digital</strong>
+                      <strong class="dt-welcome-mat__tile-title">Seguí el camión y tu remito digital</strong>
                       <span class="dt-welcome-mat__tile-desc">
-                        Planificación de rutas reales asignando móvil con patente y chofer identificado hacia la ONG.
+                        Consultá en tiempo real la patente, chofer y estado de cada donación hacia la ONG.
                       </span>
                     </div>
-                  </div>
+                  </a>
 
                   <!-- Tile 3 -->
-                  <div class="dt-welcome-mat__tile">
+                  <a th:href="@{/app/donante(tab='causas')}" onclick="cerrarWelcomeModal(); cambiarTabDonante('causas', true); return false;" class="dt-welcome-mat__tile">
                     <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #706e6b;" aria-hidden="true">
-                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
+                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
                       </svg>
                     </span>
                     <div>
-                      <strong class="dt-welcome-mat__tile-title">Entrega en comedor con foto verificada</strong>
+                      <strong class="dt-welcome-mat__tile-title">Buscá qué necesitan hoy las ONGs</strong>
                       <span class="dt-welcome-mat__tile-desc">
-                        Al arribar al comedor, se firma la recepción y se adjunta comprobante público en el mapa.
+                        Explorá necesidades activas por barrio o categoría y doná directo a una causa urgente.
                       </span>
                     </div>
-                  </div>
+                  </a>
 
                   <!-- Tile 4 -->
-                  <div class="dt-welcome-mat__tile">
+                  <a th:href="@{/app/donante(tab='directorio')}" onclick="cerrarWelcomeModal(); cambiarTabDonante('directorio', true); return false;" class="dt-welcome-mat__tile">
                     <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #706e6b;" aria-hidden="true">
-                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
+                        <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#company}"></use>
                       </svg>
                     </span>
                     <div>
-                      <strong class="dt-welcome-mat__tile-title">Puntos e insignias comunitarias</strong>
+                      <strong class="dt-welcome-mat__tile-title">Conocé los comedores verificados</strong>
                       <span class="dt-welcome-mat__tile-desc">
-                        Sumás +10 pts al registrar en depósito y +25 pts adicionales al completarse la entrega.
+                        Revisá fotos, historia e historial de entregas certificadas de cada organización solidaria.
                       </span>
                     </div>
-                  </div>
+                  </a>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 18px;">
@@ -1242,12 +1261,7 @@
         const modal = document.getElementById('welcome-roadmap-modal');
         if (modal) modal.style.display = 'none';
         try {
-          const chk = document.getElementById('welcome-no-mostrar');
-          if (chk && chk.checked) {
-            localStorage.setItem(welcomeUserKey, 'true');
-          } else {
-            localStorage.removeItem(welcomeUserKey);
-          }
+          localStorage.setItem(welcomeUserKey, 'true');
         } catch (e) {}
       };
 
@@ -1390,6 +1404,18 @@
       window.ordenarYFiltrarDonaciones = function () {
         window.ordenarDonaciones();
         window.filtrarMisDonaciones();
+      };
+
+      window.limpiarFiltrosDonaciones = function () {
+        const estadoSelect = document.getElementById('filtro-donacion-estado');
+        const subcatSelect = document.getElementById('filtro-donacion-subcategoria');
+        const ordenSelect = document.getElementById('orden-donaciones');
+        const busquedaInput = document.getElementById('filtro-donacion-busqueda');
+        if (estadoSelect) estadoSelect.value = '';
+        if (subcatSelect) subcatSelect.value = '';
+        if (ordenSelect) ordenSelect.value = 'fecha-desc';
+        if (busquedaInput) busquedaInput.value = '';
+        window.ordenarYFiltrarDonaciones();
       };
 
       // ========================================================

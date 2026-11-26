@@ -60,12 +60,30 @@
             Nueva Necesidad
           </a>
           <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; color: #ffffff; font-weight: 700; min-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center;">
-            Recepcionar
+            Confirmar Entregas
           </a>
         </div>
 
       </div>
     </article>
+
+    <!-- Guía Rápida en 3 Pasos para Organizaciones -->
+    <div class="dt-guide-strip slds-m-bottom_large">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <strong style="display: block; font-size: 0.9rem; margin-bottom: 3px;">Cómo gestionar tus donaciones en 3 pasos</strong>
+          <span style="font-size: 0.82rem; line-height: 1.45;">
+            <strong>1.</strong> Publicá tus necesidades prioritarias &nbsp;→&nbsp;
+            <strong>2.</strong> Seguí los camiones asignados hacia tu sede &nbsp;→&nbsp;
+            <strong>3.</strong> Confirmá la recepción sacando una foto al llegar el vehículo.
+          </span>
+        </div>
+        <a th:href="@{/app/beneficiaria/necesidades}" class="slds-button slds-button_neutral"
+           style="font-weight: 700; min-height: 34px; padding: 0 12px; border-radius: 6px;">
+          + Declarar Necesidad
+        </a>
+      </div>
+    </div>
 
     <!-- ==================== 4 INDICADORES OPERATIVOS (Solo visibles cuando hay actividad real) ==================== -->
     <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_large"
@@ -143,7 +161,7 @@
               </div>
             </header>
             <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_neutral slds-button_small" style="font-weight: 600;">
-              Ver Rutas
+              Ver Todas las Entregas
             </a>
           </div>
 
@@ -158,8 +176,9 @@
                 <div>
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <strong style="color: #014486; font-size: 1rem;" th:text="${e.codigoCorto}">#DT-3300</strong>
-                    <span class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700;" th:text="${e.estado}">
-                      EN_CAMINO
+                    <span class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700;"
+                          th:text="${(e.rutaIniciada or e.estado == 'EN_TRASLADO' or e.estado == 'EN_CAMINO') ? 'En camino hacia tu sede' : 'Programada en depósito'}">
+                      En camino hacia tu sede
                     </span>
                   </div>
                   <div style="font-size: 0.84rem; color: #334155; margin-top: 4px;">
@@ -171,9 +190,9 @@
                 </div>
 
                 <div>
-                  <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand"
+                  <a th:href="@{/app/beneficiaria/entregas(entregaId=${e.idEntrega})}" class="slds-button slds-button_brand"
                      style="background: #166534; border-color: #166534; color: #ffffff; font-weight: 700; font-size: 0.82rem; padding: 0 14px; min-height: 36px; border-radius: 6px; display: inline-flex; align-items: center;">
-                    Recepcionar
+                    Confirmar Entrega
                   </a>
                 </div>
               </div>
@@ -262,7 +281,7 @@
                   <ul class="slds-list_dotted dt-welcome-mat__left-text" style="text-align: left; font-size: 0.82rem; line-height: 1.45; margin: 0 0 18px 16px;">
                     <li>Publicá tus necesidades reales para donantes</li>
                     <li>Seguí en vivo los móviles asignados a tu sede</li>
-                    <li>Confirmá recepciones con remito y foto S3</li>
+                    <li>Confirmá recepciones con remito y foto del comprobante</li>
                     <li>Mostrá transparencia en tu página pública</li>
                   </ul>
                   <div style="margin-bottom: 12px;">
@@ -319,7 +338,7 @@
                     </div>
                   </a>
 
-                  <div class="dt-welcome-mat__tile">
+                  <a th:href="@{/app/beneficiaria/entregas}" onclick="cerrarWelcomeBenefModal()" class="dt-welcome-mat__tile">
                     <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #706e6b;" aria-hidden="true">
                         <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
@@ -331,7 +350,7 @@
                         Al recibir el camión en tu puerta, subí el comprobante firmado para certificar la entrega al donante.
                       </span>
                     </div>
-                  </div>
+                  </a>
 
                   <a th:href="@{/app/organizaciones/{id}(id=${beneficiarioId != null ? beneficiarioId : 'esperanza'}, nombre=${nombreOrganizacion})}" onclick="cerrarWelcomeBenefModal()" class="dt-welcome-mat__tile">
                     <span class="slds-icon_container dt-welcome-mat__icon">
@@ -383,12 +402,7 @@
           var modal = document.getElementById('welcome-beneficiaria-modal');
           if (modal) modal.style.display = 'none';
           try {
-            var chk = document.getElementById('welcome-benef-no-mostrar');
-            if (chk && chk.checked) {
-              localStorage.setItem(welcomeBenefKey, 'true');
-            } else {
-              localStorage.removeItem(welcomeBenefKey);
-            }
+            localStorage.setItem(welcomeBenefKey, 'true');
           } catch (e) {}
         };
 
