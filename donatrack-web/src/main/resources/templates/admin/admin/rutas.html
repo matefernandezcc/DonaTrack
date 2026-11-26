@@ -40,14 +40,21 @@
             <form th:action="@{/app/admin/rutas/planificar}" method="post" style="display: inline; margin: 0;">
               <button type="submit"
                       th:class="${totalPendientes != null and totalPendientes > 0} ? 'slds-button slds-button_brand' : 'slds-button slds-button_neutral'"
-                      th:disabled="${totalPendientes == null or totalPendientes == 0}"
-                      th:title="${totalPendientes != null and totalPendientes > 0} ? 'Generar rutas para las donaciones en cola' : 'No hay donaciones en cola pendientes de ruta'">
+                      th:attr="aria-disabled=${totalPendientes == null or totalPendientes == 0 ? 'true' : null}"
+                      onclick="if (this.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return false; }"
+                      interestfor="tip-planificar-rutas" aria-describedby="tip-planificar-rutas">
                 Planificar Rutas Pendientes
                 <span th:if="${totalPendientes != null and totalPendientes > 0}"
                       class="slds-badge slds-badge_lightest slds-m-left_xx-small"
                       style="font-size: 0.72rem; color: #014486;"
                       th:text="${totalPendientes}">1</span>
               </button>
+              <div id="tip-planificar-rutas" popover="hint" role="tooltip" class="slds-popover slds-popover_tooltip slds-nubbin_bottom-left dt-slds-tooltip">
+                <div class="slds-popover__body"
+                     th:text="${totalPendientes != null and totalPendientes > 0} ? 'Agrupa las donaciones asignadas en cola y genera recorridos con camión y chofer disponibles.' : 'No hay donaciones en cola para planificar. Primero asigná lotes desde Matchmaking.'">
+                  No hay donaciones en cola para planificar. Primero asigná lotes desde Matchmaking.
+                </div>
+              </div>
             </form>
             <a th:href="@{/app/admin/matchmaking}" class="slds-button slds-button_neutral">
               <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">

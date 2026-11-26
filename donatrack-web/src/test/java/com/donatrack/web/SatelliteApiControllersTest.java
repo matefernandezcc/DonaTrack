@@ -310,6 +310,20 @@ class SatelliteApiControllersTest {
 
   @Test
   @DisplayName(
+      "GET /api/public/depositos — Retorna los 6 depósitos habilitados en CABA incluyendo UTN Medrano y UTN Lugano")
+  void testDepositosDisponiblesPublico() throws Exception {
+    publicMvc
+        .perform(get("/api/public/depositos"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(6)))
+        .andExpect(jsonPath("$[?(@.id == 'utn-medrano')].direccion").value(org.hamcrest.Matchers.hasItem("Av. Medrano 951, CABA")))
+        .andExpect(jsonPath("$[?(@.id == 'utn-lugano')].direccion").value(org.hamcrest.Matchers.hasItem("Mozart 2300, CABA")))
+        .andExpect(jsonPath("$[?(@.id == 'caballito')].barrio").value(org.hamcrest.Matchers.hasItem("Caballito")))
+        .andExpect(jsonPath("$[?(@.id == 'chacarita')].barrio").value(org.hamcrest.Matchers.hasItem("Chacarita")));
+  }
+
+  @Test
+  @DisplayName(
       "GET /api/public/mapa-entregas — Retorna centros de recepción, ONGs y entregas públicas")
   void testMapaEntregasPublico() throws Exception {
     when(donacionesGateway.obtenerBeneficiarios()).thenReturn(List.of());

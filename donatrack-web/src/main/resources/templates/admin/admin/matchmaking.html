@@ -40,15 +40,22 @@
           <form id="form-auditoria-vencidos" th:action="@{/app/admin/donaciones/auditoria-vencidos}" method="post" style="display: inline;">
             <button type="button" class="slds-button slds-button_neutral" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;"
                     onclick="abrirModalConfirmacionBatch('auditoria')"
-                    title="Ejecutar barrido sanitario de lotes vencidos">
+                    interestfor="tip-auditoria-vencidos" aria-describedby="tip-auditoria-vencidos">
               Auditoría de Vencimientos
             </button>
+            <div id="tip-auditoria-vencidos" popover="hint" role="tooltip" class="slds-popover slds-popover_tooltip slds-nubbin_bottom-left dt-slds-tooltip">
+              <div class="slds-popover__body">Ejecuta un barrido sanitario en depósito para detectar y retirar lotes cuya fecha de vencimiento ya expiró.</div>
+            </div>
           </form>
           <form id="form-matchmaking-batch" th:action="@{/app/admin/matchmaking/batch}" method="post" style="display: inline;">
             <button type="button" class="slds-button slds-button_outline-brand" style="font-weight: 600; min-height: 36px; padding: 0 14px; font-size: 0.82rem; border-radius: 6px; display: inline-flex; align-items: center;"
-                    onclick="abrirModalConfirmacionBatch('batch')">
+                    onclick="abrirModalConfirmacionBatch('batch')"
+                    interestfor="tip-matchmaking-batch" aria-describedby="tip-matchmaking-batch">
               Asignación Automática
             </button>
+            <div id="tip-matchmaking-batch" popover="hint" role="tooltip" class="slds-popover slds-popover_tooltip slds-nubbin_bottom-left dt-slds-tooltip">
+              <div class="slds-popover__body">Asigna en lote todas las donaciones pendientes a las ONGs más compatibles usando el motor híbrido y prepara las rutas.</div>
+            </div>
           </form>
         </div>
       </div>
@@ -83,7 +90,17 @@
         </header>
         <form th:action="@{/app/admin/matchmaking}" method="get" style="display: flex; align-items: center; gap: 8px;">
           <input type="hidden" name="donacionId" th:value="${donacionId}" />
-          <label for="algoritmoSelect" class="slds-text-body_small" style="font-weight: 700; color: #014486; white-space: nowrap;">Criterio:</label>
+          <span class="dt-tooltip-inline">
+            <label for="algoritmoSelect" class="slds-text-body_small" style="font-weight: 700; color: #014486; white-space: nowrap; margin: 0;">Criterio:</label>
+            <button type="button" class="dt-help-icon-btn"
+                    interestfor="tip-criterio-mm" popovertarget="tip-criterio-mm" popovertargetaction="show"
+                    aria-label="Explicación de criterios de matchmaking">
+              <svg aria-hidden="true"><use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#info}"></use></svg>
+            </button>
+            <div id="tip-criterio-mm" popover="hint" role="tooltip" class="slds-popover slds-popover_tooltip slds-nubbin_bottom-left dt-slds-tooltip">
+              <div class="slds-popover__body">Combinado equilibra rubro y urgencia; Semántico prioriza coincidencia exacta de necesidades; Sub-Atendidos prioriza comedores con menos envíos recientes.</div>
+            </div>
+          </span>
           <select class="slds-select" id="algoritmoSelect" name="algoritmo" onchange="this.form.submit()" style="min-width: 220px;">
             <option value="HIBRIDO" th:selected="${algoritmoActivo == null || algoritmoActivo == 'HIBRIDO'}">Combinado (Semántico + Urgencia)</option>
             <option value="SEMANTICO" th:selected="${algoritmoActivo == 'SEMANTICO'}">Compatibilidad Semántica</option>

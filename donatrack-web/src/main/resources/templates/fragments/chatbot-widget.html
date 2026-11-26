@@ -131,7 +131,7 @@
           <div class="msg msg--bot">¡Hola! Soy tu asistente de organización. Decime qué necesitás publicar (ej: <em>"necesitamos urgente 30 kg de leche en polvo"</em>) o pedime ir a <em>"confirmar entregas"</em> y lo preparo por vos.</div>
         </th:block>
         <th:block sec:authorize="!hasRole('ADMIN') and !hasRole('BENEFICIARIA')">
-          <div class="msg msg--bot">¡Hola! Soy tu asistente de DonaTrack. Decime qué querés donar (ej: <em>"quiero donar 10 kg de fideos"</em>) o preguntame <em>"¿dónde veo mis donaciones?"</em> y te llevo o completo el formulario automáticamente.</div>
+          <div class="msg msg--bot">¡Hola! Soy tu asistente de DonaTrack. Decime qué querés donar (ej: <em>"quiero donar 10 kg de fideos"</em>) o preguntame <em>"¿qué depósitos hay cerca de mi ubicación?"</em> y te muestro los más cercanos o te completo el formulario.</div>
         </th:block>
       </div>
 
@@ -141,20 +141,20 @@
           <button class="chip" type="button" data-q="Ingresar 20 kg de arroz en depósito">Ingresar donación</button>
           <button class="chip" type="button" data-q="Ir a Matchmaking">Matchmaking</button>
           <button class="chip" type="button" data-q="Planificar rutas">Planificar rutas</button>
-          <button class="chip" type="button" data-q="Ir a usuarios y solicitudes ONG">Usuarios y ONGs</button>
+          <button class="chip" type="button" data-q="Depósitos disponibles">Depósitos</button>
         </th:block>
         <!-- Chips contextuales para Organizaciones Beneficiarias -->
         <th:block sec:authorize="hasRole('BENEFICIARIA') and !hasRole('ADMIN')">
           <button class="chip" type="button" data-q="Necesitamos urgente 30 kg de leche en polvo">Publicar necesidad</button>
           <button class="chip" type="button" data-q="Ir a confirmar entregas">Confirmar entregas</button>
-          <button class="chip" type="button" data-q="Ir a mi panel de organización">Mi organización</button>
+          <button class="chip" type="button" data-q="Depósitos cercanos a mi ubicación">Depósitos cercanos</button>
         </th:block>
         <!-- Chips contextuales para Donantes -->
         <th:block sec:authorize="!hasRole('ADMIN') and !hasRole('BENEFICIARIA')">
           <button class="chip" type="button" data-q="Quiero donar 10 kg de fideos">Quiero donar</button>
+          <button class="chip" type="button" data-q="Depósitos cercanos a mi ubicación">Depósitos cercanos</button>
           <button class="chip" type="button" data-q="¿Dónde veo mis donaciones?">Mis donaciones</button>
           <button class="chip" type="button" data-q="Ver necesidades de ONGs">Necesidades ONGs</button>
-          <button class="chip" type="button" data-q="Ver organizaciones y comedores">Comedores</button>
         </th:block>
       </div>
 

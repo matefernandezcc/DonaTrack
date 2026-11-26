@@ -125,10 +125,20 @@
             <div class="slds-modal__content slds-p-around_medium" id="modal-content-camion">
               
               <div class="slds-form-element slds-m-bottom_medium">
-                <label class="slds-form-element__label" for="patente">
-                  <abbr class="slds-required" title="requerido">* </abbr>Patente
-                </label>
-                <div class="slds-form-element__control">
+                <span class="dt-tooltip-inline">
+                  <label class="slds-form-element__label" for="patente" style="margin-bottom: 0;">
+                    <abbr class="slds-required" title="requerido">* </abbr>Patente
+                  </label>
+                  <button type="button" class="dt-help-icon-btn"
+                          interestfor="tip-camion-patente" popovertarget="tip-camion-patente" popovertargetaction="show"
+                          aria-label="Ayuda sobre formato de patente">
+                    <svg aria-hidden="true"><use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#info}"></use></svg>
+                  </button>
+                  <div id="tip-camion-patente" popover="hint" role="tooltip" class="slds-popover slds-popover_tooltip slds-nubbin_bottom-left dt-slds-tooltip">
+                    <div class="slds-popover__body">Escribí la patente sin espacios ni guiones. Formato admitido: AAA123 o AA123BB.</div>
+                  </div>
+                </span>
+                <div class="slds-form-element__control slds-m-top_xxx-small">
                   <input type="text" id="patente" name="patente" th:field="*{patente}" required
                          maxlength="7"
                          pattern="^([A-Za-z]{3}[0-9]{3}|[A-Za-z]{2}[0-9]{3}[A-Za-z]{2})$"
@@ -142,14 +152,21 @@
               </div>
 
               <div class="slds-form-element slds-m-bottom_medium">
-                <label class="slds-form-element__label" for="capacidadVolumen">
-                  <abbr class="slds-required" title="requerido">* </abbr>Capacidad de Volumen (m³)
-                </label>
-                <div class="slds-form-element__control">
+                <span class="dt-tooltip-inline">
+                  <label class="slds-form-element__label" for="capacidadVolumen" style="margin-bottom: 0;">
+                    <abbr class="slds-required" title="requerido">* </abbr>Capacidad de Volumen (m³)
+                  </label>
+                  <button type="button" class="dt-help-icon-btn"
+                          interestfor="tip-camion-volumen" popovertarget="tip-camion-volumen" popovertargetaction="show"
+                          aria-label="Ayuda sobre capacidad de volumen">
+                    <svg aria-hidden="true"><use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#info}"></use></svg>
+                  </button>
+                  <div id="tip-camion-volumen" popover="hint" role="tooltip" class="slds-popover slds-popover_tooltip slds-nubbin_bottom-left dt-slds-tooltip">
+                    <div class="slds-popover__body">El planificador de rutas usa este volumen junto al peso máximo para calcular cuántos lotes entran en cada viaje.</div>
+                  </div>
+                </span>
+                <div class="slds-form-element__control slds-m-top_xxx-small">
                   <input type="number" step="0.1" min="0.1" id="capacidadVolumen" name="capacidadVolumen" th:field="*{capacidadVolumen}" required class="slds-input" placeholder="Ej: 25.0" />
-                </div>
-                <div class="slds-form-element__help" style="font-size: 0.75rem; color: #64748b;">
-                  Usado por el planificador para calcular cuántas cajas entran por recorrido.
                 </div>
               </div>
 

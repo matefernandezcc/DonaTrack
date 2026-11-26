@@ -173,8 +173,12 @@
   const isSafeAppUrl = (url) => {
     if (!url || typeof url !== "string") return false;
     const trimmed = url.trim();
-    if (!trimmed.startsWith("/app/") || trimmed.startsWith("//")) return false;
-    return true;
+    if (trimmed.startsWith("//")) return false;
+    return (
+      trimmed.startsWith("/app/") ||
+      trimmed === "/#mapa" ||
+      trimmed.startsWith("/?deposito=")
+    );
   };
 
   const addActionButton = (label, onClickOrUrl, skipPersist) => {
@@ -242,6 +246,185 @@
       .replace(/[\u0300-\u036f]/g, "")
       .trim();
 
+  // Catálogo local de respaldo de los 6 depósitos habilitados CABA (sincronizado con /api/public/depositos)
+  const FALLBACK_DEPOSITOS = [
+    {
+      id: "utn-medrano",
+      nombre: "Depósito Central — UTN FRBA Medrano",
+      barrio: "Almagro",
+      direccion: "Av. Medrano 951, CABA",
+      horarios: "Lun a Vie 9 a 18 hs · Sáb 9 a 13 hs",
+      lat: -34.5986,
+      lng: -58.4201
+    },
+    {
+      id: "utn-lugano",
+      nombre: "Depósito Sur — UTN FRBA Campus Lugano",
+      barrio: "Villa Lugano",
+      direccion: "Mozart 2300, CABA",
+      horarios: "Lun a Vie 9 a 17:30 hs",
+      lat: -34.6625,
+      lng: -58.4611
+    },
+    {
+      id: "caballito",
+      nombre: "Depósito Caballito — Parque Rivadavia",
+      barrio: "Caballito",
+      direccion: "Av. Rivadavia 5108, CABA",
+      horarios: "Lun a Vie 10 a 19 hs · Sáb 10 a 14 hs",
+      lat: -34.6181,
+      lng: -58.4333
+    },
+    {
+      id: "chacarita",
+      nombre: "Depósito Chacarita — Estación Lacroze",
+      barrio: "Chacarita",
+      direccion: "Av. Corrientes 6271, CABA",
+      horarios: "Lun a Vie 9:30 a 18 hs",
+      lat: -34.5907,
+      lng: -58.4478
+    },
+    {
+      id: "palermo",
+      nombre: "Depósito Palermo — Av. Santa Fe",
+      barrio: "Palermo",
+      direccion: "Av. Santa Fe 3253, CABA",
+      horarios: "Lun a Sáb 10 a 19 hs",
+      lat: -34.5888,
+      lng: -58.4213
+    },
+    {
+      id: "belgrano",
+      nombre: "Depósito Belgrano — Av. Cabildo",
+      barrio: "Belgrano",
+      direccion: "Av. Cabildo 2040, CABA",
+      horarios: "Lun a Vie 9:30 a 18:30 hs · Sáb 10 a 13:30 hs",
+      lat: -34.5627,
+      lng: -58.4565
+    }
+  ];
+
+  const haversineKm = (lat1, lng1, lat2, lng2) => {
+    const toRad = (deg) => (deg * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const formatDistKm = (km) => (km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1) + " km");
+
+  const fetchDepositosCatalogo = async () => {
+    try {
+      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const t = controller ? setTimeout(() => controller.abort(), 2500) : null;
+      const res = await fetch("/api/public/depositos", {
+        headers: { Accept: "application/json" },
+        signal: controller ? controller.signal : undefined
+      });
+      if (t) clearTimeout(t);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    } catch (e) {}
+    return FALLBACK_DEPOSITOS;
+  };
+
+  const getUserCoords = () =>
+    new Promise((resolve) => {
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => resolve(null),
+        { enableHighAccuracy: false, timeout: 4500, maximumAge: 120000 }
+      );
+    });
+
+  const inferDepositoId = (norm) => {
+    if (/\b(lugano|mozart|campus|soldati)\b/.test(norm)) return "utn-lugano";
+    if (/\b(caballito|rivadavia|acoyte)\b/.test(norm)) return "caballito";
+    if (/\b(chacarita|lacroze|corrientes)\b/.test(norm)) return "chacarita";
+    if (/\b(palermo|santa fe|bulnes)\b/.test(norm)) return "palermo";
+    if (/\b(belgrano|cabildo|juramento)\b/.test(norm)) return "belgrano";
+    if (/\b(medrano|almagro|central)\b/.test(norm)) return "utn-medrano";
+    return "";
+  };
+
+  const isDepositLookupIntent = (norm) =>
+    /\b(depositos?\s+cercan\w*|deposito\s+mas\s+cercan\w*|cerca\s+de\s+mi\w*|cerca\s+mio|donde\s+(?:hay|estan|quedan?|encuentro|llevo)\s+.*deposito\w*|que\s+depositos?\s+hay|depositos?\s+disponibles?|puntos?\s+de\s+recepcion|sedes?\s+(?:de\s+)?(?:recepcion|donatrack)|mapa\s+de\s+depositos?)\b/.test(
+      norm
+    );
+
+  const handleDepositLookupIntent = async (rawText) => {
+    const norm = normalizeText(rawText);
+    const wantsProximity = /\b(cercan\w*|cerca|ubicacion|gps|donde estoy|mas cerca)\b/.test(norm);
+    const waiting = showTypingIndicator(
+      wantsProximity ? "Calculando depósitos cercanos a tu ubicación..." : "Consultando depósitos habilitados..."
+    );
+
+    const depositos = await fetchDepositosCatalogo();
+    const coords = wantsProximity ? await getUserCoords() : null;
+    waiting.remove();
+
+    if (coords) {
+      const sorted = depositos
+        .map((d) => Object.assign({}, d, { distKm: haversineKm(coords.lat, coords.lng, d.lat, d.lng) }))
+        .sort((a, b) => a.distKm - b.distKm);
+      const top3 = sorted.slice(0, 3);
+      const lines = top3.map(
+        (d, i) =>
+          "- **" +
+          (i + 1) +
+          ". " +
+          d.nombre +
+          "** *(a " +
+          formatDistKm(d.distKm) +
+          ")*: " +
+          d.direccion +
+          " (" +
+          d.barrio +
+          ") · " +
+          d.horarios
+      );
+      const closest = top3[0];
+      const msg =
+        "Estos son los **3 depósitos DonaTrack más cercanos** a tu ubicación:\n" +
+        lines.join("\n") +
+        "\nPodés verlos en el mapa o registrar tu donación directamente en **" +
+        closest.barrio +
+        "**.";
+      addMessageBubble(msg, "bot");
+      addActionButton("Ver depósito en el mapa →", "/?deposito=" + encodeURIComponent(closest.id) + "#mapa");
+      if (userRole === "DONANTE" || userRole === "ADMIN") {
+        addActionButton(
+          "Donar en " + closest.barrio + " →",
+          "/app/donante/donaciones?deposito=" + encodeURIComponent(closest.id) + "&source=chatbot"
+        );
+      }
+      return true;
+    }
+
+    const listLines = depositos.map(
+      (d) => "- **" + d.nombre + "**: " + d.direccion + " (" + d.barrio + ") · " + d.horarios
+    );
+    const intro = wantsProximity
+      ? "No pude acceder a tu GPS en este momento, pero acá tenés nuestras **6 sedes habilitadas en CABA** (en el mapa también podés pulsar *Encontrar depósito más cercano*):"
+      : "Estos son los **6 depósitos oficiales de DonaTrack** habilitados en CABA:";
+    addMessageBubble(intro + "\n" + listLines.join("\n"), "bot");
+    addActionButton("Abrir mapa de depósitos →", "/#mapa");
+    if (userRole === "DONANTE" || userRole === "ADMIN") {
+      addActionButton("Registrar donación →", "/app/donante/donaciones");
+    }
+    return true;
+  };
+
   const inferCategory = (norm) => {
     if (/(fideo|arroz|leche|lenteja|polenta|aceite|azucar|yerba|harina|galletita|alimento|comida|enlatad|atun|pure|salsa|conserva|agua|merienda|desayuno|pan|vianda|seco)/.test(norm)) {
       return "Alimentos No Perecederos";
@@ -279,6 +462,7 @@
       categoria: inferCategory(norm),
       esUsado: null,
       modalidad: "",
+      deposito: inferDepositoId(norm),
       direccionRetiro: "",
       tipo: ""
     };
@@ -319,7 +503,7 @@
       if (dirMatch && dirMatch[1]) {
         details.direccionRetiro = dirMatch[1].trim();
       }
-    } else if (/\b(deposito|medrano|lo llevo|los llevo|llevo yo|acercar)\b/.test(norm)) {
+    } else if (/\b(deposito|medrano|lugano|caballito|chacarita|palermo|belgrano|lo llevo|los llevo|llevo yo|acercar)\b/.test(norm)) {
       details.modalidad = "DEPOSITO";
     }
 
@@ -565,7 +749,7 @@
 
     if ((userRole === "DONANTE" || userRole === "ADMIN") && isDonateWithDetails) {
       const d = parseItemDetails(rawText);
-      const hasDetails = Boolean(d.descripcion || d.cantidad || d.categoria || d.modalidad);
+      const hasDetails = Boolean(d.descripcion || d.cantidad || d.categoria || d.modalidad || d.deposito);
       const qs = buildQueryString({
         descripcion: d.descripcion,
         cantidad: d.cantidad,
@@ -573,17 +757,25 @@
         categoria: d.categoria,
         esUsado: d.esUsado,
         modalidad: d.modalidad,
+        deposito: d.deposito,
         direccionRetiro: d.direccionRetiro
       });
       const targetUrl = "/app/donante/donaciones" + (hasDetails ? "?" + qs : "");
 
       if (path === "/app/donante/donaciones" && typeof window.dtAutofillDonacion === "function" && hasDetails) {
         window.dtAutofillDonacion(d);
+        const depObj = d.deposito ? FALLBACK_DEPOSITOS.find((x) => x.id === d.deposito) : null;
         const resumen = [
           d.cantidad ? d.cantidad + (d.unidad === "LITROS" ? " L" : d.unidad === "KILOS" ? " kg" : " u.") : null,
           d.descripcion || null,
           d.categoria ? "(" + d.categoria + ")" : null,
-          d.modalidad === "RETIRO" ? "· Retiro a domicilio" : d.modalidad === "DEPOSITO" ? "· Depósito Medrano 951" : null
+          d.modalidad === "RETIRO"
+            ? "· Retiro a domicilio"
+            : depObj
+              ? "· " + depObj.nombre
+              : d.modalidad === "DEPOSITO"
+                ? "· Depósito DonaTrack"
+                : null
         ].filter(Boolean).join(" ");
         return {
           reply: "¡Listo! Completé el formulario con **" + (resumen || "tus datos") + "**. Revisá los campos y presioná **Confirmar Donación**."
@@ -603,7 +795,7 @@
       }
 
       return {
-        reply: "Podés registrar tu donación en menos de 1 minuto eligiendo si la acercás al depósito (**Medrano 951, CABA**) o si coordinás **retiro por camión solidario**. También podés escribirme qué querés donar (ej: *\"quiero donar 10 kg de fideos\"*) y te completo el formulario.",
+        reply: "Podés registrar tu donación en menos de 1 minuto eligiendo cualquiera de nuestros **6 depósitos en CABA** (UTN Medrano, UTN Campus Lugano, Caballito, Chacarita, Palermo o Belgrano) o pidiendo **retiro por camión solidario**. También podés preguntarme *\"depósitos cercanos a mi ubicación\"* o decirme qué querés donar.",
         actionLabel: "Abrir formulario de donación →",
         navigateUrl: "/app/donante/donaciones"
       };
@@ -613,7 +805,7 @@
       // ¿Dónde dono / cómo dono?
       if (/\b(donde|como)\b.*\b(dono|donar|entrego|entregar|deposito|llevo)\b/.test(norm)) {
         return {
-          reply: "Podés cargar tu aporte desde **Registrar Donación** y elegir llevarlo al depósito central (**Medrano 951, CABA**, Lun a Vie de 9 a 18 hs) o pedir **retiro por camión solidario**. Si me decís qué querés donar (ej: *\"quiero donar 5 frazadas usadas\"*) te precargo el formulario automáticamente.",
+          reply: "Podés cargar tu aporte desde **Registrar Donación** y llevarlo a cualquiera de nuestros **6 depósitos habilitados en CABA** (UTN Medrano, UTN Lugano, Caballito, Chacarita, Palermo o Belgrano) o coordinar **retiro por camión solidario**. Escribime *\"depósitos cercanos a mi ubicación\"* si querés ver cuál te queda más cerca.",
           actionLabel: "Ir a Registrar Donación →",
           navigateUrl: "/app/donante/donaciones"
         };
@@ -810,6 +1002,18 @@
   };
 
   const processChatRequest = async (messageText, action) => {
+    // 0) Consulta de depósitos cercanos / sedes habilitadas (con GPS + Haversine + mapa)
+    if (!action && messageText && isDepositLookupIntent(normalizeText(messageText))) {
+      setInputDisabled(true);
+      try {
+        await handleDepositLookupIntent(messageText);
+      } finally {
+        setInputDisabled(false);
+        if (!panel.hidden) input.focus();
+      }
+      return;
+    }
+
     // 1) Intentar resolución instantánea in-page (navegación / autocompletado de formularios)
     if (!action && messageText) {
       const localResult = resolveLocalCopilotAction(messageText);

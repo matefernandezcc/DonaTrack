@@ -1505,6 +1505,184 @@
     [data-theme="dark"] .theme-toggle-admin .moon-icon {
       display: none;
     }
+
+    /* =====================================================================
+       SLDS v1 TOOLTIPS (Popover Hint + Anchor Positioning + Fallback Universal)
+       ===================================================================== */
+    .dt-tooltip-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      vertical-align: middle;
+    }
+
+    .dt-help-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      margin: 0;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: #706e6b;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .dt-help-icon-btn:hover,
+    .dt-help-icon-btn:focus-visible {
+      color: #0176d3;
+      background: rgba(1, 118, 211, 0.1);
+      outline: none;
+    }
+
+    .dt-help-icon-btn:focus-visible {
+      box-shadow: 0 0 0 2px #0176d3;
+    }
+
+    .dt-help-icon-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+      pointer-events: none;
+    }
+
+    [data-theme="dark"] .dt-help-icon-btn {
+      color: #93c5fd;
+    }
+
+    [data-theme="dark"] .dt-help-icon-btn:hover,
+    [data-theme="dark"] .dt-help-icon-btn:focus-visible {
+      color: #bfdbfe;
+      background: rgba(96, 165, 250, 0.18);
+    }
+
+    /* Botón visualmente deshabilitado pero focuseable/hovereable para tooltip SLDS */
+    .slds-button[aria-disabled="true"] {
+      opacity: 0.62;
+      cursor: not-allowed;
+    }
+
+    [interestfor] {
+      --interest-delay-start: 0.18s;
+      interest-delay-start: var(--interest-delay-start);
+      --interest-delay-end: 0.12s;
+      interest-delay-end: var(--interest-delay-end);
+    }
+
+    .dt-slds-tooltip[popover] {
+      background: #032d60;
+      color: #ffffff;
+      border: 1px solid #022146;
+      border-radius: 0.25rem;
+      padding: 0;
+      max-width: 20rem;
+      min-width: 11rem;
+      width: max-content;
+      box-shadow: 0 4px 12px rgba(3, 45, 96, 0.28);
+      overflow: visible;
+      pointer-events: auto;
+      z-index: 10050;
+    }
+
+    /* Suprimir nubbin heredado de SLDS para evitar flechas duplicadas al voltear */
+    .dt-slds-tooltip.slds-nubbin_bottom-left::before,
+    .dt-slds-tooltip.slds-nubbin_bottom-left::after {
+      content: none !important;
+      display: none !important;
+    }
+
+    .dt-slds-tooltip > .slds-popover__body {
+      position: relative;
+      padding: 0.55rem 0.78rem;
+      font-size: 0.75rem;
+      font-weight: 400;
+      line-height: 1.45;
+      color: #ffffff;
+      white-space: normal;
+      text-align: left;
+      overflow-wrap: break-word;
+    }
+
+    /* Flecha/nubbin SLDS inferior izquierda (en descendiente para soportar @container anchored) */
+    .dt-slds-tooltip > .slds-popover__body::before {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #032d60;
+      border-right: 1px solid #022146;
+      border-bottom: 1px solid #022146;
+      transform: rotate(45deg);
+      inset-block-end: -6px;
+      inset-inline-start: 14px;
+      pointer-events: none;
+    }
+
+    .dt-slds-tooltip[data-flipped="true"] > .slds-popover__body::before {
+      inset-block-end: auto;
+      inset-block-start: -6px;
+      border-right: none;
+      border-bottom: none;
+      border-left: 1px solid #022146;
+      border-top: 1px solid #022146;
+    }
+
+    [data-theme="dark"] .dt-slds-tooltip[popover] {
+      background: #0c3b73;
+      border-color: #3b82f6;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+    }
+
+    [data-theme="dark"] .dt-slds-tooltip > .slds-popover__body::before {
+      background: #0c3b73;
+      border-right-color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+
+    [data-theme="dark"] .dt-slds-tooltip[data-flipped="true"] > .slds-popover__body::before {
+      border-left-color: #3b82f6;
+      border-top-color: #3b82f6;
+    }
+
+    @supports not selector(:popover-open) {
+      .dt-slds-tooltip[popover]:not(.\:popover-open):not(.dt-tooltip-open) {
+        display: none;
+      }
+    }
+
+    .dt-slds-tooltip[popover]:is(:popover-open, .\:popover-open, .dt-tooltip-open) {
+      display: block;
+    }
+
+    /* Posicionamiento anclado nativo protegido por @supports (sin dejar popovers en 0,0) */
+    @supports (position-area: block-start) {
+      .dt-slds-tooltip[popover]:not([data-js-pos="true"]) {
+        inset: auto;
+        margin: 0;
+        position-area: block-start span-inline-end;
+        position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+        margin-block-end: 10px;
+        container-type: anchored;
+      }
+    }
+
+    @supports (container-type: anchored) {
+      @container anchored(fallback: flip-block) {
+        .dt-slds-tooltip > .slds-popover__body::before {
+          inset-block-end: auto;
+          inset-block-start: -6px;
+          border-right: none;
+          border-bottom: none;
+          border-left: 1px solid #022146;
+          border-top: 1px solid #022146;
+        }
+      }
+    }
   </style>
 
   <!-- Salesforce Data 360 / Data Cloud Beacon SDK -->
@@ -1837,13 +2015,12 @@
         </div>
       </div>
 
-      <!-- Sección Donante (Colapsada por defecto para Admin para reducir ruido) -->
-      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('DONANTE') or hasRole('ADMIN')">
+      <!-- Sección Donante (exclusiva para usuarios con rol DONANTE) -->
+      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('DONANTE') and !hasRole('ADMIN')">
         <h2 class="slds-nav-vertical__title slds-text-title_caps">Portal Donante</h2>
         <div class="slds-nav-vertical__overflow">
           <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
-            aria-controls="nav-group-donante" aria-expanded="true" data-group="nav-group-donante"
-            th:attr="data-default-collapsed=${#authorization.expression('hasRole(''ADMIN'')') ? 'true' : 'false'}">
+            aria-controls="nav-group-donante" aria-expanded="true" data-group="nav-group-donante">
             <span class="dt-nav-chevron-box">
               <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
@@ -1902,13 +2079,12 @@
         </div>
       </div>
 
-      <!-- Sección Beneficiaria (Colapsada por defecto para Admin para reducir ruido) -->
-      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('BENEFICIARIA') or hasRole('ADMIN')">
+      <!-- Sección Beneficiaria (exclusiva para organizaciones con rol BENEFICIARIA) -->
+      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('BENEFICIARIA') and !hasRole('ADMIN')">
         <h2 class="slds-nav-vertical__title slds-text-title_caps">Portal Organización</h2>
         <div class="slds-nav-vertical__overflow">
           <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
-            aria-controls="nav-group-beneficiaria" aria-expanded="true" data-group="nav-group-beneficiaria"
-            th:attr="data-default-collapsed=${#authorization.expression('hasRole(''ADMIN'')') ? 'true' : 'false'}">
+            aria-controls="nav-group-beneficiaria" aria-expanded="true" data-group="nav-group-beneficiaria">
             <span class="dt-nav-chevron-box">
               <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
@@ -2366,6 +2542,213 @@
           });
         });
       }
+
+      // 6. SLDS Tooltips accesibles (popover="hint" + interestfor + ARIA sync + fallback universal)
+      (function initSldsTooltips() {
+        var supportsPopover = Object.prototype.hasOwnProperty.call(HTMLElement.prototype, 'popover');
+        var supportsInterest = 'interestForElement' in HTMLButtonElement.prototype;
+        var supportsAnchorArea = typeof CSS !== 'undefined' && typeof CSS.supports === 'function'
+          && CSS.supports('position-area: block-start');
+        var ownedExpandedTriggers = new Set();
+
+        function normalizeWs(s) {
+          return String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        }
+
+        function getAccessibleName(el) {
+          var lblBy = el.getAttribute('aria-labelledby');
+          if (lblBy) {
+            var parts = lblBy.split(/\s+/).map(function (id) {
+              var n = document.getElementById(id);
+              return n ? n.textContent : '';
+            }).join(' ');
+            if (normalizeWs(parts)) return parts;
+          }
+          if (el.getAttribute('aria-label')) return el.getAttribute('aria-label');
+          if (normalizeWs(el.textContent)) return el.textContent;
+          return el.getAttribute('title') || '';
+        }
+
+        function isPopoverOpen(pop) {
+          if (!pop) return false;
+          try {
+            if (supportsPopover && pop.matches(':popover-open')) return true;
+          } catch (e) {}
+          return pop.classList.contains('dt-tooltip-open') || pop.classList.contains(':popover-open');
+        }
+
+        // Fallback Safari/navegadores sin popover="hint": promover toggletips a "auto" en beforetoggle
+        if (supportsPopover) {
+          var probe = document.createElement('div');
+          probe.setAttribute('popover', 'hint');
+          if (probe.popover !== 'hint') {
+            document.addEventListener('beforetoggle', function (evt) {
+              var target = evt.target;
+              if (!target || !target.id) return;
+              var isHint = target.getAttribute('popover') === 'hint';
+              var hasPopoverTarget = document.querySelector('[popovertarget="' + CSS.escape(target.id) + '"]');
+              if (evt.newState === 'open' && isHint && hasPopoverTarget) {
+                target.setAttribute('popover', 'auto');
+              }
+            }, true);
+          }
+        }
+
+        // Sincronizar aria-expanded desde el evento toggle en fase capture (toggle no burbujea)
+        document.addEventListener('toggle', function (evt) {
+          var pop = evt.target;
+          if (!pop || !pop.id) return;
+          var isOpen = evt.newState === 'open';
+          document.querySelectorAll('[interestfor="' + CSS.escape(pop.id) + '"]').forEach(function (tr) {
+            if (ownedExpandedTriggers.has(tr)) {
+              tr.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            }
+          });
+        }, true);
+
+        function positionTooltipFallback(trigger, pop) {
+          if (!trigger || !pop) return;
+          pop.setAttribute('data-js-pos', 'true');
+          pop.style.position = 'fixed';
+          pop.style.margin = '0';
+          pop.style.inset = 'auto';
+          var rect = trigger.getBoundingClientRect();
+          var popW = pop.offsetWidth || 260;
+          var popH = pop.offsetHeight || 64;
+          var gap = 10;
+          var left = rect.left + Math.min(rect.width / 2, 16) - 18;
+          if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+          if (left < 12) left = 12;
+
+          var top = rect.top - popH - gap;
+          var flipped = false;
+          if (top < 12) {
+            top = rect.bottom + gap;
+            flipped = true;
+          }
+          pop.setAttribute('data-flipped', flipped ? 'true' : 'false');
+          pop.style.left = Math.round(left) + 'px';
+          pop.style.top = Math.round(top) + 'px';
+        }
+
+        var activeFallbackTip = null;
+        var activeFallbackTrigger = null;
+        var hideTimer = null;
+
+        function closeFallbackTip(pop, trigger) {
+          if (!pop) return;
+          try {
+            if (supportsPopover && isPopoverOpen(pop)) {
+              pop.hidePopover();
+            }
+          } catch (e) {}
+          pop.classList.remove('dt-tooltip-open');
+          if (trigger && ownedExpandedTriggers.has(trigger)) {
+            trigger.setAttribute('aria-expanded', 'false');
+          }
+          if (activeFallbackTip === pop) {
+            activeFallbackTip = null;
+            activeFallbackTrigger = null;
+          }
+        }
+
+        function openFallbackTip(trigger, pop) {
+          if (!trigger || !pop) return;
+          if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+          if (activeFallbackTip && activeFallbackTip !== pop) {
+            closeFallbackTip(activeFallbackTip, activeFallbackTrigger);
+          }
+          activeFallbackTip = pop;
+          activeFallbackTrigger = trigger;
+          try {
+            if (supportsPopover) {
+              if (!isPopoverOpen(pop)) pop.showPopover();
+            } else {
+              pop.classList.add('dt-tooltip-open');
+            }
+          } catch (e) {
+            pop.classList.add('dt-tooltip-open');
+          }
+          if (!supportsAnchorArea || !supportsInterest) {
+            positionTooltipFallback(trigger, pop);
+          }
+          if (ownedExpandedTriggers.has(trigger)) {
+            trigger.setAttribute('aria-expanded', 'true');
+          }
+        }
+
+        function scheduleHide(trigger, pop) {
+          if (hideTimer) clearTimeout(hideTimer);
+          hideTimer = setTimeout(function () {
+            closeFallbackTip(pop, trigger);
+          }, 140);
+        }
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && activeFallbackTip) {
+            closeFallbackTip(activeFallbackTip, activeFallbackTrigger);
+          }
+        });
+
+        window.dtSyncTooltipsAria = function () {
+          document.querySelectorAll('[interestfor]').forEach(function (trigger) {
+            var tipId = trigger.getAttribute('interestfor');
+            var pop = tipId ? document.getElementById(tipId) : null;
+            if (!pop || pop.getAttribute('popover') !== 'hint') return;
+
+            var hintText = normalizeWs(pop.textContent);
+            var triggerName = normalizeWs(getAccessibleName(trigger));
+
+            if (hintText && hintText !== triggerName) {
+              if (!pop.hasAttribute('role')) {
+                pop.setAttribute('role', 'tooltip');
+              }
+              if (!triggerName) {
+                if (!trigger.hasAttribute('aria-labelledby')) {
+                  trigger.setAttribute('aria-labelledby', tipId);
+                }
+              } else {
+                var opensOnActivate = trigger.getAttribute('popovertarget') === tipId
+                  || trigger.getAttribute('commandfor') === tipId;
+                if (opensOnActivate) {
+                  if (!trigger.hasAttribute('aria-expanded')) {
+                    trigger.setAttribute('aria-expanded', isPopoverOpen(pop) ? 'true' : 'false');
+                    ownedExpandedTriggers.add(trigger);
+                  }
+                } else if (!trigger.hasAttribute('aria-describedby')) {
+                  trigger.setAttribute('aria-describedby', tipId);
+                }
+              }
+            }
+
+            // Fallback local sin CDN externo cuando el navegador aún no soporta interestfor nativo
+            if (!supportsInterest && !trigger.dataset.dtTipBound) {
+              trigger.dataset.dtTipBound = '1';
+              trigger.addEventListener('mouseenter', function () { openFallbackTip(trigger, pop); });
+              trigger.addEventListener('mouseleave', function () { scheduleHide(trigger, pop); });
+              trigger.addEventListener('focus', function () { openFallbackTip(trigger, pop); });
+              trigger.addEventListener('blur', function () { scheduleHide(trigger, pop); });
+              if (trigger.getAttribute('popovertarget') === tipId) {
+                trigger.addEventListener('click', function (ev) {
+                  ev.preventDefault();
+                  openFallbackTip(trigger, pop);
+                });
+              }
+              if (!pop.dataset.dtTipHoverBound) {
+                pop.dataset.dtTipHoverBound = '1';
+                pop.addEventListener('mouseenter', function () {
+                  if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+                });
+                pop.addEventListener('mouseleave', function () {
+                  scheduleHide(activeFallbackTrigger, pop);
+                });
+              }
+            }
+          });
+        };
+
+        window.dtSyncTooltipsAria();
+      })();
     });
   </script>
 

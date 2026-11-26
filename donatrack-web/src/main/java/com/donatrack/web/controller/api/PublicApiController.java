@@ -1,8 +1,10 @@
 package com.donatrack.web.controller.api;
 
+import com.donatrack.web.dto.DepositoDTO;
 import com.donatrack.web.dto.PuntoMapaPublicoDTO;
 import com.donatrack.web.gateway.DonacionesGateway;
 import com.donatrack.web.service.CacheResilienteService;
+import com.donatrack.web.service.DepositosCatalogo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,11 @@ public class PublicApiController {
       CacheResilienteService cacheResilienteService, DonacionesGateway donacionesGateway) {
     this.cacheResilienteService = cacheResilienteService;
     this.donacionesGateway = donacionesGateway;
+  }
+
+  @GetMapping("/depositos")
+  public ResponseEntity<List<DepositoDTO>> obtenerDepositosDisponibles() {
+    return ResponseEntity.ok(DepositosCatalogo.listarDisponibles());
   }
 
   @GetMapping("/mapa-entregas")

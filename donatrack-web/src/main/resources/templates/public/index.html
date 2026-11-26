@@ -334,72 +334,80 @@
     <section class="map-sec" id="mapa" aria-labelledby="map-title">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow">Mapa de impacto</span>
-          <h2 id="map-title">Donde tus donaciones generan impacto</h2>
+          <span class="eyebrow">Red de depósitos</span>
+          <h2 id="map-title">Depósitos habilitados para acercar tu donación</h2>
           <p class="section-head__lead">
-            Puntos de recepción, organizaciones beneficiarias y entregas
-            confirmadas en tu zona.
+            Contamos con 6 puntos de recepción activos en CABA —incluyendo sedes
+            cercanas a UTN Medrano y UTN Campus Lugano— para recibir, clasificar
+            y distribuir tus donaciones con trazabilidad completa.
           </p>
         </div>
 
-        <div class="map-sec__legend" aria-hidden="true">
-          <span><i class="dot dot--blue"></i> Punto de recepción</span>
-          <span><i class="dot dot--green"></i> ONG receptora</span>
-          <span><i class="dot dot--orange"></i> Entrega confirmada</span>
+        <div class="map-sec__toolbar">
+          <div class="map-sec__legend" aria-hidden="true">
+            <span><i class="dot dot--blue"></i> Depósito DonaTrack habilitado</span>
+            <span><i class="dot dot--green"></i> Tu ubicación (opcional)</span>
+          </div>
+          <div class="map-sec__geo-actions">
+            <button type="button" id="btn-nearest-deposit" class="btn btn--outline btn--sm map-sec__geo-btn">
+              📍 Encontrar depósito más cercano
+            </button>
+            <span id="map-geo-status" class="map-sec__geo-status" role="status" aria-live="polite"></span>
+          </div>
         </div>
 
         <div class="map-sec__container">
           <div class="map-sec__map-wrap">
-            <section id="map" class="map-sec__map" aria-label="Mapa interactivo de donaciones"></section>
+            <section id="map" class="map-sec__map" aria-label="Mapa interactivo de depósitos disponibles DonaTrack"></section>
           </div>
-          <aside class="map-sec__sidebar" aria-label="Lista de ubicaciones">
+          <aside class="map-sec__sidebar" aria-label="Lista de depósitos habilitados">
             <div class="map-sec__sidebar-head">
-              <h3 id="map-sidebar-count">Ubicaciones Activas (6)</h3>
-              <p>Hacé clic en cualquier punto para enfocar el mapa</p>
+              <h3 id="map-sidebar-count">Depósitos Disponibles (6)</h3>
+              <p>Hacé clic en una sede para ver dirección, horarios y cómo donar</p>
             </div>
             <ul class="map-sec__list" id="map-sidebar-list">
               <li>
                 <button type="button" class="map-sec__item is-active" data-coord-index="0">
                   <span class="dot dot--blue" aria-hidden="true"></span>
                   <div class="map-sec__item-body">
-                    <strong>Punto de recepción — Centro</strong>
-                    <span>DonaTrack Hub Centro · Alimentos y Ropa</span>
+                    <strong>Depósito Central — UTN FRBA Medrano</strong>
+                    <span>Av. Medrano 951, Almagro · Lun a Vie 9 a 18 hs</span>
                   </div>
                 </button>
               </li>
               <li>
                 <button type="button" class="map-sec__item" data-coord-index="1">
-                  <span class="dot dot--green" aria-hidden="true"></span>
+                  <span class="dot dot--blue" aria-hidden="true"></span>
                   <div class="map-sec__item-body">
-                    <strong>Comedor El Faro</strong>
-                    <span>Asoc. Civil El Faro · 220 familias/sem</span>
+                    <strong>Depósito Sur — UTN FRBA Campus Lugano</strong>
+                    <span>Mozart 2300, Villa Lugano · Lun a Vie 9 a 17:30 hs</span>
                   </div>
                 </button>
               </li>
               <li>
                 <button type="button" class="map-sec__item" data-coord-index="2">
-                  <span class="dot dot--orange" aria-hidden="true"></span>
+                  <span class="dot dot--blue" aria-hidden="true"></span>
                   <div class="map-sec__item-body">
-                    <strong>Entrega #DT-2418</strong>
-                    <span>Hogar Caminos · Camperas y frazadas</span>
+                    <strong>Depósito Caballito — Parque Rivadavia</strong>
+                    <span>Av. Rivadavia 5108, Caballito · Lun a Vie 10 a 19 hs</span>
                   </div>
                 </button>
               </li>
               <li>
                 <button type="button" class="map-sec__item" data-coord-index="3">
-                  <span class="dot dot--green" aria-hidden="true"></span>
+                  <span class="dot dot--blue" aria-hidden="true"></span>
                   <div class="map-sec__item-body">
-                    <strong>Fundación Raíces</strong>
-                    <span>Útiles escolares · 4 escuelas rurales</span>
+                    <strong>Depósito Chacarita — Estación Lacroze</strong>
+                    <span>Av. Corrientes 6271, Chacarita · Lun a Vie 9:30 a 18 hs</span>
                   </div>
                 </button>
               </li>
               <li>
                 <button type="button" class="map-sec__item" data-coord-index="4">
-                  <span class="dot dot--orange" aria-hidden="true"></span>
+                  <span class="dot dot--blue" aria-hidden="true"></span>
                   <div class="map-sec__item-body">
-                    <strong>Entrega #DT-2390</strong>
-                    <span>Comedor La Esperanza · Mobiliario</span>
+                    <strong>Depósito Palermo — Av. Santa Fe</strong>
+                    <span>Av. Santa Fe 3253, Palermo · Lun a Sáb 10 a 19 hs</span>
                   </div>
                 </button>
               </li>
@@ -407,8 +415,8 @@
                 <button type="button" class="map-sec__item" data-coord-index="5">
                   <span class="dot dot--blue" aria-hidden="true"></span>
                   <div class="map-sec__item-body">
-                    <strong>Punto de recepción — Oeste</strong>
-                    <span>DonaTrack Hub Oeste · Clasificación</span>
+                    <strong>Depósito Belgrano — Av. Cabildo</strong>
+                    <span>Av. Cabildo 2040, Belgrano · Lun a Vie 9:30 a 18:30 hs</span>
                   </div>
                 </button>
               </li>
@@ -417,7 +425,7 @@
         </div>
       </div>
 
-      <!-- Modal for marker -->
+      <!-- Modal for deposit detail -->
       <dialog class="modal" id="map-modal" aria-labelledby="modal-title" hidden>
         <div class="modal__backdrop" data-close></div>
         <div class="modal__panel">
@@ -426,23 +434,32 @@
           </button>
           <div class="modal__media" id="modal-media"></div>
           <div class="modal__body">
-            <span class="pill pill--green" id="modal-status">Entregado</span>
-            <h3 id="modal-title">Donación</h3>
+            <span class="pill pill--blue" id="modal-status">Disponible</span>
+            <h3 id="modal-title">Depósito DonaTrack</h3>
             <p id="modal-desc"></p>
             <dl class="modal__meta">
               <div>
-                <dt id="modal-org-label">Beneficiario</dt>
+                <dt id="modal-org-label">Dirección</dt>
                 <dd id="modal-org">—</dd>
               </div>
               <div>
-                <dt id="modal-type-label">Tipo</dt>
+                <dt id="modal-type-label">Recibe</dt>
                 <dd id="modal-type">—</dd>
               </div>
               <div>
-                <dt>Fecha</dt>
+                <dt id="modal-date-label">Horarios</dt>
                 <dd id="modal-date">—</dd>
               </div>
+              <div>
+                <dt id="modal-ref-label">Referencia</dt>
+                <dd id="modal-ref">—</dd>
+              </div>
             </dl>
+            <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <a id="modal-donate-cta" href="/app/donante/donaciones" class="btn btn--primary btn--sm">
+                Donar en este depósito →
+              </a>
+            </div>
           </div>
         </div>
       </dialog>

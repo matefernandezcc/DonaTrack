@@ -391,6 +391,35 @@ class DonanteFlowTest {
 
     @Test
     @DisplayName(
+        "POST /app/donante/donaciones con depositoDestino=utn-lugano refleja UTN Lugano (Mozart 2300) en flashOk")
+    void testCrearDonacionEnDepositoUtnLugano() throws Exception {
+      UUID donacionGenId = UUID.randomUUID();
+      when(donacionesGateway.crearRecepcion(any()))
+          .thenReturn(Map.of("id", donacionGenId.toString()));
+
+      mockMvc
+          .perform(
+              post("/app/donante/donaciones")
+                  .principal(donanteAuth)
+                  .param("descripcion", "Frazadas de invierno")
+                  .param("cantidad", "5")
+                  .param("unidadMedicion", "UNIDADES")
+                  .param("nombreSubcategoria", "Ropa y Abrigo")
+                  .param("modalidadEntrega", "DEPOSITO")
+                  .param("depositoDestino", "utn-lugano"))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("/app/donante?tab=seguimiento"))
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk",
+                      allOf(
+                          containsString("UTN FRBA Campus Lugano"),
+                          containsString("Mozart 2300, CABA"))));
+    }
+
+    @Test
+    @DisplayName(
         "POST /app/donante/donaciones con error 502/Bad Gateway debe mostrar mensaje amigable")
     void testCrearDonacionError502() throws Exception {
       // Arrange

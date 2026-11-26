@@ -61,8 +61,19 @@
                 Proveedor</th>
               <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap;">Rol
                 Actual</th>
-              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap; min-width: 260px;">Acción
-                de Asignación & Seguridad</th>
+              <th scope="col" style="font-weight: 700; padding: 10px 14px; white-space: nowrap; min-width: 260px;">
+                <span class="dt-tooltip-inline">
+                  <span>Acción de Asignación &amp; Seguridad</span>
+                  <button type="button" class="dt-help-icon-btn"
+                          interestfor="tip-usuarios-roles" popovertarget="tip-usuarios-roles" popovertargetaction="show"
+                          aria-label="Ayuda sobre cambio de roles y reseteo de clave">
+                    <svg aria-hidden="true"><use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#info}"></use></svg>
+                  </button>
+                  <div id="tip-usuarios-roles" popover="hint" role="tooltip" class="slds-popover slds-popover_tooltip slds-nubbin_bottom-left dt-slds-tooltip">
+                    <div class="slds-popover__body">Cambiar el rol actualiza permisos al próximo inicio de sesión. Resetear Clave genera una contraseña temporal enviada por correo.</div>
+                  </div>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody>

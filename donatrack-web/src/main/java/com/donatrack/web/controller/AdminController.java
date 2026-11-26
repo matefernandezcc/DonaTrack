@@ -1,9 +1,11 @@
 package com.donatrack.web.controller;
 
 import com.donatrack.web.dto.CamionDto;
+import com.donatrack.web.dto.DepositoDTO;
 import com.donatrack.web.gateway.DonacionesGateway;
 import com.donatrack.web.gateway.IncentivosGateway;
 import com.donatrack.web.gateway.LogisticaGateway;
+import com.donatrack.web.service.DepositosCatalogo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.net.URI;
@@ -2101,9 +2103,13 @@ public class AdminController {
       @RequestParam(name = "descripcion", required = false) String descripcion,
       @RequestParam(name = "categoria", required = false) String categoria,
       @RequestParam(name = "ong", required = false) String ong,
+      @RequestParam(name = "deposito", required = false) String deposito,
       Model model,
       Authentication auth) {
     model.addAttribute("nombreUsuario", auth.getName());
+    model.addAttribute("depositos", DepositosCatalogo.listarDisponibles());
+    model.addAttribute(
+        "depositoSeleccionado", DepositosCatalogo.buscarPorIdODefault(deposito).id());
     if (descripcion != null && !descripcion.isBlank()) {
       model.addAttribute("prefillDescripcion", descripcion);
     }
@@ -2127,11 +2133,13 @@ public class AdminController {
       @RequestParam(name = "ongSugerida", required = false) String ongSugerida,
       @RequestParam(name = "modalidadEntrega", required = false, defaultValue = "DEPOSITO")
           String modalidadEntrega,
+      @RequestParam(name = "depositoDestino", required = false) String depositoDestino,
       @RequestParam(name = "direccionRetiro", required = false) String direccionRetiro,
       Authentication auth,
       RedirectAttributes redirectAttributes) {
     try {
       UUID donanteId = resolverDonanteId(auth);
+      DepositoDTO depositoElegido = DepositosCatalogo.buscarPorIdODefault(depositoDestino);
       String descFinal = descripcion != null ? descripcion.trim() : "";
       if (ongSugerida != null && !ongSugerida.isBlank()) {
         descFinal = descFinal + " [Priorizada para: " + ongSugerida.trim() + "]";
@@ -2140,6 +2148,16 @@ public class AdminController {
           && direccionRetiro != null
           && !direccionRetiro.isBlank()) {
         descFinal = descFinal + " · Retiro en: " + direccionRetiro.trim();
+      } else if (!"RETIRO".equalsIgnoreCase(modalidadEntrega)
+          && depositoDestino != null
+          && !depositoDestino.isBlank()) {
+        descFinal =
+            descFinal
+                + " · Depósito: "
+                + depositoElegido.nombre()
+                + " ("
+                + depositoElegido.direccion()
+                + ")";
       }
       Map<String, Object> payload =
           Map.of(
@@ -2199,7 +2217,13 @@ public class AdminController {
       String detalleEntrega =
           "RETIRO".equalsIgnoreCase(modalidadEntrega)
               ? " Coordinaremos el retiro con la flota solidaria."
-              : " Presentá el código " + codigoCorto + " al entregar en Medrano 951, CABA.";
+              : " Presentá el código "
+                  + codigoCorto
+                  + " al entregar en "
+                  + depositoElegido.nombre()
+                  + " ("
+                  + depositoElegido.direccion()
+                  + ").";
       redirectAttributes.addFlashAttribute(
           "flashOk",
           "Donación "
