@@ -1,0 +1,83 @@
+groups:
+  - name: donatrack_rnf_and_silent_alerts
+    interval: 15s
+    rules:
+      # 1. ALARMA SILENCIOSA: Servicio deja de emitir telemetría o cae (up == 0)
+      - alert: SilentAlarmServiceDown
+        expr: up{job="donatrack-services"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          category: silent_alarm
+        annotations:
+          summary: "Alarma Silenciosa: Servicio {{ $labels.instance }} dejó de responder telemetría"
+          description: "El endpoint /actuator/prometheus de {{ $labels.instance }} no entrega métricas hace más de 30s. Autoheal reiniciará el contenedor si el healthcheck falla."
+
+      # 2. ALARMA SILENCIOSA GLOBAL: Ausencia total de telemetría del cluster
+      - alert: SilentAlarmTelemetryAbsent
+        expr: absent(up{job="donatrack-services"})
+        for: 1m
+        labels:
+          severity: critical
+          category: silent_alarm
+        annotations:
+          summary: "Alarma Silenciosa: Ausencia total de telemetría en DonaTrack"
+          description: "Prometheus dejó de recibir series temporales del job donatrack-services durante más de 1 minuto."
+
+      # 3. UMBRAL RNF: Tasa de errores 5xx > 5%
+      - alert: HighHttp5xxErrorRate
+        expr: |
+          (
+            sum by (application) (rate(http_server_requests_seconds_count{status=~"5.."}[2m]))
+            /
+            clamp_min(sum by (application) (rate(http_server_requests_seconds_count[2m])), 0.001)
+          ) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+          category: rnf_errors
+        annotations:
+          summary: "Tasa de errores 5xx > 5% en {{ $labels.application }}"
+          description: "El servicio {{ $labels.application }} supera el umbral RNF de errores 5xx ({{ $value | humanizePercentage }})."
+
+      # 4. UMBRAL RNF: Latencia p95 > 1.5 segundos
+      - alert: HighHttpLatencyP95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, application) (rate(http_server_requests_seconds_bucket[2m]))
+          ) > 1.5
+        for: 1m
+        labels:
+          severity: warning
+          category: rnf_latency
+        annotations:
+          summary: "Latencia p95 > 1.5s en {{ $labels.application }}"
+          description: "El percentil 95 de respuesta en {{ $labels.application }} supera el umbral RNF de 1.5s ({{ $value | humanizeDuration }})."
+
+      # 5. UMBRAL RECURSOS: Saturación de memoria Heap JVM > 85%
+      - alert: HighJvmHeapSaturation
+        expr: |
+          (
+            sum by (application) (jvm_memory_used_bytes{area="heap"})
+            /
+            clamp_min(sum by (application) (jvm_memory_max_bytes{area="heap"}), 1)
+          ) > 0.85
+        for: 2m
+        labels:
+          severity: warning
+          category: saturation
+        annotations:
+          summary: "Saturación de Heap JVM (>85%) en {{ $labels.application }}"
+          description: "El consumo de Heap en {{ $labels.application }} alcanzó {{ $value | humanizePercentage }}."
+
+      # 6. SEGURIDAD / RATE LIMITING: Posible abuso o fuerza bruta (HTTP 429)
+      - alert: RateLimitingBurstDetected
+        expr: sum by (application) (increase(http_server_requests_seconds_count{status="429"}[1m])) > 10
+        for: 15s
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Pico de bloqueos Rate Limit (429) en {{ $labels.application }}"
+          description: "Bucket4j bloqueó más de 10 solicitudes en 1 minuto. Verificar posible abuso o denegación de servicio."

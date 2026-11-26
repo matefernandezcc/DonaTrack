@@ -10,11 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
 public class IniciarRutaService implements IniciarRutaUseCase {
+
+  private static final Logger log = LoggerFactory.getLogger(IniciarRutaService.class);
 
   private final RutaDeRepartoRepositoryPort rutaRepository;
   private final ApplicationEventPublisher eventPublisher;
@@ -67,6 +71,6 @@ public class IniciarRutaService implements IniciarRutaUseCase {
             idsDonaciones);
     eventPublisher.publishEvent(event);
 
-    System.out.println("Ruta iniciada correctamente y evento publicado para ruta ID: " + idRuta);
+    log.info("Ruta iniciada correctamente y evento publicado para rutaId={}", idRuta);
   }
 }

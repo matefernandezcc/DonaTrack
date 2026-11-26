@@ -7,11 +7,15 @@ import com.donatrack.donaciones.domain.entities.persona.Persona;
 import com.donatrack.donaciones.domain.entities.roles.Beneficiario;
 import java.time.LocalDate;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RenovacionPeriodosJob {
+
+  private static final Logger log = LoggerFactory.getLogger(RenovacionPeriodosJob.class);
 
   private final PersonaRepository personaRepository;
 
@@ -43,8 +47,7 @@ public class RenovacionPeriodosJob {
 
             recurrente.cerrarPeriodoYCrearSiguiente();
             huboCambios = true;
-            System.out.println(
-                "Período renovado para NecesidadRecurrente ID: " + recurrente.getId());
+            log.info("Período renovado para NecesidadRecurrente id={}", recurrente.getId());
           }
         }
       }

@@ -12,8 +12,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImportadorCSV implements ImportadorStrategy {
+
+  private static final Logger log = LoggerFactory.getLogger(ImportadorCSV.class);
 
   private final PersonaRepository personaRepository;
   private final PersonaFactory personaFactory = new PersonaFactory();
@@ -34,6 +38,8 @@ public class ImportadorCSV implements ImportadorStrategy {
 
     String linea;
     String separador = ",";
+    int creados = 0;
+    int actualizados = 0;
 
     try (BufferedReader br =
         new BufferedReader(
@@ -48,7 +54,6 @@ public class ImportadorCSV implements ImportadorStrategy {
         Optional<Persona> personaExistenteOpt = personaRepository.buscarPorEmail(email);
 
         if (personaExistenteOpt.isPresent()) {
-          System.out.println("El email " + email + " ya existe. Actualizando información...");
           Persona personaExistente = personaExistenteOpt.get();
           Persona datosNuevos = personaFactory.crearDesdeCSV(datos);
 
@@ -65,8 +70,8 @@ public class ImportadorCSV implements ImportadorStrategy {
           }
           personaExistente.actualizarInformacion(map);
           personaRepository.guardar(personaExistente);
+          actualizados++;
         } else {
-          System.out.println("Creando nuevo donante para: " + email);
           Persona nuevaPersona = personaFactory.crearDesdeCSV(datos);
           if (nuevaPersona.getRoles().isEmpty()) {
             com.donatrack.donaciones.domain.entities.roles.Donante rolDonante =
@@ -75,11 +80,15 @@ public class ImportadorCSV implements ImportadorStrategy {
             nuevaPersona.agregarRol(rolDonante);
           }
           personaRepository.guardar(nuevaPersona);
-          System.out.println("Enviando credenciales de acceso a " + email);
+          creados++;
         }
       }
+      log.info(
+          "Importación CSV completada: {} donantes creados, {} actualizados",
+          creados,
+          actualizados);
     } catch (IOException e) {
-      System.err.println("Error al intentar leer el contenido CSV: " + e.getMessage());
+      log.error("Error al intentar leer el contenido CSV: {}", e.getMessage());
     }
   }
 }

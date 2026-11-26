@@ -1,5 +1,6 @@
 package com.donatrack.common.infrastructure.security;
 
+import com.donatrack.common.infrastructure.observability.ObservabilityMdcFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -14,5 +15,11 @@ public class ServiceSecurityAutoConfiguration {
   @ConditionalOnMissingBean(SecurityFilterChain.class)
   public ServiceSecurityFilter serviceSecurityFilter() {
     return new ServiceSecurityFilter();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean(ObservabilityMdcFilter.class)
+  public ObservabilityMdcFilter observabilityMdcFilter() {
+    return new ObservabilityMdcFilter();
   }
 }

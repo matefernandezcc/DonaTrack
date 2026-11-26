@@ -66,23 +66,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleUnreadableMessage(
       HttpMessageNotReadableException ex, HttpServletRequest request) {
 
-    String mensaje = "El cuerpo de la solicitud no es válido.";
-
+    String mensaje = "El cuerpo de la solicitud JSON no es válido o tiene un formato incorrecto.";
     Throwable cause = ex.getCause();
-    if (cause instanceof InvalidTypeIdException typeEx) {
+    if (cause instanceof InvalidTypeIdException) {
       mensaje =
-          String.format(
-              "Falta el campo discriminador de tipo o su valor es inválido. "
-                  + "Para 'Persona' se requiere el campo 'tipo' con valor 'HUMANA' o 'JURIDICA'. "
-                  + "Detalle: %s",
-              typeEx.getOriginalMessage());
-    } else if (cause != null) {
-      String causeMsg = cause.getMessage();
-      if (causeMsg != null && causeMsg.length() > 200) {
-        causeMsg = causeMsg.substring(0, 200) + "...";
-      }
-      mensaje = String.format("Error al parsear el JSON: %s", causeMsg);
+          "Falta el campo discriminador de tipo o su valor es inválido. "
+              + "Para 'Persona' se requiere el campo 'tipo' con valor 'HUMANA' o 'JURIDICA'.";
     }
+    log.warn("Error al parsear JSON en {}: {}", request.getRequestURI(), ex.getMessage());
 
     return buildResponse(HttpStatus.BAD_REQUEST, mensaje, request);
   }
