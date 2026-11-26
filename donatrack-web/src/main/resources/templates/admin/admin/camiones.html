@@ -208,6 +208,11 @@
       });
 
       document.addEventListener('DOMContentLoaded', function() {
+        try {
+          if (new URLSearchParams(window.location.search).get('nuevo') === 'true') {
+            abrirModalCamion();
+          }
+        } catch (e) {}
         var patInput = document.getElementById('patente');
         var patHelp = document.getElementById('patente-help');
         if (patInput) {

@@ -227,6 +227,11 @@
       }
 
       document.addEventListener('DOMContentLoaded', function() {
+        try {
+          if (new URLSearchParams(window.location.search).get('nuevo') === 'true') {
+            abrirModalChofer();
+          }
+        } catch (e) {}
         var legajoInput = document.getElementById('legajo');
         if (legajoInput) {
           legajoInput.addEventListener('input', function(e) {

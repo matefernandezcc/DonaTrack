@@ -845,6 +845,111 @@ class PublicControllerTest {
     }
 
     @Test
+    @DisplayName(
+        "POST /api/public/chatbot envía userRole/currentPath y solo reenvía clientAction hacia rutas seguras /app/")
+    void testChatbotProxyClientActionSeguroYRol() throws Exception {
+      com.sun.net.httpserver.HttpServer server =
+          com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress(0), 0);
+      final java.util.concurrent.atomic.AtomicReference<String> capturedBody =
+          new java.util.concurrent.atomic.AtomicReference<>();
+      final java.util.concurrent.atomic.AtomicBoolean returnEvilUrl =
+          new java.util.concurrent.atomic.AtomicBoolean(false);
+      server.createContext(
+          "/webhook/chatbot",
+          exchange -> {
+            capturedBody.set(
+                new String(
+                    exchange.getRequestBody().readAllBytes(),
+                    java.nio.charset.StandardCharsets.UTF_8));
+            String url =
+                returnEvilUrl.get()
+                    ? "https://evil.example/steal"
+                    : "/app/donante/donaciones?descripcion=Fideos&cantidad=10";
+            byte[] respBytes =
+                ("{\"mode\":\"bot\",\"chunks\":[\"Te preparo el formulario.\"],"
+                        + "\"clientAction\":{\"type\":\"NAVIGATE\",\"label\":\"Ir a donar\","
+                        + "\"url\":\""
+                        + url
+                        + "\"}}")
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "application/json; charset=utf-8");
+            exchange.sendResponseHeaders(200, respBytes.length);
+            try (var os = exchange.getResponseBody()) {
+              os.write(respBytes);
+            }
+          });
+      server.start();
+
+      try {
+        Jwt jwt =
+            Jwt.withTokenValue("valid-jwt-2")
+                .header("alg", "HS256")
+                .subject(UUID.randomUUID().toString())
+                .claim("email", "maria@donatrack.org")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build();
+        var auth =
+            new org.springframework.security.oauth2.server.resource.authentication
+                .JwtAuthenticationToken(
+                jwt,
+                List.of(
+                    new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                        "ROLE_DONANTE")),
+                "maria");
+
+        PublicController controllerConServer =
+            new PublicController(
+                authGateway,
+                incentivosGateway,
+                logisticaGateway,
+                jwtDecoder,
+                new HttpSessionSecurityContextRepository(),
+                solicitudOngService);
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            controllerConServer,
+            "n8nUrl",
+            "http://127.0.0.1:" + server.getAddress().getPort());
+
+        MockMvc localMvc = MockMvcBuilders.standaloneSetup(controllerConServer).build();
+
+        // Caso 1: URL segura /app/... se reenvía + userRole y currentPath se pasan a n8n
+        localMvc
+            .perform(
+                post("/api/public/chatbot")
+                    .principal(auth)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{\"message\":\"Quiero donar fideos\",\"currentPath\":\"/app/donante\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.clientAction.type").value("NAVIGATE"))
+            .andExpect(
+                jsonPath("$.clientAction.url")
+                    .value("/app/donante/donaciones?descripcion=Fideos&cantidad=10"));
+
+        String sent = capturedBody.get();
+        org.junit.jupiter.api.Assertions.assertTrue(
+            sent.contains("\"userRole\":\"DONANTE\""), "Debe enviar userRole DONANTE: " + sent);
+        org.junit.jupiter.api.Assertions.assertTrue(
+            sent.contains("\"currentPath\":\"/app/donante\""),
+            "Debe enviar currentPath seguro: " + sent);
+
+        // Caso 2: URL externa maliciosa es descartada por completo
+        returnEvilUrl.set(true);
+        localMvc
+            .perform(
+                post("/api/public/chatbot")
+                    .principal(auth)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"message\":\"Hola\",\"currentPath\":\"//evil.com\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.clientAction").doesNotExist());
+      } finally {
+        server.stop(0);
+      }
+    }
+
+    @Test
     @DisplayName("GET /api/public/chatbot/context retorna vacío si es anónimo y datos JWT si está logueado")
     void chatbotContextRetornaUsuarioVerificado() throws Exception {
       org.springframework.security.core.context.SecurityContextHolder.clearContext();

@@ -416,6 +416,88 @@
         var form = document.getElementById('form-recepcion-deposito');
         var submitBtn = document.getElementById('btn-submit-recepcion');
 
+        function flashEl(el) {
+          if (!el) return;
+          el.classList.remove('dt-autofill-flash');
+          void el.offsetWidth;
+          el.classList.add('dt-autofill-flash');
+        }
+
+        window.dtAutofillRecepcion = function (data) {
+          if (!data || typeof data !== 'object') return false;
+          var filled = false;
+          var descEl = document.getElementById('descripcion');
+          var cantEl = document.getElementById('cantidad');
+          var unidEl = document.getElementById('unidadMedicion');
+          var catEl = document.getElementById('nombreSubcategoria');
+          var usadoEl = document.getElementById('esUsado');
+
+          if (data.descripcion && descEl) {
+            descEl.value = data.descripcion;
+            flashEl(descEl);
+            filled = true;
+          }
+          if (data.cantidad && !isNaN(Number(data.cantidad)) && Number(data.cantidad) > 0 && cantEl) {
+            cantEl.value = String(Number(data.cantidad));
+            flashEl(cantEl);
+            filled = true;
+          }
+          if (data.unidad && unidEl) {
+            var u = String(data.unidad).toLowerCase();
+            if (u.includes('litro') || u === 'l') unidEl.value = 'litros';
+            else if (u.includes('unidad') || u.includes('paquete') || u === 'u') unidEl.value = 'unidades';
+            else if (u.includes('bulto') || u.includes('caja')) unidEl.value = 'bultos';
+            else if (u.includes('par')) unidEl.value = 'pares';
+            else if (u.includes('kilo') || u === 'kg') unidEl.value = 'kg';
+            flashEl(unidEl);
+            filled = true;
+          }
+          if (data.categoria && catEl) {
+            var c = String(data.categoria).toLowerCase();
+            if (c.includes('alimento') || c.includes('pereceder')) catEl.value = 'Alimentos No Perecederos';
+            else if (c.includes('abrigo') || c.includes('ropa')) catEl.value = 'Ropa y Abrigo';
+            else if (c.includes('calzado')) catEl.value = 'Calzado';
+            else if (c.includes('medicamento')) catEl.value = 'Medicamentos';
+            else if (c.includes('higiene') || c.includes('limpieza')) catEl.value = 'Higiene y Limpieza';
+            else if (c.includes('mobiliario') || c.includes('util') || c.includes('escolar')) catEl.value = 'Mobiliario y Equipamiento';
+            else if (c.includes('juguete') || c.includes('recreac')) catEl.value = 'Juguetes y Recreación';
+            flashEl(catEl);
+            filled = true;
+          }
+          if (data.esUsado !== undefined && data.esUsado !== null && String(data.esUsado) !== '' && usadoEl) {
+            var uv = String(data.esUsado).toLowerCase();
+            usadoEl.checked = (uv === 'true' || uv === 'usado' || uv === 'si');
+            filled = true;
+          }
+          if (filled && form) {
+            var notice = document.getElementById('dt-autofill-rec-notice');
+            if (!notice) {
+              notice = document.createElement('div');
+              notice.id = 'dt-autofill-rec-notice';
+              notice.className = 'slds-notify slds-notify_alert slds-alert_info slds-m-bottom_medium';
+              notice.setAttribute('role', 'status');
+              form.parentNode.insertBefore(notice, form);
+            }
+            notice.textContent = 'Datos precargados desde el asistente. Seleccioná la persona donante y presioná Confirmar Recepción.';
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          return filled;
+        };
+
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var urlData = {
+            descripcion: params.get('descripcion') || params.get('desc'),
+            cantidad: params.get('cantidad') || params.get('qty'),
+            unidad: params.get('unidad'),
+            categoria: params.get('categoria') || params.get('subcategoria'),
+            esUsado: params.get('esUsado')
+          };
+          if (Object.keys(urlData).some(function (k) { return Boolean(urlData[k]); })) {
+            window.dtAutofillRecepcion(urlData);
+          }
+        } catch (e) {}
+
         if (window.DonaTrackForms) {
           DonaTrackForms.registrarProteccion(form, submitBtn);
           var formPersona = document.getElementById('form-nueva-persona');

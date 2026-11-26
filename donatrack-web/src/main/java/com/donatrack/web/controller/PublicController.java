@@ -1086,12 +1086,23 @@ public class PublicController {
 
     Map<String, String> ctx = extraerContextoUsuario(authentication, request);
 
+    String userRole = resolverRolAutenticado(authentication);
+    String currentPath = "";
+    if (payload != null && payload.get("currentPath") != null) {
+      String rawPath = payload.get("currentPath").toString().trim();
+      if (rawPath.startsWith("/") && !rawPath.startsWith("//") && rawPath.length() <= 160) {
+        currentPath = rawPath;
+      }
+    }
+
     Map<String, Object> n8nPayload = new HashMap<>();
     n8nPayload.put("message", mensaje);
     n8nPayload.put("mensaje", mensaje);
     n8nPayload.put("sessionId", sessionId);
     n8nPayload.put("verifiedUserId", ctx.get("verifiedUserId"));
     n8nPayload.put("verifiedEmail", ctx.get("verifiedEmail"));
+    n8nPayload.put("userRole", userRole);
+    n8nPayload.put("currentPath", currentPath);
     n8nPayload.put("action", action);
 
     try {
@@ -1236,7 +1247,59 @@ public class PublicController {
       }
       out.put("suggestedAction", actionMap);
     }
+    if (resp.get("clientAction") instanceof Map<?, ?> ca && ca.get("type") != null) {
+      String caType = ca.get("type").toString().trim().toUpperCase();
+      if ("NAVIGATE".equals(caType) || "AUTOFILL".equals(caType)) {
+        Map<String, Object> safeCa = new HashMap<>();
+        safeCa.put("type", caType);
+        if (ca.get("label") != null) {
+          safeCa.put("label", limpiarHtmlCrudo(ca.get("label").toString()));
+        }
+        if (ca.get("url") != null) {
+          String rawUrl = ca.get("url").toString().trim();
+          if (rawUrl.startsWith("/app/") && !rawUrl.startsWith("//") && !rawUrl.contains("\n") && !rawUrl.contains("\r")) {
+            safeCa.put("url", rawUrl);
+          }
+        }
+        if (ca.get("fields") instanceof Map<?, ?> rawFields) {
+          Map<String, Object> safeFields = new HashMap<>();
+          for (Map.Entry<?, ?> entry : rawFields.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+              String k = entry.getKey().toString().replaceAll("[^a-zA-Z0-9_]", "");
+              if (!k.isBlank()) {
+                safeFields.put(k, limpiarHtmlCrudo(entry.getValue().toString()));
+              }
+            }
+          }
+          if (!safeFields.isEmpty()) {
+            safeCa.put("fields", safeFields);
+          }
+        }
+        if (safeCa.containsKey("url") || safeCa.containsKey("fields")) {
+          out.put("clientAction", safeCa);
+        }
+      }
+    }
     return out;
+  }
+
+  private String resolverRolAutenticado(org.springframework.security.core.Authentication auth) {
+    org.springframework.security.core.Authentication effective =
+        auth != null ? auth : SecurityContextHolder.getContext().getAuthentication();
+    if (effective == null || !effective.isAuthenticated() || effective.getAuthorities() == null) {
+      return "ANON";
+    }
+    boolean isBenef = false;
+    boolean isDonante = false;
+    for (var ga : effective.getAuthorities()) {
+      String a = ga != null ? ga.getAuthority() : "";
+      if ("ROLE_ADMIN".equals(a)) return "ADMIN";
+      if ("ROLE_BENEFICIARIA".equals(a)) isBenef = true;
+      if ("ROLE_DONANTE".equals(a)) isDonante = true;
+    }
+    if (isBenef) return "BENEFICIARIA";
+    if (isDonante) return "DONANTE";
+    return "ANON";
   }
 
   public static String limpiarHtmlCrudo(String raw) {

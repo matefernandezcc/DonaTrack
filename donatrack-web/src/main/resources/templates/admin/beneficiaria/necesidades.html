@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
 <head>
   <title>DonaTrack · Necesidades Materiales</title>
 </head>
@@ -25,7 +25,7 @@
           <strong>¿Qué pasa cuando publicás una necesidad?</strong> Aparece de inmediato en el buscador de donantes y el motor de asignación prioriza tu organización cuando ingresen esos insumos al depósito.
         </div>
 
-        <form th:action="@{/app/beneficiaria/necesidades}" method="post">
+        <form id="form-beneficiaria-necesidad" th:action="@{/app/beneficiaria/necesidades}" method="post">
           <div class="slds-form slds-form_stacked">
             
             <div class="slds-form-element slds-m-bottom_small">
@@ -137,6 +137,96 @@
       </div>
     </article>
   </div>
+
+  <th:block id="page-scripts">
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('form-beneficiaria-necesidad');
+
+        function flashEl(el) {
+          if (!el) return;
+          el.classList.remove('dt-autofill-flash');
+          void el.offsetWidth;
+          el.classList.add('dt-autofill-flash');
+        }
+
+        window.dtAutofillNecesidad = function (data) {
+          if (!data || typeof data !== 'object') return false;
+          var filled = false;
+          var descEl = document.getElementById('descripcion');
+          var cantEl = document.getElementById('cantidadRequerida');
+          var unidEl = document.getElementById('unidadReferencia');
+          var tipoEl = document.getElementById('tipo');
+          var catEl = document.getElementById('subcategoria');
+
+          if (data.descripcion && descEl) {
+            descEl.value = data.descripcion;
+            flashEl(descEl);
+            filled = true;
+          }
+          if (data.cantidad && !isNaN(Number(data.cantidad)) && Number(data.cantidad) >= 1 && cantEl) {
+            cantEl.value = String(Math.round(Number(data.cantidad)));
+            flashEl(cantEl);
+            filled = true;
+          }
+          if (data.unidad && unidEl) {
+            var u = String(data.unidad).toLowerCase();
+            if (u.includes('litro') || u === 'l') unidEl.value = 'Litros (L)';
+            else if (u.includes('unidad') || u.includes('paquete') || u === 'u') unidEl.value = 'Unidades';
+            else if (u.includes('caja') || u.includes('bulto')) unidEl.value = 'Cajas / Bultos';
+            else if (u.includes('kilo') || u === 'kg') unidEl.value = 'Kilos (kg)';
+            flashEl(unidEl);
+            filled = true;
+          }
+          if (data.tipo && tipoEl) {
+            var t = String(data.tipo).toLowerCase();
+            if (t.includes('ord') || t.includes('mensual') || t.includes('recurr')) tipoEl.value = 'ordinaria';
+            else if (t.includes('extra') || t.includes('urg')) tipoEl.value = 'extraordinaria';
+            flashEl(tipoEl);
+            filled = true;
+          }
+          if (data.categoria && catEl) {
+            var c = String(data.categoria).toLowerCase();
+            if (c.includes('alimento') || c.includes('pereceder')) catEl.value = 'Alimentos No Perecederos';
+            else if (c.includes('abrigo') || c.includes('ropa')) catEl.value = 'Ropa y Abrigo';
+            else if (c.includes('higiene') || c.includes('limpieza')) catEl.value = 'Higiene y Limpieza';
+            else if (c.includes('medicamento')) catEl.value = 'Medicamentos';
+            else if (c.includes('mobiliario') || c.includes('util') || c.includes('escolar')) catEl.value = 'Mobiliario y Equipamiento';
+            else if (c.includes('juguete') || c.includes('recreac')) catEl.value = 'Juguetes y Recreación';
+            flashEl(catEl);
+            filled = true;
+          }
+          if (filled && form) {
+            var notice = document.getElementById('dt-autofill-nec-notice');
+            if (!notice) {
+              notice = document.createElement('div');
+              notice.id = 'dt-autofill-nec-notice';
+              notice.className = 'slds-notify slds-notify_alert slds-alert_info slds-m-bottom_medium';
+              notice.setAttribute('role', 'status');
+              form.parentNode.insertBefore(notice, form);
+            }
+            notice.textContent = 'Datos precargados desde el asistente. Revisá los campos y presioná Publicar Necesidad.';
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          return filled;
+        };
+
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var urlData = {
+            descripcion: params.get('descripcion') || params.get('desc'),
+            cantidad: params.get('cantidad') || params.get('qty'),
+            unidad: params.get('unidad'),
+            tipo: params.get('tipo'),
+            categoria: params.get('categoria') || params.get('subcategoria')
+          };
+          if (Object.keys(urlData).some(function (k) { return Boolean(urlData[k]); })) {
+            window.dtAutofillNecesidad(urlData);
+          }
+        } catch (e) {}
+      });
+    </script>
+  </th:block>
 
 </body>
 </html>

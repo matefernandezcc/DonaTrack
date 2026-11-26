@@ -26,7 +26,6 @@
   <link rel="stylesheet" th:href="@{/css/base.css}" />
   <link rel="stylesheet" th:href="@{/css/components.css}" />
   <link rel="stylesheet" th:href="@{/css/sections.css}" />
-  <link rel="stylesheet" th:href="@{/css/chatbot.css}" />
 
   <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}" />
 
@@ -53,8 +52,8 @@
 
   <footer th:replace="~{fragments/public-footer :: footer}"></footer>
 
-  <!-- ============ CHATBOT ORQUESTADOR: N8N + AGENTFORCE SOFÍA ============ -->
-  <th:block th:replace="~{fragments/chatbot-widget :: widget}"></th:block>
+  <!-- ============ CHATBOT PÚBLICO: SALESFORCE AGENTFORCE (MIAW) ============ -->
+  <th:block th:replace="~{fragments/chatbot-widget :: salesforce}"></th:block>
 
   <!-- Leaflet y JS común -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

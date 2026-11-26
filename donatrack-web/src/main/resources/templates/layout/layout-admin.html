@@ -2371,8 +2371,8 @@
 
   <script th:src="@{/js/notificaciones-panel.js}" defer></script>
 
-  <!-- Asistente Conversacional DonaTrack (n8n + Agentforce Sofía) -->
-  <th:block th:replace="~{fragments/chatbot-widget :: widget}"></th:block>
+  <!-- Asistente Nativo DonaTrack para paneles logueados (n8n + navegación in-page y autocompletado) -->
+  <th:block th:replace="~{fragments/chatbot-widget :: native}"></th:block>
 
   <!-- Scripts específicos de la vista -->
   <th:block th:replace="${scripts}"></th:block>

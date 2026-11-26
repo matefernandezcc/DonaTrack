@@ -246,59 +246,125 @@
           sincronizarStepCantidad();
         }
 
-        // Autocompletado desde Navigation Bridge (MIAW / URL query params)
-        try {
-          var params = new URLSearchParams(window.location.search);
-          var descParam = params.get('descripcion') || params.get('desc') || params.get('item');
-          var cantParam = params.get('cantidad') || params.get('qty');
-          var unidParam = (params.get('unidad') || params.get('unidadMedicion') || params.get('unit') || '').trim().toLowerCase();
-          var catParam = (params.get('subcategoria') || params.get('categoria') || params.get('nombreSubcategoria') || '').trim().toLowerCase();
-          var usadoParam = (params.get('esUsado') || params.get('usado') || '').trim().toLowerCase();
-          var ongParam = params.get('ong');
-          var sourceParam = (params.get('source') || '').trim().toLowerCase();
-          var prefilled = false;
+        function flashField(el) {
+          if (!el) return;
+          el.classList.remove('dt-autofill-flash');
+          void el.offsetWidth;
+          el.classList.add('dt-autofill-flash');
+        }
 
-          if (descParam) {
+        function mostrarAvisoPrecarga(source) {
+          if (!form) return;
+          var existing = document.getElementById('dt-autofill-notice');
+          if (!existing) {
+            existing = document.createElement('div');
+            existing.id = 'dt-autofill-notice';
+            existing.className = 'slds-notify slds-notify_alert slds-alert_info slds-m-bottom_medium';
+            existing.setAttribute('role', 'status');
+            form.parentNode.insertBefore(existing, form);
+          }
+          existing.textContent = source === 'chatbot'
+            ? 'Datos precargados desde el asistente. Revisá los campos y presioná Confirmar Donación.'
+            : 'Datos precargados según la campaña seleccionada. Revisá los campos y presioná Confirmar Donación.';
+        }
+
+        window.dtAutofillDonacion = function (data, source) {
+          if (!data || typeof data !== 'object') return false;
+          var prefilled = false;
+          var descVal = data.descripcion || data.desc || data.item;
+          var cantVal = data.cantidad || data.qty;
+          var unidVal = String(data.unidad || data.unidadMedicion || data.unit || '').trim().toLowerCase();
+          var catVal = String(data.categoria || data.subcategoria || data.nombreSubcategoria || '').trim().toLowerCase();
+          var usadoVal = data.esUsado !== undefined && data.esUsado !== null ? String(data.esUsado).trim().toLowerCase() : '';
+          var modVal = String(data.modalidad || data.modalidadEntrega || '').trim().toUpperCase();
+          var dirVal = data.direccionRetiro || '';
+
+          if (descVal) {
             var descEl = document.getElementById('descripcion');
-            if (descEl) { descEl.value = descParam; prefilled = true; }
+            if (descEl) { descEl.value = descVal; flashField(descEl); prefilled = true; }
           }
-          if (cantParam && !isNaN(Number(cantParam)) && Number(cantParam) > 0) {
-            if (cantidadEl) { cantidadEl.value = String(Number(cantParam)); prefilled = true; }
-          }
-          if (unidParam && unidadEl) {
-            if (unidParam.includes('paquete') || unidParam.includes('unidad') || unidParam === 'u') unidadEl.value = 'UNIDADES';
-            else if (unidParam.includes('litro') || unidParam === 'l') unidadEl.value = 'LITROS';
-            else if (unidParam.includes('kilo') || unidParam === 'kg') unidadEl.value = 'KILOS';
-            sincronizarStepCantidad();
+          if (cantVal && !isNaN(Number(cantVal)) && Number(cantVal) > 0 && cantidadEl) {
+            cantidadEl.value = String(Number(cantVal));
+            flashField(cantidadEl);
             prefilled = true;
           }
-          if (catParam) {
+          if (unidVal && unidadEl) {
+            if (unidVal.includes('paquete') || unidVal.includes('unidad') || unidVal === 'u') unidadEl.value = 'UNIDADES';
+            else if (unidVal.includes('litro') || unidVal === 'l') unidadEl.value = 'LITROS';
+            else if (unidVal.includes('kilo') || unidVal === 'kg') unidadEl.value = 'KILOS';
+            sincronizarStepCantidad();
+            flashField(unidadEl);
+            prefilled = true;
+          }
+          if (catVal) {
             var catEl = document.getElementById('subcategoria');
             if (catEl) {
-              if (catParam.includes('alimento') || catParam.includes('pereceder')) catEl.value = 'Alimentos No Perecederos';
-              else if (catParam.includes('abrigo') || catParam.includes('ropa')) catEl.value = 'Ropa y Abrigo';
-              else if (catParam.includes('higiene')) catEl.value = 'Higiene y Limpieza';
-              else if (catParam.includes('mobiliario') || catParam.includes('util') || catParam.includes('escolar')) catEl.value = 'Mobiliario y Equipamiento';
-              else if (catParam.includes('medicamento')) catEl.value = 'Medicamentos';
-              else if (catParam.includes('juguete') || catParam.includes('recreac')) catEl.value = 'Juguetes y Recreación';
+              if (catVal.includes('alimento') || catVal.includes('pereceder')) catEl.value = 'Alimentos No Perecederos';
+              else if (catVal.includes('abrigo') || catVal.includes('ropa')) catEl.value = 'Ropa y Abrigo';
+              else if (catVal.includes('higiene') || catVal.includes('limpieza')) catEl.value = 'Higiene y Limpieza';
+              else if (catVal.includes('mobiliario') || catVal.includes('util') || catVal.includes('escolar')) catEl.value = 'Mobiliario y Equipamiento';
+              else if (catVal.includes('medicamento')) catEl.value = 'Medicamentos';
+              else if (catVal.includes('juguete') || catVal.includes('recreac')) catEl.value = 'Juguetes y Recreación';
+              flashField(catEl);
               prefilled = true;
             }
           }
-          if (usadoParam) {
+          if (usadoVal) {
             var usadoEl = document.getElementById('esUsado');
             if (usadoEl) {
-              usadoEl.value = (usadoParam === 'true' || usadoParam === 'usado' || usadoParam === 'si') ? 'true' : 'false';
+              usadoEl.value = (usadoVal === 'true' || usadoVal === 'usado' || usadoVal === 'si') ? 'true' : 'false';
+              flashField(usadoEl);
               prefilled = true;
             }
           }
-          if (prefilled && form && !ongParam) {
-            var notice = document.createElement('div');
-            notice.className = 'slds-notify slds-notify_alert slds-alert_info slds-m-bottom_medium';
-            notice.setAttribute('role', 'status');
-            notice.textContent = sourceParam === 'chatbot'
-              ? 'Datos precargados desde el asistente. Revisá los campos y presioná Confirmar Donación.'
-              : 'Datos precargados según la campaña seleccionada. Revisá los campos y presioná Confirmar Donación.';
-            form.parentNode.insertBefore(notice, form);
+          if (modVal === 'RETIRO' || modVal === 'DEPOSITO') {
+            var radioEl = document.getElementById(modVal === 'RETIRO' ? 'mod-retiro' : 'mod-deposito');
+            if (radioEl) {
+              radioEl.checked = true;
+              window.toggleModalidadEntrega();
+              prefilled = true;
+            }
+          }
+          if (dirVal) {
+            var dirEl = document.getElementById('direccionRetiro');
+            if (dirEl) {
+              dirEl.value = dirVal;
+              flashField(dirEl);
+              prefilled = true;
+            }
+          }
+          if (prefilled) {
+            mostrarAvisoPrecarga(source || 'chatbot');
+            if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          return prefilled;
+        };
+
+        // Autocompletado desde URL query params (asistente nativo / campañas)
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var ongParam = params.get('ong');
+          var sourceParam = (params.get('source') || '').trim().toLowerCase();
+          var dataFromUrl = {
+            descripcion: params.get('descripcion') || params.get('desc') || params.get('item'),
+            cantidad: params.get('cantidad') || params.get('qty'),
+            unidad: params.get('unidad') || params.get('unidadMedicion') || params.get('unit'),
+            categoria: params.get('subcategoria') || params.get('categoria') || params.get('nombreSubcategoria'),
+            esUsado: params.get('esUsado') || params.get('usado'),
+            modalidad: params.get('modalidad') || params.get('modalidadEntrega'),
+            direccionRetiro: params.get('direccionRetiro')
+          };
+          var hasAny = Object.keys(dataFromUrl).some(function (k) { return Boolean(dataFromUrl[k]); });
+          if (hasAny) {
+            if (ongParam) {
+              // Si viene desde una ONG específica, no mostramos el banner genérico (ya está el banner de ONG)
+              var prevScroll = form ? form.scrollIntoView : null;
+              window.dtAutofillDonacion(dataFromUrl, sourceParam);
+              var n = document.getElementById('dt-autofill-notice');
+              if (n) n.remove();
+            } else {
+              window.dtAutofillDonacion(dataFromUrl, sourceParam);
+            }
           }
         } catch (e) {}
 
