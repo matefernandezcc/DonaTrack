@@ -117,18 +117,19 @@
           
           <div style="display: flex; gap: 10px; align-items: center; flex-grow: 1; max-width: 600px;">
             <div class="slds-input-has-icon slds-input-has-icon_left" style="position: relative; width: 100%;">
+              <label for="busqueda-entregas" class="slds-assistive-text">Buscar entregas por código, patente, chofer o destino</label>
               <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
               </svg>
-              <input type="text" id="busqueda-entregas" class="slds-input"
+              <input type="search" id="busqueda-entregas" class="slds-input"
                      placeholder="Buscar por código (#DT-XXXX), patente, chofer o destino..."
-                     oninput="filtrarEntregas()" onkeyup="filtrarEntregas()" style="border-radius: 6px;" />
+                     oninput="filtrarEntregas()" style="border-radius: 6px;" />
             </div>
             
-            <select id="filtro-estado" aria-label="Filtrar entregas por estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 175px; border-radius: 6px;">
+            <select id="filtro-estado" aria-label="Filtrar entregas por estado" class="slds-select" onchange="filtrarEntregas()" style="max-width: 190px; border-radius: 6px;">
               <option value="TODOS">Todos los estados</option>
-              <option value="TRANSITO">En Tránsito</option>
-              <option value="PLANIFICADA">Planificada</option>
+              <option value="TRANSITO">En camino hacia sede</option>
+              <option value="PLANIFICADA">Programada en depósito</option>
             </select>
           </div>
 
@@ -149,10 +150,10 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                   <strong style="font-size: 1.15rem; color: #014486; font-weight: 800;" th:text="${e.codigoCorto}">#DT-3300</strong>
                   <span th:if="${e.rutaIniciada or e.estado == 'EN_TRASLADO'}" class="slds-badge slds-theme_success" style="font-size: 0.72rem; font-weight: 700;">
-                    EN TRÁNSITO
+                    EN CAMINO
                   </span>
                   <span th:unless="${e.rutaIniciada or e.estado == 'EN_TRASLADO'}" class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700; color: #475569;">
-                    PLANIFICADA
+                    PROGRAMADA
                   </span>
                 </div>
 
@@ -181,12 +182,19 @@
                         th:attr="data-id=${e.idEntrega},data-patente=${e.patente},data-codigo=${e.codigoCorto},data-chofer=${e.choferNombre},data-peso=${e.peso},data-dir=${e.direccion}"
                         onclick="abrirModalConfirmacionDesdeBoton(this)"
                         style="border-radius: 6px; font-weight: 700; min-height: 38px;">
-                  Recepcionar
+                  Confirmar Entrega
                 </button>
               </div>
 
             </div>
           </div>
+        </div>
+
+        <!-- Estado Vacío cuando los filtros no arrojan coincidencias -->
+        <div id="entregas-sin-resultados" style="display: none; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 12px;">
+          <strong style="color: #0f172a; display: block; margin-bottom: 4px;">No hay entregas que coincidan con tu búsqueda</strong>
+          <p class="slds-text-body_small slds-text-color_weak" style="margin-bottom: 10px;">Probá borrando el filtro de texto o seleccionando "Todos los estados".</p>
+          <button type="button" class="slds-button slds-button_neutral" onclick="limpiarFiltrosEntregas()" style="font-weight: 600; border-radius: 6px;">Limpiar filtros</button>
         </div>
 
         <!-- Paginador de Entregas -->
@@ -229,7 +237,7 @@
       </div>
       <div class="slds-card__body slds-p-around_none">
         <div id="leaflet-map-container" style="height: 380px; width: 100%; z-index: 1;"></div>
-        <div id="leaflet-map-empty" style="display: none; padding: 32px 20px; text-align: center; background: #f8fafc;">
+        <div id="leaflet-map-empty" class="dt-empty-state-box" style="display: none; padding: 32px 20px; text-align: center; border-radius: 0; border-left: none; border-right: none; border-bottom: none;">
           <h4 style="font-weight: 700; color: #0f172a; font-size: 0.95rem; margin-bottom: 4px;">
             No hay paradas ni camiones en ruta asignados a tu organización en este momento.
           </h4>
@@ -365,7 +373,7 @@
 
               <!-- Selector de Foto / Cámara Móvil -->
               <div class="slds-form-element slds-m-bottom_medium">
-                <label class="slds-form-element__label" style="font-weight: 700; color: #0f172a; display: inline-flex; align-items: center; gap: 6px;">
+                <label class="slds-form-element__label" for="cameraFile" style="font-weight: 700; color: #0f172a; display: inline-flex; align-items: center; gap: 6px;">
                   <svg class="slds-icon slds-icon_xx-small slds-icon-text-default" aria-hidden="true">
                     <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#photo}"></use>
                   </svg>
@@ -380,19 +388,26 @@
                       </svg>
                       Abrir Cámara del Teléfono o Elegir Foto
                     </button>
-                    </button>
-                    <img id="camera-preview" src="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" alt="Vista previa de foto"
+                    <img id="camera-preview" src="" alt="Vista previa de foto"
                          style="display: none; max-width: 180px; max-height: 140px; margin: 10px auto 4px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
                     <p id="camera-filename" style="margin-top: 8px; font-size: 0.78rem; color: #64748b;">
-                      Tomá una fotografía con la cámara de tu teléfono para adjuntar como remito de entrega.
+                      Tomá una fotografía con la cámara de tu teléfono para adjuntar como comprobante de entrega.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <!-- Comprobante Digital Automático -->
-              <input type="hidden" id="fotoUrl" name="fotoUrl"
-                     value="https://nkqyubnzckxojsubyiuk.supabase.co/storage/v1/object/public/remitos/remito-placeholder.webp" />
+              <!-- Opción explícita si no puede subir foto en el momento -->
+              <input type="hidden" id="fotoUrl" name="fotoUrl" value="" />
+              <div class="slds-form-element slds-m-bottom_small">
+                <label class="slds-checkbox" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="chk-sin-foto" onchange="actualizarEstadoConfirmar()" style="accent-color: #166534;" />
+                  <span style="font-size: 0.82rem; color: #334155;">No tengo foto disponible ahora (confirmar con acta digital estándar)</span>
+                </label>
+              </div>
+              <div id="confirmar-foto-aviso" role="alert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 6px; padding: 8px 12px; font-size: 0.8rem; margin-bottom: 10px;">
+                Adjuntá una foto del remito o marcá la casilla "No tengo foto disponible ahora" para continuar.
+              </div>
               <div class="slds-box slds-box_x-small slds-m-bottom_medium" style="background: #f8fafc; border-color: #e2e8f0; border-radius: 8px;">
                 <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
                   <strong>Resguardo Digital Automático:</strong> La foto del comprobante se guarda y vincula automáticamente a esta entrega para su consulta.
@@ -626,7 +641,18 @@
 
         var pagContainer = document.getElementById('paginacion-entregas');
         if (pagContainer) pagContainer.style.display = total > 0 ? 'flex' : 'none';
+
+        var sinRes = document.getElementById('entregas-sin-resultados');
+        if (sinRes) sinRes.style.display = (total === 0 && allCards.length > 0) ? 'block' : 'none';
       }
+
+      window.limpiarFiltrosEntregas = function () {
+        var b = document.getElementById('busqueda-entregas');
+        var f = document.getElementById('filtro-estado');
+        if (b) b.value = '';
+        if (f) f.value = 'TODOS';
+        filtrarEntregas();
+      };
 
       window.cambiarPagina = function (delta) {
         paginaActual += delta;
@@ -635,7 +661,12 @@
         if (contenedor) contenedor.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
 
-      // 3. Lógica del Modal de Confirmación
+      window.actualizarEstadoConfirmar = function () {
+        var aviso = document.getElementById('confirmar-foto-aviso');
+        if (aviso) aviso.style.display = 'none';
+      };
+
+      // 3. Lógica del Modal de Confirmación (reseteo completo en cada apertura)
       window.abrirModalConfirmacionDesdeBoton = function (btn) {
         var id = btn.getAttribute('data-id');
         var patente = btn.getAttribute('data-patente');
@@ -652,6 +683,23 @@
         document.getElementById('modal-peso').textContent = peso ? peso + ' kg' : 'Carga asignada';
         document.getElementById('modal-dir').textContent = dir || 'Sede Comedor';
 
+        // Reset limpio para evitar arrastrar fotos de entregas anteriores
+        var fileInput = document.getElementById('cameraFile');
+        if (fileInput) fileInput.value = '';
+        var preview = document.getElementById('camera-preview');
+        if (preview) { preview.src = ''; preview.style.display = 'none'; }
+        var info = document.getElementById('camera-filename');
+        if (info) {
+          info.textContent = 'Tomá una fotografía con la cámara de tu teléfono para adjuntar como comprobante de entrega.';
+          info.style.color = '#64748b';
+        }
+        var hiddenUrl = document.getElementById('fotoUrl');
+        if (hiddenUrl) hiddenUrl.value = '';
+        var chkSinFoto = document.getElementById('chk-sin-foto');
+        if (chkSinFoto) chkSinFoto.checked = false;
+        var aviso = document.getElementById('confirmar-foto-aviso');
+        if (aviso) aviso.style.display = 'none';
+
         var modal = document.getElementById('modal-confirmar-entrega');
         if (modal) modal.style.display = 'block';
       };
@@ -666,7 +714,7 @@
           var file = input.files[0];
           var info = document.getElementById('camera-filename');
           if (info) {
-            info.innerHTML = 'Foto lista para adjuntar al comprobante: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
+            info.textContent = 'Foto lista para adjuntar: ' + file.name + ' (' + Math.round(file.size / 1024) + ' KB)';
             info.style.color = '#166534';
           }
           var preview = document.getElementById('camera-preview');
@@ -675,13 +723,11 @@
             reader.onload = function(e) {
               preview.src = e.target.result;
               preview.style.display = 'block';
-              var hiddenUrl = document.getElementById('fotoUrl');
-              if (hiddenUrl) {
-                hiddenUrl.value = e.target.result;
-              }
             };
             reader.readAsDataURL(file);
           }
+          var aviso = document.getElementById('confirmar-foto-aviso');
+          if (aviso) aviso.style.display = 'none';
         }
       };
 
@@ -719,21 +765,42 @@
         }
       };
 
-      // Indicador de Carga y Deshabilitación en Confirmación
+      // Indicador de Carga, Validación de Comprobante y Auto-apertura por ?entregaId=
       document.addEventListener('DOMContentLoaded', function () {
         var form = document.getElementById('form-confirmar-entrega');
         if (form) {
-          form.addEventListener('submit', function () {
+          form.addEventListener('submit', function (e) {
+            var fileInput = document.getElementById('cameraFile');
+            var chkSinFoto = document.getElementById('chk-sin-foto');
+            var aviso = document.getElementById('confirmar-foto-aviso');
+            var tieneFoto = fileInput && fileInput.files && fileInput.files.length > 0;
+            var sinFotoOk = chkSinFoto && chkSinFoto.checked;
+            if (!tieneFoto && !sinFotoOk) {
+              e.preventDefault();
+              if (aviso) aviso.style.display = 'block';
+              return;
+            }
             var btn = document.getElementById('btn-submit-confirmar');
             var txt = document.getElementById('btn-confirmar-text');
             if (btn && txt) {
               btn.disabled = true;
               btn.style.opacity = '0.75';
               btn.style.cursor = 'not-allowed';
-              txt.innerHTML = 'Subiendo y certificando...';
+              txt.textContent = 'Subiendo y certificando...';
             }
           });
         }
+
+        // Si viene con ?entregaId=... desde el panel principal, abrir directo esa entrega
+        try {
+          var targetId = new URLSearchParams(window.location.search).get('entregaId');
+          if (targetId) {
+            var matchBtn = document.querySelector('#contenedor-cards-entregas button[data-id="' + targetId.replace(/"/g, '') + '"]');
+            if (matchBtn) {
+              abrirModalConfirmacionDesdeBoton(matchBtn);
+            }
+          }
+        } catch (e) {}
 
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape') {

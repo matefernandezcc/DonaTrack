@@ -7,9 +7,9 @@ public final class InputFormatUtils {
 
   private static final Pattern CUIT_PATTERN = Pattern.compile("^\\d{2}-\\d{8}-\\d$");
   private static final Pattern CELULAR_STRICT_PATTERN =
-      Pattern.compile("^\\+54 9 11 \\d{4}-\\d{4}$");
+      Pattern.compile("^\\+54 9 \\d{2,4} \\d{2,4}-\\d{4}$");
   private static final Pattern CELULAR_ADMIN_PATTERN =
-      Pattern.compile("^\\+54 (?:9 )?11 \\d{4}-\\d{4}$");
+      Pattern.compile("^\\+54 (?:9 )?\\d{2,4} \\d{2,4}-\\d{4}$");
   private static final Pattern PATENTE_PATTERN =
       Pattern.compile("^([A-Z]{3}[0-9]{3}|[A-Z]{2}[0-9]{3}[A-Z]{2})$");
   private static final Pattern LEGAJO_PATTERN = Pattern.compile("^CH-\\d{3,4}$");
@@ -40,31 +40,62 @@ public final class InputFormatUtils {
       return "";
     }
     String trimmed = raw.trim();
-    if (CELULAR_STRICT_PATTERN.matcher(trimmed).matches()) {
+    if (esCelularArgStrictValido(trimmed)) {
       return trimmed;
     }
     String digits = trimmed.replaceAll("\\D", "");
-    if (digits.startsWith("54911") && digits.length() == 13) {
-      digits = digits.substring(5);
-    } else if (digits.startsWith("5411") && digits.length() == 12) {
-      digits = digits.substring(4);
-    } else if (digits.startsWith("011") && digits.length() == 11) {
+    if (digits.startsWith("549") && digits.length() == 13) {
       digits = digits.substring(3);
-    } else if (digits.startsWith("11") && digits.length() == 10) {
+    } else if (digits.startsWith("54") && digits.length() == 12) {
       digits = digits.substring(2);
+    } else if (digits.startsWith("0") && digits.length() == 11) {
+      digits = digits.substring(1);
     }
+
+    // 8 dígitos sin código de área -> asume AMBA (11)
     if (digits.length() == 8) {
       return "+54 9 11 " + digits.substring(0, 4) + "-" + digits.substring(4);
+    }
+    // 10 dígitos nacionales (código de área de 2, 3 o 4 dígitos + número local)
+    if (digits.length() == 10) {
+      if (digits.startsWith("11")) {
+        return "+54 9 11 " + digits.substring(2, 6) + "-" + digits.substring(6);
+      }
+      // Si el usuario ya separó un código de área de 4 dígitos, respetarlo; si no, agrupar 3 + 3-4
+      String[] tokens = trimmed.replaceFirst("^\\+?54\\s*9?\\s*", "").split("[\\s-]+");
+      if (tokens.length >= 2 && tokens[0].replaceAll("\\D", "").length() == 4) {
+        return "+54 9 "
+            + digits.substring(0, 4)
+            + " "
+            + digits.substring(4, 6)
+            + "-"
+            + digits.substring(6);
+      }
+      return "+54 9 "
+          + digits.substring(0, 3)
+          + " "
+          + digits.substring(3, 6)
+          + "-"
+          + digits.substring(6);
     }
     return trimmed;
   }
 
   public static boolean esCelularArgStrictValido(String tel) {
-    return tel != null && CELULAR_STRICT_PATTERN.matcher(tel.trim()).matches();
+    if (tel == null || !CELULAR_STRICT_PATTERN.matcher(tel.trim()).matches()) {
+      return false;
+    }
+    String digits = tel.replaceAll("\\D", "");
+    return digits.startsWith("549") && digits.length() == 13;
   }
 
   public static boolean esCelularAdminValido(String tel) {
-    return tel != null && CELULAR_ADMIN_PATTERN.matcher(tel.trim()).matches();
+    if (tel == null || !CELULAR_ADMIN_PATTERN.matcher(tel.trim()).matches()) {
+      return false;
+    }
+    String digits = tel.replaceAll("\\D", "");
+    return (digits.startsWith("549") && digits.length() == 13)
+        || (digits.startsWith("54") && !digits.startsWith("549") && digits.length() == 12);
   }
 
   public static String normalizarPatente(String raw) {

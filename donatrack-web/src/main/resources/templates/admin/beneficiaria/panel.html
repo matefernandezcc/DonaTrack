@@ -60,12 +60,30 @@
             Nueva Necesidad
           </a>
           <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand" style="background: #166534; border-color: #166534; color: #ffffff; font-weight: 700; min-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center;">
-            Recepcionar
+            Confirmar Entregas
           </a>
         </div>
 
       </div>
     </article>
+
+    <!-- Guía Rápida en 3 Pasos para Organizaciones -->
+    <div class="dt-guide-strip slds-m-bottom_large">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <strong style="display: block; font-size: 0.9rem; margin-bottom: 3px;">Cómo gestionar tus donaciones en 3 pasos</strong>
+          <span style="font-size: 0.82rem; line-height: 1.45;">
+            <strong>1.</strong> Publicá tus necesidades prioritarias &nbsp;→&nbsp;
+            <strong>2.</strong> Seguí los camiones asignados hacia tu sede &nbsp;→&nbsp;
+            <strong>3.</strong> Confirmá la recepción sacando una foto al llegar el vehículo.
+          </span>
+        </div>
+        <a th:href="@{/app/beneficiaria/necesidades}" class="slds-button slds-button_neutral"
+           style="font-weight: 700; min-height: 34px; padding: 0 12px; border-radius: 6px;">
+          + Declarar Necesidad
+        </a>
+      </div>
+    </div>
 
     <!-- ==================== 4 INDICADORES OPERATIVOS (Solo visibles cuando hay actividad real) ==================== -->
     <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_large"
@@ -143,7 +161,7 @@
               </div>
             </header>
             <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_neutral slds-button_small" style="font-weight: 600;">
-              Ver Rutas
+              Ver Todas las Entregas
             </a>
           </div>
 
@@ -158,8 +176,9 @@
                 <div>
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <strong style="color: #014486; font-size: 1rem;" th:text="${e.codigoCorto}">#DT-3300</strong>
-                    <span class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700;" th:text="${e.estado}">
-                      EN_CAMINO
+                    <span class="slds-badge slds-badge_lightest" style="font-size: 0.72rem; font-weight: 700;"
+                          th:text="${(e.rutaIniciada or e.estado == 'EN_TRASLADO' or e.estado == 'EN_CAMINO') ? 'En camino hacia tu sede' : 'Programada en depósito'}">
+                      En camino hacia tu sede
                     </span>
                   </div>
                   <div style="font-size: 0.84rem; color: #334155; margin-top: 4px;">
@@ -171,9 +190,9 @@
                 </div>
 
                 <div>
-                  <a th:href="@{/app/beneficiaria/entregas}" class="slds-button slds-button_brand"
+                  <a th:href="@{/app/beneficiaria/entregas(entregaId=${e.idEntrega})}" class="slds-button slds-button_brand"
                      style="background: #166534; border-color: #166534; color: #ffffff; font-weight: 700; font-size: 0.82rem; padding: 0 14px; min-height: 36px; border-radius: 6px; display: inline-flex; align-items: center;">
-                    Recepcionar
+                    Confirmar Entrega
                   </a>
                 </div>
               </div>
@@ -238,13 +257,13 @@
     </div>
 
     <!-- ==================== MODAL DE BIENVENIDA ESTILO SALESFORCE WELCOME MAT (BENEFICIARIA) ==================== -->
-    <div id="welcome-beneficiaria-modal" style="display: none;">
-      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true" style="z-index: 10001;">
-        <div class="slds-modal__container" style="max-width: 880px; width: 94vw; padding: 0;">
-          <div class="dt-welcome-mat">
-            <button type="button" class="slds-button slds-modal__close dt-modal-close-btn dt-welcome-mat__close"
+    <div id="welcome-beneficiaria-modal" hidden style="display: none; position: fixed; inset: 0; z-index: 10050;">
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true" style="z-index: 10052; pointer-events: auto;">
+        <div class="slds-modal__container" style="max-width: 880px; width: 94vw; padding: 0; position: relative; z-index: 10053; pointer-events: auto;">
+          <div class="dt-welcome-mat" style="pointer-events: auto;">
+            <button type="button" id="btn-close-welcome-benef-x" class="slds-button slds-modal__close dt-modal-close-btn dt-welcome-mat__close"
               onclick="cerrarWelcomeBenefModal()" title="Cerrar" aria-label="Cerrar"
-              style="position: absolute !important; top: -14px !important; right: -14px !important; width: 30px !important; height: 30px !important; min-width: 30px !important; min-height: 30px !important; border-radius: 4px !important;">
+              style="position: absolute !important; top: -14px !important; right: -14px !important; width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; border-radius: 6px !important;">
               <span aria-hidden="true" style="font-size: 0.95rem !important;">✕</span>
               <span class="slds-assistive-text">Cerrar</span>
             </button>
@@ -262,7 +281,7 @@
                   <ul class="slds-list_dotted dt-welcome-mat__left-text" style="text-align: left; font-size: 0.82rem; line-height: 1.45; margin: 0 0 18px 16px;">
                     <li>Publicá tus necesidades reales para donantes</li>
                     <li>Seguí en vivo los móviles asignados a tu sede</li>
-                    <li>Confirmá recepciones con remito y foto S3</li>
+                    <li>Confirmá recepciones con remito y foto del comprobante</li>
                     <li>Mostrá transparencia en tu página pública</li>
                   </ul>
                   <div style="margin-bottom: 12px;">
@@ -319,7 +338,7 @@
                     </div>
                   </a>
 
-                  <div class="dt-welcome-mat__tile">
+                  <a th:href="@{/app/beneficiaria/entregas}" onclick="cerrarWelcomeBenefModal()" class="dt-welcome-mat__tile">
                     <span class="slds-icon_container dt-welcome-mat__icon">
                       <svg class="slds-icon slds-icon_small" style="fill: #706e6b;" aria-hidden="true">
                         <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#check}"></use>
@@ -331,7 +350,7 @@
                         Al recibir el camión en tu puerta, subí el comprobante firmado para certificar la entrega al donante.
                       </span>
                     </div>
-                  </div>
+                  </a>
 
                   <a th:href="@{/app/organizaciones/{id}(id=${beneficiarioId != null ? beneficiarioId : 'esperanza'}, nombre=${nombreOrganizacion})}" onclick="cerrarWelcomeBenefModal()" class="dt-welcome-mat__tile">
                     <span class="slds-icon_container dt-welcome-mat__icon">
@@ -359,7 +378,7 @@
           </div>
         </div>
       </section>
-      <div class="slds-backdrop slds-backdrop_open" style="z-index: 10000; opacity: 0.6;" onclick="cerrarWelcomeBenefModal()"></div>
+      <div id="backdrop-welcome-benef" class="slds-backdrop slds-backdrop_open" style="z-index: 10051; opacity: 0.6;" onclick="cerrarWelcomeBenefModal()"></div>
     </div>
 
   </div>
@@ -370,44 +389,60 @@
         var benefUser = (/*[[${nombreUsuario}]]*/ 'beneficiaria') || 'beneficiaria';
         var welcomeBenefKey = 'donatrack_welcome_benef_' + String(benefUser).toLowerCase();
 
-        window.abrirWelcomeBenefModal = function () {
+        function ensureModalPortal() {
           var modal = document.getElementById('welcome-beneficiaria-modal');
+          if (modal && modal.parentNode !== document.body) {
+            document.body.appendChild(modal);
+          }
+          return modal;
+        }
+
+        window.abrirWelcomeBenefModal = function () {
+          var modal = ensureModalPortal();
           var chk = document.getElementById('welcome-benef-no-mostrar');
           try {
             if (chk) chk.checked = (localStorage.getItem(welcomeBenefKey) === 'true');
           } catch (e) {}
-          if (modal) modal.style.display = 'block';
+          if (modal) {
+            modal.removeAttribute('hidden');
+            modal.style.setProperty('display', 'block', 'important');
+          }
         };
 
         window.cerrarWelcomeBenefModal = function () {
           var modal = document.getElementById('welcome-beneficiaria-modal');
-          if (modal) modal.style.display = 'none';
+          if (modal) {
+            modal.style.setProperty('display', 'none', 'important');
+            modal.setAttribute('hidden', '');
+          }
           try {
-            var chk = document.getElementById('welcome-benef-no-mostrar');
-            if (chk && chk.checked) {
-              localStorage.setItem(welcomeBenefKey, 'true');
-            } else {
-              localStorage.removeItem(welcomeBenefKey);
-            }
+            localStorage.setItem(welcomeBenefKey, 'true');
           } catch (e) {}
         };
 
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' || e.key === 'Esc') {
             var modal = document.getElementById('welcome-beneficiaria-modal');
-            if (modal && modal.style.display !== 'none') {
+            if (modal && !modal.hasAttribute('hidden') && modal.style.display !== 'none') {
               window.cerrarWelcomeBenefModal();
             }
           }
         });
 
-        document.addEventListener('DOMContentLoaded', function () {
+        function initWelcomeBenef() {
+          ensureModalPortal();
           try {
             if (localStorage.getItem(welcomeBenefKey) !== 'true') {
               window.abrirWelcomeBenefModal();
             }
           } catch (e) {}
-        });
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initWelcomeBenef);
+        } else {
+          initWelcomeBenef();
+        }
       })();
     </script>
   </th:block>

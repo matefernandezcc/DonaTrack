@@ -1,4 +1,28 @@
+(waf_and_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(self), camera=(), microphone=()"
+		-Server
+	}
+	@waf_blocked {
+		path_regexp waf_path (?i)(\.\./|/\.(env|git|htaccess)|wp-admin|wp-login|phpinfo)
+	}
+	@waf_sqli_xss {
+		vars_regexp waf_query {query} (?i)(union(\+|%20)+select|<script|%3cscript|javascript:|drop(\+|%20)+table)
+	}
+	handle @waf_blocked {
+		respond `{"status":403,"error":"Forbidden","message":"Solicitud bloqueada por política de seguridad perimetral (WAF)"}` 403
+	}
+	handle @waf_sqli_xss {
+		respond `{"status":403,"error":"Forbidden","message":"Solicitud bloqueada por política de seguridad perimetral (WAF)"}` 403
+	}
+}
+
 (donatrack_routes) {
+	import waf_and_headers
 	handle /oauth2/* {
 		reverse_proxy auth:8004
 	}
@@ -67,6 +91,7 @@ dev.{$PUBLIC_DOMAIN:donatrack.social} {
 }
 
 api.{$PUBLIC_DOMAIN:donatrack.social} {
+	import waf_and_headers
 	@cors_preflight method OPTIONS
 	handle @cors_preflight {
 		header Access-Control-Allow-Origin "*"
@@ -95,6 +120,22 @@ api.{$PUBLIC_DOMAIN:donatrack.social} {
 
 grafana.{$PUBLIC_DOMAIN:donatrack.social} {
 	reverse_proxy grafana:3000
+}
+
+graphql.{$PUBLIC_DOMAIN:donatrack.social} {
+	import waf_and_headers
+	@root path /
+	redir @root /graphiql permanent
+	handle /graphiql* {
+		reverse_proxy donaciones:8000
+	}
+	handle /graphql* {
+		reverse_proxy donaciones:8000
+	}
+	handle {
+		header Content-Type "application/json; charset=utf-8"
+		respond `{"status":404,"error":"Not Found","graphiql":"https://graphql.{$PUBLIC_DOMAIN:donatrack.social}/graphiql"}` 404
+	}
 }
 
 n8n.{$PUBLIC_DOMAIN:donatrack.social} {

@@ -1,72 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
-  <th:block th:fragment="widget">
-    <button class="chatbot__fab" id="chat-fab" type="button" aria-label="Abrir asistente de DonaTrack"
-      aria-expanded="false" aria-controls="chat-panel">
-      <svg viewBox="0 0 520 520" fill="currentColor" aria-hidden="true">
-        <path
-          d="M260 40C127 40 21 138 21 259c0 38 11 74 29 106 3 5 4 11 2 17l-31 85c-3 8 5 15 13 13l86-33c5-2 11-1 17 2 36 20 79 32 125 32 131-1 238-98 238-220-1-123-108-221-240-221M140 300c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40m120 0c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40m120 0c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40" />
-      </svg>
-    </button>
 
-    <dialog class="chatbot" id="chat-panel" aria-modal="false" aria-labelledby="chat-title" hidden>
-      <header class="chatbot__head">
-        <div class="chatbot__who">
-          <span class="chatbot__avatar" id="chat-avatar" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" fill="#1F9D6E" />
-              <path d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"
-                fill="none" />
-              <circle cx="9" cy="10" r="1" fill="#fff" />
-              <circle cx="15" cy="10" r="1" fill="#fff" />
-            </svg>
-          </span>
-          <div>
-            <strong id="chat-title">Asistente DonaTrack</strong>
-            <span class="chatbot__status" id="chat-status"><i></i> En línea</span>
-          </div>
-        </div>
-        <button class="chatbot__close" id="chat-close" type="button" aria-label="Cerrar chat">&times;</button>
-      </header>
-
-      <div class="chatbot__log" id="chat-log" aria-live="polite">
-        <div class="msg msg--bot">¡Hola! Soy el asistente virtual de DonaTrack. ¿En qué te puedo ayudar hoy?</div>
-      </div>
-
-      <div class="chatbot__chips" id="chat-chips">
-        <button class="chip" type="button" data-q="¿Cómo donar?">¿Cómo donar?</button>
-        <button class="chip" type="button" data-q="Rastrear remito">Rastrear remito</button>
-        <button class="chip" type="button" data-q="Verificar ONG">Verificar ONG</button>
-        <button class="chip" type="button" data-q="Quiero hablar con un agente" data-action="HANDOFF_AGENT">Hablar con un agente</button>
-      </div>
-
-      <form class="chatbot__form" id="chat-form">
-        <label for="chat-input" class="slds-assistive-text sr-only">Escribí tu mensaje</label>
-        <input id="chat-input" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
-        <button type="submit" id="chat-submit" class="chatbot__send" aria-label="Enviar">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 11 21 3l-8 18-2-8-8-2Z" stroke="currentColor" stroke-width="2" fill="none"
-              stroke-linejoin="round" />
-          </svg>
-        </button>
-      </form>
-    </dialog>
-
-    <script th:src="@{/js/chatbot.js}" defer></script>
-
-    <!-- Salesforce MIAW (Enhanced Chat v2) en modo híbrido + Navigation Bridge -->
-    <style>
-      body:not(.dt-miaw-launched) .embeddedMessagingConversationButton {
-        opacity: 0 !important;
-        pointer-events: none !important;
-        position: fixed !important;
-        bottom: -200px !important;
-      }
-    </style>
+  <!-- =========================================================================
+       1) WEB PÚBLICA: EXCLUSIVAMENTE SALESFORCE MIAW (AGENTFORCE SOFÍA)
+       Sin botón nativo duplicado ni reglas CSS que oculten el lanzador oficial.
+       ========================================================================= -->
+  <th:block th:fragment="salesforce">
     <script type="text/javascript">
-      window.__dtMiawReady = false;
-
       function dtHandleMiawNavigation(rawUrl, messageKey) {
         if (!rawUrl) return false;
         try {
@@ -89,11 +30,11 @@
 
       window.addEventListener("onEmbeddedMessagingReady", async function () {
         try {
-          const res = await fetch("/api/public/chatbot/context", { credentials: "same-origin" });
+          var res = await fetch("/api/public/chatbot/context", { credentials: "same-origin" });
           if (res.ok && typeof embeddedservice_bootstrap !== "undefined" &&
               embeddedservice_bootstrap.prechatAPI &&
               typeof embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields === "function") {
-            const ctx = await res.json();
+            var ctx = await res.json();
             embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({
               Verified_User_Id: ctx.verifiedUserId || "",
               Verified_User_Email: ctx.verifiedEmail || ""
@@ -104,30 +45,6 @@
         }
       });
 
-      window.addEventListener("onEmbeddedMessagingButtonCreated", function () {
-        window.__dtMiawReady = true;
-        if (typeof window.__dtOnMiawReady === "function") {
-          window.__dtOnMiawReady();
-        }
-      });
-
-      window.addEventListener("onEmbeddedMessagingWindowMaximized", function () {
-        document.body.classList.add("dt-miaw-launched");
-        var chatFab = document.getElementById("chat-fab");
-        if (chatFab) chatFab.style.display = "none";
-      });
-      window.addEventListener("onEmbeddedMessagingWindowMinimized", function () {
-        document.body.classList.add("dt-miaw-launched");
-        var chatFab = document.getElementById("chat-fab");
-        if (chatFab) chatFab.style.display = "none";
-      });
-      window.addEventListener("onEmbeddedMessagingWindowClosed", function () {
-        document.body.classList.remove("dt-miaw-launched");
-        var chatFab = document.getElementById("chat-fab");
-        if (chatFab) chatFab.style.display = "";
-      });
-
-      // Navigation Bridge: links clickeados o intenciones en mensajes del agente
       window.addEventListener("onEmbeddedMessageLinkClicked", function (event) {
         try {
           var detail = event && event.detail ? event.detail : {};
@@ -170,6 +87,95 @@
     <script type="text/javascript"
       src="https://be1776887191673.my.site.com/ESWChatbotDonaTrack1780800682238/assets/js/bootstrap.min.js"
       onload="initEmbeddedMessaging()" async defer></script>
+  </th:block>
+
+  <!-- =========================================================================
+       2) PANELES LOGUEADOS: EXCLUSIVAMENTE ASISTENTE NATIVO DONATRACK (n8n + COPILOTO IN-PAGE)
+       Sin Salesforce MIAW para evitar superposiciones. Incluye navegación in-page y autocompletado.
+       ========================================================================= -->
+  <th:block th:fragment="native">
+    <button class="chatbot__fab" id="chat-fab" type="button" aria-label="Abrir asistente de DonaTrack"
+      aria-expanded="false" aria-controls="chat-panel" title="Asistente DonaTrack (navegación y formularios)">
+      <svg viewBox="0 0 520 520" fill="currentColor" aria-hidden="true">
+        <path
+          d="M260 40C127 40 21 138 21 259c0 38 11 74 29 106 3 5 4 11 2 17l-31 85c-3 8 5 15 13 13l86-33c5-2 11-1 17 2 36 20 79 32 125 32 131-1 238-98 238-220-1-123-108-221-240-221M140 300c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40m120 0c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40m120 0c-22 0-40-18-40-40s18-40 40-40 40 18 40 40-18 40-40 40" />
+      </svg>
+    </button>
+
+    <dialog class="chatbot" id="chat-panel" aria-modal="false" aria-labelledby="chat-title" hidden
+      th:attr="data-role=${#authorization.expression('hasRole(''ADMIN'')') ? 'ADMIN' : (#authorization.expression('hasRole(''BENEFICIARIA'')') ? 'BENEFICIARIA' : 'DONANTE')}">
+      <header class="chatbot__head">
+        <div class="chatbot__who">
+          <span class="chatbot__avatar" id="chat-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="#1F9D6E" />
+              <path d="M8 13c1 1.5 2.5 2 4 2s3-.5 4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                fill="none" />
+              <circle cx="9" cy="10" r="1" fill="#fff" />
+              <circle cx="15" cy="10" r="1" fill="#fff" />
+            </svg>
+          </span>
+          <div>
+            <strong id="chat-title">Asistente DonaTrack</strong>
+            <span class="chatbot__status" id="chat-status"><i></i> Copiloto en línea</span>
+          </div>
+        </div>
+        <button class="chatbot__close" id="chat-close" type="button" aria-label="Cerrar chat">&times;</button>
+      </header>
+
+      <div class="chatbot__log" id="chat-log" aria-live="polite">
+        <th:block sec:authorize="hasRole('ADMIN')">
+          <div class="msg msg--bot">¡Hola! Soy el asistente operativo de DonaTrack. Podés pedirme que te lleve a cualquier sección (ej: <em>"ir a matchmaking"</em>, <em>"planificar rutas"</em>) o que precargue una recepción (ej: <em>"ingresar 20 kg de arroz"</em>).</div>
+        </th:block>
+        <th:block sec:authorize="hasRole('BENEFICIARIA') and !hasRole('ADMIN')">
+          <div class="msg msg--bot">¡Hola! Soy tu asistente de organización. Decime qué necesitás publicar (ej: <em>"necesitamos urgente 30 kg de leche en polvo"</em>) o pedime ir a <em>"confirmar entregas"</em> y lo preparo por vos.</div>
+        </th:block>
+        <th:block sec:authorize="!hasRole('ADMIN') and !hasRole('BENEFICIARIA')">
+          <div class="msg msg--bot">¡Hola! Soy tu asistente de DonaTrack. Decime qué querés donar (ej: <em>"quiero donar 10 kg de fideos"</em>) o preguntame <em>"¿dónde veo mis donaciones?"</em> y te llevo o completo el formulario automáticamente.</div>
+        </th:block>
+      </div>
+
+      <div class="chatbot__chips" id="chat-chips">
+        <!-- Chips contextuales para Administradores -->
+        <th:block sec:authorize="hasRole('ADMIN')">
+          <button class="chip" type="button" data-q="Ingresar 20 kg de arroz en depósito">Ingresar donación</button>
+          <button class="chip" type="button" data-q="Ir a Matchmaking">Matchmaking</button>
+          <button class="chip" type="button" data-q="Planificar rutas">Planificar rutas</button>
+          <button class="chip" type="button" data-q="Ir a usuarios y solicitudes ONG">Usuarios y ONGs</button>
+        </th:block>
+        <!-- Chips contextuales para Organizaciones Beneficiarias -->
+        <th:block sec:authorize="hasRole('BENEFICIARIA') and !hasRole('ADMIN')">
+          <button class="chip" type="button" data-q="Necesitamos urgente 30 kg de leche en polvo">Publicar necesidad</button>
+          <button class="chip" type="button" data-q="Ir a confirmar entregas">Confirmar entregas</button>
+          <button class="chip" type="button" data-q="Ir a mi panel de organización">Mi organización</button>
+        </th:block>
+        <!-- Chips contextuales para Donantes -->
+        <th:block sec:authorize="!hasRole('ADMIN') and !hasRole('BENEFICIARIA')">
+          <button class="chip" type="button" data-q="Quiero donar 10 kg de fideos">Quiero donar</button>
+          <button class="chip" type="button" data-q="¿Dónde veo mis donaciones?">Mis donaciones</button>
+          <button class="chip" type="button" data-q="Ver necesidades de ONGs">Necesidades ONGs</button>
+          <button class="chip" type="button" data-q="Ver organizaciones y comedores">Comedores</button>
+        </th:block>
+      </div>
+
+      <form class="chatbot__form" id="chat-form">
+        <label for="chat-input" class="slds-assistive-text sr-only">Escribí tu mensaje</label>
+        <input id="chat-input" type="text" placeholder="Ej: Quiero donar 10 kg de fideos…" autocomplete="off" />
+        <button type="submit" id="chat-submit" class="chatbot__send" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 11 21 3l-8 18-2-8-8-2Z" stroke="currentColor" stroke-width="2" fill="none"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+      </form>
+    </dialog>
+
+    <script th:src="@{/js/chatbot.js}" defer></script>
+  </th:block>
+
+  <!-- Alias retrocompatible apuntando al asistente nativo -->
+  <th:block th:fragment="widget">
+    <th:block th:replace="~{fragments/chatbot-widget :: native}"></th:block>
   </th:block>
 </body>
 </html>

@@ -12,11 +12,15 @@ import com.donatrack.donaciones.domain.entities.roles.Rol;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NotificacionInactividadJob {
+
+  private static final Logger log = LoggerFactory.getLogger(NotificacionInactividadJob.class);
 
   private final PersonaRepository personaRepository;
   private final ServicioNotificaciones servicioNotificaciones;
@@ -30,7 +34,7 @@ public class NotificacionInactividadJob {
   // Se ejecuta todos los días a las 09:00 AM
   @Scheduled(cron = "0 0 9 * * ?")
   public void notificarInactividad() {
-    System.out.println("[NotificacionInactividadJob] Iniciando búsqueda de donantes inactivos...");
+    log.info("Iniciando búsqueda programada de donantes inactivos (>20 días)");
     List<Persona> personas = personaRepository.obtenerTodas();
     LocalDate hoy = LocalDate.now();
 
@@ -47,9 +51,7 @@ public class NotificacionInactividadJob {
                           ? contacto.getMedioPredeterminado()
                           : MedioContacto.CORREO);
               servicioNotificaciones.enviar(notificacion, contacto);
-              System.out.println(
-                  "[NotificacionInactividadJob] Notificación enviada a "
-                      + contacto.getCorreoElectronico());
+              log.info("Notificación de inactividad despachada para personaId={}", persona.getId());
             }
           }
         }

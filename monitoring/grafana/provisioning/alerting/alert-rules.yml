@@ -1,0 +1,232 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: DonaTrack — Alertas RNF y Alarma Silenciosa
+    folder: DonaTrack
+    interval: 30s
+    rules:
+      - uid: dt-silent-alarm-service-down
+        title: "Alarma Silenciosa — Ausencia de Telemetría / Servicio Caído"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: min by (instance) (up{job="donatrack-services"})
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: last
+                  type: query
+              expression: A
+              refId: C
+              type: threshold
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 30s
+        annotations:
+          summary: "Alarma Silenciosa activada: dejó de llegar telemetría de un microservicio DonaTrack."
+          description: "Se detectó ausencia de métricas (noDataState=Alerting) o caída del target Prometheus (up < 1)."
+        labels:
+          severity: critical
+          type: silent_alarm
+
+      - uid: dt-rnf-high-5xx-rate
+        title: "Umbral RNF — Tasa de Errores HTTP 5xx > 5%"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: (sum by (application) (rate(http_server_requests_seconds_count{status=~"5.."}[2m])) / clamp_min(sum by (application) (rate(http_server_requests_seconds_count[2m])), 0.001)) * 100
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 5
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: last
+                  type: query
+              expression: A
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 1m
+        annotations:
+          summary: "Tasa de errores 5xx supera el umbral RNF del 5%."
+          description: "Revisar logs JSON en Loki y traza distribuida en Zipkin por traceId."
+        labels:
+          severity: critical
+          type: rnf_threshold
+
+      - uid: dt-rnf-high-latency-p95
+        title: "Umbral RNF — Latencia HTTP p95 > 1.5s"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, sum by (le, application) (rate(http_server_requests_seconds_bucket[2m])))
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1.5
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: last
+                  type: query
+              expression: A
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 1m
+        annotations:
+          summary: "Latencia p95 supera el umbral RNF de 1.5 segundos."
+          description: "Inspeccionar el waterfall de spans en Zipkin para detectar el cuello de botella."
+        labels:
+          severity: warning
+          type: rnf_threshold
+
+      - uid: dt-rnf-jvm-heap-saturation
+        title: "Umbral Recursos — Saturación Memoria Heap JVM > 85%"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: (sum by (application) (jvm_memory_used_bytes{area="heap"}) / clamp_min(sum by (application) (jvm_memory_max_bytes{area="heap"}), 1)) * 100
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 85
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: last
+                  type: query
+              expression: A
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: "Uso de Heap JVM supera el 85% de capacidad."
+          description: "Posible fuga de memoria o carga excesiva en el microservicio."
+        labels:
+          severity: warning
+          type: saturation
+
+      - uid: dt-security-rate-limit-429
+        title: "Seguridad — Pico de Solicitudes Bloqueadas por Rate Limit (HTTP 429)"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(http_server_requests_seconds_count{status="429"}[1m]))
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 10
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: last
+                  type: query
+              expression: A
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 15s
+        annotations:
+          summary: "Bucket4j bloqueó más de 10 solicitudes en 1 minuto (HTTP 429)."
+          description: "Posible intento de fuerza bruta o denegación de servicio."
+        labels:
+          severity: warning
+          type: security

@@ -47,7 +47,7 @@ rectangle "Capa Web & Presentación" #line.dashed {
 rectangle "Dominio (DonaTrack Microservicios)" #line.dashed {
     node "Servidor de Auth\n:8004" as N_Auth {
         component "Servicio de Autenticación\n(donatrack-auth)" as ModAuth
-        component "Generador JWT & Passwords\n(Argon2id / HS256)" as ModAuthSecurity
+        component "Generador JWT & Passwords\n(BCrypt / HS256 / OAuth2 SSO)" as ModAuthSecurity
         ModAuth ..> ModAuthSecurity : usa
     }
 

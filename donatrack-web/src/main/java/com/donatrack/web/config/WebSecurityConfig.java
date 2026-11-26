@@ -35,6 +35,30 @@ public class WebSecurityConfig {
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
         .securityContext(sc -> sc.securityContextRepository(securityContextRepository()))
+        .headers(
+            headers ->
+                headers
+                    .contentSecurityPolicy(
+                        csp ->
+                            csp.policyDirectives(
+                                "default-src 'self'; "
+                                    + "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdn.c360a.salesforce.com https://*.my.site.com https://*.salesforce.com https://*.salesforce-scrt.com; "
+                                    + "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com https://*.my.site.com https://*.salesforce.com; "
+                                    + "img-src 'self' data: blob: https:; "
+                                    + "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://*.my.site.com; "
+                                    + "frame-src 'self' https://*.my.site.com https://*.salesforce.com https://*.salesforce-scrt.com; "
+                                    + "connect-src 'self' https://blobatar.dev https://cdn.c360a.salesforce.com https://*.salesforce.com https://*.my.site.com https://*.salesforce-scrt.com https://*.tile.openstreetmap.org; "
+                                    + "frame-ancestors 'none';"))
+                    .httpStrictTransportSecurity(
+                        hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000))
+                    .frameOptions(frame -> frame.deny())
+                    .contentTypeOptions(ct -> {})
+                    .referrerPolicy(
+                        ref ->
+                            ref.policy(
+                                org.springframework.security.web.header.writers
+                                    .ReferrerPolicyHeaderWriter.ReferrerPolicy
+                                    .STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
@@ -58,6 +82,7 @@ public class WebSecurityConfig {
                         "/healthcheck",
                         "/actuator/health",
                         "/actuator/info",
+                        "/actuator/prometheus",
                         "/error")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/notificaciones/mis-alertas")

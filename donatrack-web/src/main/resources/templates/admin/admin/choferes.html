@@ -31,7 +31,7 @@
             </h2>
           </div>
           <div class="slds-no-flex">
-            <button class="slds-button slds-button_brand" onclick="abrirModalChofer()">
+            <button type="button" class="slds-button slds-button_brand" onclick="abrirModalChofer()">
               <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#add}"></use>
               </svg>Registrar Nuevo Chofer
@@ -75,7 +75,8 @@
                 </td>
                 <td style="text-align: right;">
                   <form th:action="@{/app/admin/choferes/{leg}/eliminar(leg=${chofer.legajo})}" method="post" style="display: inline;"
-                        onsubmit="return confirm('¿Seguro que deseas eliminar este chofer?');">
+                        th:attr="data-legajo=${chofer.legajo}"
+                        onsubmit="return confirm('¿Seguro que deseas dar de baja al chofer con legajo ' + this.getAttribute('data-legajo') + '?');">
                     <button type="submit" class="slds-button slds-button_text-destructive" style="font-size: 0.85rem;">
                       Eliminar
                     </button>
@@ -155,13 +156,13 @@
                   <abbr class="slds-required" title="requerido">* </abbr>Teléfono / Celular
                 </label>
                 <div class="slds-form-element__control">
-                  <input type="tel" id="telefono" th:field="*{telefono}" required
-                         maxlength="18" pattern="^\+54 9 11 \d{4}-\d{4}$"
-                         title="Formato requerido: +54 9 11 XXXX-XXXX"
-                         placeholder="Ej: +54 9 11 5566-7788" class="slds-input" />
+                  <input type="tel" id="telefono" th:field="*{telefono}" required autocomplete="tel"
+                         maxlength="20" pattern="^\+54 (?:9 )?\d{2,4} \d{2,4}-\d{4}$"
+                         title="Formato argentino con código de área (ej: +54 9 11 5566-7788 o +54 9 351 455-6677)"
+                         placeholder="Ej: +54 9 11 5566-7788 o +54 9 351 455-6677" class="slds-input" />
                 </div>
                 <div id="telefono-chofer-help" class="slds-form-element__help" style="font-size: 0.75rem; color: #64748b;">
-                  Formato requerido: <strong>+54 9 11 XXXX-XXXX</strong>.
+                  Cualquier provincia de Argentina: <strong>+54 9 [cód. área] XXXX-XXXX</strong>.
                 </div>
               </div>
 
@@ -184,7 +185,7 @@
 
   </div>
 
-  <div id="extra-scripts">
+  <th:block id="extra-scripts">
     <script>
       function abrirModalChofer() {
         var el = document.getElementById('modal-chofer-container');
@@ -209,24 +210,28 @@
         return 'CH-' + digits;
       }
 
-      function formatPhoneArg(raw, isDelete) {
+      function formatPhoneArg(raw) {
         var trimmed = String(raw || '').trim();
         if (!trimmed) return '';
-        if (isDelete && (/^\+54\s*9?\s*1?$/.test(trimmed) || trimmed.replace(/\D/g, '').length <= 4)) {
-          return trimmed;
-        }
+        if (/^\+54 (?:9 )?\d{2,4} \d{2,4}-\d{4}$/.test(trimmed)) return trimmed;
         var d = trimmed.replace(/\D/g, '');
-        if (d.indexOf('54911') === 0) d = d.slice(5);
-        else if (d.indexOf('5411') === 0) d = d.slice(4);
-        else if (d.indexOf('011') === 0) d = d.slice(3);
-        else if (d.indexOf('11') === 0 && d.length > 2) d = d.slice(2);
-        d = d.slice(0, 8);
-        if (!d) return '';
-        if (d.length <= 4) return '+54 9 11 ' + d;
-        return '+54 9 11 ' + d.slice(0, 4) + '-' + d.slice(4);
+        if (d.indexOf('549') === 0 && d.length >= 13) d = d.slice(3, 13);
+        else if (d.indexOf('54') === 0 && d.length >= 12) d = d.slice(2, 12);
+        else if (d.indexOf('0') === 0 && d.length >= 11) d = d.slice(1, 11);
+        if (d.length === 8) return '+54 9 11 ' + d.slice(0, 4) + '-' + d.slice(4);
+        if (d.length === 10) {
+          if (d.indexOf('11') === 0) return '+54 9 11 ' + d.slice(2, 6) + '-' + d.slice(6);
+          return '+54 9 ' + d.slice(0, 3) + ' ' + d.slice(3, 6) + '-' + d.slice(6);
+        }
+        return trimmed;
       }
 
       document.addEventListener('DOMContentLoaded', function() {
+        try {
+          if (new URLSearchParams(window.location.search).get('nuevo') === 'true') {
+            abrirModalChofer();
+          }
+        } catch (e) {}
         var legajoInput = document.getElementById('legajo');
         if (legajoInput) {
           legajoInput.addEventListener('input', function(e) {
@@ -236,14 +241,13 @@
         }
         var telInput = document.getElementById('telefono');
         if (telInput) {
-          telInput.addEventListener('input', function(e) {
-            var isDel = e && e.inputType && e.inputType.indexOf('delete') === 0;
-            telInput.value = formatPhoneArg(telInput.value, isDel);
+          telInput.addEventListener('blur', function() {
+            telInput.value = formatPhoneArg(telInput.value);
           });
         }
       });
     </script>
-  </div>
+  </th:block>
 </body>
 </html>
 

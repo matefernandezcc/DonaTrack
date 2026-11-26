@@ -46,6 +46,7 @@
             </div>
 
             <form id="form-donante-donacion" th:action="@{/app/donante/donaciones}" method="post">
+              <input type="hidden" name="ongSugerida" th:if="${prefillOng != null && !prefillOng.isBlank()}" th:value="${prefillOng}" />
               <div class="slds-form slds-form_stacked">
                 
                 <div class="slds-form-element slds-m-bottom_small">
@@ -90,11 +91,12 @@
                       <label class="slds-form-element__label" for="subcategoria" style="font-weight: 700; color: #1e293b;">Categoría Solidaria</label>
                       <div class="slds-form-element__control">
                         <select class="slds-select" id="subcategoria" name="nombreSubcategoria">
-                          <option value="No Perecederos" th:selected="${prefillCategoria == null || prefillCategoria == '' || prefillCategoria == 'No Perecederos'}">Alimentos No Perecederos</option>
-                          <option value="Abrigo" th:selected="${prefillCategoria == 'Abrigo'}">Abrigo / Ropa de Temporada</option>
-                          <option value="Higiene" th:selected="${prefillCategoria == 'Higiene'}">Artículos de Higiene Personal</option>
-                          <option value="Mobiliario" th:selected="${prefillCategoria == 'Mobiliario'}">Mobiliario y Útiles Escolares</option>
+                          <option value="Alimentos No Perecederos" th:selected="${prefillCategoria == null || prefillCategoria == '' || prefillCategoria == 'No Perecederos' || prefillCategoria == 'Alimentos No Perecederos' || prefillCategoria == 'ALIMENTOS_NO_PERECEDEROS'}">Alimentos No Perecederos</option>
+                          <option value="Ropa y Abrigo" th:selected="${prefillCategoria == 'Abrigo' || prefillCategoria == 'Ropa y Abrigo' || prefillCategoria == 'ABRIGO_INDUMENTARIA'}">Ropa y Abrigo</option>
+                          <option value="Higiene y Limpieza" th:selected="${prefillCategoria == 'Higiene' || prefillCategoria == 'Higiene y Limpieza'}">Higiene y Limpieza</option>
+                          <option value="Mobiliario y Equipamiento" th:selected="${prefillCategoria == 'Mobiliario' || prefillCategoria == 'Mobiliario y Equipamiento' || prefillCategoria == 'MOBILIARIO_EQUIPAMIENTO'}">Mobiliario y Útiles Escolares</option>
                           <option value="Medicamentos" th:selected="${prefillCategoria == 'Medicamentos'}">Medicamentos y Primeros Auxilios</option>
+                          <option value="Juguetes y Recreación" th:selected="${prefillCategoria == 'Juguetes' || prefillCategoria == 'Juguetes y Recreación'}">Juguetes y Recreación</option>
                         </select>
                       </div>
                     </div>
@@ -111,6 +113,38 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Modalidad de Entrega Física (A prueba de dudas) -->
+                <fieldset class="slds-form-element slds-m-bottom_medium" style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 16px; background: #f8fafc;">
+                  <legend class="slds-form-element__label" style="float: none; width: 100%; display: block; font-weight: 800; color: #014486; padding: 0 2px; margin-bottom: 10px; font-size: 0.85rem;">
+                    ¿Cómo vas a entregar tu donación?
+                  </legend>
+                  <div class="slds-grid slds-gutters_small slds-wrap" style="margin-top: 6px;">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small">
+                      <label for="mod-deposito" style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1.5px solid #0176d3; border-radius: 6px; background: #ffffff; cursor: pointer; height: 100%;">
+                        <input type="radio" id="mod-deposito" name="modalidadEntrega" value="DEPOSITO" checked onchange="toggleModalidadEntrega()" style="margin-top: 3px; accent-color: #0176d3;" />
+                        <span>
+                          <strong style="display: block; font-size: 0.86rem; color: #0f172a;">Llevar al Depósito Central</strong>
+                          <span style="display: block; font-size: 0.78rem; color: #475569; line-height: 1.35;">Medrano 951, CABA · Lun a Vie de 9 a 18 hs. Presentá tu código #DT-XXXX al llegar.</span>
+                        </span>
+                      </label>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small">
+                      <label for="mod-retiro" style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; cursor: pointer; height: 100%;">
+                        <input type="radio" id="mod-retiro" name="modalidadEntrega" value="RETIRO" onchange="toggleModalidadEntrega()" style="margin-top: 3px; accent-color: #0176d3;" />
+                        <span>
+                          <strong style="display: block; font-size: 0.86rem; color: #0f172a;">Coordinar retiro por camión solidario</strong>
+                          <span style="display: block; font-size: 0.78rem; color: #475569; line-height: 1.35;">Indicá tu dirección y franja horaria para que pase la flota de DonaTrack.</span>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                  <div id="bloque-direccion-retiro" style="display: none; margin-top: 10px;">
+                    <label class="slds-form-element__label" for="direccionRetiro" style="font-weight: 700; color: #1e293b;">Dirección y franja horaria para retiro</label>
+                    <input type="text" id="direccionRetiro" name="direccionRetiro" class="slds-input" autocomplete="street-address"
+                           placeholder="Ej: Av. Rivadavia 4200, Caballito · Jueves de 14 a 18 hs" />
+                  </div>
+                </fieldset>
 
                 <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
                   <button class="slds-button slds-button_brand" id="btn-submit-donacion" type="submit" style="font-weight: 700; padding: 0 18px; min-height: 38px; border-radius: 6px;">
@@ -179,62 +213,158 @@
 
   <th:block id="page-scripts">
     <script>
+      window.toggleModalidadEntrega = function () {
+        var modRetiro = document.getElementById('mod-retiro');
+        var bloque = document.getElementById('bloque-direccion-retiro');
+        var inputDir = document.getElementById('direccionRetiro');
+        var esRetiro = !!(modRetiro && modRetiro.checked);
+        if (bloque) bloque.style.display = esRetiro ? 'block' : 'none';
+        if (inputDir) inputDir.required = esRetiro;
+      };
+
       document.addEventListener('DOMContentLoaded', function () {
         var form = document.getElementById('form-donante-donacion');
         var submitBtn = document.getElementById('btn-submit-donacion');
+        var unidadEl = document.getElementById('unidadMedicion');
+        var cantidadEl = document.getElementById('cantidad');
 
-        // Autocompletado desde Navigation Bridge (MIAW / URL query params)
-        try {
-          var params = new URLSearchParams(window.location.search);
-          var descParam = params.get('descripcion') || params.get('desc') || params.get('item');
-          var cantParam = params.get('cantidad') || params.get('qty');
-          var unidParam = (params.get('unidad') || params.get('unidadMedicion') || params.get('unit') || '').trim().toLowerCase();
-          var catParam = (params.get('subcategoria') || params.get('categoria') || params.get('nombreSubcategoria') || '').trim().toLowerCase();
-          var usadoParam = (params.get('esUsado') || params.get('usado') || '').trim().toLowerCase();
-          var prefilled = false;
-
-          if (descParam) {
-            var descEl = document.getElementById('descripcion');
-            if (descEl) { descEl.value = descParam; prefilled = true; }
-          }
-          if (cantParam && !isNaN(Number(cantParam)) && Number(cantParam) > 0) {
-            var cantEl = document.getElementById('cantidad');
-            if (cantEl) { cantEl.value = String(Number(cantParam)); prefilled = true; }
-          }
-          if (unidParam) {
-            var unidEl = document.getElementById('unidadMedicion');
-            if (unidEl) {
-              if (unidParam.includes('paquete') || unidParam.includes('unidad') || unidParam === 'u') unidEl.value = 'UNIDADES';
-              else if (unidParam.includes('litro') || unidParam === 'l') unidEl.value = 'LITROS';
-              else if (unidParam.includes('kilo') || unidParam === 'kg') unidEl.value = 'KILOS';
-              prefilled = true;
+        function sincronizarStepCantidad() {
+          if (!unidadEl || !cantidadEl) return;
+          if (unidadEl.value === 'UNIDADES') {
+            cantidadEl.step = '1';
+            cantidadEl.min = '1';
+            if (cantidadEl.value && Number(cantidadEl.value) % 1 !== 0) {
+              cantidadEl.value = String(Math.max(1, Math.round(Number(cantidadEl.value))));
             }
+          } else {
+            cantidadEl.step = '0.5';
+            cantidadEl.min = '0.5';
           }
-          if (catParam) {
+        }
+        if (unidadEl) {
+          unidadEl.addEventListener('change', sincronizarStepCantidad);
+          sincronizarStepCantidad();
+        }
+
+        function flashField(el) {
+          if (!el) return;
+          el.classList.remove('dt-autofill-flash');
+          void el.offsetWidth;
+          el.classList.add('dt-autofill-flash');
+        }
+
+        function mostrarAvisoPrecarga(source) {
+          if (!form) return;
+          var existing = document.getElementById('dt-autofill-notice');
+          if (!existing) {
+            existing = document.createElement('div');
+            existing.id = 'dt-autofill-notice';
+            existing.className = 'slds-notify slds-notify_alert slds-alert_info slds-m-bottom_medium';
+            existing.setAttribute('role', 'status');
+            form.parentNode.insertBefore(existing, form);
+          }
+          existing.textContent = source === 'chatbot'
+            ? 'Datos precargados desde el asistente. Revisá los campos y presioná Confirmar Donación.'
+            : 'Datos precargados según la campaña seleccionada. Revisá los campos y presioná Confirmar Donación.';
+        }
+
+        window.dtAutofillDonacion = function (data, source) {
+          if (!data || typeof data !== 'object') return false;
+          var prefilled = false;
+          var descVal = data.descripcion || data.desc || data.item;
+          var cantVal = data.cantidad || data.qty;
+          var unidVal = String(data.unidad || data.unidadMedicion || data.unit || '').trim().toLowerCase();
+          var catVal = String(data.categoria || data.subcategoria || data.nombreSubcategoria || '').trim().toLowerCase();
+          var usadoVal = data.esUsado !== undefined && data.esUsado !== null ? String(data.esUsado).trim().toLowerCase() : '';
+          var modVal = String(data.modalidad || data.modalidadEntrega || '').trim().toUpperCase();
+          var dirVal = data.direccionRetiro || '';
+
+          if (descVal) {
+            var descEl = document.getElementById('descripcion');
+            if (descEl) { descEl.value = descVal; flashField(descEl); prefilled = true; }
+          }
+          if (cantVal && !isNaN(Number(cantVal)) && Number(cantVal) > 0 && cantidadEl) {
+            cantidadEl.value = String(Number(cantVal));
+            flashField(cantidadEl);
+            prefilled = true;
+          }
+          if (unidVal && unidadEl) {
+            if (unidVal.includes('paquete') || unidVal.includes('unidad') || unidVal === 'u') unidadEl.value = 'UNIDADES';
+            else if (unidVal.includes('litro') || unidVal === 'l') unidadEl.value = 'LITROS';
+            else if (unidVal.includes('kilo') || unidVal === 'kg') unidadEl.value = 'KILOS';
+            sincronizarStepCantidad();
+            flashField(unidadEl);
+            prefilled = true;
+          }
+          if (catVal) {
             var catEl = document.getElementById('subcategoria');
             if (catEl) {
-              if (catParam.includes('alimento') || catParam.includes('pereceder')) catEl.value = 'No Perecederos';
-              else if (catParam.includes('abrigo') || catParam.includes('ropa')) catEl.value = 'Abrigo';
-              else if (catParam.includes('higiene')) catEl.value = 'Higiene';
-              else if (catParam.includes('mobiliario') || catParam.includes('util')) catEl.value = 'Mobiliario';
-              else if (catParam.includes('medicamento')) catEl.value = 'Medicamentos';
+              if (catVal.includes('alimento') || catVal.includes('pereceder')) catEl.value = 'Alimentos No Perecederos';
+              else if (catVal.includes('abrigo') || catVal.includes('ropa')) catEl.value = 'Ropa y Abrigo';
+              else if (catVal.includes('higiene') || catVal.includes('limpieza')) catEl.value = 'Higiene y Limpieza';
+              else if (catVal.includes('mobiliario') || catVal.includes('util') || catVal.includes('escolar')) catEl.value = 'Mobiliario y Equipamiento';
+              else if (catVal.includes('medicamento')) catEl.value = 'Medicamentos';
+              else if (catVal.includes('juguete') || catVal.includes('recreac')) catEl.value = 'Juguetes y Recreación';
+              flashField(catEl);
               prefilled = true;
             }
           }
-          if (usadoParam) {
+          if (usadoVal) {
             var usadoEl = document.getElementById('esUsado');
             if (usadoEl) {
-              usadoEl.value = (usadoParam === 'true' || usadoParam === 'usado' || usadoParam === 'si') ? 'true' : 'false';
+              usadoEl.value = (usadoVal === 'true' || usadoVal === 'usado' || usadoVal === 'si') ? 'true' : 'false';
+              flashField(usadoEl);
               prefilled = true;
             }
           }
-          if (prefilled && form) {
-            var notice = document.createElement('div');
-            notice.className = 'slds-notify slds-notify_alert slds-alert_info slds-m-bottom_medium';
-            notice.setAttribute('role', 'status');
-            notice.textContent = 'Datos precargados desde el asistente. Revisá los campos y presioná Confirmar Donación.';
-            form.parentNode.insertBefore(notice, form);
-            if (submitBtn) submitBtn.focus();
+          if (modVal === 'RETIRO' || modVal === 'DEPOSITO') {
+            var radioEl = document.getElementById(modVal === 'RETIRO' ? 'mod-retiro' : 'mod-deposito');
+            if (radioEl) {
+              radioEl.checked = true;
+              window.toggleModalidadEntrega();
+              prefilled = true;
+            }
+          }
+          if (dirVal) {
+            var dirEl = document.getElementById('direccionRetiro');
+            if (dirEl) {
+              dirEl.value = dirVal;
+              flashField(dirEl);
+              prefilled = true;
+            }
+          }
+          if (prefilled) {
+            mostrarAvisoPrecarga(source || 'chatbot');
+            if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          return prefilled;
+        };
+
+        // Autocompletado desde URL query params (asistente nativo / campañas)
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var ongParam = params.get('ong');
+          var sourceParam = (params.get('source') || '').trim().toLowerCase();
+          var dataFromUrl = {
+            descripcion: params.get('descripcion') || params.get('desc') || params.get('item'),
+            cantidad: params.get('cantidad') || params.get('qty'),
+            unidad: params.get('unidad') || params.get('unidadMedicion') || params.get('unit'),
+            categoria: params.get('subcategoria') || params.get('categoria') || params.get('nombreSubcategoria'),
+            esUsado: params.get('esUsado') || params.get('usado'),
+            modalidad: params.get('modalidad') || params.get('modalidadEntrega'),
+            direccionRetiro: params.get('direccionRetiro')
+          };
+          var hasAny = Object.keys(dataFromUrl).some(function (k) { return Boolean(dataFromUrl[k]); });
+          if (hasAny) {
+            if (ongParam) {
+              // Si viene desde una ONG específica, no mostramos el banner genérico (ya está el banner de ONG)
+              var prevScroll = form ? form.scrollIntoView : null;
+              window.dtAutofillDonacion(dataFromUrl, sourceParam);
+              var n = document.getElementById('dt-autofill-notice');
+              if (n) n.remove();
+            } else {
+              window.dtAutofillDonacion(dataFromUrl, sourceParam);
+            }
           }
         } catch (e) {}
 

@@ -206,7 +206,28 @@ class WebSecurityCsrfTest {
   }
 
   @Test
-  @DisplayName("Renderizado real de Thymeleaf sin errores para Home, Novedades, Organizaciones y Paneles")
+  @DisplayName(
+      "GET /login incluye cabeceras OWASP (CSP, X-Frame-Options, nosniff) y X-Request-Id de trazabilidad")
+  void testSecurityAndObservabilityHeadersPresent() throws Exception {
+    MvcResult res = mockMvc.perform(get("/login")).andExpect(status().isOk()).andReturn();
+    assertNotNull(res.getResponse().getHeader("Content-Security-Policy"));
+    assertNotNull(res.getResponse().getHeader("X-Content-Type-Options"));
+    assertNotNull(res.getResponse().getHeader("X-Frame-Options"));
+    assertNotNull(res.getResponse().getHeader("X-Request-Id"));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /actuator/prometheus es accesible para scraping de Prometheus sin redirección a login")
+  void testActuatorPrometheusPermittedForScraper() throws Exception {
+    MvcResult res = mockMvc.perform(get("/actuator/prometheus")).andReturn();
+    assertNotEquals(401, res.getResponse().getStatus());
+    assertNotEquals(403, res.getResponse().getStatus());
+  }
+
+  @Test
+  @DisplayName(
+      "Renderizado real de Thymeleaf sin errores para Home, Novedades, Organizaciones y Paneles")
   void testRealThymeleafTemplatesRenderCleanly() throws Exception {
     when(incentivosGateway.obtenerTop3())
         .thenReturn(
@@ -237,7 +258,9 @@ class WebSecurityCsrfTest {
             new JwtAuthenticationToken(
                 jwtDonante, List.of(new SimpleGrantedAuthority("ROLE_DONANTE")))));
 
-    mockMvc.perform(get("/app/organizaciones/esperanza").session(sessionDon)).andExpect(status().isOk());
+    mockMvc
+        .perform(get("/app/organizaciones/esperanza").session(sessionDon))
+        .andExpect(status().isOk());
     mockMvc.perform(get("/app/donante").session(sessionDon)).andExpect(status().isOk());
 
     Jwt jwtAdmin =
@@ -256,7 +279,9 @@ class WebSecurityCsrfTest {
             new JwtAuthenticationToken(
                 jwtAdmin, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))));
 
-    mockMvc.perform(get("/app/admin/donaciones/recepcion").session(sessionAdmin)).andExpect(status().isOk());
+    mockMvc
+        .perform(get("/app/admin/donaciones/recepcion").session(sessionAdmin))
+        .andExpect(status().isOk());
     mockMvc.perform(get("/app/admin/matchmaking").session(sessionAdmin)).andExpect(status().isOk());
     mockMvc.perform(get("/app/beneficiaria").session(sessionAdmin)).andExpect(status().isOk());
   }

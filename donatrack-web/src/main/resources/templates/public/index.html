@@ -47,11 +47,14 @@
             </div>
 
             <!-- Buscador Interactivo de Remitos -->
-            <form id="hero-tracker-form" onsubmit="buscarRemitoHero(event)" style="margin: 12px 0 10px; display: flex; gap: 6px;">
+            <form id="hero-tracker-form" onsubmit="buscarRemitoHero(event)" style="margin: 12px 0 8px; display: flex; gap: 6px;">
               <input type="text" id="hero-tracker-input" aria-label="Código de remito digital a rastrear" placeholder="Ej: #DT-3300, #DT-3200..." value="#DT-3300"
+                     autocorrect="off" autocapitalize="characters" spellcheck="false"
                      style="flex: 1; min-height: 48px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.88rem; background: var(--bg); color: var(--fg);" />
               <button type="submit" style="min-height: 48px; min-width: 48px; padding: 10px 16px; background: var(--btn-blue-bg, #0b4a8f); color: #fff; border: none; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">Rastrear</button>
             </form>
+            <div id="hero-tracker-error" role="alert" hidden
+                 style="margin: 0 0 10px; padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; background: rgba(220, 38, 38, 0.12); color: #b91c1c; border: 1px solid rgba(220, 38, 38, 0.35);"></div>
 
             <div id="hero-tracker-details" style="font-size: 0.78rem; line-height: 1.5; color: var(--muted); margin-bottom: 10px;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
@@ -118,6 +121,13 @@
               </button>
               <button type="button" class="story-pill" data-step="6" role="tab" aria-selected="false" onclick="selectCircleStep(6)">
                 <span>06</span> En Sucursal
+              </button>
+            </div>
+            <div style="margin-top: 12px;">
+              <button type="button" id="story-autoplay-toggle" onclick="toggleCircleAutoplay()" class="btn btn--ghost btn--sm"
+                      aria-label="Pausar ciclo automático" style="font-size: 0.8rem; min-height: 36px; padding: 6px 12px; gap: 6px;">
+                <span id="story-autoplay-icon" aria-hidden="true">⏸</span>
+                <span id="story-autoplay-text">Pausar ciclo automático</span>
               </button>
             </div>
           </div>
@@ -218,7 +228,7 @@
             <span class="eyebrow">Minijuego Interactivo · Estilo Dino Runner</span>
             <h2 id="truck-game-title" style="margin-bottom: 0.35rem;">Ruta Solidaria: Esquivá pozos y lomas de burro</h2>
             <p class="section-head__lead" style="margin: 0;">
-              Ayudá al camión de DonaTrack a llegar a la ONG sin dañar la carga. Saltá los baches y las lomas de burro con <strong>Espacio</strong>, <strong>↑</strong> o haciendo clic.
+              Ayudá al camión de DonaTrack a llegar a la ONG sin dañar la carga. Hacé clic en el juego o tocá <strong>Saltar</strong> para empezar y esquivá baches con <strong>Espacio</strong> o <strong>↑</strong>.
             </p>
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
@@ -231,8 +241,8 @@
 
         <div class="truck-game-card" style="background: var(--bg); border: 2px solid var(--line-2); border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.14);">
           <div style="position: relative; width: 100%; background: var(--bg);">
-            <canvas id="truck-game-canvas" width="880" height="250"
-                    aria-label="Minijuego del camión DonaTrack esquivando pozos y lomas de burro"
+            <canvas id="truck-game-canvas" width="880" height="250" tabindex="0"
+                    aria-label="Minijuego del camión DonaTrack esquivando pozos y lomas de burro. Hacé clic o presioná Espacio cuando esté enfocado para jugar."
                     style="display: block; width: 100%; height: auto; max-height: 270px; cursor: pointer; touch-action: manipulation;"></canvas>
           </div>
 
@@ -408,10 +418,10 @@
       </div>
 
       <!-- Modal for marker -->
-      <dialog class="modal" id="map-modal" aria-modal="true" aria-labelledby="modal-title" hidden>
+      <dialog class="modal" id="map-modal" aria-labelledby="modal-title" hidden>
         <div class="modal__backdrop" data-close></div>
         <div class="modal__panel">
-          <button class="modal__close" aria-label="Cerrar" data-close>
+          <button type="button" class="modal__close" aria-label="Cerrar" data-close>
             &times;
           </button>
           <div class="modal__media" id="modal-media"></div>
@@ -421,11 +431,11 @@
             <p id="modal-desc"></p>
             <dl class="modal__meta">
               <div>
-                <dt>Beneficiario</dt>
+                <dt id="modal-org-label">Beneficiario</dt>
                 <dd id="modal-org">—</dd>
               </div>
               <div>
-                <dt>Tipo</dt>
+                <dt id="modal-type-label">Tipo</dt>
                 <dd id="modal-type">—</dd>
               </div>
               <div>
@@ -747,10 +757,10 @@
     </section>
 
     <!-- Modal Solicitud Verificación ONG -->
-    <dialog class="modal" id="modal-solicitud-ong" aria-modal="true" aria-labelledby="modal-ong-title" hidden>
+    <dialog class="modal" id="modal-solicitud-ong" aria-labelledby="modal-ong-title" hidden>
       <div class="modal__backdrop" onclick="cerrarModalSolicitudOng()"></div>
       <div class="modal__panel" style="max-width: 580px; width: 92%; max-height: 90vh; overflow-y: auto; background: var(--bg); color: var(--ink); border: 1px solid var(--line-2);">
-        <button class="modal__close" aria-label="Cerrar" onclick="cerrarModalSolicitudOng()" style="color: var(--ink);">&times;</button>
+        <button type="button" class="modal__close" aria-label="Cerrar" onclick="cerrarModalSolicitudOng()" style="color: var(--ink);">&times;</button>
         <div class="modal__body" style="padding: 2rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
             <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--blue-50); color: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -760,12 +770,12 @@
             </div>
             <div>
               <h3 id="modal-ong-title" style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--ink);">Solicitud de Verificación ONG</h3>
-              <p style="margin: 0; font-size: 0.85rem; color: var(--muted);">Registrá tu entidad para recibir donaciones trazadas en DonaTrack</p>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--muted);">Enviá los datos de tu entidad para revisión. ¿Preferís elegir ya tu contraseña? <a th:href="@{/registro(rol='BENEFICIARIA')}" style="color: var(--blue); font-weight: 700; text-decoration: underline;">Usá el registro completo</a>.</p>
             </div>
           </div>
 
           <form id="form-solicitud-ong" onsubmit="enviarSolicitudOng(event)">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; margin-bottom: 0.85rem;">
               <div>
                 <label for="ong-nombre" style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--ink); margin-bottom: 0.25rem;">Nombre de la Organización *</label>
                 <input type="text" id="ong-nombre" required placeholder="Ej: Comedor Esperanza" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.88rem; background: var(--bg-soft); color: var(--ink); box-sizing: border-box;">
@@ -776,7 +786,7 @@
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; margin-bottom: 0.85rem;">
               <div>
                 <label for="ong-responsable" style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--ink); margin-bottom: 0.25rem;">Nombre del Responsable *</label>
                 <input type="text" id="ong-responsable" required placeholder="Ej: Marta Gómez" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.88rem; background: var(--bg-soft); color: var(--ink); box-sizing: border-box;">
@@ -792,14 +802,14 @@
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; margin-bottom: 0.85rem;">
               <div>
                 <label for="ong-email" style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--ink); margin-bottom: 0.25rem;">Correo Electrónico *</label>
                 <input type="email" id="ong-email" required placeholder="contacto@organizacion.org" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.88rem; background: var(--bg-soft); color: var(--ink); box-sizing: border-box;">
               </div>
               <div>
                 <label for="ong-telefono" style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--ink); margin-bottom: 0.25rem;">Teléfono de Contacto *</label>
-                <input type="tel" id="ong-telefono" required placeholder="+54 11 5555-4321" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.88rem; background: var(--bg-soft); color: var(--ink); box-sizing: border-box;">
+                <input type="tel" id="ong-telefono" required placeholder="+54 9 11 5555-4321" style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--line-2); border-radius: 6px; font-size: 0.88rem; background: var(--bg-soft); color: var(--ink); box-sizing: border-box;">
               </div>
             </div>
 
@@ -850,12 +860,24 @@
       async function buscarRemitoHero(e) {
         if (e) e.preventDefault();
         const input = document.getElementById("hero-tracker-input");
+        const errBox = document.getElementById("hero-tracker-error");
         const codigo = input ? input.value.trim() : "";
-        if (!codigo) return;
+        if (errBox) {
+          errBox.hidden = true;
+          errBox.textContent = "";
+        }
+        if (!codigo) {
+          if (errBox) {
+            errBox.textContent = "Ingresá un código de remito o patente (ej: #DT-3300).";
+            errBox.hidden = false;
+          }
+          return;
+        }
 
         try {
           const res = await fetch("/api/public/rastreo?codigo=" + encodeURIComponent(codigo));
-          const data = await res.json();
+          let data = {};
+          try { data = await res.json(); } catch (_) {}
           if (res.ok) {
             lastRemitoData = data;
             document.getElementById("hero-tracker-title").textContent = "Donación " + data.codigo;
@@ -864,11 +886,16 @@
             document.getElementById("hero-tracker-peso").textContent = data.peso + " (" + data.volumen + ")";
             document.getElementById("hero-tracker-camion").textContent = data.patente + " · " + data.chofer;
             document.getElementById("hero-tracker-proof-btn").textContent = "Ver comprobante auditado (" + data.codigo + ")";
-          } else {
-            alert(data.error || "No se encontró el remito.");
+          } else if (errBox) {
+            errBox.textContent = data.error || "No se encontró un remito con ese código.";
+            errBox.hidden = false;
           }
         } catch (err) {
           console.error("Error al rastrear remito:", err);
+          if (errBox) {
+            errBox.textContent = "No pudimos consultar el remito en este momento. Reintentá en unos segundos.";
+            errBox.hidden = false;
+          }
         }
       }
 
@@ -877,12 +904,16 @@
         if (!modal) return;
         const mTitle = document.getElementById("modal-title");
         const mDesc = document.getElementById("modal-desc");
+        const mOrgLabel = document.getElementById("modal-org-label");
+        const mTypeLabel = document.getElementById("modal-type-label");
         const mOrg = document.getElementById("modal-org");
         const mType = document.getElementById("modal-type");
         const mDate = document.getElementById("modal-date");
         const mStatus = document.getElementById("modal-status");
         const mMedia = document.getElementById("modal-media");
 
+        if (mOrgLabel) mOrgLabel.textContent = "Transporte / Chofer";
+        if (mTypeLabel) mTypeLabel.textContent = "Carga y Volumen";
         mTitle.textContent = "Remito " + lastRemitoData.codigo;
         mDesc.textContent = "Entrega auditada en " + lastRemitoData.direccion;
         mOrg.textContent = lastRemitoData.chofer + " (Móvil " + lastRemitoData.patente + ")";
@@ -902,7 +933,6 @@
 
         modal.removeAttribute("hidden");
         modal.showModal();
-        document.body.style.overflow = "hidden";
       }
 
       function abrirModalSolicitudOng(e) {
@@ -911,9 +941,7 @@
         if (m) {
           m.removeAttribute("hidden");
           m.showModal();
-          document.body.style.overflow = "hidden";
           m.addEventListener("close", () => {
-            document.body.style.overflow = "";
             m.setAttribute("hidden", "true");
           }, { once: true });
         }
@@ -924,8 +952,22 @@
         if (m) {
           m.close();
           m.setAttribute("hidden", "true");
-          document.body.style.overflow = "";
         }
+      }
+
+      function buildCsrfHeadersOng() {
+        const headers = { "Content-Type": "application/json" };
+        const xsrfMatch = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+        if (xsrfMatch) {
+          headers["X-XSRF-TOKEN"] = decodeURIComponent(xsrfMatch[1]);
+        } else {
+          const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+          const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+          if (csrfTokenMeta && csrfHeaderMeta && csrfTokenMeta.content && csrfHeaderMeta.content) {
+            headers[csrfHeaderMeta.content] = csrfTokenMeta.content;
+          }
+        }
+        return headers;
       }
 
       async function enviarSolicitudOng(e) {
@@ -949,45 +991,49 @@
         };
 
         try {
-          const headers = { "Content-Type": "application/json" };
-          const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
-          const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-          if (csrfTokenMeta && csrfHeaderMeta && csrfTokenMeta.content && csrfHeaderMeta.content) {
-            headers[csrfHeaderMeta.content] = csrfTokenMeta.content;
-          } else {
-            const xsrfMatch = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
-            if (xsrfMatch) {
-              headers["X-XSRF-TOKEN"] = decodeURIComponent(xsrfMatch[1]);
-            }
-          }
-          const res = await fetch("/api/public/solicitudes-ong", {
+          let res = await fetch("/api/public/solicitudes-ong", {
             method: "POST",
-            headers: headers,
+            credentials: "same-origin",
+            headers: buildCsrfHeadersOng(),
             body: JSON.stringify(payload)
           });
-          const data = await res.json();
+          if (res.status === 403) {
+            await fetch("/healthcheck", { credentials: "same-origin" });
+            res = await fetch("/api/public/solicitudes-ong", {
+              method: "POST",
+              credentials: "same-origin",
+              headers: buildCsrfHeadersOng(),
+              body: JSON.stringify(payload)
+            });
+          }
+          let data = {};
+          const contentType = res.headers.get("content-type") || "";
+          if (contentType.includes("application/json")) {
+            data = await res.json();
+          }
           alertBox.style.display = "block";
           if (res.ok) {
-            alertBox.style.background = "#e6f4ea";
-            alertBox.style.color = "#137333";
-            alertBox.style.border = "1px solid #ceead6";
-            alertBox.textContent = "✅ " + (data.mensaje || "¡Solicitud enviada con éxito! El equipo de DonaTrack la revisará.");
+            alertBox.style.background = "rgba(22, 163, 74, 0.14)";
+            alertBox.style.color = "var(--green, #15803d)";
+            alertBox.style.border = "1px solid rgba(22, 163, 74, 0.35)";
+            alertBox.textContent = (data.mensaje || "Solicitud enviada con éxito. Un administrador auditará los datos y te enviará las credenciales de acceso por correo.");
             document.getElementById("form-solicitud-ong").reset();
             setTimeout(() => {
               cerrarModalSolicitudOng();
               alertBox.style.display = "none";
-            }, 2500);
+            }, 3500);
           } else {
-            alertBox.style.background = "#fce8e6";
-            alertBox.style.color = "#c5221f";
-            alertBox.style.border = "1px solid #fad2cf";
-            alertBox.textContent = "❌ " + (data.error || "No se pudo registrar la solicitud.");
+            alertBox.style.background = "rgba(220, 38, 38, 0.12)";
+            alertBox.style.color = "#b91c1c";
+            alertBox.style.border = "1px solid rgba(220, 38, 38, 0.35)";
+            alertBox.textContent = data.error || "No se pudo registrar la solicitud. Verificá los datos e intentá nuevamente.";
           }
         } catch (err) {
           alertBox.style.display = "block";
-          alertBox.style.background = "#fce8e6";
-          alertBox.style.color = "#c5221f";
-          alertBox.textContent = "❌ Error de conexión al enviar la solicitud.";
+          alertBox.style.background = "rgba(220, 38, 38, 0.12)";
+          alertBox.style.color = "#b91c1c";
+          alertBox.style.border = "1px solid rgba(220, 38, 38, 0.35)";
+          alertBox.textContent = "Error de conexión al enviar la solicitud. Reintentá en unos instantes.";
         } finally {
           btn.disabled = false;
           btn.textContent = "Enviar Solicitud";

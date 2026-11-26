@@ -376,7 +376,14 @@ class DonanteFlowTest {
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/donante?tab=seguimiento"))
           .andExpect(flash().attributeExists("flashOk"))
-          .andExpect(flash().attribute("flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!"));
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk",
+                      allOf(
+                          containsString("#DT-"),
+                          containsString("registrada con éxito"),
+                          containsString("Medrano 951, CABA"))));
 
       verify(donacionesGateway, times(1)).crearRecepcion(any());
       verify(incentivosGateway, times(1)).registrarActividad(eq(donantePersonaId), any());
@@ -451,7 +458,14 @@ class DonanteFlowTest {
                   .param("nombreSubcategoria", "Educación"))
           .andExpect(status().is3xxRedirection())
           .andExpect(redirectedUrl("/app/donante?tab=seguimiento"))
-          .andExpect(flash().attribute("flashOk", "Donación registrada con éxito. ¡Gracias por tu aporte solidario!"));
+          .andExpect(
+              flash()
+                  .attribute(
+                      "flashOk",
+                      allOf(
+                          containsString("#DT-"),
+                          containsString("registrada con éxito"),
+                          containsString("Medrano 951, CABA"))));
     }
 
     @Test

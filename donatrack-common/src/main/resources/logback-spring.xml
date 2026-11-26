@@ -2,10 +2,14 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
+    <springProperty scope="context" name="SERVICE_NAME" source="spring.application.name" defaultValue="donatrack"/>
+    <springProperty scope="context" name="APP_VERSION" source="info.app.version" defaultValue="1.0.0-entrega7"/>
+    <property name="INSTANCE_ID" value="${HOSTNAME:-local}"/>
+
     <springProfile name="local,test,default">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) [traceId=%X{traceId:-},spanId=%X{spanId:-}] - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSS'Z', UTC} [%thread] %highlight(%-5level) ${SERVICE_NAME}@${INSTANCE_ID} v${APP_VERSION} %cyan(%logger{36}) [traceId=%X{traceId:-},spanId=%X{spanId:-},req=%X{requestId:-},user=%X{user:-anon},session=%X{sessionId:-none}] - %msg%n</pattern>
             </encoder>
         </appender>
         <root level="INFO">
@@ -16,9 +20,13 @@
     <springProfile name="prod,docker">
         <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <customFields>{"service":"${spring.application.name:-donatrack}"}</customFields>
+                <timeZone>UTC</timeZone>
+                <customFields>{"service":"${SERVICE_NAME}","version":"${APP_VERSION}","instance":"${INSTANCE_ID}"}</customFields>
                 <includeMdcKeyName>traceId</includeMdcKeyName>
                 <includeMdcKeyName>spanId</includeMdcKeyName>
+                <includeMdcKeyName>requestId</includeMdcKeyName>
+                <includeMdcKeyName>user</includeMdcKeyName>
+                <includeMdcKeyName>sessionId</includeMdcKeyName>
             </encoder>
         </appender>
         <root level="INFO">

@@ -216,7 +216,7 @@
         <nav class="dev-actions" aria-label="Accesos rápidos">
           <a id="link-web" href="/" class="dev-btn dev-btn--primary">Portal Web</a>
           <a id="link-api" href="/" class="dev-btn">API Gateway</a>
-          <a href="/donaciones/graphiql" target="_blank" rel="noopener" class="dev-btn">GraphiQL (Donaciones)</a>
+          <a id="link-graphiql" href="/donaciones/graphiql" target="_blank" rel="noopener" class="dev-btn">GraphiQL (Donaciones)</a>
         </nav>
       </div>
 
@@ -241,18 +241,23 @@
 
       const linkWeb = document.getElementById("link-web");
       const linkApi = document.getElementById("link-api");
+      const linkGraphiql = document.getElementById("link-graphiql");
       const subtitle = document.getElementById("portal-subtitle");
+      const graphiqlUrl = host.startsWith("dev.") ? `${proto}//graphql.${baseDomain}/graphiql` : "/donaciones/graphiql";
       if (linkWeb) linkWeb.href = webOrigin;
       if (linkApi) {
         linkApi.href = apiOrigin;
         linkApi.textContent = `API Gateway (${apiHost})`;
+      }
+      if (linkGraphiql) {
+        linkGraphiql.href = graphiqlUrl;
       }
       if (subtitle) {
         subtitle.textContent = `OpenAPI unificado, GraphiQL y estado en vivo · ${host} · Gateway: ${apiHost}`;
       }
 
       const SERVICES = [
-        { id: "donaciones", label: "Donaciones", extra: { label: "GraphiQL", href: "/donaciones/graphiql" } },
+        { id: "donaciones", label: "Donaciones", extra: { label: "GraphiQL", href: graphiqlUrl } },
         { id: "logistica", label: "Logística" },
         { id: "incentivos", label: "Incentivos" },
         { id: "notificaciones", label: "Notificaciones" },

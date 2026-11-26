@@ -8,7 +8,7 @@
   <main id="contenido">
     <section class="novedades-sec" style="padding: 72px 0 96px;">
       <div class="container">
-        <div class="section-head section-head--row" style="margin-bottom: 36px;">
+        <div class="section-head section-head--row" style="margin-bottom: 24px;">
           <div>
             <span class="eyebrow eyebrow--green">Actualidad de la Red</span>
             <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 10px;">Novedades</h1>
@@ -18,11 +18,35 @@
           </div>
         </div>
 
+        <!-- Buscador y Filtros por Categoría -->
+        <search aria-label="Buscar y filtrar novedades" style="margin-bottom: 28px;">
+          <form th:action="@{/novedades}" method="get" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px;">
+            <input type="hidden" name="categoria" th:value="${categoriaSeleccionada}" th:if="${categoriaSeleccionada != null and !categoriaSeleccionada.isEmpty()}" />
+            <label for="novedades-q" class="sr-only">Buscar novedades por título o tema</label>
+            <input id="novedades-q" name="q" type="search" th:value="${busqueda}"
+                   placeholder="Buscar campañas, jornadas o temas..."
+                   style="flex: 1 1 260px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--line-2); border-radius: 8px; font-size: 0.92rem; background: var(--bg); color: var(--ink);" />
+            <button type="submit" class="btn btn--primary btn--sm" style="min-height: 44px; padding: 0 18px;">Buscar</button>
+            <a th:if="${(busqueda != null and !busqueda.isEmpty()) or (categoriaSeleccionada != null and !categoriaSeleccionada.isEmpty())}"
+               th:href="@{/novedades}" class="btn btn--ghost btn--sm" style="min-height: 44px; padding: 0 14px;">Limpiar</a>
+          </form>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+            <a th:href="@{/novedades(q=${busqueda})}"
+               th:class="${categoriaSeleccionada == null or categoriaSeleccionada.isEmpty()} ? 'btn btn--primary btn--sm' : 'btn btn--ghost btn--sm'"
+               style="min-height: 36px; padding: 0 14px; font-size: 0.82rem;">Todas</a>
+            <a th:each="cat : ${ {'Campañas', 'Comunidad', 'Institucional', 'Logística', 'Educación', 'Emergencias'} }"
+               th:href="@{/novedades(categoria=${cat}, q=${busqueda})}"
+               th:text="${cat}"
+               th:class="${cat.equalsIgnoreCase(categoriaSeleccionada)} ? 'btn btn--primary btn--sm' : 'btn btn--ghost btn--sm'"
+               style="min-height: 36px; padding: 0 14px; font-size: 0.82rem;">Categoría</a>
+          </div>
+        </search>
+
         <!-- Grilla de Novedades -->
         <div class="novedades-grid" th:if="${novedades != null and not #lists.isEmpty(novedades)}">
           <article class="novedad-card" th:each="n : ${novedades}">
-            <a class="novedad-card__media" th:href="@{/novedades/{id}(id=${n['id']})}">
-              <img class="novedad-card__img" th:src="@{${n['imagen']}}" th:alt="${n['titulo']}" loading="lazy" />
+            <a class="novedad-card__media" th:href="@{/novedades/{id}(id=${n['id']})}" tabindex="-1" aria-hidden="true">
+              <img class="novedad-card__img" th:src="@{${n['imagen']}}" alt="" loading="lazy" />
             </a>
             <div class="novedad-card__body">
               <h2 class="novedad-card__title">
@@ -39,7 +63,7 @@
                 Resumen editorial del artículo solidario...
               </p>
               <div class="novedad-card__actions">
-                <a th:href="@{/novedades/{id}(id=${n['id']})}" class="novedad-card__btn">Leer más</a>
+                <a th:href="@{/novedades/{id}(id=${n['id']})}" class="novedad-card__btn" tabindex="-1" aria-hidden="true">Leer más</a>
               </div>
             </div>
           </article>

@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
         "enable": true,
         "hide": true,
         "name": "Annotations & Alerts",
@@ -20,252 +23,406 @@
   "panels": [
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
       "id": 100,
-      "title": "Métricas de Negocio y Tráfico HTTP",
+      "title": "Estado de Salud, Alarma Silenciosa y Cumplimiento RNF",
       "type": "row"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "mappings": [
+            { "options": { "0": { "color": "red", "text": "DOWN (Alarma Silenciosa)" }, "1": { "color": "green", "text": "UP" } }, "type": "value" }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 12, "x": 0, "y": 1 },
+      "id": 10,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "title": "Disponibilidad de Microservicios (Heartbeat / Alarma Silenciosa)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "up{job=\"donatrack-services\"}",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 12, "y": 1 },
+      "id": 11,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "title": "Tasa de Errores 5xx (RNF < 5%)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "(sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_server_requests_seconds_count[5m])), 0.001) * 100",
+          "legendFormat": "5xx %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.8 },
+              { "color": "red", "value": 1.5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 1 },
+      "id": 12,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "title": "Latencia Global p95 (RNF < 1.5s)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket[5m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 1 },
+      "id": 13,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "title": "Bloqueos Rate Limit 429 (5m)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(increase(http_server_requests_seconds_count{status=\"429\"}[5m])) or vector(0)",
+          "legendFormat": "HTTP 429",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "id": 101,
+      "title": "Los 4 Golden Signals — Tráfico, Errores y Latencia (Contrastados contra RNF)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisLabel": "req/s", "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 2 },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 7 },
+      "id": 1,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "1. Tráfico — Throughput por Microservicio (RPS)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(http_server_requests_seconds_count[1m])) by (application)",
+          "legendFormat": "{{application}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
           "custom": {
-            "axisLabel": "req/s",
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2
+            "axisLabel": "errores/s",
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "lineWidth": 1
           },
           "unit": "reqps"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 1
-      },
-      "id": 1,
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 7 },
+      "id": 20,
       "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
       },
-      "title": "Throughput por Microservicio (RPS)",
+      "title": "2. Errores — Códigos 4xx / 5xx por Servicio",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": "Prometheus",
-          "expr": "sum(rate(http_server_requests_seconds_count[1m])) by (application)",
-          "legendFormat": "{{application}}"
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (application, status) (rate(http_server_requests_seconds_count{status=~\"4..|5..\"}[1m]))",
+          "legendFormat": "{{application}} [HTTP {{status}}]",
+          "refId": "A"
         }
       ]
     },
     {
-      "datasource": "Prometheus",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
-            "axisLabel": "Latencia",
+            "axisLabel": "Latencia (s)",
             "drawStyle": "line",
             "lineInterpolation": "smooth",
-            "lineWidth": 2
+            "lineWidth": 2,
+            "thresholdsStyle": { "mode": "line" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1.5 }
+            ]
           },
           "unit": "s"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
-      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 7 },
       "id": 2,
       "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
       },
-      "title": "Latencia Máxima HTTP por Microservicio",
+      "title": "3. Latencia — Percentil p95 por Microservicio (Umbral RNF = 1.5s)",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": "Prometheus",
-          "expr": "max(http_server_requests_seconds_max) by (application)",
-          "legendFormat": "{{application}}"
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, application) (rate(http_server_requests_seconds_bucket[2m])))",
+          "legendFormat": "p95 {{application}}",
+          "refId": "A"
         }
       ]
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
-      },
-      "id": 101,
-      "title": "Recursos de Infraestructura JVM & Host",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+      "id": 102,
+      "title": "4. Saturación de Recursos — Memoria JVM, CPU y Concurrencia de Hilos",
       "type": "row"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
-            "axisLabel": "Memoria",
+            "axisLabel": "Heap %",
             "drawStyle": "line",
             "fillOpacity": 20,
-            "lineWidth": 2
+            "lineWidth": 2,
+            "thresholdsStyle": { "mode": "line" }
           },
-          "unit": "bytes"
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 85 }
+            ]
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 10
-      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
       "id": 3,
       "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
       },
-      "title": "Consumo de Heap JVM por Servicio",
+      "title": "Saturación de Heap JVM (%) — Umbral 85%",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": "Prometheus",
-          "expr": "sum(jvm_memory_used_bytes{area=\"heap\"}) by (application)",
-          "legendFormat": "{{application}}"
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "(sum by (application) (jvm_memory_used_bytes{area=\"heap\"}) / clamp_min(sum by (application) (jvm_memory_max_bytes{area=\"heap\"}), 1)) * 100",
+          "legendFormat": "{{application}}",
+          "refId": "A"
         }
       ]
     },
     {
-      "datasource": "Prometheus",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Uso CPU",
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2
-          },
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisLabel": "Uso CPU", "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 2 },
           "unit": "percentunit"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 10
-      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
       "id": 4,
       "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
       },
       "title": "Uso de CPU del Proceso JVM",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": "Prometheus",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "process_cpu_usage",
-          "legendFormat": "{{application}}"
+          "legendFormat": "{{application}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisLabel": "Hilos", "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 2 },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "id": 21,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "Concurrencia — Hilos Activos JVM & Conexiones DB",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "jvm_threads_live_threads",
+          "legendFormat": "Threads {{application}}",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "hikaricp_connections_active",
+          "legendFormat": "Hikari DB {{application}}",
+          "refId": "B"
         }
       ]
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 18
-      },
-      "id": 102,
-      "title": "Logs Centralizados en Tiempo Real (Loki & Promtail)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 },
+      "id": 103,
+      "title": "Logs Estructurados JSON (UTC · Thread · Usuario · Sesión · Versión · TraceID -> Zipkin)",
       "type": "row"
     },
     {
-      "datasource": "Loki",
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 19
-      },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 11, "w": 24, "x": 0, "y": 25 },
       "id": 5,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
-        "prettifyLogMessage": false,
+        "prettifyLogMessage": true,
         "showCommonLabels": false,
         "showLabels": true,
         "showTime": true,
         "sortOrder": "Descending",
-        "wrapLogMessage": false
+        "wrapLogMessage": true
       },
-      "title": "Stream Unificado de Logs (Docker Microservicios)",
+      "title": "Stream Unificado de Logs Estructurados (Clic en traceId abre Zipkin)",
       "type": "logs",
       "targets": [
         {
-          "datasource": "Loki",
-          "expr": "{container=~\".+\"}"
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{service=~\"donaciones|incentivos|logistica|notificaciones|auth|web\"}",
+          "refId": "A"
         }
       ]
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 38,
+  "schemaVersion": 39,
   "style": "dark",
-  "tags": ["donatrack", "observabilidad", "microservicios"],
-  "time": {
-    "from": "now-15m",
-    "to": "now"
-  },
+  "tags": ["donatrack", "observabilidad", "golden-signals", "rnf", "seguridad"],
+  "time": { "from": "now-15m", "to": "now" },
   "timepicker": {},
-  "timezone": "browser",
-  "title": "DonaTrack — Overview de Observabilidad",
+  "timezone": "utc",
+  "title": "DonaTrack — Observabilidad Integral (4 Golden Signals, Logs & Alertas)",
   "uid": "donatrack-overview",
-  "version": 1
+  "version": 2
 }

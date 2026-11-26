@@ -629,7 +629,7 @@
       ctx.save();
       ctx.font = "bold 15px 'Courier New', monospace";
       ctx.textAlign = "right";
-      ctx.fillStyle = dark ? "#94a3b8" : "#475569";
+      ctx.fillStyle = dark ? "#e2e8f0" : "#334155";
 
       const hiText = "HI " + formatScore(highScore);
       const scoreText =
@@ -764,11 +764,11 @@
         ctx.restore();
       });
 
-      // HUD Score
-      drawHUD(dark);
-
       // State Overlays
       drawOverlays(dark);
+
+      // HUD Score (dibujado encima para mantener alto contraste también en IDLE)
+      drawHUD(dark);
     }
 
     function loop(timestamp) {
@@ -784,16 +784,33 @@
       requestAnimationFrame(loop);
     }
 
-    // Check if the minigame section is visible in viewport for keyboard capture
+    // Solo capturar teclado si la partida está activa o el usuario enfocó el lienzo del minijuego
+    let gameFocused = false;
+    const gameSection = document.getElementById("minijuego");
+
+    canvas.addEventListener("focus", function () {
+      gameFocused = true;
+    });
+    canvas.addEventListener("blur", function () {
+      gameFocused = false;
+    });
+    document.addEventListener("pointerdown", function (e) {
+      gameFocused = !!(gameSection && gameSection.contains(e.target));
+    });
+
     function isGameInViewport() {
       const rect = canvas.getBoundingClientRect();
       return rect.top < window.innerHeight && rect.bottom > 0;
     }
 
     window.addEventListener("keydown", function (e) {
-      const tag = document.activeElement ? document.activeElement.tagName : "";
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      const active = document.activeElement;
+      const tag = active ? active.tagName : "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON" || tag === "A") return;
       if (!isGameInViewport()) return;
+      // No interceptar Espacio/flechas para hacer scroll mientras el usuario solo navega la landing
+      const canCapture = gameState === "PLAYING" || gameFocused || active === canvas;
+      if (!canCapture) return;
 
       if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
         e.preventDefault();
@@ -814,6 +831,8 @@
 
     canvas.addEventListener("pointerdown", function (e) {
       e.preventDefault();
+      gameFocused = true;
+      if (typeof canvas.focus === "function") canvas.focus({ preventScroll: true });
       jump();
     });
 

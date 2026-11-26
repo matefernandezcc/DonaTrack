@@ -5,6 +5,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
   <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}" />
   <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}" />
   <title th:replace="${title}">DonaTrack · Backoffice</title>
@@ -29,10 +30,22 @@
   </script>
 
   <style>
+    :root {
+      color-scheme: light dark;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+    }
+
     /* Respaldo y garantía de visualización para navegación vertical SLDS */
     @media (min-width: 768px) {
       #admin-nav {
         display: block !important;
+        position: sticky;
+        top: 50px;
+        align-self: flex-start;
+        max-height: calc(100vh - 50px);
+        overflow-y: auto;
       }
       #admin-nav.is-collapsed {
         display: none !important;
@@ -120,8 +133,16 @@
     }
 
     .dt-touch-target {
-      min-width: 48px !important;
-      min-height: 48px !important;
+      min-height: 36px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      line-height: 1.2;
     }
 
     #admin-menu-toggle,
@@ -193,21 +214,33 @@
       transform: rotate(90deg);
     }
     .dt-nav-sublist {
-      padding-left: 16px;
+      padding-left: 8px;
       margin-top: 2px;
     }
 
-    .dt-touch-target {
-      min-height: 36px;
-      padding: 0 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      border-radius: 6px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      line-height: 1.2;
+    /* Validación inline semántica (claro y oscuro) */
+    .dt-help-neutral { color: #64748b !important; }
+    .dt-help-valid { color: #166534 !important; font-weight: 600; }
+    .dt-help-invalid { color: #b91c1c !important; font-weight: 600; }
+    [data-theme="dark"] .dt-help-neutral { color: #cbd5e1 !important; }
+    [data-theme="dark"] .dt-help-valid { color: #86efac !important; }
+    [data-theme="dark"] .dt-help-invalid { color: #fca5a5 !important; }
+
+    /* Paso guiado / ayuda contextual en backoffice */
+    .dt-guide-strip {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #0c4a6e;
+    }
+    [data-theme="dark"] .dt-guide-strip {
+      background: #0f2942 !important;
+      border-color: #1e40af !important;
+      color: #e0f2fe !important;
+    }
+    [data-theme="dark"] #donatrack-form-spinner {
+      background: rgba(11, 15, 25, 0.78) !important;
     }
 
     .slds-modal__close span[aria-hidden="true"],
@@ -425,29 +458,88 @@
       color: #e5e7eb !important;
     }
 
-    /* Navegación Vertical */
-    [data-theme="dark"] #admin-nav {
+    /* Navegación Vertical (Alto Contraste en Modo Oscuro) */
+    [data-theme="dark"] #admin-nav,
+    [data-theme="dark"] nav#admin-nav[style] {
       background-color: #111827 !important;
+      background: #111827 !important;
       border-right: 1px solid #1f2937 !important;
-      color: #e5e7eb !important;
+      color: #f1f5f9 !important;
     }
 
     [data-theme="dark"] #admin-nav .slds-nav-vertical__title {
-      color: #9ca3af !important;
+      color: #cbd5e1 !important;
+      letter-spacing: 0.04em;
     }
 
-    [data-theme="dark"] #admin-nav .slds-nav-vertical__action {
-      color: #e5e7eb !important;
+    [data-theme="dark"] #admin-nav .slds-nav-vertical__action,
+    [data-theme="dark"] #admin-nav .dt-nav-group-toggle,
+    [data-theme="dark"] #admin-nav .dt-nav-group-toggle .slds-nav-vertical__action-text {
+      color: #e2e8f0 !important;
     }
 
     [data-theme="dark"] #admin-nav .slds-nav-vertical__action:hover,
+    [data-theme="dark"] #admin-nav .dt-nav-group-toggle:hover,
     [data-theme="dark"] #admin-nav .slds-is-active .slds-nav-vertical__action {
-      background-color: #1f2937 !important;
-      color: #60a5fa !important;
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      color: #93c5fd !important;
     }
 
-    [data-theme="dark"] #admin-nav .slds-icon-text-default {
-      fill: #9ca3af !important;
+    [data-theme="dark"] #admin-nav .dt-nav-group-toggle:hover .slds-nav-vertical__action-text {
+      color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] #admin-nav .dt-nav-group-toggle[aria-expanded="true"] .dt-nav-chevron-box {
+      border: 1.5px solid #3b82f6 !important;
+      background: rgba(59, 130, 246, 0.22) !important;
+      color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] #admin-nav .dt-nav-group-toggle[aria-expanded="false"] .dt-nav-chevron-box {
+      border: 1px solid #334155 !important;
+      background: #1e293b !important;
+      color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] #admin-nav .dt-nav-chevron-svg,
+    #admin-nav .dt-nav-chevron-svg {
+      fill: currentColor !important;
+    }
+
+    [data-theme="dark"] #admin-nav .slds-icon-text-default,
+    [data-theme="dark"] #admin-nav .slds-input__icon {
+      fill: #cbd5e1 !important;
+    }
+
+    /* Botones de cierre (✕) en modales y menús en modo oscuro */
+    [data-theme="dark"] .slds-modal__close,
+    [data-theme="dark"] button.slds-modal__close,
+    [data-theme="dark"] .dt-modal-close-btn {
+      background: #1f2937 !important;
+      background-color: #1f2937 !important;
+      color: #f8fafc !important;
+      border: 1px solid #475569 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55) !important;
+    }
+
+    [data-theme="dark"] .slds-modal__close:hover,
+    [data-theme="dark"] button.slds-modal__close:hover,
+    [data-theme="dark"] .dt-modal-close-btn:hover {
+      background: #334155 !important;
+      background-color: #334155 !important;
+      color: #ffffff !important;
+      border-color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .dt-notif-delete-btn {
+      color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .dt-notif-delete-btn:hover,
+    [data-theme="dark"] .dt-notif-delete-btn:focus {
+      color: #fca5a5 !important;
+      background-color: rgba(239, 68, 68, 0.22) !important;
     }
 
     /* Contenido Principal y Encabezados */
@@ -492,8 +584,80 @@
     }
 
     [data-theme="dark"] .slds-page-header__name-meta,
-    [data-theme="dark"] .slds-text-color_weak {
-      color: #9ca3af !important;
+    [data-theme="dark"] .slds-text-color_weak,
+    [data-theme="dark"] .slds-form-element__help {
+      color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .slds-form-element__help.dt-help-valid,
+    [data-theme="dark"] .dt-help-valid {
+      color: #86efac !important;
+    }
+
+    [data-theme="dark"] .slds-form-element__help.dt-help-invalid,
+    [data-theme="dark"] .dt-help-invalid {
+      color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .slds-theme_shade {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      color: #f1f5f9 !important;
+      border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .slds-theme_default,
+    [data-theme="dark"] .slds-dropdown,
+    [data-theme="dark"] .slds-listbox {
+      background-color: #111827 !important;
+      color: #f8fafc !important;
+      border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .slds-card__footer {
+      background-color: #0f172a !important;
+      border-top-color: #1f2937 !important;
+      color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .slds-border_top,
+    [data-theme="dark"] .slds-border_bottom,
+    [data-theme="dark"] .slds-border_left,
+    [data-theme="dark"] .slds-border_right {
+      border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] details summary {
+      color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] code {
+      background-color: #1e293b !important;
+      color: #93c5fd !important;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    [data-theme="dark"] hr {
+      border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] #leaflet-map-empty {
+      background-color: #1e293b !important;
+      background: #1e293b !important;
+      color: #f1f5f9 !important;
+      border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .slds-checkbox_faux,
+    [data-theme="dark"] .slds-radio_faux {
+      background-color: #1f2937 !important;
+      border-color: #64748b !important;
+    }
+
+    [data-theme="dark"] ::placeholder {
+      color: #94a3b8 !important;
+      opacity: 1 !important;
     }
 
     /* Tarjetas y Contenedores */
@@ -544,7 +708,7 @@
       color: #d1d5db !important;
     }
 
-    /* Anulación universal de fondos claros inline en modo oscuro */
+    /* Anulación universal de fondos claros inline en modo oscuro (incluye rgb() re-serializado por JS) */
     [data-theme="dark"] [style*="background: #ffffff"],
     [data-theme="dark"] [style*="background:#ffffff"],
     [data-theme="dark"] [style*="background: white"],
@@ -553,70 +717,187 @@
     [data-theme="dark"] [style*="background-color: #ffffff"],
     [data-theme="dark"] [style*="background-color:#ffffff"],
     [data-theme="dark"] [style*="background-color: white"],
+    [data-theme="dark"] [style*="rgb(255, 255, 255)"],
     [data-theme="dark"] [style*="background: #f8fafc"],
     [data-theme="dark"] [style*="background:#f8fafc"],
     [data-theme="dark"] [style*="background-color: #f8fafc"],
     [data-theme="dark"] [style*="background-color:#f8fafc"],
+    [data-theme="dark"] [style*="rgb(248, 250, 252)"],
     [data-theme="dark"] [style*="background: #f1f5f9"],
     [data-theme="dark"] [style*="background:#f1f5f9"],
     [data-theme="dark"] [style*="background-color: #f1f5f9"],
     [data-theme="dark"] [style*="background-color:#f1f5f9"],
+    [data-theme="dark"] [style*="rgb(241, 245, 249)"],
     [data-theme="dark"] [style*="background: #fafaf9"],
     [data-theme="dark"] [style*="background:#fafaf9"],
     [data-theme="dark"] [style*="background-color: #fafaf9"],
     [data-theme="dark"] [style*="background-color:#fafaf9"],
-    [data-theme="dark"] [style*="background: #f0fdf4"],
-    [data-theme="dark"] [style*="background:#f0fdf4"],
     [data-theme="dark"] [style*="background: #fdfaf6"],
     [data-theme="dark"] [style*="background:#fdfaf6"],
-    [data-theme="dark"] [style*="background: #f0f9ff"],
-    [data-theme="dark"] [style*="background:#f0f9ff"],
-    [data-theme="dark"] [style*="background: #fef9c3"],
-    [data-theme="dark"] [style*="background:#fef9c3"] {
+    [data-theme="dark"] [style*="background: #e2e8f0"],
+    [data-theme="dark"] [style*="background:#e2e8f0"],
+    [data-theme="dark"] [style*="rgb(226, 232, 240)"],
+    [data-theme="dark"] [style*="background: #e5e5e5"],
+    [data-theme="dark"] [style*="rgb(229, 229, 229)"],
+    [data-theme="dark"] [style*="background: #f3f3f3"],
+    [data-theme="dark"] [style*="rgb(243, 243, 243)"],
+    [data-theme="dark"] [style*="background: #f3f4f6"],
+    [data-theme="dark"] [style*="background:#f3f4f6"],
+    [data-theme="dark"] [style*="rgb(243, 244, 246)"] {
       background-color: #1e293b !important;
       background: #1e293b !important;
       border-color: #334155 !important;
       color: #f3f4f6 !important;
     }
 
-    /* Anulación universal de textos oscuros inline en modo oscuro */
-    [data-theme="dark"] [style*="color: #0f172a"],
-    [data-theme="dark"] [style*="color:#0f172a"],
-    [data-theme="dark"] [style*="color: #1e293b"],
-    [data-theme="dark"] [style*="color:#1e293b"],
-    [data-theme="dark"] [style*="color: #334155"],
-    [data-theme="dark"] [style*="color:#334155"] {
-      color: #f1f5f9 !important;
+    [data-theme="dark"] [style*="rgba(248, 250, 252"],
+    [data-theme="dark"] [style*="rgba(255, 255, 255"] {
+      background-color: rgba(15, 23, 42, 0.88) !important;
+      background: rgba(15, 23, 42, 0.88) !important;
     }
 
-    [data-theme="dark"] [style*="color: #475569"],
-    [data-theme="dark"] [style*="color:#475569"],
-    [data-theme="dark"] [style*="color: #64748b"],
-    [data-theme="dark"] [style*="color:#64748b"],
-    [data-theme="dark"] [style*="color: #706e6b"],
-    [data-theme="dark"] [style*="color:#706e6b"] {
-      color: #94a3b8 !important;
+    /* Reafirmar #admin-nav tras reglas genéricas [style*="background-color: #ffffff"] */
+    [data-theme="dark"] #admin-nav {
+      background-color: #111827 !important;
+      background: #111827 !important;
+      border-right: 1px solid #1f2937 !important;
     }
 
-    [data-theme="dark"] [style*="color: #014486"],
-    [data-theme="dark"] [style*="color:#014486"],
-    [data-theme="dark"] [style*="color: #0176d3"],
-    [data-theme="dark"] [style*="color:#0176d3"] {
-      color: #60a5fa !important;
+    /* Superficies tintadas semánticas en modo oscuro (contraste WCAG AA/AAA garantizado) */
+    [data-theme="dark"] [style*="background: #fef3c7"],
+    [data-theme="dark"] [style*="background:#fef3c7"],
+    [data-theme="dark"] [style*="rgb(254, 243, 199)"],
+    [data-theme="dark"] [style*="background: #fef08a"],
+    [data-theme="dark"] [style*="background:#fef08a"],
+    [data-theme="dark"] [style*="rgb(254, 240, 138)"],
+    [data-theme="dark"] [style*="background: #fef9c3"],
+    [data-theme="dark"] [style*="background:#fef9c3"],
+    [data-theme="dark"] [style*="background: #fdf8e2"],
+    [data-theme="dark"] [style*="background:#fdf8e2"],
+    [data-theme="dark"] [style*="rgb(253, 248, 226)"] {
+      background-color: #422006 !important;
+      background: #422006 !important;
+      border-color: #a16207 !important;
+      color: #fef08a !important;
     }
 
-    [data-theme="dark"] [style*="color: #166534"],
-    [data-theme="dark"] [style*="color:#166534"] {
+    [data-theme="dark"] [style*="background: #dcfce7"],
+    [data-theme="dark"] [style*="background:#dcfce7"],
+    [data-theme="dark"] [style*="rgb(220, 252, 231)"],
+    [data-theme="dark"] [style*="background: #e8f5e9"],
+    [data-theme="dark"] [style*="background:#e8f5e9"],
+    [data-theme="dark"] [style*="rgb(232, 245, 233)"],
+    [data-theme="dark"] [style*="background: #f0fdf4"],
+    [data-theme="dark"] [style*="background:#f0fdf4"],
+    [data-theme="dark"] [style*="rgb(240, 253, 244)"],
+    [data-theme="dark"] [style*="background: #e6f4ea"],
+    [data-theme="dark"] [style*="background: #e6f6ef"] {
+      background-color: #052e16 !important;
+      background: #052e16 !important;
+      border-color: #166534 !important;
       color: #86efac !important;
     }
 
-    [data-theme="dark"] [style*="color: #854d0e"],
-    [data-theme="dark"] [style*="color:#854d0e"],
-    [data-theme="dark"] [style*="color: #92400e"],
-    [data-theme="dark"] [style*="color:#92400e"],
-    [data-theme="dark"] [style*="color: #c2410c"],
-    [data-theme="dark"] [style*="color:#c2410c"] {
+    [data-theme="dark"] [style*="background: #e0f2fe"],
+    [data-theme="dark"] [style*="background:#e0f2fe"],
+    [data-theme="dark"] [style*="background-color: #e0f2fe"],
+    [data-theme="dark"] [style*="rgb(224, 242, 254)"],
+    [data-theme="dark"] [style*="background: #dbeafe"],
+    [data-theme="dark"] [style*="rgb(219, 234, 254)"],
+    [data-theme="dark"] [style*="background: #eff6ff"],
+    [data-theme="dark"] [style*="background-color: #eff6ff"],
+    [data-theme="dark"] [style*="rgb(239, 246, 255)"],
+    [data-theme="dark"] [style*="background: #f0f9ff"],
+    [data-theme="dark"] [style*="background:#f0f9ff"],
+    [data-theme="dark"] [style*="rgb(240, 249, 255)"],
+    [data-theme="dark"] [style*="background: #e8f1fb"] {
+      background-color: #172554 !important;
+      background: #172554 !important;
+      border-color: #1d4ed8 !important;
+      color: #bfdbfe !important;
+    }
+
+    [data-theme="dark"] [style*="background: #fee2e2"],
+    [data-theme="dark"] [style*="background:#fee2e2"],
+    [data-theme="dark"] [style*="rgb(254, 226, 226)"],
+    [data-theme="dark"] [style*="background: #fef2f2"],
+    [data-theme="dark"] [style*="background:#fef2f2"],
+    [data-theme="dark"] [style*="rgb(254, 242, 242)"],
+    [data-theme="dark"] [style*="background: #fff5f5"],
+    [data-theme="dark"] [style*="background: #fce8e6"] {
+      background-color: #450a0a !important;
+      background: #450a0a !important;
+      border-color: #991b1b !important;
+      color: #fecaca !important;
+    }
+
+    [data-theme="dark"] [style*="background: #ffedd5"],
+    [data-theme="dark"] [style*="background:#ffedd5"],
+    [data-theme="dark"] [style*="rgb(255, 237, 213)"],
+    [data-theme="dark"] [style*="background: #fdece2"] {
+      background-color: #431407 !important;
+      background: #431407 !important;
+      border-color: #9a3412 !important;
+      color: #fed7aa !important;
+    }
+
+    /* Anulación universal de textos oscuros inline en modo oscuro (sin afectar botones CTA sólidos) */
+    [data-theme="dark"] [style*="color: #0f172a"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#0f172a"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #1e293b"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#1e293b"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #334155"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#334155"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #1f2937"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #444"]:not(.slds-button) {
+      color: #f1f5f9 !important;
+    }
+
+    [data-theme="dark"] [style*="color: #475569"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#475569"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #64748b"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#64748b"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #706e6b"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#706e6b"]:not(.slds-button) {
+      color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] [style*="color: #4338ca"]:not(.slds-button) {
+      color: #a5b4fc !important;
+    }
+
+    [data-theme="dark"] [style*="color: #014486"]:not(.slds-button):not([style*="background: #014486"]),
+    [data-theme="dark"] [style*="color:#014486"]:not(.slds-button):not([style*="background:#014486"]),
+    [data-theme="dark"] [style*="color: #0176d3"]:not(.slds-button):not([style*="background: #0176d3"]),
+    [data-theme="dark"] [style*="color:#0176d3"]:not(.slds-button):not([style*="background:#0176d3"]),
+    [data-theme="dark"] [style*="color: #0369a1"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #1e40af"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #0b4a8f"]:not(.slds-button) {
+      color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] [style*="color: #166534"]:not(.slds-button):not([style*="background: #166534"]):not([style*="background:#166534"]),
+    [data-theme="dark"] [style*="color:#166534"]:not(.slds-button):not([style*="background: #166534"]):not([style*="background:#166534"]),
+    [data-theme="dark"] [style*="color: #15803d"]:not(.slds-button):not([style*="background: #15803d"]),
+    [data-theme="dark"] [style*="color: #157a4f"]:not(.slds-button) {
+      color: #86efac !important;
+    }
+
+    [data-theme="dark"] [style*="color: #854d0e"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#854d0e"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #92400e"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#92400e"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #a16207"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #b45309"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #c2410c"]:not(.slds-button),
+    [data-theme="dark"] [style*="color:#c2410c"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #a83508"]:not(.slds-button) {
       color: #fde047 !important;
+    }
+
+    [data-theme="dark"] [style*="color: #991b1b"]:not(.slds-button),
+    [data-theme="dark"] [style*="color: #b91c1c"]:not(.slds-button) {
+      color: #fca5a5 !important;
     }
 
     /* Labels de formularios y títulos en mayúsculas */
@@ -1162,25 +1443,30 @@
       background: #1e293b !important;
       border-color: #334155 !important;
     }
-    [data-theme="dark"] #main-content-slot [style*="color: #0f172a"],
-    [data-theme="dark"] #main-content-slot [style*="color: #1e293b"],
-    [data-theme="dark"] #main-content-slot [style*="color: #334155"] {
+    [data-theme="dark"] #main-content-slot [style*="color: #0f172a"]:not(.slds-button),
+    [data-theme="dark"] #main-content-slot [style*="color: #1e293b"]:not(.slds-button),
+    [data-theme="dark"] #main-content-slot [style*="color: #334155"]:not(.slds-button) {
       color: #f1f5f9 !important;
     }
-    [data-theme="dark"] #main-content-slot [style*="color: #64748b"] {
+    [data-theme="dark"] #main-content-slot [style*="color: #64748b"]:not(.slds-button) {
       color: #94a3b8 !important;
     }
-    [data-theme="dark"] #main-content-slot [style*="color: #166534"] {
-      color: #4ade80 !important;
+    [data-theme="dark"] #main-content-slot [style*="color: #166534"]:not(.slds-button):not([style*="background: #166534"]),
+    [data-theme="dark"] #main-content-slot [style*="color:#166534"]:not(.slds-button):not([style*="background:#166534"]) {
+      color: #86efac !important;
     }
-    [data-theme="dark"] #main-content-slot [style*="color: #014486"] {
-      color: #60a5fa !important;
+    [data-theme="dark"] #main-content-slot [style*="color: #014486"]:not(.slds-button):not([style*="background: #014486"]) {
+      color: #93c5fd !important;
     }
-    [data-theme="dark"] #main-content-slot [style*="color: #4338ca"] {
+    [data-theme="dark"] #main-content-slot [style*="color: #4338ca"]:not(.slds-button) {
       color: #a5b4fc !important;
     }
-    [data-theme="dark"] #main-content-slot [style*="color: #c2410c"] {
-      color: #fb923c !important;
+    [data-theme="dark"] #main-content-slot [style*="color: #c2410c"]:not(.slds-button) {
+      color: #fdba74 !important;
+    }
+    [data-theme="dark"] a.slds-button_brand,
+    [data-theme="dark"] button.slds-button_brand {
+      color: #ffffff !important;
     }
 
     .theme-toggle-admin:hover {
@@ -1269,7 +1555,9 @@
           <span class="slds-text-heading_small slds-m-left_x-small"
             style="font-weight: 700; color: #014486; letter-spacing: -0.3px;">DonaTrack</span>
         </a>
-        <span class="slds-badge slds-badge_lightest slds-m-left_small">Backoffice</span>
+        <span sec:authorize="hasRole('ADMIN')" class="slds-badge slds-badge_lightest slds-m-left_small" style="font-weight: 700;">Panel Administrador</span>
+        <span sec:authorize="hasRole('BENEFICIARIA') and !hasRole('ADMIN')" class="slds-badge slds-badge_lightest slds-m-left_small" style="font-weight: 700;">Portal Organización</span>
+        <span sec:authorize="hasRole('DONANTE') and !hasRole('ADMIN') and !hasRole('BENEFICIARIA')" class="slds-badge slds-badge_lightest slds-m-left_small" style="font-weight: 700;">Portal Donante</span>
       </div>
 
       <!-- User Profile, Notificaciones & Actions con Blobatar Avatar -->
@@ -1399,31 +1687,31 @@
       aria-label="Menú de Navegación"
       style="background-color: #ffffff; border-right: 1px solid #dddbda; min-height: calc(100vh - 60px);">
 
-      <!-- SLDS Quick Find -->
+      <!-- Buscador de Secciones -->
       <div class="slds-form-element slds-m-bottom_small">
-        <label class="slds-form-element__label slds-assistive-text" for="nav-quick-find">Quick Find</label>
+        <label class="slds-form-element__label slds-assistive-text" for="nav-quick-find">Buscar sección</label>
         <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
           <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
             <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#search}"></use>
           </svg>
-          <input type="search" id="nav-quick-find" placeholder="Quick Find" class="slds-input" autocomplete="off" />
+          <input type="search" id="nav-quick-find" placeholder="Buscar sección..." class="slds-input" autocomplete="off" />
         </div>
       </div>
 
-      <!-- Sección Administrador -->
+      <!-- Sección Administrador: 1. Operación Diaria -->
       <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('ADMIN')">
-        <h2 class="slds-nav-vertical__title slds-text-title_caps">Administración</h2>
+        <h2 class="slds-nav-vertical__title slds-text-title_caps">1. Operación Diaria</h2>
         <div class="slds-nav-vertical__overflow">
           <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
-            aria-controls="nav-group-admin" aria-expanded="true" data-group="nav-group-admin">
+            aria-controls="nav-group-admin-ops" aria-expanded="true" data-group="nav-group-admin-ops">
             <span class="dt-nav-chevron-box">
               <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
               </svg>
             </span>
-            <span class="slds-nav-vertical__action-text">Herramientas Admin</span>
+            <span class="slds-nav-vertical__action-text">Recepción y Asignación</span>
           </button>
-          <div id="nav-group-admin" class="slds-show dt-nav-sublist">
+          <div id="nav-group-admin-ops" class="slds-show dt-nav-sublist">
             <ul>
               <li class="slds-nav-vertical__item">
                 <a th:href="@{/app/admin}" class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
@@ -1431,6 +1719,53 @@
                     <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chart}"></use>
                   </svg>
                   <span class="slds-truncate">Resumen Operativo</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/donaciones/recepcion}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#inbox}"></use>
+                  </svg>
+                  <span class="slds-truncate">Ingresar Donación</span>
+                </a>
+              </li>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/matchmaking}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#change_record_type}"></use>
+                  </svg>
+                  <span class="slds-truncate">Asignar a ONGs (Matchmaking)</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección Administrador: 2. Logística y Flota -->
+      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('ADMIN')">
+        <h2 class="slds-nav-vertical__title slds-text-title_caps">2. Logística y Flota</h2>
+        <div class="slds-nav-vertical__overflow">
+          <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
+            aria-controls="nav-group-admin-logistica" aria-expanded="true" data-group="nav-group-admin-logistica">
+            <span class="dt-nav-chevron-box">
+              <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
+              </svg>
+            </span>
+            <span class="slds-nav-vertical__action-text">Rutas, Camiones y Choferes</span>
+          </button>
+          <div id="nav-group-admin-logistica" class="slds-show dt-nav-sublist">
+            <ul>
+              <li class="slds-nav-vertical__item">
+                <a th:href="@{/app/admin/rutas}"
+                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
+                  </svg>
+                  <span class="slds-truncate">Rutas de Reparto</span>
                 </a>
               </li>
               <li class="slds-nav-vertical__item">
@@ -1451,40 +1786,33 @@
                   <span class="slds-truncate">Choferes</span>
                 </a>
               </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección Administrador: 3. Comunidad y Control -->
+      <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('ADMIN')">
+        <h2 class="slds-nav-vertical__title slds-text-title_caps">3. Comunidad y Control</h2>
+        <div class="slds-nav-vertical__overflow">
+          <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
+            aria-controls="nav-group-admin-comunidad" aria-expanded="true" data-group="nav-group-admin-comunidad">
+            <span class="dt-nav-chevron-box">
+              <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
+                <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
+              </svg>
+            </span>
+            <span class="slds-nav-vertical__action-text">Usuarios, CSV y Ranking</span>
+          </button>
+          <div id="nav-group-admin-comunidad" class="slds-show dt-nav-sublist">
+            <ul>
               <li class="slds-nav-vertical__item">
-                <a th:href="@{/app/admin/rutas}"
+                <a th:href="@{/app/admin/usuarios}"
                   class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
                   <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#routing_offline}"></use>
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
                   </svg>
-                  <span class="slds-truncate">Rutas de Reparto</span>
-                </a>
-              </li>
-              <li class="slds-nav-vertical__item">
-                <a th:href="@{/app/admin/ranking}"
-                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
-                  </svg>
-                  <span class="slds-truncate">Ranking &amp; Podio</span>
-                </a>
-              </li>
-              <li class="slds-nav-vertical__item">
-                <a th:href="@{/app/admin/donaciones/recepcion}"
-                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#inbox}"></use>
-                  </svg>
-                  <span class="slds-truncate">Recepción en Depósito</span>
-                </a>
-              </li>
-              <li class="slds-nav-vertical__item">
-                <a th:href="@{/app/admin/matchmaking}"
-                  class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
-                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#change_record_type}"></use>
-                  </svg>
-                  <span class="slds-truncate">Matchmaking</span>
+                  <span class="slds-truncate" style="font-weight: 700;">Usuarios y ONGs</span>
                 </a>
               </li>
               <li class="slds-nav-vertical__item">
@@ -1496,12 +1824,12 @@
                 </a>
               </li>
               <li class="slds-nav-vertical__item">
-                <a th:href="@{/app/admin/usuarios}"
+                <a th:href="@{/app/admin/ranking}"
                   class="slds-nav-vertical__action slds-grid slds-grid_vertical-align-center">
                   <svg class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small" aria-hidden="true">
-                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#user}"></use>
+                    <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#rating}"></use>
                   </svg>
-                  <span class="slds-truncate" style="font-weight: 700; color: #014486;">Usuarios &amp; Roles</span>
+                  <span class="slds-truncate">Ranking Mensual</span>
                 </a>
               </li>
             </ul>
@@ -1509,12 +1837,13 @@
         </div>
       </div>
 
-      <!-- Sección Donante -->
+      <!-- Sección Donante (Colapsada por defecto para Admin para reducir ruido) -->
       <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('DONANTE') or hasRole('ADMIN')">
         <h2 class="slds-nav-vertical__title slds-text-title_caps">Portal Donante</h2>
         <div class="slds-nav-vertical__overflow">
           <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
-            aria-controls="nav-group-donante" aria-expanded="true" data-group="nav-group-donante">
+            aria-controls="nav-group-donante" aria-expanded="true" data-group="nav-group-donante"
+            th:attr="data-default-collapsed=${#authorization.expression('hasRole(''ADMIN'')') ? 'true' : 'false'}">
             <span class="dt-nav-chevron-box">
               <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
@@ -1573,12 +1902,13 @@
         </div>
       </div>
 
-      <!-- Sección Beneficiaria -->
+      <!-- Sección Beneficiaria (Colapsada por defecto para Admin para reducir ruido) -->
       <div class="slds-nav-vertical__section dt-nav-section" sec:authorize="hasRole('BENEFICIARIA') or hasRole('ADMIN')">
-        <h2 class="slds-nav-vertical__title slds-text-title_caps">Organizaciones</h2>
+        <h2 class="slds-nav-vertical__title slds-text-title_caps">Portal Organización</h2>
         <div class="slds-nav-vertical__overflow">
           <button type="button" class="slds-button slds-button_reset slds-nav-vertical__action slds-nav-vertical__action_overflow dt-nav-group-toggle"
-            aria-controls="nav-group-beneficiaria" aria-expanded="true" data-group="nav-group-beneficiaria">
+            aria-controls="nav-group-beneficiaria" aria-expanded="true" data-group="nav-group-beneficiaria"
+            th:attr="data-default-collapsed=${#authorization.expression('hasRole(''ADMIN'')') ? 'true' : 'false'}">
             <span class="dt-nav-chevron-box">
               <svg class="slds-button__icon dt-nav-chevron-svg" aria-hidden="true" style="width: 12px; height: 12px; margin: 0;">
                 <use th:href="@{/assets/slds-icons/utility-sprite/svg/symbols.svg#chevronright}"></use>
@@ -1638,7 +1968,8 @@
                     <h1 class="slds-page-header__title slds-truncate" th:insert="${pageTitle}">Panel de Control</h1>
                   </div>
                 </div>
-                <p class="slds-page-header__name-meta">Gestión operativa en tiempo real en DonaTrack</p>
+                <p id="dt-page-subtitle" class="slds-page-header__name-meta"
+                   th:text="${pageSubtitle != null ? pageSubtitle : 'Plataforma solidaria DonaTrack'}">Plataforma solidaria DonaTrack</p>
               </div>
             </div>
           </div>
@@ -1955,11 +2286,14 @@
         var ctrlId = toggle.getAttribute('aria-controls');
         var panel = ctrlId ? document.getElementById(ctrlId) : null;
         var hasActive = panel && panel.querySelector('.slds-is-active') !== null;
+        var defaultCollapsed = toggle.getAttribute('data-default-collapsed') === 'true';
         var saved = null;
         try {
           saved = localStorage.getItem('donatrack_nav_group_' + (ctrlId || ''));
         } catch (e) {}
-        if (!hasActive && saved === '0') {
+        if (hasActive) {
+          setNavGroupExpanded(toggle, true, false);
+        } else if (saved === '0' || (saved === null && defaultCollapsed)) {
           setNavGroupExpanded(toggle, false, false);
         } else {
           setNavGroupExpanded(toggle, true, false);
@@ -1970,6 +2304,32 @@
           setNavGroupExpanded(toggle, !isExpanded, true);
         });
       });
+
+      // Subtítulo contextual automático por sección para orientar a cualquier usuario en 1 lectura
+      var subEl = document.getElementById('dt-page-subtitle');
+      if (subEl && subEl.textContent.trim() === 'Plataforma solidaria DonaTrack') {
+        var subMap = {
+          '/app/donante': 'Consultá tu impacto, seguí tus donaciones paso a paso y descubrí qué necesitan hoy los comedores.',
+          '/app/donante/donaciones': 'Cargá alimentos o bienes en menos de 1 minuto y elegí si los acercás al depósito o coordinás retiro.',
+          '/app/beneficiaria': 'Publicá lo que precisa tu organización, seguí los camiones en camino y confirmá cada llegada.',
+          '/app/beneficiaria/necesidades': 'Declarar tus necesidades prioriza tu organización en el motor de asignación y en el buscador de donantes.',
+          '/app/beneficiaria/entregas': 'Controlá los envíos asignados a tu sede y confirmá la recepción sacando una foto al pie del camión.',
+          '/app/admin': 'Centro de control diario: revisá pendientes, donaciones en depósito, flota y solicitudes de ONGs.',
+          '/app/admin/donaciones/recepcion': 'Paso 1: ingresá donaciones recibidas en depósito para habilitarlas en la bandeja de asignación.',
+          '/app/admin/matchmaking': 'Paso 2: elegí a qué organización asignar cada donación en depósito antes de despachar rutas.',
+          '/app/admin/rutas': 'Paso 3: planificá recorridos para las donaciones asignadas e iniciá el viaje para activar seguimiento en vivo.',
+          '/app/admin/camiones': 'Administrá la flota de camiones disponibles y su capacidad de volumen, altura y carga.',
+          '/app/admin/choferes': 'Administrá los conductores habilitados con legajo CH-XXX para asignar a las rutas de reparto.',
+          '/app/admin/usuarios': 'Gestioná permisos de acceso, reseteo de claves y aprobación de nuevas organizaciones beneficiarias.',
+          '/app/admin/csv': 'Cargá padrones de donantes en forma masiva subiendo un archivo CSV delimitado por comas.',
+          '/app/admin/ranking': 'Consultá el podio mensual vigente y auditá períodos históricos consolidados.'
+        };
+        if (subMap[currentPath]) {
+          subEl.textContent = subMap[currentPath];
+        } else if (currentPath.startsWith('/app/organizaciones/')) {
+          subEl.textContent = 'Perfil público verificado con misión, necesidades activas e historial de entregas auditadas.';
+        }
+      }
 
       // 5. Quick Find: filtrado instantáneo del menú vertical SLDS
       var quickFindInput = document.getElementById('nav-quick-find');
@@ -2011,8 +2371,8 @@
 
   <script th:src="@{/js/notificaciones-panel.js}" defer></script>
 
-  <!-- Asistente Conversacional DonaTrack (n8n + Agentforce Sofía) -->
-  <th:block th:replace="~{fragments/chatbot-widget :: widget}"></th:block>
+  <!-- Asistente Nativo DonaTrack para paneles logueados (n8n + navegación in-page y autocompletado) -->
+  <th:block th:replace="~{fragments/chatbot-widget :: native}"></th:block>
 
   <!-- Scripts específicos de la vista -->
   <th:block th:replace="${scripts}"></th:block>

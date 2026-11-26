@@ -45,6 +45,10 @@ public class ApiClientsConfig {
           String internalApiKey) {
     return (request, body, execution) -> {
       request.getHeaders().set("X-Service-Key", internalApiKey);
+      String requestId = org.slf4j.MDC.get("requestId");
+      if (requestId != null && !requestId.isBlank()) {
+        request.getHeaders().set("X-Request-Id", requestId);
+      }
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth instanceof JwtAuthenticationToken jwtAuth) {
         request.getHeaders().setBearerAuth(jwtAuth.getToken().getTokenValue());
@@ -58,6 +62,7 @@ public class ApiClientsConfig {
   }
 
   private RestClient createClient(
+      RestClient.Builder restClientBuilder,
       String baseUrl,
       ApiProperties props,
       ClientHttpRequestInterceptor interceptor,
@@ -66,7 +71,8 @@ public class ApiClientsConfig {
     JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(sharedHttpClient);
     requestFactory.setReadTimeout(Duration.ofSeconds(timeoutSec));
 
-    return RestClient.builder()
+    return restClientBuilder
+        .clone()
         .baseUrl(baseUrl != null ? baseUrl : "http://localhost:8080")
         .requestFactory(requestFactory)
         .requestInterceptor(interceptor)
@@ -76,41 +82,50 @@ public class ApiClientsConfig {
 
   @Bean
   public RestClient authClient(
+      RestClient.Builder restClientBuilder,
       ApiProperties props,
       ClientHttpRequestInterceptor interceptor,
       java.net.http.HttpClient sharedHttpClient) {
-    return createClient(props.authUrl(), props, interceptor, sharedHttpClient);
+    return createClient(restClientBuilder, props.authUrl(), props, interceptor, sharedHttpClient);
   }
 
   @Bean
   public RestClient logisticaClient(
+      RestClient.Builder restClientBuilder,
       ApiProperties props,
       ClientHttpRequestInterceptor interceptor,
       java.net.http.HttpClient sharedHttpClient) {
-    return createClient(props.logisticaUrl(), props, interceptor, sharedHttpClient);
+    return createClient(
+        restClientBuilder, props.logisticaUrl(), props, interceptor, sharedHttpClient);
   }
 
   @Bean
   public RestClient incentivosClient(
+      RestClient.Builder restClientBuilder,
       ApiProperties props,
       ClientHttpRequestInterceptor interceptor,
       java.net.http.HttpClient sharedHttpClient) {
-    return createClient(props.incentivosUrl(), props, interceptor, sharedHttpClient);
+    return createClient(
+        restClientBuilder, props.incentivosUrl(), props, interceptor, sharedHttpClient);
   }
 
   @Bean
   public RestClient donacionesClient(
+      RestClient.Builder restClientBuilder,
       ApiProperties props,
       ClientHttpRequestInterceptor interceptor,
       java.net.http.HttpClient sharedHttpClient) {
-    return createClient(props.donacionesUrl(), props, interceptor, sharedHttpClient);
+    return createClient(
+        restClientBuilder, props.donacionesUrl(), props, interceptor, sharedHttpClient);
   }
 
   @Bean
   public RestClient notificacionesClient(
+      RestClient.Builder restClientBuilder,
       ApiProperties props,
       ClientHttpRequestInterceptor interceptor,
       java.net.http.HttpClient sharedHttpClient) {
-    return createClient(props.notificacionesUrl(), props, interceptor, sharedHttpClient);
+    return createClient(
+        restClientBuilder, props.notificacionesUrl(), props, interceptor, sharedHttpClient);
   }
 }

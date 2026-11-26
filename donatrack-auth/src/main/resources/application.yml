@@ -38,6 +38,11 @@ donatrack:
     mock-sso:
       enabled: true
 
+info:
+  app:
+    name: donatrack-auth
+    version: 1.0.0-entrega7
+
 management:
   endpoints:
     web:
@@ -51,6 +56,9 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
   health:
     rabbit:
       enabled: false

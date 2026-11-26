@@ -70,8 +70,8 @@
           <h2 id="ultimas-novedades-heading" class="novedad-latest__heading">Últimas novedades</h2>
           <div class="novedades-grid">
             <article class="novedad-card" th:each="u : ${ultimasNovedades}">
-              <a class="novedad-card__media" th:href="@{/novedades/{id}(id=${u['id']})}">
-                <img class="novedad-card__img" th:src="@{${u['imagen']}}" th:alt="${u['titulo']}" loading="lazy" />
+              <a class="novedad-card__media" th:href="@{/novedades/{id}(id=${u['id']})}" tabindex="-1" aria-hidden="true">
+                <img class="novedad-card__img" th:src="@{${u['imagen']}}" alt="" loading="lazy" />
               </a>
               <div class="novedad-card__body">
                 <h3 class="novedad-card__title">
@@ -86,7 +86,7 @@
                 </div>
                 <p class="novedad-card__excerpt" th:text="${u['resumen']}">Resumen...</p>
                 <div class="novedad-card__actions">
-                  <a th:href="@{/novedades/{id}(id=${u['id']})}" class="novedad-card__btn">Leer más</a>
+                  <a th:href="@{/novedades/{id}(id=${u['id']})}" class="novedad-card__btn" tabindex="-1" aria-hidden="true">Leer más</a>
                 </div>
               </div>
             </article>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{})}">
+      th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
 <head>
   <title>DonaTrack · Necesidades Materiales</title>
 </head>
@@ -21,41 +21,54 @@
         </header>
       </div>
       <div class="slds-card__body slds-card__body_inner">
-        <p class="slds-m-bottom_medium">
-          Las necesidades declaradas alimentan el algoritmo de matchmaking para asignar donaciones de forma equitativa.
-        </p>
+        <div class="dt-guide-strip slds-m-bottom_medium" style="font-size: 0.84rem;">
+          <strong>¿Qué pasa cuando publicás una necesidad?</strong> Aparece de inmediato en el buscador de donantes y el motor de asignación prioriza tu organización cuando ingresen esos insumos al depósito.
+        </div>
 
-        <form th:action="@{/app/beneficiaria/necesidades}" method="post">
+        <form id="form-beneficiaria-necesidad" th:action="@{/app/beneficiaria/necesidades}" method="post">
           <div class="slds-form slds-form_stacked">
             
             <div class="slds-form-element slds-m-bottom_small">
-              <label class="slds-form-element__label" for="descripcion">
+              <label class="slds-form-element__label" for="descripcion" style="font-weight: 700;">
                 <abbr class="slds-required" title="obligatorio">* </abbr>Descripción de la Necesidad
               </label>
               <div class="slds-form-element__control">
                 <input class="slds-input" type="text" id="descripcion" name="descripcion"
-                       placeholder="Ej: Leche en polvo para merendero infantil" required />
+                       placeholder="Ej: Leche en polvo para merendero infantil, frazadas de 1 plaza..." required />
               </div>
             </div>
 
-            <div class="slds-grid slds-gutters_small slds-m-bottom_small">
-              <div class="slds-col slds-size_1-of-2">
+            <div class="slds-grid slds-gutters_small slds-wrap slds-m-bottom_small">
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
                 <div class="slds-form-element">
-                  <label class="slds-form-element__label" for="cantidadRequerida">
+                  <label class="slds-form-element__label" for="cantidadRequerida" style="font-weight: 700;">
                     <abbr class="slds-required" title="obligatorio">* </abbr>Cantidad Requerida
                   </label>
                   <div class="slds-form-element__control">
-                    <input class="slds-input" type="number" step="1" id="cantidadRequerida" name="cantidadRequerida" value="50" required />
+                    <input class="slds-input" type="number" step="1" min="1" id="cantidadRequerida" name="cantidadRequerida" value="50" required />
                   </div>
                 </div>
               </div>
-              <div class="slds-col slds-size_1-of-2">
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
                 <div class="slds-form-element">
-                  <label class="slds-form-element__label" for="tipo">Prioridad / Tipo</label>
+                  <label class="slds-form-element__label" for="unidadReferencia" style="font-weight: 700;">Unidad de Referencia</label>
+                  <div class="slds-form-element__control">
+                    <select class="slds-select" id="unidadReferencia" name="unidadReferencia">
+                      <option value="Kilos (kg)" selected>Kilos (kg)</option>
+                      <option value="Unidades">Unidades</option>
+                      <option value="Litros (L)">Litros (L)</option>
+                      <option value="Cajas / Bultos">Cajas / Bultos</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                <div class="slds-form-element">
+                  <label class="slds-form-element__label" for="tipo" style="font-weight: 700;">Frecuencia / Urgencia</label>
                   <div class="slds-form-element__control">
                     <select class="slds-select" id="tipo" name="tipo">
-                      <option value="extraordinaria" selected>Extraordinaria (Urgente)</option>
-                      <option value="ordinaria">Ordinaria (Recurrente)</option>
+                      <option value="extraordinaria" selected>Urgente (pedido puntual)</option>
+                      <option value="ordinaria">Recurrente (necesidad mensual)</option>
                     </select>
                   </div>
                 </div>
@@ -63,19 +76,20 @@
             </div>
 
             <div class="slds-form-element slds-m-bottom_medium">
-              <label class="slds-form-element__label" for="subcategoria">Rubro / Subcategoría</label>
+              <label class="slds-form-element__label" for="subcategoria" style="font-weight: 700;">Categoría / Rubro</label>
               <div class="slds-form-element__control">
                 <select class="slds-select" id="subcategoria" name="nombreSubcategoria">
-                  <option value="Alimentos" selected>Alimentos y Bebidas</option>
-                  <option value="No Perecederos">No Perecederos</option>
-                  <option value="Abrigo">Ropa y Abrigo</option>
-                  <option value="Higiene">Higiene Personal</option>
-                  <option value="Medicamentos">Medicamentos</option>
+                  <option value="Alimentos No Perecederos" selected>Alimentos No Perecederos</option>
+                  <option value="Ropa y Abrigo">Ropa y Abrigo</option>
+                  <option value="Higiene y Limpieza">Higiene y Limpieza</option>
+                  <option value="Medicamentos">Medicamentos y Primeros Auxilios</option>
+                  <option value="Mobiliario y Equipamiento">Mobiliario y Útiles Escolares</option>
+                  <option value="Juguetes y Recreación">Juguetes y Recreación</option>
                 </select>
               </div>
             </div>
 
-            <button class="slds-button slds-button_brand" type="submit">
+            <button class="slds-button slds-button_brand" type="submit" style="font-weight: 700; min-height: 38px; padding: 0 18px; border-radius: 6px;">
               Publicar Necesidad
             </button>
           </div>
@@ -123,6 +137,96 @@
       </div>
     </article>
   </div>
+
+  <th:block id="page-scripts">
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('form-beneficiaria-necesidad');
+
+        function flashEl(el) {
+          if (!el) return;
+          el.classList.remove('dt-autofill-flash');
+          void el.offsetWidth;
+          el.classList.add('dt-autofill-flash');
+        }
+
+        window.dtAutofillNecesidad = function (data) {
+          if (!data || typeof data !== 'object') return false;
+          var filled = false;
+          var descEl = document.getElementById('descripcion');
+          var cantEl = document.getElementById('cantidadRequerida');
+          var unidEl = document.getElementById('unidadReferencia');
+          var tipoEl = document.getElementById('tipo');
+          var catEl = document.getElementById('subcategoria');
+
+          if (data.descripcion && descEl) {
+            descEl.value = data.descripcion;
+            flashEl(descEl);
+            filled = true;
+          }
+          if (data.cantidad && !isNaN(Number(data.cantidad)) && Number(data.cantidad) >= 1 && cantEl) {
+            cantEl.value = String(Math.round(Number(data.cantidad)));
+            flashEl(cantEl);
+            filled = true;
+          }
+          if (data.unidad && unidEl) {
+            var u = String(data.unidad).toLowerCase();
+            if (u.includes('litro') || u === 'l') unidEl.value = 'Litros (L)';
+            else if (u.includes('unidad') || u.includes('paquete') || u === 'u') unidEl.value = 'Unidades';
+            else if (u.includes('caja') || u.includes('bulto')) unidEl.value = 'Cajas / Bultos';
+            else if (u.includes('kilo') || u === 'kg') unidEl.value = 'Kilos (kg)';
+            flashEl(unidEl);
+            filled = true;
+          }
+          if (data.tipo && tipoEl) {
+            var t = String(data.tipo).toLowerCase();
+            if (t.includes('ord') || t.includes('mensual') || t.includes('recurr')) tipoEl.value = 'ordinaria';
+            else if (t.includes('extra') || t.includes('urg')) tipoEl.value = 'extraordinaria';
+            flashEl(tipoEl);
+            filled = true;
+          }
+          if (data.categoria && catEl) {
+            var c = String(data.categoria).toLowerCase();
+            if (c.includes('alimento') || c.includes('pereceder')) catEl.value = 'Alimentos No Perecederos';
+            else if (c.includes('abrigo') || c.includes('ropa')) catEl.value = 'Ropa y Abrigo';
+            else if (c.includes('higiene') || c.includes('limpieza')) catEl.value = 'Higiene y Limpieza';
+            else if (c.includes('medicamento')) catEl.value = 'Medicamentos';
+            else if (c.includes('mobiliario') || c.includes('util') || c.includes('escolar')) catEl.value = 'Mobiliario y Equipamiento';
+            else if (c.includes('juguete') || c.includes('recreac')) catEl.value = 'Juguetes y Recreación';
+            flashEl(catEl);
+            filled = true;
+          }
+          if (filled && form) {
+            var notice = document.getElementById('dt-autofill-nec-notice');
+            if (!notice) {
+              notice = document.createElement('div');
+              notice.id = 'dt-autofill-nec-notice';
+              notice.className = 'slds-notify slds-notify_alert slds-alert_info slds-m-bottom_medium';
+              notice.setAttribute('role', 'status');
+              form.parentNode.insertBefore(notice, form);
+            }
+            notice.textContent = 'Datos precargados desde el asistente. Revisá los campos y presioná Publicar Necesidad.';
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          return filled;
+        };
+
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var urlData = {
+            descripcion: params.get('descripcion') || params.get('desc'),
+            cantidad: params.get('cantidad') || params.get('qty'),
+            unidad: params.get('unidad'),
+            tipo: params.get('tipo'),
+            categoria: params.get('categoria') || params.get('subcategoria')
+          };
+          if (Object.keys(urlData).some(function (k) { return Boolean(urlData[k]); })) {
+            window.dtAutofillNecesidad(urlData);
+          }
+        } catch (e) {}
+      });
+    </script>
+  </th:block>
 
 </body>
 </html>

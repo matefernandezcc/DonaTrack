@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/layout-admin :: layout(~{::title}, ~{::#page-header-title}, ~{::#main-content-slot}, ~{::#page-scripts})}">
 <head>
   <title th:text="'DonaTrack · ' + ${org['nombre']}">DonaTrack · Perfil de Organización</title>
@@ -37,11 +37,16 @@
           </div>
 
           <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <a th:href="@{/app/donante/donaciones(ong=${org['nombre']})}"
+            <a sec:authorize="hasRole('DONANTE') or hasRole('ADMIN')"
+               th:href="@{/app/donante/donaciones(ong=${org['nombre']})}"
                class="slds-button slds-button_brand"
                style="background: #c9430c; border-color: #c9430c; color: #ffffff; min-height: 38px; padding: 0 18px; border-radius: 6px; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px;">
               Donar a esta Organización →
             </a>
+            <span sec:authorize="hasRole('BENEFICIARIA') and !hasRole('ADMIN') and !hasRole('DONANTE')"
+                  class="slds-badge" style="background: rgba(15,23,42,0.55); color: #ffffff; border: 1px solid rgba(255,255,255,0.45); font-weight: 700; padding: 6px 12px;">
+              Vista previa de tu página pública
+            </span>
           </div>
         </div>
       </div>
@@ -161,7 +166,8 @@
                 </div>
                 <strong style="display: block; font-size: 0.88rem; color: #0f172a;" th:text="${nec['descripcion']}">Descripción</strong>
               </div>
-              <a th:href="@{/app/donante/donaciones(categoria=${nec['subcategoria']},descripcion=${nec['descripcion']},ong=${org['nombre']})}"
+              <a sec:authorize="hasRole('DONANTE') or hasRole('ADMIN')"
+                 th:href="@{/app/donante/donaciones(categoria=${nec['subcategoria']},descripcion=${nec['descripcion']},ong=${org['nombre']})}"
                  class="slds-button slds-button_brand"
                  style="min-height: 34px; padding: 0 12px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center;">
                 Donar esto →
