@@ -1574,12 +1574,18 @@
       interest-delay-end: var(--interest-delay-end);
     }
 
+    /* CRITICAL: SLDS .slds-popover declara display: flex y position: relative,
+       que pisan el UA [popover]:not(:popover-open) { display: none }.
+       Ocultamos totalmente cuando está cerrado para no ocupar espacio ni romper layouts. */
     .dt-slds-tooltip[popover] {
-      background: #032d60;
+      display: none !important;
+      position: fixed !important;
+      background: #032d60 !important;
       color: #ffffff;
       border: 1px solid #022146;
       border-radius: 0.25rem;
       padding: 0;
+      min-height: 0;
       max-width: 20rem;
       min-width: 11rem;
       width: max-content;
@@ -1587,6 +1593,11 @@
       overflow: visible;
       pointer-events: auto;
       z-index: 10050;
+    }
+
+    .dt-slds-tooltip[popover][data-js-pos="true"] {
+      inset: auto !important;
+      margin: 0 !important;
     }
 
     /* Suprimir nubbin heredado de SLDS para evitar flechas duplicadas al voltear */
@@ -1633,7 +1644,7 @@
     }
 
     [data-theme="dark"] .dt-slds-tooltip[popover] {
-      background: #0c3b73;
+      background: #0c3b73 !important;
       border-color: #3b82f6;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
     }
@@ -1656,7 +1667,7 @@
     }
 
     .dt-slds-tooltip[popover]:is(:popover-open, .\:popover-open, .dt-tooltip-open) {
-      display: block;
+      display: block !important;
     }
 
     /* Posicionamiento anclado nativo protegido por @supports (sin dejar popovers en 0,0) */
@@ -2612,11 +2623,13 @@
           pop.style.position = 'fixed';
           pop.style.margin = '0';
           pop.style.inset = 'auto';
+          pop.style.right = 'auto';
+          pop.style.bottom = 'auto';
           var rect = trigger.getBoundingClientRect();
           var popW = pop.offsetWidth || 260;
           var popH = pop.offsetHeight || 64;
           var gap = 10;
-          var left = rect.left + Math.min(rect.width / 2, 16) - 18;
+          var left = rect.left + Math.min(rect.width / 2, 16) - 19;
           if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
           if (left < 12) left = 12;
 
@@ -2684,8 +2697,27 @@
           }, 140);
         }
 
+        document.addEventListener('click', function (e) {
+          if (activeFallbackTip && !activeFallbackTip.contains(e.target) &&
+              (!activeFallbackTrigger || !activeFallbackTrigger.contains(e.target))) {
+            closeFallbackTip(activeFallbackTip, activeFallbackTrigger);
+          }
+        });
+
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' && activeFallbackTip) {
+            closeFallbackTip(activeFallbackTip, activeFallbackTrigger);
+          }
+        });
+
+        window.addEventListener('scroll', function () {
+          if (activeFallbackTip) {
+            closeFallbackTip(activeFallbackTip, activeFallbackTrigger);
+          }
+        }, true);
+
+        window.addEventListener('resize', function () {
+          if (activeFallbackTip) {
             closeFallbackTip(activeFallbackTip, activeFallbackTrigger);
           }
         });
